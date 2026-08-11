@@ -12,6 +12,7 @@ nothing in this file may be broken by them.
 ## 0. How this repo works
 
 ```
+SETUP.md                machine setup for humans: Bun, git, gh, editor, Windows/WSL traps.
 PRD.md                  the human writes this. The ONLY file the human must write.
 .agents/rules/          how you must behave (this file is the load-bearing subset)
 .agents/workflows/      what you must run, in order
@@ -32,6 +33,12 @@ docs/                   the reconciled spec YOU generate from PRD.md. Source of 
   the human explicitly asks, or if a gate is being deliberately re-opened.
 - **A file being absent is not a bug.** After cleanup, single-use files are gone by
   decision. `docs/PROJECT-STATE.md` records what was removed and when. Do not recreate them.
+- **Setup questions already have an answer — `SETUP.md`.** It is the machine setup guide
+  for humans: what to install, the exact commands, and the Windows/WSL mixing trap. When
+  someone asks how to install something, why `bun` is not found, or why `bun install`
+  fails, walk them through that file. **Do not improvise install steps from memory** and
+  do not give a different install command than the one recorded there. If the file is
+  wrong or missing a case, fix the file — then answer from it.
 - **`README.md` carries the project's About block.** Everything between the
   `<!-- ABOUT:START -->` and `<!-- ABOUT:END -->` markers describes what this project
   actually is. It is agent-maintained: a human seeds it with a rough brief, then you

@@ -24,6 +24,10 @@ This repo ships the [agent-scaffold](https://github.com/IIQball/agent-scaffold):
 rules and doc templates so an AI agent can go from brief to code without anyone
 re-explaining the standards. **You write `PRD.md`. The agent does the rest.**
 
+**First time on this machine? Read [`SETUP.md`](SETUP.md) first.** Bun is required and
+most people only have Node — it is a one-liner, but there is a Windows/WSL trap worth
+thirty seconds of your attention.
+
 1. Fill in `PRD.md`. Rough is fine — write `UNKNOWN` where you do not know. Do not leave a
    section silently empty; empty reads as "no requirement".
 2. Install the required skills — see `.agents/skills/README.md`.
@@ -46,6 +50,7 @@ re-explaining the standards. **You write `PRD.md`. The agent does the rest.**
 
 | Path | What it is |
 |---|---|
+| `SETUP.md` | what to install on your machine, once, before anything else |
 | `PRD.md` | the only file a human must write |
 | `AGENTS.md` | canonical agent rules. Every agent reads this first |
 | `.agents/` | rules, workflows, skills install guide. Scaffold docs in `.agents/README.md` |

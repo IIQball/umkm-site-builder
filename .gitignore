@@ -2,3 +2,16 @@
 # Many developers globally ignore `**/.agents/` to keep agent config out of repos.
 # This negation overrides that, so the rules actually get committed.
 !.agents/
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# Cloudflare / Wrangler local state
+.wrangler/
+.dev.vars
+
+# Secrets
+.env
+.env.*
+!.env.example

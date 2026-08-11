@@ -1,0 +1,4 @@
+# `.agents/` is the product here, not local tooling.
+# Many developers globally ignore `**/.agents/` to keep agent config out of repos.
+# This negation overrides that, so the rules actually get committed.
+!.agents/

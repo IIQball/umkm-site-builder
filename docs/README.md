@@ -31,19 +31,19 @@ If you are a new session and have not read the files below, you are not ready to
 
 | Doc | Purpose | Status |
 |---|---|---|
-| `prd/00-overview.md` | Big-picture PRD: scope, goals, non-goals, locked decisions | TODO |
-| `prd/personas.md` | Who uses this and what they need | TODO |
-| `prd/user-stories.md` | Stories plus acceptance criteria | TODO |
-| `prd/user-journeys.md` | End-to-end flows | TODO |
+| `prd/00-overview.md` | Big-picture PRD: scope, goals, non-goals, locked decisions | LOCKED |
+| `prd/personas.md` | Who uses this and what they need | LOCKED |
+| `prd/user-stories.md` | Stories plus acceptance criteria | LOCKED |
+| `prd/user-journeys.md` | End-to-end flows | LOCKED |
 | `prd/features/*.md` | One small PRD per feature | TODO |
-| `tech/architecture.md` | Structure, routing, rendering, preflight decisions | TODO |
-| `tech/data-model-erd.md` | Tables and relations | TODO |
-| `tech/permissions-matrix.md` | Role x action x resource | TODO |
-| `tech/api-spec.md` | Routes, methods, Zod contracts, guard order | TODO |
-| `tech/security.md` | Threat surface and enforced controls | TODO |
-| `tech/code-standards.md` | Project-specific standards on top of `.agents/rules/` | TODO |
-| `tech/testing-strategy.md` | Test layers and the CI gate | TODO |
-| `planning/roadmap.md` | Foundation, core flow, quality, production | TODO |
+| `tech/architecture.md` | Structure, routing, rendering, preflight decisions | LOCKED |
+| `tech/data-model-erd.md` | Tables and relations | LOCKED |
+| `tech/permissions-matrix.md` | Role x action x resource | LOCKED |
+| `tech/api-spec.md` | Routes, methods, Zod contracts, guard order | LOCKED |
+| `tech/security.md` | Threat surface and enforced controls | LOCKED |
+| `tech/code-standards.md` | Project-specific standards on top of `.agents/rules/` | LOCKED |
+| `tech/testing-strategy.md` | Test layers and the CI gate | LOCKED |
+| `planning/roadmap.md` | Foundation, core flow, quality, production | LOCKED |
 | `memory/codebase-map.md` | Where everything lives | LIVE |
 | `memory/css-vars.md` | Every token and custom class, and where it is used | LIVE |
 | `memory/ui-inventory.md` | daisyUI components in use | LIVE |

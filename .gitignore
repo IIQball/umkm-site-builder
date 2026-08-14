@@ -6,12 +6,39 @@
 # Dependencies and build output
 node_modules/
 dist/
+.astro/
 
 # Cloudflare / Wrangler local state
 .wrangler/
 .dev.vars
 
-# Secrets
+# Secrets (G6 — never pushed to GitHub)
 .env
-.env.*
+.env.local
+.env.*.local
+.env.production
 !.env.example
+
+# Uploaded media (local Cloudinary cache, if any)
+uploads/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/

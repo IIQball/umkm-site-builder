@@ -1,76 +1,199 @@
 # Planning — Roadmap
 
-Status: TODO
+Status: LOCKED
 
-Four phases. A phase does not start until the previous phase's gate is green. Gates exist
-so quality does not become the thing that gets cut at the end.
-
----
-
-## Phase 0 — Foundation
-
-Project boots, decisions locked, nothing is guessed.
-
-- [ ] Every preflight gate answered and recorded (`../tech/architecture.md`)
-- [ ] `.gitignore` written before the first commit
-- [ ] Project scaffolded: Astro + Svelte + Vite + Bun, daisyUI wired
-- [ ] Global tokens and spacing scale defined, recorded in `../memory/css-vars.md`
-- [ ] Icon pack installed, SSR path verified
-- [ ] Drizzle client and the G1 connection path working against a real database
-- [ ] Response helper, logger, and auth guard primitives exist in `lib`
-- [ ] `typecheck`, `lint`, `test` commands run clean on an empty project
-
-**GATE 0:** nothing above is a guess, and `bun run verify` passes.
-
-## Phase 1 — Core flow
-
-The shortest path that proves the product works end to end.
-
-- [ ] <the one flow that, if it works, proves the concept>
-- [ ] Auth: sign in, session, role, and a protected route that actually denies
-- [ ] The primary screens with all states built
-- [ ] The primary entities in the database with the ownership column enforced
-
-**GATE 1:** a real user can complete the core flow, and an unauthorized user is denied
-server-side (test proves it, not a manual click).
-
-## Phase 2 — Quality
-
-Where the product becomes safe to leave alone.
-
-- [ ] Permission tests generated from the matrix — every row covered
-- [ ] Validation tests per endpoint
-- [ ] Smoke tests for critical flows
-- [ ] Every screen reviewed in a real browser: responsive, focus, clean console
-- [ ] Error handling audited: no unguarded async, no leaked server detail
-- [ ] `docs/memory/` accurate and current
-
-**GATE 2:** the full definition of done passes on every shipped surface, not just the
-last one touched.
-
-## Phase 3 — Production
-
-- [ ] Environments separated; production database is not reachable from local
-- [ ] Secrets in the host's secret store, none in the repo
-- [ ] Rate limits on auth and anything that costs money
-- [ ] Backup and restore procedure written and tested once
-- [ ] Logging and error visibility in production
-- [ ] Deploy runbook, including rollback
-- [ ] Security review recorded in `../tech/security.md` §9
-
-**GATE 3:** a rollback has been rehearsed, not just documented.
+Foundation → Core Flow → Quality → Production. Each phase gates the next.
 
 ---
 
-## Current position
+## Phase 1: Foundation (Weeks 1-2)
 
-**Phase:** <n> · **Next slice:** <what `10-feature.md` runs next>
+**Goal:** Scaffolding, auth, payment infrastructure, database schema.
 
-Keep this in sync with `../PROJECT-STATE.md`.
+**Deliverables:**
+- [ ] Project setup (Astro, Svelte, Drizzle, Vitest, Zod)
+- [ ] BetterAuth integration (Google OAuth, email/password, sessions)
+- [ ] Database schema (users, sessions, stores, products, payments, templates, wallets, commissions, images)
+- [ ] Xendit integration (payment initiation, webhook verification)
+- [ ] Cloudinary integration (signed uploads, transformations)
+- [ ] Admin registration flow (whitelist, email verification, password setup)
+- [ ] Tenant registration & payment flow (email verification, Xendit payment initiation)
+- [ ] API scaffolding (unified response shape, error codes, rate limiting)
+- [ ] Unit tests (80%+ coverage on utilities, lib/)
+- [ ] Integration tests (auth, payments, media flows)
 
-## Deferred
+**Stories:**
+- US-01: Admin registers tenant
+- US-02: Tenant pays activation fee
+- US-11: Admin/Tenant/Designer uploads images
 
-Deliberately not now. Each one names what would make it worth doing.
+**Exit criteria:**
+- Database schema validated with Drizzle
+- Admin can register a tenant and receive email
+- Tenant can activate account and pay via Xendit
+- Images can be uploaded to Cloudinary and stored in DB
+- All tests passing; 80%+ coverage
 
-| Item | Deferred because | Revisit when |
+---
+
+## Phase 2: Core Flow (Weeks 3-4)
+
+**Goal:** Admin store setup, store rendering, public directory, template builder.
+
+**Deliverables:**
+- [ ] Admin store setup (subdomain validation, blacklist check, JSONB blueprint injection)
+- [ ] Store rendering (subdomain routing via host header, Astro SSR, CDN caching)
+- [ ] Public directory (store cards, search, responsive grid)
+- [ ] Product management (tenant CRUD, images per product)
+- [ ] Visual template builder (split-screen, live preview, save-on-click)
+- [ ] Template publishing (designer submits, admin approves/rejects)
+- [ ] Template marketplace (published templates visible to tenants)
+- [ ] Template purchase & apply (tenant buys, applies to store via Xendit payment)
+- [ ] WhatsApp redirect (product buy button → wa.me URL with pre-filled order)
+- [ ] Designer wallet setup (commissions auto-calculated, balance tracking)
+- [ ] Integration tests (all user journeys, error paths)
+- [ ] Permissions tests (generated from matrix, all roles)
+
+**Stories:**
+- US-03: Admin sets up tenant store
+- US-04: Visitor browses directory
+- US-05: Buyer accesses store via subdomain
+- US-06: Buyer clicks product → WhatsApp
+- US-07: Designer creates template
+- US-08: Designer publishes template
+- US-09: Tenant purchases & applies template
+
+**Exit criteria:**
+- Store can be set up by admin and goes live in <5 seconds
+- Directory renders in <1 second with 50+ stores
+- Visual builder is responsive (desktop, tablet, mobile)
+- Template purchase triggers commission auto-calculation
+- WhatsApp redirect works on mobile and web
+- All permission tests passing
+- E2E smoke tests for 4 main journeys
+
+---
+
+## Phase 3: Quality & Resilience (Weeks 5-6)
+
+**Goal:** Error handling, edge cases, monitoring, performance optimization.
+
+**Deliverables:**
+- [ ] Error handling (all error codes tested, client sees safe messages)
+- [ ] Edge cases (empty states, slow networks, image upload failures, orphan cleanup)
+- [ ] Admin dashboard (payments table, templates table, payouts table, metrics)
+- [ ] Payout flow (designer requests payout, admin triggers Xendit disbursement)
+- [ ] Audit logging (all state changes logged with user ID and timestamp)
+- [ ] Caching strategy (CDN cache TTL per route, cache invalidation on updates)
+- [ ] Performance (Lighthouse scores, Core Web Vitals, <1s store render SLA)
+- [ ] Security hardening (secrets audit, permission matrix enforcement, OWASP checks)
+- [ ] E2E full suite (all journeys, both happy and failure paths)
+- [ ] Load testing (concurrent users, spike handling)
+- [ ] Documentation (README updates, onboarding guide, deployment runbook)
+
+**Stories:**
+- US-10: Admin monitors payments and payouts in dashboard
+
+**Exit criteria:**
+- Admin dashboard functional and responsive
+- Lighthouse score ≥90 (performance, accessibility, best practices)
+- All E2E journeys passing (4 main + variants)
+- Zero TypeScript errors, zero lint errors
+- Security review completed (secrets not in repo, auth flows verified)
+- Load test: 100 concurrent users without errors
+
+---
+
+## Phase 4: Production Readiness (Week 7)
+
+**Goal:** Deployment, monitoring, incident response, go-live prep.
+
+**Deliverables:**
+- [ ] CI/CD pipeline (GitHub Actions, tests gate merge, auto-deploy to staging)
+- [ ] Production deployment (Cloudflare Workers, Neon production branch, secret management)
+- [ ] Monitoring & alerting (error rate, failed webhooks, quota usage, downtime)
+- [ ] Backup & disaster recovery (Neon daily backups, manual export procedure)
+- [ ] Runbook (incident response, manual payout processing, subdomain troubleshooting)
+- [ ] Soft launch (invite 5-10 UMKM, collect feedback, iterate)
+- [ ] Go-live (public launch, blog post, marketing)
+
+**Exit criteria:**
+- Zero issues in soft launch (or documented + prioritized for future)
+- Monitoring active and alerting working
+- Team trained on runbook
+- Backups tested and recoverable
+- Go-live checklist completed
+
+---
+
+## Deferred (Post-MVP)
+
+- [ ] Template versioning & rollback
+- [ ] Custom domain per store (not subdomain-only)
+- [ ] Inventory sync & stock alerts
+- [ ] Order history & analytics for tenants
+- [ ] Designer template ratings & reviews
+- [ ] Undo/redo in visual builder
+- [ ] Bulk product import (CSV)
+- [ ] Email order notifications (WhatsApp order → email to tenant)
+- [ ] Multi-language UI (not just Indonesian)
+- [ ] Mobile app (React Native or Flutter)
+- [ ] Advanced permission roles (e.g., tenant sub-users for staff)
+- [ ] A/B testing templates
+- [ ] Video upload support
+- [ ] Live chat customer support widget
+- [ ] Automated payout scheduling (weekly, monthly)
+
+---
+
+## Success metrics
+
+| Metric | Target | Why |
 |---|---|---|
+| Store onboarding time | <5 min | Core value prop |
+| Directory render time | <1 sec | User retention (bounce if slow) |
+| Tenant adoption | 10+ stores in soft launch | Validation of demand |
+| Designer adoption | 3+ published templates | Marketplace viability |
+| Payment success rate | >95% | Revenue reliability |
+| Uptime | 99.5% | SLA target |
+| Error rate | <0.5% of requests | Quality bar |
+| Support tickets | <5 per 100 tenants/month | UX quality |
+
+---
+
+## Dependencies & risks
+
+| Risk | Mitigation |
+|---|---|
+| **Xendit API changes** | Monitor API changelog; pin SDK version; fallback to manual verification |
+| **Cloudinary quota exceeded** | Set alert at 80%; upgrade to paid tier if needed; compress images more aggressively |
+| **Subdomain routing complexity** | Test thoroughly in Phase 2; have static generation fallback ready for Phase 3 |
+| **Designer adoption slow** | Provide template templates/starters; offer design feedback; market to local design communities |
+| **Payment fraud** | Use Xendit's built-in fraud detection; manual review of high-value transactions |
+| **Data loss** | Test Neon backups weekly; document recovery procedure; alert on backup failures |
+
+---
+
+## Approval gate
+
+**Before Phase 2 starts:**
+- [ ] Schema migration tested locally
+- [ ] Auth flows working end-to-end
+- [ ] Xendit payment testing successful (use sandbox credentials)
+- [ ] Cloudinary uploads tested
+- [ ] All Phase 1 tests passing
+
+**Before Phase 3 starts:**
+- [ ] All Phase 2 stories merged and tested
+- [ ] Director and WhatsApp flow working on mobile
+- [ ] Admin can set up 5+ test stores without errors
+
+**Before Phase 4 starts:**
+- [ ] E2E suite green
+- [ ] Performance SLAs met
+- [ ] Security review completed and signed off
+
+**Before go-live:**
+- [ ] Soft launch feedback incorporated
+- [ ] Runbook walkthrough completed with team
+- [ ] Post-launch support plan agreed

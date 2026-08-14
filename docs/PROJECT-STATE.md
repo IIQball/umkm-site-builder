@@ -11,38 +11,43 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete + Phase 1.1 (Project Scaffolding) complete. Astro/Svelte/Tailwind/daisyUI project fully initialized with folder structure, configuration, and design system. Ready for Phase 1.2 (BetterAuth authentication).
+Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema, and Neon Serverless integration. Ready for Phase 1.2 (BetterAuth authentication).
 
-The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Vite/Tailwind/daisyUI/Vitest on Cloudflare.
+The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Tailwind/daisyUI/Drizzle/Neon on Cloudflare.
 
 ## Last session did
 
-- Kickoff (4 phases):
-  - Phase 1: Identified gaps and conflicts in PRD → none found (PRD was comprehensive)
-  - Phase 2: Resolved all 7 preflight gates (G1-G7) with human input
-  - Phase 3: Deep technical discussion → 3 key decisions locked (host header routing, client-side builder state, payment idempotency via unique constraint)
+- Kickoff (6 phases completed):
+  - Phase 1: Identified gaps and conflicts → none found
+  - Phase 2: Resolved all 7 preflight gates (G1-G7)
+  - Phase 3: Deep technical discussion → 3 decisions locked
   - Phase 4: Wrote 17 spec documents (all LOCKED)
-  - Phase 5: Presented summary and got human approval
+  - Phase 5: Presented summary and got approval
   - Phase 6: Committed kickoff work to `dev` branch
-- Feature 01 (this session):
-  - Initialized Astro 3.6 project with Svelte 4 integration
+- Feature 01a (Project Scaffolding):
+  - Initialized Astro 3.6 with Svelte 4 integration
   - Configured Tailwind CSS + daisyUI with CSS variables
-  - Created project folder structure (20 directories per architecture spec)
-  - Set up TypeScript strict mode with path aliases
-  - Created global design system (colors, spacing, typography, shadows)
-  - Created base layout, home page, API response types, environment config
-  - All 666 dependencies installed and locked (package-lock.json)
-  - Build tested successfully (`npm run build` → dist/ complete)
-  - Committed to `feature/01-project-setup` with full feature documentation
+  - Created 20-directory project structure
+  - All 666 dependencies installed and locked
+  - Build succeeds (`npm run build`)
+  - Committed to `feature/01-project-setup`
+- Feature 01b (Database Layer):
+  - Installed drizzle-orm, @neondatabase/serverless, drizzle-kit
+  - Created 19-table Drizzle schema with full relationships
+  - Implemented all entities from data-model-erd.md spec
+  - Generated initial migration (0000_breezy_morph.sql)
+  - TypeScript validation: zero errors
+  - Build still succeeds (398ms)
+  - Committed to `feature/01-project-setup`
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth Setup):** Email/password auth, Google OAuth, session management, route guards
-2. **Phase 1.3 (Database Schema):** Drizzle ORM schema, Neon connection, migrations
+1. **Phase 1.2 (BetterAuth):** Email/password auth, Google OAuth, session management, route guards
+2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
 3. **Phase 1.4 (Xendit Payments):** Payment initiation, webhook verification, idempotency
 4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage
-6. **Phase 1 exit:** Schema validated, auth working, payments tested, tests passing
+6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Open threads (unresolved, needs a decision)

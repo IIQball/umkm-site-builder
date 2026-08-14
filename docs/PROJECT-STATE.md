@@ -11,37 +11,39 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete. All spec documents written and locked. Database schema defined. API contract established. Ready to start Phase 1 (Foundation: auth, payments, database setup).
+Kickoff complete + Phase 1.1 (Project Scaffolding) complete. Astro/Svelte/Tailwind/daisyUI project fully initialized with folder structure, configuration, and design system. Ready for Phase 1.2 (BetterAuth authentication).
 
-The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Vite/Bun/Drizzle/Vitest on Cloudflare.
+The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Vite/Tailwind/daisyUI/Vitest on Cloudflare.
 
 ## Last session did
 
-- Phase 1: Identified gaps and conflicts in PRD → none found (PRD was comprehensive)
-- Phase 2: Resolved all 7 preflight gates (G1-G7) with human input
-- Phase 3: Deep technical discussion → 3 key decisions locked (host header routing, client-side builder state, payment idempotency via unique constraint)
-- Phase 4: Wrote 17 spec documents:
-  - `docs/prd/00-overview.md` — Big-picture PRD with 8 locked decisions
-  - `docs/prd/personas.md` — 5 personas (Superadmin, Admin, Designer, Tenant, Visitor)
-  - `docs/prd/user-stories.md` — 11 user stories with acceptance criteria (happy + unhappy paths)
-  - `docs/prd/user-journeys.md` — 4 end-to-end journeys with failure paths and drop-off risks
-  - `docs/tech/architecture.md` — Stack, preflight gates, rendering model, folder structure, data layer, auth, environments, external services
-  - `docs/tech/data-model-erd.md` — 30-table ERD with relationships, JSONB schemas, seeding strategy
-  - `docs/tech/permissions-matrix.md` — Role x action x resource authorization matrix; 6 enforcement points
-  - `docs/tech/api-spec.md` — 20+ API routes with input/output schemas, error codes, idempotency, rate limits
-  - `docs/tech/security.md` — Threat surface, controls, secrets management, logging, incident response
-  - `docs/tech/testing-strategy.md` — 4 test layers (unit, integration, permissions, E2E); 80%+ coverage target
-  - `docs/tech/code-standards.md` — Naming conventions, patterns, CSS variables, Zod schemas, service modules, response helpers
-  - `docs/planning/roadmap.md` — 4 phases (Foundation, Core Flow, Quality, Production); week-by-week breakdown; success metrics; risks
-  - Updated `docs/README.md` with current statuses
-  - README.md About block remains a template (will rewrite at end of session when all docs locked)
+- Kickoff (4 phases):
+  - Phase 1: Identified gaps and conflicts in PRD → none found (PRD was comprehensive)
+  - Phase 2: Resolved all 7 preflight gates (G1-G7) with human input
+  - Phase 3: Deep technical discussion → 3 key decisions locked (host header routing, client-side builder state, payment idempotency via unique constraint)
+  - Phase 4: Wrote 17 spec documents (all LOCKED)
+  - Phase 5: Presented summary and got human approval
+  - Phase 6: Committed kickoff work to `dev` branch
+- Feature 01 (this session):
+  - Initialized Astro 3.6 project with Svelte 4 integration
+  - Configured Tailwind CSS + daisyUI with CSS variables
+  - Created project folder structure (20 directories per architecture spec)
+  - Set up TypeScript strict mode with path aliases
+  - Created global design system (colors, spacing, typography, shadows)
+  - Created base layout, home page, API response types, environment config
+  - All 666 dependencies installed and locked (package-lock.json)
+  - Build tested successfully (`npm run build` → dist/ complete)
+  - Committed to `feature/01-project-setup` with full feature documentation
 
 ## Next up
 
-1. **Phase 1 (Foundation):** Build auth (BetterAuth), database (Drizzle/Neon), payments (Xendit), media (Cloudinary), admin registration
-2. **Phase 1 exit criteria:** Schema validated, auth working, payment sandbox tested, 80%+ test coverage
-3. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, visual builder, template marketplace, WhatsApp redirect
-4. **After Phase 2:** Internal soft launch with 5-10 test stores to validate UX before Phase 3 quality work
+1. **Phase 1.2 (BetterAuth Setup):** Email/password auth, Google OAuth, session management, route guards
+2. **Phase 1.3 (Database Schema):** Drizzle ORM schema, Neon connection, migrations
+3. **Phase 1.4 (Xendit Payments):** Payment initiation, webhook verification, idempotency
+4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage
+6. **Phase 1 exit:** Schema validated, auth working, payments tested, tests passing
+7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Open threads (unresolved, needs a decision)
 

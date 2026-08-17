@@ -1,15 +1,22 @@
-# CLAUDE.md
+## Development
 
-Rules for this repo live in **`AGENTS.md`** at the repo root. Read it before any work.
+When starting the dev server, use background mode:
 
-`AGENTS.md` is canonical for every agent and every tool. This file exists only so Claude
-Code loads the same rules. Do not put rules here — edit `AGENTS.md`.
+```
+astro dev --background
+```
 
-Detail lives in `.agents/rules/`. Workflows live in `.agents/workflows/`. The generated
-spec lives in `docs/`.
+Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
-Claude Code specifics:
+## Documentation
 
-- Use the `frontend-design` skill on UI work, on top of `.agents/rules/30-ui-ux.md`.
-- Use the `clean-code` skill whenever writing, editing, reviewing, or refactoring code.
-- Use `context7` for library docs. Never trained memory.
+Full documentation: https://docs.astro.build
+
+Consult these guides before working on related tasks:
+
+- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
+- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
+- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
+- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
+- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
+- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)

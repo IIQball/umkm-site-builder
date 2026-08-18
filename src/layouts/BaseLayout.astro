@@ -17,6 +17,12 @@ const { title = 'UMKM Site Builder', description = 'No-code SaaS for Indonesian 
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Anti-flicker theme script - runs before DOM renders -->
+    <script is:inline>
+      const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    </script>
   </head>
   <body>
     <slot />

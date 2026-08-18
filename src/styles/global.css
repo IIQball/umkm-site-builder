@@ -47,9 +47,18 @@
   --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark theme */
+/* Dark theme - DaisyUI will override with data-theme="dark" */
+html[data-theme="dark"] {
+  --color-text: #f3f4f6;
+  --color-text-muted: #9ca3af;
+  --color-bg: #111827;
+  --color-bg-muted: #1f2937;
+  --color-border: #374151;
+}
+
+/* Legacy media query fallback */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --color-text: #f3f4f6;
     --color-text-muted: #9ca3af;
     --color-bg: #111827;

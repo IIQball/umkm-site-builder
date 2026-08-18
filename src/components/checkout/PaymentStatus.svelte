@@ -1,21 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  
+
   export let invoiceId: string;
   export let onStatusUpdate: (status: 'pending' | 'completed' | 'failed') => void = () => {};
 
   let status: 'pending' | 'completed' | 'failed' = 'pending';
-  let loading = true;
   let error: string | null = null;
   let pollCount = 0;
-  const maxPolls = 120; // Poll for 10 minutes (5s interval)
+  const maxPolls = 120; // 10 menit (interval 5 detik)
 
   const fetchPaymentStatus = async () => {
     try {
       const response = await fetch(`/api/payments/status/${invoiceId}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch payment status');
+        throw new Error('Gagal memeriksa status pembayaran');
       }
 
       const result = await response.json();
@@ -26,29 +25,19 @@
           status = newStatus;
           onStatusUpdate(status);
         }
-
-        // Stop polling if payment is completed or failed
-        if (status === 'completed' || status === 'failed') {
-          loading = false;
-          return;
-        }
       }
     } catch (err) {
-      console.error('[PaymentStatus] Error fetching status:', err);
-      error = err instanceof Error ? err.message : 'Error fetching status';
-    } finally {
-      loading = false;
+      console.error('[PaymentStatus] Error:', err);
+      error = err instanceof Error ? err.message : 'Error memeriksa status';
     }
   };
 
   onMount(() => {
-    // Initial fetch
     fetchPaymentStatus();
 
-    // Poll every 5 seconds
     const interval = setInterval(() => {
       pollCount++;
-      if (pollCount > maxPolls) {
+      if (pollCount > maxPolls || status === 'completed' || status === 'failed') {
         clearInterval(interval);
         return;
       }
@@ -62,68 +51,32 @@
   });
 </script>
 
-<div class="space-y-3">
-  {#if loading && status === 'pending'}
-    <div class="flex items-center gap-2">
-      <span class="loading loading-spinner loading-sm"></span>
-      <span class="text-sm text-base-content/60">Memperbarui status...</span>
+<div class="w-full">
+  {#if status === 'pending'}
+    <div class="flex items-center justify-center gap-2 text-base-content/60 text-xs py-1 animate-pulse">
+      <span class="material-symbols-outlined text-[16px] animate-spin">sync</span>
+      <span>Mengecek status pembayaran otomatis...</span>
     </div>
   {/if}
 
   {#if error}
-    <div class="alert alert-warning alert-sm">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        class="stroke-current shrink-0 w-4 h-4"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span class="text-xs">{error}</span>
+    <div class="alert alert-warning text-xs py-2 px-3 mt-2 rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+      <span class="material-symbols-outlined text-[16px]">warning</span>
+      <span>{error}</span>
     </div>
   {/if}
 
   {#if status === 'completed'}
-    <div class="alert alert-success alert-sm">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        class="stroke-current shrink-0 w-4 h-4"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M5 13l4 4L19 7"
-        />
-      </svg>
-      <span class="text-xs">Pembayaran berhasil diproses!</span>
+    <div class="flex items-center justify-center gap-1.5 text-emerald-500 text-xs font-semibold py-1">
+      <span class="material-symbols-outlined text-[16px]">verified</span>
+      <span>Pembayaran Berhasil Diverifikasi</span>
     </div>
   {/if}
 
   {#if status === 'failed'}
-    <div class="alert alert-error alert-sm">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        class="stroke-current shrink-0 w-4 h-4"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-      <span class="text-xs">Pembayaran gagal. Silakan coba lagi.</span>
+    <div class="flex items-center justify-center gap-1.5 text-rose-500 text-xs font-semibold py-1">
+      <span class="material-symbols-outlined text-[16px]">cancel</span>
+      <span>Pembayaran Gagal. Silakan coba lagi.</span>
     </div>
   {/if}
 </div>

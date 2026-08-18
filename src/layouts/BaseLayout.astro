@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import Navbar from '@/components/common/Navbar.astro';
 
 interface Props {
   title?: string;
@@ -17,6 +18,7 @@ const { title = 'UMKM Site Builder', description = 'No-code SaaS for Indonesian 
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     <!-- Anti-flicker theme script - runs before DOM renders -->
     <script is:inline>
@@ -25,12 +27,12 @@ const { title = 'UMKM Site Builder', description = 'No-code SaaS for Indonesian 
     </script>
   </head>
   <body>
+    <Navbar />
     <slot />
   </body>
 </html>
 
 <style is:global>
-  /* Ensure body takes full height */
   html,
   body {
     height: 100%;

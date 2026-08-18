@@ -314,9 +314,26 @@ export const stores = pgTable('stores', {
   };
 });
 
+export const productCategories = pgTable('product_categories', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  
+  name: text('name').notNull(),
+  description: text('description'),
+  
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+}, (table) => {
+  return {
+    storeIdIdx: index('product_categories_store_id_idx').on(table.storeId),
+  };
+});
+
 export const products = pgTable('products', {
   id: text('id').primaryKey(),
   storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  categoryId: text('category_id').references(() => productCategories.id, { onDelete: 'set null' }),
   
   name: text('name').notNull(),
   description: text('description'),
@@ -332,6 +349,7 @@ export const products = pgTable('products', {
 }, (table) => {
   return {
     storeIdIdx: index('products_store_id_idx').on(table.storeId),
+    categoryIdIdx: index('products_category_id_idx').on(table.categoryId),
   };
 });
 
@@ -433,8 +451,14 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   products: many(products),
 }));
 
+export const productCategoriesRelations = relations(productCategories, ({ one, many }) => ({
+  store: one(stores, { fields: [productCategories.storeId], references: [stores.id] }),
+  products: many(products),
+}));
+
 export const productsRelations = relations(products, ({ one }) => ({
   store: one(stores, { fields: [products.storeId], references: [stores.id] }),
+  category: one(productCategories, { fields: [products.categoryId], references: [productCategories.id] }),
 }));
 
 export const imagesRelations = relations(images, ({ one }) => ({

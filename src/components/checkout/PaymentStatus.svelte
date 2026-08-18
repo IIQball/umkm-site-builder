@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { PaymentRecord } from '@/types/payments';
-
+  
   export let invoiceId: string;
   export let onStatusUpdate: (status: 'pending' | 'completed' | 'failed') => void = () => {};
 

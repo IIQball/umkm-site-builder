@@ -1,0 +1,25 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RegisterForm from "@/components/auth/RegisterForm.svelte";
+---
+
+<BaseLayout title="Create Account - UMKM Site Builder" description="Create your UMKM Site Builder account">
+  <main class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">Create Account</h1>
+        <p class="text-base-content/70 mt-2">Start building your UMKM store today</p>
+      </div>
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <RegisterForm client:load />
+          <div class="divider">OR</div>
+          <p class="text-center text-sm">
+            Already have an account?
+            <a href="/auth/login" class="link link-primary">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

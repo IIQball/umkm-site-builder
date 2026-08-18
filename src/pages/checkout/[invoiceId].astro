@@ -2,7 +2,8 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import InvoiceDetails from '@/components/checkout/InvoiceDetails.svelte';
 import PaymentStatus from '@/components/checkout/PaymentStatus.svelte';
-import { paymentService } from '@/lib/payments/service';
+import { paymentService } from '@/services/payment.service';
+import { formatCurrency } from '@/lib/utils/format';
 import type { CheckoutPageData } from '@/types/payments';
 
 interface Props {
@@ -28,7 +29,7 @@ try {
     pageData = {
       invoiceId: payment.metadata?.invoiceId || invoiceId,
       amount: payment.amount,
-      amountFormatted: paymentService.formatCurrency(Math.round(payment.amount * 100)),
+      amountFormatted: formatCurrency(Math.round(payment.amount * 100)),
       paymentUrl: payment.metadata?.invoiceUrl || '',
       status: payment.status as 'pending' | 'completed' | 'failed',
       expiresAt: payment.metadata?.expiresAt || '',

@@ -6,7 +6,7 @@
 
 import type { APIRoute } from 'astro';
 import { xenditClient } from '@/lib/xendit';
-import { paymentService } from '@/lib/payments/service';
+import { paymentService } from '@/services/payment.service';
 import { XenditWebhookPayloadSchema } from '@/lib/payments/schemas';
 import { z } from 'zod';
 

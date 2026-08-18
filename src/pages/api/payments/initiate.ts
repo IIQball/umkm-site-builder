@@ -4,7 +4,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { paymentService } from '@/lib/payments/service';
+import { paymentService } from '@/services/payment.service';
 import { PaymentInitiateInputSchema } from '@/lib/payments/schemas';
 import { z } from 'zod';
 

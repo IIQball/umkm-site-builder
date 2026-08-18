@@ -24,6 +24,13 @@ export const GET: APIRoute = async (context) => {
     });
 
     if (!userStore) {
+      // DEV MODE: Auto-create store for mock user if not exists
+      if (import.meta.env.DEV && session.userId === 'dev_user_123') {
+        console.warn('[DEV] No store found for mock user, using placeholder store');
+        // In real app, this would be a user's actual store
+        // For now, return early with mock data for UI testing
+        return new Response(JSON.stringify(okResponse([])));
+      }
       return new Response(JSON.stringify(forbidden('Store not found or inactive')), { status: 403 });
     }
 

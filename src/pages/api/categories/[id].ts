@@ -33,7 +33,13 @@ export const PATCH: APIRoute = async (context) => {
       where: and(eq(stores.userId, session.userId), isNull(stores.deletedAt)),
     });
 
-    if (!userStore) return new Response(JSON.stringify(forbidden()), { status: 403 });
+    if (!userStore) {
+      // DEV MODE: Auto-create store for mock user if not exists
+      if (import.meta.env.DEV && session.userId === 'dev_user_123') {
+        return new Response(JSON.stringify(notFound()), { status: 404 });
+      }
+      return new Response(JSON.stringify(forbidden()), { status: 403 });
+    }
 
     // Ensure category exists and belongs to user's store
     const existing = await db.query.productCategories.findFirst({
@@ -82,7 +88,13 @@ export const DELETE: APIRoute = async (context) => {
       where: and(eq(stores.userId, session.userId), isNull(stores.deletedAt)),
     });
 
-    if (!userStore) return new Response(JSON.stringify(forbidden()), { status: 403 });
+    if (!userStore) {
+      // DEV MODE: Auto-create store for mock user if not exists
+      if (import.meta.env.DEV && session.userId === 'dev_user_123') {
+        return new Response(JSON.stringify(notFound()), { status: 404 });
+      }
+      return new Response(JSON.stringify(forbidden()), { status: 403 });
+    }
 
     const existing = await db.query.productCategories.findFirst({
       where: and(

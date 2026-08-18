@@ -4,6 +4,8 @@
  * ponytail: minimal cookie decode; replace with `auth.api.getSession()` once
  * BetterAuth is wired (Phase 1.2). This stub lets the categories endpoint
  * compile and pass the guard order today.
+ * 
+ * DEV MODE: Auto-creates mock session for local testing when auth not implemented.
  */
 
 import type { APIContext } from 'astro';
@@ -18,9 +20,20 @@ export interface Session {
 /**
  * Extract session from request.
  * Returns null when cookie is missing or invalid.
+ * 
+ * DEV MODE: Returns mock session if import.meta.env.DEV is true.
  */
 export function getSession(context: APIContext): Session | null {
+  const isDev = import.meta.env.DEV;
   const token = context.cookies.get('session')?.value;
+  
+  if (!token && isDev) {
+    return {
+      userId: 'dev_user_123',
+      role: 'tenant',
+    };
+  }
+
   if (!token) return null;
 
   try {
@@ -35,6 +48,8 @@ export function getSession(context: APIContext): Session | null {
 /**
  * Require an authenticated session.
  * Returns the session or an ErrorResponse + status.
+ * 
+ * DEV MODE: Bypasses auth check if import.meta.env.DEV is true.
  */
 export function requireSession(
   context: APIContext

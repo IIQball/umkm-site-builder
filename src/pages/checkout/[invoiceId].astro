@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import PaymentStatus from '@/components/checkout/PaymentStatus.svelte';
-import { paymentService } from '@/services/payment.service';
+import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
+import PaymentModal from '@/components/checkout/PaymentModal.svelte';
+import { transactionService } from '@/services/transaction.service';
 import { formatCurrency } from '@/lib/utils/format';
-import type { CheckoutPageData } from '@/types/payments';
+import type { CheckoutPageData } from '@/types/transactions';
 
 const { invoiceId } = Astro.params;
 
@@ -15,22 +16,27 @@ let pageData: CheckoutPageData | null = null;
 let error: string | null = null;
 
 try {
-  const payment = await paymentService.getPaymentDetails(invoiceId);
-  if (!payment) {
+  const transaction = await transactionService.getTransactionDetails(invoiceId);
+  if (!transaction) {
     error = 'Tagihan tidak ditemukan atau telah kedaluwarsa';
   } else {
+    let paymentUrl = '';
+    if (transaction.status === 'pending') {
+      paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || '';
+    }
+
     pageData = {
-      invoiceId: payment.metadata?.invoiceId || invoiceId,
-      amount: payment.amount,
-      amountFormatted: formatCurrency(Math.round(payment.amount * 100)),
-      paymentUrl: payment.metadata?.invoiceUrl || '',
-      status: payment.status as 'pending' | 'completed' | 'failed',
-      expiresAt: payment.metadata?.expiresAt || '',
-      paymentMethod: payment.metadata?.method,
+      invoiceId: transaction.externalId,
+      amount: transaction.amount,
+      amountFormatted: formatCurrency(Math.round(transaction.amount * 100)),
+      paymentUrl,
+      status: transaction.status,
+      expiresAt: '',
+      paymentMethod: transaction.paymentChannel,
     };
   }
 } catch (err) {
-  console.error('[Checkout] Error fetching payment:', err);
+  console.error('[Checkout] Error fetching transaction:', err);
   error = 'Gagal memuat rincian pembayaran';
 }
 ---
@@ -76,7 +82,7 @@ try {
               Kembali ke Beranda
             </a>
             
-            {pageData.status === 'completed' ? (
+            {pageData.status === 'success' ? (
               <div class="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/20">
                 <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
                 Lunas
@@ -85,6 +91,11 @@ try {
               <div class="flex items-center gap-1.5 bg-rose-500/10 text-rose-500 px-3 py-1 rounded-full text-xs font-semibold border border-rose-500/20">
                 <div class="w-1.5 h-1.5 bg-rose-500 rounded-full"></div>
                 Gagal
+              </div>
+            ) : pageData.status === 'expired' ? (
+              <div class="flex items-center gap-1.5 bg-orange-500/10 text-orange-500 px-3 py-1 rounded-full text-xs font-semibold border border-orange-500/20">
+                <div class="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                Kedaluwarsa
               </div>
             ) : (
               <div class="flex items-center gap-1.5 bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/20 animate-pulse">
@@ -97,14 +108,14 @@ try {
           <!-- Header Content (Centered) -->
           <div class="p-6 md:p-8 space-y-6">
             <div class="text-center space-y-2">
-              {pageData.status === 'completed' && (
+              {pageData.status === 'success' && (
                 <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-500 shadow-sm">
                   <span class="material-symbols-outlined text-3xl font-bold">check</span>
                 </div>
               )}
               <h1 class="text-2xl font-extrabold tracking-tight text-base-content">Pembayaran Aktivasi</h1>
               <p class="text-xs text-base-content/70 max-w-sm mx-auto leading-relaxed">
-                {pageData.status === 'completed' 
+                {pageData.status === 'success' 
                   ? 'Pembayaran berhasil dilakukan. Toko online Anda kini telah aktif.' 
                   : 'Selesaikan pembayaran untuk mengaktifkan toko online Anda'}
               </p>
@@ -167,32 +178,64 @@ try {
             </div>
 
             <!-- Action Button & Poller -->
-            {pageData.status === 'pending' && pageData.paymentUrl ? (
+            {pageData.status === 'pending' ? (
               <div class="space-y-3 pt-1">
-                <button 
-                  type="button" 
-                  class="btn btn-primary w-full shadow-lg shadow-primary/20 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none"
-                  onclick="document.getElementById('payment_modal').showModal()"
-                >
-                  <span>Bayar Sekarang</span>
-                  <span class="material-symbols-outlined text-[18px]">payment</span>
-                </button>
+                {pageData.paymentUrl ? (
+                  <button 
+                    type="button"
+                    class="btn btn-primary w-full shadow-lg shadow-primary/20 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none"
+                    onclick="document.getElementById('payment_modal')?.showModal()"
+                  >
+                    <span>Lanjutkan ke Pembayaran</span>
+                    <span class="material-symbols-outlined text-[18px]">payment</span>
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    class="btn btn-primary w-full shadow-lg shadow-primary/20 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none"
+                    onclick="window.location.href = '/checkout/' + window.location.pathname.split('/').pop()"
+                  >
+                    <span>Muat Ulang Halaman</span>
+                    <span class="material-symbols-outlined text-[18px]">refresh</span>
+                  </button>
+                )}
                 
-                <PaymentStatus invoiceId={invoiceId} client:load />
+                <TransactionStatus 
+                  {invoiceId} 
+                  onStatusUpdate={(status) => {
+                    if (status === 'success') {
+                      const modal = document.getElementById('payment_modal');
+                      if (modal instanceof HTMLDialogElement) {
+                        modal.close();
+                      }
+                      window.location.reload();
+                    }
+                  }}
+                  client:load 
+                />
               </div>
-            ) : pageData.status === 'completed' ? (
+            ) : pageData.status === 'success' ? (
               <div class="space-y-3 pt-1">
                 <a 
                   href="/" 
                   class="btn btn-primary w-full shadow-lg shadow-primary/20 text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none text-center"
                 >
-                  <span>Buka Toko Saya</span>
+                  <span>Menuju Dashboard</span>
                   <span class="material-symbols-outlined text-[18px]">dashboard</span>
                 </a>
                 
-                <PaymentStatus invoiceId={invoiceId} client:load />
+                <TransactionStatus {invoiceId} client:load />
               </div>
             ) : null}
+
+            <!-- Payment Modal -->
+            {pageData.paymentUrl && (
+              <PaymentModal 
+                paymentUrl={pageData.paymentUrl}
+                onClose={() => {}}
+                client:load
+              />
+            )}
 
           </div>
 
@@ -213,36 +256,6 @@ try {
       )}
 
     </div>
-
-    <!-- Embedded Payment Modal Dialog -->
-    {pageData?.paymentUrl && (
-      <dialog id="payment_modal" class="modal modal-bottom sm:modal-middle">
-        <div class="modal-box w-11/12 max-w-2xl p-0 overflow-hidden bg-base-100 border border-base-content/10 shadow-2xl">
-          <div class="flex justify-between items-center px-5 py-3.5 border-b border-base-content/10 bg-base-200">
-            <div class="flex items-center gap-2 text-xs font-bold text-base-content">
-              <span class="material-symbols-outlined text-primary text-[18px]">shield</span>
-              Halaman Pembayaran
-            </div>
-            <form method="dialog">
-              <button class="btn btn-sm btn-circle btn-ghost text-base-content/70 hover:text-base-content">
-                <span class="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </form>
-          </div>
-          <div class="w-full h-[620px] bg-base-100">
-            <iframe
-              src={pageData.paymentUrl}
-              class="w-full h-full border-none"
-              title="Halaman Pembayaran"
-              allow="payment"
-            ></iframe>
-          </div>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-    )}
 
     <!-- Copy Toast Floating Notification -->
     <div

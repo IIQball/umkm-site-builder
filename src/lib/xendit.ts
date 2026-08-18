@@ -4,7 +4,7 @@
  */
 
 import { config } from "@/lib/config/app";
-import type { XenditInvoice } from "@/types/payments";
+import type { XenditInvoice } from "@/types/transactions";
 import crypto from 'node:crypto';
 
 // Xendit menggunakan base URL yang sama untuk sandbox dan production
@@ -114,10 +114,23 @@ export class XenditClient {
         .update(payload)
         .digest("hex");
 
-      return crypto.timingSafeEqual(
+      const isValid = crypto.timingSafeEqual(
         Buffer.from(computed),
         Buffer.from(signature),
       );
+
+      if (!isValid) {
+        console.warn('[Xendit] Signature mismatch:', {
+          webhookSecretLength: this.webhookSecret.length,
+          payloadLength: payload.length,
+          computedLength: computed.length,
+          signatureLength: signature.length,
+          computedPrefix: computed.slice(0, 16),
+          signaturePrefix: signature.slice(0, 16),
+        });
+      }
+
+      return isValid;
     } catch (error) {
       console.error("[Xendit] Signature verification failed:", error);
       return false;

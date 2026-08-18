@@ -1,11 +1,11 @@
 /**
- * POST /api/payments/initiate
- * Initiate a payment via Xendit
+ * POST /api/transactions/initiate
+ * Initiate a transaction via Xendit
  */
 
 import type { APIRoute } from 'astro';
-import { paymentService } from '@/services/payment.service';
-import { PaymentInitiateInputSchema } from '@/lib/payments/schemas';
+import { transactionService } from '@/services/transaction.service';
+import { TransactionInitiateInputSchema } from '@/lib/transactions/schemas';
 import { z } from 'zod';
 
 interface ResponseData {
@@ -44,15 +44,15 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     // Parse and validate input
     const body = await context.request.json();
-    const input = PaymentInitiateInputSchema.parse(body);
+    const input = TransactionInitiateInputSchema.parse(body);
 
     // Get base URL for redirect URLs
     const protocol = context.request.url.startsWith('https') ? 'https' : 'http';
     const host = context.request.headers.get('host') || 'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
 
-    // Initiate payment
-    const result = await paymentService.initiatePayment(userId, input, baseUrl);
+    // Initiate transaction
+    const result = await transactionService.initiateTransaction(userId, input, baseUrl);
 
     return new Response(
       JSON.stringify({
@@ -65,7 +65,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     );
   } catch (error) {
-    console.error('[POST /api/payments/initiate]', error);
+    console.error('[POST /api/transactions/initiate]', error);
 
     // Handle validation errors
     if (error instanceof z.ZodError) {

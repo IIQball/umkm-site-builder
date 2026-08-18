@@ -1,10 +1,10 @@
 /**
- * Payment service tests
+ * Transaction service tests
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { paymentService } from '@/lib/payments/service';
-import type { PaymentInitiateInput } from '@/types/payments';
+import { transactionService } from '@/services/transaction.service';
+import type { TransactionInitiateInput } from '@/types/transactions';
 
 // Mock xenditClient
 vi.mock('@/lib/xendit', () => ({
@@ -24,7 +24,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-describe('PaymentService', () => {
+describe('TransactionService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -35,43 +35,56 @@ describe('PaymentService', () => {
 
   describe('formatCurrency', () => {
     it('should format amount to IDR currency', () => {
-      const formatted = paymentService.formatCurrency(10000000); // 100,000 IDR in cents
+      const formatted = transactionService.formatCurrency(10000000); // 100,000 IDR in cents
       expect(formatted).toContain('100');
       expect(formatted).toContain('Rp'); // IDR symbol or text
     });
 
     it('should handle zero amount', () => {
-      const formatted = paymentService.formatCurrency(0);
+      const formatted = transactionService.formatCurrency(0);
       expect(formatted).toBeDefined();
     });
 
     it('should handle large amounts', () => {
-      const formatted = paymentService.formatCurrency(999999999900); // 9,999,999,999 IDR
+      const formatted = transactionService.formatCurrency(999999999900); // 9,999,999,999 IDR
       expect(formatted).toBeDefined();
     });
   });
 
-  describe('initiatePayment', () => {
-    it('should validate amount matches ACTIVATION_FEE_IDR', async () => {
-      const input: PaymentInitiateInput = {
+  describe('initiateTransaction', () => {
+    it('should validate amount matches STORE_REGISTRATION_FEE_IDR', async () => {
+      const input: TransactionInitiateInput = {
         amount: 50000, // Wrong amount
-        type: 'activation_fee',
+        type: 'store_registration',
+        storeId: 'store_123',
       };
 
       await expect(
-        paymentService.initiatePayment('user_123', input, 'http://localhost:3000')
+        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
       ).rejects.toThrow(/Invalid amount/);
     });
 
+    it('should require storeId for store_registration', async () => {
+      const input: TransactionInitiateInput = {
+        amount: 100000,
+        type: 'store_registration',
+      };
+
+      // This should fail validation in the schema
+      await expect(
+        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
+      ).rejects.toThrow();
+    });
+
     it('should require templateId for template_purchase', async () => {
-      const input: PaymentInitiateInput = {
+      const input: TransactionInitiateInput = {
         amount: 50000,
         type: 'template_purchase',
       };
 
       // This should fail validation in the schema, but service should handle gracefully
       await expect(
-        paymentService.initiatePayment('user_123', input, 'http://localhost:3000')
+        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
       ).rejects.toThrow();
     });
   });
@@ -89,7 +102,7 @@ describe('PaymentService', () => {
 
       // Should not throw
       await expect(
-        paymentService.processWebhook(payload)
+        transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
     });
 
@@ -104,9 +117,9 @@ describe('PaymentService', () => {
       };
 
       // Should not throw on second call
-      await paymentService.processWebhook(payload);
+      await transactionService.processWebhook(payload);
       await expect(
-        paymentService.processWebhook(payload)
+        transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
     });
 
@@ -121,7 +134,7 @@ describe('PaymentService', () => {
       };
 
       await expect(
-        paymentService.processWebhook(payload)
+        transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
     });
 
@@ -136,14 +149,29 @@ describe('PaymentService', () => {
       };
 
       await expect(
-        paymentService.processWebhook(payload)
+        transactionService.processWebhook(payload)
+      ).resolves.toBeUndefined();
+    });
+
+    it('should handle EXPIRED status', async () => {
+      const payload = {
+        id: 'xendit_expired',
+        external_id: 'INV-user_exp-123456',
+        amount: 100000,
+        paid_amount: 0,
+        status: 'EXPIRED',
+        paid: false,
+      };
+
+      await expect(
+        transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
     });
   });
 
-  describe('getPaymentDetails', () => {
-    it('should return null for non-existent payment', async () => {
-      const result = await paymentService.getPaymentDetails('nonexistent');
+  describe('getTransactionDetails', () => {
+    it('should return null for non-existent transaction', async () => {
+      const result = await transactionService.getTransactionDetails('nonexistent');
       expect(result).toBeNull();
     });
   });

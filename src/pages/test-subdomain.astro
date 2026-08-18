@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SubdomainInput from '../components/onboarding/SubdomainInput.svelte';
+---
+<BaseLayout title="Test Subdomain">
+  <div class="container py-8 max-w-md mx-auto">
+    <h1 class="text-xl font-bold mb-4">Test Subdomain Input</h1>
+    <SubdomainInput client:load />
+  </div>
+</BaseLayout>

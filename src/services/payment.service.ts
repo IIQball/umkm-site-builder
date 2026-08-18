@@ -170,33 +170,46 @@ export class PaymentService {
    */
   async getPaymentDetails(invoiceNum: string): Promise<PaymentRecord | null> {
     try {
-      // Query by metadata invoiceId since we store the external_id there
+      // Query by transactionId OR metadata invoiceId
       const results = await db
         .select()
         .from(payments)
         .where(eq(payments.transactionId, invoiceNum));
 
-      if (!results.length) {
+      if (results.length) {
+        const payment = results[0];
+        return this.mapPaymentToRecord(payment);
+      }
+
+      // Fallback: search by invoiceNum in metadata (if not found by transactionId)
+      const allPayments = await db.select().from(payments);
+      const payment = allPayments.find(
+        (p: any) => (p.metadata as Record<string, any>)?.invoiceId === invoiceNum
+      );
+
+      if (!payment) {
         return null;
       }
 
-      const payment = results[0];
-
-      return {
-        id: payment.id,
-        userId: payment.userId,
-        amount: payment.amount / 100, // Convert from cents
-        transactionId: payment.transactionId,
-        status: payment.status as any,
-        provider: payment.provider,
-        metadata: payment.metadata as any,
-        createdAt: payment.createdAt,
-        updatedAt: payment.updatedAt,
-      };
+      return this.mapPaymentToRecord(payment);
     } catch (error) {
       console.error('[PaymentService] Failed to get payment details:', error);
       throw error;
     }
+  }
+
+  private mapPaymentToRecord(payment: any): PaymentRecord {
+    return {
+      id: payment.id,
+      userId: payment.userId,
+      amount: payment.amount / 100,
+      transactionId: payment.transactionId,
+      status: payment.status as any,
+      provider: payment.provider,
+      metadata: payment.metadata as any,
+      createdAt: payment.createdAt,
+      updatedAt: payment.updatedAt,
+    };
   }
 }
 

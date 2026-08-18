@@ -48,7 +48,7 @@ try {
       <!-- Header -->
       <div class="mb-8">
         <a href="/" class="link link-hover text-sm mb-4 inline-flex items-center gap-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
           Kembali ke Beranda
@@ -82,54 +82,130 @@ try {
       <!-- Main Content -->
       {pageData && (
         <div class="grid gap-6">
-          <!-- Invoice Details -->
-          <InvoiceDetails data={pageData} client:load />
+          <!-- Invoice Card -->
+          <div class="card bg-base-100 shadow-xl border border-base-300">
+            <div class="card-body space-y-6">
+              <!-- Header -->
+              <div class="flex items-center justify-between">
+                <h2 class="card-title text-2xl">Detail Invoice</h2>
+                <div class="badge {pageData.status === 'completed' ? 'badge-success' : pageData.status === 'failed' ? 'badge-error' : 'badge-warning'}">
+                  {pageData.status === 'completed' ? 'Lunas' : pageData.status === 'failed' ? 'Gagal' : 'Menunggu'}
+                </div>
+              </div>
 
-          <!-- Payment Status Tracker -->
-          <div class="card bg-base-100 shadow-md border border-base-300">
-            <div class="card-body">
-              <h3 class="card-title">Status Pembayaran Real-time</h3>
+              <!-- Invoice Number -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold">Nomor Invoice</span>
+                </label>
+                <div class="bg-base-200 px-4 py-2 rounded text-sm font-mono break-all">
+                  {pageData.invoiceId}
+                </div>
+              </div>
+
+              <!-- Total Amount -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold">Total Tagihan</span>
+                </label>
+                <div class="text-4xl font-bold text-primary">
+                  {pageData.amountFormatted}
+                </div>
+              </div>
+
+              <!-- Payment Method (if available) -->
+              {pageData.paymentMethod && (
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-sm">Metode Pembayaran</span>
+                  </label>
+                  <div class="text-sm capitalize">
+                    {pageData.paymentMethod}
+                  </div>
+                </div>
+              )}
+
+              <!-- Expiry -->
+              {pageData.expiresAt && (
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-sm">Berlaku Hingga</span>
+                  </label>
+                  <div class="text-sm">
+                    {new Date(pageData.expiresAt).toLocaleDateString('id-ID', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <!-- Status Poller -->
               <PaymentStatus invoiceId={invoiceId} client:load />
+
+              <!-- Pay Now Button -->
+              {pageData.status === 'pending' && pageData.paymentUrl && (
+                <button
+                  onclick={`window.open('${pageData.paymentUrl}', '_blank')`}
+                  class="btn btn-primary btn-lg w-full"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Bayar Sekarang
+                </button>
+              )}
+
+              <!-- Success Alert -->
+              {pageData.status === 'completed' && (
+                <div class="alert alert-success shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-bold">Pembayaran Berhasil!</h3>
+                    <div class="text-sm">Akun Anda telah diaktifkan.</div>
+                  </div>
+                </div>
+              )}
+
+              <!-- Error Alert -->
+              {pageData.status === 'failed' && (
+                <div class="alert alert-error shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-bold">Pembayaran Gagal</h3>
+                    <div class="text-sm">Silakan coba lagi atau hubungi dukungan.</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <!-- Mobile-First Responsive Info -->
-          <div class="space-y-3 text-sm">
-            <!-- Security Info -->
+          <!-- Info Cards -->
+          <div class="grid gap-3">
             <div class="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div>
-                <h4 class="font-semibold mb-1">Pembayaran Aman</h4>
-                <p>Kami bermitra dengan Xendit untuk memastikan transaksi Anda aman dan terpercaya.</p>
+                <h3 class="font-bold">Pembayaran Aman</h3>
+                <div class="text-sm">Diproses melalui Xendit, penyedia pembayaran terpercaya.</div>
               </div>
             </div>
 
-            <!-- Instructions -->
             <div class="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div>
-                <h4 class="font-semibold mb-1">Petunjuk Pembayaran</h4>
-                <ul class="list-disc list-inside space-y-1">
-                  <li>Klik tombol "Bayar Sekarang" di atas</li>
-                  <li>Pilih metode pembayaran Anda</li>
-                  <li>Ikuti instruksi pembayaran</li>
-                  <li>Status akan diperbarui secara otomatis</li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Support -->
-            <div class="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.172l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <div>
-                <h4 class="font-semibold mb-1">Butuh Bantuan?</h4>
-                <p>Hubungi tim dukungan kami di support@umkmbuilder.com jika ada masalah.</p>
+                <h3 class="font-bold">Butuh Bantuan?</h3>
+                <div class="text-sm">Hubungi support@umkmbuilder.com</div>
               </div>
             </div>
           </div>

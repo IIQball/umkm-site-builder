@@ -1,0 +1,57 @@
+---
+/**
+ * Navbar.astro
+ * Semantic navbar with theme toggle using DaisyUI
+ * Sticky header with navigation links and dark/light mode toggle
+ */
+import ThemeToggle from '@/components/common/ThemeToggle.astro';
+---
+
+<nav class="navbar bg-base-100 border-b border-base-200 sticky top-0 z-40 shadow-sm">
+  <div class="flex-1">
+    <a href="/" class="btn btn-ghost text-xl font-bold">
+      UMKM Builder
+    </a>
+  </div>
+
+  <div class="flex-none gap-2">
+    <!-- Navigation Links -->
+    <div class="hidden md:flex gap-1">
+      <a href="/" class="btn btn-ghost btn-sm">
+        Beranda
+      </a>
+      <a href="#" class="btn btn-ghost btn-sm">
+        Fitur
+      </a>
+      <a href="#" class="btn btn-ghost btn-sm">
+        Harga
+      </a>
+      <a href="#" class="btn btn-ghost btn-sm">
+        Bantuan
+      </a>
+    </div>
+
+    <!-- Theme Toggle -->
+    <ThemeToggle />
+
+    <!-- Mobile Menu -->
+    <div class="dropdown dropdown-end md:hidden">
+      <button
+        tabindex="0"
+        class="btn btn-ghost btn-circle"
+        aria-label="Menu"
+      >
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <ul
+        tabindex="0"
+        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200"
+      >
+        <li><a href="/">Beranda</a></li>
+        <li><a href="#">Fitur</a></li>
+        <li><a href="#">Harga</a></li>
+        <li><a href="#">Bantuan</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>

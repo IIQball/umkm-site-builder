@@ -1,0 +1,25 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RegisterForm from "@/components/auth/RegisterForm.svelte";
+---
+
+<BaseLayout title="Buat Akun - UMKM Site Builder" description="Buat akun UMKM Site Builder Anda">
+  <main class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">Buat Akun</h1>
+        <p class="text-base-content/70 mt-2">Mulai bangun toko UMKM Anda hari ini</p>
+      </div>
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <RegisterForm client:load />
+          <div class="divider">ATAU</div>
+          <p class="text-center text-sm">
+            Sudah punya akun?
+            <a href="/auth/login" class="link link-primary">Masuk</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

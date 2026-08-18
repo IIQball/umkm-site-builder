@@ -1,0 +1,25 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import LoginForm from "@/components/auth/LoginForm.svelte";
+---
+
+<BaseLayout title="Masuk - UMKM Site Builder" description="Masuk ke akun Anda">
+  <main class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">Selamat Datang</h1>
+        <p class="text-base-content/70 mt-2">Masuk untuk mengelola toko UMKM Anda</p>
+      </div>
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <LoginForm client:load />
+          <div class="divider">ATAU</div>
+          <p class="text-center text-sm">
+            Belum punya akun?
+            <a href="/auth/register" class="link link-primary">Buat akun</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

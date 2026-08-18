@@ -150,8 +150,6 @@ export class XenditClient {
       metadata: typeof raw.metadata === 'object' ? (raw.metadata as Record<string, unknown>) : undefined,
     };
   }
-    };
-  }
-}
+};
 
 export const xenditClient = new XenditClient();

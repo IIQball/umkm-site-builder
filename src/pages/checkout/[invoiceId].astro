@@ -108,7 +108,18 @@ try {
                 type="button"
                 class="copy-btn"
                 title="Salin Nomor Invoice"
-                onclick={`navigator.clipboard.writeText('${pageData.invoiceId}'); alert('Nomor invoice berhasil disalin!');`}
+                onclick={`
+                  navigator.clipboard.writeText('${pageData.invoiceId}');
+                  const toast = document.getElementById('copy_toast');
+                  if (toast) {
+                    toast.classList.remove('hidden');
+                    toast.classList.add('opacity-100');
+                    setTimeout(() => {
+                      toast.classList.add('hidden');
+                      toast.classList.remove('opacity-100');
+                    }, 2500);
+                  }
+                `}
               >
                 <span class="material-symbols-outlined icon-18">content_copy</span>
               </button>
@@ -204,5 +215,16 @@ try {
         </div>
       </dialog>
     )}
+  </div>
+
+  <!-- Copy Toast Notification -->
+  <div
+    id="copy_toast"
+    class="toast toast-top toast-end opacity-0 transition-opacity duration-300 hidden"
+  >
+    <div class="alert alert-success text-xs text-white">
+      <span class="material-symbols-outlined icon-16">check_circle</span>
+      <span>Nomor invoice berhasil disalin!</span>
+    </div>
   </div>
 </BaseLayout>

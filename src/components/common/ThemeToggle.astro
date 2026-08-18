@@ -1,0 +1,36 @@
+---
+/**
+ * ThemeToggle.astro
+ * Dark/Light mode toggle using DaisyUI theme-controller
+ */
+---
+
+<label class="swap swap-rotate btn btn-ghost btn-circle btn-sm">
+  <input
+    type="checkbox"
+    id="theme-toggle-input"
+    class="theme-controller"
+    value="dark"
+  />
+  <span class="swap-off material-symbols-outlined text-[20px]">light_mode</span>
+  <span class="swap-on material-symbols-outlined text-[20px]">dark_mode</span>
+</label>
+
+<script is:inline>
+  const toggle = document.getElementById('theme-toggle-input');
+  const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  
+  if (toggle) {
+    toggle.checked = currentTheme === 'dark';
+    toggle.addEventListener('change', (e) => {
+      const newTheme = e.target.checked ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('theme', newTheme);
+    });
+  }
+</script>

@@ -15,6 +15,9 @@ export default defineConfig({
     svelte(),
   ],
   vite: {
+    server: {
+      allowedHosts: true,
+    },
     ssr: {
       external: ['svelte', 'node:crypto'],
     },

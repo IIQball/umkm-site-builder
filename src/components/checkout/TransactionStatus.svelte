@@ -2,19 +2,19 @@
   import { onMount } from 'svelte';
 
   export let invoiceId: string;
-  export let onStatusUpdate: (status: 'pending' | 'completed' | 'failed') => void = () => {};
+  export let onStatusUpdate: (status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded') => void = () => {};
 
-  let status: 'pending' | 'completed' | 'failed' = 'pending';
+  let status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded' = 'pending';
   let error: string | null = null;
   let pollCount = 0;
   const maxPolls = 120; // 10 menit (interval 5 detik)
 
-  const fetchPaymentStatus = async () => {
+  const fetchTransactionStatus = async () => {
     try {
-      const response = await fetch(`/api/payments/status/${invoiceId}`);
+      const response = await fetch(`/api/transactions/status/${invoiceId}`);
 
       if (!response.ok) {
-        throw new Error('Gagal memeriksa status pembayaran');
+        throw new Error('Gagal memeriksa status transaksi');
       }
 
       const result = await response.json();
@@ -27,23 +27,23 @@
         }
       }
     } catch (err) {
-      console.error('[PaymentStatus] Error:', err);
+      console.error('[TransactionStatus] Error:', err);
       error = err instanceof Error ? err.message : 'Error memeriksa status';
     }
   };
 
   onMount(() => {
-    fetchPaymentStatus();
+    fetchTransactionStatus();
 
     const interval = setInterval(() => {
       pollCount++;
-      if (pollCount > maxPolls || status === 'completed' || status === 'failed') {
+      if (pollCount > maxPolls || status === 'success' || status === 'failed') {
         clearInterval(interval);
         return;
       }
 
       if (status === 'pending') {
-        fetchPaymentStatus();
+        fetchTransactionStatus();
       }
     }, 5000);
 
@@ -66,17 +66,17 @@
     </div>
   {/if}
 
-  {#if status === 'completed'}
+  {#if status === 'success'}
     <div class="flex items-center justify-center gap-1.5 text-emerald-500 text-xs font-semibold py-1">
       <span class="material-symbols-outlined text-[16px]">verified</span>
       <span>Pembayaran Berhasil Diverifikasi</span>
     </div>
   {/if}
 
-  {#if status === 'failed'}
+  {#if status === 'failed' || status === 'expired' || status === 'canceled' || status === 'refunded'}
     <div class="flex items-center justify-center gap-1.5 text-rose-500 text-xs font-semibold py-1">
       <span class="material-symbols-outlined text-[16px]">cancel</span>
-      <span>Pembayaran Gagal. Silakan coba lagi.</span>
+      <span>Pembayaran {status === 'expired' ? 'Kedaluwarsa' : status === 'canceled' ? 'Dibatalkan' : status === 'refunded' ? 'Dikembalikan' : 'Gagal'}. Silakan coba lagi.</span>
     </div>
   {/if}
 </div>

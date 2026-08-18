@@ -67,7 +67,7 @@ Decided with the human. Do not change without explicit approval. Each one carrie
 | 5 | Build tool: Plain Vite + Bun scripts | Explicit control, fewer dependencies, stable Vite ecosystem. Vite Plus deferred unless complexity justifies it. | 2026-08-14 |
 | 6 | Subdomain routing: Host header detection (Astro SSR) | Every request queries DB to resolve host → tenant → config. Acceptable because workload is read-heavy and refresh-to-see-changes is fine. | 2026-08-14 |
 | 7 | Builder state: Client-side only, save-on-click | Live preview instant (client state). No auto-save to reduce DB load. Users click explicit "Save" button. Data loss risk accepted for simplicity. | 2026-08-14 |
-| 8 | Payment idempotency: Unique transaction_id constraint | Duplicate webhooks fail silently (natural idempotency). Simpler than separate idempotency table. | 2026-08-14 |
+| 8 | Payment idempotency: Unique externalId constraint | Duplicate webhooks fail silently (natural idempotency). Simpler than separate idempotency table. externalId is the Xendit invoice number. | 2026-08-14 |
 
 ## 9. Open questions
 

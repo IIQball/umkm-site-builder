@@ -3,14 +3,16 @@
  * Singleton instance of Drizzle ORM connected to Neon PostgreSQL
  */
 
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { config } from '@/lib/config/app';
 import * as schema from '@/db/schema';
 
-let dbInstance: any = null;
+type Database = NeonHttpDatabase<typeof schema>;
 
-export function getDb() {
+let dbInstance: Database | null = null;
+
+export function getDb(): Database {
   if (dbInstance) {
     return dbInstance;
   }

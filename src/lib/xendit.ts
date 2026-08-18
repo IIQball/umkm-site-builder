@@ -127,27 +127,29 @@ export class XenditClient {
   /**
    * Map Xendit API response to internal interface
    */
-  private mapXenditResponse(raw: any): XenditInvoice {
+  private mapXenditResponse(raw: Record<string, unknown>): XenditInvoice {
     return {
-      id: raw.id,
-      invoiceNum: raw.external_id,
-      userId: raw.user_id,
-      userEmail: raw.user_email,
-      amount: raw.amount,
-      paidAmount: raw.paid_amount || 0,
-      payerEmail: raw.payer_email,
-      description: raw.description,
-      expiryDate: raw.expiry_date,
-      invoiceUrl: raw.invoice_url,
-      status: raw.status?.toUpperCase() || "PENDING",
-      paid: raw.paid || false,
-      paidAt: raw.paid_at,
-      paymentMethod: raw.payment_method,
-      paymentChannel: raw.payment_channel,
-      created: raw.created,
-      updated: raw.updated,
-      currency: raw.currency || "IDR",
-      metadata: raw.metadata,
+      id: String(raw.id),
+      invoiceNum: String(raw.external_id),
+      userId: raw.user_id ? String(raw.user_id) : undefined,
+      userEmail: raw.user_email ? String(raw.user_email) : undefined,
+      amount: Number(raw.amount),
+      paidAmount: Number(raw.paid_amount) || 0,
+      payerEmail: raw.payer_email ? String(raw.payer_email) : undefined,
+      description: raw.description ? String(raw.description) : undefined,
+      expiryDate: raw.expiry_date ? String(raw.expiry_date) : undefined,
+      invoiceUrl: raw.invoice_url ? String(raw.invoice_url) : undefined,
+      status: (String(raw.status || 'PENDING').toUpperCase() as 'PAID' | 'PENDING' | 'EXPIRED' | 'SETTLED'),
+      paid: Boolean(raw.paid),
+      paidAt: raw.paid_at ? String(raw.paid_at) : undefined,
+      paymentMethod: raw.payment_method ? String(raw.payment_method) : undefined,
+      paymentChannel: raw.payment_channel ? String(raw.payment_channel) : undefined,
+      created: raw.created ? String(raw.created) : undefined,
+      updated: raw.updated ? String(raw.updated) : undefined,
+      currency: String(raw.currency || 'IDR'),
+      metadata: typeof raw.metadata === 'object' ? (raw.metadata as Record<string, unknown>) : undefined,
+    };
+  }
     };
   }
 }

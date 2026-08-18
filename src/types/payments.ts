@@ -15,6 +15,17 @@ export interface PaymentInitiateResponse {
   expiresAt: string;
 }
 
+export interface PaymentMetadata {
+  invoiceId?: string;
+  invoiceUrl?: string;
+  paidAt?: string;
+  method?: string;
+  channel?: string;
+  type?: 'activation_fee' | 'template_purchase';
+  templateId?: string | null;
+  expiresAt?: string;
+}
+
 export interface XenditInvoice {
   id: string;
   invoiceNum?: string;
@@ -31,7 +42,7 @@ export interface XenditInvoice {
   paidAt?: string;
   paymentMethod?: string;
   paymentChannel?: string;
-  paymentDetails?: Record<string, any>;
+  paymentDetails?: Record<string, unknown>;
   created?: string;
   updated?: string;
   successRedirectUrl?: string;
@@ -43,13 +54,13 @@ export interface XenditInvoice {
     quantity: number;
     price: number;
   }>;
-  fees?: Record<string, any>;
+  fees?: Record<string, unknown>;
   customer?: {
     givenNames?: string;
     email?: string;
     mobileNumber?: string;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface XenditWebhookPayload {
@@ -71,7 +82,7 @@ export interface XenditWebhookPayload {
   created?: string;
   updated?: string;
   currency?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentRecord {
@@ -81,12 +92,7 @@ export interface PaymentRecord {
   transactionId: string; // Xendit ID
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
   provider: string;
-  metadata: {
-    invoiceId?: string;
-    paidAt?: string;
-    method?: string;
-    [key: string]: any;
-  };
+  metadata: PaymentMetadata;
   createdAt: Date;
   updatedAt: Date;
 }

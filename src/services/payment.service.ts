@@ -6,7 +6,7 @@ import { db } from '@/lib/db/client';
 import { payments, users } from '@/db/schema';
 import { xenditClient } from '@/lib/xendit';
 import { eq } from 'drizzle-orm';
-import type { PaymentInitiateInput, PaymentRecord } from '@/types/payments';
+import type { PaymentInitiateInput, PaymentRecord, PaymentMetadata } from '@/types/payments';
 
 export const ACTIVATION_FEE_IDR = 100000; // 100,000 IDR
 
@@ -141,19 +141,19 @@ export class PaymentService {
       // Update payment status
       const newStatus = isPaid ? 'completed' : status === 'FAILED' ? 'failed' : 'pending';
 
-      const existingMetadata = (payment.metadata as Record<string, any>) || {};
+      const existingMetadata = (payment.metadata as PaymentMetadata) || {};
       
       await db
         .update(payments)
         .set({
-          status: newStatus as any,
+          status: newStatus as 'pending' | 'completed' | 'failed' | 'cancelled',
           metadata: {
             ...existingMetadata,
             invoiceId: invoiceNum,
             paidAt: payload.paid_at,
             method: payload.payment_method,
             channel: payload.payment_channel,
-          } as any,
+          } as PaymentMetadata,
           updatedAt: new Date(),
         })
         .where(eq(payments.id, payment.id));
@@ -183,9 +183,10 @@ export class PaymentService {
 
       // Fallback: search by invoiceNum in metadata (if not found by transactionId)
       const allPayments = await db.select().from(payments);
-      const payment = allPayments.find(
-        (p: any) => (p.metadata as Record<string, any>)?.invoiceId === invoiceNum
-      );
+      const payment = allPayments.find((p) => {
+        const meta = p.metadata as PaymentMetadata;
+        return meta?.invoiceId === invoiceNum;
+      });
 
       if (!payment) {
         return null;
@@ -198,15 +199,25 @@ export class PaymentService {
     }
   }
 
-  private mapPaymentToRecord(payment: any): PaymentRecord {
+  private mapPaymentToRecord(payment: {
+    id: string;
+    userId: string;
+    amount: number;
+    transactionId: string;
+    status: string;
+    provider: string;
+    metadata: unknown;
+    createdAt: Date;
+    updatedAt: Date;
+  }): PaymentRecord {
     return {
       id: payment.id,
       userId: payment.userId,
       amount: payment.amount / 100,
       transactionId: payment.transactionId,
-      status: payment.status as any,
+      status: payment.status as 'pending' | 'completed' | 'failed' | 'cancelled',
       provider: payment.provider,
-      metadata: payment.metadata as any,
+      metadata: (payment.metadata as PaymentMetadata) || {},
       createdAt: payment.createdAt,
       updatedAt: payment.updatedAt,
     };

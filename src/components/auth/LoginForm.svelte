@@ -19,7 +19,7 @@
 
       window.location.href = "/";
     } catch (err: any) {
-      error = err.message || "Failed to sign in";
+      error = err.message || "Gagal masuk";
     } finally {
       loading = false;
     }
@@ -41,7 +41,7 @@
       type="email"
       id="email"
       bind:value={email}
-      placeholder="you@example.com"
+      placeholder="anda@contoh.com"
       class="input input-bordered w-full"
       required
     />
@@ -49,13 +49,13 @@
 
   <div class="form-control">
     <label class="label" for="password">
-      <span class="label-text">Password</span>
+      <span class="label-text">Kata Sandi</span>
     </label>
     <input
       type="password"
       id="password"
       bind:value={password}
-      placeholder="Enter your password"
+      placeholder="Masukkan kata sandi"
       class="input input-bordered w-full"
       required
     />
@@ -65,14 +65,14 @@
     <button type="submit" class="btn btn-primary" disabled={loading}>
       {#if loading}
         <span class="loading loading-spinner"></span>
-        Signing in...
+        Masuk...
       {:else}
-        Sign In
+        Masuk
       {/if}
     </button>
   </div>
 
   <div class="text-center">
-    <a href="#" class="link link-hover text-sm">Forgot password?</a>
+    <a href="#" class="link link-hover text-sm">Lupa kata sandi?</a>
   </div>
 </form>

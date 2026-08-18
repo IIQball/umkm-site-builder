@@ -13,12 +13,12 @@
     error = "";
 
     if (password !== confirmPassword) {
-      error = "Passwords do not match";
+      error = "Kata sandi tidak cocok";
       return;
     }
 
     if (password.length < 8) {
-      error = "Password must be at least 8 characters";
+      error = "Kata sandi minimal 8 karakter";
       return;
     }
 
@@ -33,7 +33,7 @@
 
       window.location.href = "/";
     } catch (err: any) {
-      error = err.message || "Failed to create account";
+      error = err.message || "Gagal membuat akun";
     } finally {
       loading = false;
     }
@@ -49,13 +49,13 @@
 
   <div class="form-control">
     <label class="label" for="name">
-      <span class="label-text">Full Name</span>
+      <span class="label-text">Nama Lengkap</span>
     </label>
     <input
       type="text"
       id="name"
       bind:value={name}
-      placeholder="Your full name"
+      placeholder="Nama lengkap Anda"
       class="input input-bordered w-full"
       required
     />
@@ -69,7 +69,7 @@
       type="email"
       id="email"
       bind:value={email}
-      placeholder="you@example.com"
+      placeholder="anda@contoh.com"
       class="input input-bordered w-full"
       required
     />
@@ -77,13 +77,13 @@
 
   <div class="form-control">
     <label class="label" for="password">
-      <span class="label-text">Password</span>
+      <span class="label-text">Kata Sandi</span>
     </label>
     <input
       type="password"
       id="password"
       bind:value={password}
-      placeholder="Minimum 8 characters"
+      placeholder="Minimal 8 karakter"
       class="input input-bordered w-full"
       required
     />
@@ -91,13 +91,13 @@
 
   <div class="form-control">
     <label class="label" for="confirmPassword">
-      <span class="label-text">Confirm Password</span>
+      <span class="label-text">Konfirmasi Kata Sandi</span>
     </label>
     <input
       type="password"
       id="confirmPassword"
       bind:value={confirmPassword}
-      placeholder="Confirm your password"
+      placeholder="Konfirmasi kata sandi"
       class="input input-bordered w-full"
       required
     />
@@ -107,14 +107,14 @@
     <button type="submit" class="btn btn-primary" disabled={loading}>
       {#if loading}
         <span class="loading loading-spinner"></span>
-        Creating account...
+        Membuat akun...
       {:else}
-        Create Account
+        Buat Akun
       {/if}
     </button>
   </div>
 
   <p class="text-xs text-center text-base-content/70">
-    By creating an account, you agree to our Terms of Service and Privacy Policy.
+    Dengan membuat akun, Anda menyetujui Syarat Layanan dan Kebijakan Privasi kami.
   </p>
 </form>

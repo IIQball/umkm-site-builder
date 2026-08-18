@@ -1,0 +1,143 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import InvoiceDetails from '@/components/checkout/InvoiceDetails.svelte';
+import PaymentStatus from '@/components/checkout/PaymentStatus.svelte';
+import { paymentService } from '@/lib/payments/service';
+import type { CheckoutPageData } from '@/types/payments';
+
+interface Props {
+  invoiceId: string;
+}
+
+const { invoiceId } = Astro.params as Props;
+
+if (!invoiceId) {
+  return Astro.redirect('/');
+}
+
+// Fetch payment details
+let pageData: CheckoutPageData | null = null;
+let error: string | null = null;
+
+try {
+  const payment = await paymentService.getPaymentDetails(invoiceId);
+
+  if (!payment) {
+    error = 'Invoice not found';
+  } else {
+    pageData = {
+      invoiceId: payment.metadata?.invoiceId || invoiceId,
+      amount: payment.amount,
+      amountFormatted: paymentService.formatCurrency(Math.round(payment.amount * 100)),
+      paymentUrl: payment.metadata?.invoiceUrl || '',
+      status: payment.status as 'pending' | 'completed' | 'failed',
+      expiresAt: payment.metadata?.expiresAt || '',
+      paymentMethod: payment.metadata?.method,
+    };
+  }
+} catch (err) {
+  console.error('[Checkout Page] Error fetching payment:', err);
+  error = 'Failed to load payment details';
+}
+---
+
+<BaseLayout title="Checkout - UMKM Site Builder" description="Complete your payment">
+  <main class="min-h-screen bg-base-200 py-8">
+    <div class="container mx-auto px-4 max-w-2xl">
+      <!-- Header -->
+      <div class="mb-8">
+        <a href="/" class="link link-hover text-sm mb-4 inline-flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Kembali ke Beranda
+        </a>
+        <h1 class="text-4xl font-bold">Pembayaran Aktivasi</h1>
+        <p class="text-base-content/60 mt-2">Selesaikan pembayaran untuk mengaktifkan akun Anda</p>
+      </div>
+
+      <!-- Error State -->
+      {error && (
+        <div class="alert alert-error shadow-lg mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2" />
+          </svg>
+          <div>
+            <h3 class="font-bold">Error</h3>
+            <div class="text-sm">{error}</div>
+          </div>
+        </div>
+      )}
+
+      <!-- Loading State -->
+      {!pageData && !error && (
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body flex items-center justify-center py-12">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        </div>
+      )}
+
+      <!-- Main Content -->
+      {pageData && (
+        <div class="grid gap-6">
+          <!-- Invoice Details -->
+          <InvoiceDetails data={pageData} client:load />
+
+          <!-- Payment Status Tracker -->
+          <div class="card bg-base-100 shadow-md border border-base-300">
+            <div class="card-body">
+              <h3 class="card-title">Status Pembayaran Real-time</h3>
+              <PaymentStatus invoiceId={invoiceId} client:load />
+            </div>
+          </div>
+
+          <!-- Mobile-First Responsive Info -->
+          <div class="space-y-3 text-sm">
+            <!-- Security Info -->
+            <div class="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h4 class="font-semibold mb-1">Pembayaran Aman</h4>
+                <p>Kami bermitra dengan Xendit untuk memastikan transaksi Anda aman dan terpercaya.</p>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h4 class="font-semibold mb-1">Petunjuk Pembayaran</h4>
+                <ul class="list-disc list-inside space-y-1">
+                  <li>Klik tombol "Bayar Sekarang" di atas</li>
+                  <li>Pilih metode pembayaran Anda</li>
+                  <li>Ikuti instruksi pembayaran</li>
+                  <li>Status akan diperbarui secara otomatis</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Support -->
+            <div class="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.172l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <div>
+                <h4 class="font-semibold mb-1">Butuh Bantuan?</h4>
+                <p>Hubungi tim dukungan kami di support@umkmbuilder.com jika ada masalah.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  /* daisyUI tokens only */
+</style>

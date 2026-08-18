@@ -27,7 +27,13 @@ One pack. Never a second. No emojis as substitutes.
 
 | Component | Classes | Where |
 |---|---|---|
-| | | |
+| btn | btn-primary, btn-outline, btn-lg | index.astro, checkout page |
+| card | card, card-body, card-title | checkout/InvoiceDetails.svelte |
+| badge | badge-success, badge-warning, badge-error | checkout/InvoiceDetails.svelte |
+| alert | alert, alert-success, alert-error, alert-info, alert-warning | checkout/InvoiceDetails.svelte, PaymentStatus.svelte |
+| form-control | form-control, label, label-text, input, input-bordered | checkout/InvoiceDetails.svelte |
+| loading | loading-spinner | checkout page, PaymentStatus.svelte |
+| link | link, link-hover | checkout page |
 
 ## 4. Established patterns
 

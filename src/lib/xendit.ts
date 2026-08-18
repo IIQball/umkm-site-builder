@@ -5,7 +5,7 @@
 
 import { config } from "@/lib/config/app";
 import type { XenditInvoice } from "@/types/payments";
-import crypto from "crypto";
+import crypto from 'node:crypto';
 
 // Xendit menggunakan base URL yang sama untuk sandbox dan production
 const XENDIT_BASE_URL = "https://api.xendit.co";

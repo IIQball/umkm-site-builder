@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { XenditClient } from '@/lib/xendit';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 describe('XenditClient', () => {
   let client: XenditClient;

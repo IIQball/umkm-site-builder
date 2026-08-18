@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 describe('Webhook Handler - POST /api/webhooks/xendit', () => {
   beforeEach(() => {

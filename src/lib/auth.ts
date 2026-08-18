@@ -1,29 +1,19 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db } from "@/db";
-
-// Mendukung pembacaan env lewat Vite (import.meta.env) maupun Node.js (process.env)
-const secretKey = 
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BETTER_AUTH_SECRET) || 
-  process.env.BETTER_AUTH_SECRET;
-
-const siteUrl = 
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BETTER_AUTH_URL) || 
-  process.env.BETTER_AUTH_URL || 
-  "http://localhost:4321";
+import { db, users, sessions, accounts, verifications } from "@/db";
 
 export const auth = betterAuth({
-  baseURL: siteUrl,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: "users",
-      session: "sessions",
-      account: "accounts",
-      verification: "verifications",
+      user: users,
+      session: sessions,
+      account: accounts,
+      verification: verifications,
     },
   }),
-  secret: secretKey!,
+  secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4321",
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

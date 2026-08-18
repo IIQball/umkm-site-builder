@@ -31,6 +31,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@astrojs/cloudflare": "^7.0.0",
     "@astrojs/svelte": "^3.1.0",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^1.0.0",

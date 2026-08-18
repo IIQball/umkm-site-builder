@@ -42,79 +42,79 @@
 
 <form on:submit={handleSubmit} class="space-y-4">
   {#if error}
-    <div class="alert alert-error">
+    <div class="alert alert-error shadow-sm">
       <span>{error}</span>
     </div>
   {/if}
 
   <div class="form-control">
     <label class="label" for="name">
-      <span class="label-text">Nama Lengkap</span>
+      <span class="label-text font-medium">Nama Lengkap</span>
     </label>
     <input
       type="text"
       id="name"
       bind:value={name}
       placeholder="Nama lengkap Anda"
-      class="input input-bordered w-full"
+      class="input input-bordered w-full focus:input-primary"
       required
     />
   </div>
 
   <div class="form-control">
     <label class="label" for="email">
-      <span class="label-text">Email</span>
+      <span class="label-text font-medium">Email</span>
     </label>
     <input
       type="email"
       id="email"
       bind:value={email}
       placeholder="anda@contoh.com"
-      class="input input-bordered w-full"
+      class="input input-bordered w-full focus:input-primary"
       required
     />
   </div>
 
   <div class="form-control">
     <label class="label" for="password">
-      <span class="label-text">Kata Sandi</span>
+      <span class="label-text font-medium">Kata Sandi</span>
     </label>
     <input
       type="password"
       id="password"
       bind:value={password}
       placeholder="Minimal 8 karakter"
-      class="input input-bordered w-full"
+      class="input input-bordered w-full focus:input-primary"
       required
     />
   </div>
 
   <div class="form-control">
     <label class="label" for="confirmPassword">
-      <span class="label-text">Konfirmasi Kata Sandi</span>
+      <span class="label-text font-medium">Konfirmasi Kata Sandi</span>
     </label>
     <input
       type="password"
       id="confirmPassword"
       bind:value={confirmPassword}
       placeholder="Konfirmasi kata sandi"
-      class="input input-bordered w-full"
+      class="input input-bordered w-full focus:input-primary"
       required
     />
   </div>
 
-  <div class="form-control mt-6">
-    <button type="submit" class="btn btn-primary" disabled={loading}>
+  <div class="form-control pt-2">
+    <button type="submit" class="btn btn-primary w-full" disabled={loading}>
       {#if loading}
-        <span class="loading loading-spinner"></span>
-        Membuat akun...
+        <span class="loading loading-spinner loading-sm"></span>
+        Memproses...
       {:else}
         Buat Akun
       {/if}
     </button>
   </div>
 
-  <p class="text-xs text-center text-base-content/70">
-    Dengan membuat akun, Anda menyetujui Syarat Layanan dan Kebijakan Privasi kami.
+  <p class="text-xs text-center text-base-content/70 pt-2">
+    Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="link link-primary">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="link link-primary">Kebijakan Privasi</a> kami.
   </p>
 </form>

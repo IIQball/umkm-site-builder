@@ -9,7 +9,7 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      external: ['svelte'],
+      external: ['svelte', 'node:crypto'],
     },
   },
   output: 'server', // SSR enabled for dynamic routes

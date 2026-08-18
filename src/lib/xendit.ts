@@ -114,10 +114,14 @@ export class XenditClient {
         .update(payload)
         .digest("hex");
 
-      const isValid = crypto.timingSafeEqual(
-        Buffer.from(computed),
-        Buffer.from(signature),
-      );
+      const bufA = Buffer.from(computed, 'utf8');
+      const bufB = Buffer.from(signature, 'utf8');
+      
+      if (bufA.length !== bufB.length) {
+        return false;
+      }
+
+      const isValid = crypto.timingSafeEqual(bufA, bufB);
 
       if (!isValid) {
         console.warn('[Xendit] Signature mismatch:', {

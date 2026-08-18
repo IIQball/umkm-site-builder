@@ -76,6 +76,7 @@ export class TransactionService {
 
       // Record transaction in database
       const transactionId = `txn_${Date.now()}`;
+      const externalId = xenditInvoice?.invoiceNum || xenditInvoice?.id;
       await db.insert(transactions).values({
         id: transactionId,
         userId,
@@ -84,14 +85,13 @@ export class TransactionService {
         status: 'pending' as PaymentStatus,
         storeId: input.storeId || null,
         templateId: input.templateId || null,
-        externalId: xenditInvoice.invoiceNum || xenditInvoice.id,
+        externalId,
         paymentGatewayRef: xenditInvoice.id,
         paymentChannel: null,
         createdAt: new Date(),
       });
 
       // Cache invoice URL for later retrieval
-      const externalId = xenditInvoice.invoiceNum || xenditInvoice.id;
       if (xenditInvoice.invoiceUrl) {
         invoiceUrlCache.set(externalId, xenditInvoice.invoiceUrl);
       }
@@ -137,7 +137,7 @@ export class TransactionService {
         console.warn(
           `[TransactionService] Webhook received for unknown transaction: ${externalId}`
         );
-        throw new Error('Transaction not found');
+        return;
       }
 
       const transaction = existingTxs[0];

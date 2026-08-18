@@ -16,21 +16,54 @@ vi.mock('@/lib/xendit', () => ({
 }));
 
 // Mock database
-vi.mock('@/lib/db', () => ({
-  db: {
+vi.mock('@/lib/db/client', () => {
+  const mockDb = {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
-  },
-}));
+  };
+  return { db: mockDb };
+});
 
 describe('TransactionService', () => {
+  let mockDb: any;
+  let consoleErrorSpy: any;
+  let consoleWarnSpy: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockDb = require('@/lib/db/client').db;
+    
+    // Suppress console output during tests
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Setup default mock chain for select
+    mockDb.select.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    });
+
+    // Setup default mock chain for insert
+    mockDb.insert.mockReturnValue({
+      values: vi.fn().mockResolvedValue(undefined),
+    });
+
+    // Setup default mock chain for update
+    mockDb.update.mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+    });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   describe('formatCurrency', () => {
@@ -54,35 +87,90 @@ describe('TransactionService', () => {
   describe('initiateTransaction', () => {
     it('should validate amount matches STORE_REGISTRATION_FEE_IDR', async () => {
       const input: TransactionInitiateInput = {
-        amount: 50000, // Wrong amount
+        amount: 50000,
         type: 'store_registration',
         storeId: 'store_123',
       };
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
+          }),
+        }),
+      });
 
       await expect(
         transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
       ).rejects.toThrow(/Invalid amount/);
     });
 
-    it('should require storeId for store_registration', async () => {
+    it('should allow store_registration without storeId (per US-02)', async () => {
       const input: TransactionInitiateInput = {
         amount: 100000,
         type: 'store_registration',
       };
 
-      // This should fail validation in the schema
-      await expect(
-        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
-      ).rejects.toThrow();
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
+          }),
+        }),
+      });
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
+
+      const mockXendit = require('@/lib/xendit').xenditClient;
+      mockXendit.createInvoice.mockResolvedValueOnce({
+        id: 'xendit_123',
+        invoiceNum: 'INV-user_123-123456',
+        invoiceUrl: 'https://xendit.co/invoices/xyz',
+      });
+
+      const result = await transactionService.initiateTransaction('user_123', input, 'http://localhost:3000');
+      expect(result).toBeDefined();
+      expect(result.invoiceId).toBe('INV-user_123-123456');
     });
 
-    it('should require templateId for template_purchase', async () => {
+    it('should require templateId for template_purchase (per US-09)', async () => {
       const input: TransactionInitiateInput = {
         amount: 50000,
         type: 'template_purchase',
       };
 
-      // This should fail validation in the schema, but service should handle gracefully
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
+          }),
+        }),
+      });
+
+      await expect(
+        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
+      ).rejects.toThrow();
+    });
+
+    it('should require storeId for template_purchase (per US-09)', async () => {
+      const input: TransactionInitiateInput = {
+        amount: 50000,
+        type: 'template_purchase',
+        templateId: 'template_123',
+      };
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
+          }),
+        }),
+      });
+
       await expect(
         transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
       ).rejects.toThrow();
@@ -100,7 +188,17 @@ describe('TransactionService', () => {
         paid: true,
       };
 
-      // Should not throw
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_123',
+              status: 'pending',
+            },
+          ]),
+        }),
+      });
+
       await expect(
         transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
@@ -116,8 +214,30 @@ describe('TransactionService', () => {
         paid: true,
       };
 
-      // Should not throw on second call
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_123',
+              status: 'success',
+            },
+          ]),
+        }),
+      });
+
       await transactionService.processWebhook(payload);
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_123',
+              status: 'success',
+            },
+          ]),
+        }),
+      });
+
       await expect(
         transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
@@ -132,6 +252,17 @@ describe('TransactionService', () => {
         status: 'PENDING',
         paid: false,
       };
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_456',
+              status: 'pending',
+            },
+          ]),
+        }),
+      });
 
       await expect(
         transactionService.processWebhook(payload)
@@ -148,6 +279,17 @@ describe('TransactionService', () => {
         paid: false,
       };
 
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_789',
+              status: 'pending',
+            },
+          ]),
+        }),
+      });
+
       await expect(
         transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
@@ -163,9 +305,45 @@ describe('TransactionService', () => {
         paid: false,
       };
 
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_expired',
+              status: 'pending',
+            },
+          ]),
+        }),
+      });
+
       await expect(
         transactionService.processWebhook(payload)
       ).resolves.toBeUndefined();
+    });
+
+    it('should gracefully handle unknown transaction (idempotent)', async () => {
+      const payload = {
+        id: 'xendit_unknown',
+        external_id: 'INV-unknown-999999',
+        amount: 100000,
+        paid_amount: 0,
+        status: 'PENDING',
+        paid: false,
+      };
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
+
+      await expect(
+        transactionService.processWebhook(payload)
+      ).resolves.toBeUndefined();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Webhook received for unknown transaction')
+      );
     });
   });
 
@@ -176,3 +354,5 @@ describe('TransactionService', () => {
     });
   });
 });
+
+

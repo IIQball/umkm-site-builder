@@ -21,7 +21,7 @@ and state they pass through to get it — including the ones that go wrong.
 | 2 | `/auth/setup-password` | Enters password and confirms | System hashes password, creates session, marks account active | Redirects to login |
 | 3 | `/auth/login` | Enters email and password | System authenticates | Redirects to tenant dashboard |
 | 4 | `/tenant/dashboard` | Views dashboard | System shows "Payment Required" status | Dashboard with Xendit payment button visible |
-| 5 | Xendit payment modal | Tenant enters card details and completes payment | System receives webhook, verifies transaction_id (unique), updates payment status to "Paid" | Payment confirmed, redirects back to dashboard with "Setup In Progress" status |
+| 5 | Xendit payment modal | Tenant enters card details and completes payment | System receives webhook, verifies externalId (unique), updates transaction status to "success" | Payment confirmed, redirects back to dashboard with "Setup In Progress" status |
 | 6 | Dashboard (waiting) | Tenant refreshes or waits | Admin receives notification and sets up store (sets name, subdomain, template) | Dashboard shows "Store Live" with store URL |
 | 7 | Email + dashboard | Tenant receives "Store Live" email and notification | System injects default JSONB blueprint, adds to directory | Tenant can click "View Store" to see live subdomain |
 | 8 | Tenant's subdomain (e.g., `kopi-budi.domain.com`) | Tenant clicks "View Store" | System renders store from JSONB config, displays default template layout | Store loads in <1s with Hero, Catalog, Footer sections visible |
@@ -33,12 +33,12 @@ and state they pass through to get it — including the ones that go wrong.
 | Email activation | Link is clicked after 24h expires | "Activation link expired. Request a new one." with resend button | Admin re-registers tenant or tenant requests new activation link |
 | Password setup | Password is <8 chars or missing uppercase | Field validation: "Password must be 8+ chars, 1 uppercase" | User corrects and retries |
 | Payment modal | Payment card is declined | "Payment failed. Try another card or contact support." | Tenant retries with different card or cancels |
-| Payment webhook | Duplicate webhook received (network retry) | System silently rejects (unique constraint on transaction_id) | Duplicate does not double-charge; payment status remains accurate |
-| Admin store setup | Subdomain is reserved (e.g., "admin") | Admin sees error: "Subdomain reserved. Choose another." | Admin enters different subdomain and retries |
+| Payment webhook | Duplicate webhook received (network retry) | System silently rejects (unique constraint on externalId) | Duplicate does not double-charge; payment status remains accurate |
+| Admin store setup | Subdomain is reserved (e.g., "admin") | Admin sees error: "Subdomain reserved. Choose another." (validation in app layer) | Admin enters different subdomain and retries |
 | Admin store setup | Admin enters invalid WhatsApp format | Form rejects: "WhatsApp must be numbers only" | Admin corrects and retries |
 | Store rendering | Tenant accesses subdomain before Admin completes setup | 404 page: "Store not ready yet. Check back soon." | Admin completes setup; tenant refreshes and store appears |
 | Store rendering | Image fails to load from Cloudinary | Broken image icon appears; console shows CDN error | System retries image fetch; tenant can refresh to retry |
-| Payment recovery | Tenant loses session during payment | "Session expired. Please log in again." | Tenant logs back in; payment status is already recorded (webhook independent of session) |
+| Payment recovery | Tenant loses session during payment | "Session expired. Please log in again." | Tenant logs back in; transaction status is already recorded (webhook independent of session) |
 
 ### Drop-off risks
 
@@ -157,10 +157,10 @@ and state they pass through to get it — including the ones that go wrong.
 | 2 | Dashboard | Notices "1 Tenant Awaiting Setup" | System shows notification badge | Sidebar highlights "Tenants" with count badge |
 | 3 | `/admin/tenants` | Clicks "Tenants" tab | System queries all paid-but-not-yet-setup tenants | List shows tenant names, payment dates, status "Awaiting Setup" |
 | 4 | Tenant row | Clicks "Setup Store" on tenant "Budi Coffee" | System shows form for Store Name, Subdomain, WhatsApp, Template Selection | Setup form is pre-populated with tenant email; Admin enters store details |
-| 5 | Setup form | Admin enters: Name: "Kopi Budi", Subdomain: "kopi-budi", WhatsApp: "62812345678", Template: "Default" | System validates subdomain against blacklist (not www, admin, api, etc.) | Form shows "Valid" checkmark next to subdomain |
+| 5 | Setup form | Admin enters: Name: "Kopi Budi", Subdomain: "kopi-budi", WhatsApp: "62812345678", Template: "Default" | System validates subdomain against reserved keywords (www, admin, api, etc.) at application layer | Form shows "Valid" checkmark next to subdomain |
 | 6 | Setup form | Admin clicks "Create Store" | System creates store record, injects JSONB blueprint, marks store as "Active", adds to directory | Toast: "Store created and is now live!"; button disables briefly |
-| 7 | `/admin/payments` | Admin clicks "Payments" tab | System queries all tenant payment transactions | Table shows columns: Tenant Name, Payment Date, Amount, Status (Paid/Pending), Transaction ID |
-| 8 | Payments table | Admin sees all payments; all show "Paid" | System confirms webhook receipts matched transaction_ids | All rows show green "Paid" badge |
+| 7 | `/admin/payments` | Admin clicks "Payments" tab | System queries all tenant payment transactions from transactions table (type: store_registration) | Table shows columns: Tenant Name, Payment Date, Amount, Status (success/failed/pending/expired/canceled/refunded), externalId |
+| 8 | Payments table | Admin sees all payments; all show "success" status | System confirms webhook receipts matched externalIds | All rows show green "success" badge |
 | 9 | `/admin/templates` | Admin clicks "Templates" tab | System queries templates with status "Pending Approval" | List shows 3 pending templates with Designer names and preview thumbnails |
 | 10 | Template row | Admin clicks "Review" on Designer "Eka's Template" | System shows template preview, description, Designer info | Preview loads; Admin can inspect design quality |
 | 11 | Review panel | Admin clicks "Approve" | System marks template as "Published"; Designer receives email notification | Toast: "Template approved"; status updates to "Published" |

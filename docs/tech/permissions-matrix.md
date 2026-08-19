@@ -37,16 +37,11 @@ Deny by default. A role not listed for an action does not have it.
 | admin_whitelist | read (all) | yes | no | no | no | no | — | — |
 | admin_whitelist | update | yes | no | no | no | no | — | — |
 | admin_whitelist | delete | yes | no | no | no | no | — | — |
-| **Subdomain Blacklist** | | | | | | | | |
-| subdomain_blacklist | create | yes | no | no | no | no | — | — |
-| subdomain_blacklist | read (all) | yes | yes | no | no | no | — | — |
-| subdomain_blacklist | update | yes | no | no | no | no | — | — |
-| subdomain_blacklist | delete | yes | no | no | no | no | — | — |
-| **Payments (Activation)** | | | | | | | | |
-| payments | create (self, tenant) | no | no | no | yes | no | yes | tenant paid=false |
-| payments | read (own) | yes | yes | no | yes | no | yes | — |
-| payments | read (any) | yes | yes | no | no | no | no | — |
-| payments | update (status via webhook) | yes | no | no | no | no | — | — |
+| **Transactions (Payments)** | | | | | | | | |
+| transactions | create (webhook from Xendit) | yes | no | no | no | no | — | — |
+| transactions | read (own) | yes | yes | no | yes | no | yes | — |
+| transactions | read (any) | yes | yes | no | no | no | no | — |
+| transactions | update (status via webhook) | yes | no | no | no | no | — | — |
 | **Stores** | | | | | | | | |
 | stores | create (admin setup) | no | yes | no | no | no | — | tenant paid=true |
 | stores | read (own) | yes | yes | no | yes | no | yes | any |
@@ -104,18 +99,17 @@ Deny by default. A role not listed for an action does not have it.
 | bank_accounts | update (any, admin) | yes | yes | no | no | no | — | — |
 | bank_accounts | delete (own) | no | no | yes | no | no | yes | — |
 | **Payout Requests** | | | | | | | | |
-| payout_requests | create (designer requests) | no | no | yes | no | no | yes | wallet.pendingBalance > 0 |
+| payout_requests | create (designer requests) | no | no | yes | no | no | yes | wallet.balance > 0 |
 | payout_requests | read (own) | yes | yes | yes | no | no | yes | — |
 | payout_requests | read (all, admin) | yes | yes | no | no | no | — | — |
 | payout_requests | process (admin triggers) | no | yes | no | no | no | — | status=pending |
 | payout_requests | cancel (admin or designer) | no | yes | yes | no | no | yes/own | status=pending |
-| **Images (Media)** | | | | | | | | |
-| images | create (upload) | yes | yes | yes | yes | no | — | — |
-| images | read (metadata) | yes | yes | yes | yes | yes | no | — |
-| images | delete (soft delete) | yes | yes | yes | yes | no | — | deleted_at=null |
-| **Audit Logs** | | | | | | | | |
-| audit_logs | read (all) | yes | no | no | no | no | — | — |
-| audit_logs | read (own entity logs) | yes | yes | yes | yes | no | yes | — |
+| **Activity Logs** | | | | | | | | |
+| activity_logs | read (all) | yes | no | no | no | no | — | — |
+| activity_logs | read (own entity logs) | yes | yes | yes | yes | no | yes | — |
+| **Platform Settings** | | | | | | | | |
+| platform_settings | read | yes | yes | no | no | no | — | — |
+| platform_settings | update | yes | no | no | no | no | — | — |
 
 ---
 

@@ -1,29 +1,23 @@
 /**
  * Payment types and interfaces
+ * Aligned with transactions table schema
  */
 
-export interface PaymentInitiateInput {
+export type TransactionType = 'store_registration' | 'template_purchase';
+export type PaymentStatus = 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded';
+
+export interface TransactionInitiateInput {
   amount: number;
-  type: 'activation_fee' | 'template_purchase';
-  templateId?: string; // for template_purchase only
+  type: 'store_registration' | 'template_purchase';
+  storeId?: string;
+  templateId?: string;
 }
 
-export interface PaymentInitiateResponse {
+export interface TransactionInitiateResponse {
   invoiceId: string;
   paymentUrl: string;
   amount: number;
   expiresAt: string;
-}
-
-export interface PaymentMetadata {
-  invoiceId?: string;
-  invoiceUrl?: string;
-  paidAt?: string;
-  method?: string;
-  channel?: string;
-  type?: 'activation_fee' | 'template_purchase';
-  templateId?: string | null;
-  expiresAt?: string;
 }
 
 export interface XenditInvoice {
@@ -85,16 +79,22 @@ export interface XenditWebhookPayload {
   metadata?: Record<string, unknown>;
 }
 
-export interface PaymentRecord {
+/**
+ * Transaction record as stored in database
+ * Maps directly to transactions table
+ */
+export interface TransactionRecord {
   id: string;
   userId: string;
-  amount: number;
-  transactionId: string; // Xendit ID
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  provider: string;
-  metadata: PaymentMetadata;
+  type: TransactionType;
+  amount: number; // in IDR cents (multiply by 100 to store, divide by 100 to retrieve)
+  status: PaymentStatus;
+  storeId?: string;
+  templateId?: string;
+  externalId: string; // Xendit invoice ID
+  paymentGatewayRef?: string; // Additional reference from Xendit
+  paymentChannel?: string; // Payment method (e.g., BANK_TRANSFER, E_WALLET)
   createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface CheckoutPageData {
@@ -102,7 +102,7 @@ export interface CheckoutPageData {
   amount: number;
   amountFormatted: string;
   paymentUrl: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: PaymentStatus;
   expiresAt: string;
   paymentMethod?: string;
 }

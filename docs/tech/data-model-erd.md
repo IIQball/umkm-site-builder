@@ -51,64 +51,55 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 │  ├─ createdAt                                                                │
 │  └─ createdBy (FK to users.id, superadmin who added)                         │
 │                                                                              │
-│  subdomain_blacklist (security)                                              │
-│  ├─ id (primary)                                                             │
-│  ├─ keyword (unique, e.g., 'www', 'admin', 'api')                            │
-│  ├─ reason (documentation)                                                   │
-│  └─ addedAt                                                                  │
+│  (subdomain validation is app-layer logic, no database table)                │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ TENANTS & STORES                                                            │
+  │ TENANTS & STORES                                                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  payments (tenant activation fees)                                           │
-│  ├─ id (primary)                                                             │
-│  ├─ userId (FK) ──┐                                                          │
-│  ├─ amount (decimal)                                                         │
-│  ├─ transactionId (unique, from Xendit, idempotency key)                     │
-│  ├─ status (pending|paid|failed)                                             │
-│  ├─ provider (xendit)                                                        │
-│  ├─ metadata (JSON: invoiceId, paidAt, method)                               │
-│  ├─ createdAt                                                                │
-│  └─ updatedAt                                                                │
-│       │                                                                      │
-│       └────────────────┐                                                     │
-│                        │ 1:1                                                 │
 │  stores (1 tenant = 1 store)                                                │
 │  ├─ id (primary)                                                             │
-│  ├─ userId (FK) ──────────────┐ (tenant owner)                               │
-│  ├─ name                       │                                             │
-│  ├─ subdomain (unique, lowercase)                                            │
-│  ├─ whatsappNumber             │                                             │
-│  ├─ status (active|inactive)   │                                             │
-│  ├─ config (JSONB, versioned)  │ (layout, colors, template sections)        │
-│  │  └─ version: 1              │                                             │
-│  │     sections: [...]         │                                             │
-│  │     customColors: {...}     │                                             │
-│  ├─ templateId (FK) ───────────┼─────────────┐ (default/current template)   │
-│  ├─ createdAt                  │             │                             │
-│  └─ updatedAt                  │             │                             │
-│                                │             │                             │
-│  store_categories              │             │                             │
-│  ├─ id (primary)               │             │                             │
-│  ├─ storeId (FK) ──────────────┘             │                             │
-│  ├─ name (e.g., Kopi, Makanan, Kerajinan)    │                             │
-│  ├─ description                              │                             │
-│  └─ ...                                      │                             │
-│                                              │                             │
-│  products                                    │                             │
-│  ├─ id (primary)                             │                             │
-│  ├─ storeId (FK)                             │                             │
-│  ├─ name                                     │                             │
-│  ├─ description                              │                             │
-│  ├─ price (decimal)                          │                             │
-│  ├─ imageId (FK) ──────────┐                 │                             │
-│  ├─ status (active|hidden) │                 │                             │
-│  ├─ createdAt              │                 │                             │
-│  └─ updatedAt              │                 │                             │
-│                            │                 │                             │
+│  ├─ userId (FK) ─────────────────────────────┐ (tenant owner)               │
+│  ├─ name                                      │                             │
+│  ├─ subdomain (unique, lowercase)             │                             │
+│  ├─ waNumber (WhatsApp number)                │                             │
+│  ├─ googleMapsUrl                             │                             │
+│  ├─ isRegistrationPaid (boolean)              │                             │
+│  ├─ status (pending|active|inactive|suspended) │                             │
+│  ├─ customization (JSONB, versioned)          │ (layout, colors, sections)  │
+│  │  └─ version: 1                             │                             │
+│  │     sections: [...]                        │                             │
+│  │     customColors: {...}                    │                             │
+│  ├─ templateId (FK) ────────────────────┐     │ (default/current template)  │
+│  ├─ totalWaClicks (integer)              │     │                            │
+│  ├─ totalViews (integer)                 │     │                            │
+│  ├─ createdAt                            │     │                            │
+│  └─ updatedAt                            │     │                            │
+│                                          │     │                            │
+│  store_categories                        │     │                            │
+│  ├─ id (primary)                         │     │                            │
+│  ├─ storeId (FK)                         │     │                            │
+│  ├─ name (e.g., Kopi, Makanan, Kerajinan) │    │                            │
+│  ├─ slug                                 │     │                            │
+│  ├─ createdAt                            │     │                            │
+│  └─ updatedAt                            │     │                            │
+│                                          │     │                            │
+│  products                                │     │                            │
+│  ├─ id (primary)                         │     │                            │
+│  ├─ storeId (FK)                         │     │                            │
+│  ├─ categoryId (FK to store_categories)  │     │                            │
+│  ├─ name                                 │     │                            │
+│  ├─ slug                                 │     │                            │
+│  ├─ basePrice (bigint, in cents)         │     │                            │
+│  ├─ imageUrls (JSONB array)              │     │                            │
+│  ├─ variants (JSONB array)               │     │                            │
+│  ├─ isAvailable (boolean)                │     │                            │
+│  ├─ sortOrder (integer)                  │     │                            │
+│  ├─ description                          │     │                            │
+│  ├─ createdAt                            │     │                            │
+│  └─ updatedAt                            │     │                            │
 └────────────────────────────┼─────────────────┼─────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -122,46 +113,45 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 │  ├─ description          │                                                   │
 │  ├─ config (JSONB)       │ (versioned sections, components)                 │
 │  │  └─ version: 1        │                                                   │
-│  ├─ price (decimal) ────┐│ (set by designer; immutable once published)      │
-│  ├─ status (draft|pending_approval|published|rejected)                      │
-│  ├─ thumbnailId (FK) ───┼┼─────────────┐ (preview image)                    │
-│  ├─ approvedBy (FK to users.id, admin) │ (null if draft)                    │
-│  ├─ rejectionReason (text, nullable)   │                                    │
-│  ├─ createdAt                          │                                    │
-│  ├─ publishedAt (nullable)             │                                    │
-│  └─ updatedAt                          │                                    │
+│  ├─ price (bigint, cents) ─┐ (set by designer; immutable once published)    │
+│  ├─ status (draft|pending|approved|rejected)                                 │
+│  ├─ thumbnailUrl (text) ──┘ (preview image URL from Cloudinary)             │
+│  ├─ approvedBy (FK to users.id, admin) (null if draft)                       │
+│  ├─ rejectionReason (text, nullable)                                        │
+│  ├─ deleteReason (text, nullable)                                           │
+│  ├─ createdAt                                                                │
+│  └─ updatedAt                                                                │
 │       │                                │                                    │
 │       │ M:N via                        │                                    │
-│  user_templates (ownership tracking)   │                                    │
+│  user_templates (ownership tracking)   │              │                    │
 │  ├─ id (primary)        │              │                                    │
 │  ├─ userId (FK)         │              │                                    │
 │  ├─ templateId (FK) ────┼──────┐       │                                    │
-│  ├─ purchasedAt (nullable, null=assigned) │                                │
-│  ├─ status (owned|purchased|revoked)  │                                    │
-│  └─ createdAt           │              │                                    │
-│                         │              │                                    │
-│  transactions (template purchases)     │                                    │
-│  ├─ id (primary)        │              │                                    │
-│  ├─ buyerId (FK to users.id, tenant)   │                                    │
-│  ├─ templateId (FK) ────┼──────────────┘                                    │
-│  ├─ amount (decimal, price snapshot)                                        │
-│  ├─ transactionId (unique, from Xendit)                                     │
-│  ├─ status (pending|completed|failed|refunded)                              │
-│  ├─ provider (xendit)                                                        │
-│  ├─ metadata (JSON: invoiceId, paidAt)                                      │
-│  ├─ createdAt                                                                │
-│  └─ updatedAt                                                                │
+│  ├─ acquiredAt          │      │       │                                    │
+│  └─ (unique constraint on userId+templateId)                               │
+│                         │      │       │                                    │
+│  transactions (store_registration|template_purchase)  │                     │
+│  ├─ id (primary)        │      │       │                                    │
+│  ├─ userId (FK)         │      │       │                                    │
+│  ├─ type (store_registration|template_purchase)      │                     │
+│  ├─ amount (bigint, cents, from Xendit)              │                     │
+│  ├─ status (pending|success|failed|expired|canceled|refunded)               │
+│  ├─ storeId (FK) ──────────────┐                                            │
+│  ├─ templateId (FK) ───────────┼──────┘                                    │
+│  ├─ externalId (unique, from Xendit invoice)                                │
+│  ├─ paymentGatewayRef (Xendit transaction ID)                               │
+│  ├─ paymentChannel (BANK_TRANSFER, E_WALLET, etc.)                          │
+│  └─ createdAt                                                                │
 │                                                                              │
 │  commissions (calculated from each transaction)                              │
 │  ├─ id (primary)                                                             │
 │  ├─ designerId (FK) ──────────────────────────────────┐                    │
-│  ├─ transactionId (FK)                               │                    │
+│  ├─ transactionId (FK, unique)                        │                    │
 │  ├─ templateId (FK)                                  │                    │
-│  ├─ amount (decimal, calculated)                     │                    │
-│  ├─ percentage (e.g., 0.30 = 30%)                    │                    │
-│  ├─ status (pending|processed|paid_out)              │                    │
-│  ├─ createdAt                                        │                    │
-│  └─ updatedAt                                        │                    │
+│  ├─ totalAmount (bigint, cents)                      │                    │
+│  ├─ platformFee (bigint, cents)                      │                    │
+│  ├─ designerAmount (bigint, cents)                   │                    │
+│  └─ createdAt                                        │                    │
 │                                                      │                    │
 └──────────────────────────────────────────────────────┼────────────────────┘
 
@@ -172,21 +162,19 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 │  wallets (designer earnings tracking)                │                    │
 │  ├─ id (primary)                                     │                    │
 │  ├─ designerId (FK) ◄───────────────────────────────┘                    │
-│  ├─ balance (decimal, total earnings)                                     │
-│  ├─ pendingBalance (decimal, unpaid commissions)                          │
-│  ├─ totalPaidOut (decimal, historical)                                   │
+│  ├─ balance (bigint, total earnings in cents)                             │
 │  ├─ createdAt                                                             │
 │  └─ updatedAt                                                             │
 │                                                                            │
-│  wallet_mutations (ledger of all transactions)                            │
+│  wallet_mutations (immutable ledger of all transactions)                  │
 │  ├─ id (primary)                                                          │
 │  ├─ walletId (FK)                                                         │
-│  ├─ type (commission_added|commission_processed|payout_requested|paid)    │
-│  ├─ amount (decimal, signed)                                              │
-│  ├─ reference (commissionId, payoutId, etc.)                              │
+│  ├─ type (CREDIT|DEBIT)                                                   │
+│  ├─ amount (bigint, signed, in cents)                                     │
+│  ├─ balanceAfter (bigint, wallet balance after mutation)                  │
 │  ├─ description                                                           │
-│  ├─ createdAt                                                             │
-│  └─ updatedAt                                                             │
+│  ├─ referenceId (commissionId, payoutId, etc.)                            │
+│  └─ createdAt                                                             │
 │                                                                            │
 │  bank_accounts (designer's withdrawal destination)                        │
 │  ├─ id (primary)                                                          │
@@ -203,36 +191,40 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 │  ├─ id (primary)                                                          │
 │  ├─ designerId (FK)                                                       │
 │  ├─ bankAccountId (FK)                                                    │
-│  ├─ amount (decimal)                                                      │
-│  ├─ status (pending|processing|completed|failed|cancelled)                │
-│  ├─ payoutId (from Xendit, unique)                                        │
-│  ├─ failureReason (nullable, if failed)                                   │
-│  ├─ requestedAt                                                           │
-│  ├─ processedAt (nullable)                                                │
+│  ├─ amount (bigint, cents)                                                │
+│  ├─ status (pending|processing|completed|rejected)                        │
+│  ├─ xenditPayoutId (from Xendit, unique)                                  │
+│  ├─ gatewayReference (Xendit reference)                                   │
+│  ├─ gatewayMessage (Xendit response message)                              │
+│  ├─ processedBy (FK to users.id, admin)                                   │
+│  ├─ createdAt                                                             │
 │  └─ updatedAt                                                             │
 │                                                                            │
 └────────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ MEDIA (Images & Files)                                                     │
+│ MEDIA & ACTIVITY                                                           │
 ├────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  images (media references, metadata only; binary stored in Cloudinary)    │
+│  Note: Media is stored as JSONB arrays or external URLs, not in DB table   │
+│  - products.imageUrls (JSONB array of Cloudinary URLs)                     │
+│  - templates.thumbnailUrl (text URL from Cloudinary)                       │
+│  - stores.customization (JSONB with backgroundImage URLs)                  │
+│                                                                             │
+│  activity_logs (audit trail)                                               │
 │  ├─ id (primary)                                                            │
-│  ├─ provider (cloudinary)                                                   │
-│  ├─ provider_key (public_id from Cloudinary)                                │
-│  ├─ version (1)                                                             │
-│  ├─ dimensions (JSON: {width, height})                                      │
-│  ├─ alt_text (accessibility)                                                │
-│  ├─ size_bytes (final WebP size)                                            │
-│  ├─ uploadedBy (FK to users.id)                                             │
-│  ├─ deleted_at (soft delete timestamp, nullable)                            │
-│  ├─ createdAt                                                               │
-│  └─ updatedAt                                                               │
-│       │                                                                     │
-│       ├─→ (referenced by products.imageId)                                  │
-│       ├─→ (referenced by templates.thumbnailId)                             │
-│       └─→ (referenced by stores via config JSONB)                           │
+│  ├─ userId (FK)                                                             │
+│  ├─ storeId (FK, nullable)                                                  │
+│  ├─ action (text, e.g., 'product_created', 'payment_received')              │
+│  ├─ details (JSONB, additional context)                                     │
+│  └─ createdAt                                                               │
+│                                                                             │
+│  platform_settings (configuration)                                         │
+│  ├─ id (primary)                                                            │
+│  ├─ platformFeePercentage (integer, default 30)                             │
+│  ├─ payoutMinimumBalance (bigint, default 50000 cents)                      │
+│  ├─ updatedAt                                                               │
+│  └─ updatedBy (FK to users.id)                                              │
 │                                                                             │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -255,40 +247,41 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 | Table | Purpose | Notes |
 |---|---|---|
 | `admin_whitelist` | Email allowlist | Only whitelisted emails can register as Admin |
-| `subdomain_blacklist` | Reserved keywords | www, admin, api, dashboard, etc.; prevents routing conflicts |
+| (subdomain validation) | Reserved keywords | www, admin, api, dashboard, etc.; validation in application layer, no DB table |
 
 ### Tenants & Stores
 
 | Table | Purpose | Notes |
 |---|---|---|
-| `payments` | Activation fees | 1 per tenant; idempotency key: `transactionId` (unique constraint) |
-| `stores` | Tenant storefronts | 1:1 with userId (tenant); config is JSONB with version attribute |
-| `store_categories` | Product grouping | Optional; allows tenants to organize products |
-| `products` | Catalog items | Linked to store; each product has 1 image |
+| `transactions` | Payments (store_registration type) | 1 per tenant activation; idempotency key: `externalId` (unique constraint) |
+| `stores` | Tenant storefronts | 1:1 with userId (tenant); customization is JSONB with version attribute |
+| `store_categories` | Product grouping | Allows tenants to organize products by category |
+| `products` | Catalog items | Linked to store and category; imageUrls is JSONB array of Cloudinary URLs |
 
 ### Templates & Marketplace
 
 | Table | Purpose | Notes |
 |---|---|---|
-| `templates` | Master designs | Created by designer or system (default template); immutable price once published |
-| `user_templates` | Ownership tracking | M:N junction; tracks purchases and assignments |
-| `transactions` | Purchases | Idempotency key: `transactionId` (unique constraint, prevents double-crediting) |
-| `commissions` | Designer earnings | Auto-calculated from transaction; percentage is configurable (default 30%) |
+| `templates` | Master designs | Created by designer or system (default template); immutable price once published; thumbnailUrl is external URL |
+| `user_templates` | Ownership tracking | M:N junction; tracks purchases and ownership; unique on (userId, templateId) |
+| `transactions` | Purchases | type='template_purchase'; idempotency key: `externalId` (unique constraint) |
+| `commissions` | Designer earnings | Auto-calculated from transaction; fees calculated from platformFeePercentage setting |
 
 ### Designer Finance
 
 | Table | Purpose | Notes |
 |---|---|---|
-| `wallets` | Balance summary | balance = total earned; pendingBalance = unpaid commissions |
-| `wallet_mutations` | Ledger | Immutable log of all balance changes (audit trail) |
+| `wallets` | Balance summary | balance = total earned (bigint, cents); no pendingBalance (calculated on-demand) |
+| `wallet_mutations` | Ledger | Immutable log of all balance changes (audit trail); type is CREDIT\|DEBIT |
 | `bank_accounts` | Payout destinations | Encrypted; Xendit bank codes stored for API calls |
-| `payout_requests` | Withdrawal requests | Admin approves; system calls Xendit Payouts API |
+| `payout_requests` | Withdrawal requests | Admin approves; system calls Xendit Payouts API; xenditPayoutId for idempotency |
 
-### Media
+### Activity & Configuration
 
 | Table | Purpose | Notes |
 |---|---|---|
-| `images` | Image metadata | Binary stored in Cloudinary (not DB); DB stores reference + dimensions |
+| `activity_logs` | Audit trail | Immutable logs of all user actions (product_created, store_updated, etc.) |
+| `platform_settings` | Configuration | Platform-wide settings (platformFeePercentage, payoutMinimumBalance); single record |
 
 ---
 

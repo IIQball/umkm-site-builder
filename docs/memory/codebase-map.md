@@ -11,9 +11,9 @@ is stale it is worse than empty, because it gets trusted.
 |---|---|---|
 | app root layout | src/layouts/BaseLayout.astro | HTML shell, global styles |
 | home route | src/pages/index.astro | Marketing landing page |
-| checkout route | src/pages/checkout/[invoiceId].astro | Dynamic payment checkout page |
-| payment API | src/pages/api/payments/initiate.ts | POST: initiate Xendit payment |
-| webhook API | src/pages/api/webhooks/xendit.ts | POST: receive payment confirmation |
+| checkout route | src/pages/checkout/[invoiceId].astro | Dynamic transaction checkout page |
+| transaction API | src/pages/api/transactions/initiate.ts | POST: initiate Xendit transaction |
+| webhook API | src/pages/api/webhooks/xendit.ts | POST: receive transaction confirmation |
 | db client | src/lib/db/client.ts | Drizzle ORM singleton |
 
 ## 2. Folder map
@@ -22,17 +22,17 @@ is stale it is worse than empty, because it gets trusted.
 |---|---|---|
 | `src/pages/` | Astro routes and API endpoints | File-based routing per Astro |
 | `src/pages/checkout/` | Checkout page | Dynamic route: [invoiceId] |
-| `src/pages/api/payments/` | Payment API routes | POST initiate, GET status |
-| `src/pages/api/webhooks/` | Webhook handlers | Xendit payment confirmations |
-| `src/components/checkout/` | Checkout UI components | Svelte: InvoiceDetails, PaymentStatus |
+| `src/pages/api/transactions/` | Transaction API routes | POST initiate, GET status |
+| `src/pages/api/webhooks/` | Webhook handlers | Xendit transaction confirmations |
+| `src/components/checkout/` | Checkout UI components | Svelte: InvoiceDetails, TransactionStatus |
 | `src/components/public/` | Public-facing components | (empty, for Phase 2) |
 | `src/components/admin/` | Admin components | (empty, for Phase 2) |
 | `src/components/shared/` | Cross-feature UI | (empty, for Phase 2) |
 | `src/lib/xendit.ts` | Xendit API client | Single module, no subfolder |
-| `src/lib/payments/` | Payment business logic | schemas.ts, service.ts |
+| `src/lib/transactions/` | Transaction business logic | schemas.ts, service.ts |
 | `src/lib/db/` | Database layer | Drizzle ORM client |
 | `src/lib/config/` | Configuration | Environment variables |
-| `src/types/payments.ts` | Payment types | Interfaces and contracts |
+| `src/types/transactions.ts` | Transaction types | Interfaces and contracts |
 | `src/db/schema.ts` | Drizzle schema | 19 tables, all entities |
 | `tests/` | Test suites | Vitest, mirrors src structure |
 
@@ -42,18 +42,19 @@ is stale it is worse than empty, because it gets trusted.
 |---|---|---|
 | response shape | src/pages/api/*.ts | `{ ok: true, data: T }` or `{ ok: false, error: { code, message } }` |
 | Xendit client | src/lib/xendit.ts | Invoice creation, signature verification, API calls |
-| payment service | src/lib/payments/service.ts | Payment initiation, webhook processing, currency formatting |
+| transaction service | src/lib/transactions/service.ts or src/services/transaction.service.ts | Transaction initiation, webhook processing, currency formatting (uses transactions table) |
 | db client | src/lib/db/client.ts | Lazy-loaded Drizzle ORM singleton |
-| payment schemas | src/lib/payments/schemas.ts | Zod validation for inputs and webhooks |
+| transaction schemas | src/lib/transactions/schemas.ts | Zod validation for inputs and webhooks |
+| transaction types | src/types/transactions.ts | TransactionType, PaymentStatus, TransactionRecord interfaces |
 
 ## 4. Major flows — where each one actually lives
 
 | Flow | Path through the code |
 |---|---|
-| Initiate payment | POST /api/payments/initiate → paymentService.initiatePayment() → xenditClient.createInvoice() → payments table |
-| Receive webhook | POST /api/webhooks/xendit → verify signature → paymentService.processWebhook() → update payments table |
-| View checkout | GET /checkout/[invoiceId] → fetch payment details → render InvoiceDetails + PaymentStatus |
-| Poll status | Frontend: PaymentStatus.svelte → GET /api/payments/status/[invoiceId] → fetch from payments table |
+| Initiate transaction | POST /api/transactions/initiate → transactionService.initiateTransaction() → xenditClient.createInvoice() → transactions table (type: store_registration or template_purchase) |
+| Receive webhook | POST /api/webhooks/xendit → verify signature → transactionService.processWebhook() → update transactions table (status: success, failed, expired, etc) |
+| View checkout | GET /checkout/[invoiceId] → getTransactionDetails() → render invoice, amount, status |
+| Poll status | Frontend: TransactionStatus.svelte → GET /api/transactions/status/[invoiceId] → fetch from transactions table |
 
 ## 5. Where to add a new X
 
@@ -64,7 +65,7 @@ is stale it is worse than empty, because it gets trusted.
 | a type | `src/types/<feature>/` | — |
 | a token or custom class | `src/styles/` | `memory/css-vars.md` |
 | a table | `src/db/schema.ts` | `tech/data-model-erd.md` |
-| a payment flow | `src/lib/payments/` or API route | `tech/api-spec.md`, this file |
+| a payment flow | `src/lib/transactions/` or API route | `tech/api-spec.md`, this file |
 
 ## 6. Gotchas
 

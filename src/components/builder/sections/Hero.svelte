@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { ChevronUp, ChevronDown, Trash2 } from 'lucide-svelte';
   import { editorStore, activeNodeId } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types/builder';
+  import HeroElementToolbar from './hero/HeroElementToolbar.svelte';
 
   export let props: HeroProps = {};
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
+
+  $: isMobileView = $editorStore?.viewMode === 'mobile';
+  $: isTabletView = $editorStore?.viewMode === 'tablet';
 
   $: tagName = props?.tagName || 'h1';
   $: title = props?.title || 'Selamat datang di toko kami';
@@ -18,9 +21,10 @@
   $: nodeStylesMap = props?.nodeStyles || {};
 
   const defaultOrder = ['badge', 'title', 'subtitle', 'image', 'cta'];
-  $: elementOrder = Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-    ? props.elementOrder
-    : defaultOrder;
+  $: elementOrder =
+    Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
+      ? props.elementOrder
+      : defaultOrder;
 
   let draggedKey: string | null = null;
   let dropTargetKey: string | null = null;
@@ -33,7 +37,6 @@
     const custom = nodeStylesMap[key] || {};
     const merged = { ...defaults, ...custom };
     const rules: string[] = [];
-
     if (merged.textAlign) rules.push(`text-align: ${merged.textAlign}`);
     if (merged.color) rules.push(`color: ${merged.color}`);
     if (merged.fontFamily) rules.push(`font-family: ${merged.fontFamily}`);
@@ -48,7 +51,6 @@
     if (merged.animation && merged.animation !== 'none') {
       rules.push(`animation: ${merged.animation} 600ms cubic-bezier(0.16, 1, 0.3, 1) both`);
     }
-
     return rules.join('; ');
   };
 
@@ -76,7 +78,6 @@
         return;
       }
     }
-
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       editorStore.selectNode(sectionId, key);
@@ -142,28 +143,19 @@
     dropTargetKey = key;
   };
 
-  const onDragLeave = () => {
-    dropTargetKey = null;
-  };
+  const onDragLeave = () => { dropTargetKey = null; };
 
   const onDrop = (e: DragEvent, targetKey: string) => {
     e.preventDefault();
-    if (!draggedKey || draggedKey === targetKey) {
-      draggedKey = null;
-      dropTargetKey = null;
-      return;
-    }
-
+    if (!draggedKey || draggedKey === targetKey) { draggedKey = null; dropTargetKey = null; return; }
     const list = [...elementOrder];
     const fromIdx = list.indexOf(draggedKey);
     const toIdx = list.indexOf(targetKey);
-
     if (fromIdx !== -1 && toIdx !== -1) {
       const [item] = list.splice(fromIdx, 1);
       list.splice(toIdx, 0, item);
       editorStore.updateSectionProps(sectionId, { elementOrder: list });
     }
-
     draggedKey = null;
     dropTargetKey = null;
   };
@@ -174,7 +166,6 @@
     if (idx === -1) return;
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= list.length) return;
-
     const temp = list[idx];
     list[idx] = list[targetIdx];
     list[targetIdx] = temp;
@@ -202,153 +193,76 @@
           : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60 rounded-lg p-1'
       } ${dropTargetKey === key ? 'border-t-2 border-blue-500 py-1' : ''} ${draggedKey === key ? 'opacity-40' : ''}`}
     >
-      <!-- Active Node Toolbar & Figma-like Corner Handles -->
       {#if isElementActive}
-        <!-- Top Toolbar: Badge, Reorder, Delete -->
-        <div class="absolute -top-7 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-slate-900 text-white rounded-lg shadow-xl border border-slate-700 px-2 py-0.5 z-40">
-          <span class="text-[9px] font-bold uppercase tracking-wider text-blue-400 font-mono">
-            {key}
-          </span>
-
-          <div class="h-3 w-px bg-slate-700" />
-
-          <button
-            type="button"
-            on:click|stopPropagation={() => moveElement(key, 'up')}
-            disabled={index === 0}
-            class="p-0.5 hover:text-blue-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-            title="Pindah ke Atas"
-          >
-            <ChevronUp size={12} />
-          </button>
-          <button
-            type="button"
-            on:click|stopPropagation={() => moveElement(key, 'down')}
-            disabled={index === elementOrder.length - 1}
-            class="p-0.5 hover:text-blue-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-            title="Pindah ke Bawah"
-          >
-            <ChevronDown size={12} />
-          </button>
-
-          <div class="h-3 w-px bg-slate-700" />
-
-          <button
-            type="button"
-            on:click|stopPropagation={() => editorStore.deleteNode(sectionId, key)}
-            class="p-0.5 hover:text-rose-400 text-slate-400 transition-colors cursor-pointer"
-            title="Hapus Elemen (Delete)"
-          >
-            <Trash2 size={12} />
-          </button>
-        </div>
-
-        <!-- Live Resize Tooltip -->
-        {#if isResizingNode && resizeTooltip}
-          <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-mono font-bold text-[10px] px-2 py-0.5 rounded shadow-lg z-50 pointer-events-none">
-            {resizeTooltip}
-          </div>
-        {/if}
-
-        <!-- 4-Corner Resize Handles -->
-        <div
-          role="slider"
-          tabindex="0"
-          aria-valuenow={0}
-          aria-label="Resize Top Left"
-          on:pointerdown={(e) => startNodeResize(e, key, 'nw')}
-          class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nwse-resize z-40 hover:scale-125 transition-transform"
-        />
-        <div
-          role="slider"
-          tabindex="0"
-          aria-valuenow={0}
-          aria-label="Resize Top Right"
-          on:pointerdown={(e) => startNodeResize(e, key, 'ne')}
-          class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nesw-resize z-40 hover:scale-125 transition-transform"
-        />
-        <div
-          role="slider"
-          tabindex="0"
-          aria-valuenow={0}
-          aria-label="Resize Bottom Left"
-          on:pointerdown={(e) => startNodeResize(e, key, 'sw')}
-          class="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nesw-resize z-40 hover:scale-125 transition-transform"
-        />
-        <div
-          role="slider"
-          tabindex="0"
-          aria-valuenow={0}
-          aria-label="Resize Bottom Right"
-          on:pointerdown={(e) => startNodeResize(e, key, 'se')}
-          class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nwse-resize z-40 hover:scale-125 transition-transform"
-        />
-        <!-- Side Edge Handles -->
-        <div
-          role="slider"
-          tabindex="0"
-          aria-valuenow={0}
-          aria-label="Resize Width"
-          on:pointerdown={(e) => startNodeResize(e, key, 'e')}
-          class="absolute top-1/2 -right-1.5 -translate-y-1/2 w-2 h-4 bg-white border border-blue-600 rounded-sm shadow cursor-ew-resize z-40 hover:scale-125 transition-transform"
+        <HeroElementToolbar
+          nodeKey={key}
+          {index}
+          total={elementOrder.length}
+          {sectionId}
+          {isResizingNode}
+          {resizeTooltip}
+          onMoveElement={moveElement}
+          onStartResize={startNodeResize}
         />
       {/if}
 
-  <!-- Badge Element -->
+      <!-- Badge -->
       {#if key === 'badge'}
         {#if badgeText}
           <div
             style={buildNodeStyle('badge')}
-            class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200/80 mb-3 shadow-sm"
+            class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] sm:text-xs font-semibold border border-blue-200/80 mb-3 shadow-sm max-w-full truncate"
           >
             <span>{badgeText}</span>
           </div>
         {/if}
 
-      <!-- Title Element -->
+      <!-- Title -->
       {:else if key === 'title'}
         <svelte:element
           this={tagName || 'h1'}
           style={buildNodeStyle('title', {
             color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#f8fafc' : '#0f172a'),
-            fontSize: tagName === 'h1' ? '2.25rem' : '1.75rem',
             fontWeight: '800',
             textAlign: styles?.textAlign || 'center',
             marginBottom: '12px',
           })}
-          class="tracking-tight leading-tight w-full max-w-2xl"
+          class={`font-extrabold tracking-tight leading-tight w-full max-w-3xl box-border ${
+            isMobileView ? 'text-2xl sm:text-3xl' : isTabletView ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-4xl lg:text-5xl'
+          }`}
         >
           {title}
         </svelte:element>
 
-      <!-- Subtitle Element -->
+      <!-- Subtitle -->
       {:else if key === 'subtitle'}
         <p
           style={buildNodeStyle('subtitle', {
             color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#cbd5e1' : '#475569'),
-            fontSize: '1rem',
             textAlign: styles?.textAlign || 'center',
             marginBottom: '20px',
           })}
-          class="max-w-xl leading-relaxed w-full opacity-90"
+          class={`max-w-2xl leading-relaxed w-full opacity-90 box-border ${
+            isMobileView ? 'text-xs sm:text-sm' : isTabletView ? 'text-sm sm:text-base' : 'text-xs sm:text-base lg:text-lg'
+          }`}
         >
           {subtitle}
         </p>
 
-      <!-- Banner Image Element -->
+      <!-- Banner Image -->
       {:else if key === 'image'}
         {#if imageUrl}
           <div
             style={buildNodeStyle('image')}
-            class="mb-6 w-full max-w-xl overflow-hidden rounded-2xl shadow-sm border border-slate-200/80"
+            class="mb-6 w-full max-w-2xl overflow-hidden rounded-xl sm:rounded-2xl shadow-sm border border-slate-200/80 box-border"
           >
-            <img src={imageUrl} alt="Banner Produk Toko" class="w-full h-56 md:h-64 object-cover" />
+            <img src={imageUrl} alt="Banner Produk Toko" class="w-full h-auto max-h-[260px] sm:max-h-[360px] lg:max-h-[440px] object-cover" />
           </div>
         {/if}
 
-      <!-- CTA Button Element -->
+      <!-- CTA Button -->
       {:else if key === 'cta'}
-        <div class="mb-2 w-full flex justify-center">
+        <div class="mb-2 w-full flex justify-center px-2">
           <a
             href={ctaLink}
             on:click|preventDefault
@@ -356,11 +270,11 @@
               backgroundColor: '#2563eb',
               color: '#ffffff',
               borderRadius: '12px',
-              padding: '12px 28px',
-              fontSize: '14px',
               fontWeight: '600',
             })}
-            class={`inline-flex items-center justify-center text-white shadow-md shadow-blue-600/20 active:scale-[0.98] pointer-events-auto cursor-pointer ${getNodeHoverClass('cta')}`}
+            class={`${
+              isMobileView ? 'w-full' : 'w-full sm:w-auto'
+            } inline-flex items-center justify-center text-center px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold rounded-xl text-white shadow-md shadow-blue-600/20 active:scale-[0.98] pointer-events-auto cursor-pointer ${getNodeHoverClass('cta')}`}
           >
             {ctaText}
           </a>

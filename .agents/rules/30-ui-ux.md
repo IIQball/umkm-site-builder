@@ -111,3 +111,12 @@ it before reporting — "it renders" is not the bar.
 - **Canvas Isolation**: The storefront template canvas must render its own styling independently while the surrounding workspace adapts cleanly to the selected theme.
 - **Svelte Block Integrity**: Svelte `{@const ...}` directives must only be placed directly inside valid block tags (`{#if}`, `{#each}`, etc.), never inside raw HTML elements like `<div>`.
 
+## 12. Responsive Builder Engine & Draft Schema Invariants
+
+- **Dual Responsive Awareness**:
+  - Builder components must support both runtime store-driven viewport switching (`$editorStore.viewMode` -> `isMobileView`, `isTabletView`) for in-app frame emulation and standard CSS responsive breakpoints (`sm:`, `md:`, `lg:`) for production SSR.
+  - Avoid fixed pixel widths (`w-[500px]`); use fluid sizing (`w-full`, `max-w-*`, `box-border`, `min-w-0`).
+  - Cards with horizontal split layout (`flex-row`) must collapse to `flex-col` in mobile viewport mode to prevent horizontal blowout.
+- **Draft Schema Invariants**:
+  - Draft update and submit schemas in Zod (`TemplateDraftUpdateSchema`, etc.) must tolerate `null` and empty string values for optional attributes (`description: z.string().nullable().optional()`, `thumbnailUrl: z.string().url().nullable().or(z.literal('')).optional()`) to avoid 400 validation failures during draft saves.
+

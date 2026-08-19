@@ -41,8 +41,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
-    if (input.thumbnailUrl !== undefined) updateData.thumbnailUrl = input.thumbnailUrl;
-    if (input.price !== undefined) updateData.price = Math.floor(input.price * 100);
+    if (input.thumbnailUrl !== undefined) updateData.thumbnailUrl = input.thumbnailUrl || null;
+    if (input.price !== undefined) updateData.price = input.price;
     if (input.config !== undefined) updateData.config = input.config;
 
     const updated = await db

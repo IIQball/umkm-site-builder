@@ -40,23 +40,23 @@ export const TemplateConfigSchema = z.object({
 export const TemplateDraftCreateSchema = z.object({
   name: z.string().min(1, 'Template name is required'),
   price: z.number().nonnegative('Price must be non-negative').optional().default(0),
-  description: z.string().optional(),
-  thumbnailUrl: z.string().url().optional(),
+  description: z.string().nullable().optional(),
+  thumbnailUrl: z.string().url().nullable().or(z.literal('')).optional(),
 });
 
 export const TemplateDraftUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   price: z.number().nonnegative().optional(),
-  description: z.string().optional(),
-  thumbnailUrl: z.string().url().optional(),
+  description: z.string().nullable().optional(),
+  thumbnailUrl: z.string().url().nullable().or(z.literal('')).optional(),
   config: TemplateConfigSchema.optional(),
 });
 
 export const TemplateDraftSubmitSchema = z.object({
   name: z.string().min(1, 'Template name is required'),
   price: z.number().nonnegative('Price must be non-negative'),
-  description: z.string().optional(),
-  thumbnailUrl: z.string().url().optional(),
+  description: z.string().nullable().optional(),
+  thumbnailUrl: z.string().url().nullable().or(z.literal('')).optional(),
   config: TemplateConfigSchema,
 });
 

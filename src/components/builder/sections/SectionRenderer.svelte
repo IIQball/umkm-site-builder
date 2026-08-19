@@ -62,16 +62,16 @@
   $: inlineStyle = buildStyle(section?.styles);
   $: containerWidthMode = section?.styles?.containerWidth || 'boxed';
   $: containerClass = containerWidthMode === 'full'
-    ? 'w-full px-4 md:px-6'
-    : 'max-w-6xl mx-auto w-full px-4 md:px-8';
+    ? 'w-full max-w-full px-3.5 sm:px-6 md:px-8'
+    : 'max-w-6xl mx-auto w-full max-w-full px-3.5 sm:px-6 md:px-8';
 </script>
 
 <section
   id={section.id}
   style={inlineStyle}
-  class="relative transition-all box-border w-full overflow-hidden"
+  class="relative transition-all box-border w-full max-w-full overflow-x-hidden min-w-0"
 >
-  <div class={containerClass}>
+  <div class={`${containerClass} min-w-0 box-border`}>
     {#if section.type === 'header_announcement'}
       <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
     {:else if section.type === 'hero'}

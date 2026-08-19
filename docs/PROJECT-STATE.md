@@ -11,17 +11,18 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Visual Template Builder (feature/h2-virda-draft-template) complete. 3-column responsive editor (LayerPanel, Canvas, PropertyInspector) with centralized Svelte `editorStore`, live two-way synchronization, undo/redo history, keyboard shortcuts, instant save API (`/api/builder/save`), and zero-blank SSR rendering. All 7 UMKM default sections fully editable.
+Visual Template Builder (feature/h2-virda-draft-template) complete. 3-column responsive editor (LayerPanel, Canvas, PropertyInspector) with centralized Svelte `editorStore`, live two-way synchronization, undo/redo history, keyboard shortcuts, instant save API (`/api/builder/save`), and zero-blank SSR rendering. Fluid Auto-Layout Engine completed across all 7 UMKM sections with dual responsive awareness (`$editorStore.viewMode` + CSS media queries), zero horizontal overflow, and flawless layout adaptation on Desktop, Tablet (768px), and Mobile (375px).
 
 ## Last session did
 
-- Visual Template Builder Finalization:
-  - Centralized state management in `src/components/builder/stores/editorStore.ts` with live two-way binding and undo/redo history stack.
-  - Endpoint `POST /api/builder/save` for instant builder config persistence with Zod validation.
-  - Full-height SSR integration in `src/pages/builder/[templateId].astro` passing `initialTemplate` to eliminate blank screen.
-  - Granular PropertyInspector with Content and Styles tabs (Layout Flex/Grid/Align/Justify/Gap, Spacing, Typography & Text Align, Background & Border).
-  - 7 reactive section components in `src/components/builder/sections/`.
-  - Added unit test suites in `tests/api/builder/save.test.ts` and `tests/schemas/template.test.ts`. 100% tests passing.
+- Fluid Auto-Layout Engine (Mobile, Tablet, Desktop Responsiveness):
+  - Refactored `Canvas.svelte` with `overflow-x-hidden` and box-border constraints on viewport frames.
+  - Implemented dual responsive engine in all 7 section components (`HeaderAnnouncement`, `Hero`, `Features`, `ProductCatalog`, `Testimonials`, `FAQ`, `Footer`) subscribing to `$editorStore.viewMode` while retaining Tailwind breakpoint classes for SSR.
+  - Hero banner now features fluid typography (`text-2xl sm:text-4xl lg:text-5xl`), auto-wrapping subtitle, responsive banner image (`max-h-[260px] sm:max-h-[360px] lg:max-h-[440px]`), and mobile full-width CTA button.
+  - Product Catalog and Horizontal card presets now collapse cleanly to vertical layout on narrow viewports without horizontal blowout.
+  - Features, Testimonials, and Footer grids smoothly adapt from multi-column desktop to 2-column tablet and 1-column mobile stacked layouts.
+  - 100% tests passing (`bun test`), TypeScript check (`bun run type-check`), and ESLint (`bun run lint`).
+  - Verified live across Mobile (375px), Tablet (768px), and Desktop (1280px) in browser builder.
   - Audited all 21 documentation files against authoritative schema in `src/db/schema.ts`
   - Updated docs/tech/data-model-erd.md: removed `images` and `subdomain_blacklist` tables, updated all references to `transactions` table (externalId instead of transactionId), updated payment status enum, clarified media as JSONB URLs
   - Updated docs/tech/api-spec.md: updated all payment endpoints to use transactions table with externalId, updated template publishing to require price, updated media endpoints to reflect JSONB storage, fixed all status values to match schema

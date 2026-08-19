@@ -7,6 +7,7 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
 
+  $: isMobileView = $editorStore?.viewMode === 'mobile';
   $: announcementText = props?.announcementText ?? 'Diskon 20% khusus hari ini';
   $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
   $: hasCustomBg = !!styles?.backgroundColor;
@@ -77,25 +78,25 @@
   };
 </script>
 
-<div class={`flex flex-wrap items-center justify-between px-6 py-2.5 border-b ${hasCustomBg ? '' : 'bg-slate-50 border-slate-200/80'}`}>
+<div class={`w-full flex ${isMobileView ? 'flex-col gap-2' : 'flex-col sm:flex-row gap-2 sm:gap-4'} items-center justify-between px-3 sm:px-6 py-2 sm:py-2.5 border-b box-border ${hasCustomBg ? '' : 'bg-slate-50 border-slate-200/80'}`}>
   <div
     role="button"
     tabindex="0"
     on:click={handleAnnouncementClick}
     on:keydown={handleAnnouncementKeydown}
-    class={`flex-1 text-center md:text-left min-w-[200px] cursor-pointer rounded px-2 py-0.5 transition-all ${
+    class={`w-full sm:w-auto flex-1 ${isMobileView ? 'text-center' : 'text-center sm:text-left'} min-w-0 cursor-pointer rounded px-2 py-0.5 transition-all ${
       isActive && $activeNodeId === 'announcement' ? 'ring-2 ring-blue-500' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60'
     }`}
   >
     <p
       style={buildNodeStyle('announcement')}
-      class={`text-xs font-semibold tracking-wide ${hasCustomColor ? '' : 'text-slate-800'}`}
+      class={`text-xs sm:text-sm font-semibold tracking-wide ${isMobileView ? 'text-center' : 'truncate sm:whitespace-normal'} ${hasCustomColor ? '' : 'text-slate-800'}`}
     >
       {announcementText}
     </p>
   </div>
 
-  <nav class={`flex items-center gap-4 text-xs font-medium ${hasCustomColor ? 'opacity-90' : 'text-slate-600'}`}>
+  <nav class={`flex items-center justify-center ${isMobileView ? 'flex-wrap gap-2.5' : 'sm:justify-end gap-3 sm:gap-5'} text-xs font-medium max-w-full py-0.5 flex-shrink-0 ${hasCustomColor ? 'opacity-90' : 'text-slate-600'}`}>
     {#each navLinks as link, index (link + index)}
       <span
         role="button"
@@ -105,7 +106,7 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
-        class={`transition-all ${isActive ? 'cursor-grab active:cursor-grabbing hover:text-blue-600' : 'cursor-pointer hover:text-slate-900'} ${
+        class={`whitespace-nowrap transition-all px-1 py-0.5 ${isActive ? 'cursor-grab active:cursor-grabbing hover:text-blue-600' : 'cursor-pointer hover:text-slate-900'} ${
           dropTargetIdx === index ? 'border-l-2 border-blue-500 pl-1' : ''
         } ${draggedIdx === index ? 'opacity-30' : ''}`}
       >

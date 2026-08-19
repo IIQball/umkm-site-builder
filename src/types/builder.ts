@@ -66,6 +66,23 @@ export interface ProductCatalogProps {
   title?: string;
   subtitle?: string;
   products?: ProductItem[];
+  columnsDesktop?: 2 | 3 | 4 | 5 | string | number;
+  columnsTablet?: 2 | 3 | string | number;
+  columnsMobile?: 1 | 2 | string | number;
+  gridGap?: 'compact' | 'normal' | 'relaxed' | string;
+  cardPreset?: 'minimal_bordered' | 'elevated_shadow' | 'flat_filled' | 'horizontal' | string;
+  cardRadius?: 'sharp' | 'rounded' | 'smooth' | 'extra_rounded' | string;
+  imageAspectRatio?: 'square' | 'portrait' | 'widescreen' | 'auto' | string;
+  badgePosition?: 'top_left' | 'top_right' | string;
+  badgeColor?: 'rose' | 'emerald' | 'amber' | 'blue' | 'violet' | 'slate' | string;
+  productNameSize?: 'sm' | 'base' | 'lg' | string;
+  productNameWeight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold' | string;
+  pricePlacement?: 'stacked' | 'inline' | string;
+  ctaButtonWidth?: 'full' | 'compact' | string;
+  ctaButtonColor?: string;
+  ctaButtonTextColor?: string;
+  ctaButtonRadius?: 'sharp' | 'rounded' | 'smooth' | 'pill' | string;
+  showWhatsAppIcon?: boolean;
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }
@@ -129,6 +146,24 @@ export interface SectionStyles {
   animationDuration?: string;
   animationDelay?: string;
   fontFamily?: string;
+  // Product Catalog Customizer options when stored in styles
+  columnsDesktop?: 2 | 3 | 4 | 5 | string | number;
+  columnsTablet?: 2 | 3 | string | number;
+  columnsMobile?: 1 | 2 | string | number;
+  gridGap?: 'compact' | 'normal' | 'relaxed' | string;
+  cardPreset?: 'minimal_bordered' | 'elevated_shadow' | 'flat_filled' | 'horizontal' | string;
+  cardRadius?: 'sharp' | 'rounded' | 'smooth' | 'extra_rounded' | string;
+  imageAspectRatio?: 'square' | 'portrait' | 'widescreen' | 'auto' | string;
+  badgePosition?: 'top_left' | 'top_right' | string;
+  badgeColor?: 'rose' | 'emerald' | 'amber' | 'blue' | 'violet' | 'slate' | string;
+  productNameSize?: 'sm' | 'base' | 'lg' | string;
+  productNameWeight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold' | string;
+  pricePlacement?: 'stacked' | 'inline' | string;
+  ctaButtonWidth?: 'full' | 'compact' | string;
+  ctaButtonColor?: string;
+  ctaButtonTextColor?: string;
+  ctaButtonRadius?: 'sharp' | 'rounded' | 'smooth' | 'pill' | string;
+  showWhatsAppIcon?: boolean;
   [key: string]: unknown;
 }
 

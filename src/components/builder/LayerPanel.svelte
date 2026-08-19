@@ -1,34 +1,9 @@
 <script lang="ts">
-  import type { ComponentType } from 'svelte';
-  import {
-    ChevronUp,
-    ChevronDown,
-    ChevronRight,
-    Trash2,
-    Plus,
-    Layers,
-    Megaphone,
-    Sparkles,
-    CheckCircle,
-    ShoppingBag,
-    MessageSquare,
-    HelpCircle,
-    PanelBottom,
-    Heading,
-    FileText,
-    Image,
-    MousePointerClick,
-    ListFilter,
-  } from 'lucide-svelte';
+  import { ChevronUp, ChevronDown, ChevronRight, Trash2, Plus, Layers } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas/template.schema';
-  import type {
-    LayerNodeItem,
-    FeatureItem,
-    ProductItem,
-    TestimonialItem,
-    FAQItem,
-  } from '@/types/builder';
   import { editorStore } from './stores/editorStore';
+  import { getSectionNodes, sectionTypeLabels, sectionTypeIcons, sectionTypes } from './layer/layerPanel.helpers';
+  import AddNodeDropdown from './layer/AddNodeDropdown.svelte';
 
   export let sections: TemplateSection[] = [];
   export let selectedSectionId: string | null = null;
@@ -37,36 +12,6 @@
   export let onAddSection: (type: TemplateSection['type']) => void;
   export let onDeleteSection: (id: string) => void;
   export let onReorderSection: (id: string, direction: 'up' | 'down') => void;
-
-  const sectionTypeLabels: Record<TemplateSection['type'], string> = {
-    header_announcement: 'Header & Announcement',
-    hero: 'Hero Banner',
-    features: 'Fitur & Keunggulan',
-    product_catalog: 'Katalog Produk',
-    testimonials: 'Testimoni Pelanggan',
-    faq: 'FAQ (Tanya Jawab)',
-    footer: 'Footer & Kontak',
-  };
-
-  const sectionTypeIcons: Record<TemplateSection['type'], ComponentType> = {
-    header_announcement: Megaphone,
-    hero: Sparkles,
-    features: CheckCircle,
-    product_catalog: ShoppingBag,
-    testimonials: MessageSquare,
-    faq: HelpCircle,
-    footer: PanelBottom,
-  };
-
-  const sectionTypes: TemplateSection['type'][] = [
-    'header_announcement',
-    'hero',
-    'features',
-    'product_catalog',
-    'testimonials',
-    'faq',
-    'footer',
-  ];
 
   let isAddMenuOpen = false;
   let expandedSections: Record<string, boolean> = {};
@@ -87,85 +32,15 @@
     isAddMenuOpen = false;
   };
 
-  const getSectionNodes = (section: TemplateSection): LayerNodeItem[] => {
-    switch (section.type) {
-      case 'header_announcement': {
-        const list: LayerNodeItem[] = [];
-        if (section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
-          list.push({ id: 'announcement', name: 'Announcement Bar', icon: Megaphone });
-        }
-        const navs = Array.isArray(section.props?.navLinks) ? (section.props.navLinks as string[]) : [];
-        navs.forEach((link: string, idx: number) => {
-          list.push({ id: `nav_${idx}`, name: `Nav: ${link}`, icon: ListFilter });
-        });
-        return list;
-      }
-      case 'hero': {
-        const order = Array.isArray(section.props?.elementOrder) && section.props.elementOrder.length > 0
-          ? (section.props.elementOrder as string[])
-          : ['badge', 'title', 'subtitle', 'image', 'cta'];
-        const map: Record<string, LayerNodeItem> = {
-          badge: { id: 'badge', name: 'Promo Badge', icon: Sparkles },
-          title: { id: 'title', name: 'Heading Title', icon: Heading },
-          subtitle: { id: 'subtitle', name: 'Subtitle Description', icon: FileText },
-          image: { id: 'image', name: 'Banner Image', icon: Image },
-          cta: { id: 'cta', name: 'Action Button', icon: MousePointerClick },
-        };
-        return order.map((k: string) => map[k] || { id: k, name: k, icon: Sparkles });
-      }
-      case 'features': {
-        const list: LayerNodeItem[] = [{ id: 'header', name: 'Section Header', icon: Heading }];
-        const items = Array.isArray(section.props?.features) ? (section.props.features as FeatureItem[]) : [];
-        items.forEach((item: FeatureItem, idx: number) => {
-          list.push({ id: `item_${idx}`, name: item.title || `Fitur #${idx + 1}`, icon: CheckCircle });
-        });
-        return list;
-      }
-      case 'product_catalog': {
-        const list: LayerNodeItem[] = [{ id: 'header', name: 'Catalog Header', icon: Heading }];
-        const items = Array.isArray(section.props?.products) ? (section.props.products as ProductItem[]) : [];
-        items.forEach((item: ProductItem, idx: number) => {
-          list.push({ id: `item_${idx}`, name: item.name || `Produk #${idx + 1}`, icon: ShoppingBag });
-        });
-        return list;
-      }
-      case 'testimonials': {
-        const list: LayerNodeItem[] = [{ id: 'header', name: 'Testimonial Header', icon: Heading }];
-        const items = Array.isArray(section.props?.testimonials) ? (section.props.testimonials as TestimonialItem[]) : [];
-        items.forEach((item: TestimonialItem, idx: number) => {
-          list.push({ id: `item_${idx}`, name: item.customerName || `Review #${idx + 1}`, icon: MessageSquare });
-        });
-        return list;
-      }
-      case 'faq': {
-        const list: LayerNodeItem[] = [{ id: 'header', name: 'FAQ Header', icon: Heading }];
-        const items = Array.isArray(section.props?.faqs) ? (section.props.faqs as FAQItem[]) : [];
-        items.forEach((item: FAQItem, idx: number) => {
-          list.push({ id: `item_${idx}`, name: item.question || `FAQ #${idx + 1}`, icon: HelpCircle });
-        });
-        return list;
-      }
-      case 'footer':
-        return [
-          { id: 'whatsapp', name: 'WhatsApp Contact', icon: MessageSquare },
-          { id: 'address', name: 'Store Location', icon: PanelBottom },
-          { id: 'info', name: 'Information Links', icon: ListFilter },
-          { id: 'copyright', name: 'Copyright Text', icon: FileText },
-        ];
-      default:
-        return [];
-    }
-  };
-
   const moveHeroNode = (section: TemplateSection, nodeId: string, direction: 'up' | 'down') => {
-    const order = Array.isArray(section.props?.elementOrder) && section.props.elementOrder.length > 0
-      ? [...(section.props.elementOrder as string[])]
-      : ['badge', 'title', 'subtitle', 'image', 'cta'];
+    const order =
+      Array.isArray(section.props?.elementOrder) && section.props.elementOrder.length > 0
+        ? [...(section.props.elementOrder as string[])]
+        : ['badge', 'title', 'subtitle', 'image', 'cta'];
     const idx = order.indexOf(nodeId);
     if (idx === -1) return;
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= order.length) return;
-
     const temp = order[idx];
     order[idx] = order[targetIdx];
     order[targetIdx] = temp;
@@ -181,7 +56,7 @@
       <span class="text-xs font-semibold uppercase tracking-wider text-base-content/80">Tree Layers ({sections.length})</span>
     </div>
 
-    <!-- Add Section Button / Dropdown -->
+    <!-- Add Section Dropdown -->
     <div class="relative">
       <button
         type="button"
@@ -193,14 +68,12 @@
       </button>
 
       {#if isAddMenuOpen}
-        <!-- Backdrop -->
         <button
           type="button"
           class="fixed inset-0 z-40 cursor-default bg-transparent w-full h-full border-none outline-none"
           on:click={() => (isAddMenuOpen = false)}
           aria-label="Close menu"
         />
-
         <div class="absolute right-0 mt-1 w-56 bg-base-100 border border-base-200 dark:border-slate-800 rounded-lg shadow-xl py-1 z-50 overflow-hidden text-base-content">
           <div class="px-3 py-1.5 text-[10px] font-semibold text-base-content/50 uppercase tracking-wider border-b border-base-200 dark:border-slate-800">
             Pilih Tipe Section
@@ -220,7 +93,7 @@
     </div>
   </div>
 
-  <!-- Section & Nested Node Tree List -->
+  <!-- Section & Node Tree -->
   <div class="flex-1 overflow-y-auto p-2 space-y-1">
     {#if sections.length === 0}
       <div class="p-4 text-center text-xs text-base-content/50">
@@ -247,7 +120,6 @@
                 : 'border-transparent text-base-content/80 hover:bg-base-200/60 hover:text-base-content'
             }`}
           >
-            <!-- Left: Toggle Chevron, Icon & Name -->
             <div class="flex items-center gap-2 min-w-0 flex-1">
               <button
                 type="button"
@@ -257,20 +129,17 @@
               >
                 <svelte:component this={isExpanded ? ChevronDown : ChevronRight} size={13} />
               </button>
-
               <svelte:component
                 this={sectionTypeIcons[section.type] || Layers}
                 size={14}
                 class={isSectionSelected ? 'text-blue-600 dark:text-blue-400' : 'text-base-content/50'}
               />
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold truncate">
-                  {sectionTypeLabels[section.type] || section.type}
-                </p>
+                <p class="text-xs font-semibold truncate">{sectionTypeLabels[section.type] || section.type}</p>
               </div>
             </div>
 
-            <!-- Right: Actions (Reorder & Delete) -->
+            <!-- Actions -->
             <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1 flex-shrink-0">
               <button
                 type="button"
@@ -301,7 +170,7 @@
             </div>
           </div>
 
-          <!-- Nested Child Nodes Tree -->
+          <!-- Nested Child Nodes -->
           {#if isExpanded}
             <div class="ml-5 pl-2.5 border-l border-base-300 dark:border-slate-800 space-y-0.5 py-0.5">
               {#each nodes as node, nodeIdx (node.id)}
@@ -326,8 +195,7 @@
                     <span class="truncate text-[11px]">{node.name}</span>
                   </div>
 
-                  <!-- Actions for inner element (Reorder + Delete) -->
-                  <div class="flex items-center gap-0.5 opacity-0 group/node:opacity-100 group-hover/node:opacity-100 transition-opacity">
+                  <div class="flex items-center gap-0.5 opacity-0 group-hover/node:opacity-100 transition-opacity">
                     {#if section.type === 'hero'}
                       <button
                         type="button"
@@ -348,7 +216,6 @@
                         <ChevronDown size={11} />
                       </button>
                     {/if}
-
                     <button
                       type="button"
                       on:click|stopPropagation={() => editorStore.deleteNode(section.id, node.id)}
@@ -361,7 +228,7 @@
                 </div>
               {/each}
 
-              <!-- Add Element button inside section -->
+              <!-- Add Element button -->
               <div class="pt-1">
                 <button
                   type="button"
@@ -375,85 +242,7 @@
                 </button>
 
                 {#if openAddNodeDropdown === section.id}
-                  <div class="mt-1 p-1 bg-base-100 border border-base-200 dark:border-slate-800 rounded-lg shadow-xl space-y-0.5 z-40 text-base-content">
-                    {#if section.type === 'hero'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'badge'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Promo Badge
-                      </button>
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'title'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Heading Title
-                      </button>
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'subtitle'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Subtitle Description
-                      </button>
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'image'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Banner Image
-                      </button>
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'cta'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Action Button (CTA)
-                      </button>
-                    {:else if section.type === 'header_announcement'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'nav'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Nav Link Menu
-                      </button>
-                    {:else if section.type === 'features'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Card Fitur Baru
-                      </button>
-                    {:else if section.type === 'product_catalog'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Produk Baru
-                      </button>
-                    {:else if section.type === 'testimonials'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + Review Testimoni
-                      </button>
-                    {:else if section.type === 'faq'}
-                      <button
-                        type="button"
-                        on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
-                      >
-                        + FAQ Accordion
-                      </button>
-                    {/if}
-                  </div>
+                  <AddNodeDropdown {section} onClose={() => (openAddNodeDropdown = null)} />
                 {/if}
               </div>
             </div>

@@ -107,15 +107,15 @@
   };
 </script>
 
-<main class="flex-1 h-full overflow-y-auto bg-base-200/60 p-4 sm:p-6 flex justify-center items-start select-none transition-colors">
-  <!-- Frame Container with fixed device boundaries and safe-zone margins -->
+<main class="flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors">
+  <!-- Frame Container with fluid auto-layout boundaries -->
   <div
-    class={`transition-all duration-300 ease-in-out bg-white text-slate-900 shadow-xl overflow-visible my-4 flex flex-col ${
+    class={`transition-all duration-300 ease-in-out bg-white text-slate-900 shadow-2xl my-2 sm:my-4 flex flex-col box-border overflow-x-hidden ${
       viewMode === 'desktop'
         ? 'w-full max-w-6xl rounded-xl min-h-[800px] border border-base-300 dark:border-slate-800'
         : viewMode === 'tablet'
-        ? 'w-[768px] rounded-2xl min-h-[800px] border-4 border-slate-700'
-        : 'w-[375px] rounded-2xl min-h-[667px] border-4 border-slate-700'
+        ? 'w-[768px] max-w-full rounded-2xl min-h-[800px] border-4 border-slate-700 mx-auto'
+        : 'w-[375px] max-w-full rounded-2xl min-h-[667px] border-4 border-slate-700 mx-auto'
     }`}
   >
     {#if sections.length === 0}
@@ -123,7 +123,7 @@
         <p class="text-sm">Tidak ada section untuk ditampilkan.</p>
       </div>
     {:else}
-      <div class="flex flex-col w-full transition-all">
+      <div class="flex flex-col w-full min-w-0 transition-all">
         {#each sections as section (section.id)}
           <div
             role="button"

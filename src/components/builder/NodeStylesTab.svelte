@@ -1,15 +1,7 @@
 <script lang="ts">
-  import {
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
-    AlignJustify,
-    Type,
-    Sliders,
-    Palette,
-    Sparkles,
-  } from 'lucide-svelte';
+  import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Sliders, Palette, Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas/template.schema';
+  import { fontFamilies, fontSizes, fontWeights, radiusPresets, buttonPaddings, shadowPresets, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -20,157 +12,47 @@
   const handleStyleChange = (key: string, value: string) => {
     const currentProps = section.props || {};
     const currentNodeStyles = currentProps.nodeStyles || {};
-    const updatedForThisNode = {
-      ...(currentNodeStyles[nodeId] || {}),
-      [key]: value,
-    };
-
-    const updatedSection: TemplateSection = {
-      ...section,
-      props: {
-        ...currentProps,
-        nodeStyles: {
-          ...currentNodeStyles,
-          [nodeId]: updatedForThisNode,
-        },
-      },
-    };
-
-    onUpdate(updatedSection);
+    const updatedForThisNode = { ...(currentNodeStyles[nodeId] || {}), [key]: value };
+    onUpdate({ ...section, props: { ...currentProps, nodeStyles: { ...currentNodeStyles, [nodeId]: updatedForThisNode } } });
   };
 
-  const fontFamilies = [
-    { label: 'Default (Inter)', value: 'Inter, sans-serif' },
-    { label: 'Poppins (Modern)', value: 'Poppins, sans-serif' },
-    { label: 'Roboto (Clean)', value: 'Roboto, sans-serif' },
-    { label: 'Playfair Display (Serif/Elegant)', value: "'Playfair Display', serif" },
-    { label: 'Montserrat (Bold)', value: 'Montserrat, sans-serif' },
-  ];
-
-  const fontSizes = [
-    { label: 'Extra Small (12px)', value: '12px' },
-    { label: 'Small (14px)', value: '14px' },
-    { label: 'Base (16px)', value: '16px' },
-    { label: 'Large (18px)', value: '18px' },
-    { label: 'XL (20px)', value: '20px' },
-    { label: '2XL (24px)', value: '24px' },
-    { label: '3XL (30px)', value: '30px' },
-    { label: '4XL (36px)', value: '36px' },
-    { label: '5XL (48px)', value: '48px' },
-  ];
-
-  const fontWeights = [
-    { label: 'Normal (400)', value: '400' },
-    { label: 'Medium (500)', value: '500' },
-    { label: 'Semi Bold (600)', value: '600' },
-    { label: 'Bold (700)', value: '700' },
-    { label: 'Extra Bold (800)', value: '800' },
-  ];
-
-  const radiusPresets = [
-    { label: 'Kotak (0px)', value: '0px' },
-    { label: 'Sedikit (6px)', value: '6px' },
-    { label: 'Sedang (12px)', value: '12px' },
-    { label: 'Bulat (24px)', value: '24px' },
-    { label: 'Pill (9999px)', value: '9999px' },
-  ];
-
-  const buttonPaddings = [
-    { label: 'Kompak', value: '8px 16px' },
-    { label: 'Normal', value: '12px 24px' },
-    { label: 'Besar', value: '16px 32px' },
-  ];
-
-  const shadowPresets = [
-    { label: 'Tanpa Shadow', value: 'none' },
-    { label: 'Soft Shadow', value: '0 4px 6px -1px rgb(0 0 0 / 0.1)' },
-    { label: 'Glow Blue', value: '0 10px 25px -5px rgba(59, 130, 246, 0.4)' },
-    { label: 'Deep Shadow', value: '0 20px 25px -5px rgb(0 0 0 / 0.2)' },
-  ];
-
-  const animationOptions = [
-    { value: '', label: 'Tanpa Animasi' },
-    { value: 'fadeIn', label: 'Fade In (Halus)' },
-    { value: 'slideUp', label: 'Slide Up (Muncul dari Bawah)' },
-    { value: 'slideLeft', label: 'Slide In Left (Dari Kanan)' },
-    { value: 'slideRight', label: 'Slide In Right (Dari Kiri)' },
-    { value: 'zoomIn', label: 'Zoom In (Membesar)' },
-  ];
-
-  const hoverOptions = [
-    { value: '', label: 'None' },
-    { value: 'scale', label: 'Scale Up (1.05x)' },
-    { value: 'lift', label: 'Lift Up (-4px)' },
-    { value: 'glow', label: 'Glow Shadow' },
-  ];
-
   $: isButtonNode = nodeId === 'cta' || nodeId.includes('button') || nodeId.includes('btn');
+  const alignButtons = [
+    { value: 'left', icon: AlignLeft, title: 'Rata Kiri' },
+    { value: 'center', icon: AlignCenter, title: 'Rata Tengah' },
+    { value: 'right', icon: AlignRight, title: 'Rata Kanan' },
+    { value: 'justify', icon: AlignJustify, title: 'Rata Kiri-Kanan' },
+  ];
 </script>
 
 <div class="p-4 space-y-5 text-xs text-base-content/80">
-  <!-- Typography Group -->
+  <!-- Typography -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Type size={13} class="text-blue-500" />
       <span>Typography & Text Align</span>
     </div>
 
-    <!-- Text Align -->
     <div>
       <span class="block font-medium mb-1 text-base-content/80">Perataan Teks</span>
       <div class="grid grid-cols-4 gap-1 bg-base-200/60 p-1 rounded-md border border-base-300 dark:border-slate-700">
-        <button
-          type="button"
-          on:click={() => handleStyleChange('textAlign', 'left')}
-          class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
-            nodeStyles.textAlign === 'left' || !nodeStyles.textAlign
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
-          }`}
-          title="Rata Kiri"
-        >
-          <AlignLeft size={13} />
-        </button>
-        <button
-          type="button"
-          on:click={() => handleStyleChange('textAlign', 'center')}
-          class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
-            nodeStyles.textAlign === 'center'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
-          }`}
-          title="Rata Tengah"
-        >
-          <AlignCenter size={13} />
-        </button>
-        <button
-          type="button"
-          on:click={() => handleStyleChange('textAlign', 'right')}
-          class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
-            nodeStyles.textAlign === 'right'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
-          }`}
-          title="Rata Kanan"
-        >
-          <AlignRight size={13} />
-        </button>
-        <button
-          type="button"
-          on:click={() => handleStyleChange('textAlign', 'justify')}
-          class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
-            nodeStyles.textAlign === 'justify'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
-          }`}
-          title="Rata Kiri-Kanan"
-        >
-          <AlignJustify size={13} />
-        </button>
+        {#each alignButtons as btn}
+          <button
+            type="button"
+            on:click={() => handleStyleChange('textAlign', btn.value)}
+            class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
+              nodeStyles.textAlign === btn.value || (btn.value === 'left' && !nodeStyles.textAlign)
+                ? 'bg-base-100 text-base-content font-semibold shadow-sm'
+                : 'text-base-content/60 hover:text-base-content'
+            }`}
+            title={btn.title}
+          >
+            <svelte:component this={btn.icon} size={13} />
+          </button>
+        {/each}
       </div>
     </div>
 
-    <!-- Font Family -->
     <div>
       <label for="node-font-family" class="block font-medium mb-1 text-base-content/80">Jenis Font</label>
       <select
@@ -186,7 +68,6 @@
       </select>
     </div>
 
-    <!-- Font Size & Weight -->
     <div class="grid grid-cols-2 gap-2">
       <div>
         <label for="node-font-size" class="block font-medium mb-1 text-base-content/80">Ukuran Font</label>
@@ -202,7 +83,6 @@
           {/each}
         </select>
       </div>
-
       <div>
         <label for="node-font-weight" class="block font-medium mb-1 text-base-content/80">Ketebalan Font</label>
         <select
@@ -220,14 +100,13 @@
     </div>
   </div>
 
-  <!-- Colors Group -->
+  <!-- Colors -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Palette size={13} class="text-blue-500" />
       <span>Warna Elemen</span>
     </div>
 
-    <!-- Text Color -->
     <div>
       <label for="node-text-color" class="block font-medium mb-1 text-base-content/80">Warna Teks</label>
       <div class="flex items-center gap-2">
@@ -248,7 +127,6 @@
       </div>
     </div>
 
-    <!-- Background Color (For Badges/Buttons/Cards) -->
     <div>
       <label for="node-bg-color" class="block font-medium mb-1 text-base-content/80">Warna Background</label>
       <div class="flex items-center gap-2">
@@ -270,7 +148,7 @@
     </div>
   </div>
 
-  <!-- Button & Shape Customizer (Only for buttons or card nodes) -->
+  <!-- Button Customizer -->
   {#if isButtonNode}
     <div class="space-y-3">
       <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
@@ -278,7 +156,6 @@
         <span>Kustomisasi Tombol</span>
       </div>
 
-      <!-- Border Radius -->
       <div>
         <label for="node-border-radius" class="block font-medium mb-1 text-base-content/80">Kelengkungan Sudut (Radius)</label>
         <select
@@ -293,7 +170,6 @@
         </select>
       </div>
 
-      <!-- Button Padding -->
       <div>
         <span class="block font-medium mb-1 text-base-content/80">Ukuran Tombol (Padding)</span>
         <div class="grid grid-cols-3 gap-1">
@@ -313,7 +189,6 @@
         </div>
       </div>
 
-      <!-- Shadow Presets -->
       <div>
         <label for="node-shadow" class="block font-medium mb-1 text-base-content/80">Button Shadow</label>
         <select
@@ -330,7 +205,7 @@
     </div>
   {/if}
 
-  <!-- Animation & Hover Effects -->
+  <!-- Animation & Hover -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Sparkles size={13} class="text-blue-500" />
@@ -346,7 +221,7 @@
           on:change={(e) => handleStyleChange('animation', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
-          {#each animationOptions as anim}
+          {#each nodeAnimationOptions as anim}
             <option value={anim.value}>{anim.label}</option>
           {/each}
         </select>
@@ -368,7 +243,7 @@
     </div>
   </div>
 
-  <!-- Spacing (Margin Top & Bottom per Node) -->
+  <!-- Margin Per Node -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Sliders size={13} class="text-blue-500" />
@@ -387,7 +262,6 @@
           placeholder="e.g. 0px, 16px"
         />
       </div>
-
       <div>
         <label for="node-margin-bottom" class="block font-medium mb-1 text-base-content/80">Margin Bawah</label>
         <input

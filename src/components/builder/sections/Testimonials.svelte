@@ -18,6 +18,8 @@
         },
       ]) as TestimonialItem[];
 
+  $: isMobileView = $editorStore?.viewMode === 'mobile';
+  $: isTabletView = $editorStore?.viewMode === 'tablet';
   $: hasCustomColor = !!styles?.color;
 
   let draggedIdx: number | null = null;
@@ -56,17 +58,17 @@
   };
 </script>
 
-<div class="max-w-6xl mx-auto w-full">
-  <div class="mb-8 text-center">
-    <h2 class={`text-2xl font-bold tracking-tight mb-2 ${hasCustomColor ? '' : 'text-slate-900'}`}>
+<div class="max-w-6xl mx-auto w-full box-border">
+  <div class="mb-6 sm:mb-8 text-center px-2">
+    <h2 class={`text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight mb-2 ${hasCustomColor ? '' : 'text-slate-900'}`}>
       {props?.title || 'Apa Kata Pelanggan Kami'}
     </h2>
-    <p class={`text-xs ${hasCustomColor ? 'opacity-80' : 'text-slate-600'}`}>
+    <p class={`text-xs sm:text-sm max-w-xl mx-auto ${hasCustomColor ? 'opacity-80' : 'text-slate-600'}`}>
       {props?.subtitle || 'Ulasan jujur dan kepuasan pengalaman berbelanja dari para pelanggan setia'}
     </p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class={`grid ${isMobileView ? 'grid-cols-1' : isTabletView ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-4 sm:gap-6 w-full`}>
     {#each testimonials as item, index (item.customerName + index)}
       <div
         role="listitem"
@@ -75,7 +77,7 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
-        class={`bg-white p-6 rounded-2xl border transition-all flex flex-col justify-between text-left ${
+        class={`bg-white p-4 sm:p-6 rounded-2xl border transition-all flex flex-col justify-between text-left min-w-0 ${
           isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
         } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200/80 shadow-sm'} ${
           draggedIdx === index ? 'opacity-30' : ''
@@ -87,21 +89,21 @@
               <Star size={14} class="fill-amber-400 text-amber-400" />
             {/each}
           </div>
-          <p class="text-xs text-slate-600 leading-relaxed line-clamp-3">
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed break-words line-clamp-4">
             "{item.comment || 'Pelayanan sangat memuaskan dan produk sesuai ekspektasi!'}"
           </p>
         </div>
 
         <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
           {#if item.avatar}
-            <img src={item.avatar} alt={item.customerName} class="w-8 h-8 rounded-full object-cover border border-slate-200" />
+            <img src={item.avatar} alt={item.customerName} class="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0" />
           {:else}
-            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center flex-shrink-0">
               {(item.customerName || 'P').charAt(0).toUpperCase()}
             </div>
           {/if}
-          <div>
-            <p class="text-xs font-bold text-slate-900">{item.customerName || 'Pelanggan Setia'}</p>
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-900 truncate">{item.customerName || 'Pelanggan Setia'}</p>
             <p class="text-[10px] text-slate-400 font-medium">Pembeli Terverifikasi</p>
           </div>
         </div>

@@ -72,9 +72,9 @@
           on:dragover={(e) => onDragOver(e, index)}
           on:dragleave={() => (dropTargetIdx = null)}
           on:drop={(e) => onDrop(e, index)}
-          class={`bg-white rounded-2xl border overflow-hidden shadow-sm transition-all flex flex-col ${
+          class={`bg-white rounded-2xl border overflow-hidden transition-all flex flex-col ${
             isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
-          } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-xl' : 'border-slate-100'} ${
+          } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-xl' : 'border-slate-200/80 shadow-sm'} ${
             draggedIdx === index ? 'opacity-30' : ''
           }`}
         >
@@ -83,13 +83,13 @@
           {:else}
             <div class="w-full h-48 bg-slate-100 flex flex-col items-center justify-center text-slate-400 gap-1.5">
               <Package size={26} class="text-slate-300" />
-              <span class="text-[11px]">Foto Produk</span>
+              <span class="text-[11px] font-medium text-slate-400">Foto Produk</span>
             </div>
           {/if}
 
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-1">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
                 <h3 class="font-bold text-sm text-slate-900 line-clamp-1">{product.name || 'Nama Produk'}</h3>
                 {#if product.badge}
                   <span class="px-2 py-0.5 text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200 rounded-full">
@@ -97,7 +97,7 @@
                   </span>
                 {/if}
               </div>
-              <p class="text-lg font-extrabold text-blue-600 mb-3">
+              <p class="text-base font-extrabold text-blue-600 mb-3 font-mono">
                 Rp {typeof product.price === 'number' ? product.price.toLocaleString('id-ID') : product.price || '0'}
               </p>
             </div>
@@ -105,7 +105,7 @@
             <button
               type="button"
               on:click|preventDefault
-              class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center justify-center gap-1.5"
+              class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Pesan via WhatsApp</span>
             </button>

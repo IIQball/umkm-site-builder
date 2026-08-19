@@ -8,16 +8,29 @@
   $: whatsappNumber = props?.whatsappNumber || '';
   $: address = props?.address || '';
   $: copyrightText = props?.copyrightText || '© 2026 Toko Kami. Semua hak dilindungi.';
-  $: hasCustomBg = !!styles?.backgroundColor;
-  $: hasCustomColor = !!styles?.color;
+
+  const isDarkColor = (color?: string): boolean => {
+    if (!color || color === 'transparent') return true;
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16) || 0;
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness < 128;
+    }
+    return true;
+  };
+
+  $: isDarkBg = isDarkColor(styles?.backgroundColor || '#1f2937');
 </script>
 
-<div class={`w-full ${hasCustomBg ? '' : 'text-slate-100'}`}>
+<div class="w-full">
   <div class="w-full">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 text-left">
       <!-- Kontak WhatsApp -->
       <div>
-        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${hasCustomColor ? 'opacity-70' : 'text-slate-400'}`}>
+        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDarkBg ? 'text-slate-300' : 'text-slate-700'}`}>
           Kontak Cepat
         </h3>
         {#if whatsappNumber}
@@ -25,13 +38,17 @@
             href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
             target="_blank"
             rel="noreferrer"
-            class="inline-flex items-center gap-2 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-950/40 border border-emerald-800/40 px-3 py-1.5 rounded-lg"
+            class={`inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm transition-colors ${
+              isDarkBg
+                ? 'text-emerald-300 bg-emerald-950/60 border border-emerald-700/60 hover:bg-emerald-900/60'
+                : 'text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100'
+            }`}
           >
             <MessageCircle size={14} />
             <span>+{whatsappNumber}</span>
           </a>
         {:else}
-          <p class={`text-xs italic ${hasCustomColor ? 'opacity-60' : 'text-slate-500'}`}>
+          <p class={`text-xs italic ${isDarkBg ? 'text-slate-400' : 'text-slate-500'}`}>
             WhatsApp belum diatur
           </p>
         {/if}
@@ -39,16 +56,16 @@
 
       <!-- Alamat -->
       <div>
-        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${hasCustomColor ? 'opacity-70' : 'text-slate-400'}`}>
+        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDarkBg ? 'text-slate-300' : 'text-slate-700'}`}>
           Lokasi Toko
         </h3>
         {#if address}
           <div class="flex items-start gap-2 text-xs">
             <MapPin size={14} class="mt-0.5 text-blue-400 flex-shrink-0" />
-            <p class="leading-relaxed">{address}</p>
+            <p class={`leading-relaxed ${isDarkBg ? 'text-slate-200' : 'text-slate-600'}`}>{address}</p>
           </div>
         {:else}
-          <p class={`text-xs italic ${hasCustomColor ? 'opacity-60' : 'text-slate-500'}`}>
+          <p class={`text-xs italic ${isDarkBg ? 'text-slate-400' : 'text-slate-500'}`}>
             Alamat belum diatur
           </p>
         {/if}
@@ -56,19 +73,23 @@
 
       <!-- Navigasi Footer -->
       <div>
-        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${hasCustomColor ? 'opacity-70' : 'text-slate-400'}`}>
+        <h3 class={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDarkBg ? 'text-slate-300' : 'text-slate-700'}`}>
           Informasi
         </h3>
-        <ul class="space-y-1.5 text-xs opacity-80">
-          <li><span class="hover:opacity-100 transition-opacity cursor-pointer">Tentang Kami</span></li>
-          <li><span class="hover:opacity-100 transition-opacity cursor-pointer">Kebijakan Privasi</span></li>
-          <li><span class="hover:opacity-100 transition-opacity cursor-pointer">Syarat & Ketentuan</span></li>
+        <ul class={`space-y-1.5 text-xs ${isDarkBg ? 'text-slate-300' : 'text-slate-600'}`}>
+          <li><span class="hover:underline cursor-pointer">Tentang Kami</span></li>
+          <li><span class="hover:underline cursor-pointer">Kebijakan Privasi</span></li>
+          <li><span class="hover:underline cursor-pointer">Syarat dan Ketentuan</span></li>
         </ul>
       </div>
     </div>
 
     <!-- Copyright -->
-    <div class="pt-6 border-t border-slate-700/40 text-center text-[11px] opacity-70">
+    <div class={`pt-6 border-t text-center text-[11px] ${
+      isDarkBg
+        ? 'border-slate-700/60 text-slate-400'
+        : 'border-slate-200 text-slate-500'
+    }`}>
       <p>{copyrightText}</p>
     </div>
   </div>

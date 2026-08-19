@@ -12,12 +12,26 @@
   export let section: TemplateSection;
   export let isActive: boolean = false;
 
+  const isDarkColor = (color?: string): boolean => {
+    if (!color || color === 'transparent') return false;
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16) || 0;
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness < 128;
+    }
+    return false;
+  };
+
   const buildStyle = (styles: SectionStyles = {}): string => {
     const s = styles || {};
     const rules: string[] = [];
+    const defaultTextColor = isDarkColor(s.backgroundColor || '#ffffff') ? '#f8fafc' : '#0f172a';
 
     rules.push(`background-color: ${s.backgroundColor || '#ffffff'}`);
-    rules.push(`color: ${s.color || '#0f172a'}`);
+    rules.push(`color: ${s.color || defaultTextColor}`);
     rules.push(`padding: ${s.padding || '48px 24px'}`);
     rules.push(`text-align: ${s.textAlign || 'center'}`);
     rules.push(`border-radius: ${s.borderRadius || '0px'}`);

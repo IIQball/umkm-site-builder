@@ -71,24 +71,24 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class="flex flex-col h-full w-full bg-slate-950 text-slate-100 overflow-hidden">
+<div class="flex flex-col h-full w-full bg-base-100 text-base-content overflow-hidden transition-colors">
   {#if loading}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">
       <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      <p class="text-sm font-medium text-slate-400">Memuat workspace template...</p>
+      <p class="text-xs font-medium text-base-content/60">Memuat workspace template...</p>
     </div>
   {:else if fetchError || $editorStore.error && !$editorStore.template}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4 p-8 text-center">
-      <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center text-xl font-bold">
+      <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center text-xl font-bold">
         !
       </div>
       <div>
-        <h2 class="text-lg font-semibold text-slate-200">Gagal Memuat Template</h2>
-        <p class="text-sm text-slate-400 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
+        <h2 class="text-base font-bold text-base-content">Gagal Memuat Template</h2>
+        <p class="text-xs text-base-content/60 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
       </div>
       <button
         on:click={fetchTemplate}
-        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors cursor-pointer"
+        class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors cursor-pointer"
       >
         Coba Lagi
       </button>
@@ -108,7 +108,7 @@
     />
 
     <!-- Main Workspace: 3 Columns -->
-    <div class="flex flex-1 w-full overflow-hidden bg-slate-950">
+    <div class="flex flex-1 w-full overflow-hidden bg-base-100">
       <!-- Left Panel: Layers / Sections -->
       <LayerPanel
         sections={$editorStore.template.config.sections}

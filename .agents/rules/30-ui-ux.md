@@ -103,3 +103,11 @@ Building the UI is half the job. Review it:
 
 Only after that is UI work done. If a screenshot shows a spacing or alignment problem, fix
 it before reporting — "it renders" is not the bar.
+
+## 11. Builder & Preview Theme Adaptability
+
+- **Semantic Tokens Only**: Never use hardcoded slate/gray/black classes (`bg-slate-950`, `bg-slate-900`, `text-slate-100`) on UI shell builder components (TopBar, Inspector, LayerPanel, Modal/Form). Always use semantic tokens (`bg-base-100`, `bg-base-200`, `text-base-content`, `border-base-200/300`).
+- **Synchronized Dark/Light Modes**: The full builder lifecycle from metadata creation (`/builder/new`), visual editor (`/builder/[id]`), to read-only preview (`/builder/preview/[id]`) must seamlessly sync with the active theme (`data-theme="light"` / `data-theme="dark"`).
+- **Canvas Isolation**: The storefront template canvas must render its own styling independently while the surrounding workspace adapts cleanly to the selected theme.
+- **Svelte Block Integrity**: Svelte `{@const ...}` directives must only be placed directly inside valid block tags (`{#if}`, `{#each}`, etc.), never inside raw HTML elements like `<div>`.
+

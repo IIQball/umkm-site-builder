@@ -173,12 +173,12 @@
   };
 </script>
 
-<aside class="w-72 flex-shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-full overflow-hidden">
+<aside class="w-72 flex-shrink-0 bg-base-100 border-r border-base-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-base-content transition-colors">
   <!-- Header -->
-  <div class="p-3 border-b border-slate-800 flex items-center justify-between">
-    <div class="flex items-center gap-2 text-slate-200">
-      <Layers size={16} class="text-blue-400" />
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Tree Layers ({sections.length})</span>
+  <div class="p-3 border-b border-base-200 dark:border-slate-800 flex items-center justify-between">
+    <div class="flex items-center gap-2 text-base-content">
+      <Layers size={16} class="text-blue-600 dark:text-blue-400" />
+      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/80">Tree Layers ({sections.length})</span>
     </div>
 
     <!-- Add Section Button / Dropdown -->
@@ -186,9 +186,9 @@
       <button
         type="button"
         on:click={() => (isAddMenuOpen = !isAddMenuOpen)}
-        class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-700 transition-colors cursor-pointer"
+        class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-base-content bg-base-200 hover:bg-base-300 rounded-md border border-base-300 dark:border-slate-700 transition-colors cursor-pointer"
       >
-        <Plus size={14} />
+        <Plus size={13} />
         <span>Tambah</span>
       </button>
 
@@ -201,17 +201,17 @@
           aria-label="Close menu"
         />
 
-        <div class="absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-800 rounded-lg shadow-xl py-1 z-50 overflow-hidden">
-          <div class="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+        <div class="absolute right-0 mt-1 w-56 bg-base-100 border border-base-200 dark:border-slate-800 rounded-lg shadow-xl py-1 z-50 overflow-hidden text-base-content">
+          <div class="px-3 py-1.5 text-[10px] font-semibold text-base-content/50 uppercase tracking-wider border-b border-base-200 dark:border-slate-800">
             Pilih Tipe Section
           </div>
           {#each sectionTypes as type}
             <button
               type="button"
               on:click={() => handleAdd(type)}
-              class="w-full px-3 py-2 text-left text-xs text-slate-200 hover:bg-blue-600/20 hover:text-blue-300 flex items-center gap-2.5 transition-colors cursor-pointer"
+              class="w-full px-3 py-2 text-left text-xs text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-300 flex items-center gap-2.5 transition-colors cursor-pointer"
             >
-              <svelte:component this={sectionTypeIcons[type]} size={14} class="text-slate-400" />
+              <svelte:component this={sectionTypeIcons[type]} size={14} class="text-base-content/50" />
               <span>{sectionTypeLabels[type]}</span>
             </button>
           {/each}
@@ -223,7 +223,7 @@
   <!-- Section & Nested Node Tree List -->
   <div class="flex-1 overflow-y-auto p-2 space-y-1">
     {#if sections.length === 0}
-      <div class="p-4 text-center text-xs text-slate-500">
+      <div class="p-4 text-center text-xs text-base-content/50">
         Belum ada section. Klik tombol Tambah di atas.
       </div>
     {:else}
@@ -241,10 +241,10 @@
             on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectNode(section.id, null)}
             class={`group w-full flex items-center justify-between p-2 rounded-lg text-left transition-all border cursor-pointer ${
               isSectionSelected && !selectedNodeId
-                ? 'bg-blue-600/15 border-blue-500/50 text-blue-200 shadow-sm'
+                ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700/60 text-blue-700 dark:text-blue-300 shadow-sm'
                 : isSectionSelected
-                ? 'bg-slate-800/40 border-slate-700/50 text-slate-200'
-                : 'border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-slate-100'
+                ? 'bg-base-200/80 border-base-300 dark:border-slate-700/50 text-base-content'
+                : 'border-transparent text-base-content/80 hover:bg-base-200/60 hover:text-base-content'
             }`}
           >
             <!-- Left: Toggle Chevron, Icon & Name -->
@@ -252,7 +252,7 @@
               <button
                 type="button"
                 on:click|stopPropagation={() => toggleExpand(section.id)}
-                class="p-0.5 text-slate-400 hover:text-slate-200 rounded cursor-pointer transition-transform"
+                class="p-0.5 text-base-content/50 hover:text-base-content rounded cursor-pointer transition-transform"
                 title={isExpanded ? 'Collapse' : 'Expand'}
               >
                 <svelte:component this={isExpanded ? ChevronDown : ChevronRight} size={13} />
@@ -261,10 +261,10 @@
               <svelte:component
                 this={sectionTypeIcons[section.type] || Layers}
                 size={14}
-                class={isSectionSelected ? 'text-blue-400' : 'text-slate-400'}
+                class={isSectionSelected ? 'text-blue-600 dark:text-blue-400' : 'text-base-content/50'}
               />
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-medium truncate">
+                <p class="text-xs font-semibold truncate">
                   {sectionTypeLabels[section.type] || section.type}
                 </p>
               </div>
@@ -276,7 +276,7 @@
                 type="button"
                 on:click|stopPropagation={() => onReorderSection(section.id, 'up')}
                 disabled={index === 0}
-                class="p-1 hover:bg-slate-700/80 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
+                class="p-1 hover:bg-base-300 rounded text-base-content/60 hover:text-base-content disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
                 title="Pindah ke Atas"
               >
                 <ChevronUp size={13} />
@@ -285,7 +285,7 @@
                 type="button"
                 on:click|stopPropagation={() => onReorderSection(section.id, 'down')}
                 disabled={index === sections.length - 1}
-                class="p-1 hover:bg-slate-700/80 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
+                class="p-1 hover:bg-base-300 rounded text-base-content/60 hover:text-base-content disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
                 title="Pindah ke Bawah"
               >
                 <ChevronDown size={13} />
@@ -293,7 +293,7 @@
               <button
                 type="button"
                 on:click|stopPropagation={() => onDeleteSection(section.id)}
-                class="p-1 hover:bg-rose-500/20 rounded text-slate-400 hover:text-rose-400 cursor-pointer"
+                class="p-1 hover:bg-rose-500/20 rounded text-base-content/60 hover:text-rose-500 cursor-pointer"
                 title="Hapus Section"
               >
                 <Trash2 size={13} />
@@ -303,7 +303,7 @@
 
           <!-- Nested Child Nodes Tree -->
           {#if isExpanded}
-            <div class="ml-5 pl-2.5 border-l border-slate-800/80 space-y-0.5 py-0.5">
+            <div class="ml-5 pl-2.5 border-l border-base-300 dark:border-slate-800 space-y-0.5 py-0.5">
               {#each nodes as node, nodeIdx (node.id)}
                 {@const isNodeSelected = isSectionSelected && selectedNodeId === node.id}
                 <div
@@ -313,21 +313,21 @@
                   on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectNode(section.id, node.id)}
                   class={`group/node w-full flex items-center justify-between px-2 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
                     isNodeSelected
-                      ? 'bg-blue-600 text-white font-medium shadow-sm'
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                      ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                      : 'text-base-content/70 hover:bg-base-200/70 hover:text-base-content'
                   }`}
                 >
                   <div class="flex items-center gap-2 min-w-0 flex-1">
                     <svelte:component
                       this={node.icon}
                       size={12}
-                      class={isNodeSelected ? 'text-white' : 'text-slate-500'}
+                      class={isNodeSelected ? 'text-white' : 'text-base-content/40'}
                     />
                     <span class="truncate text-[11px]">{node.name}</span>
                   </div>
 
                   <!-- Actions for inner element (Reorder + Delete) -->
-                  <div class="flex items-center gap-0.5 opacity-0 group-hover/node:opacity-100 transition-opacity">
+                  <div class="flex items-center gap-0.5 opacity-0 group/node:opacity-100 group-hover/node:opacity-100 transition-opacity">
                     {#if section.type === 'hero'}
                       <button
                         type="button"
@@ -352,7 +352,7 @@
                     <button
                       type="button"
                       on:click|stopPropagation={() => editorStore.deleteNode(section.id, node.id)}
-                      class="p-0.5 hover:text-rose-400 text-slate-400 transition-colors cursor-pointer"
+                      class="p-0.5 hover:text-rose-400 text-base-content/40 transition-colors cursor-pointer"
                       title="Hapus Elemen"
                     >
                       <Trash2 size={11} />
@@ -368,47 +368,47 @@
                   on:click|stopPropagation={() => {
                     openAddNodeDropdown = openAddNodeDropdown === section.id ? null : section.id;
                   }}
-                  class="w-full flex items-center justify-center gap-1 py-1 text-[10px] font-semibold text-slate-400 hover:text-blue-400 bg-slate-800/40 hover:bg-slate-800 rounded border border-dashed border-slate-700/60 transition-colors cursor-pointer"
+                  class="w-full flex items-center justify-center gap-1 py-1 text-[10px] font-semibold text-base-content/60 hover:text-blue-600 dark:hover:text-blue-400 bg-base-200/50 hover:bg-base-200 rounded border border-dashed border-base-300 dark:border-slate-800 transition-colors cursor-pointer"
                 >
                   <Plus size={11} />
                   <span>Tambah Elemen</span>
                 </button>
 
                 {#if openAddNodeDropdown === section.id}
-                  <div class="mt-1 p-1 bg-slate-950 border border-slate-800 rounded-lg shadow-xl space-y-0.5 z-40">
+                  <div class="mt-1 p-1 bg-base-100 border border-base-200 dark:border-slate-800 rounded-lg shadow-xl space-y-0.5 z-40 text-base-content">
                     {#if section.type === 'hero'}
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'badge'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Promo Badge
                       </button>
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'title'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Heading Title
                       </button>
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'subtitle'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Subtitle Description
                       </button>
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'image'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Banner Image
                       </button>
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'cta'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Action Button (CTA)
                       </button>
@@ -416,7 +416,7 @@
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'nav'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Nav Link Menu
                       </button>
@@ -424,7 +424,7 @@
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Card Fitur Baru
                       </button>
@@ -432,7 +432,7 @@
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Produk Baru
                       </button>
@@ -440,7 +440,7 @@
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + Review Testimoni
                       </button>
@@ -448,7 +448,7 @@
                       <button
                         type="button"
                         on:click={() => { editorStore.addNode(section.id, 'item'); openAddNodeDropdown = null; }}
-                        class="w-full text-left px-2 py-1 text-[10px] text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 rounded"
+                        class="w-full text-left px-2 py-1 text-[10px] text-base-content/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 rounded cursor-pointer"
                       >
                         + FAQ Accordion
                       </button>

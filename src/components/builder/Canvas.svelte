@@ -107,12 +107,12 @@
   };
 </script>
 
-<main class="flex-1 h-full overflow-y-auto bg-slate-900/50 p-6 flex justify-center items-start select-none">
+<main class="flex-1 h-full overflow-y-auto bg-base-200/60 p-4 sm:p-6 flex justify-center items-start select-none transition-colors">
   <!-- Frame Container with fixed device boundaries and safe-zone margins -->
   <div
-    class={`transition-all duration-300 ease-in-out bg-white text-slate-900 shadow-2xl overflow-visible my-4 flex flex-col ${
+    class={`transition-all duration-300 ease-in-out bg-white text-slate-900 shadow-xl overflow-visible my-4 flex flex-col ${
       viewMode === 'desktop'
-        ? 'w-full max-w-6xl rounded-xl min-h-[800px] border border-slate-800'
+        ? 'w-full max-w-6xl rounded-xl min-h-[800px] border border-base-300 dark:border-slate-800'
         : viewMode === 'tablet'
         ? 'w-[768px] rounded-2xl min-h-[800px] border-4 border-slate-700'
         : 'w-[375px] rounded-2xl min-h-[667px] border-4 border-slate-700'

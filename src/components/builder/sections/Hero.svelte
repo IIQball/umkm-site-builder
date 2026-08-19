@@ -294,12 +294,12 @@
         />
       {/if}
 
-      <!-- Badge Element -->
+  <!-- Badge Element -->
       {#if key === 'badge'}
         {#if badgeText}
           <div
             style={buildNodeStyle('badge')}
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 mb-4 shadow-sm"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200/80 mb-3 shadow-sm"
           >
             <span>{badgeText}</span>
           </div>
@@ -310,13 +310,13 @@
         <svelte:element
           this={tagName || 'h1'}
           style={buildNodeStyle('title', {
-            color: styles?.color || '#0f172a',
-            fontSize: tagName === 'h1' ? '2.25rem' : '1.875rem',
+            color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#f8fafc' : '#0f172a'),
+            fontSize: tagName === 'h1' ? '2.25rem' : '1.75rem',
             fontWeight: '800',
             textAlign: styles?.textAlign || 'center',
-            marginBottom: '16px',
+            marginBottom: '12px',
           })}
-          class="tracking-tight leading-tight w-full"
+          class="tracking-tight leading-tight w-full max-w-2xl"
         >
           {title}
         </svelte:element>
@@ -325,12 +325,12 @@
       {:else if key === 'subtitle'}
         <p
           style={buildNodeStyle('subtitle', {
-            color: styles?.color ? styles.color : '#475569',
-            fontSize: '1.125rem',
+            color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#cbd5e1' : '#475569'),
+            fontSize: '1rem',
             textAlign: styles?.textAlign || 'center',
-            marginBottom: '24px',
+            marginBottom: '20px',
           })}
-          class="max-w-2xl leading-relaxed w-full"
+          class="max-w-xl leading-relaxed w-full opacity-90"
         >
           {subtitle}
         </p>
@@ -340,9 +340,9 @@
         {#if imageUrl}
           <div
             style={buildNodeStyle('image')}
-            class="mb-6 w-full max-w-lg overflow-hidden rounded-2xl shadow-md border border-slate-100"
+            class="mb-6 w-full max-w-xl overflow-hidden rounded-2xl shadow-sm border border-slate-200/80"
           >
-            <img src={imageUrl} alt="Hero Banner" class="w-full h-56 md:h-72 object-cover" />
+            <img src={imageUrl} alt="Banner Produk Toko" class="w-full h-56 md:h-64 object-cover" />
           </div>
         {/if}
 
@@ -356,11 +356,11 @@
               backgroundColor: '#2563eb',
               color: '#ffffff',
               borderRadius: '12px',
-              padding: '12px 24px',
+              padding: '12px 28px',
               fontSize: '14px',
               fontWeight: '600',
             })}
-            class={`inline-flex items-center justify-center shadow-lg shadow-blue-500/25 pointer-events-auto cursor-pointer ${getNodeHoverClass('cta')}`}
+            class={`inline-flex items-center justify-center text-white shadow-md shadow-blue-600/20 active:scale-[0.98] pointer-events-auto cursor-pointer ${getNodeHoverClass('cta')}`}
           >
             {ctaText}
           </a>

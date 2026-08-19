@@ -77,7 +77,7 @@
   };
 </script>
 
-<div class={`flex flex-wrap items-center justify-between px-6 py-3 border-b ${hasCustomBg ? '' : 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-500/10 border-amber-500/20'}`}>
+<div class={`flex flex-wrap items-center justify-between px-6 py-2.5 border-b ${hasCustomBg ? '' : 'bg-slate-50 border-slate-200/80'}`}>
   <div
     role="button"
     tabindex="0"
@@ -89,13 +89,13 @@
   >
     <p
       style={buildNodeStyle('announcement')}
-      class={`text-xs font-semibold tracking-wide ${hasCustomColor ? '' : 'text-amber-900'}`}
+      class={`text-xs font-semibold tracking-wide ${hasCustomColor ? '' : 'text-slate-800'}`}
     >
       {announcementText}
     </p>
   </div>
 
-  <nav class={`flex items-center gap-3 text-xs font-medium ${hasCustomColor ? 'opacity-90' : 'text-slate-600'}`}>
+  <nav class={`flex items-center gap-4 text-xs font-medium ${hasCustomColor ? 'opacity-90' : 'text-slate-600'}`}>
     {#each navLinks as link, index (link + index)}
       <span
         role="button"
@@ -105,7 +105,7 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
-        class={`transition-all ${isActive ? 'cursor-grab active:cursor-grabbing hover:text-blue-600' : 'cursor-pointer'} ${
+        class={`transition-all ${isActive ? 'cursor-grab active:cursor-grabbing hover:text-blue-600' : 'cursor-pointer hover:text-slate-900'} ${
           dropTargetIdx === index ? 'border-l-2 border-blue-500 pl-1' : ''
         } ${draggedIdx === index ? 'opacity-30' : ''}`}
       >

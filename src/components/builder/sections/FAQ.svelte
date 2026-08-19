@@ -84,16 +84,16 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
-        class={`bg-white rounded-2xl border transition-all overflow-hidden ${
+        class={`bg-white rounded-xl border transition-all overflow-hidden ${
           isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
-        } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200 shadow-sm'} ${
+        } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200/80 shadow-sm'} ${
           draggedIdx === index ? 'opacity-30' : ''
         }`}
       >
         <button
           type="button"
           on:click={() => toggle(index)}
-          class="w-full px-5 py-4 text-left flex items-center justify-between gap-4 transition-colors hover:bg-slate-50 cursor-pointer"
+          class="w-full px-5 py-3.5 text-left flex items-center justify-between gap-4 transition-colors hover:bg-slate-50 cursor-pointer"
         >
           <span class="font-semibold text-xs sm:text-sm text-slate-900 leading-snug">
             {item.question || 'Pertanyaan...'}

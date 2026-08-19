@@ -2,16 +2,67 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="UMKM Site Builder - Home" description="Create a professional website for your UMKM business in minutes, no coding required.">
-  <main class="container mx-auto px-4 py-12">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold mb-4">UMKM Site Builder</h1>
-      <p class="text-xl text-gray-600 mb-8">
-        No-code web builder for Indonesian micro-enterprises
+<BaseLayout title="UMKM Site Builder - Platform Website No-Code UMKM" description="Buat website profesional untuk UMKM Indonesia dalam hitungan menit tanpa koding.">
+  <main class="container mx-auto px-4 py-16 md:py-24 max-w-5xl">
+    <div class="text-center space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20">
+        <span>✨ Platform SaaS Visual Builder UMKM</span>
+      </div>
+
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-base-content leading-tight">
+        Bangun Toko & Website UMKM <br />
+        <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          Cepat, Elegan, dan Tanpa Coding
+        </span>
+      </h1>
+
+      <p class="text-lg md:text-xl text-base-content/70 max-w-2xl mx-auto leading-relaxed">
+        Solusi no-code terintegrasi dengan sub-domain instan, pembayaran digital, dan template visual modular khusus usaha mikro Indonesia.
       </p>
-      <div class="flex gap-4 justify-center">
-        <a href="/auth/login" class="btn btn-primary">Sign In</a>
-        <a href="/auth/register" class="btn btn-outline">Get Started</a>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <a
+          href="/templates"
+          class="btn btn-primary px-8 py-3.5 text-base font-bold shadow-xl shadow-primary/25 rounded-2xl flex items-center gap-2"
+        >
+          <span>🛍️ Jelajahi Template</span>
+          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+        </a>
+
+        <a
+          href="/builder/new"
+          class="btn btn-outline px-6 py-3.5 rounded-2xl font-semibold flex items-center gap-1.5"
+        >
+          <span>🎨 Buat Template Baru</span>
+        </a>
+      </div>
+
+      <!-- Features Preview Highlights -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-16 text-left">
+        <div class="p-6 rounded-2xl bg-base-200/50 border border-base-content/10 shadow-sm space-y-2">
+          <div class="text-2xl">⚡</div>
+          <h3 class="font-bold text-base text-base-content">Visual Drag & Edit</h3>
+          <p class="text-xs text-base-content/70 leading-relaxed">
+            Editor modular 3-kolom interaktif dengan preview responsif Desktop & Mobile serta styling instan.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-base-200/50 border border-base-content/10 shadow-sm space-y-2">
+          <div class="text-2xl">💳</div>
+          <h3 class="font-bold text-base text-base-content">Pembayaran Terintegrasi</h3>
+          <p class="text-xs text-base-content/70 leading-relaxed">
+            Didukung gateway pembayaran otomatis untuk aktivasi toko dan pembelian template desainer.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-base-200/50 border border-base-content/10 shadow-sm space-y-2">
+          <div class="text-2xl">🇮🇩</div>
+          <h3 class="font-bold text-base text-base-content">Khusus UMKM Lokal</h3>
+          <p class="text-xs text-base-content/70 leading-relaxed">
+            7 section standar bisnis lokal: katalog WhatsApp, integrasi maps, testimoni, & FAQ terverifikasi.
+          </p>
+        </div>
       </div>
     </div>
   </main>

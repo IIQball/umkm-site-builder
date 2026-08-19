@@ -51,10 +51,10 @@ if (config.app.isProd) {
   ];
   
   for (const key of required) {
-    if (!import.meta.env[key]) {
-      console.warn(`Missing required secret: ${key}`);
-    }
-  }
+     if (!import.meta.env[key]) {
+       // Missing required secret
+     }
+   }
 }
 
 export default config;

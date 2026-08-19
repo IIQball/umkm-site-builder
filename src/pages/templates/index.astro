@@ -1,0 +1,167 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublicTemplates } from '@/services/template.service';
+
+export const prerender = false;
+
+const templatesList = await getPublicTemplates();
+
+const formatPrice = (cents: number): string => {
+  if (!cents || cents === 0) return 'Gratis';
+  const rupiah = Math.floor(cents / 100);
+  return `Rp ${rupiah.toLocaleString('id-ID')}`;
+};
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return {
+        label: 'Siap Pakai',
+        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+      };
+    case 'pending':
+      return {
+        label: 'Menunggu Review',
+        className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+      };
+    case 'rejected':
+      return {
+        label: 'Perlu Revisi',
+        className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+      };
+    default:
+      return {
+        label: 'Draft Desainer',
+        className: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+      };
+  }
+};
+---
+
+<BaseLayout title="Katalog Template Website UMKM - UMKM Site Builder">
+  <div class="min-h-screen bg-base-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-base-200 pb-8">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3 border border-primary/20">
+            <span>✨ Marketplace Template Desainer</span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-base-content">
+            Katalog Template Website UMKM
+          </h1>
+          <p class="text-base text-base-content/70 mt-2 max-w-2xl leading-relaxed">
+            Pilih desain landing page dan toko online profesional siap pakai untuk memaksimalkan konversi penjualan bisnis Anda.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="/builder/new"
+            class="btn btn-primary rounded-xl font-bold shadow-lg shadow-primary/20 gap-2"
+          >
+            <span>🎨 Buat Template Baru</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Templates Grid -->
+      {templatesList.length === 0 ? (
+        <div class="text-center py-20 px-4 bg-base-200/50 rounded-3xl border border-dashed border-base-300 max-w-xl mx-auto">
+          <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl mx-auto mb-4">
+            🎨
+          </div>
+          <h3 class="text-lg font-bold text-base-content mb-1">Belum Ada Template Terdaftar</h3>
+          <p class="text-xs text-base-content/60 mb-6">
+            Jadilah yang pertama membuat dan mempublikasikan template website UMKM di platform ini.
+          </p>
+          <a href="/builder/new" class="btn btn-primary btn-sm rounded-xl font-semibold">
+            Mulai Buat Template
+          </a>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {templatesList.map((tpl) => {
+            const badge = getStatusBadge(tpl.status);
+            return (
+              <div class="card bg-base-100 border border-base-200 hover:border-primary/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                <!-- Thumbnail / Header Preview -->
+                <div class="relative h-48 w-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center overflow-hidden border-b border-base-200">
+                  {tpl.thumbnailUrl ? (
+                    <img
+                      src={tpl.thumbnailUrl}
+                      alt={tpl.name}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div class="flex flex-col items-center justify-center text-slate-400 gap-2 p-6 text-center">
+                      <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl shadow-inner">
+                        🛍️
+                      </div>
+                      <span class="text-xs font-medium text-slate-300">Live Preview Website</span>
+                    </div>
+                  )}
+
+                  <!-- Status Badge -->
+                  <div class="absolute top-3 right-3">
+                    <span class={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-md ${badge.className}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <!-- Name & Price -->
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <h2 class="text-base font-bold text-base-content line-clamp-1 group-hover:text-primary transition-colors">
+                        {tpl.name}
+                      </h2>
+                      <span class="text-sm font-extrabold text-primary flex-shrink-0">
+                        {formatPrice(tpl.price)}
+                      </span>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="text-xs text-base-content/65 line-clamp-2 mb-4 leading-relaxed">
+                      {tpl.description || 'Template desain responsif modern dengan integrasi katalog produk, WhatsApp, dan checkout praktis.'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <!-- Designer Info -->
+                    <div class="flex items-center gap-2.5 pt-4 border-t border-base-200 mb-4">
+                      <div class="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-[10px] flex items-center justify-center">
+                        {tpl.designerName.charAt(0).toUpperCase()}
+                      </div>
+                      <span class="text-xs text-base-content/70 font-medium truncate">
+                        {tpl.designerName}
+                      </span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-2">
+                      <a
+                        href={`/builder/preview/${tpl.id}`}
+                        class="btn btn-outline btn-sm rounded-xl text-xs font-semibold"
+                      >
+                        👁️ Live Preview
+                      </a>
+                      <a
+                        href={`/builder/${tpl.id}`}
+                        class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm"
+                      >
+                        ✏️ Edit Builder
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>

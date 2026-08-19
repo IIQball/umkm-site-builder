@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-18 by xendit-refactor session
+Status: LIVE · Updated: 2026-08-19 by visual-builder session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,13 +11,17 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete + Documentation Audit complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema aligned with all documentation, and Neon Serverless integration. All documentation files audited and refactored to match final schema (transactions table, JSONB media, correct field names). Ready for Phase 1.2 (BetterAuth authentication).
-
-The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Tailwind/daisyUI/Drizzle/Neon on Cloudflare.
+Visual Template Builder (feature/h2-virda-draft-template) complete. 3-column responsive editor (LayerPanel, Canvas, PropertyInspector) with centralized Svelte `editorStore`, live two-way synchronization, undo/redo history, keyboard shortcuts, instant save API (`/api/builder/save`), and zero-blank SSR rendering. All 7 UMKM default sections fully editable.
 
 ## Last session did
 
-- Documentation Audit & Refactor (main branch, docs only):
+- Visual Template Builder Finalization:
+  - Centralized state management in `src/components/builder/stores/editorStore.ts` with live two-way binding and undo/redo history stack.
+  - Endpoint `POST /api/builder/save` for instant builder config persistence with Zod validation.
+  - Full-height SSR integration in `src/pages/builder/[templateId].astro` passing `initialTemplate` to eliminate blank screen.
+  - Granular PropertyInspector with Content and Styles tabs (Layout Flex/Grid/Align/Justify/Gap, Spacing, Typography & Text Align, Background & Border).
+  - 7 reactive section components in `src/components/builder/sections/`.
+  - Added unit test suites in `tests/api/builder/save.test.ts` and `tests/schemas/template.test.ts`. 100% tests passing.
   - Audited all 21 documentation files against authoritative schema in `src/db/schema.ts`
   - Updated docs/tech/data-model-erd.md: removed `images` and `subdomain_blacklist` tables, updated all references to `transactions` table (externalId instead of transactionId), updated payment status enum, clarified media as JSONB URLs
   - Updated docs/tech/api-spec.md: updated all payment endpoints to use transactions table with externalId, updated template publishing to require price, updated media endpoints to reflect JSONB storage, fixed all status values to match schema

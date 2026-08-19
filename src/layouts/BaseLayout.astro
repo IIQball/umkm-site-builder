@@ -5,9 +5,14 @@ import Navbar from '@/components/common/Navbar.astro';
 interface Props {
   title?: string;
   description?: string;
+  hideNavbar?: boolean;
 }
 
-const { title = 'UMKM Site Builder', description = 'No-code SaaS for Indonesian micro-enterprises' } = Astro.props;
+const {
+  title = 'UMKM Site Builder',
+  description = 'No-code SaaS for Indonesian micro-enterprises',
+  hideNavbar = false,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -26,8 +31,8 @@ const { title = 'UMKM Site Builder', description = 'No-code SaaS for Indonesian 
       document.documentElement.setAttribute('data-theme', theme);
     </script>
   </head>
-  <body>
-    <Navbar />
+  <body class="overflow-x-hidden">
+    {!hideNavbar && <Navbar />}
     <slot />
   </body>
 </html>

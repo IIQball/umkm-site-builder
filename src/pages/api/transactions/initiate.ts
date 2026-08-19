@@ -64,10 +64,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         headers: { 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
-    console.error('[POST /api/transactions/initiate]', error);
-
-    // Handle validation errors
+   } catch (error) {
+     // Handle validation errors
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({

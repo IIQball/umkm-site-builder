@@ -9,25 +9,23 @@ import ThemeToggle from '@/components/common/ThemeToggle.astro';
 
 <nav class="navbar bg-base-100 border-b border-base-200 sticky top-0 z-40 shadow-sm">
   <div class="flex-1">
-    <a href="/" class="btn btn-ghost text-xl font-bold">
-      UMKM Builder
+    <a href="/" class="btn btn-ghost text-xl font-bold gap-2">
+      <span class="text-primary text-2xl">⚡</span>
+      <span>UMKM Builder</span>
     </a>
   </div>
 
   <div class="flex-none gap-2">
     <!-- Navigation Links -->
-    <div class="hidden md:flex gap-1">
+    <div class="hidden md:flex items-center gap-1">
       <a href="/" class="btn btn-ghost btn-sm">
         Beranda
       </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Fitur
+      <a href="/templates" class="btn btn-ghost btn-sm font-medium">
+        Katalog Template
       </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Harga
-      </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Bantuan
+      <a href="/builder/new" class="btn btn-primary btn-sm rounded-xl font-semibold gap-1.5 shadow-sm">
+        <span>🎨 Visual Builder</span>
       </a>
     </div>
 
@@ -45,12 +43,11 @@ import ThemeToggle from '@/components/common/ThemeToggle.astro';
       </button>
       <ul
         tabindex="0"
-        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200"
+        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200 space-y-1"
       >
         <li><a href="/">Beranda</a></li>
-        <li><a href="#">Fitur</a></li>
-        <li><a href="#">Harga</a></li>
-        <li><a href="#">Bantuan</a></li>
+        <li><a href="/templates">Katalog Template</a></li>
+        <li><a href="/builder/new" class="font-semibold text-primary">🎨 Visual Builder</a></li>
       </ul>
     </div>
   </div>

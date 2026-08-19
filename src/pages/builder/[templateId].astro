@@ -1,0 +1,16 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BuilderEditor from '@/components/builder/BuilderEditor.svelte';
+
+const { templateId } = Astro.params;
+
+if (!templateId) {
+  return Astro.redirect('/');
+}
+---
+
+<BaseLayout title="Template Builder" hideNavbar={true}>
+  <div class="h-screen w-full bg-slate-950 overflow-hidden flex flex-col">
+    <BuilderEditor client:only="svelte" {templateId} />
+  </div>
+</BaseLayout>

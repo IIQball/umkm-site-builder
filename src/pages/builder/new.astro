@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import NewTemplateForm from '@/components/builder/NewTemplateForm.svelte';
+---
+
+<BaseLayout title="Buat Template Baru - UMKM Visual Builder" description="Mulai membuat template website UMKM baru">
+  <div class="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 md:p-8">
+    <NewTemplateForm client:load />
+  </div>
+</BaseLayout>

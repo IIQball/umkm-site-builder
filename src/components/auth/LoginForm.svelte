@@ -12,14 +12,19 @@
     loading = true;
 
     try {
-      await authClient.signIn.email({
+      const { error: errResponse } = await authClient.signIn.email({
         email,
         password,
       });
 
+      if (errResponse) {
+        error = errResponse.message || "Gagal masuk";
+        return;
+      }
+
       window.location.href = "/";
     } catch (err: any) {
-      error = err.message || "Gagal masuk";
+      error = err.message || "Terjadi kesalahan sistem";
     } finally {
       loading = false;
     }

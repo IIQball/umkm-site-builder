@@ -25,15 +25,22 @@
     loading = true;
 
     try {
-      await authClient.signUp.email({
+      const { error: errResponse } = await authClient.signUp.email({
         email,
         password,
         name,
       });
 
+      if (errResponse) {
+        error = errResponse.message || "Gagal membuat akun.";
+        return; 
+      }
+
+      // Jika benar-benar sukses, baru arahkan ke beranda
       window.location.href = "/";
+      
     } catch (err: any) {
-      error = err.message || "Gagal membuat akun";
+      error = err.message || "Terjadi kesalahan sistem";
     } finally {
       loading = false;
     }

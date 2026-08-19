@@ -21,21 +21,21 @@ interface ResponseData {
 }
 
 export const POST: APIRoute = async (context): Promise<Response> => {
-   try {
+  try {
      // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
-     const runtimeEnv = ((context.locals as Record<string, unknown>)?.runtime as Record<string, unknown>)?.env as Record<string, string> | undefined;
-     const expectedToken = (
-       runtimeEnv?.XENDIT_WEBHOOK_SECRET ||
-       import.meta.env.XENDIT_WEBHOOK_SECRET ||
-       process.env.XENDIT_WEBHOOK_SECRET ||
-       ''
-     ).trim();
+    const runtimeEnv = ((context.locals as unknown as Record<string, unknown>)?.runtime as Record<string, unknown>)?.env as Record<string, string> | undefined;
+    const expectedToken = (
+      runtimeEnv?.XENDIT_WEBHOOK_SECRET ||
+      import.meta.env.XENDIT_WEBHOOK_SECRET ||
+      process.env.XENDIT_WEBHOOK_SECRET ||
+      ''
+    ).trim();
 
      // Get callback token from header
-     const callbackToken = context.request.headers.get('x-callback-token');
+    const callbackToken = context.request.headers.get('x-callback-token');
 
-     if (!expectedToken) {
-       return new Response(
+    if (!expectedToken) {
+      return new Response(
         JSON.stringify({
           ok: false,
           error: {
@@ -50,8 +50,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-     if (!callbackToken) {
-       return new Response(
+    if (!callbackToken) {
+      return new Response(
         JSON.stringify({
           ok: false,
           error: {
@@ -67,8 +67,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
      // Verify callback token
-     if (callbackToken.trim() !== expectedToken) {
-       return new Response(
+    if (callbackToken.trim() !== expectedToken) {
+      return new Response(
         JSON.stringify({
           ok: false,
           error: {
@@ -79,17 +79,17 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         {
           status: 403,
           headers: { 'Content-Type': 'application/json' },
-       }
-     );
-     }
+      }
+    );
+    }
 
-     // Parse and validate payload
-     const payload = XenditWebhookPayloadSchema.parse(await context.request.json());
+    // Parse and validate payload
+    const payload = XenditWebhookPayloadSchema.parse(await context.request.json());
 
      // Handle Invoice payment callback
-     const isPaid = payload.status === 'PAID' || payload.status === 'SETTLED';
-     
-     if (isPaid) {
+    const isPaid = payload.status === 'PAID' || payload.status === 'SETTLED';
+    
+    if (isPaid) {
 
       // Update transaction status
       await db
@@ -98,9 +98,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           status: 'success',
           paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
           paymentGatewayRef: payload.id,
-         })
-         .where(eq(transactions.externalId, payload.external_id));
-     } else if (payload.status === 'FAILED' || payload.status === 'EXPIRED') {
+        })
+        .where(eq(transactions.externalId, payload.external_id));
+    } else if (payload.status === 'FAILED' || payload.status === 'EXPIRED') {
 
       // Update transaction status to failed/expired
       const failedStatus = payload.status === 'EXPIRED' ? 'expired' : 'failed';
@@ -109,9 +109,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         .set({
           status: failedStatus,
           paymentGatewayRef: payload.id,
-         })
-         .where(eq(transactions.externalId, payload.external_id));
-     }
+        })
+        .where(eq(transactions.externalId, payload.external_id));
+    }
 
      // Return success (200 OK)
     return new Response(
@@ -123,11 +123,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       }
-     );
-   } catch (error) {
+    );
+  } catch (error) {
      // Handle validation errors
-     if (error instanceof z.ZodError) {
-       return new Response(
+    if (error instanceof z.ZodError) {
+      return new Response(
         JSON.stringify({
           ok: false,
           error: {

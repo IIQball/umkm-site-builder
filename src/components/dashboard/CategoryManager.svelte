@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-svelte';
-  import type { SuccessResponse } from '@/types/api';
-
+  
   interface Category {
     id: string;
     name: string;
@@ -236,7 +235,12 @@
           </button>
         </div>
       </div>
-      <div class="modal-backdrop bg-black/50" on:click={() => isModalOpen = false}></div>
+      <button 
+        type="button" 
+        class="modal-backdrop bg-black/50 border-0 cursor-default" 
+        aria-label="Tutup modal"
+        on:click={() => isModalOpen = false}
+      ></button>
     </div>
   {/if}
 </div>

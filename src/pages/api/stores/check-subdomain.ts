@@ -1,22 +1,23 @@
 import type { APIRoute } from 'astro';
 import { db } from '@db/index';
-import { stores, subdomainBlacklist } from '@db/schema';
+import { stores } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { CheckSubdomainInput } from '@lib/stores/schemas';
 import { ZodError } from 'zod';
+
+const SUBDOMAIN_BLACKLIST = new Set([
+  'www', 'api', 'admin', 'app', 'mail', 'smtp', 'ftp', 'ssh',
+  'login', 'register', 'dashboard', 'panel', 'support', 'help',
+  'blog', 'docs', 'status', 'cdn', 'static', 'assets', 'media',
+  'store', 'shop', 'test', 'staging', 'dev', 'demo',
+]);
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const { subdomain } = CheckSubdomainInput.parse(body);
 
-    const [blacklisted] = await db
-      .select({ keyword: subdomainBlacklist.keyword })
-      .from(subdomainBlacklist)
-      .where(eq(subdomainBlacklist.keyword, subdomain))
-      .limit(1);
-
-    if (blacklisted) {
+    if (SUBDOMAIN_BLACKLIST.has(subdomain)) {
       return new Response(
         JSON.stringify({ ok: true, data: { available: false, subdomain } }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },

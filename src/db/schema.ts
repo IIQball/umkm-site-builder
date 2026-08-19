@@ -32,7 +32,7 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  emailVerified: boolean('email_verified').notNull(),
+  emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
 
   role: roleEnum('role').default('tenant').notNull(),
@@ -60,6 +60,7 @@ export const accounts = pgTable('accounts', {
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
+  issuer: text('issuer'),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   expiresAt: timestamp('expires_at'),

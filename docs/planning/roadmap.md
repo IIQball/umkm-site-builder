@@ -13,7 +13,7 @@ Foundation → Core Flow → Quality → Production. Each phase gates the next.
 **Deliverables:**
 - [ ] Project setup (Astro, Svelte, Drizzle, Vitest, Zod)
 - [ ] BetterAuth integration (Google OAuth, email/password, sessions)
-- [ ] Database schema (users, sessions, stores, products, payments, templates, wallets, commissions, images)
+- [ ] Database schema (users, sessions, stores, storeCategories, products, transactions, templates, wallets, commissions, activityLogs, platformSettings)
 - [ ] Xendit integration (payment initiation, webhook verification)
 - [ ] Cloudinary integration (signed uploads, transformations)
 - [ ] Admin registration flow (whitelist, email verification, password setup)
@@ -41,16 +41,16 @@ Foundation → Core Flow → Quality → Production. Each phase gates the next.
 **Goal:** Admin store setup, store rendering, public directory, template builder.
 
 **Deliverables:**
-- [ ] Admin store setup (subdomain validation, blacklist check, JSONB blueprint injection)
+- [ ] Admin store setup (subdomain validation, application-layer reserved keyword check, JSONB blueprint injection)
 - [ ] Store rendering (subdomain routing via host header, Astro SSR, CDN caching)
 - [ ] Public directory (store cards, search, responsive grid)
-- [ ] Product management (tenant CRUD, images per product)
+- [ ] Product management (tenant CRUD, imageUrls JSONB array per product, categoryId support)
 - [ ] Visual template builder (split-screen, live preview, save-on-click)
 - [ ] Template publishing (designer submits, admin approves/rejects)
 - [ ] Template marketplace (published templates visible to tenants)
-- [ ] Template purchase & apply (tenant buys, applies to store via Xendit payment)
+- [ ] Template purchase & apply (tenant buys, applies to store via Xendit payment, transaction type: template_purchase)
 - [ ] WhatsApp redirect (product buy button → wa.me URL with pre-filled order)
-- [ ] Designer wallet setup (commissions auto-calculated, balance tracking)
+- [ ] Designer wallet setup (commissions auto-calculated, balance tracking via wallet_mutations)
 - [ ] Integration tests (all user journeys, error paths)
 - [ ] Permissions tests (generated from matrix, all roles)
 
@@ -80,10 +80,10 @@ Foundation → Core Flow → Quality → Production. Each phase gates the next.
 
 **Deliverables:**
 - [ ] Error handling (all error codes tested, client sees safe messages)
-- [ ] Edge cases (empty states, slow networks, image upload failures, orphan cleanup)
-- [ ] Admin dashboard (payments table, templates table, payouts table, metrics)
-- [ ] Payout flow (designer requests payout, admin triggers Xendit disbursement)
-- [ ] Audit logging (all state changes logged with user ID and timestamp)
+- [ ] Edge cases (empty states, slow networks, image upload failures, media JSONB handling)
+- [ ] Admin dashboard (transactions table, templates table, payout_requests table, metrics)
+- [ ] Payout flow (designer requests payout, admin triggers Xendit disbursement via xenditPayoutId)
+- [ ] Audit logging (all state changes logged to activity_logs with user ID and timestamp)
 - [ ] Caching strategy (CDN cache TTL per route, cache invalidation on updates)
 - [ ] Performance (Lighthouse scores, Core Web Vitals, <1s store render SLA)
 - [ ] Security hardening (secrets audit, permission matrix enforcement, OWASP checks)

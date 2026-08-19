@@ -44,9 +44,9 @@ These are what the review workflow verifies one by one, so write them as checks.
 
 - [ ] Given newly activated tenant, when logging in, then dashboard displays "Payment Required" status with Xendit payment button.
 - [ ] Given tenant clicks pay button, when payment gateway loads, then payment form is pre-filled with activation fee amount (not editable).
-- [ ] Given successful Xendit payment, when webhook received, then payment status updates to "Paid" in database (within 2 seconds).
-- [ ] Given duplicate webhook from Xendit, when second webhook received, then system rejects silently (unique transaction_id constraint prevents double-crediting).
-- [ ] Given payment webhook received, when verified, then Admin dashboard shows notification badge and payment record is visible in audit log.
+- [ ] Given successful Xendit payment, when webhook received, then transaction status updates to "success" in database (within 2 seconds).
+- [ ] Given duplicate webhook from Xendit, when second webhook received, then system rejects silently (unique externalId constraint prevents double-crediting).
+- [ ] Given payment webhook received, when verified, then Admin dashboard shows notification badge and transaction record is visible in audit log.
 - [ ] Given payment fails or times out, when user returns to dashboard, then status remains "Payment Required" and user can retry.
 
 **Out of scope for this story:** Refund flow, manual payment verification, payment plan options.
@@ -64,7 +64,7 @@ These are what the review workflow verifies one by one, so write them as checks.
 **Acceptance criteria**
 
 - [ ] Given paid tenant in Admin dashboard, when Admin clicks "Setup Store", then Admin sees form for Store Name, Subdomain, WhatsApp, Template Selection.
-- [ ] Given Admin enters subdomain (e.g., "kopi-budi"), when checking against blacklist, then system rejects reserved names (www, admin, api, etc.) with clear message.
+- [ ] Given Admin enters subdomain (e.g., "kopi-budi"), when checking against reserved names, then system rejects reserved keywords (www, admin, api, etc.) with clear message (validation done in app layer).
 - [ ] Given valid subdomain, when Admin submits store setup, then system creates store record, injects default JSONB blueprint (Header, Hero, Features, Catalog, Testimonial, FAQ, Footer), and marks store as "Active".
 - [ ] Given store marked Active, when system checks, then store appears in public directory within 5 seconds.
 - [ ] Given Admin submits duplicate subdomain, when validation runs, then system rejects with "Subdomain already in use".
@@ -109,9 +109,9 @@ These are what the review workflow verifies one by one, so write them as checks.
 
 - [ ] Given subdomain `kopi-budi.domain.com` in browser, when request reaches server, then Astro middleware detects subdomain, queries tenant config, and renders store page.
 - [ ] Given tenant store loaded, when page renders, then all JSONB-defined sections (Hero, Catalog, Testimonial, Footer) display correctly.
-- [ ] Given product images in catalog, when rendered, then images are served as WebP (converted by Cloudinary, max 200KB per image).
+- [ ] Given product images in catalog, when rendered, then images are served from Cloudinary URLs (converted to WebP, max 200KB per image).
 - [ ] Given store accessed on mobile and desktop, when viewport changes, then layout reflows responsive (mobile-first design).
-- [ ] Given store with custom colors/fonts from tenant config, when page renders, then CSS variables and theme apply correctly (no hardcoded colors).
+- [ ] Given store with custom colors/fonts from tenant customization JSONB, when page renders, then CSS variables and theme apply correctly (no hardcoded colors).
 - [ ] Given invalid subdomain (not registered), when accessed, then system returns 404 with helpful message (not 500).
 
 **Out of scope for this story:** Cross-tenant cache invalidation, dynamic product updates during load.
@@ -218,9 +218,9 @@ These are what the review workflow verifies one by one, so write them as checks.
 
 **Acceptance criteria**
 
-- [ ] Given Admin in dashboard, when viewing "Payments" tab, then table shows all tenant payments with date, amount, status, tenant name.
-- [ ] Given Admin in dashboard, when viewing "Payouts" tab, then table shows all pending/completed designer payouts with date, amount, status, designer name.
-- [ ] Given payment marked "Paid", when status checked, then status reflects successful Xendit webhook receipt.
+- [ ] Given admin in dashboard, when viewing "Payments" tab, then table shows all tenant transactions (type: store_registration) with date, amount, status, tenant name.
+- [ ] Given admin in dashboard, when viewing "Payouts" tab, then table shows all pending/completed designer payouts with date, amount, status, designer name.
+- [ ] Given transaction marked "success", when status checked, then status reflects successful Xendit webhook receipt.
 - [ ] Given payout request from Designer, when status is "Pending", then Admin can manually trigger payout via Xendit Payouts API.
 - [ ] Given payout triggered, when Xendit confirms, then status updates to "Completed" and Designer is notified.
 - [ ] Given payout fails, when error returned, then Admin sees error reason and can retry.

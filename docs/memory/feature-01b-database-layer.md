@@ -9,19 +9,19 @@ Complete Drizzle ORM schema and Neon PostgreSQL integration with 19 tables, migr
 ### Deliverables
 
 **Database Schema (src/db/schema.ts):**
-- ✓ 8 PostgreSQL enums (role, status, payment types, etc.)
+- ✓ 8 PostgreSQL enums (role, status, transaction types, payment statuses, etc.)
 - ✓ 19 tables with proper relationships:
   - **Auth (4 tables):** users, sessions, accounts, verifications (BetterAuth-compatible)
-  - **Security (2 tables):** admin_whitelist, subdomain_blacklist
-  - **Finance (5 tables):** payments, wallets, wallet_mutations, bank_accounts, payout_requests
+  - **Security (1 table):** admin_whitelist (subdomain validation is app-layer logic)
+  - **Finance (5 tables):** transactions, wallets, wallet_mutations, bank_accounts, payout_requests
   - **Templates (3 tables):** templates, user_templates, commissions
-  - **Stores (2 tables):** stores, products (tenant storefronts)
-  - **Transactions (1 table):** transactions (activation fees + template purchases)
-  - **Media (1 table):** images (Cloudinary references)
+  - **Stores (3 tables):** stores, store_categories, products (tenant storefronts)
+  - **Activity & Config (2 tables):** activity_logs, platform_settings
+  - **Media:** No separate table; stored as JSONB arrays/URLs in products.imageUrls, templates.thumbnailUrl, stores.customization
 - ✓ Complete Drizzle relations (19 relation definitions)
-- ✓ Idempotency via unique constraints (transactionId, payoutId, etc.)
-- ✓ Soft delete support (deletedAt timestamps)
-- ✓ JSONB config columns with version attributes for forward compatibility
+- ✓ Idempotency via unique constraints (externalId on transactions, xenditPayoutId on payout_requests, etc.)
+- ✓ Soft delete support (deletedAt timestamps on products, templates, stores)
+- ✓ JSONB config/customization columns with version attributes for forward compatibility
 - ✓ Foreign keys with proper cascade/restrict policies
 - ✓ Indexes on frequently queried columns (userId, subdomain, status, etc.)
 
@@ -52,36 +52,46 @@ Complete Drizzle ORM schema and Neon PostgreSQL integration with 19 tables, migr
 - Email verifications for password reset/activation
 
 **Financial:**
-- Payments table with Xendit idempotency (unique transactionId)
-- Wallets for designer earning tracking
-- Wallet mutations as immutable ledger (audit trail)
+- Transactions table with unified payment tracking (store_registration and template_purchase types)
+- Transaction idempotency: unique externalId (Xendit invoice number)
+- Payment statuses: pending, success, failed, expired, canceled, refunded (matches Xendit enum)
+- Wallets for designer earning tracking (balance only, no pendingBalance)
+- Wallet mutations as immutable ledger with type (CREDIT|DEBIT) and balanceAfter field (audit trail)
 - Bank accounts with encryption support
-- Payout requests with status tracking
+- Payout requests with xenditPayoutId for idempotency
 
 **Multitenancy:**
 - Stores with unique subdomain per tenant (soft-delete aware)
-- Products organized by store
+- Store categories for product organization
+- Products organized by store and category with imageUrls (JSONB array of Cloudinary URLs)
 - Templates with designer attribution
 - User-template ownership via user_templates junction table
+- Customization stored as JSONB versioned config on stores table
 
 **Media Management:**
-- Images table with Cloudinary provider references
-- Soft delete tracking (deletedAt) for orphan cleanup
-- Dimensions and metadata storage
-- Uploader attribution
+- No separate images/media table in database
+- Media stored as JSONB arrays or external URLs:
+  - products.imageUrls: array of Cloudinary URLs
+  - templates.thumbnailUrl: single Cloudinary URL
+  - stores.customization: JSONB with backgroundImage URLs embedded in sections
+- Soft delete tracking: URLs remain until explicitly removed from JSONB during product/template update
+- No orphan cleanup needed (URLs are references, not stored metadata)
 
 **Data Integrity:**
-- Unique constraints on business identifiers (subdomain, email, transactionId, payoutId)
+- Unique constraints on business identifiers (subdomain, email, externalId on transactions, xenditPayoutId on payout_requests)
 - Foreign keys with appropriate cascade/restrict policies
 - Soft delete support (WHERE deleted_at IS NULL in unique indexes)
 - JSONB versioning for schema migrations
+- Payment idempotency: transactions.externalId prevents duplicate payments from webhook retries
+- Payout idempotency: payout_requests.xenditPayoutId prevents duplicate payouts
 
 ### Architecture Alignment
 
-✓ **Matches docs/tech/data-model-erd.md:** All 30 tables/relationships from spec
-✓ **Matches docs/tech/architecture.md:** G1 decision (Neon Serverless), database driver, schema details
+✓ **Matches docs/tech/data-model-erd.md:** All 19 tables/relationships from spec (no images table, no subdomain_blacklist table)
+✓ **Matches docs/tech/architecture.md:** G1 decision (Neon Serverless), database driver, schema details, media handling (JSONB URLs)
 ✓ **Matches docs/tech/permissions-matrix.md:** Role-based schema (superadmin, admin, designer, tenant)
-✓ **Matches docs/prd/user-stories.md:** All entities needed for 11 user stories
+✓ **Matches docs/prd/user-stories.md:** All entities needed for 11 user stories with correct field names
+✓ **Xendit integration:** transactions table with externalId, paymentGatewayRef, paymentChannel, status enum matching Xendit
 
 ### Migration Strategy
 
@@ -109,6 +119,14 @@ Complete Drizzle ORM schema and Neon PostgreSQL integration with 19 tables, migr
 - `drizzle/meta/*` — Migration metadata
 - `package.json` — Added drizzle-orm, @neondatabase/serverless, drizzle-kit
 - `package-lock.json` — Updated dependencies
+
+Key schema fields per final spec:
+- transactions: externalId (not transactionId), paymentGatewayRef, paymentChannel, type (store_registration|template_purchase)
+- products: basePrice (not price), imageUrls (JSONB array, not imageId)
+- stores: waNumber (not whatsapp_number), customization (not config), no subdomain_blacklist validation
+- templates: thumbnailUrl (not thumbnailId), status (draft|pending|approved|rejected), price stored directly
+- wallets: balance only (no pendingBalance), wallet_mutations type (CREDIT|DEBIT)
+- payout_requests: xenditPayoutId (not payoutId), gatewayReference, gatewayMessage
 
 ## Next steps
 

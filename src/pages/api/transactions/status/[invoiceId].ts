@@ -1,20 +1,21 @@
 /**
- * GET /api/payments/status/[invoiceId]
- * Get current payment status for checkout page
+ * GET /api/transactions/status/[invoiceId]
+ * Get current transaction status for checkout page
  */
 
 import type { APIRoute } from 'astro';
-import { paymentService } from '@/services/payment.service';
+import { transactionService } from '@/services/transaction.service';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface ResponseData {
   ok: boolean;
   data?: {
     invoiceId: string;
-    status: 'pending' | 'completed' | 'failed';
+    status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded';
     amount: number;
     amountFormatted: string;
     paymentMethod?: string;
+    paymentUrl?: string;
   };
   error?: {
     code: string;
@@ -42,16 +43,16 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-    // Get payment details
-    const payment = await paymentService.getPaymentDetails(invoiceId);
+     // Get transaction details
+     const transaction = await transactionService.getTransactionDetails(invoiceId);
 
-    if (!payment) {
+    if (!transaction) {
       return new Response(
         JSON.stringify({
           ok: false,
           error: {
             code: 'NOT_FOUND',
-            message: 'Payment not found',
+            message: 'Transaction not found',
           },
         } as ResponseData),
         {
@@ -61,15 +62,22 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       );
     }
 
+    // Fetch payment URL if pending
+    let paymentUrl: string | undefined;
+    if (transaction.status === 'pending') {
+      paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || undefined;
+    }
+
     return new Response(
       JSON.stringify({
         ok: true,
         data: {
-          invoiceId: payment.metadata?.invoiceId || invoiceId,
-          status: payment.status as 'pending' | 'completed' | 'failed',
-          amount: payment.amount,
-          amountFormatted: formatCurrency(Math.round(payment.amount * 100)),
-          paymentMethod: payment.metadata?.method,
+          invoiceId: transaction.externalId,
+          status: transaction.status,
+          amount: transaction.amount,
+          amountFormatted: formatCurrency(Math.round(transaction.amount * 100)),
+          paymentMethod: transaction.paymentChannel,
+          paymentUrl,
         },
       } as ResponseData),
       {
@@ -78,14 +86,14 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       }
     );
   } catch (error) {
-    console.error('[GET /api/payments/status]', error);
+    console.error('[GET /api/transactions/status]', error);
 
     return new Response(
       JSON.stringify({
         ok: false,
         error: {
           code: 'INTERNAL',
-          message: 'Failed to fetch payment status',
+          message: 'Failed to fetch transaction status',
         },
       } as ResponseData),
       {

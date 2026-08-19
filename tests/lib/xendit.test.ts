@@ -2,18 +2,29 @@
  * Xendit client tests
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { XenditClient } from '@/lib/xendit';
 import crypto from 'node:crypto';
 
 describe('XenditClient', () => {
   let client: XenditClient;
   let mockFetch: any;
+  let consoleErrorSpy: any;
+  let consoleWarnSpy: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     client = new XenditClient();
     mockFetch = vi.spyOn(global, 'fetch' as any);
+    
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   describe('verifyWebhookSignature', () => {

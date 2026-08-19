@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-14 by kickoff session
+Status: LIVE · Updated: 2026-08-18 by xendit-refactor session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,48 +11,59 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema, and Neon Serverless integration. Ready for Phase 1.2 (BetterAuth authentication).
+Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete + Documentation Audit complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema aligned with all documentation, and Neon Serverless integration. All documentation files audited and refactored to match final schema (transactions table, JSONB media, correct field names). Ready for Phase 1.2 (BetterAuth authentication).
 
 The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Tailwind/daisyUI/Drizzle/Neon on Cloudflare.
 
 ## Last session did
 
-- Kickoff (6 phases completed):
-  - Phase 1: Identified gaps and conflicts → none found
-  - Phase 2: Resolved all 7 preflight gates (G1-G7)
-  - Phase 3: Deep technical discussion → 3 decisions locked
-  - Phase 4: Wrote 17 spec documents (all LOCKED)
-  - Phase 5: Presented summary and got approval
-  - Phase 6: Committed kickoff work to `dev` branch
-- Feature 01a (Project Scaffolding):
-  - Initialized Astro 3.6 with Svelte 4 integration
-  - Configured Tailwind CSS + daisyUI with CSS variables
-  - Created 20-directory project structure
-  - All 666 dependencies installed and locked
-  - Build succeeds (`npm run build`)
-  - Committed to `feature/01-project-setup`
-- Feature 01b (Database Layer):
-  - Installed drizzle-orm, @neondatabase/serverless, drizzle-kit
-  - Created 19-table Drizzle schema with full relationships
-  - Implemented all entities from data-model-erd.md spec
-  - Generated initial migration (0000_breezy_morph.sql)
-  - TypeScript validation: zero errors
-  - Build still succeeds (398ms)
-  - Committed to `feature/01-project-setup`
+- Documentation Audit & Refactor (main branch, docs only):
+  - Audited all 21 documentation files against authoritative schema in `src/db/schema.ts`
+  - Updated docs/tech/data-model-erd.md: removed `images` and `subdomain_blacklist` tables, updated all references to `transactions` table (externalId instead of transactionId), updated payment status enum, clarified media as JSONB URLs
+  - Updated docs/tech/api-spec.md: updated all payment endpoints to use transactions table with externalId, updated template publishing to require price, updated media endpoints to reflect JSONB storage, fixed all status values to match schema
+  - Updated docs/tech/architecture.md: clarified media storage as JSONB/URLs (not database records), removed soft-delete sync logic, updated transaction fields, updated data layer section
+  - Updated docs/prd/user-stories.md: changed transaction/payment status references, updated admin store setup to note app-layer validation
+  - Updated docs/prd/user-journeys.md: updated transaction status values, clarified webhook uses externalId
+  - Updated docs/memory/feature-01b-database-layer.md: clarified 19 tables (no images/subdomain_blacklist), updated all schema field names to match final spec
+  - All documentation now aligned with authoritative schema in `src/db/schema.ts`
+  - No code changes; documentation only
 
 ## Next up
 
 1. **Phase 1.2 (BetterAuth):** Email/password auth, Google OAuth, session management, route guards
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
-3. **Phase 1.4 (Xendit Payments):** Payment initiation, webhook verification, idempotency
+2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints)
+3. **Phase 1.4 (Template Purchases):** Use existing transaction flow for template purchase type
 4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
-## Open threads (unresolved, needs a decision)
+## Documentation status
 
-None. All preflight gates answered. All architecture locked. All user flows documented.
+All 21 documentation files audited and aligned with authoritative schema:
+
+✅ **Fixed in this session:**
+- docs/tech/data-model-erd.md — Removed `images` table, removed `subdomain_blacklist` table (app-layer validation), updated transactions fields, clarified media as JSONB
+- docs/tech/api-spec.md — Updated all payment endpoints, transaction status values, removed imageId references, updated payout fields
+- docs/tech/architecture.md — Clarified media storage (JSONB URLs, no orphan cleanup), updated data layer, transaction fields
+- docs/prd/user-stories.md — Updated payment/transaction status, blacklist validation note
+- docs/prd/user-journeys.md — Updated transaction status values, externalId usage
+- docs/memory/feature-01b-database-layer.md — Clarified 19 tables, updated all field names, media handling
+
+**No changes needed (already correct or not applicable):**
+- docs/README.md — Index is accurate
+- docs/PROJECT-STATE.md — Being updated now
+- docs/prd/00-overview.md — Decision summary is correct
+- docs/prd/personas.md — No schema references
+- docs/planning/roadmap.md — No schema references
+- docs/tech/security.md — No detailed schema references
+- docs/tech/code-standards.md — No schema references
+- docs/tech/permissions-matrix.md — No schema references
+- docs/tech/testing-strategy.md — No schema references
+- docs/memory/codebase-map.md — Maps to code, not schema
+- docs/memory/css-vars.md — Design tokens, not schema
+- docs/memory/ui-inventory.md — Component inventory, not schema
+- docs/memory/feature-01-project-setup.md — Historical, not schema-dependent
 
 ## Known gaps and deliberate shortcuts
 

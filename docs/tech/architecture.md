@@ -104,18 +104,32 @@ Stack is locked in `../../AGENTS.md` §3. This file records how it is wired **in
 
 **Reference shape stored in the database:**
 
-```sql
--- columns on images/media table
-provider: 'cloudinary'                      -- always 'cloudinary'
-provider_key: 'v1234/ufmbnca5n4bnab'        -- Cloudinary public_id
-version: 1                                  -- For future provider migration
-dimensions: { width: 1920, height: 1080 }   -- Captured at upload
-alt_text: 'Product photo'                   -- User-provided accessibility
-size_bytes: 201024                          -- Final WebP size
-deleted_at: null                            -- Soft delete timestamp
+Media is stored as JSONB arrays or external URLs (not as separate database records):
+
+```json
+// On products table
+imageUrls: [
+  "https://res.cloudinary.com/..../v1234/product_image.jpg",
+  "https://res.cloudinary.com/..../v1235/product_image2.jpg"
+]
+
+// On templates table
+thumbnailUrl: "https://res.cloudinary.com/..../v1236/template_thumb.jpg"
+
+// On stores customization JSONB
+customization: {
+  "version": 1,
+  "sections": [
+    {
+      "id": "hero_1",
+      "type": "hero",
+      "backgroundImage": "https://res.cloudinary.com/..../v1237/hero_bg.jpg"
+    }
+  ]
+}
 ```
 
-**Variant set:** The defined list of sizes/formats
+**Variant set:** The defined list of sizes/formats for responsive images
 
 | Variant | Use case | Transformation | Cost |
 |---|---|---|---|
@@ -130,12 +144,10 @@ deleted_at: null                            -- Soft delete timestamp
 2. Server generates signed upload URL from Cloudinary (includes auth + folder path)
 3. Client uploads directly to Cloudinary (not through our servers)
 4. Cloudinary returns public_id and metadata
-5. Server saves reference to database (transaction):
-   - If DB save succeeds: done
-   - If DB save fails: immediately call Cloudinary API to delete file (hard delete, rollback)
-6. Client receives confirmation; media is live
-
-**Soft delete sync:** When image record is soft-deleted (deleted_at timestamp set), background job calls Cloudinary API to hard-delete the file (prevents orphans).
+5. Server returns Cloudinary URL to client
+6. Client stores URL in product.imageUrls or template.thumbnailUrl (JSONB)
+7. On product/template save: JSONB is validated and persisted to database
+8. No orphan cleanup needed; URLs are references, not stored metadata
 
 ### G2 detail — icon pack
 
@@ -253,7 +265,10 @@ Rules that govern this: `../../AGENTS.md` §4.
 - **Single path application queries take:** All queries go through Drizzle ORM; no raw SQL except migrations
 - **Two-layer authorization:**
   - Middleware layer (before handler): Validate user is logged in, has correct role
-  - Data layer (inside handler): Drizzle query filtered by `tenant_id`, `user_id`, or `permission` (row-level)
+  - Data layer (inside handler): Drizzle query filtered by `userId`, `storeId`, or `permission` (row-level)
+- **Transactions table:** Unified payment tracking for both `store_registration` and `template_purchase` types
+  - Idempotency: unique constraint on `externalId` (Xendit invoice number)
+  - Status values: `pending`, `success`, `failed`, `expired`, `canceled`, `refunded` (matches Xendit enum)
 - **Migrations:**
   - Generated: `bun run drizzle-kit generate` (compares schema.ts to remote DB)
   - Applied locally: `bun run drizzle-kit push` (Neon branch)
@@ -367,7 +382,7 @@ All logs include: timestamp, tag, operation (verb), result (success/failure), er
 2. **Subdomain routing via host header:** Every store request queries DB. Acceptable because workload is read-heavy and cache hit rate will be high (same tenant visited repeatedly). If SLA violated, migrate to static generation per tenant.
 3. **Builder state is client-side only (no auto-save):** Users can lose work if browser crashes. Accepted trade-off for simplicity. Future: IndexedDB persistence.
 4. **Cloudinary Free Tier credit limit:** Once 25 credits exhausted, all transformations fail silently. Monitoring is critical. Alert Admin when 80% spent.
-5. **Payment idempotency via unique constraint:** If webhook delivery fails after 3 retries, manual intervention required. Acceptable; status quo per payment industry standards.
-6. **Tenant cannot change subdomain after Admin setup:** If business name changes, new subdomain required (breaking change). Document clearly. Future: alias domains.
+5. **Payment idempotency via unique externalId constraint:** If webhook delivery fails after 3 retries, manual intervention required. Acceptable; status quo per payment industry standards.
+6. **Tenant cannot change subdomain after Admin setup:** If business name changes, need new subdomain (breaking change). Document clearly. Future: alias domains.
 7. **No persistent undo/redo in builder:** Each Save overwrites previous version. Acceptable for MVP. Future: version history with revert.
-8. **Soft delete sync is eventual consistent:** If DB soft-delete succeeds but Cloudinary delete API fails, orphan files may accumulate. Monitor and clean up weekly via cron job.
+8. **Media stored as URLs in JSONB:** No orphan cleanup needed because URLs are references only. If Cloudinary file is deleted, URL becomes broken (no database cleanup required).

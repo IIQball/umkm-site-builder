@@ -37,7 +37,7 @@ Example:
 | NOT_FOUND | 404 | no such resource, or not visible to this caller | "Not found" |
 | DUPLICATE_KEY | 409 | unique constraint violated | specific (e.g., "Email already in use") |
 | INVALID_STATE | 400 | resource state does not permit this action | specific (e.g., "Payment already received") |
-| PAYMENT_FAILED | 402 | payment processing failed | specific reason from Xendit |
+| TRANSACTION_FAILED | 402 | transaction processing failed | specific reason from Xendit |
 | INTERNAL | 500 | unexpected server error | "Something went wrong. Try again." |
 
 Adding a code is deliberate. Document it here before using.
@@ -113,35 +113,35 @@ Adding a code is deliberate. Document it here before using.
 
 ---
 
-### `POST /api/payments/initiate`
+### `POST /api/transactions/initiate`
 
-- **Purpose:** Initiate tenant activation payment via Xendit
+- **Purpose:** Initiate tenant activation transaction via Xendit
 - **Auth:** Required (tenant only)
-- **Input:** Zod schema `PaymentInitiateInput`
+- **Input:** Zod schema `TransactionInitiateInput`
 
 | Field | Type | Rules |
 |---|---|---|
 | amount | number | activation fee (hardcoded, must match server fee) |
 
-- **Server-derived:** `transactionId`, `invoiceId` (from Xendit API)
+- **Server-derived:** `externalId`, `invoiceId` (from Xendit API)
 - **Success:** `{ ok: true, data: { invoiceId, paymentUrl } }`
 - **Errors:** VALIDATION_ERROR, INVALID_STATE (already paid), INTERNAL (Xendit API error)
-- **Side effects:** Creates payment record (status: pending); calls Xendit API to create invoice
+- **Side effects:** Creates transaction record (type: store_registration, status: pending); calls Xendit API to create invoice
 - **Rate limit:** 10 per user per hour
 
 ---
 
 ### `POST /api/webhooks/xendit`
 
-- **Purpose:** Receive payment confirmation webhook from Xendit
+- **Purpose:** Receive transaction confirmation webhook from Xendit
 - **Auth:** Verified via XENDIT_WEBHOOK_SECRET signature
 - **Input:** Raw Xendit webhook payload
 
-- **Server-derived:** None (only updates existing payment record)
+- **Server-derived:** None (only updates existing transaction record)
 - **Success:** `{ ok: true, data: {} }`
 - **Errors:** VALIDATION_ERROR (signature invalid), NOT_FOUND (transaction not in DB)
-- **Idempotency:** Unique constraint on `payments.transactionId` prevents double-crediting
-- **Side effects:** Updates payment status (pending → paid); creates wallet for Designer if applicable; sends email to tenant and notification to admin
+- **Idempotency:** Unique constraint on `transactions.externalId` prevents double-crediting
+- **Side effects:** Updates transaction status (pending → success/failed/expired); creates commission and updates designer wallet if applicable; sends email to user and notification to admin
 - **Rate limit:** None (webhook retries from Xendit)
 
 ---
@@ -213,14 +213,17 @@ Adding a code is deliberate. Document it here before using.
 | Field | Type | Rules |
 |---|---|---|
 | storeId | string | tenant's store ID |
+| categoryId | string | store category ID (FK to store_categories) |
 | name | string | 1-200 chars |
 | description | string | 0-2000 chars |
-| price | number | > 0, max 999,999,999 |
-| imageId | string | image ID (already uploaded) |
+| basePrice | number | > 0, in cents, max 999,999,999 |
+| imageUrls | string[] | array of Cloudinary URLs (already uploaded) |
+| variants | object[] | optional product variants (JSONB) |
+| slug | string | URL-safe slug (auto-generated from name if not provided) |
 
-- **Server-derived:** `id`, `createdAt`, `status: active`
-- **Success:** `{ ok: true, data: { productId, name, price } }`
-- **Errors:** VALIDATION_ERROR, NOT_FOUND (store/image), FORBIDDEN (not owner), INVALID_STATE (store not active/paid)
+- **Server-derived:** `id`, `createdAt`, `isAvailable: true`, `sortOrder: 0`
+- **Success:** `{ ok: true, data: { productId, name, basePrice } }`
+- **Errors:** VALIDATION_ERROR, NOT_FOUND (store/category), FORBIDDEN (not owner), INVALID_STATE (store not active/paid)
 - **Side effects:** Creates product; store page is invalidated in cache
 - **Rate limit:** 100 per tenant per day
 
@@ -234,10 +237,11 @@ Adding a code is deliberate. Document it here before using.
 
 | Field | Type | Rules |
 |---|---|---|
-| fileName | string | basename only (no path); checked for valid image ext |
-| contentType | string | image/jpeg, image/png, etc. |
+| fileName | string | basename only (no path); checked for valid image ext (jpg, jpeg, png) |
+| contentType | string | image/jpeg, image/png |
+| altText | string | optional, 0-255 chars (accessibility) |
 
-- **Server-derived:** `signedUrl` (Cloudinary signed request), `publicId` (Cloudinary folder/id)
+- **Server-derived:** `signedUrl` (Cloudinary signed request), `publicId` (Cloudinary public_id)
 - **Success:** `{ ok: true, data: { signedUrl, publicId, maxSize: 5242880 } }`
 - **Errors:** VALIDATION_ERROR (bad filename/type), INTERNAL (Cloudinary API error)
 - **Side effects:** None (just generates URL; actual upload happens client-side to Cloudinary)
@@ -247,31 +251,32 @@ Adding a code is deliberate. Document it here before using.
 
 ### `POST /api/media/confirm-upload`
 
-- **Purpose:** After client uploads to Cloudinary, confirm and store metadata in DB
+- **Purpose:** After client uploads to Cloudinary, confirm and get optimized URL
 - **Auth:** Required (admin, designer, or tenant)
 - **Input:** Zod schema `MediaConfirmInput`
 
 | Field | Type | Rules |
 |---|---|---|
 | publicId | string | returned from Cloudinary |
-| dimensions | object | { width, height } |
+| dimensions | object | { width, height } from Cloudinary response |
 | altText | string | 0-255 chars |
 
-- **Server-derived:** `id`, `provider: cloudinary`, `size_bytes`, `createdAt`
-- **Success:** `{ ok: true, data: { imageId, url } }`
+- **Server-derived:** `url` (Cloudinary CDN URL), `transformedUrls` (thumbnail, card, hero variants)
+- **Success:** `{ ok: true, data: { url, transformedUrls: { thumbnail, card, hero, original }, publicId } }`
 - **Errors:** VALIDATION_ERROR, NOT_FOUND (publicId not found in Cloudinary), INTERNAL
-- **Side effects:** Creates image metadata record in DB; if DB save fails, hard-deletes from Cloudinary (rollback)
+- **Side effects:** No database write; metadata stored in request context only. Images are stored as URLs in product.imageUrls or template.thumbnailUrl JSONB
 - **Rate limit:** 50 per user per hour
 
 ---
 
-### `DELETE /api/media/[imageId]`
+### `DELETE /api/media/[publicId]`
 
-- **Purpose:** Delete image (soft delete in DB, hard delete in Cloudinary)
+- **Purpose:** Delete image from Cloudinary (hard delete immediately)
 - **Auth:** Required (admin, uploader, or store owner if product image)
+- **Input:** `publicId` in URL path
 - **Success:** `{ ok: true, data: { message: "Image deleted" } }`
-- **Errors:** NOT_FOUND, FORBIDDEN (not uploader/owner)
-- **Side effects:** Sets `deleted_at` timestamp; queues async Cloudinary deletion (may retry if API fails)
+- **Errors:** NOT_FOUND, FORBIDDEN (not uploader/owner), INTERNAL (Cloudinary API error)
+- **Side effects:** Calls Cloudinary API to hard-delete file; removes URL from product.imageUrls or template.thumbnailUrl in subsequent updates
 - **Rate limit:** 50 per user per hour
 
 ---
@@ -317,11 +322,15 @@ Adding a code is deliberate. Document it here before using.
 
 - **Purpose:** Designer submits template for approval
 - **Auth:** Required (designer), ownership, state (draft)
-- **Input:** None
+- **Input:** Zod schema `TemplatePublishInput` with `price` (in cents)
 
-- **Success:** `{ ok: true, data: { templateId, status: 'pending_approval' } }`
-- **Errors:** FORBIDDEN, INVALID_STATE (not draft or already published)
-- **Side effects:** Sets status to pending_approval; notifies admin (email); sends confirmation to designer
+| Field | Type | Rules |
+|---|---|---|
+| price | number | > 0, immutable once published |
+
+- **Success:** `{ ok: true, data: { templateId, status: 'pending', price } }`
+- **Errors:** FORBIDDEN, INVALID_STATE (not draft), VALIDATION_ERROR (invalid price)
+- **Side effects:** Sets status to pending, stores price; notifies admin (email); sends confirmation to designer
 - **Rate limit:** 50 per designer per day
 
 ---
@@ -329,13 +338,13 @@ Adding a code is deliberate. Document it here before using.
 ### `POST /api/admin/templates/[templateId]/approve`
 
 - **Purpose:** Admin approves template for publication
-- **Auth:** Required (admin), state (pending_approval)
+- **Auth:** Required (admin), state (pending)
 - **Input:** None
 
-- **Success:** `{ ok: true, data: { templateId, status: 'published', publishedAt } }`
+- **Success:** `{ ok: true, data: { templateId, status: 'approved' } }`
 - **Errors:** NOT_FOUND, FORBIDDEN, INVALID_STATE
-- **Side effects:** Sets status to published; sends email to designer; template appears in marketplace
-- **Audit:** Logged with admin ID, template ID, action
+- **Side effects:** Sets status to approved; sends email to designer; template appears in marketplace
+- **Audit:** Logged with admin ID, template ID, action, timestamp
 - **Rate limit:** None (admin action, low frequency)
 
 ---
@@ -343,17 +352,17 @@ Adding a code is deliberate. Document it here before using.
 ### `POST /api/admin/templates/[templateId]/reject`
 
 - **Purpose:** Admin rejects template with reason
-- **Auth:** Required (admin), state (pending_approval)
+- **Auth:** Required (admin), state (pending)
 - **Input:** Zod schema `TemplateRejectInput`
 
 | Field | Type | Rules |
 |---|---|---|
-| reason | string | 1-500 chars |
+| rejectionReason | string | 1-500 chars |
 
-- **Success:** `{ ok: true, data: { templateId, status: 'rejected' } }`
+- **Success:** `{ ok: true, data: { templateId, status: 'rejected', rejectionReason } }`
 - **Errors:** VALIDATION_ERROR, NOT_FOUND, INVALID_STATE
-- **Side effects:** Sets status to rejected; sends email to designer with reason
-- **Audit:** Logged with admin ID, template ID, reason
+- **Side effects:** Sets status to rejected, stores rejectionReason; sends email to designer with reason
+- **Audit:** Logged with admin ID, template ID, reason, timestamp
 - **Rate limit:** None (admin action)
 
 ---
@@ -361,18 +370,18 @@ Adding a code is deliberate. Document it here before using.
 ### `POST /api/tenant/templates/[templateId]/purchase`
 
 - **Purpose:** Tenant purchases a template; initiates payment via Xendit
-- **Auth:** Required (tenant), state (template published)
+- **Auth:** Required (tenant), state (template approved)
 - **Input:** Zod schema `TemplatePurchaseInput`
 
 | Field | Type | Rules |
 |---|---|---|
-| templateId | string | published template ID |
-| storeId | string | tenant's store ID |
+| templateId | string | approved template ID |
+| storeId | string | tenant's store ID (optional, for context) |
 
-- **Server-derived:** `transactionId`, `invoiceId`
-- **Success:** `{ ok: true, data: { invoiceId, paymentUrl } }`
-- **Errors:** VALIDATION_ERROR, NOT_FOUND, INVALID_STATE (template not published)
-- **Side effects:** Creates transaction record (status: pending); calls Xendit API; sends confirmation email
+- **Server-derived:** `externalId`, `invoiceId` (from Xendit)
+- **Success:** `{ ok: true, data: { invoiceId, paymentUrl, amount } }`
+- **Errors:** VALIDATION_ERROR, NOT_FOUND, INVALID_STATE (template not approved)
+- **Side effects:** Creates transaction record (type: template_purchase, status: pending); calls Xendit API; sends confirmation email
 - **Rate limit:** 50 per tenant per hour
 
 ---
@@ -405,15 +414,15 @@ Adding a code is deliberate. Document it here before using.
 ### `POST /api/designer/payouts/request`
 
 - **Purpose:** Designer requests payout
-- **Auth:** Required (designer), state (pendingBalance > 0)
+- **Auth:** Required (designer), state (wallet.balance > payoutMinimumBalance)
 - **Input:** Zod schema `PayoutRequestInput`
 
 | Field | Type | Rules |
 |---|---|---|
-| bankAccountId | string | designer's registered bank account |
-| amount | number | > 0, <= wallet.pendingBalance |
+| bankAccountId | string | designer's registered bank account ID |
+| amount | number | > 0, <= wallet.balance, >= payoutMinimumBalance |
 
-- **Server-derived:** `id`, `status: pending`, `requestedAt`
+- **Server-derived:** `id`, `status: pending`, `createdAt`
 - **Success:** `{ ok: true, data: { payoutRequestId, amount, status: 'pending' } }`
 - **Errors:** VALIDATION_ERROR, NOT_FOUND (account), FORBIDDEN (not owner), INVALID_STATE (insufficient balance)
 - **Side effects:** Creates payout_requests record; notifies admin (email/dashboard badge)
@@ -427,10 +436,10 @@ Adding a code is deliberate. Document it here before using.
 - **Auth:** Required (admin), state (pending)
 - **Input:** None
 
-- **Success:** `{ ok: true, data: { payoutRequestId, status: 'processing', payoutId } }`
+- **Success:** `{ ok: true, data: { payoutRequestId, status: 'processing', xenditPayoutId } }`
 - **Errors:** NOT_FOUND, INVALID_STATE, INTERNAL (Xendit API error)
-- **Side effects:** Calls Xendit Payouts API; sets status to processing; sends email to designer
-- **Audit:** Logged
+- **Side effects:** Calls Xendit Payouts API; sets status to processing, stores xenditPayoutId; sends email to designer
+- **Audit:** Logged with admin ID, payout ID, xendit reference, timestamp
 - **Rate limit:** None (admin action)
 
 ---
@@ -442,7 +451,7 @@ Adding a code is deliberate. Document it here before using.
 | POST /api/auth/login | 5 | 15 min | Brute-force protection |
 | POST /api/auth/register | 5 | 1 hour | Spam prevention |
 | POST /api/auth/verify-email | 3 | per token | Link misuse prevention |
-| POST /api/payments/initiate | 10 | 1 hour | Prevent accidental duplication |
+| POST /api/transactions/initiate | 10 | 1 hour | Prevent accidental duplication |
 | POST /api/media/upload-signed-url | 50 | 1 hour | Prevent abuse |
 | POST /api/media/confirm-upload | 50 | 1 hour | Prevent abuse |
 | POST /api/designer/templates/*/save | 100 | 1 hour | Live save during editing |
@@ -473,28 +482,30 @@ Invalid input returns VALIDATION_ERROR with field-level messages.
 
 ## 6. Idempotency
 
-**Payment webhooks:** Unique constraint on `transactionId` prevents double-crediting if webhook is retried.
+**Payment webhooks:** Unique constraint on `transactions.externalId` prevents double-crediting if webhook is retried.
 
-**Payout requests:** Similar constraint on `payoutId`.
+**Payout requests:** Unique constraint on `payout_requests.xenditPayoutId` prevents duplicate payouts.
 
 **Safe to retry (idempotent):**
-- POST /api/payments/initiate (if same amount/user, returns same invoiceId)
-- POST /api/media/confirm-upload (if same publicId, returns same imageId)
-- POST /api/webhooks/xendit (retries are harmless due to unique constraints)
+- POST /api/payments/initiate (if same amount/user, returns same invoiceId via externalId lookup)
+- POST /api/webhooks/xendit (retries are harmless due to unique externalId constraint)
+- POST /api/admin/stores/setup (idempotent via subdomain uniqueness)
 
 **Not safe to retry (avoid retrying):**
-- POST /api/designer/templates/*/publish (changes state each time)
-- POST /api/admin/stores/setup (creates new store each time)
+- POST /api/designer/templates/*/publish (changes state, sets price)
+- POST /api/tenant/templates/*/purchase (creates new transaction each time)
 
 ---
 
 ## 7. Server-derived values (never trust client)
 
-- `userId`, `createdAt`, `updatedAt`
-- `price` (for purchases; snapshot from template)
-- `commission` amount (calculated from transaction price)
+- `userId`, `createdAt`, `updatedAt`, `deletedAt`
+- `externalId` (Xendit invoice number, generated server-side)
 - `status` (set by system logic, not client input)
-- `transactionId` (generated or verified from provider)
+- `commissions` amount (calculated from transaction.amount and platformFeePercentage)
+- `balanceAfter` (wallet balance after mutation, computed from ledger)
 - Session data (role, permissions)
+- `slug` (URL-safe identifier, auto-generated from name if not provided)
+- `transformedUrls` (Cloudinary variant URLs, generated server-side)
 
 Always re-derive or fetch from DB; never echo client input back as if it were authoritative.

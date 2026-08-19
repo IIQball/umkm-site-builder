@@ -1,0 +1,52 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SubdomainInput from '@/components/onboarding/SubdomainInput.svelte';
+---
+
+<BaseLayout title="Pilih Subdomain - UMKM Site Builder">
+  <div class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+    <div class="max-w-md w-full bg-base-100 rounded-box shadow-xl p-8">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-base-content mb-2">Pilih Alamat Toko</h1>
+        <p class="text-base-content/70">
+          Tentukan subdomain unik untuk toko online Anda. Alamat ini akan digunakan pelanggan untuk mengunjungi toko Anda.
+        </p>
+      </div>
+
+      <form onsubmit="event.preventDefault()" class="flex flex-col gap-6">
+        <SubdomainInput client:load onValid={(val) => { console.log('Valid subdomain selected:', val) }} />
+        
+        <div class="flex flex-col gap-2">
+          <button type="submit" class="btn btn-primary w-full" id="btn-continue" disabled>
+            Lanjutkan
+          </button>
+          <a href="/" class="btn btn-ghost w-full">Kembali</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Enable/disable the continue button based on validation state
+    // We listen for a custom event from the svelte component, or simply poll the DOM (since SubdomainInput uses class:input-success)
+    
+    // Better approach: listen for DOM mutations on the input to check if it has 'input-success' class
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-continue') as HTMLButtonElement;
+      const input = document.getElementById('subdomain-input') as HTMLInputElement;
+      
+      if (!input || !btn) return;
+      
+      // Simple mutation observer to check when input gets input-success class
+      const observer = new MutationObserver(() => {
+        if (input.classList.contains('input-success')) {
+          btn.disabled = false;
+        } else {
+          btn.disabled = true;
+        }
+      });
+      
+      observer.observe(input, { attributes: true, attributeFilter: ['class'] });
+    });
+  </script>
+</BaseLayout>

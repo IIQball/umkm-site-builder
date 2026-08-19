@@ -15,14 +15,14 @@ vi.mock('@/lib/xendit', () => ({
   },
 }));
 
-// Mock database
+// Mock database - must mock before any imports
 vi.mock('@/lib/db/client', () => {
   const mockDb = {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
   };
-  return { db: mockDb };
+  return { db: mockDb, getDb: () => mockDb };
 });
 
 describe('TransactionService', () => {

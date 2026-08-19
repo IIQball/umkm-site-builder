@@ -1,77 +1,198 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import CategoryManager from '@/components/dashboard/CategoryManager.svelte';
-import { LayoutDashboard, Package, Tag, Settings, LogOut } from 'lucide-svelte';
+import DashboardLayout from '../../layouts/BaseLayout.astro';
+import { db } from '../../db';
+import { stores, storeCategories } from '../../db/schema';
+import { isNull, eq } from 'drizzle-orm';
+
+const allStores = await db.select().from(stores).where(isNull(stores.deletedAt));
+
+const allCategories = await db
+  .select({
+    id: storeCategories.id,
+    name: storeCategories.name,
+    slug: storeCategories.slug,
+    storeName: stores.name,
+    storeId: stores.id
+  })
+  .from(storeCategories)
+  .leftJoin(stores, eq(storeCategories.storeId, stores.id))
+  .where(isNull(storeCategories.deletedAt));
 ---
-
-<BaseLayout title="Manajemen Kategori - Dashboard">
-  <div class="drawer lg:drawer-open min-h-screen bg-base-200">
-    <input id="dashboard-drawer" type="checkbox" class="drawer-toggle" />
+<DashboardLayout title="Kategori Produk">
+  <div class="p-6 bg-[var(--color-card-base)] text-[var(--color-text-main)] border border-[var(--color-border)] rounded-lg">
+    <h1 class="text-2xl font-bold mb-4 text-[var(--color-text-main)]">Manajemen Kategori</h1>
+    <button id="addBtn" class="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-4 py-2 rounded">Tambah Kategori</button>
     
-    <!-- Sidebar -->
-    <div class="drawer-side z-20">
-      <label for="dashboard-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-      <div class="menu p-4 w-80 min-h-full bg-base-100 text-base-content flex flex-col">
-        <div class="px-4 py-6 mb-4">
-          <h1 class="text-2xl font-bold text-primary flex items-center gap-2">
-            <LayoutDashboard size={24} />
-            UMKM Builder
-          </h1>
-        </div>
-        
-        <ul class="space-y-1 flex-1">
-          <li>
-            <a href="/tenant/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-base-200">
-              <LayoutDashboard size={20} />
-              Dashboard
-            </a>
-          </li>
-          <li>
-            <a href="/dashboard/products" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-base-200">
-              <Package size={20} />
-              Produk
-            </a>
-          </li>
-          <li>
-            <a href="/dashboard/categories" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-primary-content">
-              <Tag size={20} />
-              Kategori
-            </a>
-          </li>
-          <li>
-            <a href="/tenant/builder" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-base-200">
-              <Settings size={20} />
-              Store Builder
-            </a>
-          </li>
-        </ul>
+      <table class="w-full mt-4 border border-[var(--color-border)]">
+      <thead>
+        <tr class="text-[var(--color-text-secondary)]">
+          <th class="border-b border-[var(--color-border)] p-2 text-left">Nama Kategori</th>
+          <th class="border-b border-[var(--color-border)] p-2 text-left">Store</th>
+          <th class="border-b border-[var(--color-border)] p-2 text-center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="categoryTable">
+        {allCategories.map(cat => (
+          <tr>
+            <td class="border-b border-[var(--color-border)] p-2">{cat.name}</td>
+            <td class="border-b border-[var(--color-border)] p-2">{cat.storeName}</td>
+            <td class="border-b border-[var(--color-border)] p-2 text-center">
+              <button 
+                class="edit-btn bg-[var(--color-warning)] text-white px-2 py-1 rounded mr-1"
+                data-id={cat.id}
+                data-name={cat.name}
+                data-slug={cat.slug}
+                data-storeid={cat.storeId}
+              >
+                Edit
+              </button>
+              <button 
+                class="btn-delete bg-[var(--color-error)] text-white px-2 py-1 rounded"
+                data-id={cat.id}
+              >
+                Hapus
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
-        <div class="mt-auto border-t border-base-200 pt-4">
-          <button class="btn btn-ghost w-full justify-start gap-3 text-error">
-            <LogOut size={20} />
-            Keluar
-          </button>
-        </div>
+  </div>
+
+  <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-[var(--color-card-base)] p-6 rounded shadow-lg w-96 text-[var(--color-text-main)] border border-[var(--color-border)]">
+      <h2 class="text-xl font-bold mb-4">Konfirmasi Hapus</h2>
+      <p class="mb-6">Apakah Anda yakin ingin menghapus kategori ini?</p>
+      <div class="flex justify-end gap-2">
+        <button id="cancelDelete" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+        <button id="btnConfirmDelete" class="bg-[var(--color-error)] text-white px-4 py-2 rounded">Hapus</button>
       </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="drawer-content flex flex-col">
-      <!-- Navbar (Mobile) -->
-      <div class="navbar bg-base-100 lg:hidden shadow-sm">
-        <div class="flex-none">
-          <label for="dashboard-drawer" class="btn btn-square btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-          </label>
-        </div>
-        <div class="flex-1">
-          <a class="btn btn-ghost normal-case text-xl">Dashboard</a>
-        </div>
-      </div>
-
-      <main class="p-6 md:p-8 max-w-6xl mx-auto w-full">
-        <CategoryManager client:load />
-      </main>
     </div>
   </div>
-</BaseLayout>
+
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-[var(--color-card-base)] p-6 rounded shadow-lg w-96 text-[var(--color-text-main)] border border-[var(--color-border)]">
+      <h2 id="modalTitle" class="text-xl font-bold mb-4">Tambah Kategori</h2>
+      <form id="categoryForm">
+        <input type="hidden" name="id" id="categoryId" />
+        <div class="mb-4">
+          <label>Store</label>
+          <select name="storeId" id="storeSelect" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" required>
+            <option value="">Pilih Store</option>
+            {allStores.map(store => (
+              <option value={store.id}>{store.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="mb-4">
+          <label>Nama Kategori</label>
+          <input type="text" name="name" id="categoryName" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" required />
+        </div>
+        <div class="mb-4 hidden">
+          <label>Slug</label>
+          <input type="text" name="slug" id="categorySlug" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" />
+        </div>
+        <button type="submit" class="bg-[var(--color-primary)] text-white px-4 py-2 rounded">Simpan</button>
+        <button type="button" id="closeModal" class="ml-2 px-4 py-2 rounded bg-gray-500 text-white">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const addBtn = document.getElementById('addBtn');
+    const closeModal = document.getElementById('closeModal');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const btnConfirmDelete = document.getElementById('btnConfirmDelete') as HTMLButtonElement | null;
+    const categoryForm = document.getElementById('categoryForm') as HTMLFormElement | null;
+    const modalTitle = document.getElementById('modalTitle');
+    let deleteId: string | null = null;
+
+    const categoryName = document.getElementById('categoryName') as HTMLInputElement | null;
+    const categorySlug = document.getElementById('categorySlug') as HTMLInputElement | null;
+
+    const slugify = (text: string) => text
+      .toString().toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+
+    if (categoryName && categorySlug) {
+      categoryName.addEventListener('input', () => {
+        categorySlug.value = slugify(categoryName.value);
+      });
+    }
+
+    const openModal = (mode: 'add' | 'edit', data?: any) => {
+      if (!modal || !categoryForm || !modalTitle) return;
+      categoryForm.reset();
+      (document.getElementById('categoryId') as HTMLInputElement).value = '';
+      if (mode === 'edit' && data) {
+        modalTitle.innerText = 'Edit Kategori';
+        (document.getElementById('categoryId') as HTMLInputElement).value = data.id;
+        (document.getElementById('storeSelect') as HTMLSelectElement).value = data.storeid;
+        (document.getElementById('categoryName') as HTMLInputElement).value = data.name;
+        (document.getElementById('categorySlug') as HTMLInputElement).value = data.slug;
+      } else {
+        modalTitle.innerText = 'Tambah Kategori';
+      }
+      modal.classList.remove('hidden');
+    };
+
+    if (addBtn) addBtn.onclick = () => openModal('add');
+    if (closeModal && modal) closeModal.onclick = () => modal.classList.add('hidden');
+    if (cancelDelete && deleteModal) cancelDelete.onclick = () => deleteModal.classList.add('hidden');
+
+    if (btnConfirmDelete) {
+      btnConfirmDelete.onclick = async () => {
+        if (!deleteId) return;
+        btnConfirmDelete.innerText = 'Menghapus...';
+        try {
+          const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
+          if (res.ok) window.location.reload();
+          else alert('Gagal menghapus');
+        } catch (err) { alert('Kesalahan koneksi'); }
+        deleteModal?.classList.add('hidden');
+        btnConfirmDelete.innerText = 'Hapus';
+      };
+    }
+    
+    document.addEventListener('click', async (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('edit-btn')) openModal('edit', target.dataset);
+      if (target.closest('.btn-delete')) {
+        deleteId = (target.closest('.btn-delete') as HTMLElement).dataset.id || null;
+        deleteModal?.classList.remove('hidden');
+      }
+    });
+
+    if (categoryForm) {
+      categoryForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const data = Object.fromEntries(formData.entries());
+        try {
+          const response = await fetch('/api/categories', {
+            method: data.id ? 'PATCH' : 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            alert(result.error || 'Terjadi kesalahan internal');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan jaringan');
+        }
+      };
+    }
+  </script>
+</DashboardLayout>

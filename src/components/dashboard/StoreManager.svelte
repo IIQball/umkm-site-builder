@@ -205,7 +205,7 @@
           </button>
         </div>
       </form>
-    {:else}
+    {:else if initialData}
       <!-- Read-Only View -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
         <div>
@@ -233,6 +233,10 @@
             <p class="text-base font-medium text-base-content/40 italic">Belum diatur</p>
           {/if}
         </div>
+      </div>
+    {:else}
+      <div class="py-6 text-center text-base-content/60">
+        <p>Belum ada data toko.</p>
       </div>
     {/if}
   </div>

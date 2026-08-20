@@ -106,3 +106,12 @@ export function isActive(user: AuthenticatedUser | null): boolean {
 export function isAuthorizedDesigner(user: AuthenticatedUser | null): boolean {
   return isActive(user) && isDesigner(user);
 }
+
+export function isAdmin(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'superadmin';
+}
+
+export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
+  return isActive(user) && isAdmin(user);
+}

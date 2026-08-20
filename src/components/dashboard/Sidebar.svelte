@@ -13,7 +13,7 @@
   const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
     if (role === 'designer') return [
       { label: 'Dashboard',          href: '/dashboard',          icon: 'dashboard' },
-      { label: 'Template Saya',      href: '/templates',          icon: 'grid_view' },
+      { label: 'Template Saya',      href: '/designer/templates', icon: 'grid_view' },
       { label: 'Buat Template',      href: '/builder/new',        icon: 'add_circle' },
       { label: 'Dompet',             href: '/designer/wallet',    icon: 'account_balance_wallet' },
     ];
@@ -26,6 +26,7 @@
     if (role === 'admin' || role === 'superadmin') return [
       { label: 'Overview',           href: '/dashboard',          icon: 'monitoring' },
       { label: 'Kurasi Template',    href: '/admin/templates',    icon: 'palette' },
+      { label: 'Pengaturan Komisi',  href: '/admin/settings',     icon: 'settings' },
       { label: 'Manajemen User',     href: '/admin/users',        icon: 'group' },
       { label: 'Transaksi',          href: '/admin/transactions', icon: 'receipt_long' },
     ];

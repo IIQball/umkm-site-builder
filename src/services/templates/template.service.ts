@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc } from 'drizzle-orm';
+import { eq, isNull, desc, and } from 'drizzle-orm';
 import type { PublicTemplateItem } from '@/types';
 
 export type { PublicTemplateItem };
@@ -21,7 +21,12 @@ export async function getPublicTemplates(): Promise<PublicTemplateItem[]> {
       .from(templates)
       .leftJoin(designers, eq(templates.designerId, designers.userId))
       .leftJoin(users, eq(designers.userId, users.id))
-      .where(isNull(templates.deletedAt))
+      .where(
+        and(
+          isNull(templates.deletedAt),
+          eq(templates.status, 'approved')
+        )
+      )
       .orderBy(desc(templates.createdAt));
 
     return records.map((r) => ({

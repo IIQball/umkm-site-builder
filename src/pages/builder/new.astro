@@ -19,13 +19,13 @@ if (!user || !isAuthorizedDesigner(user)) {
   <nav class="flex items-center gap-1.5 text-xs text-base-content/50 mb-6" aria-label="Breadcrumb">
     <a href="/dashboard" class="hover:text-base-content transition-colors">Dashboard</a>
     <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-    <a href="/templates" class="hover:text-base-content transition-colors">Template Saya</a>
+    <a href="/designer/templates" class="hover:text-base-content transition-colors">Template Saya</a>
     <span class="material-symbols-outlined text-[14px]">chevron_right</span>
     <span class="text-base-content font-medium">Buat Baru</span>
   </nav>
 
   <!-- Center the form in the content area -->
   <div class="flex justify-center">
-    <NewTemplateForm client:load backHref="/templates" />
+    <NewTemplateForm client:load backHref="/designer/templates" />
   </div>
 </DashboardLayout>

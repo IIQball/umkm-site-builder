@@ -1,8 +1,23 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getPublicTemplates } from '@/services';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { userTemplates } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import TemplateCardAction from '@/components/marketplace/TemplateCardAction.svelte';
 
 export const prerender = false;
+
+const currentUser = await getAuthenticatedUser(Astro.request);
+const ownedTemplateIds = currentUser
+  ? (
+      await db
+        .select({ templateId: userTemplates.templateId })
+        .from(userTemplates)
+        .where(eq(userTemplates.userId, currentUser.id))
+    ).map((ut) => ut.templateId)
+  : [];
 
 const templatesList = await getPublicTemplates();
 
@@ -54,16 +69,6 @@ const getStatusBadge = (status: string) => {
             Pilih desain landing page dan toko online profesional siap pakai untuk memaksimalkan konversi penjualan bisnis lokal Anda.
           </p>
         </div>
-
-        <div class="flex items-center gap-3">
-          <a
-            href="/builder/new"
-            class="btn btn-primary rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 gap-2 px-5"
-          >
-            <span class="material-symbols-outlined text-[18px]">add</span>
-            <span>Buat Template Baru</span>
-          </a>
-        </div>
       </div>
 
       <!-- Templates Grid -->
@@ -73,17 +78,15 @@ const getStatusBadge = (status: string) => {
             <span class="material-symbols-outlined text-2xl">layers</span>
           </div>
           <h3 class="text-base font-bold text-base-content mb-1">Belum Ada Template Terdaftar</h3>
-          <p class="text-xs text-base-content/60 mb-5">
-            Jadilah yang pertama membuat dan mempublikasikan template website UMKM di platform ini.
+          <p class="text-xs text-base-content/60">
+            Saat ini belum ada template yang tersedia di katalog.
           </p>
-          <a href="/builder/new" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold">
-            Mulai Buat Template
-          </a>
         </div>
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {templatesList.map((tpl) => {
             const badge = getStatusBadge(tpl.status);
+            const isDesigner = currentUser?.role === 'designer';
             return (
               <div class="card bg-base-100 border border-base-200/80 hover:border-blue-500/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group">
                 <!-- Thumbnail / Header Preview -->
@@ -141,22 +144,24 @@ const getStatusBadge = (status: string) => {
                       </span>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="grid grid-cols-2 gap-2">
+                     <!-- Action Buttons -->
+                    <div class="flex flex-col gap-2 pt-1">
                       <a
                         href={`/builder/preview/${tpl.id}`}
-                        class="btn btn-outline border-base-300 hover:bg-base-200 btn-sm rounded-xl text-xs font-medium flex items-center justify-center gap-1"
+                        class="btn btn-outline border-base-300 hover:bg-base-200 btn-sm rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 w-full"
                       >
-                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                        <span>Preview</span>
+                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                        <span>Pratinjau Langsung</span>
                       </a>
-                      <a
-                        href={`/builder/${tpl.id}`}
-                        class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm flex items-center justify-center gap-1"
-                      >
-                        <span class="material-symbols-outlined text-[15px]">edit</span>
-                        <span>Edit</span>
-                      </a>
+                      {!isDesigner && (
+                        <TemplateCardAction
+                          client:load
+                          templateId={tpl.id}
+                          price={tpl.price}
+                          isOwned={ownedTemplateIds.includes(tpl.id)}
+                          isLoggedIn={!!currentUser}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

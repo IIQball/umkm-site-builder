@@ -1,0 +1,30 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import CommissionSettingsPanel from '@/components/admin/CommissionSettingsPanel.svelte';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { platformSettings } from '@/db/schema';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (!isAuthorizedAdmin(user)) {
+  return Astro.redirect('/dashboard');
+}
+
+let initialFeePercentage = 30;
+try {
+  const records = await db.select().from(platformSettings).limit(1);
+  if (records.length > 0 && typeof records[0].platformFeePercentage === 'number') {
+    initialFeePercentage = records[0].platformFeePercentage;
+  }
+} catch {
+  initialFeePercentage = 30;
+}
+---
+
+<DashboardLayout title="Pengaturan Komisi" breadcrumb="Admin / Pengaturan Komisi">
+  <CommissionSettingsPanel client:load {initialFeePercentage} />
+</DashboardLayout>

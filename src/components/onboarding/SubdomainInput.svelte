@@ -18,15 +18,15 @@
 
   $: isSubmittable = status === 'available' && submitStatus !== 'submitting';
 
-  function validateLocally(input: string): string | null {
+  const validateLocally = (input: string): string | null => {
     if (input.length < MIN_LENGTH) return `Minimal ${MIN_LENGTH} karakter`;
     if (input.length > MAX_LENGTH) return `Maksimal ${MAX_LENGTH} karakter`;
     if (!SUBDOMAIN_PATTERN.test(input)) return 'Hanya huruf kecil, angka, dan tanda hubung';
     if (input.startsWith('-') || input.endsWith('-')) return 'Tidak boleh diawali/diakhiri tanda hubung';
     return null;
-  }
+  };
 
-  async function checkAvailability(subdomain: string) {
+  const checkAvailability = async (subdomain: string) => {
     status = 'checking';
     message = '';
 
@@ -61,9 +61,9 @@
       status = 'error';
       message = 'Gagal memeriksa ketersediaan';
     }
-  }
+  };
 
-  function onInput(e: Event) {
+  const onInput = (e: Event) => {
     const raw = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     value = raw;
     submitStatus = 'idle';
@@ -87,9 +87,9 @@
     status = 'typing';
     message = '';
     debounceTimer = setTimeout(() => checkAvailability(value), DEBOUNCE_MS);
-  }
+  };
 
-  async function registerSubdomain() {
+  const registerSubdomain = async () => {
     if (!isSubmittable) return;
 
     submitStatus = 'submitting';

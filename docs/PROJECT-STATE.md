@@ -11,21 +11,24 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Core Financial Engine & Ledger implemented. Dynamic commission calculator configured from platformSettings (fallback 30%). Full designer wallet credit/debit with immutable ledger mutations (`walletMutations`). Post-payment webhook fulfillment automatically activates stores and awards net commissions to designer wallets with strict idempotency guards. Submit-review template API secured with real BetterAuth session & designer ownership verification.
+Milestone 3 complete. Admin Template Review API (`/api/admin/templates/[id]/review`) & Dynamic Platform Settings API (`/api/admin/settings/commission`) fully implemented with Zod validation (`reviewTemplateSchema`, `commissionSettingsSchema`) and strict role protection (`admin`/`superadmin` & `active`). Admin UI pages & Svelte panels (`/admin/templates`, `/admin/settings`) built with DaisyUI tabs, modals, and toasts. End-to-end integration test suite (`tests/transactions/e2e-template-marketplace-flow.test.ts`) verifies full flow from draft submit -> admin approve -> dynamic fee split -> tenant purchase -> Xendit webhook fulfillment -> designer wallet credit. `bun run type-check`: 0 errors. `bun test`: 87/87 pass across 13 test files.
 
 ## Last session did
 
-- **Domain-Based Architecture & Proxy Cleanup:**
-  - Removed duplicate proxy files in root: `src/schemas/template.schema.ts`, `src/schemas/transaction.schema.ts`, `src/services/transaction.service.ts`, `src/services/wallet.service.ts`, `src/services/commission.service.ts`, `src/services/template.service.ts`, `src/lib/xendit.ts`.
-  - Migrated all imports across Svelte components, Astro pages, APIs, and tests to centralized barrel exports (`@/schemas`, `@/services`) or domain submodules (`@/lib/finance/xendit`).
-  - `bun run type-check`: 0 errors. `bun test`: 79/79 pass.
+- **Milestone 3 Implementation:**
+  - Implemented `POST/PUT /api/admin/templates/[id]/review` for admin template approval/rejection.
+  - Implemented `GET/POST/PUT /api/admin/settings/commission` for dynamic platform fee percentage configuration (fallback 30%).
+  - Built `/admin/templates` Astro page & `TemplateReviewPanel.svelte` with status tabs, preview links, instant approve modal, and rejection reason modal.
+  - Built `/admin/settings` Astro page & `CommissionSettingsPanel.svelte` with dynamic fee percentage input and DaisyUI loading feedback.
+  - Created `tests/transactions/e2e-template-marketplace-flow.test.ts` for comprehensive end-to-end marketplace flow verification.
+  - Added `isAdmin` and `isAuthorizedAdmin` helpers in `@/lib/auth`.
+  - All files strictly < 300 lines. `bun run type-check`: 0 errors. `bun test`: 87/87 pass.
 
 ## Next up
 
-1. **Phase 1.2 (Designer Marketplace & Approval):** Admin review template UI, template status approval/rejection endpoints
-2. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
-3. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+1. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
+2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
+3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 
 5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing

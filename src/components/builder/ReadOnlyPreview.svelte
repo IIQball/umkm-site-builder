@@ -30,6 +30,7 @@
       };
     };
   };
+  export let isOwner: boolean = false;
 
   let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   let isDark = false;
@@ -51,72 +52,64 @@
 <div class="min-h-screen bg-base-200/50 flex flex-col font-sans text-base-content transition-colors">
   <!-- Top Admin Status & Navigation Banner -->
   <header class="sticky top-0 z-50 border-b shadow-sm bg-base-100 border-base-200">
-    <!-- Status Specific Color Alert Bar -->
-    {#if template.status === 'pending'}
-      <div class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2.5 flex items-center justify-between text-amber-700 dark:text-amber-300">
-        <div class="flex items-center gap-2.5 text-xs font-medium">
-          <Clock size={16} class="text-amber-500 animate-pulse flex-shrink-0" />
-          <span>
-            <strong>Template Sedang Ditinjau Admin:</strong> Template ini telah diajukan dan sedang menunggu proses validasi serta persetujuan dari tim kurasi admin sebelum diterbitkan ke katalog UMKM.
+    <!-- Status Specific Color Alert Bar (hanya untuk desainer pemilik template) -->
+    {#if isOwner}
+      {#if template.status === 'pending'}
+        <div class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2.5 flex items-center justify-between text-amber-700 dark:text-amber-300">
+          <div class="flex items-center gap-2.5 text-xs font-medium">
+            <Clock size={16} class="text-amber-500 animate-pulse flex-shrink-0" />
+            <span>
+              <strong>Template Sedang Ditinjau Admin:</strong> Template ini telah diajukan dan sedang menunggu proses validasi serta persetujuan dari tim kurasi admin sebelum diterbitkan ke katalog UMKM.
+            </span>
+          </div>
+          <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-500/20 px-2.5 py-0.5 rounded border border-amber-500/30">
+            Menunggu Review
           </span>
         </div>
-        <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-500/20 px-2.5 py-0.5 rounded border border-amber-500/30">
-          Menunggu Review
-        </span>
-      </div>
-    {:else if template.status === 'approved'}
-      <div class="bg-emerald-500/10 border-b border-emerald-500/20 px-6 py-2.5 flex items-center justify-between text-emerald-700 dark:text-emerald-300">
-        <div class="flex items-center gap-2.5 text-xs font-medium">
-          <CheckCircle2 size={16} class="text-emerald-500 flex-shrink-0" />
-          <span>
-            <strong>Template Disetujui dan Live:</strong> Template ini telah lolos kurasi admin dan dapat dibeli oleh pemilik UMKM di katalog marketplace.
+      {:else if template.status === 'approved'}
+        <div class="bg-emerald-500/10 border-b border-emerald-500/20 px-6 py-2.5 flex items-center justify-between text-emerald-700 dark:text-emerald-300">
+          <div class="flex items-center gap-2.5 text-xs font-medium">
+            <CheckCircle2 size={16} class="text-emerald-500 flex-shrink-0" />
+            <span>
+              <strong>Template Disetujui dan Live:</strong> Template ini telah lolos kurasi admin dan dapat dibeli oleh pemilik UMKM di katalog marketplace.
+            </span>
+          </div>
+          <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/20 px-2.5 py-0.5 rounded border border-emerald-500/30">
+            Disetujui
           </span>
         </div>
-        <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/20 px-2.5 py-0.5 rounded border border-emerald-500/30">
-          Disetujui
-        </span>
-      </div>
-    {:else if template.status === 'rejected'}
-      <div class="bg-rose-500/10 border-b border-rose-500/20 px-6 py-2.5 flex items-center justify-between text-rose-700 dark:text-rose-300">
-        <div class="flex items-center gap-2.5 text-xs font-medium">
-          <XCircle size={16} class="text-rose-500 flex-shrink-0" />
-          <span>
-            <strong>Pengajuan Ditolak:</strong> {template.rejectionReason || 'Desain atau konfigurasi template memerlukan penyesuaian. Silakan perbaiki di editor dan ajukan kembali.'}
+      {:else if template.status === 'rejected'}
+        <div class="bg-rose-500/10 border-b border-rose-500/20 px-6 py-2.5 flex items-center justify-between text-rose-700 dark:text-rose-300">
+          <div class="flex items-center gap-2.5 text-xs font-medium">
+            <XCircle size={16} class="text-rose-500 flex-shrink-0" />
+            <span>
+              <strong>Pengajuan Ditolak:</strong> {template.rejectionReason || 'Desain atau konfigurasi template memerlukan penyesuaian. Silakan perbaiki di editor dan ajukan kembali.'}
+            </span>
+          </div>
+          <span class="text-[10px] font-semibold uppercase tracking-wider bg-rose-500/20 px-2.5 py-0.5 rounded border border-rose-500/30">
+            Ditolak
           </span>
         </div>
-        <span class="text-[10px] font-semibold uppercase tracking-wider bg-rose-500/20 px-2.5 py-0.5 rounded border border-rose-500/30">
-          Ditolak
-        </span>
-      </div>
-    {:else}
-      <div class="bg-blue-500/10 border-b border-blue-500/20 px-6 py-2.5 flex items-center justify-between text-blue-700 dark:text-blue-300">
-        <div class="flex items-center gap-2.5 text-xs font-medium">
-          <FileEdit size={16} class="text-blue-500 flex-shrink-0" />
-          <span>
-            <strong>Preview Mode (Draft):</strong> Template masih dalam tahap pembuatan dan belum diajukan ke admin.
+      {:else}
+        <div class="bg-blue-500/10 border-b border-blue-500/20 px-6 py-2.5 flex items-center justify-between text-blue-700 dark:text-blue-300">
+          <div class="flex items-center gap-2.5 text-xs font-medium">
+            <FileEdit size={16} class="text-blue-500 flex-shrink-0" />
+            <span>
+              <strong>Preview Mode (Draft):</strong> Template masih dalam tahap pembuatan dan belum diajukan ke admin.
+            </span>
+          </div>
+          <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-500/20 px-2.5 py-0.5 rounded border border-blue-500/30">
+            Draft
           </span>
         </div>
-        <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-500/20 px-2.5 py-0.5 rounded border border-blue-500/30">
-          Draft
-        </span>
-      </div>
+      {/if}
     {/if}
 
-    <!-- Toolbar: Back, Title, Viewport Switcher, Theme Toggle -->
+    <!-- Toolbar: Title, Viewport Switcher, Theme Toggle -->
     <div class="px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
-      <!-- Left: Back Button & Template Name -->
+      <!-- Left: Template Name -->
       <div class="flex items-center gap-3 min-w-0">
-        <a
-          href={`/builder/${template.id}`}
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-base-200 hover:bg-base-300 text-base-content/80 hover:text-base-content rounded-lg text-xs font-semibold border border-base-300 transition-colors"
-        >
-          <ArrowLeft size={13} />
-          <span>Edit di Builder</span>
-        </a>
-
-        <div class="h-4 w-px bg-base-300 hidden sm:block" />
-
-        <div class="min-w-0 hidden sm:block">
+        <div class="min-w-0">
           <h1 class="text-xs sm:text-sm font-bold text-base-content truncate">{template.name || 'Untitled Template'}</h1>
           <p class="text-[10px] sm:text-[11px] text-base-content/60 truncate">{template.description || 'Preview read-only tampilan website'}</p>
         </div>
@@ -167,7 +160,7 @@
         </button>
       </div>
 
-      <!-- Right: Theme Toggle & Direct Link -->
+      <!-- Right: Theme Toggle -->
       <div class="flex items-center gap-2">
         <button
           type="button"
@@ -181,14 +174,6 @@
             <Moon size={14} class="text-slate-600" />
           {/if}
         </button>
-
-        <a
-          href="/"
-          class="hidden md:flex items-center gap-1.5 text-xs text-base-content/70 hover:text-base-content transition-colors px-2 py-1"
-        >
-          <span>Dashboard</span>
-          <ExternalLink size={12} />
-        </a>
       </div>
     </div>
   </header>

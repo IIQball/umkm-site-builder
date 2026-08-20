@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Sparkles, ArrowLeft, ArrowRight, Loader2, FileText, Tag } from 'lucide-svelte';
 
-  export let backHref = '/templates';
+  export let backHref = '/designer/templates';
 
   let name = '';
   let description = '';

@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by auth-integration-dashboard-shell session
+Status: LIVE · Updated: 2026-08-20 by store-onboarding session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -15,27 +15,13 @@ Visual Template Builder complete with Global Design System (Deselect / Root cont
 
 ## Last session did
 
-- **Auth Integration — Template Builder & Xendit Transactions:**
-  - `src/pages/builder/new.astro` — Auth guard: only `designer`/`superadmin` with `active` status.
-  - `src/pages/builder/[templateId].astro` — Auth guard: same role check. Builder stays full-canvas (no dashboard shell).
-  - `src/pages/api/templates/draft.ts` — Replaced `DEFAULT_DESIGNER_ID = 'designer_123'` with real `user.id` from BetterAuth session. POST returns 401 for unauthenticated or non-designer requests.
-  - `src/pages/api/builder/save.ts` — Auth guard + ownership check (`designerId = user.id`). Superadmin bypasses ownership filter.
-  - `src/pages/api/transactions/initiate.ts` — Replaced `x-user-id` header hack with real BetterAuth session. Added suspended account check.
-  - `src/pages/checkout/[invoiceId].astro` — Redirect to `/auth/login` if unauthenticated. Ownership check: only `transaction.userId === currentUser.id` or admin/superadmin. 403 block rendered for unauthorized access.
-- **Unified Responsive Dashboard Shell:**
-  - `src/layouts/DashboardLayout.astro` (NEW) — Auth redirect shell. Wraps Sidebar + DashboardNavbar around page content. Does NOT wrap builder pages.
-  - `src/components/dashboard/Sidebar.svelte` (NEW) — Desktop: collapsible 260px/72px sidebar, state persisted to `localStorage`. Mobile: FAB hamburger `fixed bottom-6 right-6 z-50 shadow-2xl` + slide-over drawer with backdrop. Role-based nav items (designer/tenant/admin/superadmin). Sign-out integration.
-  - `src/components/dashboard/DashboardNavbar.svelte` (NEW) — Slim header: role badge, user name + initials avatar, theme toggle.
-  - `src/pages/dashboard/index.astro` (NEW) — Entry point per role: designer (template count + wallet), tenant (toko status + produk), admin/superadmin (transaksi + user metrics placeholders).
-- **Public Navbar & Homepage:**
-  - `src/components/common/Navbar.astro` — Cleaned to Beranda + Direktori UMKM nav links only. Auth-aware: shows Masuk/Daftar or Ke Dashboard + avatar depending on session.
-  - `src/pages/index.astro` — Replaced `Buka Visual Builder` (unauthenticated link) with `Daftar Gratis` → `/auth/register`.
-  - `src/pages/umkm.astro` (NEW) — Public read-only UMKM directory stub with search bar + skeleton cards.
-- **Bug Fixes:**
-  - `NodeContentForm.svelte` — Fixed TS errors (Zod passthrough `{}` cast to `string`). Fixed A11y warnings (added `for`/`id` to Heading Level + Primary Color labels).
-- **Code Quality & Testing:**
-  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 49/49 pass.
-  - Updated `tests/api/builder/save.test.ts` to reflect new 401 auth guard behavior.
+- **Store Onboarding Feature:**
+  - `src/lib/stores/schemas.ts` — Added `OnboardStoreInput` schema to validate store profiles.
+  - `src/pages/api/stores/onboard.ts` (NEW) — Endpoint for saving store profile and subdomain, ensuring unique subdomains, valid names, and correct roles.
+  - `src/components/onboarding/OnboardingWizard.svelte` (NEW) — Multi-step wizard UI covering Subdomain choice, Store Info (Name, WA, Maps), and Success state.
+  - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
+  - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
+  - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
 
 ## Next up
 

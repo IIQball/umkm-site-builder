@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SubdomainInput from '@/components/onboarding/SubdomainInput.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+
+if (user.status !== 'active') return Astro.redirect('/auth/login');
+---
+
+<BaseLayout title="Pilih Subdomain - UMKM Site Builder">
+  <div class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+    <div class="max-w-md w-full bg-base-100 rounded-box shadow-xl p-8">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-base-content mb-2">Pilih Alamat Toko</h1>
+        <p class="text-base-content/70">
+          Tentukan subdomain unik untuk toko online Anda. Alamat ini akan digunakan pelanggan untuk mengunjungi toko Anda.
+        </p>
+      </div>
+
+      <SubdomainInput client:load />
+    </div>
+  </div>
+</BaseLayout>

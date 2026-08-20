@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, users, sessions, accounts, verifications, designers } from "@/db";
+import { db, users, sessions, accounts, verifications, designers, wallets } from "@/db";
 import { eq } from "drizzle-orm";
 
 export const auth = betterAuth({
@@ -49,9 +49,15 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: true,
+        required: false, // Wajib false agar Google OAuth tidak menolak login
         defaultValue: "tenant",
-        input: true,
+        input: true, // Wajib true agar form Register bisa mengirim role pilihan user
+      },
+      status: {
+        type: "string",
+        required: false,
+        defaultValue: "active",
+        input: false, // Status tidak boleh dimanipulasi dari form registrasi
       },
     },
   },
@@ -59,8 +65,18 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          // Jika mendaftar sebagai designer, otomatis buat record designer & wallet
           if (user.role === "designer") {
-            await db.insert(designers).values({ userId: user.id });
+            await db.insert(designers).values({ 
+              userId: user.id,
+              isVerified: true 
+            }).onConflictDoNothing();
+
+            await db.insert(wallets).values({
+              id: `wal_${crypto.randomUUID()}`,
+              designerId: user.id,
+              balance: 0,
+            }).onConflictDoNothing();
           }
         },
       },

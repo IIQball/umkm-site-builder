@@ -41,8 +41,8 @@
         return; 
       }
 
-      // Jika benar-benar sukses, baru arahkan ke beranda
-      window.location.href = "/";
+      // Jika benar-benar sukses, baru arahkan ke login
+      window.location.href = "/auth/login";
       
     } catch (err: unknown) {
       error = err instanceof Error ? err.message : "Terjadi kesalahan sistem";

@@ -24,7 +24,7 @@
         return;
       }
 
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       error = err instanceof Error ? err.message : "Terjadi kesalahan sistem";
     } finally {

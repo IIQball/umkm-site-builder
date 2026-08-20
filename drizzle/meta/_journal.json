@@ -22,6 +22,13 @@
       "when": 1787138905374,
       "tag": "0002_overconfident_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787237227209,
+      "tag": "0003_sloppy_mephisto",
+      "breakpoints": true
     }
   ]
 }

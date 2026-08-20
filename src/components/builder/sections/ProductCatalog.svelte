@@ -1,0 +1,175 @@
+<script lang="ts">
+  import { editorStore } from '../stores/editorStore';
+  import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types/builder';
+  import { Package, ShoppingBag, MessageCircle } from 'lucide-svelte';
+  import { DEFAULT_DEMO_PRODUCTS, getBadgeColorClass, getCardPresetClass } from './productCatalog.helpers';
+
+  export let props: ProductCatalogProps = {};
+  export let styles: SectionStyles = {};
+  export let sectionId: string = '';
+  export let isActive: boolean = false;
+
+  $: rawProducts = Array.isArray(props?.products) ? props.products : [];
+  $: products = (rawProducts.length > 0 ? rawProducts : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+  $: isMobileView = $editorStore?.viewMode === 'mobile';
+  $: isTabletView = $editorStore?.viewMode === 'tablet';
+  $: hasCustomColor = !!styles?.color;
+
+  $: colDesktop = Number(props?.columnsDesktop ?? styles?.columnsDesktop ?? 3);
+  $: colTablet = Number(props?.columnsTablet ?? styles?.columnsTablet ?? 2);
+  $: colMobile = Number(props?.columnsMobile ?? styles?.columnsMobile ?? 1);
+
+  $: gridColClass = (() => {
+    if (isMobileView) return colMobile === 2 ? 'grid-cols-2' : 'grid-cols-1';
+    if (isTabletView) return colTablet === 3 ? 'grid-cols-3' : 'grid-cols-2';
+    const m = colMobile === 2 ? 'grid-cols-2' : 'grid-cols-1';
+    const t = colTablet === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
+    const d = colDesktop === 2 ? 'lg:grid-cols-2' : colDesktop === 4 ? 'lg:grid-cols-4' : colDesktop === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-3';
+    return `${m} ${t} ${d}`;
+  })();
+
+  $: gridGapVal = props?.gridGap ?? styles?.gridGap ?? 'normal';
+  $: gridGapClass = isMobileView || gridGapVal === 'compact' || gridGapVal === '12px' ? 'gap-3' : gridGapVal === 'relaxed' || gridGapVal === '32px' ? 'gap-6 sm:gap-8' : 'gap-4 sm:gap-5';
+
+  $: cardPreset = String(props?.cardPreset ?? styles?.cardPreset ?? 'elevated_shadow');
+  $: isHorizontalLayout = cardPreset === 'horizontal' && (!isMobileView || colMobile === 1);
+  $: cardRadiusVal = String(props?.cardRadius ?? styles?.cardRadius ?? 'smooth');
+  $: cardRadiusClass = cardRadiusVal === 'sharp' || cardRadiusVal === '0px' ? 'rounded-none' : cardRadiusVal === 'rounded' || cardRadiusVal === '8px' ? 'rounded-lg' : cardRadiusVal === 'extra_rounded' || cardRadiusVal === '24px' ? 'rounded-3xl' : 'rounded-2xl';
+
+  $: aspectVal = String(props?.imageAspectRatio ?? styles?.imageAspectRatio ?? 'square');
+  $: imageAspectClass = isHorizontalLayout ? 'h-full w-full object-cover' : aspectVal === 'portrait' || aspectVal === '3/4' ? 'aspect-[3/4] w-full object-cover' : aspectVal === 'widescreen' || aspectVal === '16/9' ? 'aspect-[16/9] w-full object-cover' : aspectVal === 'auto' ? 'h-48 w-full object-cover' : 'aspect-square w-full object-cover';
+
+  $: badgePos = String(props?.badgePosition ?? styles?.badgePosition ?? 'top_left');
+  $: badgePosClass = badgePos === 'top_right' ? 'top-3 right-3' : 'top-3 left-3';
+  $: badgeColorVal = String(props?.badgeColor ?? styles?.badgeColor ?? 'rose');
+  $: badgeColorClass = getBadgeColorClass(badgeColorVal);
+
+  $: nameSizeVal = String(props?.productNameSize ?? styles?.productNameSize ?? 'base');
+  $: nameSizeClass = nameSizeVal === 'sm' ? 'text-xs sm:text-sm' : nameSizeVal === 'lg' ? 'text-base sm:text-lg' : 'text-sm sm:text-base';
+  $: nameWeightVal = String(props?.productNameWeight ?? styles?.productNameWeight ?? 'bold');
+  $: nameWeightClass = nameWeightVal === 'normal' ? 'font-normal' : nameWeightVal === 'medium' ? 'font-medium' : nameWeightVal === 'semibold' ? 'font-semibold' : nameWeightVal === 'extrabold' ? 'font-extrabold' : 'font-bold';
+
+  $: isInlinePrice = (props?.pricePlacement ?? styles?.pricePlacement ?? 'stacked') === 'inline';
+  $: ctaWidthClass = (props?.ctaButtonWidth ?? styles?.ctaButtonWidth) === 'compact' ? 'w-auto px-4 py-2 self-start' : 'w-full py-2.5';
+  $: ctaBtnRadiusVal = String(props?.ctaButtonRadius ?? styles?.ctaButtonRadius ?? 'smooth');
+  $: ctaBtnRadiusClass = ctaBtnRadiusVal === 'sharp' ? 'rounded-none' : ctaBtnRadiusVal === 'rounded' ? 'rounded-lg' : ctaBtnRadiusVal === 'pill' ? 'rounded-full' : 'rounded-xl';
+  $: ctaBtnColor = String(props?.ctaButtonColor ?? styles?.ctaButtonColor ?? '#059669');
+  $: ctaBtnTextColor = String(props?.ctaButtonTextColor ?? styles?.ctaButtonTextColor ?? '#ffffff');
+  $: showWhatsAppIcon = (props?.showWhatsAppIcon ?? styles?.showWhatsAppIcon) !== false;
+  $: cardPresetClass = getCardPresetClass(cardPreset);
+
+  let draggedIdx: number | null = null;
+  let dropTargetIdx: number | null = null;
+
+  const onDragStart = (e: DragEvent, index: number) => {
+    if (!isActive) return;
+    draggedIdx = index;
+    if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)); }
+  };
+  const onDragOver = (e: DragEvent, index: number) => {
+    if (draggedIdx === null || draggedIdx === index) return;
+    e.preventDefault();
+    dropTargetIdx = index;
+  };
+  const onDrop = (e: DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === targetIdx) { draggedIdx = null; dropTargetIdx = null; return; }
+    const list = [...products];
+    const [moved] = list.splice(draggedIdx, 1);
+    list.splice(targetIdx, 0, moved);
+    editorStore.updateSectionProps(sectionId, { products: list });
+    draggedIdx = null;
+    dropTargetIdx = null;
+  };
+</script>
+
+<div class="max-w-6xl mx-auto w-full">
+  <!-- Section Header -->
+  <div class="mb-8 text-center">
+    <h2 class={`text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 ${hasCustomColor ? '' : 'text-slate-900 dark:text-white'}`}>
+      {props?.title || 'Katalog Produk Pilihan'}
+    </h2>
+    <p class={`text-xs sm:text-sm max-w-xl mx-auto ${hasCustomColor ? 'opacity-80' : 'text-slate-600 dark:text-slate-400'}`}>
+      {props?.subtitle || 'Pilih produk terbaik kami dengan jaminan mutu dan kemudahan pemesanan'}
+    </p>
+  </div>
+
+  <!-- Product Grid -->
+  {#if products.length === 0}
+    <div class="p-8 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-center text-slate-400 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center gap-2">
+      <ShoppingBag size={28} class="text-slate-300 dark:text-slate-600" />
+      <p class="text-xs">Belum ada produk di katalog. Tambahkan item di panel samping.</p>
+    </div>
+  {:else}
+    <div class={`grid ${gridColClass} ${gridGapClass}`}>
+      {#each products as product, index (product.name + index)}
+        <div
+          role="listitem"
+          draggable={isActive}
+          on:dragstart={(e) => onDragStart(e, index)}
+          on:dragover={(e) => onDragOver(e, index)}
+          on:dragleave={() => (dropTargetIdx = null)}
+          on:drop={(e) => onDrop(e, index)}
+          class={`relative overflow-hidden transition-all duration-200 ${cardRadiusClass} ${cardPresetClass} ${
+            isHorizontalLayout ? 'flex flex-row items-stretch' : 'flex flex-col'
+          } ${isActive ? 'cursor-grab active:cursor-grabbing' : ''} ${
+            dropTargetIdx === index ? 'ring-2 ring-blue-500 shadow-xl' : ''
+          } ${draggedIdx === index ? 'opacity-30' : ''}`}
+        >
+          <!-- Image -->
+          <div class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${isHorizontalLayout ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}`}>
+            {#if product.imageUrl}
+              <img src={product.imageUrl} alt={product.name || 'Produk'} class={`${imageAspectClass} transition-transform duration-300 hover:scale-105`} loading="lazy" />
+            {:else}
+              <div class={`w-full ${isHorizontalLayout ? 'h-full min-h-[140px]' : 'h-48'} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}>
+                <Package size={26} class="text-slate-300 dark:text-slate-600" />
+                <span class="text-[10px] font-medium text-slate-400">Foto Produk</span>
+              </div>
+            {/if}
+            {#if product.badge}
+              <div class={`absolute ${badgePosClass} z-10`}>
+                <span class={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${badgeColorClass}`}>{product.badge}</span>
+              </div>
+            {/if}
+          </div>
+
+          <!-- Details -->
+          <div class={`p-3.5 sm:p-4 flex-1 flex flex-col justify-between ${isHorizontalLayout ? 'min-w-0' : ''}`}>
+            <div>
+              <h3 class={`mb-1.5 text-slate-900 dark:text-white line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}>
+                {product.name || 'Nama Produk'}
+              </h3>
+            </div>
+
+            {#if isInlinePrice}
+              <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                <div>
+                  <span class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight">Harga</span>
+                  <p class="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400 font-mono">
+                    Rp {typeof product.price === 'number' ? product.price.toLocaleString('id-ID') : product.price || '0'}
+                  </p>
+                </div>
+                <button type="button" on:click|preventDefault style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                  class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}>
+                  {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
+                  <span>Pesan</span>
+                </button>
+              </div>
+            {:else}
+              <div class="mt-2">
+                <p class="text-base sm:text-lg font-extrabold text-blue-600 dark:text-blue-400 mb-3 font-mono">
+                  Rp {typeof product.price === 'number' ? product.price.toLocaleString('id-ID') : product.price || '0'}
+                </p>
+                <button type="button" on:click|preventDefault style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                  class={`${ctaWidthClass} text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}>
+                  {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
+                  <span>Pesan via WhatsApp</span>
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
+</div>

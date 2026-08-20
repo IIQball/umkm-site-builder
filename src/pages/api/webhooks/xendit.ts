@@ -22,25 +22,19 @@ interface ResponseData {
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   try {
-    // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
+     // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
+    const runtimeEnv = ((context.locals as unknown as Record<string, unknown>)?.runtime as Record<string, unknown>)?.env as Record<string, string> | undefined;
     const expectedToken = (
-      (context.locals as any)?.runtime?.env?.XENDIT_WEBHOOK_SECRET ||
+      runtimeEnv?.XENDIT_WEBHOOK_SECRET ||
       import.meta.env.XENDIT_WEBHOOK_SECRET ||
       process.env.XENDIT_WEBHOOK_SECRET ||
       ''
     ).trim();
 
-    // Get callback token from header
+     // Get callback token from header
     const callbackToken = context.request.headers.get('x-callback-token');
 
-    console.log('[Webhook Xendit] Incoming request:', {
-      callbackToken: callbackToken?.slice(0, 8) + '...',
-      hasSecret: !!expectedToken,
-      contentType: context.request.headers.get('content-type'),
-    });
-
     if (!expectedToken) {
-      console.error('[Webhook Xendit] XENDIT_WEBHOOK_SECRET not configured in any runtime source');
       return new Response(
         JSON.stringify({
           ok: false,
@@ -57,7 +51,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     if (!callbackToken) {
-      console.warn('[Webhook Xendit] Missing callback token header');
       return new Response(
         JSON.stringify({
           ok: false,
@@ -73,12 +66,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-    // Verify callback token
+     // Verify callback token
     if (callbackToken.trim() !== expectedToken) {
-      console.error('[Webhook Xendit] Token mismatch', {
-        receivedLength: callbackToken.length,
-        expectedLength: expectedToken.length,
-      });
       return new Response(
         JSON.stringify({
           ok: false,
@@ -90,26 +79,17 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         {
           status: 403,
           headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      }
+    );
     }
-
-    console.log('[Webhook Xendit] Token verified, parsing payload');
 
     // Parse and validate payload
     const payload = XenditWebhookPayloadSchema.parse(await context.request.json());
 
-    console.log('[Webhook Xendit] Received event:', {
-      external_id: payload.external_id,
-      status: payload.status,
-      id: payload.id,
-    });
-
-    // Handle Invoice payment callback
+     // Handle Invoice payment callback
     const isPaid = payload.status === 'PAID' || payload.status === 'SETTLED';
     
     if (isPaid) {
-      console.log('[Webhook Xendit] Processing payment success:', payload.external_id);
 
       // Update transaction status
       await db
@@ -120,10 +100,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           paymentGatewayRef: payload.id,
         })
         .where(eq(transactions.externalId, payload.external_id));
-
-      console.log('[Webhook Xendit] Transaction updated for:', payload.external_id);
     } else if (payload.status === 'FAILED' || payload.status === 'EXPIRED') {
-      console.log('[Webhook Xendit] Processing payment failure:', payload.external_id);
 
       // Update transaction status to failed/expired
       const failedStatus = payload.status === 'EXPIRED' ? 'expired' : 'failed';
@@ -134,13 +111,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           paymentGatewayRef: payload.id,
         })
         .where(eq(transactions.externalId, payload.external_id));
-
-      console.log('[Webhook Xendit] Transaction marked as', failedStatus, ':', payload.external_id);
     }
 
-    console.log('[Webhook Xendit] Processing complete');
-
-    // Return success (200 OK)
+     // Return success (200 OK)
     return new Response(
       JSON.stringify({
         ok: true,
@@ -152,11 +125,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     );
   } catch (error) {
-    console.error('[Webhook Xendit] Error:', error);
-
-    // Handle validation errors
+     // Handle validation errors
     if (error instanceof z.ZodError) {
-      console.warn('[Webhook Xendit] Validation error:', error.errors[0]);
       return new Response(
         JSON.stringify({
           ok: false,

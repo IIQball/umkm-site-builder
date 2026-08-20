@@ -47,64 +47,59 @@ export class TransactionService {
       .from(transactions)
       .where(eq(transactions.userId, userId));
 
-    const hasPendingTx = existingTx.some(tx => tx.status === 'pending');
-    if (hasPendingTx) {
-      throw new Error('Payment already in progress');
-    }
+     const hasPendingTx = existingTx.some(tx => tx.status === 'pending');
+     if (hasPendingTx) {
+       throw new Error('Payment already in progress');
+     }
 
-    // Generate unique invoice number
-    const invoiceNum = `INV-${userId}-${Date.now()}`;
-    const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+     // Generate unique invoice number
+     const invoiceNum = `INV-${userId}-${Date.now()}`;
+     const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    try {
-      // Create invoice on Xendit
-      const xenditInvoice = await xenditClient.createInvoice({
-        invoiceNum,
-        amount: input.amount,
-        payerEmail: userEmail,
-        description: `Payment for ${input.type === 'store_registration' ? 'Store Registration' : 'Template Purchase'}`,
-        expiryDate,
-        successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
-        failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
-        metadata: {
-          userId,
-          type: input.type,
-          storeId: input.storeId || null,
-          templateId: input.templateId || null,
-        },
-      });
+     // Create invoice on Xendit
+     const xenditInvoice = await xenditClient.createInvoice({
+       invoiceNum,
+       amount: input.amount,
+       payerEmail: userEmail,
+       description: `Payment for ${input.type === 'store_registration' ? 'Store Registration' : 'Template Purchase'}`,
+       expiryDate,
+       successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
+       failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+       metadata: {
+         userId,
+         type: input.type,
+         storeId: input.storeId || null,
+         templateId: input.templateId || null,
+       },
+     });
 
-      // Record transaction in database
-      const transactionId = `txn_${Date.now()}`;
-      const externalId = xenditInvoice?.invoiceNum || xenditInvoice?.id;
-      await db.insert(transactions).values({
-        id: transactionId,
-        userId,
-        type: input.type as TransactionType,
-        amount: Math.round(input.amount * 100), // Store in cents
-        status: 'pending' as PaymentStatus,
-        storeId: input.storeId || null,
-        templateId: input.templateId || null,
-        externalId,
-        paymentGatewayRef: xenditInvoice.id,
-        paymentChannel: null,
-        createdAt: new Date(),
-      });
+     // Record transaction in database
+     const transactionId = `txn_${Date.now()}`;
+     const externalId = xenditInvoice?.invoiceNum || xenditInvoice?.id;
+     await db.insert(transactions).values({
+       id: transactionId,
+       userId,
+       type: input.type as TransactionType,
+       amount: Math.round(input.amount * 100), // Store in cents
+       status: 'pending' as PaymentStatus,
+       storeId: input.storeId || null,
+       templateId: input.templateId || null,
+       externalId,
+       paymentGatewayRef: xenditInvoice.id,
+       paymentChannel: null,
+       createdAt: new Date(),
+     });
 
-      // Cache invoice URL for later retrieval
-      if (xenditInvoice.invoiceUrl) {
-        invoiceUrlCache.set(externalId, xenditInvoice.invoiceUrl);
-      }
+     // Cache invoice URL for later retrieval
+     if (xenditInvoice.invoiceUrl) {
+       invoiceUrlCache.set(externalId, xenditInvoice.invoiceUrl);
+     }
 
-      return {
-        invoiceId: externalId,
-        paymentUrl: xenditInvoice.invoiceUrl || '',
-      };
-    } catch (error) {
-      console.error('[TransactionService] Failed to initiate payment:', error);
-      throw error;
-    }
-  }
+     return {
+       invoiceId: externalId,
+       paymentUrl: xenditInvoice.invoiceUrl || '',
+     };
+   }
 
   /**
    * Process webhook from Xendit
@@ -126,78 +121,64 @@ export class TransactionService {
     const status = payload.status?.toUpperCase() || 'PENDING';
     const isPaid = status === 'PAID' || payload.paid;
 
-    try {
-      // Find existing transaction by external ID (invoice number)
-      const existingTxs = await db
-        .select()
-        .from(transactions)
-        .where(eq(transactions.externalId, externalId));
+    // Find existing transaction by external ID (invoice number)
+    const existingTxs = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.externalId, externalId));
 
-      if (!existingTxs.length) {
-        console.warn(
-          `[TransactionService] Webhook received for unknown transaction: ${externalId}`
-        );
-        return;
-      }
-
-      const transaction = existingTxs[0];
-
-      // Map Xendit status to PaymentStatus
-      let newStatus: PaymentStatus = 'pending';
-      if (isPaid) {
-        newStatus = 'success';
-      } else if (status === 'FAILED') {
-        newStatus = 'failed';
-      } else if (status === 'EXPIRED') {
-        newStatus = 'expired';
-      } else if (status === 'CANCELED') {
-        newStatus = 'canceled';
-      }
-
-      // Check if already processed (idempotency)
-      if (transaction.status === 'success' && isPaid) {
-        console.log(`[TransactionService] Transaction already processed: ${externalId}`);
-        return;
-      }
-
-      // Update transaction status
-      await db
-        .update(transactions)
-        .set({
-          status: newStatus,
-          paymentGatewayRef: xenditId,
-          paymentChannel: payload.payment_channel || null,
-        })
-        .where(eq(transactions.id, transaction.id));
-
-      console.log(`[TransactionService] Transaction updated: ${externalId} -> ${newStatus}`);
-    } catch (error) {
-      console.error('[TransactionService] Failed to process webhook:', error);
-      throw error;
+    if (!existingTxs.length) {
+      // eslint-disable-next-line no-console
+      console.warn(`Webhook received for unknown transaction: ${externalId}`);
+      return;
     }
+
+    const transaction = existingTxs[0];
+
+    // Map Xendit status to PaymentStatus
+    let newStatus: PaymentStatus = 'pending';
+    if (isPaid) {
+      newStatus = 'success';
+    } else if (status === 'FAILED') {
+      newStatus = 'failed';
+    } else if (status === 'EXPIRED') {
+      newStatus = 'expired';
+    } else if (status === 'CANCELED') {
+      newStatus = 'canceled';
+    }
+
+    // Check if already processed (idempotency)
+    if (transaction.status === 'success' && isPaid) {
+      return;
+    }
+
+    // Update transaction status
+    await db
+      .update(transactions)
+      .set({
+        status: newStatus,
+        paymentGatewayRef: xenditId,
+        paymentChannel: payload.payment_channel || null,
+      })
+      .where(eq(transactions.id, transaction.id));
   }
 
   /**
    * Get transaction details for checkout page
    */
   async getTransactionDetails(externalId: string): Promise<TransactionRecord | null> {
-    try {
-      // Query by external ID (invoice number)
-      const results = await db
-        .select()
-        .from(transactions)
-        .where(eq(transactions.externalId, externalId));
+    // Query by external ID (invoice number)
+    const results = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.externalId, externalId));
 
-      if (!results.length) {
-        return null;
-      }
-
-      const tx = results[0];
-      return this.mapTransactionToRecord(tx);
-    } catch (error) {
-      console.error('[TransactionService] Failed to get transaction details:', error);
-      throw error;
+    if (!results.length) {
+      return null;
     }
+
+    const tx = results[0];
+    return this.mapTransactionToRecord(tx);
   }
 
   /**
@@ -229,11 +210,10 @@ export class TransactionService {
         invoiceUrlCache.set(externalId, invoiceUrl);
       }
 
-      return invoiceUrl;
-    } catch (error) {
-      console.error('[TransactionService] Failed to fetch invoice URL:', error);
-      return null;
-    }
+       return invoiceUrl;
+     } catch {
+       return null;
+     }
   }
 
   private mapTransactionToRecord(tx: {

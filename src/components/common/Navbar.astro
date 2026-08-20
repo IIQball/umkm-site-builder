@@ -1,56 +1,84 @@
 ---
 /**
  * Navbar.astro
- * Semantic navbar with theme toggle using DaisyUI
- * Sticky header with navigation links and dark/light mode toggle
+ * Public navigation: Beranda, Direktori UMKM, Masuk/Daftar (atau Dashboard jika sudah login)
  */
 import ThemeToggle from '@/components/common/ThemeToggle.astro';
+
+const user = Astro.locals.user;
+const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 ---
 
-<nav class="navbar bg-base-100 border-b border-base-200 sticky top-0 z-40 shadow-sm">
-  <div class="flex-1">
-    <a href="/" class="btn btn-ghost text-xl font-bold">
-      UMKM Builder
+<nav class="navbar bg-base-100/90 backdrop-blur-md border-b border-base-200 sticky top-0 z-40 shadow-sm transition-colors">
+  <div class="flex-1 px-2">
+    <a href="/" class="btn btn-ghost text-base sm:text-lg font-bold gap-2 px-2 hover:bg-base-200/60 rounded-xl">
+      <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
+        U
+      </div>
+      <span class="tracking-tight text-base-content">UMKM Builder</span>
     </a>
   </div>
 
-  <div class="flex-none gap-2">
-    <!-- Navigation Links -->
-    <div class="hidden md:flex gap-1">
-      <a href="/" class="btn btn-ghost btn-sm">
+  <div class="flex-none gap-2 px-2">
+    <!-- Desktop Nav Links -->
+    <div class="hidden md:flex items-center gap-1.5">
+      <a href="/" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-base-content/80 hover:text-base-content">
         Beranda
       </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Fitur
+      <a href="/umkm" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-base-content/80 hover:text-base-content">
+        Direktori UMKM
       </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Harga
-      </a>
-      <a href="#" class="btn btn-ghost btn-sm">
-        Bantuan
-      </a>
+    </div>
+
+    <!-- Desktop Auth Actions -->
+    <div class="hidden md:flex items-center gap-1.5">
+      {user ? (
+        <>
+          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold gap-1.5 shadow-sm shadow-blue-600/20">
+            <span class="material-symbols-outlined text-[16px]">dashboard</span>
+            <span>Ke Dashboard</span>
+          </a>
+          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm" title={user.name ?? user.email}>
+            {userInitial}
+          </div>
+        </>
+      ) : (
+        <>
+          <a href="/auth/login" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium">
+            Masuk
+          </a>
+          <a href="/auth/register" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm shadow-blue-600/20">
+            Daftar
+          </a>
+        </>
+      )}
     </div>
 
     <!-- Theme Toggle -->
     <ThemeToggle />
 
-    <!-- Mobile Menu -->
+    <!-- Mobile Dropdown -->
     <div class="dropdown dropdown-end md:hidden">
-      <button
-        tabindex="0"
-        class="btn btn-ghost btn-circle"
-        aria-label="Menu"
-      >
-        <span class="material-symbols-outlined">menu</span>
+      <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="Menu">
+        <span class="material-symbols-outlined text-[20px]">menu</span>
       </button>
-      <ul
-        tabindex="0"
-        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200"
-      >
-        <li><a href="/">Beranda</a></li>
-        <li><a href="#">Fitur</a></li>
-        <li><a href="#">Harga</a></li>
-        <li><a href="#">Bantuan</a></li>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-xl w-52 border border-base-200 space-y-1 mt-2 text-xs">
+        <li><a href="/" class="rounded-lg">Beranda</a></li>
+        <li><a href="/umkm" class="rounded-lg">Direktori UMKM</a></li>
+        <li class="divider my-0.5"></li>
+        {user ? (
+          <li>
+            <a href="/dashboard" class="font-semibold text-primary rounded-lg flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">dashboard</span>
+              <span>Ke Dashboard</span>
+            </a>
+          </li>
+        ) : (
+          <>
+            <li><a href="/auth/login" class="rounded-lg">Masuk</a></li>
+            <li><a href="/auth/register" class="rounded-lg font-semibold text-primary">Daftar</a></li>
+          </>
+        )}
       </ul>
     </div>
   </div>

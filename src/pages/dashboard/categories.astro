@@ -1,8 +1,12 @@
 ---
-import DashboardLayout from '../../layouts/BaseLayout.astro';
-import { db } from '../../db';
-import { stores, storeCategories } from '../../db/schema';
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { db } from '@/db';
+import { stores, storeCategories } from '@/db/schema';
 import { isNull, eq } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
 
 const allStores = await db.select().from(stores).where(isNull(stores.deletedAt));
 
@@ -18,94 +22,134 @@ const allCategories = await db
   .leftJoin(stores, eq(storeCategories.storeId, stores.id))
   .where(isNull(storeCategories.deletedAt));
 ---
-<DashboardLayout title="Kategori Produk">
-  <div class="p-6 bg-[var(--color-card-base)] text-[var(--color-text-main)] border border-[var(--color-border)] rounded-lg">
-    <h1 class="text-2xl font-bold mb-4 text-[var(--color-text-main)]">Manajemen Kategori</h1>
-    <button id="addBtn" class="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-4 py-2 rounded">Tambah Kategori</button>
-    
-      <table class="w-full mt-4 border border-[var(--color-border)]">
-      <thead>
-        <tr class="text-[var(--color-text-secondary)]">
-          <th class="border-b border-[var(--color-border)] p-2 text-left">Nama Kategori</th>
-          <th class="border-b border-[var(--color-border)] p-2 text-left">Store</th>
-          <th class="border-b border-[var(--color-border)] p-2 text-center">Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="categoryTable">
-        {allCategories.map(cat => (
-          <tr>
-            <td class="border-b border-[var(--color-border)] p-2">{cat.name}</td>
-            <td class="border-b border-[var(--color-border)] p-2">{cat.storeName}</td>
-            <td class="border-b border-[var(--color-border)] p-2 text-center">
-              <button 
-                class="edit-btn bg-[var(--color-warning)] text-white px-2 py-1 rounded mr-1"
-                data-id={cat.id}
-                data-name={cat.name}
-                data-slug={cat.slug}
-                data-storeid={cat.storeId}
-              >
-                Edit
-              </button>
-              <button 
-                class="btn-delete bg-[var(--color-error)] text-white px-2 py-1 rounded"
-                data-id={cat.id}
-              >
-                Hapus
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
+<DashboardLayout title="Kategori Produk" breadcrumb="Kategori">
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-base-content">Manajemen Kategori</h1>
+      <p class="text-sm text-base-content/60 mt-1">Kelola daftar kategori dan distribusinya per toko.</p>
+    </div>
+    <button id="addBtn" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none shadow-sm" onclick="document.getElementById('modal').showModal()">
+      <span class="material-symbols-outlined text-[20px]">add</span>
+      Tambah Kategori
+    </button>
   </div>
 
-  <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
-    <div class="bg-[var(--color-card-base)] p-6 rounded shadow-lg w-96 text-[var(--color-text-main)] border border-[var(--color-border)]">
-      <h2 class="text-xl font-bold mb-4">Konfirmasi Hapus</h2>
-      <p class="mb-6">Apakah Anda yakin ingin menghapus kategori ini?</p>
-      <div class="flex justify-end gap-2">
-        <button id="cancelDelete" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-        <button id="btnConfirmDelete" class="bg-[var(--color-error)] text-white px-4 py-2 rounded">Hapus</button>
-      </div>
+  <!-- Data Table -->
+  <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table w-full">
+        <thead class="bg-base-200/50">
+          <tr>
+            <th class="font-semibold text-base-content/70">Nama Kategori</th>
+            <th class="font-semibold text-base-content/70">Toko (Store)</th>
+            <th class="font-semibold text-base-content/70 text-right pr-6">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="categoryTable">
+          {allCategories.map(cat => (
+            <tr class="hover:bg-base-200/30 transition-colors">
+              <td class="font-medium pl-4">{cat.name}</td>
+              <td>
+                <span class="badge badge-ghost badge-sm">{cat.storeName || 'Unknown Store'}</span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex justify-end gap-2">
+                  <button 
+                    class="btn btn-sm btn-info btn-outline edit-btn"
+                    data-id={cat.id}
+                    data-name={cat.name}
+                    data-slug={cat.slug}
+                    data-storeid={cat.storeId}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-error btn-outline btn-delete"
+                    data-id={cat.id}
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+          {allCategories.length === 0 && (
+            <tr>
+              <td colspan="3" class="text-center py-12 text-base-content/50">
+                Belum ada kategori yang ditambahkan.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
-    <div class="bg-[var(--color-card-base)] p-6 rounded shadow-lg w-96 text-[var(--color-text-main)] border border-[var(--color-border)]">
-      <h2 id="modalTitle" class="text-xl font-bold mb-4">Tambah Kategori</h2>
-      <form id="categoryForm">
+  <!-- Delete Modal -->
+  <dialog id="deleteConfirmModal" class="modal backdrop-blur-sm">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg text-base-content">Konfirmasi Hapus</h3>
+      <p class="py-4 text-base-content/70">Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.</p>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn btn-ghost" id="cancelDelete">Batal</button>
+        </form>
+        <button id="btnConfirmDelete" class="btn btn-error text-white">Hapus Kategori</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Add/Edit Modal -->
+  <dialog id="modal" class="modal backdrop-blur-sm">
+    <div class="modal-box">
+      <h3 id="modalTitle" class="font-bold text-lg mb-6 text-base-content">Tambah Kategori</h3>
+      <form id="categoryForm" class="space-y-4">
         <input type="hidden" name="id" id="categoryId" />
-        <div class="mb-4">
-          <label>Store</label>
-          <select name="storeId" id="storeSelect" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" required>
-            <option value="">Pilih Store</option>
+        
+        <div class="form-control">
+          <label class="label" for="storeSelect">
+            <span class="label-text font-medium text-base-content/80">Toko (Store)</span>
+          </label>
+          <select name="storeId" id="storeSelect" class="select select-bordered w-full bg-base-100" required>
+            <option value="" disabled selected>Pilih Toko...</option>
             {allStores.map(store => (
               <option value={store.id}>{store.name}</option>
             ))}
           </select>
         </div>
-        <div class="mb-4">
-          <label>Nama Kategori</label>
-          <input type="text" name="name" id="categoryName" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" required />
+
+        <div class="form-control">
+          <label class="label" for="categoryName">
+            <span class="label-text font-medium text-base-content/80">Nama Kategori</span>
+          </label>
+          <input type="text" name="name" id="categoryName" class="input input-bordered w-full bg-base-100" placeholder="Masukkan nama kategori" required />
         </div>
-        <div class="mb-4 hidden">
-          <label>Slug</label>
-          <input type="text" name="slug" id="categorySlug" class="w-full border border-[var(--color-border)] p-2 bg-[var(--color-card-base)]" />
+
+        <input type="hidden" name="slug" id="categorySlug" />
+        
+        <div class="modal-action mt-8">
+          <button type="button" class="btn btn-ghost" id="closeModal">Batal</button>
+          <button type="submit" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none" id="btnSave">Simpan Kategori</button>
         </div>
-        <button type="submit" class="bg-[var(--color-primary)] text-white px-4 py-2 rounded">Simpan</button>
-        <button type="button" id="closeModal" class="ml-2 px-4 py-2 rounded bg-gray-500 text-white">Batal</button>
       </form>
     </div>
-  </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 
   <script>
-    const modal = document.getElementById('modal');
-    const deleteModal = document.getElementById('deleteConfirmModal');
+    const modal = document.getElementById('modal') as HTMLDialogElement | null;
+    const deleteModal = document.getElementById('deleteConfirmModal') as HTMLDialogElement | null;
     const addBtn = document.getElementById('addBtn');
     const closeModal = document.getElementById('closeModal');
     const cancelDelete = document.getElementById('cancelDelete');
     const btnConfirmDelete = document.getElementById('btnConfirmDelete') as HTMLButtonElement | null;
+    const btnSave = document.getElementById('btnSave') as HTMLButtonElement | null;
     const categoryForm = document.getElementById('categoryForm') as HTMLFormElement | null;
     const modalTitle = document.getElementById('modalTitle');
     let deleteId: string | null = null;
@@ -127,52 +171,68 @@ const allCategories = await db
       });
     }
 
-    const openModal = (mode: 'add' | 'edit', data?: any) => {
+    const openModal = (mode: 'add' | 'edit', data?: Record<string, string>) => {
       if (!modal || !categoryForm || !modalTitle) return;
       categoryForm.reset();
       (document.getElementById('categoryId') as HTMLInputElement).value = '';
       if (mode === 'edit' && data) {
         modalTitle.innerText = 'Edit Kategori';
-        (document.getElementById('categoryId') as HTMLInputElement).value = data.id;
-        (document.getElementById('storeSelect') as HTMLSelectElement).value = data.storeid;
-        (document.getElementById('categoryName') as HTMLInputElement).value = data.name;
-        (document.getElementById('categorySlug') as HTMLInputElement).value = data.slug;
+        (document.getElementById('categoryId') as HTMLInputElement).value = data.id || '';
+        (document.getElementById('storeSelect') as HTMLSelectElement).value = data.storeid || '';
+        (document.getElementById('categoryName') as HTMLInputElement).value = data.name || '';
+        (document.getElementById('categorySlug') as HTMLInputElement).value = data.slug || '';
       } else {
         modalTitle.innerText = 'Tambah Kategori';
+        (document.getElementById('storeSelect') as HTMLSelectElement).value = '';
       }
-      modal.classList.remove('hidden');
+      modal.showModal();
     };
 
     if (addBtn) addBtn.onclick = () => openModal('add');
-    if (closeModal && modal) closeModal.onclick = () => modal.classList.add('hidden');
-    if (cancelDelete && deleteModal) cancelDelete.onclick = () => deleteModal.classList.add('hidden');
+    if (closeModal && modal) closeModal.onclick = () => modal.close();
+    if (cancelDelete && deleteModal) cancelDelete.onclick = () => deleteModal.close();
 
     if (btnConfirmDelete) {
       btnConfirmDelete.onclick = async () => {
         if (!deleteId) return;
         btnConfirmDelete.innerText = 'Menghapus...';
+        btnConfirmDelete.disabled = true;
         try {
           const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
-          if (res.ok) window.location.reload();
-          else alert('Gagal menghapus');
-        } catch (err) { alert('Kesalahan koneksi'); }
-        deleteModal?.classList.add('hidden');
-        btnConfirmDelete.innerText = 'Hapus';
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Gagal menghapus');
+          }
+        } catch (err) { 
+          alert('Kesalahan koneksi'); 
+        } finally {
+          deleteModal?.close();
+          btnConfirmDelete.innerText = 'Hapus Kategori';
+          btnConfirmDelete.disabled = false;
+        }
       };
     }
     
     document.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
-      if (target.classList.contains('edit-btn')) openModal('edit', target.dataset);
+      if (target.classList.contains('edit-btn')) {
+        openModal('edit', target.dataset as Record<string, string>);
+      }
       if (target.closest('.btn-delete')) {
         deleteId = (target.closest('.btn-delete') as HTMLElement).dataset.id || null;
-        deleteModal?.classList.remove('hidden');
+        deleteModal?.showModal();
       }
     });
 
     if (categoryForm) {
       categoryForm.onsubmit = async (e) => {
         e.preventDefault();
+        if (btnSave) {
+          btnSave.disabled = true;
+          btnSave.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Menyimpan...';
+        }
+        
         const formData = new FormData(e.target as HTMLFormElement);
         const data = Object.fromEntries(formData.entries());
         try {
@@ -191,6 +251,11 @@ const allCategories = await db
           }
         } catch (error) {
           alert('Terjadi kesalahan jaringan');
+        } finally {
+          if (btnSave) {
+            btnSave.disabled = false;
+            btnSave.innerText = 'Simpan Kategori';
+          }
         }
       };
     }

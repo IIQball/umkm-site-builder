@@ -1,0 +1,48 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import ProductTable from '@/components/tenant/ProductTable.svelte';
+import { db } from '@/lib/db/client';
+import { storeCategories, stores } from '@/db/schema';
+import { eq, isNull, and } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+
+const userStores = await db.select()
+  .from(stores)
+  .where(and(eq(stores.userId, user.id), isNull(stores.deletedAt)))
+  .limit(1);
+
+const hasStore = userStores.length > 0;
+const STORE_ID = hasStore ? userStores[0].id : null;
+
+const categories = hasStore 
+  ? await db.select()
+      .from(storeCategories)
+      .where(and(
+        eq(storeCategories.storeId, STORE_ID!), 
+        isNull(storeCategories.deletedAt)
+      ))
+  : [];
+---
+
+<DashboardLayout title="Manajemen Produk" breadcrumb="Produk">
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold tracking-tight text-base-content">Manajemen Produk</h1>
+    <p class="text-sm text-base-content/60 mt-1">Kelola daftar produk, varian, dan harga untuk toko Anda.</p>
+  </div>
+  
+  <div>
+    {hasStore ? (
+      <ProductTable client:load storeId={STORE_ID!} categories={categories} />
+    ) : (
+      <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden p-6 text-center py-12">
+        <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">store_off</span>
+        <h3 class="text-lg font-bold text-base-content mb-2">Toko Belum Diatur</h3>
+        <p class="text-base-content/60 mb-6">Anda belum memiliki toko yang aktif. Silakan buat atau atur toko Anda terlebih dahulu.</p>
+        <a href="/dashboard/store" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none">Atur Toko Sekarang</a>
+      </div>
+    )}
+  </div>
+</DashboardLayout>

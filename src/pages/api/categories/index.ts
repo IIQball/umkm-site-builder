@@ -32,9 +32,9 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     return new Response(JSON.stringify({ success: true }), { status: 201 });
-  } catch (error: any) {
-    console.error('POST Error:', error);
-    const code = error?.code || error?.cause?.code;
+  } catch (error: unknown) {
+    const err = error as { code?: string; cause?: { code?: string } };
+    const code = err?.code || err?.cause?.code;
 
     if (code === '23503') {
       return new Response(JSON.stringify({ error: 'Store ID tidak ditemukan' }), { status: 400 });
@@ -71,7 +71,7 @@ export const DELETE: APIRoute = async ({ request }) => {
       .where(eq(storeCategories.id, id));
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
-  } catch (error: any) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Gagal menghapus kategori' }), { status: 500 });
   }
 };

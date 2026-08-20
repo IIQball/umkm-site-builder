@@ -65,6 +65,12 @@
     } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
       editorStore.save();
+    } else if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') || (e.shiftKey && e.key.toLowerCase() === 'g')) {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+        e.preventDefault();
+        editorStore.toggleColumnGrid();
+      }
     }
   };
 </script>

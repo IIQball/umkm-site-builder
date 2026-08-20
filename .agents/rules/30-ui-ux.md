@@ -120,3 +120,26 @@ it before reporting — "it renders" is not the bar.
 - **Draft Schema Invariants**:
   - Draft update and submit schemas in Zod (`TemplateDraftUpdateSchema`, etc.) must tolerate `null` and empty string values for optional attributes (`description: z.string().nullable().optional()`, `thumbnailUrl: z.string().url().nullable().or(z.literal('')).optional()`) to avoid 400 validation failures during draft saves.
 
+## 13. Builder Page Layout Isolation (mandatory)
+
+- `/builder/new` MUST use `DashboardLayout` (sidebar + navbar visible). It is a dashboard-shell form page.
+- `/builder/[templateId]` MUST use `BaseLayout` with `hideNavbar={true}`. It is a fullscreen canvas workspace.
+  Never wrap it with `DashboardLayout` — the canvas must be free of all shell chrome.
+- Any new page added under `/builder/*` must explicitly declare which layout it uses in a comment at the
+  top of the frontmatter (e.g. `// Layout: DashboardLayout — form inside dashboard shell`).
+
+## 14. Astro Frontmatter Import Hygiene (mandatory)
+
+- Before writing any Astro frontmatter import, confirm it is referenced in BOTH the script logic AND/OR
+  the template below the `---` fence.
+- `type` imports used only as type annotations in interfaces/prop definitions are fine — but if the
+  interface is later inlined or removed, remove the type import too.
+- After every edit to an Astro layout file, scan for unused imports. `bun run type-check` (`tsc --noEmit`)
+  catches these as errors — 0 errors is the exit condition, not optional.
+
+## 15. Route Awareness & Navigation (mandatory)
+
+- Always inspect existing routes in `src/pages/` before introducing new routes or linking form actions/navigation.
+- Prefer established routes (e.g., `/templates`) over creating redundant nested sub-paths (e.g., `/designer/templates`).
+- Provide backwards compatibility or redirects when consolidating routes to prevent 404 errors.
+

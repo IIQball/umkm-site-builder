@@ -1,10 +1,31 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
+/**
+ * pages/builder/new.astro
+ * Create-new-template form. Auth-guarded: designer or superadmin only.
+ * Rendered inside DashboardLayout shell (with Sidebar + Navbar).
+ */
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import NewTemplateForm from '@/components/builder/NewTemplateForm.svelte';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login');
+}
 ---
 
-<BaseLayout title="Buat Template Baru - UMKM Visual Builder" description="Mulai membuat template website UMKM baru">
-  <div class="min-h-[calc(100vh-65px)] bg-base-200/50 flex flex-col items-center justify-center p-4 sm:p-6 md:p-10 transition-colors">
-    <NewTemplateForm client:load />
+<DashboardLayout title="Buat Template Baru" breadcrumb="Buat Template">
+  <!-- Breadcrumb trail -->
+  <nav class="flex items-center gap-1.5 text-xs text-base-content/50 mb-6" aria-label="Breadcrumb">
+    <a href="/dashboard" class="hover:text-base-content transition-colors">Dashboard</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <a href="/templates" class="hover:text-base-content transition-colors">Template Saya</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <span class="text-base-content font-medium">Buat Baru</span>
+  </nav>
+
+  <!-- Center the form in the content area -->
+  <div class="flex justify-center">
+    <NewTemplateForm client:load backHref="/templates" />
   </div>
-</BaseLayout>
+</DashboardLayout>

@@ -50,13 +50,11 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
   switch (section.type) {
     case 'header_announcement': {
       const list: LayerNodeItem[] = [];
-      if (section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
+      if (section.props?.showAnnouncement !== false && section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
         list.push({ id: 'announcement', name: 'Announcement Bar', icon: Megaphone });
       }
-      const navs = Array.isArray(section.props?.navLinks) ? (section.props.navLinks as string[]) : [];
-      navs.forEach((link: string, idx: number) => {
-        list.push({ id: `nav_${idx}`, name: `Nav: ${link}`, icon: ListFilter });
-      });
+      list.push({ id: 'logo', name: 'Logo Brand', icon: Image });
+      list.push({ id: 'nav_links', name: 'Navigation Menu', icon: ListFilter });
       return list;
     }
     case 'hero': {

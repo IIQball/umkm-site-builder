@@ -8,7 +8,9 @@ import {
   TemplateDraftUpdateSchema,
   TemplateDraftSubmitSchema,
   DEFAULT_TEMPLATE_SECTIONS,
+  DEFAULT_TEMPLATE_THEME,
 } from '@/schemas/template.schema';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 
 interface ApiResponse<T = Record<string, unknown>> {
   ok: boolean;
@@ -19,7 +21,6 @@ interface ApiResponse<T = Record<string, unknown>> {
   };
 }
 
-const DEFAULT_DESIGNER_ID = 'designer_123';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   try {
@@ -79,6 +80,14 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   try {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedDesigner(user)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'UNAUTHORIZED', message: 'Designer access required' } } as ApiResponse),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await context.request.json();
     const input = TemplateDraftCreateSchema.parse(body);
 
@@ -92,13 +101,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         description: input.description,
         thumbnailUrl: input.thumbnailUrl,
         price: Math.floor((input.price || 0) * 100),
-        designerId: DEFAULT_DESIGNER_ID,
+        designerId: user.id,
         status: 'draft',
         config: {
-          theme: {
-            primaryColor: '#3b82f6',
-            fontFamily: 'sans-serif',
-          },
+          theme: DEFAULT_TEMPLATE_THEME,
           sections: DEFAULT_TEMPLATE_SECTIONS,
         },
       })

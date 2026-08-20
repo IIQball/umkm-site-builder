@@ -19,41 +19,43 @@
   let formName = '';
   let formDescription = '';
 
-  onMount(fetchCategories);
-
-  async function fetchCategories() {
+  const fetchCategories = async () => {
     isLoading = true;
     error = null;
     try {
       const res = await fetch('/api/categories');
-      const data = await res.json() as any;
-      if (data.ok) {
+      const data = (await res.json()) as { ok?: boolean; data?: Category[]; error?: { message?: string } };
+      if (data.ok && data.data) {
         categories = data.data;
       } else {
-        error = data.error.message;
+        error = data.error?.message || 'Gagal memuat kategori';
       }
-    } catch (e) {
+    } catch {
       error = 'Gagal memuat kategori';
     } finally {
       isLoading = false;
     }
-  }
+  };
 
-  function openAddModal() {
+  onMount(() => {
+    fetchCategories();
+  });
+
+  const openAddModal = () => {
     editingCategory = null;
     formName = '';
     formDescription = '';
     isModalOpen = true;
-  }
+  };
 
-  function openEditModal(category: Category) {
+  const openEditModal = (category: Category) => {
     editingCategory = category;
     formName = category.name;
     formDescription = category.description || '';
     isModalOpen = true;
-  }
+  };
 
-  async function handleSubmit() {
+  const handleSubmit = async () => {
     if (!formName.trim()) return;
     
     isSaving = true;
@@ -68,35 +70,35 @@
         body: JSON.stringify({ name: formName, description: formDescription }),
       });
       
-      const data = await res.json() as any;
+      const data = (await res.json()) as { ok?: boolean; error?: { message?: string } };
       if (data.ok) {
         await fetchCategories();
         isModalOpen = false;
       } else {
-        error = data.error.message;
+        error = data.error?.message || 'Gagal menyimpan kategori';
       }
-    } catch (e) {
+    } catch {
       error = 'Gagal menyimpan kategori';
     } finally {
       isSaving = false;
     }
-  }
+  };
 
-  async function deleteCategory(id: string) {
+  const deleteCategory = async (id: string) => {
     if (!confirm('Hapus kategori ini?')) return;
     
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
-      const data = await res.json() as any;
+      const data = (await res.json()) as { ok?: boolean; error?: { message?: string } };
       if (data.ok) {
         categories = categories.filter(c => c.id !== id);
       } else {
-        alert(data.error.message);
+        alert(data.error?.message || 'Gagal menghapus kategori');
       }
-    } catch (e) {
+    } catch {
       alert('Gagal menghapus kategori');
     }
-  }
+  };
 </script>
 
 <div class="space-y-6">

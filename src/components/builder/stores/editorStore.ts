@@ -1,5 +1,5 @@
 import { writable, derived, get } from 'svelte/store';
-import { type TemplateConfig, type TemplateSection } from '@/schemas/template.schema';
+import { type TemplateConfig, type TemplateSection, type TemplateTheme, DEFAULT_TEMPLATE_THEME } from '@/schemas/template.schema';
 import { type EditorTemplate, type EditorState, initialState, clone, ensureValidConfig } from './editorStore.types';
 import { applyDeleteNode, applyAddNode, applySave, applySubmitReview } from './editorStore.mutations';
 
@@ -49,12 +49,59 @@ function createEditorStore() {
       update((state) => ({ ...state, selectedSectionId: sectionId, selectedNodeId: nodeId }));
     },
 
+    deselectAll() {
+      update((state) => ({ ...state, selectedSectionId: null, selectedNodeId: null }));
+    },
+
     setViewMode(viewMode: 'desktop' | 'tablet' | 'mobile') {
       update((state) => ({ ...state, viewMode }));
     },
 
     setCanvasMargin(canvasMargin: '16px' | '24px' | '32px' | '48px') {
       update((state) => ({ ...state, canvasMargin }));
+    },
+
+    toggleColumnGrid() {
+      update((state) => ({ ...state, showColumnGrid: !state.showColumnGrid }));
+    },
+
+    togglePixelGrid() {
+      update((state) => ({ ...state, showPixelGrid: !state.showPixelGrid }));
+    },
+
+    setPreviewTheme(previewTheme: 'light' | 'dark') {
+      update((state) => ({ ...state, previewTheme }));
+    },
+
+    togglePreviewTheme() {
+      update((state) => ({
+        ...state,
+        previewTheme: state.previewTheme === 'light' ? 'dark' : 'light',
+      }));
+    },
+
+    updateGlobalTheme(themeUpdates: Partial<TemplateTheme>) {
+      update((state) => {
+        if (!state.template) return state;
+        const currentTheme = (state.template.config.theme || {}) as Partial<TemplateTheme>;
+        const updates = themeUpdates || {};
+        const newTheme: TemplateTheme = {
+          ...DEFAULT_TEMPLATE_THEME,
+          ...currentTheme,
+          ...updates,
+          colors: { ...(currentTheme.colors || {}), ...(updates.colors || {}) },
+          typography: { ...(currentTheme.typography || {}), ...(updates.typography || {}) },
+          buttons: {
+            ...(currentTheme.buttons || {}),
+            ...(updates.buttons || {}),
+            primary: { ...(currentTheme.buttons?.primary || {}), ...(updates.buttons?.primary || {}) },
+            secondary: { ...(currentTheme.buttons?.secondary || {}), ...(updates.buttons?.secondary || {}) },
+            outline: { ...(currentTheme.buttons?.outline || {}), ...(updates.buttons?.outline || {}) },
+          },
+          layout: { ...(currentTheme.layout || {}), ...(updates.layout || {}) },
+        };
+        return pushHistory(state, { ...state.template.config, theme: newTheme });
+      });
     },
 
     updateTemplateName(name: string) {

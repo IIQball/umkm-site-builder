@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Sliders, Palette, Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas/template.schema';
-  import { fontFamilies, fontSizes, fontWeights, radiusPresets, buttonPaddings, shadowPresets, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
+  import { fontSizes, fontWeights, radiusPresets, buttonPaddings, shadowPresets, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -53,19 +53,9 @@
       </div>
     </div>
 
-    <div>
-      <label for="node-font-family" class="block font-medium mb-1 text-base-content/80">Jenis Font</label>
-      <select
-        id="node-font-family"
-        value={nodeStyles.fontFamily || ''}
-        on:change={(e) => handleStyleChange('fontFamily', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
-      >
-        <option value="">Default (Mengikuti Section)</option>
-        {#each fontFamilies as f}
-          <option value={f.value}>{f.label}</option>
-        {/each}
-      </select>
+    <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[11px] text-blue-600 dark:text-blue-400">
+      <span class="font-semibold block mb-0.5">Tipografi Global Active:</span>
+      Elemen ini mengikuti font family & skala dari <strong>Global Design System</strong>.
     </div>
 
     <div class="grid grid-cols-2 gap-2">

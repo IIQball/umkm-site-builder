@@ -28,14 +28,7 @@
     { value: '500ms', label: '500ms' },
   ];
 
-  const fontOptions = [
-    { value: '', label: 'Default (Inherit)' },
-    { value: 'Inter, sans-serif', label: 'Inter' },
-    { value: 'Poppins, sans-serif', label: 'Poppins' },
-    { value: 'Roboto, sans-serif', label: 'Roboto' },
-    { value: "'Playfair Display', serif", label: 'Playfair Display' },
-    { value: 'Montserrat, sans-serif', label: 'Montserrat' },
-  ];
+
 
   const alignButtons = [
     { value: 'left', icon: AlignLeft, title: 'Rata Kiri' },
@@ -112,15 +105,9 @@
       </div>
     </div>
 
-    <div>
-      <label for="style-font-family" class="block font-medium mb-1 text-base-content/80">Font Family</label>
-      <select id="style-font-family" value={section.styles?.fontFamily || ''}
-        on:change={(e) => onStyleChange('fontFamily', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500">
-        {#each fontOptions as f}
-          <option value={f.value}>{f.label}</option>
-        {/each}
-      </select>
+    <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[11px] text-blue-600 dark:text-blue-400">
+      <span class="font-semibold block mb-0.5">Tip Tipografi Global:</span>
+      Font family dan skala hierarki diatur secara terpusat di <strong>Global Design System</strong> (klik area kosong kanvas).
     </div>
   </div>
 

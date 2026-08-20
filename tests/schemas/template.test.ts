@@ -119,5 +119,115 @@ describe('Template Schemas', () => {
       expect(catSection.styles?.cardPreset).toBe('elevated_shadow');
     }
   });
+
+  it('should validate header_announcement with full 3-element custom configuration', () => {
+    const customConfig = {
+      theme: {
+        primaryColor: '#2563eb',
+      },
+      sections: [
+        {
+          id: 'header-1',
+          type: 'header_announcement',
+          props: {
+            showAnnouncement: true,
+            announcementText: 'Gratis Ongkir Se-Indonesia',
+            announcementAlign: 'center',
+            announcementBgColor: '#1e40af',
+            announcementTextColor: '#ffffff',
+            announcementPaddingY: '10px',
+            logoType: 'image_text',
+            logoText: 'Batik Lestari',
+            logoImageUrl: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9',
+            logoImageHeight: 48,
+            logoTextSize: 'xl',
+            logoTextWeight: 'bold',
+            logoTextColor: '#1e293b',
+            navLinks: ['Beranda', 'Katalog', 'Promo', 'Kontak'],
+            navGap: 'relaxed',
+            navFontSize: '16px',
+            navFontWeight: '600',
+            navTextTransform: 'uppercase',
+            navColor: '#334155',
+            navHoverColor: '#2563eb',
+            ctaText: 'Hubungi Kami',
+            ctaLink: '#contact',
+          },
+          styles: {
+            backgroundColor: '#ffffff',
+            padding: '0px',
+          },
+        },
+      ],
+    };
+
+    const parsed = TemplateConfigSchema.safeParse(customConfig);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      const headerSection = parsed.data.sections[0];
+      expect(headerSection.type).toBe('header_announcement');
+      expect(headerSection.props?.showAnnouncement).toBe(true);
+      expect(headerSection.props?.logoType).toBe('image_text');
+      expect(headerSection.props?.logoImageHeight).toBe(48);
+      expect(headerSection.props?.navGap).toBe('relaxed');
+      expect(headerSection.props?.navTextTransform).toBe('uppercase');
+    }
+  });
+
+  it('should validate full global design system theme configuration', () => {
+    const fullThemeConfig = {
+      theme: {
+        colors: {
+          primary: '#4f46e5',
+          secondary: '#64748b',
+          background: '#ffffff',
+          surface: '#f8fafc',
+          textPrimary: '#0f172a',
+          textMuted: '#64748b',
+        },
+        typography: {
+          headingFont: 'Playfair Display, serif',
+          bodyFont: 'Inter, sans-serif',
+          h1: { fontSize: '40px', lineHeight: '1.2', fontWeight: '800' },
+          h2: { fontSize: '30px', lineHeight: '1.25', fontWeight: '700' },
+          h3: { fontSize: '24px', lineHeight: '1.3', fontWeight: '600' },
+          body: { fontSize: '16px', lineHeight: '1.6', fontWeight: '400' },
+          caption: { fontSize: '13px', lineHeight: '1.5', fontWeight: '400' },
+        },
+        buttons: {
+          borderRadius: '16px',
+          primary: {
+            backgroundColor: '#4f46e5',
+            textColor: '#ffffff',
+            hoverBg: '#4338ca',
+          },
+          secondary: {
+            backgroundColor: '#f1f5f9',
+            textColor: '#0f172a',
+          },
+          outline: {
+            borderColor: '#4f46e5',
+            textColor: '#4f46e5',
+          },
+        },
+        layout: {
+          maxWidth: '1280px',
+          horizontalMarginDesktop: '32px',
+          horizontalMarginTablet: '24px',
+          horizontalMarginMobile: '16px',
+        },
+      },
+      sections: DEFAULT_TEMPLATE_SECTIONS,
+    };
+
+    const parsed = TemplateConfigSchema.safeParse(fullThemeConfig);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.theme?.colors?.primary).toBe('#4f46e5');
+      expect(parsed.data.theme?.typography?.headingFont).toBe('Playfair Display, serif');
+      expect(parsed.data.theme?.buttons?.borderRadius).toBe('16px');
+      expect(parsed.data.theme?.layout?.maxWidth).toBe('1280px');
+    }
+  });
 });
 

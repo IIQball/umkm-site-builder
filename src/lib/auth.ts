@@ -101,7 +101,7 @@ export async function getAuthenticatedUser(request: Request): Promise<Authentica
 
 export function isDesigner(user: AuthenticatedUser | null): boolean {
   if (!user) return false;
-  return user.role === 'designer' || user.role === 'superadmin';
+  return user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin';
 }
 
 export function isActive(user: AuthenticatedUser | null): boolean {

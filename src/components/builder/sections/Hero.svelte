@@ -39,11 +39,21 @@
     const rules: string[] = [];
     if (merged.textAlign) rules.push(`text-align: ${merged.textAlign}`);
     if (merged.color) rules.push(`color: ${merged.color}`);
-    if (merged.fontFamily) rules.push(`font-family: ${merged.fontFamily}`);
+    if (merged.fontFamily) {
+      rules.push(`font-family: ${merged.fontFamily}`);
+    } else if (key === 'title' || key === 'heading' || key.includes('title')) {
+      rules.push(`font-family: var(--theme-font-heading, inherit)`);
+    } else {
+      rules.push(`font-family: var(--theme-font-body, inherit)`);
+    }
     if (merged.fontSize) rules.push(`font-size: ${merged.fontSize}`);
     if (merged.fontWeight) rules.push(`font-weight: ${merged.fontWeight}`);
     if (merged.backgroundColor) rules.push(`background-color: ${merged.backgroundColor}`);
-    if (merged.borderRadius) rules.push(`border-radius: ${merged.borderRadius}`);
+    if (merged.borderRadius) {
+      rules.push(`border-radius: ${merged.borderRadius}`);
+    } else if (key === 'cta' || key.includes('button') || key.includes('btn')) {
+      rules.push(`border-radius: var(--theme-btn-radius, 8px)`);
+    }
     if (merged.padding) rules.push(`padding: ${merged.padding}`);
     if (merged.boxShadow && merged.boxShadow !== 'none') rules.push(`box-shadow: ${merged.boxShadow}`);
     if (merged.marginTop) rules.push(`margin-top: ${merged.marginTop}`);
@@ -267,9 +277,9 @@
             href={ctaLink}
             on:click|preventDefault
             style={buildNodeStyle('cta', {
-              backgroundColor: '#2563eb',
+              backgroundColor: 'var(--theme-primary, #3b82f6)',
               color: '#ffffff',
-              borderRadius: '12px',
+              borderRadius: 'var(--theme-btn-radius, 8px)',
               fontWeight: '600',
             })}
             class={`${

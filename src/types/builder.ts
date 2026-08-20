@@ -19,9 +19,26 @@ export interface NodeStyles {
 }
 
 export interface HeaderAnnouncementProps {
+  showAnnouncement?: boolean;
   announcementText?: string;
+  announcementAlign?: 'center' | 'left' | string;
+  announcementBgColor?: string;
+  announcementTextColor?: string;
+  announcementPaddingY?: string;
+  logoType?: 'image_only' | 'text_only' | 'image_text' | string;
   logoText?: string;
+  logoImageUrl?: string;
+  logoImageHeight?: number | string;
+  logoTextSize?: 'sm' | 'base' | 'lg' | 'xl' | '2xl' | string;
+  logoTextWeight?: 'normal' | 'semibold' | 'bold' | string;
+  logoTextColor?: string;
   navLinks?: string[];
+  navGap?: 'compact' | 'normal' | 'relaxed' | string | number;
+  navFontSize?: '12px' | '14px' | '16px' | '18px' | string;
+  navFontWeight?: '400' | '500' | '600' | string;
+  navTextTransform?: 'none' | 'uppercase' | 'capitalize' | string;
+  navColor?: string;
+  navHoverColor?: string;
   ctaText?: string;
   ctaLink?: string;
   nodeStyles?: Record<string, NodeStyles>;

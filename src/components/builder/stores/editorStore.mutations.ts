@@ -83,7 +83,13 @@ export function applyDeleteNode(
       if (nodeId === 'image') currentProps.imageUrl = '';
     } else if (s.type === 'header_announcement') {
       if (nodeId === 'announcement') {
+        currentProps.showAnnouncement = false;
         currentProps.announcementText = '';
+      } else if (nodeId === 'logo') {
+        currentProps.logoText = '';
+        currentProps.logoImageUrl = '';
+      } else if (nodeId === 'nav_links') {
+        currentProps.navLinks = [];
       } else if (nodeId.startsWith('nav_')) {
         const idx = parseInt(nodeId.replace('nav_', ''), 10);
         if (Array.isArray(currentProps.navLinks)) {
@@ -144,10 +150,19 @@ export function applyAddNode(
       }
       selectedNodeKey = nodeType;
     } else if (s.type === 'header_announcement') {
-      const navs = Array.isArray(currentProps.navLinks) ? [...currentProps.navLinks] : ['Beranda'];
-      navs.push('Menu Baru');
-      currentProps.navLinks = navs;
-      selectedNodeKey = `nav_${navs.length - 1}`;
+      if (nodeType === 'announcement') {
+        currentProps.showAnnouncement = true;
+        currentProps.announcementText = currentProps.announcementText || 'Diskon 20% khusus hari ini';
+        selectedNodeKey = 'announcement';
+      } else if (nodeType === 'logo') {
+        currentProps.logoText = currentProps.logoText || 'Toko UMKM';
+        selectedNodeKey = 'logo';
+      } else {
+        const navs = Array.isArray(currentProps.navLinks) ? [...currentProps.navLinks] : ['Beranda'];
+        navs.push('Menu Baru');
+        currentProps.navLinks = navs;
+        selectedNodeKey = 'nav_links';
+      }
     } else if (s.type === 'features') {
       const items = Array.isArray(currentProps.features) ? [...currentProps.features] : [];
       items.push({ icon: '⭐', title: 'Fitur Baru', description: 'Keunggulan produk dan layanan Anda.' });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const TemplateStylesSchema = z.object({
-  display: z.enum(['flex', 'grid']).optional(),
+  display: z.enum(['flex', 'grid', 'block']).or(z.string()).optional(),
   alignItems: z.string().optional(),
   justifyContent: z.string().optional(),
   gap: z.string().optional(),
@@ -29,11 +29,64 @@ export const TemplateSectionSchema = z.object({
   styles: TemplateStylesSchema.optional(),
 });
 
+export const ThemeColorsSchema = z.object({
+  primary: z.string().optional(),
+  secondary: z.string().optional(),
+  background: z.string().optional(),
+  surface: z.string().optional(),
+  textPrimary: z.string().optional(),
+  textMuted: z.string().optional(),
+}).optional();
+
+export const TypographyScaleItemSchema = z.object({
+  fontSize: z.string().optional(),
+  lineHeight: z.string().optional(),
+  fontWeight: z.string().optional(),
+}).optional();
+
+export const ThemeTypographySchema = z.object({
+  headingFont: z.string().optional(),
+  bodyFont: z.string().optional(),
+  h1: TypographyScaleItemSchema,
+  h2: TypographyScaleItemSchema,
+  h3: TypographyScaleItemSchema,
+  body: TypographyScaleItemSchema,
+  caption: TypographyScaleItemSchema,
+}).optional();
+
+export const ThemeButtonVariantSchema = z.object({
+  backgroundColor: z.string().optional(),
+  textColor: z.string().optional(),
+  borderColor: z.string().optional(),
+  hoverBg: z.string().optional(),
+  hoverText: z.string().optional(),
+}).optional();
+
+export const ThemeButtonsSchema = z.object({
+  primary: ThemeButtonVariantSchema,
+  secondary: ThemeButtonVariantSchema,
+  outline: ThemeButtonVariantSchema,
+  borderRadius: z.string().optional(),
+}).optional();
+
+export const ThemeLayoutSchema = z.object({
+  maxWidth: z.string().optional(),
+  horizontalMarginDesktop: z.string().optional(),
+  horizontalMarginTablet: z.string().optional(),
+  horizontalMarginMobile: z.string().optional(),
+}).optional();
+
+export const TemplateThemeSchema = z.object({
+  primaryColor: z.string().optional(),
+  fontFamily: z.string().optional(),
+  colors: ThemeColorsSchema,
+  typography: ThemeTypographySchema,
+  buttons: ThemeButtonsSchema,
+  layout: ThemeLayoutSchema,
+}).passthrough().optional();
+
 export const TemplateConfigSchema = z.object({
-  theme: z.object({
-    primaryColor: z.string().optional(),
-    fontFamily: z.string().optional(),
-  }).optional(),
+  theme: TemplateThemeSchema,
   sections: z.array(TemplateSectionSchema),
 });
 
@@ -62,25 +115,94 @@ export const TemplateDraftSubmitSchema = z.object({
 
 export type TemplateStyles = z.infer<typeof TemplateStylesSchema>;
 export type TemplateSection = z.infer<typeof TemplateSectionSchema>;
+export type TemplateTheme = NonNullable<z.infer<typeof TemplateThemeSchema>>;
 export type TemplateConfig = z.infer<typeof TemplateConfigSchema>;
 export type TemplateDraftCreate = z.infer<typeof TemplateDraftCreateSchema>;
 export type TemplateDraftUpdate = z.infer<typeof TemplateDraftUpdateSchema>;
 export type TemplateDraftSubmit = z.infer<typeof TemplateDraftSubmitSchema>;
+
+export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
+  primaryColor: '#3b82f6',
+  fontFamily: 'Inter, sans-serif',
+  colors: {
+    primary: '#3b82f6',
+    secondary: '#64748b',
+    background: '#ffffff',
+    surface: '#f8fafc',
+    textPrimary: '#0f172a',
+    textMuted: '#64748b',
+  },
+  typography: {
+    headingFont: 'Inter, sans-serif',
+    bodyFont: 'Inter, sans-serif',
+    h1: { fontSize: '36px', lineHeight: '1.2', fontWeight: '700' },
+    h2: { fontSize: '28px', lineHeight: '1.25', fontWeight: '700' },
+    h3: { fontSize: '22px', lineHeight: '1.3', fontWeight: '600' },
+    body: { fontSize: '15px', lineHeight: '1.6', fontWeight: '400' },
+    caption: { fontSize: '13px', lineHeight: '1.5', fontWeight: '400' },
+  },
+  buttons: {
+    borderRadius: '8px',
+    primary: {
+      backgroundColor: '#3b82f6',
+      textColor: '#ffffff',
+      borderColor: 'transparent',
+      hoverBg: '#2563eb',
+      hoverText: '#ffffff',
+    },
+    secondary: {
+      backgroundColor: '#f1f5f9',
+      textColor: '#0f172a',
+      borderColor: 'transparent',
+      hoverBg: '#e2e8f0',
+      hoverText: '#0f172a',
+    },
+    outline: {
+      backgroundColor: 'transparent',
+      textColor: '#3b82f6',
+      borderColor: '#3b82f6',
+      hoverBg: '#eff6ff',
+      hoverText: '#2563eb',
+    },
+  },
+  layout: {
+    maxWidth: '1200px',
+    horizontalMarginDesktop: '32px',
+    horizontalMarginTablet: '24px',
+    horizontalMarginMobile: '16px',
+  },
+};
 
 export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
   {
     id: 'section-1',
     type: 'header_announcement',
     props: {
+      showAnnouncement: true,
       announcementText: 'Diskon 20% khusus hari ini',
+      announcementAlign: 'center',
+      announcementBgColor: '#2563eb',
+      announcementTextColor: '#ffffff',
+      announcementPaddingY: '8px',
+      logoType: 'image_text',
+      logoText: 'Toko UMKM',
+      logoImageUrl: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100',
+      logoImageHeight: 36,
+      logoTextSize: 'lg',
+      logoTextWeight: 'bold',
+      logoTextColor: '#0f172a',
       navLinks: ['Beranda', 'Produk', 'Tentang', 'Kontak'],
+      navGap: 'normal',
+      navFontSize: '14px',
+      navFontWeight: '500',
+      navTextTransform: 'none',
+      navColor: '#475569',
+      navHoverColor: '#2563eb',
     },
     styles: {
-      backgroundColor: '#f3f4f6',
-      padding: '16px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      backgroundColor: '#ffffff',
+      padding: '0px',
+      display: 'block',
     },
   },
   {

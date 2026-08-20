@@ -1,117 +1,33 @@
 <script lang="ts">
-  import { editorStore, activeNodeId } from '../stores/editorStore';
   import type { HeaderAnnouncementProps, SectionStyles } from '@/types/builder';
+  import AnnouncementBar from './header/AnnouncementBar.svelte';
+  import HeaderLogo from './header/HeaderLogo.svelte';
+  import HeaderNav from './header/HeaderNav.svelte';
 
   export let props: HeaderAnnouncementProps = {};
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile';
-  $: announcementText = props?.announcementText ?? 'Diskon 20% khusus hari ini';
-  $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
   $: hasCustomBg = !!styles?.backgroundColor;
-  $: hasCustomColor = !!styles?.color;
-  $: nodeStylesMap = props?.nodeStyles || {};
-
-  const buildNodeStyle = (key: string, defaults: Record<string, string> = {}): string => {
-    const custom = nodeStylesMap[key] || {};
-    const merged = { ...defaults, ...custom };
-    const rules: string[] = [];
-
-    if (merged.textAlign) rules.push(`text-align: ${merged.textAlign}`);
-    if (merged.color) rules.push(`color: ${merged.color}`);
-    if (merged.fontFamily) rules.push(`font-family: ${merged.fontFamily}`);
-    if (merged.fontSize) rules.push(`font-size: ${merged.fontSize}`);
-    if (merged.fontWeight) rules.push(`font-weight: ${merged.fontWeight}`);
-    if (merged.marginTop) rules.push(`margin-top: ${merged.marginTop}`);
-    if (merged.marginBottom) rules.push(`margin-bottom: ${merged.marginBottom}`);
-
-    return rules.join('; ');
-  };
-
-  let draggedIdx: number | null = null;
-  let dropTargetIdx: number | null = null;
-
-  const onDragStart = (e: DragEvent, index: number) => {
-    if (!isActive) return;
-    draggedIdx = index;
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', String(index));
-    }
-  };
-
-  const onDragOver = (e: DragEvent, index: number) => {
-    if (draggedIdx === null || draggedIdx === index) return;
-    e.preventDefault();
-    dropTargetIdx = index;
-  };
-
-  const onDrop = (e: DragEvent, targetIdx: number) => {
-    e.preventDefault();
-    if (draggedIdx === null || draggedIdx === targetIdx) {
-      draggedIdx = null;
-      dropTargetIdx = null;
-      return;
-    }
-
-    const list = [...navLinks];
-    const [moved] = list.splice(draggedIdx, 1);
-    list.splice(targetIdx, 0, moved);
-    editorStore.updateSectionProps(sectionId, { navLinks: list });
-
-    draggedIdx = null;
-    dropTargetIdx = null;
-  };
-
-  const handleAnnouncementClick = (e: MouseEvent) => {
-    e.stopPropagation();
-    editorStore.selectNode(sectionId, 'announcement');
-  };
-
-  const handleAnnouncementKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.stopPropagation();
-      editorStore.selectNode(sectionId, 'announcement');
-    }
-  };
 </script>
 
-<div class={`w-full flex ${isMobileView ? 'flex-col gap-2' : 'flex-col sm:flex-row gap-2 sm:gap-4'} items-center justify-between px-3 sm:px-6 py-2 sm:py-2.5 border-b box-border ${hasCustomBg ? '' : 'bg-slate-50 border-slate-200/80'}`}>
+<div class="w-full flex flex-col box-border">
+  <!-- 1. Top Full-Width Row: Announcement Bar -->
+  <AnnouncementBar {props} {sectionId} {isActive} />
+
+  <!-- 2. Main Header Navbar Row: Logo on Left, Nav on Right -->
   <div
-    role="button"
-    tabindex="0"
-    on:click={handleAnnouncementClick}
-    on:keydown={handleAnnouncementKeydown}
-    class={`w-full sm:w-auto flex-1 ${isMobileView ? 'text-center' : 'text-center sm:text-left'} min-w-0 cursor-pointer rounded px-2 py-0.5 transition-all ${
-      isActive && $activeNodeId === 'announcement' ? 'ring-2 ring-blue-500' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60'
+    class={`w-full border-b box-border transition-colors ${
+      hasCustomBg ? '' : 'bg-white border-slate-200/80'
     }`}
   >
-    <p
-      style={buildNodeStyle('announcement')}
-      class={`text-xs sm:text-sm font-semibold tracking-wide ${isMobileView ? 'text-center' : 'truncate sm:whitespace-normal'} ${hasCustomColor ? '' : 'text-slate-800'}`}
-    >
-      {announcementText}
-    </p>
-  </div>
+    <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between min-w-0">
+      <!-- Left Side: Store Logo -->
+      <HeaderLogo {props} {sectionId} {isActive} />
 
-  <nav class={`flex items-center justify-center ${isMobileView ? 'flex-wrap gap-2.5' : 'sm:justify-end gap-3 sm:gap-5'} text-xs font-medium max-w-full py-0.5 flex-shrink-0 ${hasCustomColor ? 'opacity-90' : 'text-slate-600'}`}>
-    {#each navLinks as link, index (link + index)}
-      <span
-        role="button"
-        tabindex="0"
-        draggable={isActive}
-        on:dragstart={(e) => onDragStart(e, index)}
-        on:dragover={(e) => onDragOver(e, index)}
-        on:dragleave={() => (dropTargetIdx = null)}
-        on:drop={(e) => onDrop(e, index)}
-        class={`whitespace-nowrap transition-all px-1 py-0.5 ${isActive ? 'cursor-grab active:cursor-grabbing hover:text-blue-600' : 'cursor-pointer hover:text-slate-900'} ${
-          dropTargetIdx === index ? 'border-l-2 border-blue-500 pl-1' : ''
-        } ${draggedIdx === index ? 'opacity-30' : ''}`}
-      >
-        {link}
-      </span>
-    {/each}
-  </nav>
+      <!-- Right Side: Navigation Menu & Action -->
+      <HeaderNav {props} {sectionId} {isActive} />
+    </div>
+  </div>
 </div>

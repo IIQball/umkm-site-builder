@@ -12,9 +12,10 @@
     Sun,
     Moon,
     ArrowLeft,
+    Grid,
+    Grid2X2,
   } from 'lucide-svelte';
   import { editorStore, canUndo, canRedo } from './stores/editorStore';
-  import { onMount } from 'svelte';
 
   export let templateName: string = 'Template';
   export let status: string = 'draft';
@@ -28,22 +29,10 @@
 
   let isEditingName = false;
   let nameInputValue = templateName;
-  let isDark = false;
 
   const focus = (el: HTMLInputElement) => el.focus();
 
   $: nameInputValue = templateName;
-
-  onMount(() => {
-    isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  });
-
-  const toggleTheme = () => {
-    isDark = !isDark;
-    const theme = isDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  };
 
   const handleNameSave = () => {
     isEditingName = false;
@@ -111,8 +100,8 @@
     </span>
   </div>
 
-  <!-- Center: Viewport Switcher & Undo/Redo -->
-  <div class="flex items-center gap-2.5">
+  <!-- Center: Viewport Switcher & Grid & Undo/Redo -->
+  <div class="flex items-center gap-2">
     <!-- Undo / Redo -->
     <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
       <button
@@ -145,7 +134,7 @@
             ? 'bg-base-100 text-base-content font-semibold shadow-sm'
             : 'text-base-content/60 hover:text-base-content'
         }`}
-        title="Desktop View (100% / max-w-5xl)"
+        title="Desktop View (1200px)"
       >
         <Monitor size={14} />
         <span class="hidden sm:inline">Desktop</span>
@@ -158,7 +147,7 @@
             ? 'bg-base-100 text-base-content font-semibold shadow-sm'
             : 'text-base-content/60 hover:text-base-content'
         }`}
-        title="Tablet View (768px)"
+        title="Tablet View (768px Flat Frame)"
       >
         <Tablet size={14} />
         <span class="hidden sm:inline">Tablet</span>
@@ -171,10 +160,39 @@
             ? 'bg-base-100 text-base-content font-semibold shadow-sm'
             : 'text-base-content/60 hover:text-base-content'
         }`}
-        title="Mobile View (375px)"
+        title="Mobile View (375px Flat Frame)"
       >
         <Smartphone size={14} />
         <span class="hidden sm:inline">Mobile</span>
+      </button>
+    </div>
+
+    <!-- Figma-Style Layout Grid Guides Toggle -->
+    <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
+      <button
+        type="button"
+        on:click={() => editorStore.toggleColumnGrid()}
+        class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+          $editorStore.showColumnGrid
+            ? 'bg-blue-600 text-white font-semibold shadow-sm'
+            : 'text-base-content/60 hover:text-base-content'
+        }`}
+        title="Toggle Column Grid Guides (Ctrl+G / Shift+G)"
+      >
+        <Grid size={13} />
+        <span class="hidden md:inline text-[11px]">Grid</span>
+      </button>
+      <button
+        type="button"
+        on:click={() => editorStore.togglePixelGrid()}
+        class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
+          $editorStore.showPixelGrid
+            ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+            : 'text-base-content/60 hover:text-base-content'
+        }`}
+        title="Toggle 8px Pixel Grid"
+      >
+        <Grid2X2 size={13} />
       </button>
     </div>
 
@@ -194,19 +212,25 @@
     </div>
   </div>
 
-  <!-- Right Actions: Theme Toggle, Save Draft & Submit -->
+  <!-- Right Actions: Theme Preview Toggle, Save Draft & Submit -->
   <div class="flex items-center gap-2">
-    <!-- Theme Toggle -->
+    <!-- Canvas Preview Theme Mode (Light / Dark) -->
     <button
       type="button"
-      on:click={toggleTheme}
-      class="p-1.5 rounded-lg bg-base-200 hover:bg-base-300 text-base-content/80 hover:text-base-content transition-colors cursor-pointer border border-base-300 dark:border-slate-800"
-      title="Ganti Tema (Terang / Gelap)"
+      on:click={() => editorStore.togglePreviewTheme()}
+      class={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-base-300 dark:border-slate-800 text-xs font-medium transition-colors cursor-pointer ${
+        $editorStore.previewTheme === 'dark'
+          ? 'bg-slate-800 text-amber-400 border-slate-700'
+          : 'bg-base-200 text-slate-700 hover:bg-base-300'
+      }`}
+      title="Preview Canvas Mode: Light / Dark"
     >
-      {#if isDark}
-        <Sun size={14} class="text-amber-400" />
+      {#if $editorStore.previewTheme === 'dark'}
+        <Moon size={13} class="text-amber-400" />
+        <span class="text-[11px] font-semibold">Dark</span>
       {:else}
-        <Moon size={14} class="text-slate-600" />
+        <Sun size={13} class="text-amber-500" />
+        <span class="text-[11px] font-semibold">Light</span>
       {/if}
     </button>
 

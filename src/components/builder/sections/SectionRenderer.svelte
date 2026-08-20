@@ -30,11 +30,13 @@
     const rules: string[] = [];
     const defaultTextColor = isDarkColor(s.backgroundColor || '#ffffff') ? '#f8fafc' : '#0f172a';
 
-    rules.push(`background-color: ${s.backgroundColor || '#ffffff'}`);
+    const defaultPadding = section?.type === 'header_announcement' ? '0px' : '48px 24px';
+    rules.push(`background-color: ${s.backgroundColor || 'transparent'}`);
     rules.push(`color: ${s.color || defaultTextColor}`);
-    rules.push(`padding: ${s.padding || '48px 24px'}`);
+    rules.push(`padding: ${s.padding || defaultPadding}`);
     rules.push(`text-align: ${s.textAlign || 'center'}`);
     rules.push(`border-radius: ${s.borderRadius || '0px'}`);
+    if (s.fontFamily) rules.push(`font-family: ${s.fontFamily}`);
 
     if (s.marginTop) rules.push(`margin-top: ${s.marginTop}`);
     if (s.marginBottom) rules.push(`margin-bottom: ${s.marginBottom}`);
@@ -63,31 +65,36 @@
   $: containerWidthMode = section?.styles?.containerWidth || 'boxed';
   $: containerClass = containerWidthMode === 'full'
     ? 'w-full max-w-full px-3.5 sm:px-6 md:px-8'
-    : 'max-w-6xl mx-auto w-full max-w-full px-3.5 sm:px-6 md:px-8';
+    : 'mx-auto w-full max-w-full px-3.5 sm:px-6 md:px-8';
+  $: containerStyle = containerWidthMode === 'full'
+    ? ''
+    : 'max-width: var(--theme-max-width, 1200px);';
 </script>
 
 <section
   id={section.id}
   style={inlineStyle}
-  class="relative transition-all box-border w-full max-w-full overflow-x-hidden min-w-0"
+  class="relative transition-all box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
 >
-  <div class={`${containerClass} min-w-0 box-border`}>
-    {#if section.type === 'header_announcement'}
-      <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'hero'}
-      <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'features'}
-      <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'product_catalog'}
-      <ProductCatalog props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'testimonials'}
-      <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'faq'}
-      <FAQ props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
-    {:else if section.type === 'footer'}
-      <Footer props={section.props || {}} styles={section.styles || {}} />
-    {/if}
-  </div>
+  {#if section.type === 'header_announcement'}
+    <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+  {:else}
+    <div class={`${containerClass} min-w-0 box-border`} style={containerStyle}>
+      {#if section.type === 'hero'}
+        <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+      {:else if section.type === 'features'}
+        <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+      {:else if section.type === 'product_catalog'}
+        <ProductCatalog props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+      {:else if section.type === 'testimonials'}
+        <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+      {:else if section.type === 'faq'}
+        <FAQ props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+      {:else if section.type === 'footer'}
+        <Footer props={section.props || {}} styles={section.styles || {}} />
+      {/if}
+    </div>
+  {/if}
 </section>
 
 <style>

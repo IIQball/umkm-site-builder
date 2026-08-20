@@ -113,6 +113,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    // eslint-disable-next-line no-console
     console.error('[STORE] register-subdomain failed:', err);
     return new Response(
       JSON.stringify(internalError()),

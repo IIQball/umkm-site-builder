@@ -8,7 +8,7 @@
   let loading = false;
   let showPassword = false;
 
-  async function handleSubmit(e: Event) {
+  const handleSubmit = async (e: Event) => {
     e.preventDefault();
     error = "";
     loading = true;
@@ -25,12 +25,12 @@
       }
 
       window.location.href = "/";
-    } catch (err: any) {
-      error = err.message || "Terjadi kesalahan sistem";
+    } catch (err: unknown) {
+      error = err instanceof Error ? err.message : "Terjadi kesalahan sistem";
     } finally {
       loading = false;
     }
-  }
+  };
 </script>
 
 <form on:submit={handleSubmit} class="space-y-5">

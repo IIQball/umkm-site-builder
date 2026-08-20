@@ -1,0 +1,86 @@
+---
+/**
+ * pages/dashboard/index.astro
+ * Dashboard entry point — renders summary per user role.
+ */
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+// DashboardLayout already handles null session → redirect to /auth/login
+// but we also read user here for role-based rendering
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+---
+
+<DashboardLayout title="Dashboard">
+  <div class="space-y-6">
+    <!-- Welcome Banner -->
+    <div class="p-5 rounded-2xl bg-blue-600 text-white flex items-center justify-between shadow-lg shadow-blue-600/20">
+      <div>
+        <p class="text-blue-100 text-xs font-medium mb-0.5">Selamat datang kembali</p>
+        <h1 class="text-xl font-bold">{user.name ?? user.email}</h1>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[28px]">waving_hand</span>
+      </div>
+    </div>
+
+    {/* ── Designer Dashboard ── */}
+    {user.role === 'designer' && (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Template Saya</p>
+          <p class="text-3xl font-extrabold text-base-content">—</p>
+          <a href="/templates" class="text-xs text-blue-500 font-semibold hover:underline">Lihat semua →</a>
+        </div>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Saldo Dompet</p>
+          <p class="text-3xl font-extrabold text-base-content">Rp —</p>
+          <a href="/designer/wallet" class="text-xs text-blue-500 font-semibold hover:underline">Lihat detail →</a>
+        </div>
+        <div class="sm:col-span-2 p-5 rounded-2xl bg-base-100 border border-dashed border-blue-300 dark:border-blue-800 text-center space-y-2">
+          <span class="material-symbols-outlined text-blue-400 text-[32px]">add_circle</span>
+          <p class="text-sm font-semibold text-base-content">Mulai template baru</p>
+          <a href="/builder/new" class="btn btn-primary btn-sm rounded-xl">Buka Visual Builder</a>
+        </div>
+      </div>
+    )}
+
+    {/* ── Tenant Dashboard ── */}
+    {user.role === 'tenant' && (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Status Toko</p>
+          <p class="text-2xl font-bold text-base-content">—</p>
+          <a href="/dashboard/store" class="text-xs text-blue-500 font-semibold hover:underline">Pengaturan toko →</a>
+        </div>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Produk</p>
+          <p class="text-3xl font-extrabold text-base-content">—</p>
+          <a href="/dashboard/products" class="text-xs text-blue-500 font-semibold hover:underline">Kelola produk →</a>
+        </div>
+      </div>
+    )}
+
+    {/* ── Admin / Superadmin Dashboard ── */}
+    {(user.role === 'admin' || user.role === 'superadmin') && (
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Transaksi</p>
+          <p class="text-3xl font-extrabold text-base-content">—</p>
+          <a href="/admin/transactions" class="text-xs text-blue-500 font-semibold hover:underline">Lihat semua →</a>
+        </div>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total User</p>
+          <p class="text-3xl font-extrabold text-base-content">—</p>
+          <a href="/admin/users" class="text-xs text-blue-500 font-semibold hover:underline">Manajemen user →</a>
+        </div>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Template Pending Kurasi</p>
+          <p class="text-3xl font-extrabold text-base-content">—</p>
+          <a href="/admin/templates" class="text-xs text-blue-500 font-semibold hover:underline">Kurasi →</a>
+        </div>
+      </div>
+    )}
+  </div>
+</DashboardLayout>

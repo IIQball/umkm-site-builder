@@ -5,6 +5,7 @@ import PaymentModal from '@/components/checkout/PaymentModal.svelte';
 import { transactionService } from '@/services/transaction.service';
 import { formatCurrency } from '@/lib/utils/format';
 import type { CheckoutPageData } from '@/types/transactions';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 const { invoiceId } = Astro.params;
 
@@ -12,6 +13,13 @@ if (!invoiceId) {
   return Astro.redirect('/');
 }
 
+// Auth guard: must be logged in to view checkout
+const currentUser = await getAuthenticatedUser(Astro.request);
+if (!currentUser) {
+  return Astro.redirect(`/auth/login?redirect=/checkout/${invoiceId}`);
+}
+
+let accessDenied = false;
 let pageData: CheckoutPageData | null = null;
 let error: string | null = null;
 
@@ -20,24 +28,30 @@ try {
   if (!transaction) {
     error = 'Tagihan tidak ditemukan atau telah kedaluwarsa';
   } else {
-    let paymentUrl = '';
-    if (transaction.status === 'pending') {
-      paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || '';
-    }
+    // Ownership check: only transaction owner or admin can view
+    const isOwner = transaction.userId === currentUser.id;
+    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
+    if (!isOwner && !isAdmin) {
+      accessDenied = true;
+    } else {
+      let paymentUrl = '';
+      if (transaction.status === 'pending') {
+        paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || '';
+      }
 
-    pageData = {
-      invoiceId: transaction.externalId,
-      amount: transaction.amount,
-      amountFormatted: formatCurrency(Math.round(transaction.amount * 100)),
-      paymentUrl,
-      status: transaction.status,
-      expiresAt: '',
-      paymentMethod: transaction.paymentChannel,
-    };
+      pageData = {
+        invoiceId: transaction.externalId,
+        amount: transaction.amount,
+        amountFormatted: formatCurrency(Math.round(transaction.amount * 100)),
+        paymentUrl,
+        status: transaction.status,
+        expiresAt: '',
+        paymentMethod: transaction.paymentChannel,
+      };
+    }
   }
 } catch (err) {
-  console.error('[Checkout] Error fetching transaction:', err);
-  error = 'Gagal memuat rincian pembayaran';
+   error = 'Gagal memuat rincian pembayaran';
 }
 ---
 
@@ -46,9 +60,19 @@ try {
 
   <div class="min-h-screen bg-base-200 flex flex-col justify-center items-center py-10 px-4 text-base-content antialiased">
     <div class="w-full max-w-lg">
-      
+
+      <!-- 403 Access Denied -->
+      {accessDenied && (
+        <div class="p-8 rounded-2xl bg-base-100 border border-rose-200 dark:border-rose-900 shadow-lg text-center space-y-3">
+          <span class="material-symbols-outlined text-rose-500 text-[48px]">lock</span>
+          <h2 class="text-lg font-bold text-base-content">Akses Ditolak</h2>
+          <p class="text-sm text-base-content/60">Anda tidak memiliki akses ke halaman pembayaran ini.</p>
+          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl">Ke Dashboard</a>
+        </div>
+      )}
+
       <!-- Error Alert -->
-      {error && (
+      {!accessDenied && error && (
         <div class="alert alert-error shadow-lg text-white text-xs rounded-xl flex items-start gap-2 mb-4">
           <span class="material-symbols-outlined text-lg shrink-0">error</span>
           <div>

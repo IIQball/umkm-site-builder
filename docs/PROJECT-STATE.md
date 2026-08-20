@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-18 by xendit-refactor session
+Status: LIVE · Updated: 2026-08-20 by auth-integration-dashboard-shell session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,28 +11,41 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete + Documentation Audit complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema aligned with all documentation, dan Neon Serverless integration. Mulai integrasi BetterAuth (Phase 1.2). Fitur Google OAuth provider telah ditambahkan beserta dengan penanganan di antarmuka (UI).
-
-The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Tailwind/daisyUI/Drizzle/Neon on Cloudflare.
+Visual Template Builder complete with Global Design System (Deselect / Root context), Figma-Style Layout Grid Guides (12/8/4-col adaptive + 8px pixel grid), Canvas Theme Preview toggle (Light / Dark mode), and Flat Pixel-Perfect Viewport Frame standardizations. All 7 UMKM sections inherit global tokens (colors, typography hierarchy, button variants/radius, layout container/safe-zone margins) with seamless local section override support.
 
 ## Last session did
 
-- Integrasi Google OAuth dengan BetterAuth:
-  - Menambahkan konfigurasi provider Google di `src/lib/auth.ts`.
-  - Membuat komponen mandiri `GoogleAuthButton.svelte`.
-  - Mengintegrasikan tombol login dengan Google pada `LoginForm.svelte` dan `RegisterForm.svelte`.
-  - Menjalankan uji validasi statis (type-check, test, build).
-  - Tidak ada penambahan field atau tabel baru (menggunakan tabel `accounts` bawaan dari Drizzle adapter).
+- **Auth Integration — Template Builder & Xendit Transactions:**
+  - `src/pages/builder/new.astro` — Auth guard: only `designer`/`superadmin` with `active` status.
+  - `src/pages/builder/[templateId].astro` — Auth guard: same role check. Builder stays full-canvas (no dashboard shell).
+  - `src/pages/api/templates/draft.ts` — Replaced `DEFAULT_DESIGNER_ID = 'designer_123'` with real `user.id` from BetterAuth session. POST returns 401 for unauthenticated or non-designer requests.
+  - `src/pages/api/builder/save.ts` — Auth guard + ownership check (`designerId = user.id`). Superadmin bypasses ownership filter.
+  - `src/pages/api/transactions/initiate.ts` — Replaced `x-user-id` header hack with real BetterAuth session. Added suspended account check.
+  - `src/pages/checkout/[invoiceId].astro` — Redirect to `/auth/login` if unauthenticated. Ownership check: only `transaction.userId === currentUser.id` or admin/superadmin. 403 block rendered for unauthorized access.
+- **Unified Responsive Dashboard Shell:**
+  - `src/layouts/DashboardLayout.astro` (NEW) — Auth redirect shell. Wraps Sidebar + DashboardNavbar around page content. Does NOT wrap builder pages.
+  - `src/components/dashboard/Sidebar.svelte` (NEW) — Desktop: collapsible 260px/72px sidebar, state persisted to `localStorage`. Mobile: FAB hamburger `fixed bottom-6 right-6 z-50 shadow-2xl` + slide-over drawer with backdrop. Role-based nav items (designer/tenant/admin/superadmin). Sign-out integration.
+  - `src/components/dashboard/DashboardNavbar.svelte` (NEW) — Slim header: role badge, user name + initials avatar, theme toggle.
+  - `src/pages/dashboard/index.astro` (NEW) — Entry point per role: designer (template count + wallet), tenant (toko status + produk), admin/superadmin (transaksi + user metrics placeholders).
+- **Public Navbar & Homepage:**
+  - `src/components/common/Navbar.astro` — Cleaned to Beranda + Direktori UMKM nav links only. Auth-aware: shows Masuk/Daftar or Ke Dashboard + avatar depending on session.
+  - `src/pages/index.astro` — Replaced `Buka Visual Builder` (unauthenticated link) with `Daftar Gratis` → `/auth/register`.
+  - `src/pages/umkm.astro` (NEW) — Public read-only UMKM directory stub with search bar + skeleton cards.
+- **Bug Fixes:**
+  - `NodeContentForm.svelte` — Fixed TS errors (Zod passthrough `{}` cast to `string`). Fixed A11y warnings (added `for`/`id` to Heading Level + Primary Color labels).
+- **Code Quality & Testing:**
+  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 49/49 pass.
+  - Updated `tests/api/builder/save.test.ts` to reflect new 401 auth guard behavior.
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth Lanjutan):** Email/password auth, session management, route guards.
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints).
-3. **Phase 1.4 (Template Purchases):** Use existing transaction flow for template purchase type.
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup.
-5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage.
-6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing.
-7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace.
+1. **Phase 1.2 (BetterAuth continued):** Google OAuth, email verification flow, password reset
+2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints)
+3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
+4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
+6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
+7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Documentation status
 

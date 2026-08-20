@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * seed.ts
  * Run: bun run db:seed

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore } from '../stores/editorStore';
-  import type { FeaturesProps, SectionStyles } from '@/types/builder';
+  import type { FeaturesProps, SectionStyles } from '@/types';
   import { ShieldCheck, Truck, Award, Star } from 'lucide-svelte';
 
   export let props: FeaturesProps = {};

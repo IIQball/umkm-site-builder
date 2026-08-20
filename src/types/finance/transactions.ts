@@ -1,5 +1,5 @@
 /**
- * Payment types and interfaces
+ * Payment and Transaction Types
  * Aligned with transactions table schema
  */
 
@@ -79,21 +79,17 @@ export interface XenditWebhookPayload {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Transaction record as stored in database
- * Maps directly to transactions table
- */
 export interface TransactionRecord {
   id: string;
   userId: string;
   type: TransactionType;
-  amount: number; // in IDR cents (multiply by 100 to store, divide by 100 to retrieve)
+  amount: number; // in IDR cents
   status: PaymentStatus;
   storeId?: string;
   templateId?: string;
-  externalId: string; // Xendit invoice ID
-  paymentGatewayRef?: string; // Additional reference from Xendit
-  paymentChannel?: string; // Payment method (e.g., BANK_TRANSFER, E_WALLET)
+  externalId: string;
+  paymentGatewayRef?: string;
+  paymentChannel?: string;
   createdAt: Date;
 }
 

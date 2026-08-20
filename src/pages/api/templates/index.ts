@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPublicTemplates, type PublicTemplateItem } from '@/services/template.service';
+import { getPublicTemplates, type PublicTemplateItem } from '@/services';
 
 interface ApiResponse<T = unknown> {
   ok: boolean;

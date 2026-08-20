@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore } from '../stores/editorStore';
-  import type { TestimonialsProps, SectionStyles, TestimonialItem } from '@/types/builder';
+  import type { TestimonialsProps, SectionStyles, TestimonialItem } from '@/types';
   import { Star } from 'lucide-svelte';
 
   export let props: TestimonialsProps = {};

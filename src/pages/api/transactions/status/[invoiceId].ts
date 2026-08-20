@@ -4,7 +4,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { transactionService } from '@/services/transaction.service';
+import { transactionService } from '@/services';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface ResponseData {

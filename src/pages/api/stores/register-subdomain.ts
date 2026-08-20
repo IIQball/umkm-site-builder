@@ -12,7 +12,7 @@ import {
   invalidStateError,
   internalError,
   okResponse,
-} from '@/types/api';
+} from '@/types';
 import { ZodError } from 'zod';
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 

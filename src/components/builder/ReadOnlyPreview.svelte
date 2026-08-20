@@ -13,7 +13,7 @@
     Moon,
   } from 'lucide-svelte';
   import SectionRenderer from './sections/SectionRenderer.svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { onMount } from 'svelte';
 
   export let template: {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import CatalogStylesTab from './inspector/CatalogStylesTab.svelte';
   import HeaderStylesTab from './inspector/HeaderStylesTab.svelte';
   import GeneralStylesTab from './inspector/GeneralStylesTab.svelte';

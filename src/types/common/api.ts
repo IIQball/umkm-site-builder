@@ -3,7 +3,7 @@
  * All API responses follow this structure
  */
 
-export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
+export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;
 
 export interface SuccessResponse<T> {
   ok: true;
@@ -18,7 +18,6 @@ export interface ErrorResponse {
   };
 }
 
-// Error codes
 export const ErrorCode = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   UNAUTHORIZED: 'UNAUTHORIZED',
@@ -32,7 +31,6 @@ export const ErrorCode = {
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
-// Response helpers
 export function okResponse<T>(data: T): SuccessResponse<T> {
   return { ok: true, data };
 }
@@ -59,11 +57,13 @@ export const validationError = (msg = 'Validation failed') =>
 export const duplicateKeyError = (msg = 'Resource already exists') =>
   errorResponse('DUPLICATE_KEY', msg);
 
-export const invalidStateError = (msg: string) =>
+export const invalidState = (msg = 'Invalid state') =>
   errorResponse('INVALID_STATE', msg);
 
-export const paymentFailedError = (msg: string) =>
+export const invalidStateError = invalidState;
+
+export const paymentFailed = (msg = 'Payment failed') =>
   errorResponse('PAYMENT_FAILED', msg);
 
-export const internalError = (msg = 'Something went wrong') =>
+export const internalError = (msg = 'Internal server error') =>
   errorResponse('INTERNAL', msg);

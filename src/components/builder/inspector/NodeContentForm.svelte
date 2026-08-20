@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Sparkles, Trash2, Menu, Plus } from 'lucide-svelte';
 
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { editorStore } from '../stores/editorStore';
   import {
     makeHandleAddArrayItem,

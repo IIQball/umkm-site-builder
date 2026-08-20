@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AlignLeft, AlignCenter, AlignRight, Type, PaintBucket, Sparkles } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
   export let onStyleChange: (key: string, value: string) => void;

@@ -1,4 +1,4 @@
-import type { TemplateConfig } from '@/schemas/template.schema';
+import type { TemplateConfig } from '@/schemas';
 import type { EditorState, EditorTemplate } from './editorStore.types';
 
 type Updater = (fn: (s: EditorState) => EditorState) => void;

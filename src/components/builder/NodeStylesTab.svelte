@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Sliders, Palette, Sparkles } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { fontSizes, fontWeights, radiusPresets, buttonPaddings, shadowPresets, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
 
   export let section: TemplateSection;

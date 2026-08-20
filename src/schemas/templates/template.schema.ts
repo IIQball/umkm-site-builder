@@ -1,3 +1,7 @@
+/**
+ * Template Builder Validation Schemas (Zod) - Templates Domain
+ */
+
 import { z } from 'zod';
 
 export const TemplateStylesSchema = z.object({
@@ -25,7 +29,7 @@ export const TemplateSectionSchema = z.object({
     'faq',
     'footer',
   ]),
-  props: z.record(z.any()).optional(),
+  props: z.record(z.unknown()).optional(),
   styles: TemplateStylesSchema.optional(),
 });
 

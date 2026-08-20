@@ -1,17 +1,9 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
 import { eq, isNull, desc } from 'drizzle-orm';
+import type { PublicTemplateItem } from '@/types';
 
-export interface PublicTemplateItem {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  thumbnailUrl: string | null;
-  status: 'draft' | 'pending' | 'approved' | 'rejected';
-  createdAt: Date;
-  designerName: string;
-}
+export type { PublicTemplateItem };
 
 export async function getPublicTemplates(): Promise<PublicTemplateItem[]> {
   try {

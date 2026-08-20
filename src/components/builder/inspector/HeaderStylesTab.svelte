@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import HeaderAnnouncementPanel from './header/HeaderAnnouncementPanel.svelte';
   import HeaderLogoPanel from './header/HeaderLogoPanel.svelte';
   import HeaderNavPanel from './header/HeaderNavPanel.svelte';

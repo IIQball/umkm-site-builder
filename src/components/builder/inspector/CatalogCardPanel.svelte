@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShoppingBag, Tag, Check, MessageCircle } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
   export let onConfigChange: (key: string, value: unknown) => void;

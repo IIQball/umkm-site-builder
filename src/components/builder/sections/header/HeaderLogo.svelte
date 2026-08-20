@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore, activeNodeId } from '../../stores/editorStore';
-  import type { HeaderAnnouncementProps } from '@/types/builder';
+  import type { HeaderAnnouncementProps } from '@/types';
   import { Store } from 'lucide-svelte';
 
   export let props: HeaderAnnouncementProps = {};

@@ -9,7 +9,7 @@ import {
   TemplateDraftSubmitSchema,
   DEFAULT_TEMPLATE_SECTIONS,
   DEFAULT_TEMPLATE_THEME,
-} from '@/schemas/template.schema';
+} from '@/schemas';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 
 interface ApiResponse<T = Record<string, unknown>> {

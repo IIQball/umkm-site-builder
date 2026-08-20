@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown, Megaphone, Image as ImageIcon, Menu } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import {
     makeHandlePropChange,
     makeHandleAddArrayItem,

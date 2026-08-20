@@ -2,9 +2,9 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
 import PaymentModal from '@/components/checkout/PaymentModal.svelte';
-import { transactionService } from '@/services/transaction.service';
+import { transactionService } from '@/services';
 import { formatCurrency } from '@/lib/utils/format';
-import type { CheckoutPageData } from '@/types/transactions';
+import type { CheckoutPageData } from '@/types';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const { invoiceId } = Astro.params;

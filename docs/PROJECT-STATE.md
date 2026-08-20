@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by auth-integration-dashboard-shell session
+Status: LIVE · Updated: 2026-08-20 by core-financial-engine session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,38 +11,22 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Visual Template Builder complete with Global Design System (Deselect / Root context), Figma-Style Layout Grid Guides (12/8/4-col adaptive + 8px pixel grid), Canvas Theme Preview toggle (Light / Dark mode), and Flat Pixel-Perfect Viewport Frame standardizations. All 7 UMKM sections inherit global tokens (colors, typography hierarchy, button variants/radius, layout container/safe-zone margins) with seamless local section override support.
+Core Financial Engine & Ledger implemented. Dynamic commission calculator configured from platformSettings (fallback 30%). Full designer wallet credit/debit with immutable ledger mutations (`walletMutations`). Post-payment webhook fulfillment automatically activates stores and awards net commissions to designer wallets with strict idempotency guards. Submit-review template API secured with real BetterAuth session & designer ownership verification.
 
 ## Last session did
 
-- **Auth Integration — Template Builder & Xendit Transactions:**
-  - `src/pages/builder/new.astro` — Auth guard: only `designer`/`superadmin` with `active` status.
-  - `src/pages/builder/[templateId].astro` — Auth guard: same role check. Builder stays full-canvas (no dashboard shell).
-  - `src/pages/api/templates/draft.ts` — Replaced `DEFAULT_DESIGNER_ID = 'designer_123'` with real `user.id` from BetterAuth session. POST returns 401 for unauthenticated or non-designer requests.
-  - `src/pages/api/builder/save.ts` — Auth guard + ownership check (`designerId = user.id`). Superadmin bypasses ownership filter.
-  - `src/pages/api/transactions/initiate.ts` — Replaced `x-user-id` header hack with real BetterAuth session. Added suspended account check.
-  - `src/pages/checkout/[invoiceId].astro` — Redirect to `/auth/login` if unauthenticated. Ownership check: only `transaction.userId === currentUser.id` or admin/superadmin. 403 block rendered for unauthorized access.
-- **Unified Responsive Dashboard Shell:**
-  - `src/layouts/DashboardLayout.astro` (NEW) — Auth redirect shell. Wraps Sidebar + DashboardNavbar around page content. Does NOT wrap builder pages.
-  - `src/components/dashboard/Sidebar.svelte` (NEW) — Desktop: collapsible 260px/72px sidebar, state persisted to `localStorage`. Mobile: FAB hamburger `fixed bottom-6 right-6 z-50 shadow-2xl` + slide-over drawer with backdrop. Role-based nav items (designer/tenant/admin/superadmin). Sign-out integration.
-  - `src/components/dashboard/DashboardNavbar.svelte` (NEW) — Slim header: role badge, user name + initials avatar, theme toggle.
-  - `src/pages/dashboard/index.astro` (NEW) — Entry point per role: designer (template count + wallet), tenant (toko status + produk), admin/superadmin (transaksi + user metrics placeholders).
-- **Public Navbar & Homepage:**
-  - `src/components/common/Navbar.astro` — Cleaned to Beranda + Direktori UMKM nav links only. Auth-aware: shows Masuk/Daftar or Ke Dashboard + avatar depending on session.
-  - `src/pages/index.astro` — Replaced `Buka Visual Builder` (unauthenticated link) with `Daftar Gratis` → `/auth/register`.
-  - `src/pages/umkm.astro` (NEW) — Public read-only UMKM directory stub with search bar + skeleton cards.
-- **Bug Fixes:**
-  - `NodeContentForm.svelte` — Fixed TS errors (Zod passthrough `{}` cast to `string`). Fixed A11y warnings (added `for`/`id` to Heading Level + Primary Color labels).
-- **Code Quality & Testing:**
-  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 49/49 pass.
-  - Updated `tests/api/builder/save.test.ts` to reflect new 401 auth guard behavior.
+- **Domain-Based Architecture & Proxy Cleanup:**
+  - Removed duplicate proxy files in root: `src/schemas/template.schema.ts`, `src/schemas/transaction.schema.ts`, `src/services/transaction.service.ts`, `src/services/wallet.service.ts`, `src/services/commission.service.ts`, `src/services/template.service.ts`, `src/lib/xendit.ts`.
+  - Migrated all imports across Svelte components, Astro pages, APIs, and tests to centralized barrel exports (`@/schemas`, `@/services`) or domain submodules (`@/lib/finance/xendit`).
+  - `bun run type-check`: 0 errors. `bun test`: 79/79 pass.
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth continued):** Google OAuth, email verification flow, password reset
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints)
-3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
+1. **Phase 1.2 (Designer Marketplace & Approval):** Admin review template UI, template status approval/rejection endpoints
+2. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
+3. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
 4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+
 5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace

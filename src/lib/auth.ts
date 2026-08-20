@@ -41,14 +41,8 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
-
-export interface AuthenticatedUser {
-  id: string;
-  name: string;
-  email: string;
-  role: 'superadmin' | 'admin' | 'designer' | 'tenant';
-  status: 'active' | 'suspended';
-}
+import type { AuthenticatedUser } from '@/types';
+export type { AuthenticatedUser };
 
 export async function getAuthenticatedUser(request: Request): Promise<AuthenticatedUser | null> {
   try {

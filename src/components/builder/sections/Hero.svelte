@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore, activeNodeId } from '../stores/editorStore';
-  import type { HeroProps, SectionStyles } from '@/types/builder';
+  import type { HeroProps, SectionStyles } from '@/types';
   import HeroElementToolbar from './hero/HeroElementToolbar.svelte';
 
   export let props: HeroProps = {};

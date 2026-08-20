@@ -1,5 +1,5 @@
 /**
- * Transaction validation schemas (Zod)
+ * Transaction Validation Schemas (Zod) - Finance Domain
  * Aligned with transactions table schema
  */
 
@@ -13,7 +13,7 @@ export const TransactionInitiateInputSchema = z.object({
 }).superRefine((data, ctx) => {
   // store_registration: storeId dan templateId optional (toko belum ada)
   if (data.type === 'store_registration') {
-    return; // No validation needed
+    return;
   }
 
   // template_purchase: both storeId dan templateId wajib

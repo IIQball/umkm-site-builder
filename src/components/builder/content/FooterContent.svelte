@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { makeHandlePropChange } from './content.helpers';
 
   export let section: TemplateSection;

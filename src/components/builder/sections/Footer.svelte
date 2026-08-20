@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MessageCircle, MapPin } from 'lucide-svelte';
   import { editorStore } from '../stores/editorStore';
-  import type { FooterProps, SectionStyles } from '@/types/builder';
+  import type { FooterProps, SectionStyles } from '@/types';
 
   export let props: FooterProps = {};
   export let styles: SectionStyles = {};

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import {
     makeHandlePropChange,
     makeHandleArrayItemChange,

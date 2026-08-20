@@ -1,13 +1,12 @@
 /**
- * Xendit client helper
+ * Xendit Client Helper (Finance Domain)
  * Handles invoice creation, payment verification, and webhook signature validation
  */
 
 import { config } from "@/lib/config/app";
-import type { XenditInvoice } from "@/types/transactions";
+import type { XenditInvoice } from "@/types";
 import crypto from 'node:crypto';
 
-// Xendit menggunakan base URL yang sama untuk sandbox dan production
 const XENDIT_BASE_URL = "https://api.xendit.co";
 
 export class XenditClient {
@@ -46,74 +45,74 @@ export class XenditClient {
       metadata: params.metadata || {},
     };
 
-     const response = await fetch(`${this.baseUrl}/v2/invoices`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-         Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
-       },
-       body: JSON.stringify(body),
-     });
+    const response = await fetch(`${this.baseUrl}/v2/invoices`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
+      },
+      body: JSON.stringify(body),
+    });
 
-     if (!response.ok) {
-       const error = await response.json();
-       throw new Error(
-         `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
-       );
-     }
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
+      );
+    }
 
-     const invoice = await response.json();
-     return this.mapXenditResponse(invoice);
-   }
+    const invoice = await response.json();
+    return this.mapXenditResponse(invoice);
+  }
 
-   /**
-    * Get invoice details from Xendit
-    */
-   async getInvoice(invoiceNum: string): Promise<XenditInvoice> {
-     const response = await fetch(
-       `${this.baseUrl}/v2/invoices/${invoiceNum}`,
-       {
-         method: "GET",
-         headers: {
-           Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
-         },
-       },
-     );
+  /**
+   * Get invoice details from Xendit
+   */
+  async getInvoice(invoiceNum: string): Promise<XenditInvoice> {
+    const response = await fetch(
+      `${this.baseUrl}/v2/invoices/${invoiceNum}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
+        },
+      },
+    );
 
-     if (!response.ok) {
-       if (response.status === 404) {
-         throw new Error("Invoice not found");
-       }
-       const error = await response.json();
-       throw new Error(
-         `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
-       );
-     }
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Invoice not found");
+      }
+      const error = await response.json();
+      throw new Error(
+        `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
+      );
+    }
 
-     const invoice = await response.json();
-     return this.mapXenditResponse(invoice);
-   }
+    const invoice = await response.json();
+    return this.mapXenditResponse(invoice);
+  }
 
-   /**
-    * Verify webhook signature
-    */
-   verifyWebhookSignature(payload: string, signature: string): boolean {
-     try {
-       const computed = crypto
-         .createHmac("sha256", this.webhookSecret)
-         .update(payload)
-         .digest("hex");
+  /**
+   * Verify webhook signature
+   */
+  verifyWebhookSignature(payload: string, signature: string): boolean {
+    try {
+      const computed = crypto
+        .createHmac("sha256", this.webhookSecret)
+        .update(payload)
+        .digest("hex");
 
-       const bufA = Buffer.from(computed, 'utf8');
-       const bufB = Buffer.from(signature, 'utf8');
-       
-       if (bufA.length !== bufB.length) {
-         return false;
-       }
+      const bufA = Buffer.from(computed, 'utf8');
+      const bufB = Buffer.from(signature, 'utf8');
+      
+      if (bufA.length !== bufB.length) {
+        return false;
+      }
 
-       return crypto.timingSafeEqual(bufA, bufB);
-     } catch {
-       return false;
+      return crypto.timingSafeEqual(bufA, bufB);
+    } catch {
+      return false;
     }
   }
 
@@ -143,6 +142,6 @@ export class XenditClient {
       metadata: typeof raw.metadata === 'object' ? (raw.metadata as Record<string, unknown>) : undefined,
     };
   }
-};
+}
 
 export const xenditClient = new XenditClient();

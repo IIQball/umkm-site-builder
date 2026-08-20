@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by auth-forms-zod-redesign session
+Status: LIVE · Updated: 2026-08-20 by merge auth-forms-zod-redesign and store-onboarding sessions
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -28,6 +28,13 @@ Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern
   - Total 27 unit tests specifically for the Auth module.
   - Browser subagent verified empty form submission, real-time error cleanup on typing, password complexity, and confirm password mismatch.
   - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 81/81 pass.
+- **Store Onboarding Feature:**
+  - `src/lib/stores/schemas.ts` — Added `OnboardStoreInput` schema to validate store profiles.
+  - `src/pages/api/stores/onboard.ts` (NEW) — Endpoint for saving store profile and subdomain, ensuring unique subdomains, valid names, and correct roles.
+  - `src/components/onboarding/OnboardingWizard.svelte` (NEW) — Multi-step wizard UI covering Subdomain choice, Store Info (Name, WA, Maps), and Success state.
+  - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
+  - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
+  - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
 
 ## Next up
 

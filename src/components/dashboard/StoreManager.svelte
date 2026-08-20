@@ -152,9 +152,9 @@
               class="input input-bordered w-full bg-base-100 focus:input-primary transition-colors"
               required
             />
-            <label class="label mt-1">
+            <div class="label mt-1">
               <span class="label-text-alt text-base-content/50">Digunakan pembeli untuk menghubungi Anda.</span>
-            </label>
+            </div>
           </div>
 
           <div class="form-control">

@@ -9,7 +9,8 @@ declare namespace App {
     emailVerified: boolean;
     createdAt: Date;
     updatedAt: Date;
-    role: string;
+    role?: string | null;
+    status?: string | null;
   }
 
   interface Session {

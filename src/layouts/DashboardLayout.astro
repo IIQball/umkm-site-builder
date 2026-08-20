@@ -7,6 +7,7 @@
 import { getAuthenticatedUser } from '@/lib/auth';
 import Sidebar from '@/components/dashboard/Sidebar.svelte';
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar.svelte';
+import ToastContainer from '@/components/ui/ToastContainer.svelte';
 
 interface Props {
   title?: string;
@@ -42,6 +43,7 @@ const userJson = JSON.stringify(user);
     </script>
   </head>
   <body class="bg-base-200 min-h-screen overflow-x-hidden">
+    <ToastContainer client:load />
     <div class="flex h-screen overflow-hidden">
       <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
       <Sidebar client:load userJson={userJson} />

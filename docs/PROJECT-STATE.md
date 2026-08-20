@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by auth-integration-dashboard-shell session
+Status: LIVE · Updated: 2026-08-20 by auth-forms-zod-redesign session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,36 +11,28 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Visual Template Builder complete with Global Design System (Deselect / Root context), Figma-Style Layout Grid Guides (12/8/4-col adaptive + 8px pixel grid), Canvas Theme Preview toggle (Light / Dark mode), and Flat Pixel-Perfect Viewport Frame standardizations. All 7 UMKM sections inherit global tokens (colors, typography hierarchy, button variants/radius, layout container/safe-zone margins) with seamless local section override support.
+Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern aesthetic (card container `rounded-3xl shadow-2xl`, Lucide icons, responsive layout). Native HTML browser validation disabled (`novalidate`), replaced with strict per-field Zod validation (`src/schemas/auth.schema.ts`), instant typing error clearing, and inline DaisyUI warning/error feedback. Centralized Global Toast Notification System mounted across root layouts.
 
 ## Last session did
 
-- **Auth Integration — Template Builder & Xendit Transactions:**
-  - `src/pages/builder/new.astro` — Auth guard: only `designer`/`superadmin` with `active` status.
-  - `src/pages/builder/[templateId].astro` — Auth guard: same role check. Builder stays full-canvas (no dashboard shell).
-  - `src/pages/api/templates/draft.ts` — Replaced `DEFAULT_DESIGNER_ID = 'designer_123'` with real `user.id` from BetterAuth session. POST returns 401 for unauthenticated or non-designer requests.
-  - `src/pages/api/builder/save.ts` — Auth guard + ownership check (`designerId = user.id`). Superadmin bypasses ownership filter.
-  - `src/pages/api/transactions/initiate.ts` — Replaced `x-user-id` header hack with real BetterAuth session. Added suspended account check.
-  - `src/pages/checkout/[invoiceId].astro` — Redirect to `/auth/login` if unauthenticated. Ownership check: only `transaction.userId === currentUser.id` or admin/superadmin. 403 block rendered for unauthorized access.
-- **Unified Responsive Dashboard Shell:**
-  - `src/layouts/DashboardLayout.astro` (NEW) — Auth redirect shell. Wraps Sidebar + DashboardNavbar around page content. Does NOT wrap builder pages.
-  - `src/components/dashboard/Sidebar.svelte` (NEW) — Desktop: collapsible 260px/72px sidebar, state persisted to `localStorage`. Mobile: FAB hamburger `fixed bottom-6 right-6 z-50 shadow-2xl` + slide-over drawer with backdrop. Role-based nav items (designer/tenant/admin/superadmin). Sign-out integration.
-  - `src/components/dashboard/DashboardNavbar.svelte` (NEW) — Slim header: role badge, user name + initials avatar, theme toggle.
-  - `src/pages/dashboard/index.astro` (NEW) — Entry point per role: designer (template count + wallet), tenant (toko status + produk), admin/superadmin (transaksi + user metrics placeholders).
-- **Public Navbar & Homepage:**
-  - `src/components/common/Navbar.astro` — Cleaned to Beranda + Direktori UMKM nav links only. Auth-aware: shows Masuk/Daftar or Ke Dashboard + avatar depending on session.
-  - `src/pages/index.astro` — Replaced `Buka Visual Builder` (unauthenticated link) with `Daftar Gratis` → `/auth/register`.
-  - `src/pages/umkm.astro` (NEW) — Public read-only UMKM directory stub with search bar + skeleton cards.
-- **Bug Fixes:**
-  - `NodeContentForm.svelte` — Fixed TS errors (Zod passthrough `{}` cast to `string`). Fixed A11y warnings (added `for`/`id` to Heading Level + Primary Color labels).
-- **Code Quality & Testing:**
-  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 49/49 pass.
-  - Updated `tests/api/builder/save.test.ts` to reflect new 401 auth guard behavior.
+- **Auth Zod Schemas & Per-Field Inline Validation:**
+  - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
+  - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
+  - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.
+  - `src/components/auth/GoogleAuthButton.svelte` — Refined button design tokens and Lucide error alerts.
+  - `src/pages/auth/login.astro` & `src/pages/auth/register.astro` — Modern container aesthetic with backdrop blur, rounded-3xl cards, and polished typography.
+- **Testing & Verification:**
+  - `tests/schemas/auth.test.ts` (NEW) — 8 unit tests covering login/register validation scenarios.
+  - `tests/lib/auth-helpers.test.ts` (NEW) — 9 unit tests for `getAuthenticatedUser`, `getRedirectUrlForRole`, `isDesigner`, `isActive`, and `isAuthorizedDesigner`.
+  - `tests/lib/auth-google-whitelist.test.ts` — 10 unit tests for role-based redirects, BetterAuth config, and hook lifecycle execution.
+  - Total 27 unit tests specifically for the Auth module.
+  - Browser subagent verified empty form submission, real-time error cleanup on typing, password complexity, and confirm password mismatch.
+  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 81/81 pass.
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth continued):** Google OAuth, email verification flow, password reset
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints)
+1. **Phase 1.2 (BetterAuth continued):** Email verification flow, password reset
+2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
 3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
 4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage

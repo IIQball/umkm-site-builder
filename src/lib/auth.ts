@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db, users, sessions, accounts, verifications, designers, wallets } from "@/db";
 import { eq } from "drizzle-orm";
@@ -30,7 +31,6 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google"],
-      // sementara dimatikan karena fitur verifikasi email belum dibuat di Phase 1.2
       requireLocalEmailVerified: false, 
     },
     fields: {
@@ -49,23 +49,58 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: false, // Wajib false agar Google OAuth tidak menolak login
+        required: false,
         defaultValue: "tenant",
-        input: true, // Wajib true agar form Register bisa mengirim role pilihan user
+        input: true,
       },
       status: {
         type: "string",
         required: false,
         defaultValue: "active",
-        input: false, // Status tidak boleh dimanipulasi dari form registrasi
+        input: false,
       },
+    },
+  },
+  onAPIError: {
+    onError: (error, ctx) => {
+      const err = error as { message?: string } | undefined;
+      if (err?.message === "UNAUTHORIZED_EMAIL" || err?.message?.includes("UNAUTHORIZED")) {
+        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
+        if (typeof redirectCtx?.redirect === "function") {
+          throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
+        }
+      }
     },
   },
   databaseHooks: {
     user: {
       create: {
+        before: async (user, ctx) => {
+          // Strict Whitelist Pre-Check for OAuth / Social logins:
+          // Google OAuth is only allowed if user email is already pre-registered in users table.
+          const isOAuthFlow = !ctx?.path || ctx.path.includes("/callback") || ctx.path.includes("google") || ctx.path.includes("oauth");
+
+          if (isOAuthFlow) {
+            const existingUser = await db.query.users.findFirst({
+              where: (u) => eq(u.email, user.email),
+            });
+
+            if (!existingUser) {
+              const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
+              if (typeof redirectCtx?.redirect === "function") {
+                throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
+              }
+              throw new APIError("UNAUTHORIZED", {
+                message: "UNAUTHORIZED_EMAIL",
+              });
+            }
+          }
+
+          return {
+            data: user,
+          };
+        },
         after: async (user) => {
-          // Jika mendaftar sebagai designer, otomatis buat record designer & wallet
           if (user.role === "designer") {
             await db.insert(designers).values({ 
               userId: user.id,
@@ -85,6 +120,19 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
+
+export function getRedirectUrlForRole(role?: string | null): string {
+  switch (role) {
+    case 'designer':
+      return '/designer/templates';
+    case 'admin':
+    case 'superadmin':
+      return '/admin';
+    case 'tenant':
+    default:
+      return '/dashboard';
+  }
+}
 
 export interface AuthenticatedUser {
   id: string;

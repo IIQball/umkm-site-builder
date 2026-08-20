@@ -1,0 +1,60 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const errorParam = Astro.url.searchParams.get("error") || "";
+const errorDesc = Astro.url.searchParams.get("error_description") || "";
+
+// Whitelist-specific checks or generic unauthorized check
+const isUnauthorizedEmail = 
+  errorParam.includes("UNAUTHORIZED_EMAIL") ||
+  errorParam.includes("UNAUTHORIZED") ||
+  errorParam.includes("unable_to_create_user") ||
+  errorDesc.includes("UNAUTHORIZED_EMAIL") ||
+  errorDesc.includes("unable_to_create_user");
+
+const errorMessage = isUnauthorizedEmail
+  ? "Email Anda belum terdaftar di sistem. Silakan hubungi Administrator untuk mendapatkan akses."
+  : (errorDesc || errorParam || "Terjadi kesalahan saat memproses autentikasi.");
+---
+
+<BaseLayout title="Autentikasi Gagal - UMKM Site Builder" description="Akses akun dibatasi atau terjadi kesalahan login">
+  <main class="min-h-screen flex items-center justify-center px-4 py-12 bg-base-200/40">
+    <div class="w-full max-w-md">
+      <div class="card bg-base-100 shadow-xl border border-base-200 text-center">
+        <div class="card-body p-6 sm:p-8 space-y-4">
+          <!-- Icon State -->
+          <div class="mx-auto w-16 h-16 rounded-full bg-error/10 text-error flex items-center justify-center shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-bold text-base-content">Akses Ditolak</h1>
+            <p class="text-xs text-base-content/60 mt-1 uppercase tracking-wider font-semibold">Strict Whitelist Policy</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-error/5 border border-error/20 text-left">
+            <p class="text-sm text-base-content/80 leading-relaxed">
+              {errorMessage}
+            </p>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <a href="/auth/login" class="btn btn-primary w-full shadow-md">
+              Coba Masuk Lagi
+            </a>
+            <div class="grid grid-cols-2 gap-2">
+              <a href="/" class="btn btn-ghost btn-sm text-base-content/70">
+                Kembali ke Beranda
+              </a>
+              <a href="mailto:admin@umkm.local?subject=Permintaan%20Akses%20Akun%20UMKM" class="btn btn-outline btn-sm text-base-content/70">
+                Hubungi Admin
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

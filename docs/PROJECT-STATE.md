@@ -11,32 +11,28 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete + Documentation Audit complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema aligned with all documentation, and Neon Serverless integration. All documentation files audited and refactored to match final schema (transactions table, JSONB media, correct field names). Ready for Phase 1.2 (BetterAuth authentication).
+Kickoff complete + Phase 1.1a (Project Scaffolding) + Phase 1.1b (Database Layer) complete + Documentation Audit complete. Astro/Svelte project fully initialized with Drizzle ORM, 19-table PostgreSQL schema aligned with all documentation, dan Neon Serverless integration. Mulai integrasi BetterAuth (Phase 1.2). Fitur Google OAuth provider telah ditambahkan beserta dengan penanganan di antarmuka (UI).
 
 The project is a no-code SaaS web builder for Indonesian UMKM (small businesses). Tenants get instant subdomains; designers sell templates; platform earns 30% commission on template sales. All integrations (Xendit, Cloudinary, BetterAuth, Neon) are decided and documented. Stack is Astro/Svelte/Tailwind/daisyUI/Drizzle/Neon on Cloudflare.
 
 ## Last session did
 
-- Documentation Audit & Refactor (main branch, docs only):
-  - Audited all 21 documentation files against authoritative schema in `src/db/schema.ts`
-  - Updated docs/tech/data-model-erd.md: removed `images` and `subdomain_blacklist` tables, updated all references to `transactions` table (externalId instead of transactionId), updated payment status enum, clarified media as JSONB URLs
-  - Updated docs/tech/api-spec.md: updated all payment endpoints to use transactions table with externalId, updated template publishing to require price, updated media endpoints to reflect JSONB storage, fixed all status values to match schema
-  - Updated docs/tech/architecture.md: clarified media storage as JSONB/URLs (not database records), removed soft-delete sync logic, updated transaction fields, updated data layer section
-  - Updated docs/prd/user-stories.md: changed transaction/payment status references, updated admin store setup to note app-layer validation
-  - Updated docs/prd/user-journeys.md: updated transaction status values, clarified webhook uses externalId
-  - Updated docs/memory/feature-01b-database-layer.md: clarified 19 tables (no images/subdomain_blacklist), updated all schema field names to match final spec
-  - All documentation now aligned with authoritative schema in `src/db/schema.ts`
-  - No code changes; documentation only
+- Integrasi Google OAuth dengan BetterAuth:
+  - Menambahkan konfigurasi provider Google di `src/lib/auth.ts`.
+  - Membuat komponen mandiri `GoogleAuthButton.svelte`.
+  - Mengintegrasikan tombol login dengan Google pada `LoginForm.svelte` dan `RegisterForm.svelte`.
+  - Menjalankan uji validasi statis (type-check, test, build).
+  - Tidak ada penambahan field atau tabel baru (menggunakan tabel `accounts` bawaan dari Drizzle adapter).
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth):** Email/password auth, Google OAuth, session management, route guards
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints)
-3. **Phase 1.4 (Template Purchases):** Use existing transaction flow for template purchase type
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
-5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage
-6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
-7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
+1. **Phase 1.2 (BetterAuth Lanjutan):** Email/password auth, session management, route guards.
+2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation (extends existing payment endpoints).
+3. **Phase 1.4 (Template Purchases):** Use existing transaction flow for template purchase type.
+4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup.
+5. **Phase 1.6 (Testing):** Unit + integration tests, 80%+ coverage.
+6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing.
+7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace.
 
 ## Documentation status
 

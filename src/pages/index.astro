@@ -2,16 +2,97 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="UMKM Site Builder - Home" description="Create a professional website for your UMKM business in minutes, no coding required.">
-  <main class="container mx-auto px-4 py-12">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold mb-4">UMKM Site Builder</h1>
-      <p class="text-xl text-gray-600 mb-8">
-        No-code web builder for Indonesian micro-enterprises
+<BaseLayout title="UMKM Site Builder - Platform Website No-Code Toko Online UMKM" description="Buat website toko online profesional untuk UMKM Indonesia dalam hitungan menit tanpa koding.">
+  <main class="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
+    <div class="text-center space-y-6">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-800/60 shadow-sm">
+        <span>Platform Website Toko Online UMKM</span>
+      </div>
+
+      <!-- Headline -->
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 leading-tight">
+        Bangun Toko Online UMKM Siap Jualan <br class="hidden sm:inline" />
+        <span class="text-blue-600 dark:text-blue-400">
+          Cepat dan Tanpa Koding
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
+        Katalog produk WhatsApp, subdomain instan, dan pembayaran otomatis yang dirancang khusus untuk pertumbuhan bisnis lokal.
       </p>
-      <div class="flex gap-4 justify-center">
-        <a href="/auth/login" class="btn btn-primary">Sign In</a>
-        <a href="/auth/register" class="btn btn-outline">Get Started</a>
+
+      <!-- CTAs -->
+      <div class="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+        <a
+          href="/templates"
+          class="btn btn-primary px-7 py-3 text-sm font-bold shadow-lg shadow-blue-600/20 rounded-xl flex items-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <span>Jelajahi Template</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </a>
+
+        <a
+          href="/auth/register"
+          class="btn btn-outline border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <span class="material-symbols-outlined text-[18px]">person_add</span>
+          <span>Daftar Gratis</span>
+        </a>
+      </div>
+
+      <!-- Feature Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 pt-12 text-left">
+        <!-- Prominent Visual Builder Feature -->
+        <div class="md:col-span-7 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50">
+              <span class="material-symbols-outlined text-xl">layers</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100 mb-2">
+              Visual Editor 3-Kolom Presisi
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-md">
+              Kustomisasi tata letak, warna, dan tipografi secara instan dengan preview responsif perangkat Desktop, Tablet, hingga Ponsel.
+            </p>
+          </div>
+
+          <div class="mt-6 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono text-slate-600 dark:text-slate-400">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span class="font-semibold text-slate-800 dark:text-slate-200">Layer Tree</span>
+            </div>
+            <span class="text-[11px] text-slate-400">7 Section Terverifikasi</span>
+          </div>
+        </div>
+
+        <!-- Secondary Stack -->
+        <div class="md:col-span-5 flex flex-col gap-5">
+          <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex-1">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 border border-emerald-100 dark:border-emerald-900/50">
+              <span class="material-symbols-outlined text-xl">chat</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 dark:text-slate-100 mb-1.5">
+              Pesanan Langsung WhatsApp
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Format pemesanan otomatis memudahkan calon pembeli mengirim detail produk ke nomor WhatsApp bisnis Anda.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex-1">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-100 dark:border-blue-900/50">
+              <span class="material-symbols-outlined text-xl">qr_code_2</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 dark:text-slate-100 mb-1.5">
+              Pembayaran Digital Otomatis
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Dukungan gateway QRIS dan transfer bank terverifikasi otomatis untuk aktivasi dan pembelian template.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </main>

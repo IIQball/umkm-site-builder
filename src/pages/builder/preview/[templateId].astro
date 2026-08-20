@@ -1,0 +1,39 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ReadOnlyPreview from '@/components/builder/ReadOnlyPreview.svelte';
+import { db } from '@/lib/db/client';
+import { templates } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import type { EditorTemplate } from '@/components/builder/stores/editorStore';
+import type { TemplateConfig } from '@/schemas/template.schema';
+
+export const prerender = false;
+
+const { templateId } = Astro.params;
+
+if (!templateId) {
+  return Astro.redirect('/');
+}
+
+const templateRecord = await db.query.templates.findFirst({
+  where: eq(templates.id, templateId),
+});
+
+if (!templateRecord) {
+  return new Response('Template tidak ditemukan', { status: 404 });
+}
+
+const previewTemplate: EditorTemplate = {
+  id: templateRecord.id,
+  name: templateRecord.name,
+  description: templateRecord.description,
+  thumbnailUrl: templateRecord.thumbnailUrl,
+  price: templateRecord.price,
+  status: templateRecord.status,
+  config: templateRecord.config as TemplateConfig,
+};
+---
+
+<BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
+  <ReadOnlyPreview client:only="svelte" template={previewTemplate} />
+</BaseLayout>

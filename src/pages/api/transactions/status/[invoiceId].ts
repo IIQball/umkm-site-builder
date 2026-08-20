@@ -85,10 +85,8 @@ export const GET: APIRoute = async (context): Promise<Response> => {
         headers: { 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
-    console.error('[GET /api/transactions/status]', error);
-
-    return new Response(
+   } catch {
+     return new Response(
       JSON.stringify({
         ok: false,
         error: {

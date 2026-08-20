@@ -32,7 +32,7 @@ export class XenditClient {
     expiryDate: Date;
     successRedirectUrl: string;
     failureRedirectUrl: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<XenditInvoice> {
     const body = {
       external_id: params.invoiceNum,
@@ -46,98 +46,74 @@ export class XenditClient {
       metadata: params.metadata || {},
     };
 
-    try {
-      const response = await fetch(`${this.baseUrl}/v2/invoices`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
-        },
-        body: JSON.stringify(body),
-      });
+     const response = await fetch(`${this.baseUrl}/v2/invoices`, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
+       },
+       body: JSON.stringify(body),
+     });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(
-          `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
-        );
-      }
+     if (!response.ok) {
+       const error = await response.json();
+       throw new Error(
+         `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
+       );
+     }
 
-      const invoice = await response.json();
-      return this.mapXenditResponse(invoice);
-    } catch (error) {
-      console.error("[Xendit] Failed to create invoice:", error);
-      throw error;
-    }
-  }
+     const invoice = await response.json();
+     return this.mapXenditResponse(invoice);
+   }
 
-  /**
-   * Get invoice details from Xendit
-   */
-  async getInvoice(invoiceNum: string): Promise<XenditInvoice> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/v2/invoices/${invoiceNum}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
-          },
-        },
-      );
+   /**
+    * Get invoice details from Xendit
+    */
+   async getInvoice(invoiceNum: string): Promise<XenditInvoice> {
+     const response = await fetch(
+       `${this.baseUrl}/v2/invoices/${invoiceNum}`,
+       {
+         method: "GET",
+         headers: {
+           Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
+         },
+       },
+     );
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Invoice not found");
-        }
-        const error = await response.json();
-        throw new Error(
-          `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
-        );
-      }
+     if (!response.ok) {
+       if (response.status === 404) {
+         throw new Error("Invoice not found");
+       }
+       const error = await response.json();
+       throw new Error(
+         `Xendit API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
+       );
+     }
 
-      const invoice = await response.json();
-      return this.mapXenditResponse(invoice);
-    } catch (error) {
-      console.error("[Xendit] Failed to get invoice:", error);
-      throw error;
-    }
-  }
+     const invoice = await response.json();
+     return this.mapXenditResponse(invoice);
+   }
 
-  /**
-   * Verify webhook signature
-   */
-  verifyWebhookSignature(payload: string, signature: string): boolean {
-    try {
-      const computed = crypto
-        .createHmac("sha256", this.webhookSecret)
-        .update(payload)
-        .digest("hex");
+   /**
+    * Verify webhook signature
+    */
+   verifyWebhookSignature(payload: string, signature: string): boolean {
+     try {
+       const computed = crypto
+         .createHmac("sha256", this.webhookSecret)
+         .update(payload)
+         .digest("hex");
 
-      const bufA = Buffer.from(computed, 'utf8');
-      const bufB = Buffer.from(signature, 'utf8');
-      
-      if (bufA.length !== bufB.length) {
-        return false;
-      }
+       const bufA = Buffer.from(computed, 'utf8');
+       const bufB = Buffer.from(signature, 'utf8');
+       
+       if (bufA.length !== bufB.length) {
+         return false;
+       }
 
-      const isValid = crypto.timingSafeEqual(bufA, bufB);
-
-      if (!isValid) {
-        console.warn('[Xendit] Signature mismatch:', {
-          webhookSecretLength: this.webhookSecret.length,
-          payloadLength: payload.length,
-          computedLength: computed.length,
-          signatureLength: signature.length,
-          computedPrefix: computed.slice(0, 16),
-          signaturePrefix: signature.slice(0, 16),
-        });
-      }
-
-      return isValid;
-    } catch (error) {
-      console.error("[Xendit] Signature verification failed:", error);
-      return false;
+       return crypto.timingSafeEqual(bufA, bufB);
+     } catch {
+       return false;
     }
   }
 

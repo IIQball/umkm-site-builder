@@ -27,8 +27,7 @@
         }
       }
     } catch (err) {
-      console.error('[TransactionStatus] Error:', err);
-      error = err instanceof Error ? err.message : 'Error memeriksa status';
+       error = err instanceof Error ? err.message : 'Error memeriksa status';
     }
   };
 

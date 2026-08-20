@@ -1,0 +1,23 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BuilderEditor from '@/components/builder/BuilderEditor.svelte';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+
+const { templateId } = Astro.params;
+
+if (!templateId) {
+  return Astro.redirect('/');
+}
+
+const user = await getAuthenticatedUser(Astro.request);
+
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login');
+}
+---
+
+<BaseLayout title="Template Builder" hideNavbar={true}>
+  <div class="h-screen w-full bg-base-100 overflow-hidden flex flex-col">
+    <BuilderEditor client:only="svelte" {templateId} />
+  </div>
+</BaseLayout>

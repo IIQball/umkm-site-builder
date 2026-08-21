@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+<BaseLayout title="401 Tidak Diberikan Izin">
+  <div class="flex flex-col items-center justify-center min-h-screen text-center px-4">
+    <h1 class="text-6xl font-bold text-error mb-4">401</h1>
+    <p class="text-xl mb-6">Anda harus masuk untuk mengakses halaman ini.</p>
+    <a href="/auth/login" class="btn btn-primary">Masuk</a>
+  </div>
+</BaseLayout>

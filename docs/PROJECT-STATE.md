@@ -35,14 +35,18 @@ Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern
   - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
   - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
   - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
+- **Role Middleware (h3-dina-role-middleware):**
+  - `src/middleware.ts` — Implemented Astro middleware to validate session and roles for protected routes (`/dashboard`, `/onboarding`, etc).
+  - `src/pages/401.astro` & `src/pages/403.astro` (NEW) — Created 401 Unauthorized and 403 Forbidden pages.
+  - Fixed a missing import in `src/pages/dashboard/categories.astro` causing lint error.
+  - Handled 500 server error crash in `src/pages/api/templates/submit-review.ts` by propagating errors properly.
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth continued):** Email verification flow, password reset
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
-3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
-5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
+1. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
+2. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
+3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+4. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 

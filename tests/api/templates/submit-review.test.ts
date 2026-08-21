@@ -1,6 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { POST } from '@/pages/api/templates/submit-review';
 
+vi.mock('@/lib/db/client', () => ({
+  db: {
+    query: {
+      templates: {
+        findFirst: vi.fn().mockResolvedValue(null),
+      },
+    },
+    update: vi.fn(),
+  },
+}));
 describe('POST /api/templates/submit-review', () => {
   it('should return 400 when templateId is missing', async () => {
     const request = new Request('http://localhost:4321/api/templates/submit-review', {

@@ -50,7 +50,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           ok: false,
           error: {
             code: 'UNAUTHORIZED',
-            message: 'Anda tidak memiliki hak akses untuk mengajukan template ini',
+            message: 'Anda tidak memiliki izin untuk mengirim template ini',
           },
         } as ApiResponse),
         { status: 403, headers: { 'Content-Type': 'application/json' } }
@@ -65,7 +65,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           ok: false,
           error: {
             code: 'INVALID_CONFIG',
-            message: 'Struktur konfigurasi template belum lengkap atau tidak valid',
+            message: 'Struktur konfigurasi template tidak lengkap atau tidak valid',
           },
         } as ApiResponse),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -98,19 +98,21 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           ok: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: error.errors[0]?.message || 'Invalid input',
+            message: error.errors[0]?.message || 'Input tidak valid',
           },
         } as ApiResponse),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    // eslint-disable-next-line no-console
+    console.error("Submit review 500 error:", error);
     return new Response(
       JSON.stringify({
         ok: false,
         error: {
           code: 'INTERNAL',
-          message: error instanceof Error ? error.message : 'Gagal mengajukan review template',
+          message: error instanceof Error ? error.message : 'Gagal mengirim ulasan template',
         },
       } as ApiResponse),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

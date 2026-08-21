@@ -1,22 +1,169 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import LoginForm from "@/components/auth/LoginForm.svelte";
+import RegisterForm from "@/components/auth/RegisterForm.svelte";
 ---
 
-<BaseLayout title="Masuk - UMKM Site Builder" description="Masuk ke akun Anda">
-  <main class="min-h-[100dvh] flex items-center justify-center px-4 py-12 bg-base-200/40">
-    <div class="w-full max-w-md">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-base-content">Selamat Datang</h1>
-        <p class="text-sm text-base-content/70 mt-2">Masuk untuk mengelola toko UMKM Anda</p>
+<BaseLayout title="Masuk - UMKM Site Builder" description="Masuk atau Buat Akun Anda" hideNavbar={true}>
+  <!-- Layout mutlak tanpa scroll layar utama -->
+  <main class="h-[100dvh] w-full flex items-center justify-center p-4 bg-base-300 relative overflow-hidden" id="auth-wrapper">
+    
+    <!-- Center Card -->
+    <div class="w-full max-w-5xl bg-base-100 shadow-2xl rounded-3xl overflow-hidden relative z-10 border border-base-200/50 h-[95dvh] sm:h-[90dvh]">
+      
+      <!-- Area Panel Putih (Formulir Kiri/Kanan) -->
+      <div class="absolute top-0 left-0 w-full md:w-1/2 h-full bg-base-100 transition-transform duration-700 ease-in-out z-20" id="form-panel">
+        
+        <!-- Formulir Login -->
+        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar" id="login-view">
+          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-4">
+            <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">U</div>
+            <span class="text-lg font-bold tracking-tight text-base-content">UMKM Builder</span>
+          </a>
+          <div class="flex-grow flex flex-col justify-center mt-2">
+            <div class="text-center mb-4">
+              <h1 class="text-2xl font-bold text-base-content">Masuk ke Akun</h1>
+              <p class="text-sm text-base-content/70 mt-1">Masuk untuk mengelola toko UMKM Anda</p>
+            </div>
+            <LoginForm client:load />
+            <!-- Mobile Toggle -->
+            <p class="md:hidden text-center text-sm text-base-content/70 mt-5 pt-3 border-t border-base-200">
+              Belum punya akun? <button type="button" class="link link-primary font-semibold ml-1 btn-to-register">Buat akun</button>
+            </p>
+          </div>
+        </div>
+
+        <!-- Formulir Register -->
+        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar" id="register-view">
+          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-2">
+            <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">U</div>
+            <span class="text-lg font-bold tracking-tight text-base-content">UMKM Builder</span>
+          </a>
+          <div class="flex-grow flex flex-col justify-center">
+            <div class="text-center mb-4">
+              <h1 class="text-2xl font-bold text-base-content">Buat Akun</h1>
+              <p class="text-sm text-base-content/70 mt-1">Mulai bangun toko UMKM Anda hari ini</p>
+            </div>
+            <RegisterForm client:load />
+            <!-- Mobile Toggle -->
+            <p class="md:hidden text-center text-sm text-base-content/70 mt-5 pt-3 border-t border-base-200">
+              Sudah punya akun? <button type="button" class="link link-primary font-semibold ml-1 btn-to-login">Masuk</button>
+            </p>
+          </div>
+        </div>
+
       </div>
-      <div class="card border border-base-200/80 shadow-2xl rounded-3xl p-6 sm:p-9 bg-base-100 backdrop-blur-sm">
-        <LoginForm client:load />
-        <p class="text-center text-sm text-base-content/70 mt-6 pt-5 border-t border-base-200">
-          Belum punya akun?
-          <a href="/auth/register" class="link link-primary font-semibold ml-1">Buat akun</a>
-        </p>
+
+      <!-- Area Panel Biru (Welcome Kanan/Kiri) -->
+      <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full bg-primary transition-transform duration-700 ease-in-out text-primary-content z-30" id="welcome-panel">
+        <!-- Dekorasi geometris statis -->
+        <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full"></div>
+        <div class="absolute bottom-10 left-6 w-20 h-20 bg-white/10 rounded-full"></div>
+        <div class="absolute top-1/2 left-0 w-6 h-6 bg-white/10 rounded-sm rotate-45"></div>
+
+        <!-- Welcome untuk Login (tampil saat mode Login, di kanan) -->
+        <div class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center transition-all duration-700" id="welcome-login">
+          <h2 class="text-3xl font-bold mb-3 relative z-10">Baru di Sini?</h2>
+          <p class="text-primary-content/90 text-sm leading-relaxed relative z-10 max-w-sm mb-6">
+            Daftarkan diri Anda sekarang untuk mulai membangun toko online impian tanpa koding.
+          </p>
+          <button type="button" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary hover:border-white rounded-full px-12 relative z-10 btn-to-register">
+            Buat Akun
+          </button>
+        </div>
+
+        <!-- Welcome untuk Register (tampil saat mode Register, di kiri) -->
+        <div class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center transition-all duration-700" id="welcome-register">
+          <h2 class="text-3xl font-bold mb-3 relative z-10">Selamat Datang!</h2>
+          <p class="text-primary-content/90 text-sm leading-relaxed relative z-10 max-w-sm mb-6">
+            Sudah memiliki akun? Silakan masuk untuk melanjutkan mengelola toko Anda.
+          </p>
+          <button type="button" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary hover:border-white rounded-full px-12 relative z-10 btn-to-login">
+            Masuk
+          </button>
+        </div>
       </div>
+      
     </div>
   </main>
 </BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const authWrapper = document.getElementById('auth-wrapper');
+    const btnsToRegister = document.querySelectorAll('.btn-to-register');
+    const btnsToLogin = document.querySelectorAll('.btn-to-login');
+
+    // Cek parameter URL untuk langsung membuka tab daftar
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'register') {
+      authWrapper?.classList.add('is-register');
+      document.title = "Daftar - UMKM Site Builder";
+    }
+
+    btnsToRegister.forEach(btn => {
+      btn.addEventListener('click', () => {
+        authWrapper?.classList.add('is-register');
+        document.title = "Daftar - UMKM Site Builder";
+      });
+    });
+
+    btnsToLogin.forEach(btn => {
+      btn.addEventListener('click', () => {
+        authWrapper?.classList.remove('is-register');
+        document.title = "Masuk - UMKM Site Builder";
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Base State (Login) */
+  #register-view, #welcome-register {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+  }
+  
+  #login-view, #welcome-login {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  /* Active State (Register) */
+  @media (min-width: 768px) {
+    #auth-wrapper.is-register #form-panel {
+      transform: translateX(100%);
+    }
+    #auth-wrapper.is-register #welcome-panel {
+      transform: translateX(-100%);
+    }
+  }
+
+  #auth-wrapper.is-register #login-view,
+  #auth-wrapper.is-register #welcome-login {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+  }
+
+  #auth-wrapper.is-register #register-view,
+  #auth-wrapper.is-register #welcome-register {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  /* Sembunyikan scrollbar bawaan form sepenuhnya (tetap bisa discroll dengan mouse wheel/touch) */
+  .custom-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    background: transparent;
+  }
+</style>
+

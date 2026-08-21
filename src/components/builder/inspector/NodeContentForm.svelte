@@ -24,8 +24,10 @@
     onPropChange('styles', updated);
   };
 
-  $: showAnnouncement = section.props?.showAnnouncement ?? true;
+  $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
   $: logoType = section.props?.logoType || 'image_text';
+  $: navLinks = (section.props?.navLinks as string[]) || [];
+  $: subtitle = (section.props?.subtitle as string) ?? '';
 
   const getNodeLabel = (id: string): string => {
     switch (id) {
@@ -156,13 +158,13 @@
         <span>Daftar Menu Navigasi</span>
       </div>
       <div class="space-y-2">
-        {#each section.props?.navLinks || [] as link, index}
+        {#each navLinks as link, index}
           <div class="flex items-center gap-1.5 p-1 bg-base-200/50 dark:bg-slate-950/80 border border-base-300 dark:border-slate-800 rounded-lg">
             <input
               type="text"
               value={link}
               on:input={(e) => {
-                const updated = [...(section.props?.navLinks || [])];
+                const updated = [...navLinks];
                 updated[index] = e.currentTarget.value;
                 onPropChange('navLinks', updated);
               }}
@@ -234,7 +236,7 @@
       <label for="node-hero-subtitle" class="block font-semibold text-base-content/80">Deskripsi Subtitle</label>
       <textarea
         id="node-hero-subtitle"
-        value={section.props?.subtitle ?? ''}
+        value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
         rows="4"
         class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none focus:border-blue-500 resize-y"

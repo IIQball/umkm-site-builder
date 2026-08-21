@@ -6,6 +6,7 @@
   export let onUpdate: (section: TemplateSection) => void;
 
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
+  $: address = (section.props?.address as string) ?? '';
 </script>
 
 <div class="space-y-3">
@@ -26,7 +27,7 @@
     <label for="store-address" class="block font-semibold text-base-content/80 mb-1">Alamat Fisik / Lokasi Toko</label>
     <textarea
       id="store-address"
-      value={section.props?.address ?? ''}
+      value={address}
       on:input={(e) => handlePropChange('address', e.currentTarget.value)}
       rows="3"
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"

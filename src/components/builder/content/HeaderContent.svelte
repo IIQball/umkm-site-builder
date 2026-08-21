@@ -16,8 +16,9 @@
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
 
-  $: showAnnouncement = section.props?.showAnnouncement ?? true;
+  $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
   $: logoType = section.props?.logoType || 'image_text';
+  $: navLinks = (section.props?.navLinks as string[]) || [];
 </script>
 
 <div class="space-y-6">
@@ -137,13 +138,13 @@
     </div>
 
     <div class="space-y-2">
-      {#each section.props?.navLinks || [] as link, index}
+      {#each navLinks as link, index}
         <div class="flex items-center gap-1.5 p-1 bg-base-100 dark:bg-slate-950/80 border border-base-300 dark:border-slate-800 rounded-lg">
           <input
             type="text"
             value={link}
             on:input={(e) => {
-              const updated = [...(section.props?.navLinks || [])];
+              const updated = [...navLinks];
               updated[index] = e.currentTarget.value;
               handlePropChange('navLinks', updated);
             }}
@@ -163,7 +164,7 @@
             <button
               type="button"
               on:click={() => handleMoveArrayItem('navLinks', index, 'down')}
-              disabled={index === (section.props?.navLinks || []).length - 1}
+              disabled={index === navLinks.length - 1}
               class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
               title="Pindah ke Bawah"
             >

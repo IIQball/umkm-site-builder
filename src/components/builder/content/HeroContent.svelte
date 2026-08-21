@@ -6,6 +6,7 @@
   export let onUpdate: (section: TemplateSection) => void;
 
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
+  $: subtitle = (section.props?.subtitle as string) ?? '';
 </script>
 
 <div class="space-y-3">
@@ -25,7 +26,7 @@
     <label for="hero-subtitle" class="block font-semibold text-base-content/80 mb-1">Subjudul (Subtitle)</label>
     <textarea
       id="hero-subtitle"
-      value={section.props?.subtitle ?? ''}
+      value={subtitle}
       on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
       rows="3"
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"

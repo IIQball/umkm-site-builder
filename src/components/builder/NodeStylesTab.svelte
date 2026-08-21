@@ -7,11 +7,11 @@
   export let nodeId: string;
   export let onUpdate: (section: TemplateSection) => void;
 
-  $: nodeStyles = section.props?.nodeStyles?.[nodeId] || {};
+  $: nodeStyles = ((section.props?.nodeStyles as Record<string, any>)?.[nodeId] || {}) as Record<string, string>;
 
   const handleStyleChange = (key: string, value: string) => {
     const currentProps = section.props || {};
-    const currentNodeStyles = currentProps.nodeStyles || {};
+    const currentNodeStyles = (currentProps.nodeStyles as Record<string, any>) || {};
     const updatedForThisNode = { ...(currentNodeStyles[nodeId] || {}), [key]: value };
     onUpdate({ ...section, props: { ...currentProps, nodeStyles: { ...currentNodeStyles, [nodeId]: updatedForThisNode } } });
   };

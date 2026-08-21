@@ -1,0 +1,17 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+
+if (user.status !== 'active') return Astro.redirect('/auth/login');
+if (user.role !== 'tenant') return Astro.redirect('/dashboard');
+---
+
+<BaseLayout title="Setup Toko Baru - UMKM Site Builder">
+  <div class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4 py-12">
+    <OnboardingWizard client:load />
+  </div>
+</BaseLayout>

@@ -15,6 +15,15 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
+
+  interface TestimonialItem {
+    avatar?: string;
+    customerName?: string;
+    rating?: number;
+    comment?: string;
+  }
+
+  $: testimonials = (section.props?.testimonials as TestimonialItem[]) || [];
 </script>
 
 <div class="space-y-3">
@@ -31,7 +40,7 @@
   </div>
 
   <div class="space-y-3">
-    {#each section.props?.testimonials || [] as item, index}
+    {#each testimonials as item, index}
       <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-lg space-y-2">
         <div class="flex items-center justify-between gap-2">
           <input
@@ -65,7 +74,7 @@
             <button
               type="button"
               on:click={() => handleMoveArrayItem('testimonials', index, 'down')}
-              disabled={index === (section.props?.testimonials || []).length - 1}
+              disabled={index === testimonials.length - 1}
               class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
               title="Pindah ke Bawah"
             >

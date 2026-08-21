@@ -3,12 +3,10 @@
     Monitor,
     Tablet,
     Smartphone,
-    ArrowLeft,
     Clock,
     CheckCircle2,
     XCircle,
     FileEdit,
-    ExternalLink,
     Sun,
     Moon,
   } from 'lucide-svelte';

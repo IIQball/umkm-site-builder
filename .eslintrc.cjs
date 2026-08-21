@@ -57,6 +57,7 @@ module.exports = {
       rules: {
         "no-console": ["warn", { "allow": ["warn", "error"] }],
         "no-unused-vars": "off",
+        "no-inner-declarations": "off",
       },
     },
     {

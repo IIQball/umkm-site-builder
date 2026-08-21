@@ -69,7 +69,7 @@
   </div>
 
   <div class={`grid ${isMobileView ? 'grid-cols-1' : isTabletView ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-4 sm:gap-6 w-full`}>
-    {#each testimonials as item, index (item.customerName + index)}
+    {#each testimonials as item, index ((item.customerName || '') + index)}
       <div
         role="listitem"
         draggable={isActive}

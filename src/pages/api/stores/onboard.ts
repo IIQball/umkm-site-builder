@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { db } from '@db/index';
 import { stores } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
-import { RegisterSubdomainInput } from '@lib/stores/schemas';
+import { OnboardStoreInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
 import {
   unauthorized,
@@ -12,8 +12,9 @@ import {
   invalidStateError,
   internalError,
   okResponse,
-} from '@/types';
+} from '@/types/api';
 import { ZodError } from 'zod';
+
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 const SUBDOMAIN_BLACKLIST = new Set([
@@ -58,7 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (user.role !== 'tenant') {
-    return new Response(JSON.stringify(forbidden('Hanya tenant yang dapat mendaftarkan subdomain')), {
+    return new Response(JSON.stringify(forbidden('Hanya tenant yang dapat membuat profil toko')), {
       status: 403,
       headers: JSON_HEADERS,
     });
@@ -66,7 +67,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.json();
-    const { subdomain } = RegisterSubdomainInput.parse(body);
+    const parsedData = OnboardStoreInput.parse(body);
+    const { subdomain, name, waNumber, googleMapsUrl } = parsedData;
 
     if (SUBDOMAIN_BLACKLIST.has(subdomain)) {
       return new Response(
@@ -93,16 +95,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     await db.insert(stores).values({
       id: storeId,
-      name: subdomain,
+      name,
       subdomain,
       userId: user.id,
-      templateId: 'default',
-      waNumber: '',
-      status: 'pending',
+      templateId: 'system-default-template', // From db seed logic
+      waNumber,
+      googleMapsUrl: googleMapsUrl || null,
+      status: 'pending', // Awaiting payment setup? Or active right away if MVP? Let's use active since it's just onboarding, or pending based on docs? Wait, docs say "status (pending|active|inactive|suspended)".
     });
 
     return new Response(
-      JSON.stringify(okResponse({ storeId, subdomain })),
+      JSON.stringify(okResponse({ storeId, subdomain, name })),
       { status: 201, headers: JSON_HEADERS },
     );
   } catch (err) {
@@ -114,7 +117,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // eslint-disable-next-line no-console
-    console.error('[STORE] register-subdomain failed:', err);
+    console.error('[STORE] onboard failed:', err);
     return new Response(
       JSON.stringify(internalError()),
       { status: 500, headers: JSON_HEADERS },

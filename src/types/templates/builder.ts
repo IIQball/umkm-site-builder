@@ -137,6 +137,8 @@ export interface FooterProps {
   logoImageUrl?: string;
   tagline?: string;
   copyrightText?: string;
+  whatsappNumber?: string;
+  address?: string;
   socialLinks?: Array<{
     platform: string;
     url: string;

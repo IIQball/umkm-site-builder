@@ -54,6 +54,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    // eslint-disable-next-line no-console
     console.error('[STORE] check-subdomain failed:', err);
     return new Response(
       JSON.stringify(internalError()),

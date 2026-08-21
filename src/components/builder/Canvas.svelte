@@ -44,7 +44,8 @@
   };
 
   const handleCanvasBackgroundClick = (e: MouseEvent) => {
-    if (e.target === e.currentTarget || (e.target as HTMLElement)?.classList.contains('canvas-backdrop')) {
+    const target = e.target as HTMLElement | null;
+    if (target?.classList?.contains('canvas-backdrop')) {
       editorStore.deselectAll();
     }
   };

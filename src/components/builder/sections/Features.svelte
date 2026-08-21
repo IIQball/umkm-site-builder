@@ -67,7 +67,7 @@
     dropTargetIdx = null;
   };
 
-  const renderIcon = (iconName: string) => {
+  const renderIcon = (iconName?: string) => {
     if (iconName === 'shield' || iconName === '✓') return ShieldCheck;
     if (iconName === 'truck' || iconName === '🚚') return Truck;
     if (iconName === 'award' || iconName === '💯') return Award;

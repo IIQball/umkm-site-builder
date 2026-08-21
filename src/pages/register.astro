@@ -1,0 +1,4 @@
+---
+// Alias route redirecting /register to /auth/register preserving query params
+return Astro.redirect(`/auth/register${Astro.url.search}`);
+---

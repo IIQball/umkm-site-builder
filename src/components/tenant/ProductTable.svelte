@@ -97,47 +97,35 @@
 </script>
 
 <div>
-  <!-- Stat Cards: Dipindah ke atas -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-full">
-    <div
-      class="stat bg-base-100 rounded-2xl shadow-sm border border-[var(--color-border)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default"
-    >
-      <div class="stat-title text-base-content/70 font-medium">
-        Total Produk
-      </div>
-      <div class="stat-value text-[var(--color-primary)]">{totalProducts}</div>
-      <div class="stat-desc">Seluruh produk terdaftar</div>
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Produk</p>
+      <p class="text-3xl font-extrabold text-base-content">{totalProducts}</p>
+      <p class="text-xs text-base-content/40">Seluruh produk terdaftar</p>
     </div>
 
-    <div
-      class="stat bg-base-100 rounded-2xl shadow-sm border border-[var(--color-border)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default"
-    >
-      <div class="stat-title text-base-content/70 font-medium">
-        Produk Aktif
-      </div>
-      <div class="stat-value text-success">{activeProducts}</div>
-      <div class="stat-desc">Siap untuk dijual</div>
+    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Produk Aktif</p>
+      <p class="text-3xl font-extrabold text-success">{activeProducts}</p>
+      <p class="text-xs text-base-content/40">Siap untuk dijual</p>
     </div>
 
-    <div
-      class="stat bg-base-100 rounded-2xl shadow-sm border border-[var(--color-border)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default"
-    >
-      <div class="stat-title text-base-content/70 font-medium">
-        Produk tidak aktif
-      </div>
-      <div class="stat-value text-base-content/40">{inactiveProducts}</div>
-      <div class="stat-desc">Stok nonaktif</div>
+    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
+      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Produk Tidak Aktif</p>
+      <p class="text-3xl font-extrabold text-base-content">{inactiveProducts}</p>
+      <p class="text-xs text-base-content/40">Stok nonaktif</p>
     </div>
   </div>
 
-  <!-- Kontainer Tabel Utama (Putih) -->
-  <div class="bg-base-100 border border-[var(--color-border)] shadow-sm rounded-2xl overflow-hidden p-6 mb-8">
+  <!-- Kontainer Tabel Utama -->
+  <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden p-6 mb-8">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold tracking-tight text-base-content">
         Daftar Produk
       </h2>
       <button
-        class="btn bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm rounded-lg"
+        class="btn bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm rounded-xl px-5"
         on:click={openAddModal}
       >
         <svg
@@ -159,7 +147,7 @@
     </div>
 
   {#if error}
-    <div class="alert alert-error mb-4 shadow-sm rounded-lg">
+    <div class="alert alert-error mb-4 shadow-sm rounded-xl">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="stroke-current shrink-0 h-6 w-6"
@@ -182,22 +170,21 @@
     </div>
   {:else if products.length === 0}
     <div
-      class="text-center py-12 border border-dashed border-base-300 rounded-2xl bg-base-50/50"
+      class="text-center py-12 border border-dashed border-blue-300 dark:border-blue-800 rounded-2xl"
     >
       <p class="text-base-content/60">
         Belum ada produk. Silakan tambahkan produk pertama Anda.
       </p>
     </div>
   {:else}
-    <div
-      class="overflow-x-auto rounded-xl border border-base-200 bg-base-100 shadow-sm"
-    >
+    <div class="overflow-x-auto">
       <table class="table w-full text-sm">
         <thead
-          class="bg-base-200/40 text-base-content/60 border-b border-base-200"
+          class="bg-base-200/50 text-base-content/60 border-b border-base-200"
         >
           <tr>
             <th class="font-medium px-4 py-3">Produk</th>
+            <th class="font-medium px-4 py-3">Kategori</th>
             <th class="font-medium px-4 py-3">Deskripsi</th>
             <th class="font-medium px-4 py-3">Harga</th>
             <th class="font-medium px-4 py-3">Status</th>
@@ -208,6 +195,7 @@
           {#each products as product}
             <ProductTableRow
               {product}
+              {categories}
               on:edit={(e) => openEditModal(e.detail)}
               on:delete={(e) => openDeleteModal(e.detail)}
               on:toggle={handleToggleEvent}

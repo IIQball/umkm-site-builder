@@ -24,6 +24,22 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     const { storeId, name, slug } = body;
     
+    // Check if slug exists
+    const existing = await db.query.storeCategories.findFirst({
+      where: and(eq(storeCategories.storeId, storeId), eq(storeCategories.slug, slug))
+    });
+
+    if (existing) {
+      if (existing.deletedAt !== null) {
+        // Free up the slug from the soft-deleted record
+        await db.update(storeCategories)
+          .set({ slug: `${existing.slug}-deleted-${Date.now()}` })
+          .where(eq(storeCategories.id, existing.id));
+      } else {
+        return new Response(JSON.stringify({ error: 'Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.' }), { status: 400 });
+      }
+    }
+
     await db.insert(storeCategories).values({
       id: crypto.randomUUID(),
       storeId,
@@ -50,6 +66,28 @@ export const PATCH: APIRoute = async ({ request }) => {
   const body = await request.json();
   const { id, name, slug } = body;
   
+  const currentCat = await db.query.storeCategories.findFirst({
+    where: eq(storeCategories.id, id)
+  });
+
+  if (!currentCat) {
+    return new Response(JSON.stringify({ error: 'Kategori tidak ditemukan' }), { status: 404 });
+  }
+
+  const existing = await db.query.storeCategories.findFirst({
+    where: and(eq(storeCategories.storeId, currentCat.storeId), eq(storeCategories.slug, slug))
+  });
+
+  if (existing && existing.id !== id) {
+    if (existing.deletedAt !== null) {
+      await db.update(storeCategories)
+        .set({ slug: `${existing.slug}-deleted-${Date.now()}` })
+        .where(eq(storeCategories.id, existing.id));
+    } else {
+      return new Response(JSON.stringify({ error: 'Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.' }), { status: 400 });
+    }
+  }
+
   await db.update(storeCategories)
     .set({ name, slug, updatedAt: new Date() })
     .where(eq(storeCategories.id, id));
@@ -66,9 +104,18 @@ export const DELETE: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
     }
 
-    await db.update(storeCategories)
-      .set({ deletedAt: new Date() })
-      .where(eq(storeCategories.id, id));
+    const currentCat = await db.query.storeCategories.findFirst({
+      where: eq(storeCategories.id, id)
+    });
+
+    if (currentCat) {
+      await db.update(storeCategories)
+        .set({ 
+          deletedAt: new Date(),
+          slug: `${currentCat.slug}-deleted-${Date.now()}`
+        })
+        .where(eq(storeCategories.id, id));
+    }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch {

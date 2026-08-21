@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import type { APIContext } from 'astro';
 import { GET, POST } from '../../../src/pages/api/products/index';
 import { PUT, DELETE } from '../../../src/pages/api/products/[id]';
 import { db } from '../../../src/lib/db/client';
@@ -20,14 +21,15 @@ describe('Products API', () => {
   describe('GET /api/products', () => {
     it('returns products for a store', async () => {
       const mockProducts = [{ id: '1', name: 'Produk Test' }];
-      (db.select as any).mockReturnValue({
+      (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(mockProducts),
         }),
       });
 
       const request = new Request('http://localhost/api/products?storeId=store-1');
-      const response = (await GET({ request, url: new URL(request.url) } as any)) as Response;
+      const context = { request, url: new URL(request.url) } as unknown as APIContext;
+      const response = (await GET(context)) as Response;
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -37,7 +39,8 @@ describe('Products API', () => {
 
     it('returns error if storeId is missing', async () => {
       const request = new Request('http://localhost/api/products');
-      const response = (await GET({ request, url: new URL(request.url) } as any)) as Response;
+      const context = { request, url: new URL(request.url) } as unknown as APIContext;
+      const response = (await GET(context)) as Response;
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -47,25 +50,32 @@ describe('Products API', () => {
 
   describe('POST /api/products', () => {
     it('creates a new product', async () => {
-      (db.insert as any).mockReturnValue({
+      (db.insert as Mock).mockReturnValue({
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([{ id: 'new-id' }]),
         }),
       });
 
-      const formData = new FormData();
-      formData.append('storeId', 's1');
-      formData.append('categoryId', 'c1');
-      formData.append('name', 'New Product');
-      formData.append('slug', 'new-product');
-      formData.append('basePrice', '10000');
-
       const request = new Request('http://localhost/api/products', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: 's1',
+          categoryId: 'c1',
+          name: 'New Product',
+          slug: 'new-product',
+          basePrice: 10000,
+          imageUrls: ['https://res.cloudinary.com/test/image.webp'],
+        }),
       });
-      const response = (await POST({ request, url: new URL(request.url) } as any)) as Response;
-      
+
+      const locals = {
+        user: { id: 'u1', role: 'tenant', email: 'test@example.com' },
+      };
+
+      const context = { request, locals, url: new URL(request.url) } as unknown as APIContext;
+      const response = (await POST(context)) as Response;
+
       expect(response.status).toBe(201);
       const data = await response.json();
       expect(data.ok).toBe(true);
@@ -74,13 +84,13 @@ describe('Products API', () => {
 
   describe('PUT /api/products/[id]', () => {
     it('updates a product using JSON', async () => {
-      (db.select as any).mockReturnValue({
+      (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([{ id: '1', imageUrls: [] }]),
         }),
       });
 
-      (db.update as any).mockReturnValue({
+      (db.update as Mock).mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ id: '1' }]),
@@ -93,10 +103,11 @@ describe('Products API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isAvailable: false }),
       });
-      
-      const response = (await PUT({ request, params: { id: '1' } } as any)) as Response;
+
+      const context = { request, locals: { user: { role: 'tenant' } }, params: { id: '1' } } as unknown as APIContext;
+      const response = (await PUT(context)) as Response;
       const data = await response.json();
-      
+
       expect(response.status).toBe(200);
       expect(data.ok).toBe(true);
     });
@@ -104,12 +115,12 @@ describe('Products API', () => {
 
   describe('DELETE /api/products/[id]', () => {
     it('soft deletes a product', async () => {
-      (db.select as any).mockReturnValue({
+      (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([{ id: '1', imageUrls: [] }]),
         }),
       });
-      (db.update as any).mockReturnValue({
+      (db.update as Mock).mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ id: '1' }]),
@@ -120,10 +131,11 @@ describe('Products API', () => {
       const request = new Request('http://localhost/api/products/1', {
         method: 'DELETE',
       });
-      
-      const response = (await DELETE({ request, params: { id: '1' } } as any)) as Response;
+
+      const context = { request, params: { id: '1' } } as unknown as APIContext;
+      const response = (await DELETE(context)) as Response;
       const data = await response.json();
-      
+
       expect(response.status).toBe(200);
       expect(data.ok).toBe(true);
     });

@@ -203,7 +203,7 @@
   </ul>
 
   <!-- Step Content -->
-  <div class="bg-base-100 rounded-box shadow-xl p-8">
+  <div class="bg-card rounded-3xl shadow-xl p-8 border border-border">
     
     {#if currentStep === 1}
       <!-- STEP 1: SUBDOMAIN -->
@@ -234,7 +234,7 @@
               value={subdomain}
               on:input={onSubdomainInput}
             />
-            <span class="join-item flex items-center bg-base-200 px-3 text-sm font-medium text-base-content/60">
+            <span class="join-item flex items-center bg-nested px-3 text-sm font-medium text-muted">
               .umkm.site
             </span>
           </div>
@@ -415,12 +415,12 @@
         
         <h2 class="text-2xl font-bold">Profil Toko Berhasil Dibuat!</h2>
         
-        <div class="bg-base-200 p-4 rounded-lg w-full text-left mb-4">
-          <p class="text-sm text-base-content/60 mb-1">Subdomain:</p>
-          <p class="font-mono font-medium mb-3">{subdomain}.umkm.site</p>
+        <div class="bg-nested p-4 rounded-xl w-full text-left mb-4 border border-border-light">
+          <p class="text-sm text-muted mb-1">Subdomain:</p>
+          <p class="font-mono font-medium mb-3 text-main">{subdomain}.umkm.site</p>
           
-          <p class="text-sm text-base-content/60 mb-1">Nama Toko:</p>
-          <p class="font-medium">{storeName}</p>
+          <p class="text-sm text-muted mb-1">Nama Toko:</p>
+          <p class="font-medium text-main">{storeName}</p>
         </div>
         
         <p class="text-base-content/70 mb-4">

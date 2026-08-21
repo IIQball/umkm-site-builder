@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-21 by builder-submit-review-modal session
+Status: LIVE · Updated: 2026-08-21 by store-settings session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -15,13 +15,34 @@ Fixed designer wallet currency formatting: removed division by 100 on designer b
 
 ## Last session did
 
-- **Designer Wallet Formatter Fix & IDR Normalization:**
-  - Added [formatIDR](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts#L5) in `src/lib/utils/format.ts` supporting `number | bigint | string` without cent division (`/ 100`).
-  - Updated [DesignerWalletOverview.svelte](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerWalletOverview.svelte) to use `formatIDR` directly for Saldo Aktif, Total Pendapatan Bersih, and Riwayat Mutasi Saldo.
-  - Audited [wallet.service.ts](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/services/finance/wallet.service.ts) to confirm integer values are returned unmodified.
-  - Added unit test cases for pure integer IDR formatting in `tests/finance/commission-and-masking.test.ts`.
-  - `bun run type-check`: 0 errors. `bun test`: 140/140 pass across 20 test files.
+- **Store Settings Feature:**
+  - `src/lib/stores/schemas.ts` — Added `StoreSettingsInput` schema to validate settings updates.
+  - `src/pages/api/stores/settings.ts` (NEW) — Endpoint for updating store profile (name, waNumber, googleMapsUrl) for tenants.
+  - `src/components/dashboard/StoreSettingsForm.svelte` (NEW) — Client-side Svelte component with Zod-based validation and Lucide icons for UI feedback.
+  - `src/pages/dashboard/store-settings.astro` (NEW) — Settings page mounted within `DashboardLayout`.
+  - `tests/schemas/store-settings.test.ts` (NEW) — 5 unit tests covering validation rules for store settings.
+  - All files strictly typed. `bun run type-check` passes successfully. Created PR #14.
 
+- **Auth Zod Schemas & Per-Field Inline Validation (Previous):**
+  - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
+  - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
+  - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.
+  - `src/components/auth/GoogleAuthButton.svelte` — Refined button design tokens and Lucide error alerts.
+  - `src/pages/auth/login.astro` & `src/pages/auth/register.astro` — Modern container aesthetic with backdrop blur, rounded-3xl cards, and polished typography.
+- **Testing & Verification:**
+  - `tests/schemas/auth.test.ts` (NEW) — 8 unit tests covering login/register validation scenarios.
+  - `tests/lib/auth-helpers.test.ts` (NEW) — 9 unit tests for `getAuthenticatedUser`, `getRedirectUrlForRole`, `isDesigner`, `isActive`, and `isAuthorizedDesigner`.
+  - `tests/lib/auth-google-whitelist.test.ts` — 10 unit tests for role-based redirects, BetterAuth config, and hook lifecycle execution.
+  - Total 27 unit tests specifically for the Auth module.
+  - Browser subagent verified empty form submission, real-time error cleanup on typing, password complexity, and confirm password mismatch.
+  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 81/81 pass.
+- **Store Onboarding Feature:**
+  - `src/lib/stores/schemas.ts` — Added `OnboardStoreInput` schema to validate store profiles.
+  - `src/pages/api/stores/onboard.ts` (NEW) — Endpoint for saving store profile and subdomain, ensuring unique subdomains, valid names, and correct roles.
+  - `src/components/onboarding/OnboardingWizard.svelte` (NEW) — Multi-step wizard UI covering Subdomain choice, Store Info (Name, WA, Maps), and Success state.
+  - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
+  - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
+  - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
 
 ## Next up
 

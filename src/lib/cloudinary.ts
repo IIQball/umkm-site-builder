@@ -12,15 +12,49 @@ async function generateSignature(params: Record<string, string>, apiSecret: stri
   return hashHex;
 }
 
+function getCloudinaryConfig() {
+  const cloudName = import.meta.env.CLOUDINARY_NAME || process.env.CLOUDINARY_NAME;
+  const apiKey = import.meta.env.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY;
+  const apiSecret = import.meta.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error("Missing Cloudinary configuration");
+  }
+
+  return { cloudName, apiKey, apiSecret };
+}
+
+/**
+ * Generate signed params for client-side direct upload to Cloudinary.
+ * Client uses these params to POST directly to Cloudinary upload API.
+ * No file bytes pass through our server.
+ */
+export async function generateSignedUploadParams(folder: string) {
+  const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
+
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const fullFolder = `umkm-builder/${folder}`;
+
+  const params: Record<string, string> = {
+    folder: fullFolder,
+    timestamp,
+  };
+
+  const signature = await generateSignature(params, apiSecret);
+
+  return {
+    signature,
+    timestamp,
+    apiKey,
+    cloudName,
+    folder: fullFolder,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+  };
+}
+
 export async function uploadToCloudinary(file: File, folder: string) {
   try {
-    const cloudName = import.meta.env.CLOUDINARY_NAME || process.env.CLOUDINARY_NAME;
-    const apiKey = import.meta.env.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY;
-    const apiSecret = import.meta.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_SECRET;
-
-    if (!cloudName || !apiKey || !apiSecret) {
-      throw new Error("Missing Cloudinary configuration");
-    }
+    const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
@@ -76,13 +110,7 @@ export async function uploadToCloudinary(file: File, folder: string) {
 
 export async function deleteFromCloudinary(publicId: string) {
   try {
-    const cloudName = import.meta.env.CLOUDINARY_NAME || process.env.CLOUDINARY_NAME;
-    const apiKey = import.meta.env.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY;
-    const apiSecret = import.meta.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_SECRET;
-
-    if (!cloudName || !apiKey || !apiSecret) {
-      throw new Error("Missing Cloudinary configuration");
-    }
+    const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
     const timestamp = Math.floor(Date.now() / 1000).toString();
     const params = {

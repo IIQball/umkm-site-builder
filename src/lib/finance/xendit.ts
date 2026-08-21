@@ -94,6 +94,50 @@ export class XenditClient {
   }
 
   /**
+   * Create a disbursement on Xendit
+   */
+  async createDisbursement(params: {
+    externalId: string;
+    amount: number;
+    bankCode: string;
+    accountHolderName: string;
+    accountNumber: string;
+    description: string;
+  }): Promise<{ id: string; status: string; externalId: string }> {
+    const body = {
+      external_id: params.externalId,
+      amount: Math.round(params.amount),
+      bank_code: params.bankCode.toUpperCase(),
+      account_holder_name: params.accountHolderName,
+      account_number: params.accountNumber,
+      description: params.description,
+    };
+
+    const response = await fetch(`${this.baseUrl}/disbursements`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString("base64")}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        `Xendit Disbursement API error: ${error.error_code || response.status} - ${error.message || response.statusText}`,
+      );
+    }
+
+    const data = await response.json();
+    return {
+      id: String(data.id),
+      status: String(data.status),
+      externalId: String(data.external_id),
+    };
+  }
+
+  /**
    * Verify webhook signature
    */
   verifyWebhookSignature(payload: string, signature: string): boolean {

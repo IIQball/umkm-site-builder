@@ -25,8 +25,7 @@ function testIsAuthorizedDesigner(user: AuthenticatedUser | null): boolean {
 }
 
 function testGetRedirectUrlForRole(role?: string | null): string {
-  if (role === 'designer') return '/designer/templates';
-  if (role === 'admin' || role === 'superadmin') return '/admin';
+  if (role === 'designer') return '/designer/wallet';
   return '/dashboard';
 }
 
@@ -81,13 +80,13 @@ describe('Auth Helper Functions', () => {
   });
 
   describe('getRedirectUrlForRole', () => {
-    it('returns /designer/templates for designer', () => {
-      expect(testGetRedirectUrlForRole('designer')).toBe('/designer/templates');
+    it('returns /designer/wallet for designer', () => {
+      expect(testGetRedirectUrlForRole('designer')).toBe('/designer/wallet');
     });
 
-    it('returns /admin for admin and superadmin', () => {
-      expect(testGetRedirectUrlForRole('admin')).toBe('/admin');
-      expect(testGetRedirectUrlForRole('superadmin')).toBe('/admin');
+    it('returns /dashboard for admin and superadmin', () => {
+      expect(testGetRedirectUrlForRole('admin')).toBe('/dashboard');
+      expect(testGetRedirectUrlForRole('superadmin')).toBe('/dashboard');
     });
 
     it('returns /dashboard for tenant or undefined', () => {

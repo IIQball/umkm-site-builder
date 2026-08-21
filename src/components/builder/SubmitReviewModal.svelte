@@ -46,7 +46,7 @@
   const fetchCommissionSettings = async () => {
     try {
       isLoadingFee = true;
-      const res = await fetch('/api/settings/commission');
+      const res = await fetch('/api/public/commission');
       if (res.ok) {
         const data = await res.json();
         if (data.ok && typeof data.data?.platformFeePercentage === 'number') {

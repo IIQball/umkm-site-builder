@@ -11,7 +11,7 @@
 
   const fetchTransactionStatus = async () => {
     try {
-      const response = await fetch(`/api/transactions/status/${invoiceId}`);
+      const response = await fetch(`/api/public/transactions/status/${invoiceId}`);
 
       if (!response.ok) {
         throw new Error('Gagal memeriksa status transaksi');

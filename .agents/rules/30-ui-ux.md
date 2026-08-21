@@ -81,6 +81,7 @@ does not exist on Antigravity or other agents, so this file is the source of tru
 - One icon pack, decided at preflight (G2), never a second one.
 - Verify SSR usage for the chosen pack before adopting it.
 - **No emojis anywhere** — not in UI, code, comments, commits, PRs, or docs.
+- Use Lucide icons (`lucide-svelte`) for all UI-based icon needs. Do not use emoji characters (e.g. 🕒, 🚚, 💯) or raw symbol characters (e.g. ✓) as UI elements.
 
 ## 9. Motion
 

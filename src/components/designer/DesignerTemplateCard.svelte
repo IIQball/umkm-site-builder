@@ -19,7 +19,7 @@
     if (!confirm('Hapus draf ini? Tindakan tidak dapat dibatalkan.')) return;
     try {
       isDeleting = true;
-      const res = await fetch(`/api/templates/draft?templateId=${template.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/designer/templates/draft?templateId=${template.id}`, { method: 'DELETE' });
       const result = await res.json();
       if (res.ok) {
         window.location.reload();
@@ -69,7 +69,7 @@
       />
     {:else}
       <div class="absolute inset-0 bg-nested flex flex-col items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[36px] text-muted" style="font-variation-settings:'FILL' 1">storefront</span>
+        <span class="material-symbols-outlined icon-filled text-[36px] text-muted">storefront</span>
         <span class="text-[11px] font-medium text-secondary">Preview Belum Tersedia</span>
       </div>
     {/if}

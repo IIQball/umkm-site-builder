@@ -1,14 +1,15 @@
-/**
- * Database client
- * Singleton instance of Drizzle ORM connected to Neon PostgreSQL
- */
-
-import { drizzle, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle, type NeonDatabase } from 'drizzle-orm/neon-serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { config } from '@/lib/config/app';
 import * as schema from '@/db/schema';
+import ws from 'ws';
 
-type Database = NeonHttpDatabase<typeof schema>;
+// Setup WebSocket untuk runtime Node/Bun lokal jika diperlukan
+if (typeof WebSocket === 'undefined') {
+  neonConfig.webSocketConstructor = ws;
+}
+
+export type Database = NeonDatabase<typeof schema>;
 
 let dbInstance: Database | null = null;
 
@@ -21,15 +22,11 @@ export function getDb(): Database {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  // Create Neon SQL client
-  const sql = neon(config.database.url);
-
-  // Create Drizzle ORM instance
-  dbInstance = drizzle(sql, { schema });
+  const pool = new Pool({ connectionString: config.database.url });
+  dbInstance = drizzle(pool, { schema });
   return dbInstance;
 }
 
 export const db = getDb();
-
 export default db;
 

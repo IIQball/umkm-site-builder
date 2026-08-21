@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { generateSignedUploadParams } from '../../../lib/cloudinary';
 import { MediaSignInput } from '../../../schemas/media.schema';
-import { okResponse, errorResponse } from '../../../types/api';
+import { okResponse, errorResponse } from '../../../types';
 
 /**
  * POST /api/media/sign

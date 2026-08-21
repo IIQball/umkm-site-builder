@@ -85,7 +85,7 @@
                   </span>
                 {/if}
               </td>
-              <td class="px-4 py-3.5 text-[12px] font-medium text-main max-w-[180px] truncate">
+              <td class="px-4 py-3.5 text-[12px] font-medium text-main max-w-[180px] whitespace-normal break-words">
                 {mut.description}
               </td>
               <td class="px-4 py-3.5">

@@ -232,17 +232,17 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     props: {
       features: [
         {
-          icon: '✓',
+          icon: 'shield',
           title: 'Toko Terpercaya',
           description: 'Dipercaya oleh ribuan pelanggan',
         },
         {
-          icon: '🚚',
+          icon: 'truck',
           title: 'Pengiriman Cepat',
           description: 'Gratis ongkos kirim untuk pembelian tertentu',
         },
         {
-          icon: '💯',
+          icon: 'award',
           title: 'Produk Berkualitas',
           description: 'Garansi kualitas atau uang kembali',
         },

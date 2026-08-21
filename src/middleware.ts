@@ -21,12 +21,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const { pathname } = context.url;
   const user = context.locals.user;
+  
+  // Redirect designer from general entry point /dashboard to designer templates
+  if ((pathname === '/dashboard' || pathname === '/dashboard/') && user?.role === 'designer') {
+    return context.redirect('/designer/templates');
+  }
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan
   const roleMap = [
     { prefix: '/dashboard', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/onboarding', roles: ['tenant', 'admin', 'superadmin'] },
-    { prefix: '/builder', roles: ['tenant', 'admin', 'superadmin'] },
+    { prefix: '/builder', roles: ['designer', 'tenant', 'admin', 'superadmin'] },
     { prefix: '/designer', roles: ['designer', 'admin', 'superadmin'] },
     { prefix: '/checkout', roles: ['tenant'] } // Hanya tenant yang bisa checkout
   ];

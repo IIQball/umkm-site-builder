@@ -7,7 +7,10 @@
 import type { APIRoute } from 'astro';
 import { XenditWebhookPayloadSchema } from '@/schemas';
 import { z } from 'zod';
-import { transactionService } from '@/services';
+import { transactionService, payoutService } from '@/services';
+import { db } from '@/lib/db/client';
+import { payoutRequests } from '@/db/schema';
+import { eq, or } from 'drizzle-orm';
 
 interface ResponseData {
   ok: boolean;
@@ -81,8 +84,69 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-    // Parse and validate payload
-    const payload = XenditWebhookPayloadSchema.parse(await context.request.json());
+    // Read body as raw JSON
+    const rawBody = await context.request.json();
+    const externalId = rawBody.external_id;
+
+    if (!externalId) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Missing external_id',
+          },
+        } as ResponseData),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Detect if payload is a Xendit Disbursement callback
+    const isDisbursement =
+      rawBody.status &&
+      ['COMPLETED', 'FAILED'].includes(String(rawBody.status).toUpperCase()) &&
+      !rawBody.event;
+
+    if (isDisbursement) {
+      const existingPayout = await db
+        .select()
+        .from(payoutRequests)
+        .where(
+          or(
+            eq(payoutRequests.id, externalId),
+            eq(payoutRequests.gatewayReference, externalId),
+            eq(payoutRequests.xenditPayoutId, rawBody.id)
+          )
+        )
+        .limit(1);
+
+      if (existingPayout.length > 0) {
+        const payout = existingPayout[0];
+        const status = String(rawBody.status).toUpperCase();
+
+        await payoutService.processDisbursementWebhook({
+          payoutRequestId: payout.id,
+          status,
+          failureCode: rawBody.failure_code,
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          received: true,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Parse and validate payload for invoice
+    const payload = XenditWebhookPayloadSchema.parse(rawBody);
 
     // Process webhook with business logic & fulfillment
     const result = await transactionService.processWebhook(payload);

@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import StatCard from '../ui/StatCard.svelte';
 
   export let initialFeePercentage: number = 30;
 
   let platformFeePercentage: number = initialFeePercentage;
+  let settlementDelayDays: number = 7;
   let isLoading = false;
 
   let feedback: { message: string; type: 'success' | 'error' } | null = null;
@@ -12,17 +14,26 @@
     try {
       const res = await fetch('/api/admin/settings/commission');
       const result = await res.json();
-      if (result.success && result.data?.platformFeePercentage !== undefined) {
-        platformFeePercentage = Number(result.data.platformFeePercentage);
+      if (result.success && result.data) {
+        if (result.data.platformFeePercentage !== undefined) {
+          platformFeePercentage = Number(result.data.platformFeePercentage);
+        }
+        if (result.data.settlementDelayDays !== undefined) {
+          settlementDelayDays = Number(result.data.settlementDelayDays);
+        }
       }
     } catch {
-      // Keep initialFeePercentage
+      // Keep initial/default values
     }
   });
 
   const handleSave = async () => {
     if (platformFeePercentage < 0 || platformFeePercentage > 100) {
       feedback = { message: 'Persentase fee harus antara 0% hingga 100%', type: 'error' };
+      return;
+    }
+    if (settlementDelayDays < 0) {
+      feedback = { message: 'Durasi penahanan settlement tidak boleh negatif', type: 'error' };
       return;
     }
 
@@ -35,6 +46,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platformFeePercentage: Number(platformFeePercentage),
+          settlementDelayDays: Number(settlementDelayDays),
         }),
       });
       const result = await res.json();
@@ -57,39 +69,66 @@
   $: designerShare = Math.max(0, 100 - Number(platformFeePercentage || 0));
 </script>
 
-<div class="max-w-2xl space-y-6">
+<div class="w-full space-y-6">
   <!-- Page Header -->
   <div>
-    <h1 class="text-2xl font-bold text-base-content tracking-tight">Pengaturan Komisi Platform</h1>
-    <p class="text-xs text-base-content/60 mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
+    <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Pengaturan Komisi Platform</h1>
+    <p class="text-[13px] text-secondary mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
+  </div>
+
+  <!-- Stat Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <StatCard
+      label="Fee Platform"
+      value="{platformFeePercentage}%"
+      icon="percent"
+      iconCls="icon-wrapper-indigo"
+      borderAccent="border-t-2 border-t-indigo-400"
+    />
+    <StatCard
+      label="Bagian Desainer"
+      value="{designerShare}%"
+      icon="brush"
+      iconCls="icon-wrapper-emerald"
+      borderAccent="border-t-2 border-t-emerald-400"
+    />
+    <StatCard
+      label="Penahanan Dana"
+      value="{settlementDelayDays} Hari"
+      icon="hourglass_top"
+      iconCls="icon-wrapper-amber"
+      borderAccent="border-t-2 border-t-amber-400"
+    />
   </div>
 
   <!-- Alert Feedback -->
   {#if feedback}
-    <div class="alert alert-{feedback.type === 'success' ? 'success' : 'error'} text-white shadow-md text-xs rounded-xl flex items-center gap-2">
-      <span class="material-symbols-outlined text-[18px]">
+    <div 
+      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3.5 border transition-all animate-fade-in shadow-sm {feedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}"
+    >
+      <span class="material-symbols-outlined text-[18px] flex-shrink-0">
         {feedback.type === 'success' ? 'check_circle' : 'error'}
       </span>
-      <span>{feedback.message}</span>
+      <span class="font-medium">{feedback.message}</span>
     </div>
   {/if}
 
   <!-- Form Card -->
-  <div class="bg-base-100 rounded-2xl border border-base-200 p-6 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 pb-4 border-b border-base-200">
-      <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+  <div class="bg-card rounded-2xl border border-light p-6 shadow-sm space-y-6">
+    <div class="flex items-center gap-3 pb-4 border-b border-light">
+      <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
         <span class="material-symbols-outlined text-xl">percent</span>
       </div>
       <div>
-        <h2 class="font-bold text-sm text-base-content">Potongan Fee Platform</h2>
-        <p class="text-xs text-base-content/50">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
+        <h2 class="font-bold text-sm text-main">Potongan Fee Platform</h2>
+        <p class="text-[11px] text-muted mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
       </div>
     </div>
 
-    <form on:submit|preventDefault={handleSave} class="space-y-4">
-      <div class="form-control">
-        <label for="platformFeePercentage" class="label text-xs font-semibold text-base-content">
-          <span>Persentase Fee Platform</span>
+    <form on:submit|preventDefault={handleSave} class="space-y-6">
+      <div class="form-control w-full">
+        <label for="platformFeePercentage" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">
+          Persentase Fee Platform
         </label>
         <div class="relative flex items-center">
           <input
@@ -100,41 +139,50 @@
             step="1"
             bind:value={platformFeePercentage}
             disabled={isLoading}
-            class="input input-bordered w-full pr-12 text-sm font-semibold rounded-xl focus:input-primary"
+            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-indigo-500 rounded-xl text-sm font-semibold focus:outline-none transition-colors"
             placeholder="30"
           />
-          <span class="absolute right-4 font-bold text-sm text-base-content/40 select-none">%</span>
+          <span class="absolute right-4 font-bold text-sm text-muted select-none">%</span>
         </div>
-        <label for="platformFeePercentage" class="label">
-          <span class="text-[11px] text-base-content/60 leading-relaxed">
-            Persentase potongan fee yang diambil platform dari setiap penjualan template berbayar. Sisa persentase (<strong class="text-primary font-bold">{designerShare}%</strong>) otomatis masuk ke dompet desainer.
-          </span>
-        </label>
+        <p class="text-[11px] text-muted leading-relaxed mt-2">
+          Persentase potongan fee yang diambil platform dari setiap penjualan template berbayar. Sisa persentase (<strong class="text-indigo-600 dark:text-indigo-400 font-bold">{designerShare}%</strong>) otomatis masuk ke dompet desainer.
+        </p>
       </div>
 
-      <!-- Preview Split breakdown card -->
-      <div class="bg-base-200/50 rounded-xl p-4 border border-base-200 grid grid-cols-2 gap-4 text-center">
-        <div class="space-y-1 border-r border-base-200 pr-2">
-          <span class="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Bagian Platform</span>
-          <p class="text-lg font-black text-primary">{platformFeePercentage}%</p>
+      <!-- Settlement Delay Days Input -->
+      <div class="form-control w-full">
+        <label for="settlementDelayDays" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">
+          Durasi Penahanan Settlement (Hari)
+        </label>
+        <div class="relative flex items-center">
+          <input
+            id="settlementDelayDays"
+            type="number"
+            min="0"
+            step="1"
+            bind:value={settlementDelayDays}
+            disabled={isLoading}
+            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-indigo-500 rounded-xl text-sm font-semibold focus:outline-none transition-colors"
+            placeholder="7"
+          />
+          <span class="absolute right-4 font-bold text-xs text-muted select-none">Hari</span>
         </div>
-        <div class="space-y-1 pl-2">
-          <span class="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Bagian Desainer</span>
-          <p class="text-lg font-black text-emerald-600 dark:text-emerald-400">{designerShare}%</p>
-        </div>
+        <p class="text-[11px] text-muted leading-relaxed mt-2">
+          Jumlah hari dana penjualan ditahan sebelum ditambahkan ke saldo aktif yang dapat ditarik oleh desainer.
+        </p>
       </div>
 
       <div class="pt-2">
         <button
           type="submit"
-          class="btn btn-primary w-full sm:w-auto rounded-xl gap-2 font-semibold text-xs min-w-[160px]"
+          class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold rounded-xl px-5 py-2.5 shadow-sm shadow-indigo-600/25 transition-colors active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed min-w-[160px]"
           disabled={isLoading}
         >
           {#if isLoading}
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="loading loading-spinner loading-xs flex-shrink-0"></span>
             <span>Menyimpan...</span>
           {:else}
-            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span class="material-symbols-outlined text-[18px] flex-shrink-0">save</span>
             <span>Simpan Pengaturan</span>
           {/if}
         </button>

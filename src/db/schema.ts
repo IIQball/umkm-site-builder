@@ -107,6 +107,7 @@ export const wallets = pgTable('wallets', {
   id: text('id').primaryKey(),
   designerId: text('designer_id').notNull().unique().references(() => designers.userId, { onDelete: 'cascade' }),
   balance: bigint('balance', { mode: 'number' }).default(0).notNull(), 
+  availableBalance: bigint('available_balance', { mode: 'number' }).default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -314,7 +315,8 @@ export const activityLogs = pgTable('activity_logs', {
 export const platformSettings = pgTable('platform_settings', {
   id: text('id').primaryKey(),
   platformFeePercentage: integer('platform_fee_percentage').default(30).notNull(), 
-  payoutMinimumBalance: bigint('payout_minimum_balance', { mode: 'number' }).default(50000).notNull(), 
+  payoutMinimumBalance: bigint('payout_minimum_balance', { mode: 'number' }).default(50000).notNull(),
+  settlementDelayDays: integer('settlement_delay_days').default(7).notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.id),
 });

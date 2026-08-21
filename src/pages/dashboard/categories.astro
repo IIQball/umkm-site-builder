@@ -3,7 +3,6 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db, stores, storeCategories } from '@/db';
 import { eq, and, isNull } from 'drizzle-orm';
-import CategoryManager from '@/components/dashboard/CategoryManager.svelte';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect("/auth/login");

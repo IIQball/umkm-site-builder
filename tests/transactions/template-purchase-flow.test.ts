@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { POST } from '@/pages/api/transactions/template-purchase';
+import { POST } from '@/pages/api/tenant/transactions/template-purchase';
 import { db } from '@/lib/db/client';
 import * as authLib from '@/lib/auth';
 import { xenditClient } from '@/lib/finance/xendit';

@@ -48,7 +48,7 @@
     loading = true;
 
     try {
-      const { error: errResponse } = await authClient.signIn.email({
+      const { data, error: errResponse } = await authClient.signIn.email({
         email,
         password,
       });
@@ -58,7 +58,12 @@
         return;
       }
 
-      window.location.href = "/dashboard";
+      const role = data?.user?.role;
+      if (role === 'designer') {
+        window.location.href = "/designer/wallet";
+      } else {
+        window.location.href = "/dashboard";
+      }
     } catch (err: unknown) {
       generalError = err instanceof Error ? err.message : "Terjadi kesalahan sistem";
     } finally {

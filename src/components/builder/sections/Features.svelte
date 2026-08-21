@@ -68,9 +68,9 @@
   };
 
   const renderIcon = (iconName?: string) => {
-    if (iconName === 'shield' || iconName === '✓') return ShieldCheck;
-    if (iconName === 'truck' || iconName === '🚚') return Truck;
-    if (iconName === 'award' || iconName === '💯') return Award;
+    if (iconName === 'shield') return ShieldCheck;
+    if (iconName === 'truck') return Truck;
+    if (iconName === 'award') return Award;
     return Star;
   };
 </script>

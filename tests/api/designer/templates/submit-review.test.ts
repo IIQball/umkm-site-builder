@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { POST } from '@/pages/api/templates/submit-review';
+import { POST } from '@/pages/api/designer/templates/submit-review';
 import { db } from '@/lib/db/client';
 import * as authLib from '@/lib/auth';
 
@@ -22,7 +22,7 @@ vi.mock('@/lib/auth', () => ({
   isActive: vi.fn((u) => !!u && u.status === 'active'),
   isAdmin: vi.fn((u) => !!u && (u.role === 'admin' || u.role === 'superadmin')),
   isAuthorizedAdmin: vi.fn((u) => !!u && u.status === 'active' && (u.role === 'admin' || u.role === 'superadmin')),
-  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/templates' : (role === 'admin' || role === 'superadmin' ? '/admin' : '/dashboard')),
+  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/wallet' : '/dashboard'),
   auth: { api: { getSession: vi.fn() } },
 }));
 

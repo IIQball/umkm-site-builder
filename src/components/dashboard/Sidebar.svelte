@@ -91,7 +91,7 @@
   <div class="flex items-center h-14 px-3 border-b border-light gap-2.5 flex-shrink-0">
     {#if !collapsed}
       <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm flex-shrink-0 shadow-sm shadow-indigo-600/25">
-        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">storefront</span>
+        <span class="material-symbols-outlined icon-filled text-[18px]">storefront</span>
       </div>
       <div class="flex-1 min-w-0">
         <span class="font-bold text-[13px] text-main tracking-tight truncate block leading-tight select-none">
@@ -103,7 +103,7 @@
       </div>
     {:else}
       <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-sm shadow-indigo-600/25">
-        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">storefront</span>
+        <span class="material-symbols-outlined icon-filled text-[18px]">storefront</span>
       </div>
     {/if}
     <button
@@ -140,7 +140,7 @@
         >
           <span
             class="material-symbols-outlined text-[19px] flex-shrink-0 transition-colors"
-            style={active ? "font-variation-settings:'FILL' 1" : ''}
+            class:icon-filled={active}
           >
             {item.icon}
           </span>
@@ -274,7 +274,7 @@
   <div class="flex items-center justify-between h-14 px-4 border-b border-light">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-sm shadow-indigo-600/25">
-        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">storefront</span>
+        <span class="material-symbols-outlined icon-filled text-[18px]">storefront</span>
       </div>
       <span class="font-bold text-[13px] text-main">UMKM Builder</span>
     </div>

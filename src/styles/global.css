@@ -301,4 +301,19 @@ a:hover {
   color: #fbbf24 !important;
 }
 
+/* Filled Material Icons Utility */
+.icon-filled {
+  font-variation-settings: 'FILL' 1 !important;
+}
+
+/* Custom Warning Badge */
+.badge-custom-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  color: #d97706 !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+:global(html[data-theme="dark"]) .badge-custom-warning {
+  color: #fbbf24 !important;
+}
+
 

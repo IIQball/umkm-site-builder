@@ -9,6 +9,7 @@ import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 const DEFAULT_SETTINGS = {
   platformFeePercentage: 30,
   payoutMinimumBalance: 50000,
+  settlementDelayDays: 7,
 };
 
 export const GET: APIRoute = async (context): Promise<Response> => {
@@ -44,6 +45,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
         data: {
           platformFeePercentage: settingsList[0].platformFeePercentage,
           payoutMinimumBalance: settingsList[0].payoutMinimumBalance,
+          settlementDelayDays: settingsList[0].settlementDelayDays,
         },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -89,7 +91,8 @@ export const saveSettings = async (context: Parameters<APIRoute>[0]): Promise<Re
         .values({
           id: `ps_${Date.now()}`,
           platformFeePercentage: validated.platformFeePercentage,
-          payoutMinimumBalance: DEFAULT_SETTINGS.payoutMinimumBalance,
+          payoutMinimumBalance: validated.payoutMinimumBalance ?? DEFAULT_SETTINGS.payoutMinimumBalance,
+          settlementDelayDays: validated.settlementDelayDays ?? DEFAULT_SETTINGS.settlementDelayDays,
           updatedBy: user.id,
           updatedAt: new Date(),
         })
@@ -100,6 +103,8 @@ export const saveSettings = async (context: Parameters<APIRoute>[0]): Promise<Re
         .update(platformSettings)
         .set({
           platformFeePercentage: validated.platformFeePercentage,
+          payoutMinimumBalance: validated.payoutMinimumBalance !== undefined ? validated.payoutMinimumBalance : existingList[0].payoutMinimumBalance,
+          settlementDelayDays: validated.settlementDelayDays !== undefined ? validated.settlementDelayDays : existingList[0].settlementDelayDays,
           updatedBy: user.id,
           updatedAt: new Date(),
         })

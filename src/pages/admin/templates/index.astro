@@ -46,5 +46,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
 ---
 
 <DashboardLayout title="Kurasi Template" breadcrumb="Admin / Kurasi Template">
-  <TemplateReviewPanel client:load {initialTemplatesJson} />
+  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8 animate-fade-in">
+    <TemplateReviewPanel client:load {initialTemplatesJson} />
+  </div>
 </DashboardLayout>

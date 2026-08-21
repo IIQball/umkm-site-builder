@@ -17,7 +17,7 @@
     loading = true;
     fetchError = null;
     try {
-      const response = await fetch(`/api/templates/draft?templateId=${encodeURIComponent(templateId)}`, {
+      const response = await fetch(`/api/designer/templates/draft?templateId=${encodeURIComponent(templateId)}`, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -34,7 +34,7 @@
     error = null;
 
     try {
-      const response = await fetch('/api/templates/draft', {
+      const response = await fetch('/api/designer/templates/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',

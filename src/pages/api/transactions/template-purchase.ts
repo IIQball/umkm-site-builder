@@ -92,7 +92,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     const xenditInvoice = await xenditClient.createInvoice({
       invoiceNum,
-      amount: template.price / 100, // DB stores cents, convert to IDR
+      amount: template.price,
       payerEmail: user.email,
       description: `Pembelian Template: ${template.name}`,
       expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -110,7 +110,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       id: transactionId,
       userId: user.id,
       type: 'template_purchase',
-      amount: template.price, // cents
+      amount: template.price,
       status: 'pending',
       templateId: template.id,
       externalId: invoiceNum,

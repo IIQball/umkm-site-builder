@@ -70,7 +70,7 @@ describe('TransactionService', () => {
 
   describe('formatCurrency', () => {
     it('should format amount to IDR currency', () => {
-      const formatted = transactionService.formatCurrency(10000000); // 100,000 IDR in cents
+      const formatted = transactionService.formatCurrency(100000); // 100,000 IDR
       expect(formatted).toContain('100');
       expect(formatted).toContain('Rp'); // IDR symbol or text
     });

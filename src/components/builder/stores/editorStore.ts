@@ -264,8 +264,8 @@ function createEditorStore() {
       await applySave(get({ subscribe }), update);
     },
 
-    async submitReview() {
-      await applySubmitReview(get({ subscribe }), update);
+    async submitReview(): Promise<boolean> {
+      return await applySubmitReview(get({ subscribe }), update);
     },
   };
 }

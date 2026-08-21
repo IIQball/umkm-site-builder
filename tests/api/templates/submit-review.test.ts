@@ -18,6 +18,12 @@ vi.mock('@/lib/db/client', () => {
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
   isAuthorizedDesigner: vi.fn(),
+  isDesigner: vi.fn((u) => !!u && (u.role === 'designer' || u.role === 'admin' || u.role === 'superadmin')),
+  isActive: vi.fn((u) => !!u && u.status === 'active'),
+  isAdmin: vi.fn((u) => !!u && (u.role === 'admin' || u.role === 'superadmin')),
+  isAuthorizedAdmin: vi.fn((u) => !!u && u.status === 'active' && (u.role === 'admin' || u.role === 'superadmin')),
+  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/templates' : (role === 'admin' || role === 'superadmin' ? '/admin' : '/dashboard')),
+  auth: { api: { getSession: vi.fn() } },
 }));
 
 describe('POST /api/templates/submit-review', () => {

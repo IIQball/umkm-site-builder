@@ -2,7 +2,7 @@
   import { ShoppingCart, CheckCircle, Loader } from 'lucide-svelte';
 
   export let templateId: string;
-  export let price: number; // in cents
+  export let price: number; // in IDR
   export let isOwned: boolean = false;
   export let isLoggedIn: boolean = false;
 
@@ -80,7 +80,7 @@
     <button
       type="button"
       on:click={handlePurchase}
-      class="btn btn-primary btn-sm rounded-xl text-xs font-bold shadow-sm w-full gap-1.5 text-white active:scale-[0.98] transition-transform"
+      class="btn btn-primary btn-sm rounded-xl text-xs font-bold shadow-sm w-full gap-1.5 text-white active:scale-[0.98] transition-transform cursor-pointer"
       disabled={loading}
     >
       {#if loading}

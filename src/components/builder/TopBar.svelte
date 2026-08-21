@@ -16,8 +16,12 @@
     Grid2X2,
   } from 'lucide-svelte';
   import { editorStore, canUndo, canRedo } from './stores/editorStore';
+  import SubmitReviewModal from './SubmitReviewModal.svelte';
 
+  export let templateId: string = '';
   export let templateName: string = 'Template';
+  export let templatePrice: number = 0;
+  export let platformFeePercentage: number = 30;
   export let status: string = 'draft';
   export let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   export let isDirty: boolean = false;
@@ -25,10 +29,12 @@
   export let saveSuccess: boolean = false;
   export let onViewModeChange: (mode: 'desktop' | 'tablet' | 'mobile') => void;
   export let onSave: () => void;
-  export let onSubmit: () => void;
+  export let onSubmit: () => Promise<boolean | void> = async () => {};
 
+  let isSubmitModalOpen = false;
   let isEditingName = false;
   let nameInputValue = templateName;
+
 
   const focus = (el: HTMLInputElement) => el.focus();
 
@@ -264,7 +270,7 @@
     <!-- Submit Review Button -->
     <button
       type="button"
-      on:click={onSubmit}
+      on:click={() => (isSubmitModalOpen = true)}
       disabled={saving || status === 'pending'}
       class="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
     >
@@ -273,3 +279,19 @@
     </button>
   </div>
 </header>
+
+<SubmitReviewModal
+  bind:isOpen={isSubmitModalOpen}
+  {templateId}
+  {templateName}
+  {templatePrice}
+  initialPlatformFeePercentage={platformFeePercentage}
+  onClose={() => (isSubmitModalOpen = false)}
+  onConfirm={async () => {
+    if (onSubmit) {
+      await onSubmit();
+    } else {
+      await editorStore.submitReview();
+    }
+  }}
+/>

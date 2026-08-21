@@ -100,7 +100,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         name: input.name,
         description: input.description,
         thumbnailUrl: input.thumbnailUrl,
-        price: Math.floor((input.price || 0) * 100),
+        price: input.price ?? 0,
         designerId: user.id,
         status: 'draft',
         config: {
@@ -255,7 +255,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
         name: input.name,
         description: input.description,
         thumbnailUrl: input.thumbnailUrl,
-        price: Math.floor(input.price * 100),
+        price: input.price,
         config: input.config,
         status: 'pending',
         updatedAt: new Date(),

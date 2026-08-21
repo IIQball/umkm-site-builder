@@ -153,7 +153,7 @@ describe('POST /api/transactions/template-purchase', () => {
     mockFindTemplate.mockResolvedValue({
       id: 'tpl_123',
       name: 'Template Test',
-      price: 15000000,
+      price: 150000,
       status: 'approved',
     });
     mockFindUserTemplate.mockResolvedValue({
@@ -224,7 +224,7 @@ describe('POST /api/transactions/template-purchase', () => {
     mockFindTemplate.mockResolvedValue({
       id: 'tpl_paid',
       name: 'Paid Template',
-      price: 15000000, // 150,000 IDR
+      price: 150000,
       status: 'approved',
     });
     mockFindUserTemplate.mockResolvedValue(null);

@@ -5,6 +5,7 @@ import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
 import { commissions } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
 
 export const prerender = false;
 
@@ -14,11 +15,6 @@ if (!user || !isAuthorizedDesigner(user)) {
 }
 
 const walletSummary = await getDesignerWalletSummary(user.id);
-
-const formatPrice = (cents: number): string => {
-  const rupiah = Math.floor(cents / 100);
-  return `Rp ${rupiah.toLocaleString('id-ID')}`;
-};
 
 // Calculate total net income (CREDIT sum)
 const totalNetIncome = walletSummary.mutations
@@ -41,114 +37,12 @@ const totalTemplatesSold = soldInfo?.count || 0;
       <p class="text-xs text-base-content/60 mt-1">Pantau pendapatan bersih, mutasi dompet, dan penarikan dana penjualan.</p>
     </div>
 
-    <!-- Financial Overview Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-      <!-- Active Balance Card -->
-      <div class="card bg-base-100 border border-base-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-          <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
-        </div>
-        <span class="text-[10px] uppercase font-extrabold tracking-wider text-base-content/50">Saldo Aktif</span>
-        <h2 class="text-2xl font-black text-base-content mt-2 font-mono">
-          {formatPrice(walletSummary.balance)}
-        </h2>
-        <div class="mt-4 flex items-center gap-1.5 text-[10px] text-base-content/50">
-          <span class="material-symbols-outlined text-[14px] text-emerald-500">lock</span>
-          <span>Dana siap ditarik ke rekening terdaftar</span>
-        </div>
-      </div>
-
-      <!-- Net Income Card -->
-      <div class="card bg-base-100 border border-base-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-success/10 text-success flex items-center justify-center border border-success/20">
-          <span class="material-symbols-outlined text-lg">payments</span>
-        </div>
-        <span class="text-[10px] uppercase font-extrabold tracking-wider text-base-content/50">Total Pendapatan Bersih</span>
-        <h2 class="text-2xl font-black text-base-content mt-2 font-mono">
-          {formatPrice(totalNetIncome)}
-        </h2>
-        <div class="mt-4 flex items-center gap-1.5 text-[10px] text-base-content/50">
-          <span class="material-symbols-outlined text-[14px] text-success">trending_up</span>
-          <span>Setelah potongan biaya platform</span>
-        </div>
-      </div>
-
-      <!-- Sold Templates Card -->
-      <div class="card bg-base-100 border border-base-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-info/10 text-info flex items-center justify-center border border-info/20">
-          <span class="material-symbols-outlined text-lg">sell</span>
-        </div>
-        <span class="text-[10px] uppercase font-extrabold tracking-wider text-base-content/50">Total Template Terjual</span>
-        <h2 class="text-2xl font-black text-base-content mt-2 font-mono">
-          {totalTemplatesSold} <span class="text-xs font-normal text-base-content/50">Template</span>
-        </h2>
-        <div class="mt-4 flex items-center gap-1.5 text-[10px] text-base-content/50">
-          <span class="material-symbols-outlined text-[14px] text-info">verified</span>
-          <span>Dari seluruh desain approved</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mutations Ledger -->
-    <div class="card bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden">
-      <div class="p-6 border-b border-base-200 bg-base-100">
-        <h3 class="text-sm font-bold text-base-content">Riwayat Mutasi Saldo</h3>
-      </div>
-
-      {walletSummary.mutations.length === 0 ? (
-        <div class="p-12 text-center max-w-sm mx-auto">
-          <div class="w-12 h-12 rounded-xl bg-base-200 text-base-content/40 flex items-center justify-center mx-auto mb-4 border border-base-200">
-            <span class="material-symbols-outlined text-xl">receipt_long</span>
-          </div>
-          <h4 class="text-xs font-bold text-base-content">Belum Ada Mutasi</h4>
-          <p class="text-[11px] text-base-content/60 mt-1.5">
-            Mutasi saldo atau transaksi komisi penjualan akan dicatat secara otomatis di sini.
-          </p>
-        </div>
-      ) : (
-        <div class="overflow-x-auto">
-          <table class="table table-md w-full">
-            <thead>
-              <tr class="bg-base-200/50 border-b border-base-200">
-                <th class="text-xs font-bold text-base-content/75 py-4">Tanggal</th>
-                <th class="text-xs font-bold text-base-content/75 py-4">Tipe</th>
-                <th class="text-xs font-bold text-base-content/75 py-4">Keterangan</th>
-                <th class="text-xs font-bold text-base-content/75 py-4">Reference ID</th>
-                <th class="text-xs font-bold text-base-content/75 py-4 text-right">Jumlah</th>
-                <th class="text-xs font-bold text-base-content/75 py-4 text-right">Saldo Akhir</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-base-200">
-              {walletSummary.mutations.map((mut) => (
-                <tr class="hover:bg-base-200/30 transition-colors">
-                  <td class="py-4 text-xs text-base-content/65 whitespace-nowrap">
-                    {new Date(mut.createdAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                  <td class="py-4">
-                    {mut.type === 'CREDIT' ? (
-                      <span class="badge badge-success text-white text-[10px] font-bold px-2 py-1">CREDIT</span>
-                    ) : (
-                      <span class="badge badge-error text-white text-[10px] font-bold px-2 py-1">DEBIT</span>
-                    )}
-                  </td>
-                  <td class="py-4 text-xs font-medium text-base-content max-w-xs truncate">
-                    {mut.description}
-                  </td>
-                  <td class="py-4 text-xs text-base-content/50 font-mono">
-                    {mut.referenceId || '-'}
-                  </td>
-                  <td class={`py-4 text-right text-xs font-bold font-mono ${mut.type === 'CREDIT' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                    {mut.type === 'CREDIT' ? '+' : '-'}{formatPrice(mut.amount)}
-                  </td>
-                  <td class="py-4 text-right text-xs font-bold text-base-content/70 font-mono">
-                    {formatPrice(mut.balanceAfter)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+    <!-- Designer Wallet Overview Component -->
+    <DesignerWalletOverview
+      client:load
+      walletSummary={walletSummary}
+      totalNetIncome={totalNetIncome}
+      totalTemplatesSold={totalTemplatesSold}
+    />
   </div>
 </DashboardLayout>

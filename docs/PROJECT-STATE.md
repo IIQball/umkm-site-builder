@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by core-financial-engine session
+Status: LIVE · Updated: 2026-08-21 by builder-submit-review-modal session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,18 +11,17 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Milestone 3 complete. Admin Template Review API (`/api/admin/templates/[id]/review`) & Dynamic Platform Settings API (`/api/admin/settings/commission`) fully implemented with Zod validation (`reviewTemplateSchema`, `commissionSettingsSchema`) and strict role protection (`admin`/`superadmin` & `active`). Admin UI pages & Svelte panels (`/admin/templates`, `/admin/settings`) built with DaisyUI tabs, modals, and toasts. End-to-end integration test suite (`tests/transactions/e2e-template-marketplace-flow.test.ts`) verifies full flow from draft submit -> admin approve -> dynamic fee split -> tenant purchase -> Xendit webhook fulfillment -> designer wallet credit. `bun run type-check`: 0 errors. `bun test`: 87/87 pass across 13 test files.
+Fixed designer wallet currency formatting: removed division by 100 on designer balance and mutations display. Centralized IDR formatting in `formatIDR` helper in `src/lib/utils/format.ts` to format pure integer amounts without division. All database records (`wallets.balance`, `wallet_mutations.amount`, `wallet_mutations.balance_after`) and UI displays now consistently handle raw integer IDR. `bun run type-check`: 0 errors. `bun test` / `vitest`: 140/140 pass across 20 test files.
 
 ## Last session did
 
-- **Milestone 3 Implementation:**
-  - Implemented `POST/PUT /api/admin/templates/[id]/review` for admin template approval/rejection.
-  - Implemented `GET/POST/PUT /api/admin/settings/commission` for dynamic platform fee percentage configuration (fallback 30%).
-  - Built `/admin/templates` Astro page & `TemplateReviewPanel.svelte` with status tabs, preview links, instant approve modal, and rejection reason modal.
-  - Built `/admin/settings` Astro page & `CommissionSettingsPanel.svelte` with dynamic fee percentage input and DaisyUI loading feedback.
-  - Created `tests/transactions/e2e-template-marketplace-flow.test.ts` for comprehensive end-to-end marketplace flow verification.
-  - Added `isAdmin` and `isAuthorizedAdmin` helpers in `@/lib/auth`.
-  - All files strictly < 300 lines. `bun run type-check`: 0 errors. `bun test`: 87/87 pass.
+- **Designer Wallet Formatter Fix & IDR Normalization:**
+  - Added [formatIDR](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts#L5) in `src/lib/utils/format.ts` supporting `number | bigint | string` without cent division (`/ 100`).
+  - Updated [DesignerWalletOverview.svelte](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerWalletOverview.svelte) to use `formatIDR` directly for Saldo Aktif, Total Pendapatan Bersih, and Riwayat Mutasi Saldo.
+  - Audited [wallet.service.ts](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/services/finance/wallet.service.ts) to confirm integer values are returned unmodified.
+  - Added unit test cases for pure integer IDR formatting in `tests/finance/commission-and-masking.test.ts`.
+  - `bun run type-check`: 0 errors. `bun test`: 140/140 pass across 20 test files.
+
 
 ## Next up
 

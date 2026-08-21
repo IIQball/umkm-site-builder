@@ -71,7 +71,7 @@
     {#if initialData && !isEditing}
       <button 
         type="button" 
-        class="btn btn-sm btn-ghost border border-base-300 shadow-sm"
+        class="btn btn-sm btn-ghost border border-base-300 shadow-sm cursor-pointer"
         on:click={() => (isEditing = true)}
       >
         Edit Profil
@@ -176,7 +176,7 @@
           {#if initialData}
             <button 
               type="button" 
-              class="btn btn-ghost text-base-content/70 hover:bg-base-200"
+              class="btn btn-ghost text-base-content/70 hover:bg-base-200 cursor-pointer"
               disabled={loading}
               on:click={() => {
                 isEditing = false;
@@ -193,7 +193,7 @@
           {/if}
           <button 
             type="submit" 
-            class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none shadow-sm shadow-zinc-900/10 active:scale-[0.98] transition-transform"
+            class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none shadow-sm shadow-zinc-900/10 active:scale-[0.98] transition-transform cursor-pointer"
             disabled={loading}
           >
             {#if loading}

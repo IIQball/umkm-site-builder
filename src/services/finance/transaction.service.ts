@@ -54,7 +54,7 @@ export class TransactionService {
       id: transactionId,
       userId,
       type: input.type as TransactionType,
-      amount: Math.round(input.amount * 100),
+      amount: input.amount,
       status: 'pending' as PaymentStatus,
       storeId: input.storeId || null,
       templateId: input.templateId || null,
@@ -187,7 +187,7 @@ export class TransactionService {
       id: tx.id,
       userId: tx.userId,
       type: tx.type,
-      amount: tx.amount / 100,
+      amount: tx.amount,
       status: tx.status,
       storeId: tx.storeId || undefined,
       templateId: tx.templateId || undefined,
@@ -198,12 +198,12 @@ export class TransactionService {
     };
   }
 
-  formatCurrency(amountInCents: number): string {
+  formatCurrency(amount: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
-    }).format(amountInCents / 100);
+    }).format(amount);
   }
 }
 

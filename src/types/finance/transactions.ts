@@ -83,7 +83,7 @@ export interface TransactionRecord {
   id: string;
   userId: string;
   type: TransactionType;
-  amount: number; // in IDR cents
+  amount: number; // in IDR
   status: PaymentStatus;
   storeId?: string;
   templateId?: string;

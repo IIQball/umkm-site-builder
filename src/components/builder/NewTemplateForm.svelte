@@ -5,25 +5,22 @@
 
   let name = '';
   let description = '';
-  // IDR input as formatted string (e.g. "50.000")
-  let priceRaw = '50000';
+  let priceDisplay = '50.000';
+  let numericPriceState = 50000;
   let loading = false;
   let error: string | null = null;
 
-  // Parse numeric from formatted IDR string
-  $: priceNumber = Math.max(0, parseInt(priceRaw.replace(/\D/g, ''), 10) || 0);
-  $: pricePreview = priceNumber > 0 ? `Rp ${priceNumber.toLocaleString('id-ID')}` : 'Gratis';
+  $: pricePreview = numericPriceState > 0 ? `Rp ${new Intl.NumberFormat('id-ID').format(numericPriceState)}` : 'Gratis';
 
-  /** Auto-format IDR while typing */
-  const onPriceInput = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '');
-    const num = parseInt(digits, 10) || 0;
-    priceRaw = num.toLocaleString('id-ID');
-    // Move cursor to end
-    requestAnimationFrame(() => {
-      input.setSelectionRange(input.value.length, input.value.length);
-    });
+  /** Auto-format visual masking while typing */
+  const handlePriceInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const rawDigits = target.value.replace(/\D/g, '');
+    // Format visual untuk ditampilkan ke user
+    target.value = rawDigits ? new Intl.NumberFormat('id-ID').format(Number(rawDigits)) : '';
+    priceDisplay = target.value;
+    // Simpan raw integer murni ke variabel state payload
+    numericPriceState = Number(rawDigits) || 0;
   };
 
   const handleSubmit = async (e: Event) => {
@@ -44,7 +41,7 @@
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || undefined,
-          price: priceNumber,
+          price: numericPriceState,
         }),
       });
 
@@ -153,7 +150,7 @@
         </label>
         <span
           class="text-xs font-bold font-mono
-                 {priceNumber > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-base-content/40'}"
+                 {numericPriceState > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-base-content/40'}"
         >
           {pricePreview}
         </span>
@@ -166,8 +163,8 @@
           id="tmpl-price"
           type="text"
           inputmode="numeric"
-          value={priceRaw}
-          on:input={onPriceInput}
+          value={priceDisplay}
+          on:input={handlePriceInput}
           placeholder="50.000"
           class="w-full pl-9 pr-3.5 py-2.5 bg-base-200/50 border border-base-300
                  rounded-xl text-sm text-base-content placeholder-base-content/30 font-mono

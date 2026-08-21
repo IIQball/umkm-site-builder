@@ -194,3 +194,9 @@ export function isAdmin(user: AuthenticatedUser | null): boolean {
 export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
   return isActive(user) && isAdmin(user);
 }
+
+export function getRedirectUrlForRole(role?: string | null): string {
+  if (role === 'designer') return '/designer/templates';
+  if (role === 'admin' || role === 'superadmin') return '/admin';
+  return '/dashboard';
+}

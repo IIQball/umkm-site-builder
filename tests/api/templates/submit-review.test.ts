@@ -26,6 +26,7 @@ vi.mock('@/lib/auth', () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 
+
 describe('POST /api/templates/submit-review', () => {
   const mockGetAuthUser = authLib.getAuthenticatedUser as unknown as Mock;
   const mockIsAuthorizedDesigner = authLib.isAuthorizedDesigner as unknown as Mock;

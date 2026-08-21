@@ -47,7 +47,7 @@ const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
           <a href="/auth/login" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium">
             Masuk
           </a>
-          <a href="/auth/register" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm shadow-blue-600/20">
+          <a href="/auth/login?mode=register" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm shadow-blue-600/20">
             Daftar
           </a>
         </>
@@ -76,7 +76,7 @@ const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
         ) : (
           <>
             <li><a href="/auth/login" class="rounded-lg">Masuk</a></li>
-            <li><a href="/auth/register" class="rounded-lg font-semibold text-primary">Daftar</a></li>
+            <li><a href="/auth/login?mode=register" class="rounded-lg font-semibold text-primary">Daftar</a></li>
           </>
         )}
       </ul>

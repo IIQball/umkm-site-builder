@@ -43,6 +43,11 @@ Fixed designer wallet currency formatting: removed division by 100 on designer b
   - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
   - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
   - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
+- **Role Middleware (h3-dina-role-middleware):**
+  - `src/middleware.ts` — Implemented Astro middleware to validate session and roles for protected routes (`/dashboard`, `/onboarding`, etc).
+  - `src/pages/401.astro` & `src/pages/403.astro` (NEW) — Created 401 Unauthorized and 403 Forbidden pages.
+  - Fixed a missing import in `src/pages/dashboard/categories.astro` causing lint error.
+  - Handled 500 server error crash in `src/pages/api/templates/submit-review.ts` by propagating errors properly.
 
 ## Next up
 
@@ -50,15 +55,16 @@ Fixed designer wallet currency formatting: removed division by 100 on designer b
 2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
 3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 
-5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
-6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
-7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
+4. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
+5. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
+6. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Documentation status
 
 All 21 documentation files audited and aligned with authoritative schema:
 
-✅ **Fixed in this session:**
+**Fixed in this session:**
+
 - docs/tech/data-model-erd.md — Removed `images` table, removed `subdomain_blacklist` table (app-layer validation), updated transactions fields, clarified media as JSONB
 - docs/tech/api-spec.md — Updated all payment endpoints, transaction status values, removed imageId references, updated payout fields
 - docs/tech/architecture.md — Clarified media storage (JSONB URLs, no orphan cleanup), updated data layer, transaction fields
@@ -67,6 +73,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 - docs/memory/feature-01b-database-layer.md — Clarified 19 tables, updated all field names, media handling
 
 **No changes needed (already correct or not applicable):**
+
 - docs/README.md — Index is accurate
 - docs/PROJECT-STATE.md — Being updated now
 - docs/prd/00-overview.md — Decision summary is correct
@@ -110,6 +117,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 **Status:** offered · **Date:** 2026-08-14 · **Decision pending**
 
 Single-use kickoff files and selection procedures have completed their job. The following can be archived or deleted:
+
 - `.agents/workflows/00-kickoff.md` (no longer needed; spec is written)
 - `.agents/rules/70-database-selection.md` (G1 decided; no need to re-read)
 - `.agents/rules/71-media-selection.md` (G7 decided; no need to re-read)
@@ -120,12 +128,12 @@ Single-use kickoff files and selection procedures have completed their job. The 
 
 ## Preflight decisions (from kickoff)
 
-| Gate | Decision | Recorded in |
-|---|---|---|
-| G1 database (D1 / Neon / Supabase) | Neon PostgreSQL Serverless | docs/tech/architecture.md |
-| G2 icon pack | Lucide (lucide-svelte) | docs/tech/architecture.md |
-| G3 vp / Vite Plus | Plain Vite + Bun scripts (no vp) | docs/tech/architecture.md |
-| G4 git mode (strict / light) | Strict (main protected, dev integration, PR-only) | docs/tech/architecture.md |
-| G5 auth pools and roles | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md |
-| G6 never-push list | .env*, secrets, dumps, uploaded media, credentials | .gitignore + docs/tech/security.md |
-| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert | docs/tech/architecture.md |
+| Gate                                           | Decision                                             | Recorded in                        |
+| ---------------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
+| G1 database (D1 / Neon / Supabase)             | Neon PostgreSQL Serverless                           | docs/tech/architecture.md          |
+| G2 icon pack                                   | Lucide (lucide-svelte)                               | docs/tech/architecture.md          |
+| G3 vp / Vite Plus                              | Plain Vite + Bun scripts (no vp)                     | docs/tech/architecture.md          |
+| G4 git mode (strict / light)                   | Strict (main protected, dev integration, PR-only)    | docs/tech/architecture.md          |
+| G5 auth pools and roles                        | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md    |
+| G6 never-push list                             | .env*, secrets, dumps, uploaded media, credentials   | .gitignore + docs/tech/security.md |
+| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert          | docs/tech/architecture.md          |

@@ -8,12 +8,13 @@
   const userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
 
   const roleMeta: Record<string, { label: string; cls: string }> = {
-    superadmin: { label: 'Super Admin', cls: 'bg-rose-500/10 text-rose-600 dark:text-rose-400' },
-    admin:      { label: 'Admin',       cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-    designer:   { label: 'Designer',   cls: 'bg-blue-500/10  text-blue-600  dark:text-blue-400'  },
-    tenant:     { label: 'Tenant',     cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+    superadmin: { label: 'Super Admin', cls: 'bg-rose-50 text-rose-600 border-rose-100' },
+    admin:      { label: 'Admin',       cls: 'bg-amber-50 text-amber-600 border-amber-100' },
+    designer:   { label: 'Designer',   cls: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+    tenant:     { label: 'Tenant',     cls: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
   };
-  const role = roleMeta[user.role] ?? { label: user.role, cls: 'bg-base-200 text-base-content/60' };
+  const role = roleMeta[user.role] ?? { label: user.role, cls: 'bg-slate-100 text-slate-500 border-slate-200' };
+  const homePath = user.role === 'designer' ? '/designer/wallet' : '/dashboard';
 
   let dropdownOpen = false;
   const toggleDropdown = () => { dropdownOpen = !dropdownOpen; };
@@ -30,49 +31,89 @@
 <svelte:window on:click={closeDropdown} />
 
 <header
-  class="sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-5
-         bg-base-100/70 backdrop-blur-md border-b border-base-200/50 flex-shrink-0"
+  class="sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6
+         bg-card/80 backdrop-blur-md border-b border-light/80 flex-shrink-0"
 >
-  <!-- Left: page title / breadcrumb -->
-  <div class="flex items-center gap-2 text-sm min-w-0">
-    <a
-      href="/dashboard"
-      class="font-medium text-base-content/50 hover:text-base-content transition-colors truncate hidden sm:block"
+  <!-- Left: search bar capsule -->
+  <div class="flex items-center gap-3 flex-1 min-w-0 max-w-xs">
+    <label
+      class="flex items-center gap-2 w-full bg-nested border border-light rounded-xl
+             px-3 py-1.5 cursor-text hover:border-main hover:bg-card transition-colors group"
+      for="navbar-search"
     >
-      Dashboard
-    </a>
-    {#if breadcrumb}
-      <span class="text-base-content/30 hidden sm:block">/</span>
-      <span class="font-semibold text-base-content truncate">{breadcrumb}</span>
-    {/if}
+      <span class="material-symbols-outlined text-[16px] text-muted flex-shrink-0">search</span>
+      <input
+        id="navbar-search"
+        type="text"
+        placeholder="Cari..."
+        class="bg-transparent border-none outline-none text-[13px] text-main
+               placeholder:text-muted w-full min-w-0"
+        readonly
+        on:focus|preventDefault={() => {}}
+      />
+      <span class="hidden sm:flex items-center gap-0.5 flex-shrink-0">
+        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">⌘</kbd>
+        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">F</kbd>
+      </span>
+    </label>
   </div>
 
-  <!-- Right: role pill + avatar dropdown + theme toggle -->
-  <div class="flex items-center gap-2 flex-shrink-0">
-    <!-- Role pill -->
-    <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide {role.cls}">
-      {role.label}
-    </span>
+  <!-- Right: breadcrumb (mobile), actions, profile chip -->
+  <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+    <!-- Breadcrumb (mobile only) -->
+    {#if breadcrumb}
+      <span class="sm:hidden text-[13px] font-semibold text-main truncate max-w-[120px]">
+        {breadcrumb}
+      </span>
+    {/if}
 
-    <!-- Avatar + dropdown -->
+    <!-- Notification icon -->
+    <button
+      type="button"
+      class="w-8 h-8 rounded-xl flex items-center justify-center text-muted
+             hover:text-main hover:bg-nested transition-colors relative"
+      aria-label="Notifikasi"
+      title="Notifikasi"
+    >
+      <span class="material-symbols-outlined text-[19px]">notifications</span>
+    </button>
+
+    <!-- Theme toggle -->
+    <button
+      type="button"
+      on:click={toggleTheme}
+      class="w-8 h-8 rounded-xl flex items-center justify-center
+             text-muted hover:text-main hover:bg-nested transition-colors"
+      aria-label="Toggle tema gelap/terang"
+      title="Toggle tema"
+    >
+      <span class="material-symbols-outlined text-[19px]">contrast</span>
+    </button>
+
+    <!-- Profile chip -->
     <div class="relative">
       <button
         type="button"
         on:click|stopPropagation={toggleDropdown}
-        class="flex items-center gap-2 px-2 py-1.5 rounded-xl
-               hover:bg-base-200 transition-colors group"
+        class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl
+               hover:bg-nested border border-transparent hover:border-light transition-all group"
         aria-label="Menu akun"
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
-        <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center
-                    font-bold text-xs shadow-sm shadow-blue-600/30 flex-shrink-0">
+        <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center
+                    font-bold text-xs shadow-sm shadow-indigo-600/25 flex-shrink-0">
           {userInitial}
         </div>
-        <span class="text-xs font-medium text-base-content hidden md:block max-w-[120px] truncate">
-          {user.name ?? user.email}
-        </span>
-        <span class="material-symbols-outlined text-[16px] text-base-content/40 hidden md:block
+        <div class="hidden md:flex flex-col items-start min-w-0">
+          <span class="text-[12px] font-semibold text-main max-w-[100px] truncate leading-tight">
+            {user.name ?? user.email}
+          </span>
+          <span class="text-[10px] font-bold border rounded-full px-1.5 py-0.5 leading-none mt-0.5 {role.cls}">
+            {role.label}
+          </span>
+        </div>
+        <span class="material-symbols-outlined text-[15px] text-muted hidden md:block
                      transition-transform {dropdownOpen ? 'rotate-180' : ''}">
           expand_more
         </span>
@@ -81,19 +122,18 @@
       <!-- Dropdown menu -->
       {#if dropdownOpen}
         <div
-          class="absolute right-0 top-full mt-2 w-52 bg-base-100 border border-base-200
-                 rounded-xl shadow-xl shadow-black/10 py-1.5 z-50
-                 animate-in fade-in slide-in-from-top-1 duration-150"
+          class="absolute right-0 top-full mt-2 w-52 bg-card border border-light
+                 rounded-2xl shadow-lg shadow-black/8 py-1.5 z-50"
           role="menu"
         >
-          <div class="px-3 py-2 border-b border-base-200/60 mb-1">
-            <p class="text-xs font-semibold text-base-content truncate">{user.name ?? user.email}</p>
-            <p class="text-[10px] text-base-content/40 truncate mt-0.5">{user.email}</p>
+          <div class="px-3 py-2.5 border-b border-light mb-1">
+            <p class="text-[12px] font-semibold text-main truncate">{user.name ?? user.email}</p>
+            <p class="text-[10px] text-muted truncate mt-0.5">{user.email}</p>
           </div>
           <a
-            href="/dashboard"
-            class="flex items-center gap-2.5 px-3 py-2 text-xs text-base-content/70
-                   hover:bg-base-200 hover:text-base-content transition-colors"
+            href={homePath}
+            class="flex items-center gap-2.5 px-3 py-2 text-[13px] text-secondary
+                   hover:bg-nested hover:text-main transition-colors"
             role="menuitem"
           >
             <span class="material-symbols-outlined text-[16px]">dashboard</span>
@@ -101,18 +141,18 @@
           </a>
           <a
             href="/auth/settings"
-            class="flex items-center gap-2.5 px-3 py-2 text-xs text-base-content/70
-                   hover:bg-base-200 hover:text-base-content transition-colors"
+            class="flex items-center gap-2.5 px-3 py-2 text-[13px] text-secondary
+                   hover:bg-nested hover:text-main transition-colors"
             role="menuitem"
           >
             <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
             Pengaturan Akun
           </a>
-          <div class="border-t border-base-200/60 mt-1 pt-1">
+          <div class="border-t border-light mt-1 pt-1">
             <a
               href="/auth/login"
-              class="flex items-center gap-2.5 px-3 py-2 text-xs text-rose-500
-                     hover:bg-rose-500/8 transition-colors"
+              class="flex items-center gap-2.5 px-3 py-2 text-[13px] text-rose-500
+                     hover:bg-rose-50/10 transition-colors"
               role="menuitem"
             >
               <span class="material-symbols-outlined text-[16px]">logout</span>
@@ -122,17 +162,5 @@
         </div>
       {/if}
     </div>
-
-    <!-- Theme toggle -->
-    <button
-      type="button"
-      on:click={toggleTheme}
-      class="w-8 h-8 rounded-lg flex items-center justify-center
-             text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors"
-      aria-label="Toggle tema gelap/terang"
-      title="Toggle tema"
-    >
-      <span class="material-symbols-outlined text-[18px]">contrast</span>
-    </button>
   </div>
 </header>

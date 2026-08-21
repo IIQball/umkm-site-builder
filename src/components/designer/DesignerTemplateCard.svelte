@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/utils/format';
+
   export let template: {
     id: string;
     name: string;
@@ -14,19 +16,17 @@
   let isDeleting = false;
 
   const handleDelete = async () => {
-    if (!confirm('Hapus draf ini?')) return;
+    if (!confirm('Hapus draf ini? Tindakan tidak dapat dibatalkan.')) return;
     try {
       isDeleting = true;
-      const response = await fetch(`/api/templates/draft?templateId=${template.id}`, {
-        method: 'DELETE',
-      });
-      const result = await response.json();
-      if (response.ok) {
+      const res = await fetch(`/api/templates/draft?templateId=${template.id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (res.ok) {
         window.location.reload();
       } else {
         alert(result.error?.message || 'Gagal menghapus draf');
       }
-    } catch (err) {
+    } catch {
       alert('Terjadi kesalahan koneksi');
     } finally {
       isDeleting = false;
@@ -34,116 +34,128 @@
   };
 
   const handleShowRejection = () => {
-    const modalName = document.getElementById('rejection_template_name');
-    const modalReason = document.getElementById('rejection_reason_text');
+    const nameEl = document.getElementById('rejection_template_name');
+    const reasonEl = document.getElementById('rejection_reason_text');
     const modal = document.getElementById('rejection_modal') as HTMLDialogElement | null;
-    if (modalName) modalName.textContent = template.name;
-    if (modalReason) modalReason.textContent = template.rejectionReason || 'Tidak ada alasan terperinci.';
+    if (nameEl) nameEl.textContent = template.name;
+    if (reasonEl) reasonEl.textContent = template.rejectionReason || 'Tidak ada alasan terperinci.';
     modal?.showModal();
   };
 
-  const formatPrice = (price: number): string => {
-    if (!price || price === 0) return 'Gratis';
-    return `Rp ${price.toLocaleString('id-ID')}`;
-  };
+  const formatPrice = (p: number) => (p === 0 ? 'Gratis' : formatIDR(p));
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-      case 'pending':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
-      case 'rejected':
-        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
-      default:
-        return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
-    }
+  const statusMap: Record<string, { label: string; cls: string }> = {
+    approved: { label: 'Disetujui',       cls: 'badge-custom-emerald' },
+    pending:  { label: 'Menunggu Review', cls: 'badge-custom-amber' },
+    rejected: { label: 'Ditolak',         cls: 'badge-custom-rose' },
+    draft:    { label: 'Draft',           cls: 'badge-custom-slate' },
   };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'Disetujui';
-      case 'pending':
-        return 'Menunggu Review';
-      case 'rejected':
-        return 'Ditolak';
-      default:
-        return 'Draft';
-    }
-  };
+  const statusInfo = statusMap[template.status] ?? statusMap.draft;
 </script>
 
-<div class="template-card card bg-base-100 border border-base-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col" data-status={template.status}>
-  <!-- Card Header / Thumbnail -->
-  <div class="relative h-44 w-full bg-slate-900 flex items-center justify-center overflow-hidden border-b border-base-200">
+<div
+  class="template-card bg-card border border-main rounded-2xl overflow-hidden shadow-sm
+         hover:shadow-md hover:border-main transition-all duration-200 flex flex-col group"
+  data-status={template.status}
+>
+  <!-- Thumbnail 16:9 -->
+  <div class="relative w-full aspect-video bg-nested overflow-hidden">
     {#if template.thumbnailUrl}
-      <img src={template.thumbnailUrl} alt={template.name} class="w-full h-full object-cover" />
+      <img
+        src={template.thumbnailUrl}
+        alt={template.name}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+      />
     {:else}
-      <div class="flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center">
-        <span class="material-symbols-outlined text-3xl text-slate-500">storefront</span>
-        <span class="text-[11px] font-medium text-slate-400">Preview Desain Toko</span>
+      <div class="absolute inset-0 bg-nested flex flex-col items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[36px] text-muted" style="font-variation-settings:'FILL' 1">storefront</span>
+        <span class="text-[11px] font-medium text-secondary">Preview Belum Tersedia</span>
       </div>
     {/if}
 
-    <!-- Status Badge Overlay -->
-    <div class="absolute top-3 right-3">
-      <span class={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-sm backdrop-blur-md ${getStatusBadgeClass(template.status)}`}>
-        {getStatusLabel(template.status)}
+    <div class="absolute top-3 left-3">
+      <span class="badge-custom backdrop-blur-sm bg-card/85 {statusInfo.cls}">
+        {statusInfo.label}
       </span>
     </div>
-  </div>
 
-  <!-- Card Content Body -->
-  <div class="p-5 flex-1 flex flex-col justify-between">
-    <div>
-      <div class="flex items-start justify-between gap-2 mb-1">
-        <h3 class="text-sm font-bold text-base-content line-clamp-1">{template.name}</h3>
-        <span class="text-xs font-extrabold text-blue-600 dark:text-blue-400 font-mono flex-shrink-0">
-          {formatPrice(template.price)}
+    <!-- Sold count overlay -->
+    {#if template.totalSold > 0}
+      <div class="absolute top-3 right-3">
+        <span class="text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
+          {template.totalSold}× terjual
         </span>
       </div>
-      <p class="text-xs text-base-content/60 line-clamp-2 mb-4 leading-relaxed">
-        {template.description || 'Tanpa deskripsi'}
-      </p>
+    {/if}
+  </div>
+
+  <!-- Card body -->
+  <div class="p-4 flex-1 flex flex-col">
+    <div class="flex items-start justify-between gap-2 mb-1">
+      <h3 class="text-[13px] font-bold text-main line-clamp-1 flex-1">{template.name}</h3>
+      <span class="text-[12px] font-extrabold text-indigo-600 dark:text-indigo-400 font-mono flex-shrink-0">
+        {formatPrice(template.price)}
+      </span>
     </div>
+    <p class="text-[11px] text-secondary line-clamp-2 leading-relaxed flex-1">
+      {template.description || 'Tanpa deskripsi'}
+    </p>
 
-    <!-- Card Footer Meta & Actions -->
-    <div class="space-y-3 pt-3 border-t border-base-200">
-      <div class="flex items-center justify-between text-[11px] text-base-content/60">
-        <span class="font-semibold text-base-content/80">{template.totalSold}x Terjual</span>
-        <span>{new Date(template.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-      </div>
+    <!-- Footer: date + actions -->
+    <div class="pt-3 mt-3 border-t border-light flex items-center justify-between gap-2">
+      <span class="text-[11px] text-muted">
+        {new Date(template.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+      </span>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2">
+      <!-- Actions -->
+      <div class="flex items-center gap-1.5">
         {#if template.status === 'draft'}
-          <a href={`/builder/${template.id}`} class="btn btn-primary btn-sm rounded-xl text-xs font-bold text-white flex-1">
-            Edit Builder
+          <a
+            href={`/builder/${template.id}`}
+            class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-600
+                   hover:bg-indigo-700 rounded-lg px-3 py-1.5 transition-colors active:scale-95"
+          >
+            <span class="material-symbols-outlined text-[13px]">edit</span>
+            Edit
           </a>
           <button
             type="button"
             disabled={isDeleting}
             on:click={handleDelete}
-            class="btn btn-ghost btn-sm text-rose-500 rounded-xl text-xs font-bold cursor-pointer"
+            class="inline-flex items-center text-[11px] font-medium text-muted
+                   hover:text-rose-500 hover:bg-rose-50/10 rounded-lg px-2.5 py-1.5 transition-colors"
           >
-            Hapus
+            {isDeleting ? '…' : 'Hapus'}
           </button>
         {/if}
+
         {#if template.status === 'rejected'}
           <button
             type="button"
             on:click={handleShowRejection}
-            class="btn btn-warning btn-outline btn-sm rounded-xl text-xs font-bold flex-1 cursor-pointer"
+            class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400
+                   bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 rounded-lg px-2.5 py-1.5 transition-colors"
           >
+            <span class="material-symbols-outlined text-[13px]">info</span>
             Alasan
           </button>
-          <a href={`/builder/${template.id}`} class="btn btn-primary btn-sm rounded-xl text-xs font-bold text-white flex-1">
+          <a
+            href={`/builder/${template.id}`}
+            class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-600
+                   hover:bg-indigo-700 rounded-lg px-3 py-1.5 transition-colors active:scale-95"
+          >
             Edit Ulang
           </a>
         {/if}
+
         {#if template.status === 'approved' || template.status === 'pending'}
-          <a href={`/builder/preview/${template.id}`} class="btn btn-outline btn-sm rounded-xl text-xs font-bold w-full">
+          <a
+            href={`/builder/preview/${template.id}`}
+            class="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary
+                   border border-light hover:border-main hover:bg-nested rounded-lg px-3 py-1.5 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[13px]">visibility</span>
             Pratinjau
           </a>
         {/if}
@@ -151,3 +163,4 @@
     </div>
   </div>
 </div>
+

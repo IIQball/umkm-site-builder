@@ -10,6 +10,8 @@ import { getAuthenticatedUser } from '@/lib/auth';
 // but we also read user here for role-based rendering
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer/wallet');
+
 ---
 
 <DashboardLayout title="Dashboard">
@@ -24,27 +26,6 @@ if (!user) return Astro.redirect('/auth/login');
         <span class="material-symbols-outlined text-[28px]">waving_hand</span>
       </div>
     </div>
-
-    {/* ── Designer Dashboard ── */}
-    {user.role === 'designer' && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Template Saya</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/designer/templates" class="text-xs text-blue-500 font-semibold hover:underline">Lihat semua →</a>
-        </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Saldo Dompet</p>
-          <p class="text-3xl font-extrabold text-base-content">Rp —</p>
-          <a href="/designer/wallet" class="text-xs text-blue-500 font-semibold hover:underline">Lihat detail →</a>
-        </div>
-        <div class="sm:col-span-2 p-5 rounded-2xl bg-base-100 border border-dashed border-blue-300 dark:border-blue-800 text-center space-y-2">
-          <span class="material-symbols-outlined text-blue-400 text-[32px]">add_circle</span>
-          <p class="text-sm font-semibold text-base-content">Mulai template baru</p>
-          <a href="/builder/new" class="btn bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none btn-sm rounded-xl">Buka Visual Builder</a>
-        </div>
-      </div>
-    )}
 
     {/* ── Tenant Dashboard ── */}
     {user.role === 'tenant' && (

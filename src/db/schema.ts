@@ -63,6 +63,8 @@ export const accounts = pgTable('accounts', {
   issuer: text('issuer'),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  scope: text('scope'),
   expiresAt: timestamp('expires_at'),
   password: text('password'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css';
 import Navbar from '@/components/common/Navbar.astro';
+import ToastContainer from '@/components/ui/ToastContainer.svelte';
 
 interface Props {
   title?: string;
@@ -32,6 +33,7 @@ const {
     </script>
   </head>
   <body class="overflow-x-hidden">
+    <ToastContainer client:load />
     {!hideNavbar && <Navbar />}
     <slot />
   </body>

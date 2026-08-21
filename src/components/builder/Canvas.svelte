@@ -44,7 +44,8 @@
   };
 
   const handleCanvasBackgroundClick = (e: MouseEvent) => {
-    if (e.target === e.currentTarget || (e.target as HTMLElement)?.classList.contains('canvas-backdrop')) {
+    const target = e.target as HTMLElement | null;
+    if (target?.classList?.contains('canvas-backdrop')) {
       editorStore.deselectAll();
     }
   };
@@ -131,12 +132,12 @@
   };
 </script>
 
-<main
-  tabindex="-1"
+<svelte:window
   on:click={handleCanvasBackgroundClick}
   on:keydown={(e) => e.key === 'Escape' && editorStore.deselectAll()}
-  class="canvas-backdrop flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors"
->
+/>
+
+<main class="canvas-backdrop flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors">
   <!-- Frame Container with flat pixel-perfect viewport boundaries -->
   <div
     data-theme={$editorStore.previewTheme}

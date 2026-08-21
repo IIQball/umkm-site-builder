@@ -1,26 +1,37 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { db } from '@/db';
-import { stores, storeCategories } from '@/db/schema';
-import { isNull, eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { db, stores, storeCategories } from '@/db';
+import { eq } from 'drizzle-orm';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
+if (user.role !== 'tenant') return Astro.redirect('/dashboard');
 
-const allStores = await db.select().from(stores).where(isNull(stores.deletedAt));
+// Fetch the tenant's store
+const userStore = await db.query.stores.findFirst({
+  where: eq(stores.userId, user.id),
+});
 
-const allCategories = await db
-  .select({
-    id: storeCategories.id,
-    name: storeCategories.name,
-    slug: storeCategories.slug,
-    storeName: stores.name,
-    storeId: stores.id
-  })
-  .from(storeCategories)
-  .leftJoin(stores, eq(storeCategories.storeId, stores.id))
-  .where(isNull(storeCategories.deletedAt));
+// Fetch all stores (for the modal dropdown)
+const allStores = userStore ? [{ id: userStore.id, name: userStore.name }] : [];
+
+// Fetch all categories for this tenant's store
+const rawCategories = userStore
+  ? await db
+      .select({
+        id: storeCategories.id,
+        name: storeCategories.name,
+        slug: storeCategories.slug,
+        storeId: storeCategories.storeId,
+        storeName: stores.name,
+      })
+      .from(storeCategories)
+      .leftJoin(stores, eq(storeCategories.storeId, stores.id))
+      .where(eq(storeCategories.storeId, userStore.id))
+  : [];
+
+const allCategories = rawCategories;
 ---
 <DashboardLayout title="Kategori Produk" breadcrumb="Kategori">
   <!-- Header Section -->
@@ -84,6 +95,8 @@ const allCategories = await db
         </tbody>
       </table>
     </div>
+
+    <CategoryManager client:load />
   </div>
 
   <!-- Delete Modal -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { formatIDR } from '@/lib/utils/format';
 
   export let balance: number;
@@ -67,6 +67,58 @@
       isLoadingPayouts = false;
     }
   }
+
+  let pollingInterval: any = null;
+
+  async function pollStatus() {
+    try {
+      const res = await fetch('/api/designer/payout/status');
+      const result = await res.json();
+      if (res.ok && result.success && result.data) {
+        payoutHistory = result.data.payouts || [];
+        if (result.data.wallet) {
+          balance = Number(result.data.wallet.balance);
+          availableBalance = Number(result.data.wallet.availableBalance);
+        }
+
+        const stillProcessing = payoutHistory.some(p => p.status.toLowerCase() === 'processing');
+        if (!stillProcessing) {
+          stopPolling();
+        }
+      }
+    } catch (err) {
+      console.error('Error during status polling:', err);
+    }
+  }
+
+  function checkAndStartPolling() {
+    if (typeof window === 'undefined') return;
+    const hasProcessing = payoutHistory.some(p => p.status.toLowerCase() === 'processing');
+    if (hasProcessing) {
+      if (!pollingInterval) {
+        pollingInterval = setInterval(pollStatus, 4000);
+      }
+    } else {
+      stopPolling();
+    }
+  }
+
+  function stopPolling() {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      pollingInterval = null;
+    }
+  }
+
+  $: {
+    if (payoutHistory) {
+      checkAndStartPolling();
+    }
+  }
+
+  onDestroy(() => {
+    stopPolling();
+  });
 
   onMount(async () => {
     isLoading = true;
@@ -565,7 +617,8 @@
                 <td class="py-3 text-main font-bold font-mono">{formatIDR(payout.amount)}</td>
                 <td class="py-3">
                   {#if payout.status === 'processing'}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/25">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 animate-pulse">
+                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping flex-shrink-0"></span>
                       Processing
                     </span>
                   {:else if payout.status === 'completed'}

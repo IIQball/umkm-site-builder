@@ -2,11 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateSignedUploadParams } from '../../src/lib/cloudinary';
 
 // Mock crypto.subtle for signature generation
-vi.stubGlobal('crypto', {
-  subtle: {
-    digest: vi.fn().mockResolvedValue(new ArrayBuffer(20)),
+Object.defineProperty(globalThis, 'crypto', {
+  value: {
+    subtle: {
+      digest: vi.fn().mockResolvedValue(new ArrayBuffer(20)),
+    },
+    randomUUID: () => 'test-uuid',
   },
-  randomUUID: () => 'test-uuid',
+  writable: true,
+  configurable: true,
 });
 
 describe('generateSignedUploadParams', () => {

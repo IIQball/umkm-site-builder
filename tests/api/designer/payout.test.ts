@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { GET, POST } from '@/pages/api/designer/payout';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { calculateEligibleBalance } from '@/services/finance/wallet.service';
+import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
 import { db } from '@/lib/db/client';
 
 // Mock auth helpers
@@ -29,15 +29,17 @@ vi.mock('@/lib/db/client', () => {
   return { db: mockDb };
 });
 
-// Mock wallet service
-vi.mock('@/services/finance/wallet.service', () => ({
+// Mock finance services
+vi.mock('@/services/finance', () => ({
   calculateEligibleBalance: vi.fn(),
+  createXenditDisbursement: vi.fn(),
 }));
 
 describe('Designer Payout Request API Endpoints', () => {
   const mockGetAuthUser = getAuthenticatedUser as unknown as Mock;
   const mockIsAuthorizedDesigner = isAuthorizedDesigner as unknown as Mock;
   const mockCalculateEligibleBalance = calculateEligibleBalance as unknown as Mock;
+  const mockCreateXenditDisbursement = createXenditDisbursement as unknown as Mock;
   const mockFindFirstBankAccount = db.query.bankAccounts.findFirst as unknown as Mock;
   const mockFindManyPayoutRequests = db.query.payoutRequests.findMany as unknown as Mock;
   const mockSelect = db.select as unknown as Mock;
@@ -45,6 +47,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCreateXenditDisbursement.mockResolvedValue(undefined);
   });
 
   describe('GET /api/designer/payout', () => {

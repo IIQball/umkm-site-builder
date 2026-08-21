@@ -2,18 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateSignedUploadParams } from '../../src/lib/cloudinary';
 
 // Mock crypto.subtle for signature generation
-vi.stubGlobal('crypto', {
+const originalCrypto = globalThis.crypto;
+globalThis.crypto = {
+  ...originalCrypto,
   subtle: {
+    ...originalCrypto?.subtle,
     digest: vi.fn().mockResolvedValue(new ArrayBuffer(20)),
   },
   randomUUID: () => 'test-uuid',
-});
+} as unknown as Crypto;
 
 describe('generateSignedUploadParams', () => {
   beforeEach(() => {
-    vi.stubEnv('CLOUDINARY_NAME', 'test-cloud');
-    vi.stubEnv('CLOUDINARY_API_KEY', '123456789');
-    vi.stubEnv('CLOUDINARY_SECRET', 'test-secret');
+    process.env.CLOUDINARY_NAME = 'test-cloud';
+    process.env.CLOUDINARY_API_KEY = '123456789';
+    process.env.CLOUDINARY_SECRET = 'test-secret';
   });
 
   it('returns all required fields for client-side upload', async () => {

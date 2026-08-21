@@ -206,8 +206,8 @@
   {#if canAddMore}
     <button
       type="button"
-      class="card w-full border-2 border-dashed transition-all duration-200 cursor-pointer
-        {isDragging ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50 hover:bg-base-200/50'}
+      class="card w-full rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer
+        {isDragging ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50 hover:bg-base-50'}
         {isUploading ? 'pointer-events-none opacity-60' : ''}"
       on:dragover={handleDragOver}
       on:dragleave={handleDragLeave}
@@ -250,7 +250,7 @@
 
   <!-- Error message -->
   {#if errorMessage}
-    <div class="alert alert-error text-sm">
+    <div class="alert alert-error text-sm rounded-xl shadow-sm">
       <AlertCircle size={16} />
       <span>{errorMessage}</span>
     </div>
@@ -260,7 +260,7 @@
   {#if uploadedUrls.length > 0}
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
       {#each uploadedUrls as url, index}
-        <div class="relative group rounded-xl overflow-hidden aspect-square bg-base-200">
+        <div class="relative group rounded-2xl overflow-hidden aspect-square bg-base-100 border border-base-200 shadow-sm">
           <img
             src={url}
             alt="Gambar produk {index + 1}"
@@ -283,7 +283,7 @@
 
   <!-- Empty state (no images and can't add more) -->
   {#if uploadedUrls.length === 0 && !canAddMore}
-    <div class="card bg-base-200 py-6">
+    <div class="card rounded-2xl bg-base-50 border border-base-200 py-6">
       <div class="card-body items-center text-center">
         <ImageIcon size={32} class="text-base-content/30" />
         <p class="text-sm text-base-content/50">Belum ada gambar</p>

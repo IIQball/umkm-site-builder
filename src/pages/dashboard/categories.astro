@@ -1,12 +1,12 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { db, stores, storeCategories } from '@/db';
-import { eq } from 'drizzle-orm';
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { db, stores, storeCategories } from "@/db";
+import { eq, and, isNull } from "drizzle-orm";
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user) return Astro.redirect('/auth/login');
-if (user.role !== 'tenant') return Astro.redirect('/dashboard');
+if (!user) return Astro.redirect("/auth/login");
+if (user.role !== "tenant") return Astro.redirect("/dashboard");
 
 // Fetch the tenant's store
 const userStore = await db.query.stores.findFirst({
@@ -25,86 +25,122 @@ const rawCategories = userStore
       })
       .from(storeCategories)
       .leftJoin(stores, eq(storeCategories.storeId, stores.id))
-      .where(eq(storeCategories.storeId, userStore.id))
+      .where(
+        and(
+          eq(storeCategories.storeId, userStore.id),
+          isNull(storeCategories.deletedAt),
+        ),
+      )
   : [];
 
 const allCategories = rawCategories;
 ---
+
 <DashboardLayout title="Kategori Produk" breadcrumb="Kategori">
   <!-- Header Section -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+  >
     <div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-base-content">Manajemen Kategori</h1>
-      <p class="text-sm text-base-content/60 mt-1">Kelola daftar kategori dan distribusinya per toko.</p>
+      <h1 class="text-3xl font-extrabold tracking-tight text-base-content">
+        Manajemen Kategori
+      </h1>
+      <p class="text-sm text-base-content/60 mt-1">
+        Kelola daftar kategori dan distribusinya per toko.
+      </p>
     </div>
-    <button id="addBtn" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none shadow-sm" onclick="document.getElementById('modal').showModal()">
+    <button
+      id="addBtn"
+      class="btn rounded-xl bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none shadow-sm"
+      onclick="document.getElementById('modal').showModal()"
+    >
       <span class="material-symbols-outlined text-[20px]">add</span>
       Tambah Kategori
     </button>
   </div>
 
   <!-- Data Table -->
-  <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden">
+  <div
+    class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden"
+  >
     <div class="overflow-x-auto">
-      <table class="table w-full">
-        <thead class="bg-base-200/50">
+      <table class="table w-full text-sm">
+        <thead
+          class="bg-base-200/50 text-base-content/60 border-b border-base-200"
+        >
           <tr>
-            <th class="font-semibold text-base-content/70">Nama Kategori Produk</th>
-            <th class="font-semibold text-base-content/70">Toko</th>
-            <th class="font-semibold text-base-content/70 text-right pr-6">Aksi</th>
+            <th class="font-medium px-4 py-3">Nama Kategori Produk</th>
+            <th class="font-medium px-4 py-3">Toko</th>
+            <th class="font-medium px-4 py-3 text-right">Aksi</th>
           </tr>
         </thead>
-        <tbody id="categoryTable">
-          {allCategories.map(cat => (
-            <tr class="hover:bg-base-200/30 transition-colors">
-              <td class="font-medium pl-4">{cat.name}</td>
-              <td>
-                <span class="badge badge-ghost badge-sm">{cat.storeName || 'Unknown Store'}</span>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <div class="flex justify-end gap-2">
-                  <button 
-                    class="btn btn-sm btn-info btn-outline edit-btn"
-                    data-id={cat.id}
-                    data-name={cat.name}
-                    data-slug={cat.slug}
-                    data-storeid={cat.storeId}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    class="btn btn-sm btn-error btn-outline btn-delete"
-                    data-id={cat.id}
-                  >
-                    Hapus
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-          {allCategories.length === 0 && (
-            <tr>
-              <td colspan="3" class="text-center py-12 text-base-content/50">
-                Belum ada kategori yang ditambahkan.
-              </td>
-            </tr>
-          )}
+        <tbody class="divide-y divide-base-200" id="categoryTable">
+          {
+            allCategories.map((cat) => (
+              <tr class="hover:bg-base-50/50 transition-colors group">
+                <td class="px-4 py-3 font-semibold text-base-content">
+                  {cat.name}
+                </td>
+                <td class="px-4 py-3 font-medium text-base-content/90">
+                  {cat.storeName || "Unknown Store"}
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      class="btn btn-sm btn-ghost bg-base-200 hover:bg-base-300 text-base-content/80 font-medium rounded-xl edit-btn"
+                      data-id={cat.id}
+                      data-name={cat.name}
+                      data-slug={cat.slug}
+                      data-storeid={cat.storeId}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="btn btn-sm btn-ghost hover:bg-error/10 hover:text-error text-error/80 font-medium rounded-xl btn-delete"
+                      data-id={cat.id}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
+          {
+            allCategories.length === 0 && (
+              <tr>
+                <td colspan="3" class="text-center py-12 text-base-content/50">
+                  Belum ada kategori yang ditambahkan.
+                </td>
+              </tr>
+            )
+          }
         </tbody>
       </table>
     </div>
-
   </div>
 
   <!-- Delete Modal -->
   <dialog id="deleteConfirmModal" class="modal backdrop-blur-sm">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg text-base-content">Konfirmasi Hapus</h3>
-      <p class="py-4 text-base-content/70">Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.</p>
-      <div class="modal-action">
+    <div class="modal-box rounded-2xl p-6 md:p-8">
+      <h3 class="font-bold text-xl text-base-content tracking-tight mb-2">
+        Konfirmasi Hapus
+      </h3>
+      <p class="py-4 text-base-content/70">
+        Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat
+        dibatalkan.
+      </p>
+      <div class="modal-action mt-6">
         <form method="dialog">
-          <button class="btn btn-ghost" id="cancelDelete">Batal</button>
+          <button class="btn btn-ghost rounded-xl" id="cancelDelete"
+            >Batal</button
+          >
         </form>
-        <button id="btnConfirmDelete" class="btn btn-error text-white">Hapus Kategori</button>
+        <button
+          id="btnConfirmDelete"
+          class="btn bg-error hover:bg-error/90 text-white border-none shadow-sm rounded-xl px-6"
+          >Hapus Kategori</button
+        >
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -114,25 +150,52 @@ const allCategories = rawCategories;
 
   <!-- Add/Edit Modal -->
   <dialog id="modal" class="modal backdrop-blur-sm">
-    <div class="modal-box">
-      <h3 id="modalTitle" class="font-bold text-lg text-base-content">Tambah Kategori</h3>
-      <p class="text-sm text-base-content/70 mb-6">Tambahkan kategori barang yang tersedia di toko Anda</p>
+    <div class="modal-box rounded-2xl p-6 md:p-8">
+      <h3
+        id="modalTitle"
+        class="font-bold text-xl text-base-content tracking-tight"
+      >
+        Tambah Kategori
+      </h3>
+      <p class="text-sm text-base-content/70 mb-6">
+        Tambahkan kategori barang yang tersedia di toko Anda
+      </p>
       <form id="categoryForm" class="space-y-4">
         <input type="hidden" name="id" id="categoryId" />
-        <input type="hidden" name="storeId" id="storeIdInput" value={userStore?.id || ''} />
+        <input
+          type="hidden"
+          name="storeId"
+          id="storeIdInput"
+          value={userStore?.id || ""}
+        />
 
         <div class="form-control">
           <label class="label" for="categoryName">
-            <span class="label-text font-medium text-base-content/80">Nama Kategori</span>
+            <span class="label-text font-medium text-base-content/80"
+              >Nama Kategori</span
+            >
           </label>
-          <input type="text" name="name" id="categoryName" class="input input-bordered w-full bg-base-100 placeholder:italic" placeholder="Contoh: Makanan, Minuman" required />
+          <input
+            type="text"
+            name="name"
+            id="categoryName"
+            class="input input-bordered w-full rounded-xl bg-base-100 placeholder:italic"
+            placeholder="Contoh: Makanan, Minuman"
+            required
+          />
         </div>
 
         <input type="hidden" name="slug" id="categorySlug" />
-        
+
         <div class="modal-action mt-8">
-          <button type="button" class="btn btn-ghost" id="closeModal">Batal</button>
-          <button type="submit" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none" id="btnSave">Simpan Kategori</button>
+          <button type="button" class="btn btn-ghost rounded-xl" id="closeModal"
+            >Batal</button
+          >
+          <button
+            type="submit"
+            class="btn rounded-xl bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none shadow-sm"
+            id="btnSave">Simpan Kategori</button
+          >
         </div>
       </form>
     </div>
@@ -142,82 +205,103 @@ const allCategories = rawCategories;
   </dialog>
 
   <script>
-    const modal = document.getElementById('modal') as HTMLDialogElement | null;
-    const deleteModal = document.getElementById('deleteConfirmModal') as HTMLDialogElement | null;
-    const addBtn = document.getElementById('addBtn');
-    const closeModal = document.getElementById('closeModal');
-    const cancelDelete = document.getElementById('cancelDelete');
-    const btnConfirmDelete = document.getElementById('btnConfirmDelete') as HTMLButtonElement | null;
-    const btnSave = document.getElementById('btnSave') as HTMLButtonElement | null;
-    const categoryForm = document.getElementById('categoryForm') as HTMLFormElement | null;
-    const modalTitle = document.getElementById('modalTitle');
+    const modal = document.getElementById("modal") as HTMLDialogElement | null;
+    const deleteModal = document.getElementById(
+      "deleteConfirmModal",
+    ) as HTMLDialogElement | null;
+    const addBtn = document.getElementById("addBtn");
+    const closeModal = document.getElementById("closeModal");
+    const cancelDelete = document.getElementById("cancelDelete");
+    const btnConfirmDelete = document.getElementById(
+      "btnConfirmDelete",
+    ) as HTMLButtonElement | null;
+    const btnSave = document.getElementById(
+      "btnSave",
+    ) as HTMLButtonElement | null;
+    const categoryForm = document.getElementById(
+      "categoryForm",
+    ) as HTMLFormElement | null;
+    const modalTitle = document.getElementById("modalTitle");
     let deleteId: string | null = null;
 
-    const categoryName = document.getElementById('categoryName') as HTMLInputElement | null;
-    const categorySlug = document.getElementById('categorySlug') as HTMLInputElement | null;
+    const categoryName = document.getElementById(
+      "categoryName",
+    ) as HTMLInputElement | null;
+    const categorySlug = document.getElementById(
+      "categorySlug",
+    ) as HTMLInputElement | null;
 
-    const slugify = (text: string) => text
-      .toString().toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/--+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '');
+    const slugify = (text: string) =>
+      text
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "")
+        .replace(/--+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
 
     if (categoryName && categorySlug) {
-      categoryName.addEventListener('input', () => {
+      categoryName.addEventListener("input", () => {
         categorySlug.value = slugify(categoryName.value);
       });
     }
 
-    const openModal = (mode: 'add' | 'edit', data?: Record<string, string>) => {
+    const openModal = (mode: "add" | "edit", data?: Record<string, string>) => {
       if (!modal || !categoryForm || !modalTitle) return;
       categoryForm.reset();
-      (document.getElementById('categoryId') as HTMLInputElement).value = '';
-      if (mode === 'edit' && data) {
-        modalTitle.innerText = 'Edit Kategori';
-        (document.getElementById('categoryId') as HTMLInputElement).value = data.id || '';
-        (document.getElementById('categoryName') as HTMLInputElement).value = data.name || '';
-        (document.getElementById('categorySlug') as HTMLInputElement).value = data.slug || '';
+      (document.getElementById("categoryId") as HTMLInputElement).value = "";
+      if (mode === "edit" && data) {
+        modalTitle.innerText = "Edit Kategori";
+        (document.getElementById("categoryId") as HTMLInputElement).value =
+          data.id || "";
+        (document.getElementById("categoryName") as HTMLInputElement).value =
+          data.name || "";
+        (document.getElementById("categorySlug") as HTMLInputElement).value =
+          data.slug || "";
       } else {
-        modalTitle.innerText = 'Tambah Kategori';
+        modalTitle.innerText = "Tambah Kategori";
       }
       modal.showModal();
     };
 
-    if (addBtn) addBtn.onclick = () => openModal('add');
+    if (addBtn) addBtn.onclick = () => openModal("add");
     if (closeModal && modal) closeModal.onclick = () => modal.close();
-    if (cancelDelete && deleteModal) cancelDelete.onclick = () => deleteModal.close();
+    if (cancelDelete && deleteModal)
+      cancelDelete.onclick = () => deleteModal.close();
 
     if (btnConfirmDelete) {
       btnConfirmDelete.onclick = async () => {
         if (!deleteId) return;
-        btnConfirmDelete.innerText = 'Menghapus...';
+        btnConfirmDelete.innerText = "Menghapus...";
         btnConfirmDelete.disabled = true;
         try {
-          const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
+          const res = await fetch(`/api/categories?id=${deleteId}`, {
+            method: "DELETE",
+          });
           if (res.ok) {
             window.location.reload();
           } else {
-            alert('Gagal menghapus');
+            alert("Gagal menghapus");
           }
-        } catch (err) { 
-          alert('Kesalahan koneksi'); 
+        } catch (err) {
+          alert("Kesalahan koneksi");
         } finally {
           deleteModal?.close();
-          btnConfirmDelete.innerText = 'Hapus Kategori';
+          btnConfirmDelete.innerText = "Hapus Kategori";
           btnConfirmDelete.disabled = false;
         }
       };
     }
-    
-    document.addEventListener('click', async (e) => {
+
+    document.addEventListener("click", async (e) => {
       const target = e.target as HTMLElement;
-      if (target.classList.contains('edit-btn')) {
-        openModal('edit', target.dataset as Record<string, string>);
+      if (target.classList.contains("edit-btn")) {
+        openModal("edit", target.dataset as Record<string, string>);
       }
-      if (target.closest('.btn-delete')) {
-        deleteId = (target.closest('.btn-delete') as HTMLElement).dataset.id || null;
+      if (target.closest(".btn-delete")) {
+        deleteId =
+          (target.closest(".btn-delete") as HTMLElement).dataset.id || null;
         deleteModal?.showModal();
       }
     });
@@ -227,31 +311,32 @@ const allCategories = rawCategories;
         e.preventDefault();
         if (btnSave) {
           btnSave.disabled = true;
-          btnSave.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Menyimpan...';
+          btnSave.innerHTML =
+            '<span class="loading loading-spinner loading-sm"></span> Menyimpan...';
         }
-        
+
         const formData = new FormData(e.target as HTMLFormElement);
         const data = Object.fromEntries(formData.entries());
         try {
-          const response = await fetch('/api/categories', {
-            method: data.id ? 'PATCH' : 'POST',
+          const response = await fetch("/api/categories", {
+            method: data.id ? "PATCH" : "POST",
             body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           });
-          
+
           const result = await response.json();
-          
+
           if (response.ok) {
             window.location.reload();
           } else {
-            alert(result.error || 'Terjadi kesalahan internal');
+            alert(result.error || "Terjadi kesalahan internal");
           }
         } catch (error) {
-          alert('Terjadi kesalahan jaringan');
+          alert("Terjadi kesalahan jaringan");
         } finally {
           if (btnSave) {
             btnSave.disabled = false;
-            btnSave.innerText = 'Simpan Kategori';
+            btnSave.innerText = "Simpan Kategori";
           }
         }
       };

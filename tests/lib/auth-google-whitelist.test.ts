@@ -53,13 +53,13 @@ describe("Google OAuth Whitelist & Database Hooks", () => {
   });
 
   describe("Role-Based Redirect Helper", () => {
-    it("should redirect designer to /designer/templates", () => {
-      expect(getRedirectUrlForRole("designer")).toBe("/designer/templates");
+    it("should redirect designer to /designer/wallet", () => {
+      expect(getRedirectUrlForRole("designer")).toBe("/designer/wallet");
     });
 
-    it("should redirect admin and superadmin to /admin", () => {
-      expect(getRedirectUrlForRole("admin")).toBe("/admin");
-      expect(getRedirectUrlForRole("superadmin")).toBe("/admin");
+    it("should redirect admin and superadmin to /dashboard", () => {
+      expect(getRedirectUrlForRole("admin")).toBe("/dashboard");
+      expect(getRedirectUrlForRole("superadmin")).toBe("/dashboard");
     });
 
     it("should redirect tenant to /dashboard", () => {

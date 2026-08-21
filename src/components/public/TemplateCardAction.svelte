@@ -21,7 +21,7 @@
     successMessage = '';
 
     try {
-      const response = await fetch('/api/transactions/template-purchase', {
+      const response = await fetch('/api/tenant/transactions/template-purchase', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -36,6 +36,11 @@ describe('TransactionService', () => {
     vi.clearAllMocks();
     mockDb = db as unknown as typeof mockDb;
     
+    // Reset mocks to clear any leftover mockReturnValueOnce queues
+    mockDb.select.mockReset();
+    mockDb.insert.mockReset();
+    mockDb.update.mockReset();
+
     // Suppress console output during tests
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});

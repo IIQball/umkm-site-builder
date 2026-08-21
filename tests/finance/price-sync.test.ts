@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { POST as createDraftPost, PATCH as submitDraftPatch } from '@/pages/api/templates/draft';
-import { POST as templatePurchasePost } from '@/pages/api/transactions/template-purchase';
+import { POST as createDraftPost, PATCH as submitDraftPatch } from '@/pages/api/designer/templates/draft';
+import { POST as templatePurchasePost } from '@/pages/api/tenant/transactions/template-purchase';
 import { transactionService } from '@/services/finance/transaction.service';
 import { db } from '@/lib/db/client';
 import { xenditClient } from '@/lib/finance/xendit';
@@ -41,7 +41,7 @@ vi.mock('@/lib/auth', () => ({
   isActive: vi.fn((u) => !!u && u.status === 'active'),
   isAdmin: vi.fn((u) => !!u && (u.role === 'admin' || u.role === 'superadmin')),
   isAuthorizedAdmin: vi.fn((u) => !!u && u.status === 'active' && (u.role === 'admin' || u.role === 'superadmin')),
-  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/templates' : (role === 'admin' || role === 'superadmin' ? '/admin' : '/dashboard')),
+  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/wallet' : '/dashboard'),
   auth: { api: { getSession: vi.fn() } },
 }));
 

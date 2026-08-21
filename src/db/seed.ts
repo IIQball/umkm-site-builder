@@ -29,7 +29,7 @@ function hashPassword(password: string): Promise<string> {
 }
 
 async function seed() {
-  console.log("🌱 Seeding superadmin...");
+  console.log("[SEED] Seeding superadmin...");
 
   // Skip jika sudah ada
   const existing = await db.query.users.findFirst({
@@ -37,7 +37,7 @@ async function seed() {
   });
 
   if (existing) {
-    console.log(`✅ Superadmin already exists: ${existing.email} (id: ${existing.id})`);
+    console.log(`[SEED] Superadmin already exists: ${existing.email} (id: ${existing.id})`);
     console.log("   Skipping creation.");
     process.exit(0);
   }
@@ -72,15 +72,15 @@ async function seed() {
     updatedAt: now,
   });
 
-  console.log("\n✅ Superadmin created successfully!");
+  console.log("\n[SUCCESS] Superadmin created successfully!");
   console.log(`   Email   : ${SUPERADMIN_EMAIL}`);
   console.log(`   Password: ${SUPERADMIN_PASSWORD}`);
   console.log(`   ID      : ${userId}`);
-  console.log("\n⚠️  Ganti password segera setelah login pertama!");
+  console.log("\n[WARNING] Ganti password segera setelah login pertama!");
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error("❌ Seed failed:", err);
+  console.error("[ERROR] Seed failed:", err);
   process.exit(1);
 });

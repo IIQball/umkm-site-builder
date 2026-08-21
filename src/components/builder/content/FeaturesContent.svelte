@@ -11,10 +11,18 @@
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
 
+  interface FeatureItem {
+    icon?: string;
+    title?: string;
+    description?: string;
+  }
+
   $: handleArrayItemChange = makeHandleArrayItemChange(section, onUpdate);
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
+
+  $: features = (section.props?.features as FeatureItem[]) || [];
 </script>
 
 <div class="space-y-3">
@@ -22,7 +30,7 @@
     <span class="block font-semibold text-base-content/80">Daftar Fitur / Keunggulan</span>
     <button
       type="button"
-      on:click={() => handleAddArrayItem('features', { icon: '⭐', title: 'Fitur Baru', description: 'Deskripsi keunggulan produk/layanan Anda.' })}
+      on:click={() => handleAddArrayItem('features', { icon: 'star', title: 'Fitur Baru', description: 'Deskripsi keunggulan produk/layanan Anda.' })}
       class="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-400 cursor-pointer"
     >
       <Plus size={12} />
@@ -31,7 +39,7 @@
   </div>
 
   <div class="space-y-3">
-    {#each section.props?.features || [] as feature, index}
+    {#each features as feature, index}
       <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-lg space-y-2">
         <div class="flex items-center justify-between gap-2">
           <input
@@ -39,7 +47,7 @@
             value={feature.icon ?? ''}
             on:input={(e) => handleArrayItemChange('features', index, 'icon', e.currentTarget.value)}
             class="w-16 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-center text-base-content text-sm focus:outline-none focus:border-blue-500"
-            placeholder="Icon/Emoji"
+            placeholder="Nama Icon"
           />
           <input
             type="text"
@@ -61,7 +69,7 @@
             <button
               type="button"
               on:click={() => handleMoveArrayItem('features', index, 'down')}
-              disabled={index === (section.props?.features || []).length - 1}
+              disabled={index === features.length - 1}
               class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
               title="Pindah ke Bawah"
             >

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST as reviewTemplateApi } from '@/pages/api/admin/templates/[id]/review';
 import { saveSettings as saveCommissionApi } from '@/pages/api/admin/settings/commission';
-import { POST as purchaseTemplateApi } from '@/pages/api/transactions/template-purchase';
+import { POST as purchaseTemplateApi } from '@/pages/api/tenant/transactions/template-purchase';
 import { POST as xenditWebhookApi } from '@/pages/api/webhooks/xendit';
 import { db } from '@/lib/db/client';
 import * as authLib from '@/lib/auth';

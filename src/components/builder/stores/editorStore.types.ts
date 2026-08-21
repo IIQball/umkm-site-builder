@@ -36,6 +36,7 @@ export interface EditorTemplate {
   thumbnailUrl?: string | null;
   price: number;
   status: 'draft' | 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string | null;
   config: TemplateConfig;
 }
 

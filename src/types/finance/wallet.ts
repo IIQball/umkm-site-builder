@@ -23,6 +23,7 @@ export interface WalletMutationRecord {
 export interface WalletSummary {
   designerId: string;
   balance: number;
+  availableBalance: number;
   walletId: string | null;
   mutations: WalletMutationRecord[];
 }

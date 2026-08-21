@@ -6,6 +6,7 @@
 
   export let walletSummary: {
     balance: number;
+    availableBalance: number;
     mutations: Array<{
       id: string;
       amount: number;
@@ -18,10 +19,14 @@
   };
   export let totalNetIncome: number;
   export let totalTemplatesSold: number;
+  export let settlementDelayDays = 7;
 
   const handleBalanceUpdate = (e: Event) => {
     const customEvent = e as CustomEvent;
     walletSummary.balance = customEvent.detail.balance;
+    if (customEvent.detail.availableBalance !== undefined) {
+      walletSummary.availableBalance = customEvent.detail.availableBalance;
+    }
     walletSummary.mutations = [customEvent.detail.mutation, ...walletSummary.mutations];
   };
 
@@ -80,12 +85,15 @@
     return Object.entries(grouped)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
-      .map(([name, amt], i) => ({
-        name: name.length > 28 ? name.slice(0, 28) + '…' : name,
-        amount: amt,
-        pct: Math.round((amt / totalCredit) * 100),
-        color: ['bg-indigo-500', 'bg-violet-400', 'bg-sky-400'][i],
-      }));
+      .map(([name, amt], i) => {
+        const cleanName = name.replace(/^Komisi Penjualan Template:\s*/i, '');
+        return {
+          name: cleanName,
+          amount: amt,
+          pct: Math.round((amt / totalCredit) * 100),
+          color: ['bg-indigo-500', 'bg-violet-400', 'bg-sky-400'][i],
+        };
+      });
   };
 
   $: distribution = buildDistribution();
@@ -95,12 +103,18 @@
   <!-- Row 1: Stat cards -->
   <DesignerStatCards
     balance={walletSummary.balance}
+    availableBalance={walletSummary.availableBalance}
     {totalNetIncome}
     {totalTemplatesSold}
+    {settlementDelayDays}
   />
 
   <!-- Row 2: Bank Account & Withdraw funds -->
-  <DesignerBankWithdraw bind:balance={walletSummary.balance} />
+  <DesignerBankWithdraw
+    bind:balance={walletSummary.balance}
+    bind:availableBalance={walletSummary.availableBalance}
+    {settlementDelayDays}
+  />
 
   <!-- Row 2: Analytics 2-col -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -124,7 +138,7 @@
           {#each distribution as item}
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
-                <span class="text-[12px] font-medium text-main truncate max-w-[200px]">{item.name}</span>
+                <span class="text-[12px] font-medium text-main whitespace-normal break-words">{item.name}</span>
                 <span class="text-[11px] font-bold text-secondary flex-shrink-0 ml-2">{item.pct}%</span>
               </div>
               <div class="h-2 bg-nested rounded-full overflow-hidden">
@@ -153,7 +167,7 @@
       <div class="flex items-end gap-2 h-28">
         {#each weeklyData as day}
           <div class="flex flex-col items-center gap-1.5 flex-1">
-            <div class="w-full relative flex items-end justify-center" style="height: 80px;">
+            <div class="w-full relative flex items-end justify-center h-20">
               <div
                 class="w-full rounded-t-lg transition-all duration-700
                        {day.isToday ? 'bg-indigo-500' : 'bg-nested hover:bg-indigo-500/20'}"

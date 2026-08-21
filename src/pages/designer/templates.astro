@@ -5,7 +5,7 @@ import { db } from '@/lib/db/client';
 import { templates, commissions } from '@/db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import DesignerTemplateCard from '@/components/designer/DesignerTemplateCard.svelte';
-import StatCard from '@/components/designer/StatCard.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
 
 export const prerender = false;
 
@@ -113,7 +113,7 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
         {templatesList.length === 0 ? (
           <div class="py-12 flex flex-col items-center text-center">
             <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-4">
-              <span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">layers</span>
+              <span class="material-symbols-outlined icon-filled text-[28px]">layers</span>
             </div>
             <h3 class="text-[14px] font-bold text-main">Belum Ada Template</h3>
             <p class="text-[12px] text-secondary mt-1.5 mb-6 max-w-xs mx-auto leading-relaxed">
@@ -143,7 +143,7 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
     <div class="modal-box rounded-2xl border border-light shadow-2xl p-6 bg-card max-w-sm">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[18px] text-rose-500" style="font-variation-settings:'FILL' 1">warning</span>
+          <span class="material-symbols-outlined icon-filled text-[18px] text-rose-500">warning</span>
         </div>
         <h3 class="text-[14px] font-bold text-rose-600">Alasan Penolakan</h3>
       </div>

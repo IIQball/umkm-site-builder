@@ -13,9 +13,6 @@ const userStore = await db.query.stores.findFirst({
   where: eq(stores.userId, user.id),
 });
 
-// Fetch all stores (for the modal dropdown)
-const allStores = userStore ? [{ id: userStore.id, name: userStore.name }] : [];
-
 // Fetch all categories for this tenant's store
 const rawCategories = userStore
   ? await db
@@ -52,8 +49,8 @@ const allCategories = rawCategories;
       <table class="table w-full">
         <thead class="bg-base-200/50">
           <tr>
-            <th class="font-semibold text-base-content/70">Nama Kategori</th>
-            <th class="font-semibold text-base-content/70">Toko (Store)</th>
+            <th class="font-semibold text-base-content/70">Nama Kategori Produk</th>
+            <th class="font-semibold text-base-content/70">Toko</th>
             <th class="font-semibold text-base-content/70 text-right pr-6">Aksi</th>
           </tr>
         </thead>
@@ -96,7 +93,6 @@ const allCategories = rawCategories;
       </table>
     </div>
 
-    <CategoryManager client:load />
   </div>
 
   <!-- Delete Modal -->
@@ -119,27 +115,17 @@ const allCategories = rawCategories;
   <!-- Add/Edit Modal -->
   <dialog id="modal" class="modal backdrop-blur-sm">
     <div class="modal-box">
-      <h3 id="modalTitle" class="font-bold text-lg mb-6 text-base-content">Tambah Kategori</h3>
+      <h3 id="modalTitle" class="font-bold text-lg text-base-content">Tambah Kategori</h3>
+      <p class="text-sm text-base-content/70 mb-6">Tambahkan kategori barang yang tersedia di toko Anda</p>
       <form id="categoryForm" class="space-y-4">
         <input type="hidden" name="id" id="categoryId" />
-        
-        <div class="form-control">
-          <label class="label" for="storeSelect">
-            <span class="label-text font-medium text-base-content/80">Toko (Store)</span>
-          </label>
-          <select name="storeId" id="storeSelect" class="select select-bordered w-full bg-base-100" required>
-            <option value="" disabled selected>Pilih Toko...</option>
-            {allStores.map(store => (
-              <option value={store.id}>{store.name}</option>
-            ))}
-          </select>
-        </div>
+        <input type="hidden" name="storeId" id="storeIdInput" value={userStore?.id || ''} />
 
         <div class="form-control">
           <label class="label" for="categoryName">
             <span class="label-text font-medium text-base-content/80">Nama Kategori</span>
           </label>
-          <input type="text" name="name" id="categoryName" class="input input-bordered w-full bg-base-100" placeholder="Masukkan nama kategori" required />
+          <input type="text" name="name" id="categoryName" class="input input-bordered w-full bg-base-100 placeholder:italic" placeholder="Contoh: Makanan, Minuman" required />
         </div>
 
         <input type="hidden" name="slug" id="categorySlug" />
@@ -191,12 +177,10 @@ const allCategories = rawCategories;
       if (mode === 'edit' && data) {
         modalTitle.innerText = 'Edit Kategori';
         (document.getElementById('categoryId') as HTMLInputElement).value = data.id || '';
-        (document.getElementById('storeSelect') as HTMLSelectElement).value = data.storeid || '';
         (document.getElementById('categoryName') as HTMLInputElement).value = data.name || '';
         (document.getElementById('categorySlug') as HTMLInputElement).value = data.slug || '';
       } else {
         modalTitle.innerText = 'Tambah Kategori';
-        (document.getElementById('storeSelect') as HTMLSelectElement).value = '';
       }
       modal.showModal();
     };

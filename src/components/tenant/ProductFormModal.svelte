@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import type { InferSelectModel } from 'drizzle-orm';
   import type { products as productsSchema } from '../../db/schema';
+  import ImageUpload from '../shared/ImageUpload.svelte';
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -24,7 +25,7 @@
   let description = '';
   let isAvailable = true;
   let sortOrder = 0;
-  let imageFile: File | null = null;
+  let imageUrls: string[] = [];
   let variantsText = '';
 
   // React to showModal changes safely to prevent continuous resetting
@@ -49,6 +50,10 @@
             return JSON.stringify(v);
           }).join(', ') 
         : '';
+        
+      imageUrls = Array.isArray(editingProduct.imageUrls) 
+        ? editingProduct.imageUrls.map(String) 
+        : [];
     } else {
       name = '';
       categoryId = categories.length > 0 ? categories[0].id : '';
@@ -57,8 +62,8 @@
       isAvailable = true;
       sortOrder = 0;
       variantsText = '';
+      imageUrls = [];
     }
-    imageFile = null;
 
     if (dialogElement && !dialogElement.open) {
       dialogElement.showModal();
@@ -67,13 +72,6 @@
     wasOpen = false;
     if (dialogElement && dialogElement.open) {
       dialogElement.close();
-    }
-  }
-
-  const handleFileChange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      imageFile = target.files[0];
     }
   }
 
@@ -93,16 +91,31 @@
     errorMessage = '';
   }
 
+  let fieldErrors: Record<string, string> = {};
+
   const handleSaveProduct = async () => {
     errorMessage = '';
+    fieldErrors = {};
+    let isValid = true;
+
     if (!name || name.trim().length < 2) {
-      errorMessage = 'Mohon isi Nama Produk minimal 2 karakter.';
-      return;
+      fieldErrors.name = 'Nama produk wajib diisi (minimal 2 karakter)';
+      isValid = false;
     }
     if (!categoryId) {
-      errorMessage = 'Mohon pilih Kategori produk terlebih dahulu.';
-      return;
+      fieldErrors.categoryId = 'Kategori produk wajib dipilih';
+      isValid = false;
     }
+    if (basePrice < 0 || isNaN(basePrice)) {
+      fieldErrors.basePrice = 'Harga dasar tidak valid';
+      isValid = false;
+    }
+    if (imageUrls.length === 0) {
+      fieldErrors.imageUrls = 'Mohon unggah minimal 1 gambar produk';
+      isValid = false;
+    }
+
+    if (!isValid) return;
 
     formLoading = true;
     try {
@@ -110,24 +123,26 @@
       const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
 
-      const formData = new FormData();
-      formData.append('storeId', storeId);
-      formData.append('categoryId', categoryId);
-      formData.append('name', name);
-      formData.append('slug', finalSlug);
-      formData.append('basePrice', basePrice.toString());
-      formData.append('description', description);
-      formData.append('isAvailable', isAvailable.toString());
-      formData.append('sortOrder', sortOrder.toString());
-      
       const parsedVariants = variantsText.split(',').map(v => ({ name: v.trim() })).filter(v => v.name);
-      formData.append('variants', JSON.stringify(parsedVariants));
-      
-      if (imageFile) {
-        formData.append('image', imageFile);
-      }
 
-      const res = await fetch(url, { method, body: formData });
+      const payload = {
+        storeId,
+        categoryId,
+        name,
+        slug: finalSlug,
+        basePrice,
+        description,
+        isAvailable,
+        sortOrder,
+        variants: parsedVariants,
+        imageUrls
+      };
+
+      const res = await fetch(url, { 
+        method, 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload) 
+      });
       const data = await res.json();
       
       if (data.ok) {
@@ -161,12 +176,15 @@
     
     <div class="form-control w-full mb-2">
       <label class="label" for="product-name"><span class="label-text">Nama Produk</span></label>
-      <input id="product-name" type="text" class="input input-bordered w-full" bind:value={name} />
+      <input id="product-name" type="text" class="input input-bordered w-full" class:input-error={fieldErrors.name} bind:value={name} />
+      {#if fieldErrors.name}
+        <span class="text-error text-xs mt-1">{fieldErrors.name}</span>
+      {/if}
     </div>
     
     <div class="form-control w-full mb-2">
       <label class="label" for="product-category"><span class="label-text">Kategori</span></label>
-      <select id="product-category" class="select select-bordered w-full" bind:value={categoryId}>
+      <select id="product-category" class="select select-bordered w-full" class:select-error={fieldErrors.categoryId} bind:value={categoryId}>
         {#if categories.length === 0}
           <option value="" disabled>Belum ada kategori</option>
         {/if}
@@ -174,6 +192,9 @@
           <option value={cat.id}>{cat.name}</option>
         {/each}
       </select>
+      {#if fieldErrors.categoryId}
+        <span class="text-error text-xs mt-1">{fieldErrors.categoryId}</span>
+      {/if}
     </div>
 
     <div class="form-control w-full mb-2">
@@ -183,10 +204,14 @@
         type="text" 
         inputmode="numeric" 
         class="input input-bordered w-full" 
+        class:input-error={fieldErrors.basePrice}
         value={basePrice ? basePrice.toLocaleString('id-ID') : ''}
         on:input={handlePriceInput} 
         placeholder="0"
       />
+      {#if fieldErrors.basePrice}
+        <span class="text-error text-xs mt-1">{fieldErrors.basePrice}</span>
+      {/if}
     </div>
     
     <div class="form-control w-full mb-2">
@@ -194,11 +219,18 @@
       <textarea id="product-desc" class="textarea textarea-bordered w-full" bind:value={description}></textarea>
     </div>
     
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-images"><span class="label-text">Gambar Produk</span></label>
-      <input id="product-images" type="file" accept="image/png, image/jpeg, image/jpg, image/webp" class="file-input file-input-bordered w-full" on:change={handleFileChange} />
-      {#if editingProduct}
-        <div class="label"><span class="label-text-alt text-warning">Upload baru akan menimpa gambar lama</span></div>
+    <div class="form-control w-full mb-4 mt-2">
+      <div class="label"><span class="label-text">Gambar Produk</span></div>
+      <div class="border rounded-xl p-2 bg-base-50/50" class:border-error={fieldErrors.imageUrls}>
+        <ImageUpload 
+          folder="products" 
+          maxFiles={1}
+          existingUrls={imageUrls}
+          onUpload={(urls) => { imageUrls = urls; fieldErrors.imageUrls = ''; }} 
+        />
+      </div>
+      {#if fieldErrors.imageUrls}
+        <span class="text-error text-xs mt-1">{fieldErrors.imageUrls}</span>
       {/if}
     </div>
     

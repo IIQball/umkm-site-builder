@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by merge auth-forms-zod-redesign and store-onboarding sessions
+Status: LIVE · Updated: 2026-08-21 by store-settings session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -15,7 +15,15 @@ Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern
 
 ## Last session did
 
-- **Auth Zod Schemas & Per-Field Inline Validation:**
+- **Store Settings Feature:**
+  - `src/lib/stores/schemas.ts` — Added `StoreSettingsInput` schema to validate settings updates.
+  - `src/pages/api/stores/settings.ts` (NEW) — Endpoint for updating store profile (name, waNumber, googleMapsUrl) for tenants.
+  - `src/components/dashboard/StoreSettingsForm.svelte` (NEW) — Client-side Svelte component with Zod-based validation and Lucide icons for UI feedback.
+  - `src/pages/dashboard/store-settings.astro` (NEW) — Settings page mounted within `DashboardLayout`.
+  - `tests/schemas/store-settings.test.ts` (NEW) — 5 unit tests covering validation rules for store settings.
+  - All files strictly typed. `bun run type-check` passes successfully. Created PR #14.
+
+- **Auth Zod Schemas & Per-Field Inline Validation (Previous):**
   - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
   - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
   - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.

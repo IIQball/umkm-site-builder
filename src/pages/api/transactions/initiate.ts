@@ -4,8 +4,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { transactionService } from '@/services/transaction.service';
-import { TransactionInitiateInputSchema } from '@/lib/transactions/schemas';
+import { transactionService } from '@/services';
+import { TransactionInitiateInputSchema } from '@/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { z } from 'zod';
 

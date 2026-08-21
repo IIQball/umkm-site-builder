@@ -9,7 +9,7 @@ import {
   TemplateDraftSubmitSchema,
   DEFAULT_TEMPLATE_SECTIONS,
   DEFAULT_TEMPLATE_THEME,
-} from '@/schemas/template.schema';
+} from '@/schemas';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 
 interface ApiResponse<T = Record<string, unknown>> {
@@ -100,7 +100,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         name: input.name,
         description: input.description,
         thumbnailUrl: input.thumbnailUrl,
-        price: Math.floor((input.price || 0) * 100),
+        price: input.price ?? 0,
         designerId: user.id,
         status: 'draft',
         config: {
@@ -255,7 +255,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
         name: input.name,
         description: input.description,
         thumbnailUrl: input.thumbnailUrl,
-        price: Math.floor(input.price * 100),
+        price: input.price,
         config: input.config,
         status: 'pending',
         updatedAt: new Date(),
@@ -304,6 +304,75 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
           code: 'INTERNAL',
           message: 'Failed to submit template',
         },
+      } as ApiResponse),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};
+
+export const DELETE: APIRoute = async (context): Promise<Response> => {
+  try {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedDesigner(user)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'UNAUTHORIZED', message: 'Designer access required' } } as ApiResponse),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const url = new URL(context.request.url);
+    const templateId = url.searchParams.get('templateId');
+
+    if (!templateId) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'INVALID_REQUEST', message: 'templateId is required' } } as ApiResponse),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const template = await db.query.templates.findFirst({
+      where: eq(templates.id, templateId),
+    });
+
+    if (!template) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'NOT_FOUND', message: 'Template not found' } } as ApiResponse),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Ownership check: must be owner or admin/superadmin
+    const isOwner = template.designerId === user.id;
+    const isPrivileged = user.role === 'admin' || user.role === 'superadmin';
+    if (!isOwner && !isPrivileged) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'FORBIDDEN', message: 'Forbidden' } } as ApiResponse),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Only allow soft delete of drafts or rejected templates
+    if (template.status !== 'draft' && template.status !== 'rejected' && !isPrivileged) {
+      return new Response(
+        JSON.stringify({ ok: false, error: { code: 'INVALID_STATE', message: 'Only draft or rejected templates can be deleted' } } as ApiResponse),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await db.update(templates).set({
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(eq(templates.id, templateId));
+
+    return new Response(
+      JSON.stringify({ ok: true, message: 'Template draft deleted' } as ApiResponse),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: { code: 'INTERNAL', message: error instanceof Error ? error.message : 'Failed to delete template' },
       } as ApiResponse),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );

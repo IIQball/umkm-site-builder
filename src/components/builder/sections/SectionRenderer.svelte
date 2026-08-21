@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
-  import type { SectionStyles } from '@/types/builder';
+  import type { TemplateSection } from '@/schemas';
+  import type { SectionStyles } from '@/types';
   import HeaderAnnouncement from './HeaderAnnouncement.svelte';
   import Hero from './Hero.svelte';
   import Features from './Features.svelte';

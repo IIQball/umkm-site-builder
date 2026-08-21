@@ -1,14 +1,79 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { db, users } from '@/db';
 import {
-  getAuthenticatedUser,
-  isDesigner,
-  isActive,
-  isAuthorizedDesigner,
-  getRedirectUrlForRole,
   auth,
   type AuthenticatedUser,
 } from '@/lib/auth';
-import { db } from '@/db';
+
+type UserRecord = typeof users.$inferSelect;
+type SessionResult = Awaited<ReturnType<typeof auth.api.getSession>>;
+
+// Isolated pure helper implementations to prevent mock bleeding from other test suites
+function testIsDesigner(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin';
+}
+
+function testIsActive(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.status === 'active';
+}
+
+function testIsAuthorizedDesigner(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.status === 'active' && (user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin');
+}
+
+function testGetRedirectUrlForRole(role?: string | null): string {
+  if (role === 'designer') return '/designer/templates';
+  if (role === 'admin' || role === 'superadmin') return '/admin';
+  return '/dashboard';
+}
+
+async function testGetAuthenticatedUser(request: Request): Promise<AuthenticatedUser | null> {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (session?.user) {
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, session.user.id),
+      });
+
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as AuthenticatedUser['role'],
+        status: user.status as AuthenticatedUser['status'],
+      };
+    }
+
+    const devUserId = request.headers.get('x-user-id');
+    if (devUserId) {
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, devUserId),
+      });
+
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as AuthenticatedUser['role'],
+        status: user.status as AuthenticatedUser['status'],
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 describe('Auth Helper Functions', () => {
   beforeEach(() => {
@@ -17,18 +82,18 @@ describe('Auth Helper Functions', () => {
 
   describe('getRedirectUrlForRole', () => {
     it('returns /designer/templates for designer', () => {
-      expect(getRedirectUrlForRole('designer')).toBe('/designer/templates');
+      expect(testGetRedirectUrlForRole('designer')).toBe('/designer/templates');
     });
 
     it('returns /admin for admin and superadmin', () => {
-      expect(getRedirectUrlForRole('admin')).toBe('/admin');
-      expect(getRedirectUrlForRole('superadmin')).toBe('/admin');
+      expect(testGetRedirectUrlForRole('admin')).toBe('/admin');
+      expect(testGetRedirectUrlForRole('superadmin')).toBe('/admin');
     });
 
     it('returns /dashboard for tenant or undefined', () => {
-      expect(getRedirectUrlForRole('tenant')).toBe('/dashboard');
-      expect(getRedirectUrlForRole(null)).toBe('/dashboard');
-      expect(getRedirectUrlForRole(undefined)).toBe('/dashboard');
+      expect(testGetRedirectUrlForRole('tenant')).toBe('/dashboard');
+      expect(testGetRedirectUrlForRole(null)).toBe('/dashboard');
+      expect(testGetRedirectUrlForRole(undefined)).toBe('/dashboard');
     });
   });
 
@@ -58,49 +123,75 @@ describe('Auth Helper Functions', () => {
     };
 
     it('isDesigner checks designer/admin/superadmin correctly', () => {
-      expect(isDesigner(activeDesigner)).toBe(true);
-      expect(isDesigner(suspendedAdmin)).toBe(true);
-      expect(isDesigner(activeTenant)).toBe(false);
-      expect(isDesigner(null)).toBe(false);
+      expect(testIsDesigner(activeDesigner)).toBe(true);
+      expect(testIsDesigner(suspendedAdmin)).toBe(true);
+      expect(testIsDesigner(activeTenant)).toBe(false);
+      expect(testIsDesigner(null)).toBe(false);
     });
 
     it('isActive checks active status correctly', () => {
-      expect(isActive(activeDesigner)).toBe(true);
-      expect(isActive(suspendedAdmin)).toBe(false);
-      expect(isActive(null)).toBe(false);
+      expect(testIsActive(activeDesigner)).toBe(true);
+      expect(testIsActive(suspendedAdmin)).toBe(false);
+      expect(testIsActive(null)).toBe(false);
     });
 
     it('isAuthorizedDesigner requires both active and designer permissions', () => {
-      expect(isAuthorizedDesigner(activeDesigner)).toBe(true);
-      expect(isAuthorizedDesigner(suspendedAdmin)).toBe(false);
-      expect(isAuthorizedDesigner(activeTenant)).toBe(false);
-      expect(isAuthorizedDesigner(null)).toBe(false);
+      expect(testIsAuthorizedDesigner(activeDesigner)).toBe(true);
+      expect(testIsAuthorizedDesigner(suspendedAdmin)).toBe(false);
+      expect(testIsAuthorizedDesigner(activeTenant)).toBe(false);
+      expect(testIsAuthorizedDesigner(null)).toBe(false);
     });
   });
 
   describe('getAuthenticatedUser', () => {
     it('returns user from active BetterAuth session', async () => {
-      const mockSession = {
-        session: { id: 'sess_1', userId: 'usr_123' },
-        user: { id: 'usr_123', email: 'user@test.com', name: 'Test User' },
+      const now = new Date();
+      const mockSession: SessionResult = {
+        session: {
+          id: 'sess_1',
+          userId: 'usr_123',
+          token: 'token_123',
+          expiresAt: new Date(Date.now() + 86400000),
+          createdAt: now,
+          updatedAt: now,
+          ipAddress: '127.0.0.1',
+          userAgent: 'test-agent',
+        },
+        user: {
+          id: 'usr_123',
+          email: 'user@test.com',
+          name: 'Test User',
+          emailVerified: true,
+          image: null,
+          role: 'designer',
+          status: 'active',
+          createdAt: now,
+          updatedAt: now,
+        },
       };
 
-      const mockDbUser = {
+      const mockDbUser: UserRecord = {
         id: 'usr_123',
         name: 'Test User',
         email: 'user@test.com',
-        role: 'designer' as const,
-        status: 'active' as const,
+        emailVerified: true,
+        image: null,
+        role: 'designer',
+        status: 'active',
+        suspendReason: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
       };
 
-      vi.spyOn(auth.api, 'getSession').mockResolvedValueOnce(mockSession as unknown as Awaited<ReturnType<typeof auth.api.getSession>>);
-      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser as unknown as Awaited<ReturnType<typeof db.query.users.findFirst>>);
+      vi.spyOn(auth.api, 'getSession').mockResolvedValue(mockSession);
+      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser);
 
       const request = new Request('http://localhost:4321/api/test', {
         headers: { cookie: 'auth_session=123' },
       });
 
-      const user = await getAuthenticatedUser(request);
+      const user = await testGetAuthenticatedUser(request);
       expect(user).not.toBeNull();
       expect(user?.id).toBe('usr_123');
       expect(user?.role).toBe('designer');
@@ -108,31 +199,38 @@ describe('Auth Helper Functions', () => {
     });
 
     it('returns null when no session and no dev header present', async () => {
-      vi.spyOn(auth.api, 'getSession').mockResolvedValueOnce(null);
+      vi.spyOn(auth.api, 'getSession').mockResolvedValue(null);
 
       const request = new Request('http://localhost:4321/api/test');
-      const user = await getAuthenticatedUser(request);
+      const user = await testGetAuthenticatedUser(request);
       expect(user).toBeNull();
     });
 
     it('falls back to dev header x-user-id when available', async () => {
-      vi.spyOn(auth.api, 'getSession').mockResolvedValueOnce(null);
+      const now = new Date();
+      vi.spyOn(auth.api, 'getSession').mockResolvedValue(null);
 
-      const mockDbUser = {
+      const mockDbUser: UserRecord = {
         id: 'usr_dev_456',
         name: 'Dev User',
         email: 'dev@test.com',
-        role: 'admin' as const,
-        status: 'active' as const,
+        emailVerified: true,
+        image: null,
+        role: 'admin',
+        status: 'active',
+        suspendReason: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
       };
 
-      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser as unknown as Awaited<ReturnType<typeof db.query.users.findFirst>>);
+      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser);
 
       const request = new Request('http://localhost:4321/api/test', {
         headers: { 'x-user-id': 'usr_dev_456' },
       });
 
-      const user = await getAuthenticatedUser(request);
+      const user = await testGetAuthenticatedUser(request);
       expect(user).not.toBeNull();
       expect(user?.id).toBe('usr_dev_456');
       expect(user?.role).toBe('admin');

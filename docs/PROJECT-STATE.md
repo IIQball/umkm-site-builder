@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by merge auth-forms-zod-redesign and store-onboarding sessions
+Status: LIVE · Updated: 2026-08-21 by builder-submit-review-modal session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,37 +11,24 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern aesthetic (card container `rounded-3xl shadow-2xl`, Lucide icons, responsive layout). Native HTML browser validation disabled (`novalidate`), replaced with strict per-field Zod validation (`src/schemas/auth.schema.ts`), instant typing error clearing, and inline DaisyUI warning/error feedback. Centralized Global Toast Notification System mounted across root layouts.
+Fixed designer wallet currency formatting: removed division by 100 on designer balance and mutations display. Centralized IDR formatting in `formatIDR` helper in `src/lib/utils/format.ts` to format pure integer amounts without division. All database records (`wallets.balance`, `wallet_mutations.amount`, `wallet_mutations.balance_after`) and UI displays now consistently handle raw integer IDR. `bun run type-check`: 0 errors. `bun test` / `vitest`: 140/140 pass across 20 test files.
 
 ## Last session did
 
-- **Auth Zod Schemas & Per-Field Inline Validation:**
-  - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
-  - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
-  - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.
-  - `src/components/auth/GoogleAuthButton.svelte` — Refined button design tokens and Lucide error alerts.
-  - `src/pages/auth/login.astro` & `src/pages/auth/register.astro` — Modern container aesthetic with backdrop blur, rounded-3xl cards, and polished typography.
-- **Testing & Verification:**
-  - `tests/schemas/auth.test.ts` (NEW) — 8 unit tests covering login/register validation scenarios.
-  - `tests/lib/auth-helpers.test.ts` (NEW) — 9 unit tests for `getAuthenticatedUser`, `getRedirectUrlForRole`, `isDesigner`, `isActive`, and `isAuthorizedDesigner`.
-  - `tests/lib/auth-google-whitelist.test.ts` — 10 unit tests for role-based redirects, BetterAuth config, and hook lifecycle execution.
-  - Total 27 unit tests specifically for the Auth module.
-  - Browser subagent verified empty form submission, real-time error cleanup on typing, password complexity, and confirm password mismatch.
-  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 81/81 pass.
-- **Store Onboarding Feature:**
-  - `src/lib/stores/schemas.ts` — Added `OnboardStoreInput` schema to validate store profiles.
-  - `src/pages/api/stores/onboard.ts` (NEW) — Endpoint for saving store profile and subdomain, ensuring unique subdomains, valid names, and correct roles.
-  - `src/components/onboarding/OnboardingWizard.svelte` (NEW) — Multi-step wizard UI covering Subdomain choice, Store Info (Name, WA, Maps), and Success state.
-  - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
-  - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
-  - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
+- **Designer Wallet Formatter Fix & IDR Normalization:**
+  - Added [formatIDR](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts#L5) in `src/lib/utils/format.ts` supporting `number | bigint | string` without cent division (`/ 100`).
+  - Updated [DesignerWalletOverview.svelte](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerWalletOverview.svelte) to use `formatIDR` directly for Saldo Aktif, Total Pendapatan Bersih, and Riwayat Mutasi Saldo.
+  - Audited [wallet.service.ts](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/services/finance/wallet.service.ts) to confirm integer values are returned unmodified.
+  - Added unit test cases for pure integer IDR formatting in `tests/finance/commission-and-masking.test.ts`.
+  - `bun run type-check`: 0 errors. `bun test`: 140/140 pass across 20 test files.
+
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth continued):** Email verification flow, password reset
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
-3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+1. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
+2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
+3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+
 5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace

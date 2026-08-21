@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { XenditClient } from '@/lib/xendit';
+import { XenditClient } from '@/lib/finance/xendit';
 import crypto from 'node:crypto';
 
 describe('XenditClient', () => {

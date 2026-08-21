@@ -1,7 +1,7 @@
 <script lang="ts">
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
-  import type { TemplateSection, TemplateTheme } from '@/schemas/template.schema';
+  import type { TemplateSection, TemplateTheme } from '@/schemas';
   import { editorStore } from './stores/editorStore';
   import { MoveVertical, MoveHorizontal } from 'lucide-svelte';
 
@@ -132,12 +132,15 @@
   };
 </script>
 
-<svelte:window
-  on:click={handleCanvasBackgroundClick}
-  on:keydown={(e) => e.key === 'Escape' && editorStore.deselectAll()}
-/>
+<svelte:window on:keydown={(e) => e.key === 'Escape' && editorStore.deselectAll()} />
 
-<main class="canvas-backdrop flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors">
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
+<main
+  tabindex="-1"
+  on:click={handleCanvasBackgroundClick}
+  class="canvas-backdrop flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors"
+  aria-label="Editor Canvas"
+>
   <!-- Frame Container with flat pixel-perfect viewport boundaries -->
   <div
     data-theme={$editorStore.previewTheme}

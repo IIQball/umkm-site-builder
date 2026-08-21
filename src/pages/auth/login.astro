@@ -3,16 +3,16 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import LoginForm from "@/components/auth/LoginForm.svelte";
 ---
 
-<BaseLayout title="Masuk - UMKM Site Builder" description="Masuk ke akun Anda">
-  <main class="min-h-[100dvh] flex items-center justify-center px-4 py-12 bg-base-200/40">
+<BaseLayout title="Masuk - UMKM Site Builder" description="Masuk ke akun Anda" hideNavbar={true}>
+  <main class="min-h-[100dvh] flex items-center justify-center px-4 py-12 bg-canvas">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-base-content">Selamat Datang</h1>
-        <p class="text-sm text-base-content/70 mt-2">Masuk untuk mengelola toko UMKM Anda</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-main">Selamat Datang</h1>
+        <p class="text-sm text-secondary mt-2">Masuk untuk mengelola toko UMKM Anda</p>
       </div>
-      <div class="card border border-base-200/80 shadow-2xl rounded-3xl p-6 sm:p-9 bg-base-100 backdrop-blur-sm">
+      <div class="card border border-border shadow-2xl rounded-3xl p-6 sm:p-9 bg-card backdrop-blur-sm">
         <LoginForm client:load />
-        <p class="text-center text-sm text-base-content/70 mt-6 pt-5 border-t border-base-200">
+        <p class="text-center text-sm text-secondary mt-6 pt-5 border-t border-border-light">
           Belum punya akun?
           <a href="/auth/register" class="link link-primary font-semibold ml-1">Buat akun</a>
         </p>

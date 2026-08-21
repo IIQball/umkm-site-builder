@@ -87,7 +87,7 @@
   }
 </script>
 
-<div class="bg-base-100 rounded-box shadow p-6 max-w-2xl">
+<div class="bg-card rounded-3xl shadow-xl p-6 max-w-2xl border border-border">
   <h2 class="text-2xl font-bold mb-6">Profil Toko</h2>
 
   <div class="space-y-6">
@@ -100,15 +100,15 @@
         <input
           id="subdomain-input"
           type="text"
-          class="input input-bordered join-item w-full bg-base-200"
+          class="input input-bordered join-item w-full bg-nested"
           value={subdomain}
           readonly
         />
-        <span class="join-item flex items-center bg-base-300 px-3 text-sm font-medium text-base-content/60">
+        <span class="join-item flex items-center bg-nested px-3 text-sm font-medium text-muted border-y border-r border-base-300">
           .umkm.site
         </span>
       </div>
-      <span class="label-text-alt text-base-content/50 mt-1">Subdomain tidak dapat diubah setelah pendaftaran.</span>
+      <span class="label-text-alt text-muted mt-1">Subdomain tidak dapat diubah setelah pendaftaran.</span>
     </div>
 
     <!-- Editable Fields -->

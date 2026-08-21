@@ -63,7 +63,7 @@ describe('GET /api/designer/payout/status', () => {
         id: 'po_1',
         amount: 50000,
         status: 'processing',
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       },
     ];
     mockFindManyPayoutRequests.mockResolvedValue(mockPayouts);

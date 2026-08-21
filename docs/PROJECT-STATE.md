@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-21 by xendit-payout-webhook-fix session
+Status: LIVE · Updated: 2026-08-21 by designer-payout-polling session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,9 +11,14 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Fixed Xendit Disbursement webhook callback parsing and payout request status mapping. Upgraded database drivers to support WS Neon transactions. Improved tables and charts layout text wrapping on the designer wallet. `bun run type-check`: 0 errors. `bun test` / `vitest`: 175/175 pass across 26 test files.
+Implemented real-time designer payout status polling via new status GET API and smart interval check with pulsing animations. Fixed Xendit Disbursement webhook callback parsing and payout request status mapping. Upgraded database drivers to support WS Neon transactions. Improved tables and charts layout text wrapping on the designer wallet. `bun run type-check`: 0 errors. `bun test` / `vitest`: 178/178 pass across 27 test files.
 
 ## Last session did
+
+- **Designer Payout Status Polling:**
+  - `src/pages/api/designer/payout/status.ts` (NEW) — GET status API endpoint returning payouts history and current wallet balance.
+  - `src/components/designer/DesignerBankWithdraw.svelte` — Implemented smart polling interval logic (every 4000ms) only when processing payout exists. Added animated pulsing effect to processing badge.
+  - `tests/api/designer/payout-status.test.ts` (NEW) — Unit test suite verifying the status API.
 
 - **Xendit Payout Webhook Fix:**
   - `src/pages/api/webhooks/xendit.ts` — Added specific check for Xendit Disbursement webhook callback payloads and query fallback by multiple fields (`id`, `gatewayReference`, and `xenditPayoutId`). Returns `{ received: true }` with status 200 OK.

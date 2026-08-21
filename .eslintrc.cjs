@@ -29,7 +29,7 @@ module.exports = {
       ],
       plugins: ["@typescript-eslint"],
       rules: {
-        "no-console": "warn",
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
         "@typescript-eslint/no-explicit-any": "warn",
       },
     },
@@ -43,7 +43,7 @@ module.exports = {
       },
       extends: ["prettier"],
       rules: {
-        "no-console": "warn",
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
       },
     },
     {
@@ -55,7 +55,7 @@ module.exports = {
       },
       extends: ["prettier"],
       rules: {
-        "no-console": "warn",
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
         "no-unused-vars": "off",
         "no-inner-declarations": "off",
       },
@@ -69,7 +69,7 @@ module.exports = {
       },
       extends: ["eslint:recommended", "prettier"],
       rules: {
-        "no-console": "warn",
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
       },
     },
   ],

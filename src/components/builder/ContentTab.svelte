@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import HeaderContent from './content/HeaderContent.svelte';
   import HeroContent from './content/HeroContent.svelte';
   import FeaturesContent from './content/FeaturesContent.svelte';

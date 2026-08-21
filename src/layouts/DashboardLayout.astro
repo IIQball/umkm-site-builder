@@ -13,9 +13,11 @@ interface Props {
   title?: string;
   /** Optional breadcrumb label to show in the top navbar */
   breadcrumb?: string;
+  /** Option to hide sidebar in certain pages (like onboarding wizard) */
+  hideSidebar?: boolean;
 }
 
-const { title = 'Dashboard', breadcrumb } = Astro.props;
+const { title = 'Dashboard', breadcrumb, hideSidebar = false } = Astro.props;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -46,11 +48,11 @@ const userJson = JSON.stringify(user);
     <ToastContainer client:load />
     <div class="flex h-screen overflow-hidden">
       <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
-      <Sidebar client:load userJson={userJson} />
+      {!hideSidebar && <Sidebar client:load userJson={userJson} />}
 
       <!-- Main: sticky header + scrollable content -->
       <div class="flex flex-col flex-1 min-w-0 overflow-hidden" id="dashboard-main">
-        <DashboardNavbar client:load userJson={userJson} breadcrumb={breadcrumb} />
+        {!hideSidebar && <DashboardNavbar client:load userJson={userJson} breadcrumb={breadcrumb} />}
         <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <slot />
         </main>

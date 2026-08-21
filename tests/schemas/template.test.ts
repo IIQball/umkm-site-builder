@@ -4,7 +4,7 @@ import {
   TemplateDraftCreateSchema,
   TemplateDraftSubmitSchema,
   DEFAULT_TEMPLATE_SECTIONS,
-} from '@/schemas/template.schema';
+} from '@/schemas';
 
 describe('Template Schemas', () => {
   it('should validate DEFAULT_TEMPLATE_SECTIONS against TemplateConfigSchema', () => {

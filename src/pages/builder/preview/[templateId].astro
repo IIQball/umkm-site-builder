@@ -4,11 +4,13 @@ import ReadOnlyPreview from '@/components/builder/ReadOnlyPreview.svelte';
 import { db } from '@/lib/db/client';
 import { templates } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
 import type { EditorTemplate } from '@/components/builder/stores/editorStore';
-import type { TemplateConfig } from '@/schemas/template.schema';
+import type { TemplateConfig } from '@/schemas';
 
 export const prerender = false;
 
+const currentUser = await getAuthenticatedUser(Astro.request);
 const { templateId } = Astro.params;
 
 if (!templateId) {
@@ -23,6 +25,8 @@ if (!templateRecord) {
   return new Response('Template tidak ditemukan', { status: 404 });
 }
 
+const isOwner = !!currentUser && currentUser.id === templateRecord.designerId;
+
 const previewTemplate: EditorTemplate = {
   id: templateRecord.id,
   name: templateRecord.name,
@@ -35,5 +39,5 @@ const previewTemplate: EditorTemplate = {
 ---
 
 <BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
-  <ReadOnlyPreview client:only="svelte" template={previewTemplate} />
+  <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} />
 </BaseLayout>

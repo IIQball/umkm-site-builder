@@ -1,0 +1,48 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import { getDesignerWalletSummary } from '@/services';
+import { db } from '@/lib/db/client';
+import { commissions } from '@/db/schema';
+import { eq, sql } from 'drizzle-orm';
+import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login?redirect=/designer/wallet');
+}
+
+const walletSummary = await getDesignerWalletSummary(user.id);
+
+const totalNetIncome = walletSummary.mutations
+  .filter((m) => m.type === 'CREDIT')
+  .reduce((sum, m) => sum + m.amount, 0);
+
+const [soldInfo] = await db
+  .select({ count: sql<number>`count(${commissions.id})`.mapWith(Number) })
+  .from(commissions)
+  .where(eq(commissions.designerId, user.id));
+const totalTemplatesSold = soldInfo?.count || 0;
+---
+
+<DashboardLayout title="Dompet & Keuangan" breadcrumb="Dompet">
+  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
+    <!-- Page header -->
+    <div class="mb-6">
+      <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Dashboard Keuangan</h1>
+      <p class="text-[13px] text-secondary mt-1">
+        Pantau pendapatan bersih, mutasi dompet, dan distribusi komisi penjualan template.
+      </p>
+    </div>
+
+    <!-- Wallet overview -->
+    <DesignerWalletOverview
+      client:load
+      walletSummary={walletSummary}
+      totalNetIncome={totalNetIncome}
+      totalTemplatesSold={totalTemplatesSold}
+    />
+  </div>
+</DashboardLayout>

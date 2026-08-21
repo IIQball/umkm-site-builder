@@ -1,4 +1,4 @@
-import type { TemplateSection } from '@/schemas/template.schema';
+import type { TemplateSection } from '@/schemas';
 
 export const makeHandlePropChange =
   (section: TemplateSection, onUpdate: (s: TemplateSection) => void) =>

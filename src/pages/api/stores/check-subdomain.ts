@@ -4,7 +4,7 @@ import { stores } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { CheckSubdomainInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { unauthorized, validationError, internalError, okResponse } from '@/types/api';
+import { unauthorized, validationError, internalError, okResponse } from '@/types';
 import { ZodError } from 'zod';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;

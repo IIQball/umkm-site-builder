@@ -13,8 +13,8 @@ import {
   MousePointerClick,
   ListFilter,
 } from 'lucide-svelte';
-import type { TemplateSection } from '@/schemas/template.schema';
-import type { LayerNodeItem, FeatureItem, ProductItem, TestimonialItem, FAQItem } from '@/types/builder';
+import type { TemplateSection } from '@/schemas';
+import type { LayerNodeItem, FeatureItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
 
 export const sectionTypeLabels: Record<TemplateSection['type'], string> = {
   header_announcement: 'Header & Announcement',

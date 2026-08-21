@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HeaderAnnouncementProps, SectionStyles } from '@/types/builder';
+  import type { HeaderAnnouncementProps, SectionStyles } from '@/types';
   import AnnouncementBar from './header/AnnouncementBar.svelte';
   import HeaderLogo from './header/HeaderLogo.svelte';
   import HeaderNav from './header/HeaderNav.svelte';

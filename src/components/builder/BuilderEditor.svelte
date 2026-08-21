@@ -7,9 +7,11 @@
   import { editorStore, activeSection } from './stores/editorStore';
 
   export let templateId: string;
+  export let platformFeePercentage: number = 30;
 
   let loading = true;
   let fetchError: string | null = null;
+
 
   const fetchTemplate = async () => {
     loading = true;
@@ -102,7 +104,10 @@
   {:else if $editorStore.template}
     <!-- Top Bar -->
     <TopBar
+      templateId={$editorStore.template.id}
       templateName={$editorStore.template.name}
+      templatePrice={$editorStore.template.price}
+      {platformFeePercentage}
       status={$editorStore.template.status}
       viewMode={$editorStore.viewMode}
       isDirty={$editorStore.isDirty}

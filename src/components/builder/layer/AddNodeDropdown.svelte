@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { editorStore } from '../stores/editorStore';
 
   export let section: TemplateSection;

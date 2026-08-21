@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { templates } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { TemplateConfigSchema } from '@/schemas/template.schema';
+import { TemplateConfigSchema } from '@/schemas';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 
 interface ApiResponse<T = Record<string, unknown>> {
   ok: boolean;
@@ -19,10 +20,22 @@ const SubmitReviewSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),
 });
 
-const DEFAULT_DESIGNER_ID = 'designer_123';
-
 export const POST: APIRoute = async (context): Promise<Response> => {
   try {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedDesigner(user)) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Akses desainer diperlukan untuk mengajukan review',
+          },
+        } as ApiResponse),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await context.request.json().catch(() => ({}));
     const { templateId } = SubmitReviewSchema.parse(body);
 
@@ -43,14 +56,16 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-    // Otorisasi designer
-    if (template.designerId !== DEFAULT_DESIGNER_ID) {
+    // Otorisasi kepemilikan designer (admin dan superadmin dapat bypass)
+    const isOwner = template.designerId === user.id;
+    const isPrivileged = user.role === 'admin' || user.role === 'superadmin';
+    if (!isOwner && !isPrivileged) {
       return new Response(
         JSON.stringify({
           ok: false,
           error: {
-            code: 'UNAUTHORIZED',
-            message: 'Anda tidak memiliki izin untuk mengirim template ini',
+            code: 'FORBIDDEN',
+            message: 'Anda tidak memiliki hak akses untuk mengajukan template ini',
           },
         } as ApiResponse),
         { status: 403, headers: { 'Content-Type': 'application/json' } }

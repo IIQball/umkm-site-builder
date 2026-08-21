@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ChevronDown } from 'lucide-svelte';
   import { editorStore } from '../stores/editorStore';
-  import type { FAQProps, SectionStyles, FAQItem } from '@/types/builder';
+  import type { FAQProps, SectionStyles, FAQItem } from '@/types';
 
   export let props: FAQProps = {};
   export let styles: SectionStyles = {};

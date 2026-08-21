@@ -5,11 +5,9 @@
  */
 
 import type { APIRoute } from 'astro';
-import { XenditWebhookPayloadSchema } from '@/lib/transactions/schemas';
+import { XenditWebhookPayloadSchema } from '@/schemas';
 import { z } from 'zod';
-import { db } from '@/lib/db/client';
-import { transactions } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { transactionService } from '@/services';
 
 interface ResponseData {
   ok: boolean;
@@ -22,7 +20,7 @@ interface ResponseData {
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   try {
-     // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
+    // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
     const runtimeEnv = ((context.locals as unknown as Record<string, unknown>)?.runtime as Record<string, unknown>)?.env as Record<string, string> | undefined;
     const expectedToken = (
       runtimeEnv?.XENDIT_WEBHOOK_SECRET ||
@@ -31,7 +29,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       ''
     ).trim();
 
-     // Get callback token from header
+    // Get callback token from header
     const callbackToken = context.request.headers.get('x-callback-token');
 
     if (!expectedToken) {
@@ -66,7 +64,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-     // Verify callback token
+    // Verify callback token
     if (callbackToken.trim() !== expectedToken) {
       return new Response(
         JSON.stringify({
@@ -79,45 +77,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         {
           status: 403,
           headers: { 'Content-Type': 'application/json' },
-      }
-    );
+        }
+      );
     }
 
     // Parse and validate payload
     const payload = XenditWebhookPayloadSchema.parse(await context.request.json());
 
-     // Handle Invoice payment callback
-    const isPaid = payload.status === 'PAID' || payload.status === 'SETTLED';
-    
-    if (isPaid) {
+    // Process webhook with business logic & fulfillment
+    const result = await transactionService.processWebhook(payload);
 
-      // Update transaction status
-      await db
-        .update(transactions)
-        .set({
-          status: 'success',
-          paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
-          paymentGatewayRef: payload.id,
-        })
-        .where(eq(transactions.externalId, payload.external_id));
-    } else if (payload.status === 'FAILED' || payload.status === 'EXPIRED') {
-
-      // Update transaction status to failed/expired
-      const failedStatus = payload.status === 'EXPIRED' ? 'expired' : 'failed';
-      await db
-        .update(transactions)
-        .set({
-          status: failedStatus,
-          paymentGatewayRef: payload.id,
-        })
-        .where(eq(transactions.externalId, payload.external_id));
-    }
-
-     // Return success (200 OK)
     return new Response(
       JSON.stringify({
         ok: true,
-        message: 'Webhook processed successfully',
+        message: result.message,
       } as ResponseData),
       {
         status: 200,
@@ -125,14 +98,14 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     );
   } catch (error) {
-     // Handle validation errors
+    // Handle validation errors
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
           ok: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: error.errors[0].message || 'Invalid payload',
+            message: error.errors[0]?.message || 'Invalid payload',
           },
         } as ResponseData),
         {
@@ -148,7 +121,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         ok: false,
         error: {
           code: 'INTERNAL',
-          message: 'Webhook processing failed',
+          message: error instanceof Error ? error.message : 'Webhook processing failed',
         },
       } as ResponseData),
       {

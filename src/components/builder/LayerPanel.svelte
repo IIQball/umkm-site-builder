@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ChevronUp, ChevronDown, ChevronRight, Trash2, Plus, Layers } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { editorStore } from './stores/editorStore';
   import { getSectionNodes, sectionTypeLabels, sectionTypeIcons, sectionTypes } from './layer/layerPanel.helpers';
   import AddNodeDropdown from './layer/AddNodeDropdown.svelte';

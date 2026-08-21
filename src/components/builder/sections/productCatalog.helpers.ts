@@ -1,4 +1,4 @@
-import type { ProductItem } from '@/types/builder';
+import type { ProductItem } from '@/types';
 
 export const DEFAULT_DEMO_PRODUCTS: ProductItem[] = [
   {

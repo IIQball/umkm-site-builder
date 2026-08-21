@@ -1,5 +1,5 @@
 import { writable, derived, get } from 'svelte/store';
-import { type TemplateConfig, type TemplateSection, type TemplateTheme, DEFAULT_TEMPLATE_THEME } from '@/schemas/template.schema';
+import { type TemplateConfig, type TemplateSection, type TemplateTheme, DEFAULT_TEMPLATE_THEME } from '@/schemas';
 import { type EditorTemplate, type EditorState, initialState, clone, ensureValidConfig } from './editorStore.types';
 import { applyDeleteNode, applyAddNode, applySave, applySubmitReview } from './editorStore.mutations';
 
@@ -264,8 +264,8 @@ function createEditorStore() {
       await applySave(get({ subscribe }), update);
     },
 
-    async submitReview() {
-      await applySubmitReview(get({ subscribe }), update);
+    async submitReview(): Promise<boolean> {
+      return await applySubmitReview(get({ subscribe }), update);
     },
   };
 }

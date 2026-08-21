@@ -8,7 +8,7 @@
   import HeaderAnnouncementPanel from './inspector/header/HeaderAnnouncementPanel.svelte';
   import HeaderLogoPanel from './inspector/header/HeaderLogoPanel.svelte';
   import HeaderNavPanel from './inspector/header/HeaderNavPanel.svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import { editorStore, activeNodeId } from './stores/editorStore';
 
   export let section: TemplateSection | undefined = undefined;

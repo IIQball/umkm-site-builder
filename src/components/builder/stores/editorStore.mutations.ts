@@ -1,4 +1,4 @@
-import type { TemplateConfig } from '@/schemas/template.schema';
+import type { TemplateConfig } from '@/schemas';
 import type { EditorState, EditorTemplate } from './editorStore.types';
 
 type Updater = (fn: (s: EditorState) => EditorState) => void;
@@ -30,14 +30,12 @@ export async function applySave(
 export async function applySubmitReview(
   state: EditorState,
   update: Updater
-): Promise<void> {
-  if (!state.template || state.isSaving) return;
-  const confirmed = window.confirm('Apakah Anda yakin ingin mengajukan template ini untuk direview oleh Admin?\n\nSetelah diajukan, status template akan menjadi "Menunggu Review" dan Anda akan dialihkan ke halaman preview.');
-  if (!confirmed) return;
+): Promise<boolean> {
+  if (!state.template || state.isSaving) return false;
   update((s) => ({ ...s, isSaving: true, error: null }));
   try {
     const { template } = state;
-    await fetch(`/api/builder/save?templateId=${template.id}`, {
+    await fetch(`/api/builder/save?templateId=${encodeURIComponent(template.id)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: template.name, description: template.description, price: template.price, thumbnailUrl: template.thumbnailUrl, config: template.config }),
@@ -51,12 +49,14 @@ export async function applySubmitReview(
     if (!response.ok || !resData.ok) throw new Error(resData.error?.message || 'Gagal mengajukan review template');
     update((s) => ({ ...s, isSaving: false, isDirty: false, saveSuccess: true, template: s.template ? { ...s.template, status: 'pending' as EditorTemplate['status'] } : null }));
     window.location.href = resData.redirectUrl || `/builder/preview/${template.id}`;
+    return true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Gagal mengajukan review';
     update((s) => ({ ...s, isSaving: false, error: msg }));
-    alert(`Error: ${msg}`);
+    throw err;
   }
 }
+
 
 /**
  * Handles deleteNode logic per section type.

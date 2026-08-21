@@ -1,4 +1,4 @@
-import { DEFAULT_TEMPLATE_SECTIONS, DEFAULT_TEMPLATE_THEME, type TemplateConfig, type TemplateTheme } from '@/schemas/template.schema';
+import { DEFAULT_TEMPLATE_SECTIONS, DEFAULT_TEMPLATE_THEME, type TemplateConfig, type TemplateTheme } from '@/schemas';
 
 export const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
 

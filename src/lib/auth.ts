@@ -120,27 +120,8 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
-
-export function getRedirectUrlForRole(role?: string | null): string {
-  switch (role) {
-    case 'designer':
-      return '/designer/templates';
-    case 'admin':
-    case 'superadmin':
-      return '/admin';
-    case 'tenant':
-    default:
-      return '/dashboard';
-  }
-}
-
-export interface AuthenticatedUser {
-  id: string;
-  name: string;
-  email: string;
-  role: 'superadmin' | 'admin' | 'designer' | 'tenant';
-  status: 'active' | 'suspended';
-}
+import type { AuthenticatedUser } from '@/types';
+export type { AuthenticatedUser };
 
 export async function getAuthenticatedUser(request: Request): Promise<AuthenticatedUser | null> {
   try {
@@ -150,7 +131,7 @@ export async function getAuthenticatedUser(request: Request): Promise<Authentica
 
     if (session?.user) {
       const user = await db.query.users.findFirst({
-        where: (users) => eq(users.id, session.user.id),
+        where: (users, { eq }) => eq(users.id, session.user.id),
       });
 
       if (!user) {
@@ -169,7 +150,7 @@ export async function getAuthenticatedUser(request: Request): Promise<Authentica
     const devUserId = request.headers.get('x-user-id');
     if (devUserId) {
       const user = await db.query.users.findFirst({
-        where: (users) => eq(users.id, devUserId),
+        where: (users, { eq }) => eq(users.id, devUserId),
       });
 
       if (!user) {
@@ -202,5 +183,21 @@ export function isActive(user: AuthenticatedUser | null): boolean {
 }
 
 export function isAuthorizedDesigner(user: AuthenticatedUser | null): boolean {
-  return isActive(user) && isDesigner(user);
+  if (!user) return false;
+  return user.status === 'active' && (user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin');
+}
+
+export function isAdmin(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'superadmin';
+}
+
+export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
+  return isActive(user) && isAdmin(user);
+}
+
+export function getRedirectUrlForRole(role?: string | null): string {
+  if (role === 'designer') return '/designer/templates';
+  if (role === 'admin' || role === 'superadmin') return '/admin';
+  return '/dashboard';
 }

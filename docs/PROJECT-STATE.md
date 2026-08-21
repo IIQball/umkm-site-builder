@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-20 by merge auth-forms-zod-redesign and store-onboarding sessions
+Status: LIVE · Updated: 2026-08-21 by store-settings session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,11 +11,19 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern aesthetic (card container `rounded-3xl shadow-2xl`, Lucide icons, responsive layout). Native HTML browser validation disabled (`novalidate`), replaced with strict per-field Zod validation (`src/schemas/auth.schema.ts`), instant typing error clearing, and inline DaisyUI warning/error feedback. Centralized Global Toast Notification System mounted across root layouts.
+Fixed designer wallet currency formatting: removed division by 100 on designer balance and mutations display. Centralized IDR formatting in `formatIDR` helper in `src/lib/utils/format.ts` to format pure integer amounts without division. All database records (`wallets.balance`, `wallet_mutations.amount`, `wallet_mutations.balance_after`) and UI displays now consistently handle raw integer IDR. `bun run type-check`: 0 errors. `bun test` / `vitest`: 140/140 pass across 20 test files.
 
 ## Last session did
 
-- **Auth Zod Schemas & Per-Field Inline Validation:**
+- **Store Settings Feature:**
+  - `src/lib/stores/schemas.ts` — Added `StoreSettingsInput` schema to validate settings updates.
+  - `src/pages/api/stores/settings.ts` (NEW) — Endpoint for updating store profile (name, waNumber, googleMapsUrl) for tenants.
+  - `src/components/dashboard/StoreSettingsForm.svelte` (NEW) — Client-side Svelte component with Zod-based validation and Lucide icons for UI feedback.
+  - `src/pages/dashboard/store-settings.astro` (NEW) — Settings page mounted within `DashboardLayout`.
+  - `tests/schemas/store-settings.test.ts` (NEW) — 5 unit tests covering validation rules for store settings.
+  - All files strictly typed. `bun run type-check` passes successfully. Created PR #14.
+
+- **Auth Zod Schemas & Per-Field Inline Validation (Previous):**
   - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
   - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
   - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.
@@ -43,18 +51,20 @@ Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern
 
 ## Next up
 
-1. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
-2. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
+1. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
+2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
 3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+
 4. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
-6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
-7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
+5. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
+6. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Documentation status
 
 All 21 documentation files audited and aligned with authoritative schema:
 
-✅ **Fixed in this session:**
+**Fixed in this session:**
+
 - docs/tech/data-model-erd.md — Removed `images` table, removed `subdomain_blacklist` table (app-layer validation), updated transactions fields, clarified media as JSONB
 - docs/tech/api-spec.md — Updated all payment endpoints, transaction status values, removed imageId references, updated payout fields
 - docs/tech/architecture.md — Clarified media storage (JSONB URLs, no orphan cleanup), updated data layer, transaction fields
@@ -63,6 +73,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 - docs/memory/feature-01b-database-layer.md — Clarified 19 tables, updated all field names, media handling
 
 **No changes needed (already correct or not applicable):**
+
 - docs/README.md — Index is accurate
 - docs/PROJECT-STATE.md — Being updated now
 - docs/prd/00-overview.md — Decision summary is correct
@@ -106,6 +117,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 **Status:** offered · **Date:** 2026-08-14 · **Decision pending**
 
 Single-use kickoff files and selection procedures have completed their job. The following can be archived or deleted:
+
 - `.agents/workflows/00-kickoff.md` (no longer needed; spec is written)
 - `.agents/rules/70-database-selection.md` (G1 decided; no need to re-read)
 - `.agents/rules/71-media-selection.md` (G7 decided; no need to re-read)
@@ -116,12 +128,12 @@ Single-use kickoff files and selection procedures have completed their job. The 
 
 ## Preflight decisions (from kickoff)
 
-| Gate | Decision | Recorded in |
-|---|---|---|
-| G1 database (D1 / Neon / Supabase) | Neon PostgreSQL Serverless | docs/tech/architecture.md |
-| G2 icon pack | Lucide (lucide-svelte) | docs/tech/architecture.md |
-| G3 vp / Vite Plus | Plain Vite + Bun scripts (no vp) | docs/tech/architecture.md |
-| G4 git mode (strict / light) | Strict (main protected, dev integration, PR-only) | docs/tech/architecture.md |
-| G5 auth pools and roles | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md |
-| G6 never-push list | .env*, secrets, dumps, uploaded media, credentials | .gitignore + docs/tech/security.md |
-| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert | docs/tech/architecture.md |
+| Gate                                           | Decision                                             | Recorded in                        |
+| ---------------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
+| G1 database (D1 / Neon / Supabase)             | Neon PostgreSQL Serverless                           | docs/tech/architecture.md          |
+| G2 icon pack                                   | Lucide (lucide-svelte)                               | docs/tech/architecture.md          |
+| G3 vp / Vite Plus                              | Plain Vite + Bun scripts (no vp)                     | docs/tech/architecture.md          |
+| G4 git mode (strict / light)                   | Strict (main protected, dev integration, PR-only)    | docs/tech/architecture.md          |
+| G5 auth pools and roles                        | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md    |
+| G6 never-push list                             | .env*, secrets, dumps, uploaded media, credentials   | .gitignore + docs/tech/security.md |
+| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert          | docs/tech/architecture.md          |

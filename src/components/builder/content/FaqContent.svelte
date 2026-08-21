@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import {
     makeHandleArrayItemChange,
     makeHandleAddArrayItem,
@@ -15,6 +15,13 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
+
+  interface FAQItem {
+    question?: string;
+    answer?: string;
+  }
+
+  $: faqs = (section.props?.faqs as FAQItem[]) || [];
 </script>
 
 <div class="space-y-3">
@@ -31,7 +38,7 @@
   </div>
 
   <div class="space-y-3">
-    {#each section.props?.faqs || [] as faq, index}
+    {#each faqs as faq, index}
       <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-lg space-y-2">
         <div class="flex items-center justify-between gap-2">
           <input
@@ -54,7 +61,7 @@
             <button
               type="button"
               on:click={() => handleMoveArrayItem('faqs', index, 'down')}
-              disabled={index === (section.props?.faqs || []).length - 1}
+              disabled={index === faqs.length - 1}
               class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
               title="Pindah ke Bawah"
             >

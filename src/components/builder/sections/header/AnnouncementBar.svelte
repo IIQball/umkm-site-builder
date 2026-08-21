@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore, activeNodeId } from '../../stores/editorStore';
-  import type { HeaderAnnouncementProps } from '@/types/builder';
+  import type { HeaderAnnouncementProps } from '@/types';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';

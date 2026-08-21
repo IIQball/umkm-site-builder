@@ -11,7 +11,7 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern aesthetic (card container `rounded-3xl shadow-2xl`, Lucide icons, responsive layout). Native HTML browser validation disabled (`novalidate`), replaced with strict per-field Zod validation (`src/schemas/auth.schema.ts`), instant typing error clearing, and inline DaisyUI warning/error feedback. Centralized Global Toast Notification System mounted across root layouts.
+Fixed designer wallet currency formatting: removed division by 100 on designer balance and mutations display. Centralized IDR formatting in `formatIDR` helper in `src/lib/utils/format.ts` to format pure integer amounts without division. All database records (`wallets.balance`, `wallet_mutations.amount`, `wallet_mutations.balance_after`) and UI displays now consistently handle raw integer IDR. `bun run type-check`: 0 errors. `bun test` / `vitest`: 140/140 pass across 20 test files.
 
 ## Last session did
 
@@ -46,10 +46,10 @@ Auth forms (`LoginForm.svelte` and `RegisterForm.svelte`) redesigned with modern
 
 ## Next up
 
-1. **Phase 1.2 (BetterAuth continued):** Email verification flow, password reset
-2. **Phase 1.3 (API Routes):** Unified response shape, route handlers, validation
-3. **Phase 1.4 (Designer Templates page):** `/designer/templates` list page using DashboardLayout
-4. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+1. **Phase 1.3 (Designer Payout System):** Payout requests, bank account management, minimum balance validation
+2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
+3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
+
 5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
 6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
 7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace

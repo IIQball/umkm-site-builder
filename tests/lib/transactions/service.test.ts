@@ -1,13 +1,11 @@
-/**
- * Transaction service tests
- */
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { transactionService } from '@/services/transaction.service';
-import type { TransactionInitiateInput } from '@/types/transactions';
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance, type Mock } from 'vitest';
+import { transactionService } from '@/services';
+import type { TransactionInitiateInput } from '@/types';
+import { db } from '@/lib/db/client';
+import { xenditClient } from '@/lib/finance/xendit';
 
 // Mock xenditClient
-vi.mock('@/lib/xendit', () => ({
+vi.mock('@/lib/finance/xendit', () => ({
   xenditClient: {
     createInvoice: vi.fn(),
     getInvoice: vi.fn(),
@@ -26,13 +24,17 @@ vi.mock('@/lib/db/client', () => {
 });
 
 describe('TransactionService', () => {
-  let mockDb: any;
-  let consoleErrorSpy: any;
-  let consoleWarnSpy: any;
+  let mockDb: {
+    select: Mock;
+    insert: Mock;
+    update: Mock;
+  };
+  let consoleErrorSpy: MockInstance;
+  let consoleWarnSpy: MockInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDb = require('@/lib/db/client').db;
+    mockDb = db as unknown as typeof mockDb;
     
     // Suppress console output during tests
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -68,7 +70,7 @@ describe('TransactionService', () => {
 
   describe('formatCurrency', () => {
     it('should format amount to IDR currency', () => {
-      const formatted = transactionService.formatCurrency(10000000); // 100,000 IDR in cents
+      const formatted = transactionService.formatCurrency(100000); // 100,000 IDR
       expect(formatted).toContain('100');
       expect(formatted).toContain('Rp'); // IDR symbol or text
     });
@@ -125,8 +127,7 @@ describe('TransactionService', () => {
         }),
       });
 
-      const mockXendit = require('@/lib/xendit').xenditClient;
-      mockXendit.createInvoice.mockResolvedValueOnce({
+      (xenditClient.createInvoice as Mock).mockResolvedValueOnce({
         id: 'xendit_123',
         invoiceNum: 'INV-user_123-123456',
         invoiceUrl: 'https://xendit.co/invoices/xyz',
@@ -199,9 +200,8 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('success');
     });
 
     it('should be idempotent for same transaction', async () => {
@@ -225,22 +225,9 @@ describe('TransactionService', () => {
         }),
       });
 
-      await transactionService.processWebhook(payload);
-
-      mockDb.select.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([
-            {
-              id: 'txn_123',
-              status: 'success',
-            },
-          ]),
-        }),
-      });
-
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('ignored');
+      expect(result.message).toBe('Already processed');
     });
 
     it('should handle PENDING status', async () => {
@@ -264,9 +251,8 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('success');
     });
 
     it('should handle FAILED status', async () => {
@@ -290,9 +276,8 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('success');
     });
 
     it('should handle EXPIRED status', async () => {
@@ -316,9 +301,8 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('success');
     });
 
     it('should gracefully handle unknown transaction (idempotent)', async () => {
@@ -337,9 +321,8 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.processWebhook(payload)
-      ).resolves.toBeUndefined();
+      const result = await transactionService.processWebhook(payload);
+      expect(result.status).toBe('not_found');
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Webhook received for unknown transaction')

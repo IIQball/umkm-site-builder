@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Palette, Type, MousePointerClick, Layout, Sparkles } from 'lucide-svelte';
   import { editorStore } from '../stores/editorStore';
-  import type { TemplateTheme } from '@/schemas/template.schema';
+  import type { TemplateTheme } from '@/schemas';
 
   type ThemeTab = 'colors' | 'typography' | 'buttons' | 'layout';
   let activeTab: ThemeTab = 'colors';

@@ -4,7 +4,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { transactionService } from '@/services/transaction.service';
+import { transactionService } from '@/services';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface ResponseData {
@@ -75,7 +75,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
           invoiceId: transaction.externalId,
           status: transaction.status,
           amount: transaction.amount,
-          amountFormatted: formatCurrency(Math.round(transaction.amount * 100)),
+          amountFormatted: formatCurrency(transaction.amount),
           paymentMethod: transaction.paymentChannel,
           paymentUrl,
         },

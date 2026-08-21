@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { templates } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { TemplateDraftUpdateSchema } from '@/schemas/template.schema';
+import { TemplateDraftUpdateSchema } from '@/schemas';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 
 interface ApiResponse<T = Record<string, unknown>> {

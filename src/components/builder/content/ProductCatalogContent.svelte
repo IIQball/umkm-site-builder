@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
-  import type { TemplateSection } from '@/schemas/template.schema';
+  import type { TemplateSection } from '@/schemas';
   import {
     makeHandlePropChange,
     makeHandleArrayItemChange,
@@ -17,6 +17,16 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
+
+  interface ProductItem {
+    name?: string;
+    price?: number;
+    imageUrl?: string;
+    badge?: string;
+  }
+
+  $: subtitle = (section.props?.subtitle as string) ?? '';
+  $: products = (section.props?.products as ProductItem[]) || [];
 </script>
 
 <div class="space-y-3">
@@ -36,7 +46,7 @@
     <label for="catalog-subtitle" class="block font-semibold text-base-content/80 mb-1">Subjudul (Subtitle)</label>
     <textarea
       id="catalog-subtitle"
-      value={section.props?.subtitle ?? ''}
+      value={subtitle}
       on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
       rows="2"
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"
@@ -45,7 +55,7 @@
   </div>
 
   <div class="flex items-center justify-between pt-2 border-t border-base-200 dark:border-slate-800">
-    <span class="block font-semibold text-base-content/80">Daftar Produk ({ (section.props?.products || []).length })</span>
+    <span class="block font-semibold text-base-content/80">Daftar Produk ({ products.length })</span>
     <button
       type="button"
       on:click={() => handleAddArrayItem('products', { name: 'Produk Baru', price: 50000, imageUrl: '', badge: 'Terlaris' })}
@@ -56,7 +66,7 @@
     </button>
   </div>
 
-  {#if (section.props?.products || []).length === 0}
+  {#if products.length === 0}
     <div class="p-4 text-center border border-dashed border-base-300 dark:border-slate-800 rounded-lg text-base-content/50">
       <p>Belum ada produk preview.</p>
       <button
@@ -69,7 +79,7 @@
     </div>
   {:else}
     <div class="space-y-3">
-      {#each section.props?.products || [] as product, index}
+      {#each products as product, index}
         <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-lg space-y-2">
           <div class="flex items-center justify-between gap-1.5">
             <input
@@ -92,7 +102,7 @@
               <button
                 type="button"
                 on:click={() => handleMoveArrayItem('products', index, 'down')}
-                disabled={index === (section.props?.products || []).length - 1}
+                disabled={index === products.length - 1}
                 class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                 title="Pindah ke Bawah"
               >

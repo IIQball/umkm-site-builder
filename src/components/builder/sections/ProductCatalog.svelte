@@ -1,6 +1,6 @@
 <script lang="ts">
   import { editorStore } from '../stores/editorStore';
-  import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types/builder';
+  import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { Package, ShoppingBag, MessageCircle } from 'lucide-svelte';
   import { DEFAULT_DEMO_PRODUCTS, getBadgeColorClass, getCardPresetClass } from './productCatalog.helpers';
 

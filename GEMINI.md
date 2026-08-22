@@ -195,6 +195,8 @@ umkm-site-builder/
 │   │   │   │   │   ├── draft.ts                # GET & POST/PATCH/DELETE CRUD draft template
 │   │   │   │   │   └── submit-review.ts        # POST pengajuan draf template desainer ke admin
 │   │   │   │   ├── bank-account.ts             # GET & POST/PUT data rekening bank desainer
+│   │   │   │   ├── payout/
+│   │   │   │   │   └── status.ts               # GET riwayat status penarikan dana desainer
 │   │   │   │   └── payout.ts                   # GET riwayat & POST pengajuan penarikan dana
 │   │   │   ├── media/
 │   │   │   │   └── sign.ts                     # POST generate Cloudinary upload signature
@@ -289,6 +291,7 @@ umkm-site-builder/
 │       │   └── index.ts                        # Tipe data detail otentikasi user & role
 │       ├── common/
 │       │   ├── api.ts                          # Tipe standard HTTP API responses
+│       │   ├── toast.ts                        # Tipe data notifikasi toast melayang
 │       │   └── index.ts                        # Tipe helper modular
 │       ├── finance/
 │       │   ├── commission.ts                   # Tipe skema bagi hasil komisi
@@ -311,6 +314,7 @@ umkm-site-builder/
 │   │   │   ├── templates/
 │   │   │   │   └── submit-review.test.ts       # Uji API pengajuan review template desainer
 │   │   │   ├── bank-account.test.ts            # Uji API CRUD rekening desainer
+│   │   │   ├── payout-status.test.ts           # Uji API status penarikan dana desainer
 │   │   │   └── payout.test.ts                  # Uji API pencairan komisi desainer
 │   │   ├── products/
 │   │   │   └── index.test.ts                   # Uji API CRUD produk toko tenant
@@ -506,3 +510,93 @@ Untuk bertransisi dari versi saat ini ke versi terbersih di atas, berikut langka
   - Pindahkan dan sesuaikan letak berkas-berkas di dalam folder `tests/` agar strukturnya sama persis dengan folder `src/` yang baru.
   - Jalankan `bun run type-check` dan `bun run test:unit` untuk memverifikasi fungsionalitas sistem berjalan 100% normal tanpa ada import pecah.
 ```
+
+---
+
+## 🎨 Analisis Kode CSS Manual & Rencana Standardisasi
+
+Berikut adalah temuan berkas-berkas di fitur **Platform Settings, Transaksi, dan Template** yang masih menuliskan kode CSS manual (seperti ukuran pixel ad-hoc `text-[px]`, font weight inline, dan warna hardcoded seperti `text-indigo-600` / `bg-emerald-50` / `text-slate-900`) beserta solusi standardisasinya menggunakan utility classes terpusat di `global.css`.
+
+### 1. Daftar Temuan Berkas & CSS Manual
+
+#### A. Fitur Platform Settings
+- **`src/components/admin/CommissionSettingsPanel.svelte`**
+  - *Temuan awal*: Menggunakan `text-[13px]`, `text-[11px]` untuk ukuran teks manual, border accent manual seperti `border-t-indigo-400`, `border-t-emerald-400`, dan warna manual seperti `text-indigo-600` / `bg-emerald-500/10` / `bg-indigo-600`.
+  - *Status*: **SUDAH DIPERBAIKI** dengan beralih ke variabel desain global (`text-sm`, `text-xs`), menggunakan `.border-accent-*` global, dan mendelegasikan warna button/alert ke class semantic daisyUI (`btn-primary`, `alert-success`, `alert-error`).
+
+#### B. Fitur Transaksi & Checkout
+- **`src/components/checkout/PaymentModal.svelte`**
+  - *Temuan*: Menggunakan utility warna manual: `bg-emerald-500/10`, `text-emerald-600`, `bg-amber-500/10`, `text-amber-600`. Ukuran teks ad-hoc `text-[12px]`, `text-[13px]`.
+- **`src/components/checkout/TransactionStatus.svelte`**
+  - *Temuan*: Menggunakan warna manual `bg-emerald-500/10` dan ukuran teks ad-hoc `text-[12px]`, `text-[14px]`.
+- **`src/pages/checkout/[invoiceId].astro`**
+  - *Temuan*: Menggunakan teks pixel manual `text-[48px]`, `text-[16px]`, `text-[11px]`, `text-[18px]`, `text-[10px]`, `text-[14px]`. Warna manual seperti `text-rose-500`, `text-emerald-500`, `text-slate-500`.
+
+#### C. Fitur Katalog & Builder Template
+- **`src/components/admin/TemplateReviewPanel.svelte`**
+  - *Temuan*: Ukuran teks ad-hoc `text-[13px]`, `text-[11px]`, warna manual `bg-indigo-600`, `hover:bg-indigo-700`, `text-indigo-600`, `bg-emerald-500/10`, `text-emerald-600`.
+- **`src/components/designer/DesignerTemplateCard.svelte`**
+  - *Temuan*: Ukuran teks ad-hoc `text-[11px]`, `text-[13px]`. Warna manual `bg-indigo-600`, `bg-emerald-500/10`.
+- **`src/components/ui/StatCard.svelte`**
+  - *Temuan*: Ukuran teks ad-hoc `text-[20px]`, `text-[10px]`, `text-[26px]`, `text-[11px]`.
+- **`src/pages/templates/index.astro` / `src/pages/public/templates/index.astro`**
+  - *Temuan*: Menggunakan warna manual `bg-emerald-500/10`, `text-emerald-600`, `bg-amber-500/10`, `text-amber-600`, `bg-rose-500/10`, `text-rose-600`. Teks pixel manual `text-[10px]`, `text-[16px]`.
+- **`src/pages/designer/templates.astro`**
+  - *Temuan awal*: Menggunakan button manual `bg-indigo-600 hover:bg-indigo-700 text-[13px]` dan border accent manual `border-t-indigo-400`.
+  - *Status*: **SUDAH DIPERBAIKI** dengan beralih ke `.btn-primary` dan `.border-accent-*` global.
+
+---
+
+### 2. Panduan Solusi Standardisasi (Definisi di `global.css`)
+
+Untuk merapikan sisa file-file di atas tanpa menuliskan kode CSS manual berulang kali, ikuti aturan kelas global yang telah didefinisikan di `src/styles/global.css`:
+
+#### A. Border Accent & Stat Card Top Border
+Gunakan kelas `.border-accent-*` daripada menulis `border-t-2 border-t-...-400` manual:
+```css
+/* Sudah didefinisikan di global.css */
+.border-accent-primary {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-primary) !important;
+}
+.border-accent-success {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-success) !important;
+}
+.border-accent-warning {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-warning) !important;
+}
+.border-accent-error {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-error) !important;
+}
+.border-accent-muted {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-text-light) !important;
+}
+```
+
+#### B. Semantic Text Colors
+Gunakan kelas `.text-primary`, `.text-success`, dll., daripada warna hex/Tailwind hardcoded (`text-indigo-600`, `text-emerald-500`, dll.):
+```css
+/* Sudah didefinisikan di global.css */
+.text-primary { color: var(--color-primary) !important; }
+.text-success { color: var(--color-success) !important; }
+.text-error { color: var(--color-error) !important; }
+.text-warning { color: var(--color-warning) !important; }
+.text-info { color: var(--color-info) !important; }
+```
+
+#### C. DaisyUI & Global Text Sizes
+- **Teks pixel manual `text-[13px]` atau `text-[11px]`** harus diganti dengan kelas standar sistem tipografi Tailwind:
+  - `text-[10px]` / `text-[11px]` -> Ganti dengan `text-xs` (atau `.text-xs` yang setara 0.75rem / 12px).
+  - `text-[13px]` -> Ganti dengan `text-sm` (atau `.text-sm` yang setara 0.875rem / 14px).
+  - `text-[14px]` / `text-[15px]` -> Ganti dengan `text-sm`.
+- **Button Utama**: Selalu gunakan `.btn .btn-primary` (atau kelas tombol daisyUI bawaan lainnya seperti `.btn-secondary`, `.btn-ghost`) agar mewarisi warna tema secara konsisten di light/dark mode tanpa menyisipkan utility warna manual.
+

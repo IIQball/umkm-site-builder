@@ -115,7 +115,7 @@
             <h3 id="submit-review-title" class="font-bold text-sm sm:text-base text-base-content leading-tight">
               Ajukan Template untuk Kurasi
             </h3>
-            <p class="text-[11px] text-base-content/60 truncate max-w-[280px] sm:max-w-xs mt-0.5" title={templateId ? `${templateName} (${templateId})` : templateName}>
+            <p class="text-xs text-base-content/60 truncate max-w-[280px] sm:max-w-xs mt-0.5" title={templateId ? `${templateName} (${templateId})` : templateName}>
               {templateName}
             </p>
           </div>
@@ -148,7 +148,7 @@
             <span>Alur Proses Kurasi & Peninjauan</span>
           </div>
 
-          <ul class="text-[11px] sm:text-xs text-base-content/75 space-y-1.5 pl-1.5">
+          <ul class="text-xs text-base-content/75 space-y-1.5 pl-1.5">
             <li class="flex items-start gap-2">
               <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
               <span>Status template akan beralih menjadi <strong>"Menunggu Review"</strong>.</span>
@@ -179,7 +179,7 @@
             {#if isLoadingFee}
               <span class="loading loading-spinner loading-xs text-blue-500"></span>
             {:else}
-              <span class="badge badge-sm badge-info font-medium text-[10px]">
+              <span class="badge badge-sm badge-info font-medium text-xs">
                 Dinamis Aktif
               </span>
             {/if}
@@ -188,14 +188,14 @@
           <!-- Split Percentages Grid -->
           <div class="grid grid-cols-2 gap-2 text-center mb-3">
             <div class="bg-base-100/90 dark:bg-slate-900/80 p-2.5 rounded-lg border border-base-200 dark:border-slate-800">
-              <p class="text-[10px] text-base-content/60 font-medium">Potongan Fee Platform</p>
+              <p class="text-xs text-base-content/60 font-medium">Potongan Fee Platform</p>
               <p class="text-base font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
                 {platformFeePercentage}%
               </p>
             </div>
             <div class="bg-base-100/90 dark:bg-slate-900/80 p-2.5 rounded-lg border border-emerald-500/20 dark:border-emerald-500/30">
-              <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Hak Bersih Desainer</p>
-              <p class="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <p class="text-xs text-success font-semibold">Hak Bersih Desainer</p>
+              <p class="text-base font-extrabold text-success mt-0.5">
                 {designerPercentage}%
               </p>
             </div>
@@ -203,7 +203,7 @@
 
           <!-- Financial Calculation Simulation -->
           <div class="bg-base-100/80 dark:bg-slate-900/60 rounded-lg p-3 border border-base-200/80 dark:border-slate-800 text-xs space-y-1.5">
-            <div class="flex justify-between items-center text-[11px] text-base-content/70">
+            <div class="flex justify-between items-center text-xs text-base-content/70">
               <span>Harga Jual Template:</span>
               <span class="font-bold text-base-content">
                 {templatePrice > 0 ? formatRupiah(templatePrice) : 'Gratis (Rp 0)'}
@@ -211,21 +211,21 @@
             </div>
 
             {#if templatePrice > 0}
-              <div class="flex justify-between items-center text-[11px] text-base-content/60">
+              <div class="flex justify-between items-center text-xs text-base-content/60">
                 <span>Fee Platform ({platformFeePercentage}%):</span>
                 <span class="text-amber-600 dark:text-amber-400">-{formatRupiah(platformFeeAmount)}</span>
               </div>
               <div class="border-t border-base-200 dark:border-slate-800 pt-1.5 flex justify-between items-center font-bold text-xs">
-                <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span class="text-success flex items-center gap-1">
                   <CheckCircle2 size={13} />
                   Estimasi Pendapatan Desainer:
                 </span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-extrabold">
+                <span class="text-success font-extrabold">
                   {formatRupiah(designerAmount)}
                 </span>
               </div>
             {:else}
-              <p class="text-[10px] text-base-content/60 italic pt-1">
+              <p class="text-xs text-base-content/60 italic pt-1">
                 *Template gratis tidak dikenakan potongan biaya platform.
               </p>
             {/if}
@@ -247,7 +247,7 @@
           type="button"
           on:click={handleSubmit}
           disabled={isSubmitting}
-          class="btn btn-primary btn-sm bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn btn-primary btn-sm text-white text-xs font-semibold px-4 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {#if isSubmitting}
             <Loader2 size={14} class="animate-spin" />

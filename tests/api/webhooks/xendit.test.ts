@@ -40,7 +40,7 @@ describe('Xendit Webhook API Route', () => {
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.error.code).toBe('FORBIDDEN');
   });
 
   it('delegates to payoutService when payload is a disbursement (COMPLETED)', async () => {

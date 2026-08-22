@@ -125,7 +125,7 @@ describe('Financial Engine & Ledger Service', () => {
           from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'w_123', designerId: 'd1', balance: 25000 }]) }) }),
         });
 
-        await expect(debitWallet({ designerId: 'd1', amount: 50000, description: 'Payout' })).rejects.toThrow('INSUFFICIENT_BALANCE');
+        await expect(debitWallet({ designerId: 'd1', amount: 50000, description: 'Payout' })).rejects.toThrow('Saldo tidak mencukupi untuk melakukan transaksi');
       });
     });
 

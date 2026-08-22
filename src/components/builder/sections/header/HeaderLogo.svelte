@@ -67,17 +67,18 @@
   }`}
 >
   {#if logoType === 'image_only' || logoType === 'image_text'}
+    {@const logoShape = props.logoShape || 'square'}
     {#if logoImageUrl}
       <img
         src={logoImageUrl}
         alt={logoText || 'Logo'}
-        style={`height: ${logoHeight}px; max-height: 80px;`}
-        class="w-auto object-contain rounded"
+        style={`height: ${logoHeight}px; width: ${logoShape === 'circle' ? `${logoHeight}px` : 'auto'}; max-height: 80px;`}
+        class={`object-cover select-none pointer-events-none ${logoShape === 'circle' ? 'rounded-full aspect-square' : 'rounded-lg'}`}
       />
     {:else}
       <div
         style={`height: ${logoHeight}px; width: ${logoHeight}px;`}
-        class="bg-blue-600/10 text-blue-600 rounded flex items-center justify-center flex-shrink-0 border border-blue-200 dark:border-blue-900"
+        class={`bg-blue-600/10 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-200 dark:border-blue-900 ${logoShape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}
       >
         <Store size={Math.max(16, Math.min(32, logoHeight * 0.55))} />
       </div>

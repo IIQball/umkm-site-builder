@@ -160,6 +160,7 @@ describe('POST /api/templates/submit-review', () => {
     const validTemplate = {
       id: 'tpl_123',
       designerId: 'designer_owner',
+      status: 'draft',
       config: {
         theme: {
           primaryColor: '#000000',

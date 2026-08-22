@@ -55,15 +55,15 @@
   const getStatusBadge = (s: string) => {
     switch (s) {
       case 'draft':
-        return { label: 'Draft', bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' };
+        return { label: 'Draft', bg: 'badge-custom-amber' };
       case 'pending':
-        return { label: 'Menunggu Review', bg: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20' };
+        return { label: 'Menunggu Review', bg: 'badge-custom-sky' };
       case 'approved':
-        return { label: 'Disetujui', bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' };
+        return { label: 'Disetujui', bg: 'badge-custom-emerald' };
       case 'rejected':
-        return { label: 'Ditolak', bg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' };
+        return { label: 'Ditolak', bg: 'badge-custom-rose' };
       default:
-        return { label: s, bg: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20' };
+        return { label: s, bg: 'badge-custom-slate' };
     }
   };
 
@@ -101,7 +101,7 @@
       </button>
     {/if}
 
-    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full border {badge.bg}">
+    <span class="badge-custom uppercase tracking-wider {badge.bg}">
       {badge.label}
     </span>
   </div>
@@ -180,20 +180,20 @@
         on:click={() => editorStore.toggleColumnGrid()}
         class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $editorStore.showColumnGrid
-            ? 'bg-blue-600 text-white font-semibold shadow-sm'
+            ? 'bg-primary text-white font-semibold shadow-sm animate-none'
             : 'text-base-content/60 hover:text-base-content'
         }`}
         title="Toggle Column Grid Guides (Ctrl+G / Shift+G)"
       >
         <Grid size={13} />
-        <span class="hidden md:inline text-[11px]">Grid</span>
+        <span class="hidden md:inline text-xs">Grid</span>
       </button>
       <button
         type="button"
         on:click={() => editorStore.togglePixelGrid()}
         class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $editorStore.showPixelGrid
-            ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+            ? 'bg-primary text-white font-semibold shadow-sm'
             : 'text-base-content/60 hover:text-base-content'
         }`}
         title="Toggle 8px Pixel Grid"
@@ -204,7 +204,7 @@
 
     <!-- Canvas Margin Safe-Zone Preset -->
     <div class="hidden xl:flex items-center gap-1.5 bg-base-200/80 px-2.5 py-1 rounded-lg border border-base-300 dark:border-slate-800 text-xs">
-      <span class="text-[11px] text-base-content/60 font-medium">Margin:</span>
+      <span class="text-xs text-base-content/60 font-medium">Margin:</span>
       <select
         value={$editorStore.canvasMargin}
         on:change={handleMarginChange}
@@ -233,21 +233,21 @@
     >
       {#if $editorStore.previewTheme === 'dark'}
         <Moon size={13} class="text-amber-400" />
-        <span class="text-[11px] font-semibold">Dark</span>
+        <span class="text-xs font-semibold">Dark</span>
       {:else}
         <Sun size={13} class="text-amber-500" />
-        <span class="text-[11px] font-semibold">Light</span>
+        <span class="text-xs font-semibold">Light</span>
       {/if}
     </button>
 
     <!-- Save Status Message -->
     {#if saveSuccess}
-      <div class="hidden sm:flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+      <div class="hidden sm:flex items-center gap-1 text-xs text-success">
         <CheckCircle2 size={13} />
         <span>Tersimpan</span>
       </div>
     {:else if isDirty}
-      <span class="hidden sm:inline text-[10px] text-amber-600 dark:text-amber-400 font-medium">Belum disimpan</span>
+      <span class="hidden sm:inline text-xs text-warning font-medium">Belum disimpan</span>
     {/if}
 
     <!-- Save Button -->
@@ -272,7 +272,7 @@
       type="button"
       on:click={() => (isSubmitModalOpen = true)}
       disabled={saving || status === 'pending'}
-      class="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+      class="btn btn-sm btn-primary text-xs font-semibold text-white transition-all flex items-center gap-1.5 cursor-pointer"
     >
       <Send size={13} />
       <span>{status === 'pending' ? 'Menunggu Review' : 'Ajukan Review'}</span>

@@ -1,14 +1,5 @@
 import { writable } from 'svelte/store';
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-export interface Toast {
-  id: string;
-  message: string;
-  title?: string;
-  type: ToastType;
-  duration?: number;
-}
+import type { ToastType, Toast } from '@/types';
 
 const DEFAULT_DURATION = 5000;
 

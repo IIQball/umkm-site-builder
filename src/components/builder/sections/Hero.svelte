@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { editorStore, activeNodeId } from '../stores/editorStore';
+  import { editorStore, activeNodeId, activeSection } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
   import HeroElementToolbar from './hero/HeroElementToolbar.svelte';
 
@@ -8,128 +8,141 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile';
-  $: isTabletView = $editorStore?.viewMode === 'tablet';
-
+  $: isSectionSelected = isActive || $activeSection?.id === sectionId;
   $: tagName = props?.tagName || 'h1';
   $: title = props?.title || 'Selamat datang di toko kami';
   $: subtitle = props?.subtitle || 'Produk berkualitas dengan harga terjangkau';
   $: imageUrl = props?.imageUrl || '';
+  $: imageMode = (props?.imageMode as 'element' | 'background') || 'element';
   $: ctaText = props?.ctaText || 'Lihat Katalog';
-  $: ctaLink = props?.ctaLink || '#catalog';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
   $: nodeStylesMap = props?.nodeStyles || {};
 
   const defaultOrder = ['badge', 'title', 'subtitle', 'image', 'cta'];
-  $: elementOrder =
-    Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-      ? props.elementOrder
-      : defaultOrder;
+  $: elementOrder = Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
+    ? props.elementOrder
+    : defaultOrder;
 
-  let draggedKey: string | null = null;
-  let dropTargetKey: string | null = null;
+  const defaultPositions: Record<string, { x: number; y: number; w: number }> = {
+    badge:    { x: 35, y: 40,  w: 30 },
+    title:    { x: 15, y: 100, w: 70 },
+    subtitle: { x: 20, y: 240, w: 60 },
+    image:    { x: 15, y: 340, w: 70 },
+    cta:      { x: 38, y: 440, w: 24 },
+  };
+
+  let isDraggingNode = false;
   let isResizingNode = false;
-  let resizeStartX = 0;
-  let resizeStartY = 0;
+  let currentKey: string | null = null;
+  let startX = 0;
+  let startY = 0;
+  let isDraggingBg = false;
+  let bgStartX = 0;
+  let bgStartY = 0;
+  
+  $: bgPosX = parseInt(String(styles?.backgroundPositionX ?? '50'), 10) || 50;
+  $: bgPosY = parseInt(String(styles?.backgroundPositionY ?? '50'), 10) || 50;
+
+  let initialNodeX = 0;
+  let initialNodeY = 0;
+  let initialNodeW = 0;
   let resizeTooltip = '';
 
-  const buildNodeStyle = (key: string, defaults: Record<string, string> = {}): string => {
-    const custom = nodeStylesMap[key] || {};
-    const merged = { ...defaults, ...custom };
-    const rules: string[] = [];
-    if (merged.textAlign) rules.push(`text-align: ${merged.textAlign}`);
-    if (merged.color) rules.push(`color: ${merged.color}`);
-    if (merged.fontFamily) {
-      rules.push(`font-family: ${merged.fontFamily}`);
-    } else if (key === 'title' || key === 'heading' || key.includes('title')) {
-      rules.push(`font-family: var(--theme-font-heading, inherit)`);
-    } else {
-      rules.push(`font-family: var(--theme-font-body, inherit)`);
-    }
-    if (merged.fontSize) rules.push(`font-size: ${merged.fontSize}`);
-    if (merged.fontWeight) rules.push(`font-weight: ${merged.fontWeight}`);
-    if (merged.backgroundColor) rules.push(`background-color: ${merged.backgroundColor}`);
-    if (merged.borderRadius) {
-      rules.push(`border-radius: ${merged.borderRadius}`);
-    } else if (key === 'cta' || key.includes('button') || key.includes('btn')) {
-      rules.push(`border-radius: var(--theme-btn-radius, 8px)`);
-    }
-    if (merged.padding) rules.push(`padding: ${merged.padding}`);
-    if (merged.boxShadow && merged.boxShadow !== 'none') rules.push(`box-shadow: ${merged.boxShadow}`);
-    if (merged.marginTop) rules.push(`margin-top: ${merged.marginTop}`);
-    if (merged.marginBottom) rules.push(`margin-bottom: ${merged.marginBottom}`);
-    if (merged.animation && merged.animation !== 'none') {
-      rules.push(`animation: ${merged.animation} 600ms cubic-bezier(0.16, 1, 0.3, 1) both`);
-    }
-    return rules.join('; ');
+  const getNodePos = (key: string) => {
+    const custom = (nodeStylesMap[key] || {}) as Record<string, string | undefined>;
+    const fallback = defaultPositions[key] || { x: 10, y: 10, w: 50 };
+    return {
+      x: custom.left !== undefined ? parseFloat(custom.left) : fallback.x,
+      y: custom.top !== undefined ? parseFloat(custom.top) : fallback.y,
+      w: custom.width !== undefined ? parseFloat(custom.width) : fallback.w,
+    };
   };
 
-  const getNodeHoverClass = (key: string): string => {
-    const custom = nodeStylesMap[key] || {};
-    if (custom.hoverEffect === 'scale') return 'hover:scale-105 transition-transform duration-200';
-    if (custom.hoverEffect === 'lift') return 'hover:-translate-y-1 transition-transform duration-200';
-    if (custom.hoverEffect === 'glow') return 'hover:shadow-blue-500/50 hover:shadow-xl transition-shadow duration-200';
-    return 'transition-all';
-  };
-
-  const handleElementClick = (e: MouseEvent, key: string) => {
-    if (isResizingNode) return;
+  const selectNodeDirectly = (e: Event, key: string) => {
     e.stopPropagation();
+    editorStore.selectSection(sectionId);
     editorStore.selectNode(sectionId, key);
   };
 
-  const handleElementKeydown = (e: KeyboardEvent, key: string) => {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
-      if (activeTag !== 'input' && activeTag !== 'textarea') {
-        e.stopPropagation();
-        e.preventDefault();
-        editorStore.deleteNode(sectionId, key);
-        return;
-      }
-    }
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.stopPropagation();
-      editorStore.selectNode(sectionId, key);
-    }
+  const handleBgPointerDown = (e: PointerEvent) => {
+    if (imageMode !== 'background' || !imageUrl) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.group\\/elem') || target.closest('.resize-handle') || target.closest('.toolbar-btn')) return;
+
+    e.stopPropagation();
+    editorStore.selectSection(sectionId);
+
+    isDraggingBg = true;
+    bgStartX = e.clientX;
+    bgStartY = e.clientY;
+    const initialBgX = bgPosX;
+    const initialBgY = bgPosY;
+
+    const onBgPointerMove = (moveEv: PointerEvent) => {
+      if (!isDraggingBg) return;
+      const dx = moveEv.clientX - bgStartX;
+      const dy = moveEv.clientY - bgStartY;
+
+      // Geser titik fokus background 0% - 100%
+      const newX = Math.max(0, Math.min(100, initialBgX + Math.round(dx / 5)));
+      const newY = Math.max(0, Math.min(100, initialBgY + Math.round(dy / 5)));
+
+      editorStore.updateSectionStyles(sectionId, {
+        backgroundPositionX: `${newX}%`,
+        backgroundPositionY: `${newY}%`,
+      });
+    };
+
+    const onBgPointerUp = () => {
+      isDraggingBg = false;
+      window.removeEventListener('pointermove', onBgPointerMove);
+      window.removeEventListener('pointerup', onBgPointerUp);
+    };
+
+    window.addEventListener('pointermove', onBgPointerMove);
+    window.addEventListener('pointerup', onBgPointerUp);
   };
 
-  const startNodeResize = (e: PointerEvent, key: string, handle: string) => {
+  const handlePointerDown = (e: PointerEvent, key: string) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.resize-handle') || target.closest('.toolbar-btn')) return;
+    
     e.stopPropagation();
-    e.preventDefault();
-    isResizingNode = true;
-    resizeStartX = e.clientX;
-    resizeStartY = e.clientY;
+    
+    editorStore.selectSection(sectionId);
+    editorStore.selectNode(sectionId, key);
 
-    const currentStyle = nodeStylesMap[key] || {};
-    const startFontSize = parseInt(currentStyle.fontSize || (key === 'title' ? '36px' : '16px'), 10) || 16;
-    const startRadius = parseInt(currentStyle.borderRadius || '12px', 10) || 12;
+    isDraggingNode = true;
+    currentKey = key;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const pos = getNodePos(key);
+    initialNodeX = pos.x;
+    initialNodeY = pos.y;
 
     const onPointerMove = (moveEv: PointerEvent) => {
-      const deltaX = moveEv.clientX - resizeStartX;
-      const deltaY = moveEv.clientY - resizeStartY;
+      if (!isDraggingNode || !currentKey) return;
+      const dx = moveEv.clientX - startX;
+      const dy = moveEv.clientY - startY;
 
-      if (handle === 'se' || handle === 'sw') {
-        if (key === 'title' || key === 'subtitle' || key === 'badge') {
-          const newSize = Math.max(12, Math.min(64, startFontSize + Math.round(deltaY / 3)));
-          resizeTooltip = `Font: ${newSize}px`;
-          editorStore.updateNodeStyles(sectionId, key, { fontSize: `${newSize}px` });
-        } else if (key === 'cta') {
-          const newRadius = Math.max(0, Math.min(48, startRadius + Math.round(deltaX / 2)));
-          resizeTooltip = `Radius: ${newRadius}px`;
-          editorStore.updateNodeStyles(sectionId, key, { borderRadius: `${newRadius}px` });
-        }
-      } else if (handle === 'e' || handle === 'w') {
-        const delta = Math.abs(deltaX);
-        const newMaxW = Math.max(200, Math.min(900, 450 + delta * 2));
-        resizeTooltip = `Max-Width: ${newMaxW}px`;
-        editorStore.updateNodeStyles(sectionId, key, { maxWidth: `${newMaxW}px` });
-      }
+      const container = document.getElementById(`section-hero-${sectionId}`);
+      const containerWidth = container?.offsetWidth || 1000;
+      const dxPercent = (dx / containerWidth) * 100;
+
+      const newX = Math.max(0, Math.min(95, initialNodeX + dxPercent));
+      const newY = Math.max(0, initialNodeY + dy);
+
+      editorStore.updateNodeStyles(sectionId, currentKey, {
+        left: `${newX.toFixed(1)}%`,
+        top: `${newY.toFixed(0)}px`,
+        position: 'absolute',
+      });
     };
 
     const onPointerUp = () => {
-      isResizingNode = false;
-      resizeTooltip = '';
+      isDraggingNode = false;
+      currentKey = null;
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
     };
@@ -138,158 +151,165 @@
     window.addEventListener('pointerup', onPointerUp);
   };
 
-  const onDragStart = (e: DragEvent, key: string) => {
-    if (!isActive || isResizingNode) return;
-    draggedKey = key;
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', key);
+  const handleKeydown = (e: KeyboardEvent, key: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      editorStore.selectSection(sectionId);
+      editorStore.selectNode(sectionId, key);
     }
   };
 
-  const onDragOver = (e: DragEvent, key: string) => {
-    if (!draggedKey || draggedKey === key) return;
+  const startNodeResize = (e: PointerEvent, key: string, handle: string) => {
+    e.stopPropagation();
     e.preventDefault();
-    dropTargetKey = key;
+    isResizingNode = true;
+    currentKey = key;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const pos = getNodePos(key);
+    initialNodeW = pos.w;
+
+    const onPointerMove = (moveEv: PointerEvent) => {
+      const dx = moveEv.clientX - startX;
+      const container = document.getElementById(`section-hero-${sectionId}`);
+      const containerWidth = container?.offsetWidth || 1000;
+      const dxPercent = (dx / containerWidth) * 100;
+
+      let newW = initialNodeW;
+      if (handle.includes('e')) newW = Math.max(10, Math.min(100, initialNodeW + dxPercent));
+      if (handle.includes('w')) newW = Math.max(10, Math.min(100, initialNodeW - dxPercent));
+
+      resizeTooltip = `Width: ${newW.toFixed(0)}%`;
+      editorStore.updateNodeStyles(sectionId, key, { width: `${newW.toFixed(1)}%` });
+    };
+
+    const onPointerUp = () => {
+      isResizingNode = false;
+      resizeTooltip = '';
+      currentKey = null;
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
   };
 
-  const onDragLeave = () => { dropTargetKey = null; };
-
-  const onDrop = (e: DragEvent, targetKey: string) => {
-    e.preventDefault();
-    if (!draggedKey || draggedKey === targetKey) { draggedKey = null; dropTargetKey = null; return; }
-    const list = [...elementOrder];
-    const fromIdx = list.indexOf(draggedKey);
-    const toIdx = list.indexOf(targetKey);
-    if (fromIdx !== -1 && toIdx !== -1) {
-      const [item] = list.splice(fromIdx, 1);
-      list.splice(toIdx, 0, item);
-      editorStore.updateSectionProps(sectionId, { elementOrder: list });
-    }
-    draggedKey = null;
-    dropTargetKey = null;
-  };
-
-  const moveElement = (key: string, direction: 'up' | 'down') => {
-    const list = [...elementOrder];
-    const idx = list.indexOf(key);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= list.length) return;
-    const temp = list[idx];
-    list[idx] = list[targetIdx];
-    list[targetIdx] = temp;
-    editorStore.updateSectionProps(sectionId, { elementOrder: list });
+  const buildCustomStyles = (key: string) => {
+    const custom = nodeStylesMap[key] || {};
+    const rules: string[] = [];
+    if (custom.color) rules.push(`color: ${custom.color}`);
+    if (custom.fontSize) rules.push(`font-size: ${custom.fontSize}`);
+    if (custom.textAlign) rules.push(`text-align: ${custom.textAlign}`);
+    if (custom.backgroundColor) rules.push(`background-color: ${custom.backgroundColor}`);
+    if (custom.borderRadius) rules.push(`border-radius: ${custom.borderRadius}`);
+    return rules.join('; ');
   };
 </script>
 
-<div class="max-w-4xl mx-auto flex flex-col items-center w-full">
-  {#each elementOrder as key, index (key)}
-    {@const isElementActive = isActive && $activeNodeId === key}
-    <div
-      role="button"
-      tabindex="0"
-      aria-label={`Pilih elemen ${key}`}
-      draggable={isActive}
-      on:click={(e) => handleElementClick(e, key)}
-      on:keydown={(e) => handleElementKeydown(e, key)}
-      on:dragstart={(e) => onDragStart(e, key)}
-      on:dragover={(e) => onDragOver(e, key)}
-      on:dragleave={onDragLeave}
-      on:drop={(e) => onDrop(e, key)}
-      class={`relative w-full flex flex-col items-center group/elem transition-all cursor-pointer ${
-        isElementActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 rounded-lg p-1.5 z-30'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60 rounded-lg p-1'
-      } ${dropTargetKey === key ? 'border-t-2 border-blue-500 py-1' : ''} ${draggedKey === key ? 'opacity-40' : ''}`}
-    >
-      {#if isElementActive}
-        <HeroElementToolbar
-          nodeKey={key}
-          {index}
-          total={elementOrder.length}
-          {sectionId}
-          {isResizingNode}
-          {resizeTooltip}
-          onMoveElement={moveElement}
-          onStartResize={startNodeResize}
-        />
-      {/if}
+<!-- Hero Section Container -->
+<section
+  id={`section-hero-${sectionId}`}
+  class="relative w-full !p-0 !m-0 overflow-hidden select-none outline-none block"
+  style="min-height: {styles?.minHeight || '650px'}; height: {styles?.height || 'auto'}; {styles?.backgroundColor ? `background-color: ${styles.backgroundColor};` : ''}"
+  on:pointerdown={handleBgPointerDown}
+>
+  <!-- Background Image Mode: Full edge-to-edge & Draggable Focus Position -->
+  {#if imageMode === 'background' && imageUrl}
+    <div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+      <img
+        src={imageUrl}
+        alt="Hero Background"
+        class="w-full h-full object-cover select-none pointer-events-none"
+        style="object-position: {bgPosX}% {bgPosY}%;"
+      />
+      <!-- Overlay transparan gelap agar teks tetap terbaca -->
+      <div class="absolute inset-0 bg-slate-950/40 pointer-events-none"></div>
+    </div>
+  {/if}
 
-      <!-- Badge -->
-      {#if key === 'badge'}
-        {#if badgeText}
-          <div
-            style={buildNodeStyle('badge')}
-            class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] sm:text-xs font-semibold border border-blue-200/80 mb-3 shadow-sm max-w-full truncate"
-          >
+  <!-- Background Backdrop Click Handler -->
+  <button
+    type="button"
+    tabindex="-1"
+    aria-label="Pilih Hero Section"
+    on:click|stopPropagation={() => editorStore.selectSection(sectionId)}
+    class="absolute inset-0 w-full h-full bg-transparent border-0 p-0 m-0 cursor-move focus:outline-none z-0"
+  ></button>
+
+  {#each elementOrder as key (key)}
+    <!-- Jika imageMode === 'background', sembunyikan rendering elemen image di canvas absolute -->
+    {#if !(key === 'image' && imageMode === 'background')}
+      {@const isElementActive = isSectionSelected && $activeNodeId === key}
+      {@const pos = getNodePos(key)}
+
+      <div
+        role="button"
+        tabindex="0"
+        aria-label={`Elemen ${key}`}
+        on:pointerdown|capture={(e) => handlePointerDown(e, key)}
+        on:click|capture={(e) => selectNodeDirectly(e, key)}
+        on:keydown={(e) => handleKeydown(e, key)}
+        style="left: {pos.x}%; top: {pos.y}px; width: {pos.w}%; position: absolute;"
+        class="group/elem transition-shadow cursor-move z-10 {
+          isElementActive
+            ? 'ring-2 ring-blue-500 rounded-lg shadow-lg bg-blue-500/5 !z-30'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60 rounded-lg'
+        }"
+      >
+        {#if isElementActive}
+          <HeroElementToolbar
+            nodeKey={key}
+            index={elementOrder.indexOf(key)}
+            total={elementOrder.length}
+            {sectionId}
+            {isResizingNode}
+            {resizeTooltip}
+            onMoveElement={() => {}}
+            onStartResize={startNodeResize}
+          />
+        {/if}
+
+        <!-- Badge -->
+        {#if key === 'badge' && badgeText}
+          <div style={buildCustomStyles('badge')} class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 shadow-sm w-full truncate pointer-events-none">
             <span>{badgeText}</span>
           </div>
-        {/if}
 
-      <!-- Title -->
-      {:else if key === 'title'}
-        <svelte:element
-          this={tagName || 'h1'}
-          style={buildNodeStyle('title', {
-            color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#f8fafc' : '#0f172a'),
-            fontWeight: '800',
-            textAlign: styles?.textAlign || 'center',
-            marginBottom: '12px',
-          })}
-          class={`font-extrabold tracking-tight leading-tight w-full max-w-3xl box-border ${
-            isMobileView ? 'text-2xl sm:text-3xl' : isTabletView ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-4xl lg:text-5xl'
-          }`}
-        >
-          {title}
-        </svelte:element>
-
-      <!-- Subtitle -->
-      {:else if key === 'subtitle'}
-        <p
-          style={buildNodeStyle('subtitle', {
-            color: styles?.color || (styles?.backgroundColor && parseInt(styles.backgroundColor.replace('#',''), 16) < 0x888888 ? '#cbd5e1' : '#475569'),
-            textAlign: styles?.textAlign || 'center',
-            marginBottom: '20px',
-          })}
-          class={`max-w-2xl leading-relaxed w-full opacity-90 box-border ${
-            isMobileView ? 'text-xs sm:text-sm' : isTabletView ? 'text-sm sm:text-base' : 'text-xs sm:text-base lg:text-lg'
-          }`}
-        >
-          {subtitle}
-        </p>
-
-      <!-- Banner Image -->
-      {:else if key === 'image'}
-        {#if imageUrl}
-          <div
-            style={buildNodeStyle('image')}
-            class="mb-6 w-full max-w-2xl overflow-hidden rounded-xl sm:rounded-2xl shadow-sm border border-slate-200/80 box-border"
+        <!-- Title -->
+        {:else if key === 'title'}
+          <svelte:element
+            this={tagName || 'h1'}
+            style="background-color: transparent; {buildCustomStyles('title')}"
+            class="font-black tracking-tight leading-tight w-full break-words text-2xl sm:text-4xl lg:text-5xl {imageMode === 'background' && !nodeStylesMap?.title?.color ? 'text-white' : 'text-slate-900 dark:text-white'} pointer-events-none"
           >
-            <img src={imageUrl} alt="Banner Produk Toko" class="w-full h-auto max-h-[260px] sm:max-h-[360px] lg:max-h-[440px] object-cover" />
-          </div>
-        {/if}
+            {title}
+          </svelte:element>
+          
+        <!-- Subtitle -->
+        {:else if key === 'subtitle'}
+          <p style={buildCustomStyles('subtitle')} class="leading-relaxed w-full break-words text-slate-600 dark:text-slate-300 text-sm sm:text-base pointer-events-none">
+            {subtitle}
+          </p>
 
-      <!-- CTA Button -->
-      {:else if key === 'cta'}
-        <div class="mb-2 w-full flex justify-center px-2">
-          <a
-            href={ctaLink}
-            on:click|preventDefault
-            style={buildNodeStyle('cta', {
-              backgroundColor: 'var(--theme-primary, #3b82f6)',
-              color: '#ffffff',
-              borderRadius: 'var(--theme-btn-radius, 8px)',
-              fontWeight: '600',
-            })}
-            class={`${
-              isMobileView ? 'w-full' : 'w-full sm:w-auto'
-            } inline-flex items-center justify-center text-center px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold rounded-xl text-white shadow-md shadow-blue-600/20 active:scale-[0.98] pointer-events-auto cursor-pointer ${getNodeHoverClass('cta')}`}
+        <!-- Image (Mode Elemen Bebas) -->
+        {:else if key === 'image' && imageUrl}
+          <div class="w-full overflow-hidden rounded-xl shadow-sm border border-slate-200 pointer-events-none">
+            <img src={imageUrl} alt="Banner" class="w-full h-auto object-cover max-h-[500px]" />
+          </div>
+
+        <!-- CTA Button -->
+        {:else if key === 'cta'}
+          <div
+            style={buildCustomStyles('cta')}
+            class="w-full inline-flex items-center justify-center text-center px-6 py-3 font-semibold rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-all pointer-events-none"
           >
             {ctaText}
-          </a>
-        </div>
-      {/if}
-    </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
   {/each}
-</div>
+</section>

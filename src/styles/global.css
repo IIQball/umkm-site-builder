@@ -316,4 +316,46 @@ a:hover {
   color: #fbbf24 !important;
 }
 
+/* Border Accent Helper Classes */
+.border-accent-primary {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-primary) !important;
+}
+.border-accent-success {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-success) !important;
+}
+.border-accent-warning {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-warning) !important;
+}
+.border-accent-error {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-error) !important;
+}
+.border-accent-muted {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-text-light) !important;
+}
 
+/* Custom Text Colors */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+.text-success {
+  color: var(--color-success) !important;
+}
+.text-error {
+  color: var(--color-error) !important;
+}
+.text-warning {
+  color: var(--color-warning) !important;
+}
+.text-info {
+  color: var(--color-info) !important;
+}

@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-21 by designer-payout-polling session
+Status: LIVE · Updated: 2026-08-22 by services-error-and-validation-standardization session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,9 +11,21 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Implemented real-time designer payout status polling via new status GET API and smart interval check with pulsing animations. Fixed Xendit Disbursement webhook callback parsing and payout request status mapping. Upgraded database drivers to support WS Neon transactions. Improved tables and charts layout text wrapping on the designer wallet. `bun run type-check`: 0 errors. `bun test` / `vitest`: 178/178 pass across 27 test files.
+Standardized all error handling and validation logic across the Finance and Templates service layers, enforcing unified `AppError` throws and Zod-based `validate` checks. `bun run type-check`: 0 errors. `bun test`: 188/188 pass across 29 test files.
 
 ## Last session did
+
+- **Service Layer Exceptions & Validation Standardization:**
+  - Standardized `payout.service.ts` to replace generic `Error` with `AppError` mapping custom keys (`'PAYOUT_NOT_FOUND'`, `'BANK_ACCOUNT_NOT_FOUND'`, `'WALLET_NOT_FOUND'`, `'XENDIT_DISBURSEMENT_ERROR'`).
+  - Refactored `template.service.ts` to use `validate` helper for template configs and throws structured `FORBIDDEN` and `NOT_FOUND` exceptions.
+  - Standardized `wallet.service.ts` to throw custom `'INVALID_AMOUNT'` and `'INSUFFICIENT_BALANCE'` error codes with localized messages.
+  - Added range validations for platform setting rates and delay days inside `commission.service.ts` (`'INVALID_PERCENTAGE'`, `'INVALID_DELAY_DAYS'`).
+  - Updated all unit and integration test assertions to align with new error structures.
+  - Refactored API routes and `.astro` template pages to reuse centralized `formatCurrency` helper from `@/lib/utils`.
+  - Moved inline Zod validation schemas (`PurchaseSchema`, `SubmitReviewSchema`) and types (`PlatformSettings`, `Toast`, `ToastType`) to centralized locations (`src/schemas/` and `src/types/`).
+  - Refactored designer payout and status API routes to fully utilize standard `handleApiRoute` and `validate` handlers.
+  - Cleaned up `any` type annotations in catch blocks (e.g. `StoreManager.svelte`) and initial templates array declarations.
+  - Standardized CSS classes and design tokens across all components in transactions, templates, and platform settings. Added `.border-accent-*` and `.text-*` utility variables in `global.css` and replaced inline ad-hoc classes with daisyUI variables (`btn-primary`, `alert-success`, etc.).
 
 - **Designer Payout Status Polling:**
   - `src/pages/api/designer/payout/status.ts` (NEW) — GET status API endpoint returning payouts history and current wallet balance.

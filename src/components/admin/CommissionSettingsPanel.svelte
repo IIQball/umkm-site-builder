@@ -73,7 +73,7 @@
   <!-- Page Header -->
   <div>
     <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Pengaturan Komisi Platform</h1>
-    <p class="text-[13px] text-secondary mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
+    <p class="text-sm text-secondary mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
   </div>
 
   <!-- Stat Cards Grid -->
@@ -83,28 +83,28 @@
       value="{platformFeePercentage}%"
       icon="percent"
       iconCls="icon-wrapper-indigo"
-      borderAccent="border-t-2 border-t-indigo-400"
+      borderAccent="border-accent-primary"
     />
     <StatCard
       label="Bagian Desainer"
       value="{designerShare}%"
       icon="brush"
       iconCls="icon-wrapper-emerald"
-      borderAccent="border-t-2 border-t-emerald-400"
+      borderAccent="border-accent-success"
     />
     <StatCard
       label="Penahanan Dana"
       value="{settlementDelayDays} Hari"
       icon="hourglass_top"
       iconCls="icon-wrapper-amber"
-      borderAccent="border-t-2 border-t-amber-400"
+      borderAccent="border-accent-warning"
     />
   </div>
 
   <!-- Alert Feedback -->
   {#if feedback}
     <div 
-      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3.5 border transition-all animate-fade-in shadow-sm {feedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}"
+      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3.5 border transition-all animate-fade-in shadow-sm {feedback.type === 'success' ? 'alert-success' : 'alert-error'}"
     >
       <span class="material-symbols-outlined text-[18px] flex-shrink-0">
         {feedback.type === 'success' ? 'check_circle' : 'error'}
@@ -116,18 +116,18 @@
   <!-- Form Card -->
   <div class="bg-card rounded-2xl border border-light p-6 shadow-sm space-y-6">
     <div class="flex items-center gap-3 pb-4 border-b border-light">
-      <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+      <div class="w-10 h-10 rounded-xl icon-wrapper-indigo flex items-center justify-center flex-shrink-0">
         <span class="material-symbols-outlined text-xl">percent</span>
       </div>
       <div>
         <h2 class="font-bold text-sm text-main">Potongan Fee Platform</h2>
-        <p class="text-[11px] text-muted mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
+        <p class="text-xs text-muted mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
       </div>
     </div>
 
     <form on:submit|preventDefault={handleSave} class="space-y-6">
       <div class="form-control w-full">
-        <label for="platformFeePercentage" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">
+        <label for="platformFeePercentage" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
           Persentase Fee Platform
         </label>
         <div class="relative flex items-center">
@@ -139,19 +139,19 @@
             step="1"
             bind:value={platformFeePercentage}
             disabled={isLoading}
-            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-indigo-500 rounded-xl text-sm font-semibold focus:outline-none transition-colors"
+            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-sm font-semibold focus:outline-none transition-colors"
             placeholder="30"
           />
           <span class="absolute right-4 font-bold text-sm text-muted select-none">%</span>
         </div>
-        <p class="text-[11px] text-muted leading-relaxed mt-2">
-          Persentase potongan fee yang diambil platform dari setiap penjualan template berbayar. Sisa persentase (<strong class="text-indigo-600 dark:text-indigo-400 font-bold">{designerShare}%</strong>) otomatis masuk ke dompet desainer.
+        <p class="text-xs text-muted leading-relaxed mt-2">
+          Persentase potongan fee yang diambil platform dari setiap penjualan template berbayar. Sisa persentase (<strong class="text-primary font-bold">{designerShare}%</strong>) otomatis masuk ke dompet desainer.
         </p>
       </div>
 
       <!-- Settlement Delay Days Input -->
       <div class="form-control w-full">
-        <label for="settlementDelayDays" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">
+        <label for="settlementDelayDays" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
           Durasi Penahanan Settlement (Hari)
         </label>
         <div class="relative flex items-center">
@@ -162,12 +162,12 @@
             step="1"
             bind:value={settlementDelayDays}
             disabled={isLoading}
-            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-indigo-500 rounded-xl text-sm font-semibold focus:outline-none transition-colors"
+            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-sm font-semibold focus:outline-none transition-colors"
             placeholder="7"
           />
           <span class="absolute right-4 font-bold text-xs text-muted select-none">Hari</span>
         </div>
-        <p class="text-[11px] text-muted leading-relaxed mt-2">
+        <p class="text-xs text-muted leading-relaxed mt-2">
           Jumlah hari dana penjualan ditahan sebelum ditambahkan ke saldo aktif yang dapat ditarik oleh desainer.
         </p>
       </div>
@@ -175,14 +175,14 @@
       <div class="pt-2">
         <button
           type="submit"
-          class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold rounded-xl px-5 py-2.5 shadow-sm shadow-indigo-600/25 transition-colors active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed min-w-[160px]"
+          class="btn btn-primary text-sm font-bold rounded-xl px-5 py-2.5 transition-all min-w-[160px]"
           disabled={isLoading}
         >
           {#if isLoading}
             <span class="loading loading-spinner loading-xs flex-shrink-0"></span>
             <span>Menyimpan...</span>
           {:else}
-            <span class="material-symbols-outlined text-[18px] flex-shrink-0">save</span>
+            <span class="material-symbols-outlined text-[18px] flex-shrink-0 icon-filled">save</span>
             <span>Simpan Pengaturan</span>
           {/if}
         </button>

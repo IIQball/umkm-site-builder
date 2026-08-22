@@ -1,42 +1,19 @@
 import type { APIRoute } from 'astro';
-import { getPlatformFeePercentage, DEFAULT_PLATFORM_FEE_PERCENTAGE } from '@/services/finance';
+import { getPlatformFeePercentage } from '@/services/finance';
+import { handleApiRoute, jsonSuccess } from '@/lib/utils';
 
 export const GET: APIRoute = async (): Promise<Response> => {
-  try {
+  return handleApiRoute(async () => {
     const platformFeePercentage = await getPlatformFeePercentage();
     const designerPercentage = Math.max(0, 100 - platformFeePercentage);
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        success: true,
-        data: {
-          platformFeePercentage,
-          designerPercentage,
-        },
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, max-age=0',
-        },
-      }
-    );
-  } catch {
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        success: true,
-        data: {
-          platformFeePercentage: DEFAULT_PLATFORM_FEE_PERCENTAGE,
-          designerPercentage: 100 - DEFAULT_PLATFORM_FEE_PERCENTAGE,
-        },
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
+    const res = jsonSuccess({
+      platformFeePercentage,
+      designerPercentage,
+    }, 'Informasi split komisi berhasil diambil');
+
+    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    return res;
+  });
 };
+

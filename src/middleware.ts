@@ -24,7 +24,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   
   // Redirect designer from general entry point /dashboard to designer templates
   if ((pathname === '/dashboard' || pathname === '/dashboard/') && user?.role === 'designer') {
-    return context.redirect('/designer/templates');
+    return context.redirect('/designer/wallet');
   }
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan

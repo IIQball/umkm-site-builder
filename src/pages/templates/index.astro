@@ -1,29 +1,45 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getPublicTemplates } from '@/services';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { db } from '@/lib/db/client';
-import { userTemplates } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import TemplateCardAction from '@/components/public/TemplateCardAction.svelte';
-
-export const prerender = false;
+import { db } from '@/lib/db/client';
+import { templates, userTemplates, designers, users } from '@/db/schema';
+import { eq, and, isNull, desc } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { formatCurrency } from '@/lib/utils/format';
 
 const currentUser = await getAuthenticatedUser(Astro.request);
-const ownedTemplateIds = currentUser
-  ? (
-      await db
-        .select({ templateId: userTemplates.templateId })
-        .from(userTemplates)
-        .where(eq(userTemplates.userId, currentUser.id))
-    ).map((ut) => ut.templateId)
-  : [];
+const isDesigner = currentUser?.role === 'designer';
 
-const templatesList = await getPublicTemplates();
+// Fetch all templates (only approved and published ones for marketplace)
+const records = await db
+  .select({
+    id: templates.id,
+    name: templates.name,
+    description: templates.description,
+    thumbnailUrl: templates.thumbnailUrl,
+    price: templates.price,
+    status: templates.status,
+    createdAt: templates.createdAt,
+    designerName: users.name,
+  })
+  .from(templates)
+  .leftJoin(designers, eq(templates.designerId, designers.userId))
+  .leftJoin(users, eq(designers.userId, users.id))
+  .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+  .orderBy(desc(templates.createdAt));
 
-const formatPrice = (price: number): string => {
-  if (!price || price === 0) return 'Gratis';
-  return `Rp ${price.toLocaleString('id-ID')}`;
+// Fetch owned template IDs if logged in
+let ownedTemplateIds: string[] = [];
+if (currentUser) {
+  const owned = await db
+    .select({ templateId: userTemplates.templateId })
+    .from(userTemplates)
+    .where(eq(userTemplates.userId, currentUser.id));
+  ownedTemplateIds = owned.map((o) => o.templateId);
+}
+
+const formatPrice = (price: number) => {
+  return price === 0 ? 'Gratis' : formatCurrency(price);
 };
 
 const getStatusBadge = (status: string) => {
@@ -31,22 +47,22 @@ const getStatusBadge = (status: string) => {
     case 'approved':
       return {
         label: 'Siap Pakai',
-        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        className: 'badge-custom-emerald',
       };
     case 'pending':
       return {
         label: 'Menunggu Review',
-        className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+        className: 'badge-custom-amber',
       };
     case 'rejected':
       return {
         label: 'Perlu Revisi',
-        className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+        className: 'badge-custom-rose',
       };
     default:
       return {
         label: 'Draft Desainer',
-        className: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+        className: 'badge-custom-slate',
       };
   }
 };
@@ -58,48 +74,48 @@ const getStatusBadge = (status: string) => {
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-base-200 pb-8">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-3 border border-blue-200 dark:border-blue-800/60 shadow-sm">
-            <span>Marketplace Template Desainer</span>
+          <div class="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-primary/25">
+            <span class="material-symbols-outlined text-xs">storefront</span>
+            Template Marketplace
           </div>
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-base-content">
-            Katalog Template Website UMKM
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-base-content leading-tight">
+            Desain Profesional untuk Toko Online Anda
           </h1>
-          <p class="text-xs sm:text-sm text-base-content/70 mt-2 max-w-2xl leading-relaxed">
-            Pilih desain landing page dan toko online profesional siap pakai untuk memaksimalkan konversi penjualan bisnis lokal Anda.
+          <p class="text-base-content/75 text-sm mt-2 max-w-2xl leading-relaxed">
+            Pilih template buatan desainer handal kami untuk mendongkrak omzet penjualan produk digital & fisik UMKM Anda secara instan.
           </p>
         </div>
       </div>
 
       <!-- Templates Grid -->
-      {templatesList.length === 0 ? (
-        <div class="text-center py-16 px-4 bg-base-200/40 rounded-2xl border border-dashed border-base-300 max-w-md mx-auto">
-          <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3 border border-blue-100 dark:border-blue-900/50">
-            <span class="material-symbols-outlined text-2xl">layers</span>
+      {records.length === 0 ? (
+        <div class="flex flex-col items-center justify-center py-20 text-center bg-base-200/50 rounded-2xl border border-base-content/10">
+          <div class="w-16 h-16 rounded-full bg-base-300 flex items-center justify-center mb-4 text-base-content/50">
+            <span class="material-symbols-outlined text-3xl">layers_clear</span>
           </div>
-          <h3 class="text-base font-bold text-base-content mb-1">Belum Ada Template Terdaftar</h3>
-          <p class="text-xs text-base-content/60">
-            Saat ini belum ada template yang tersedia di katalog.
+          <h3 class="text-lg font-bold text-base-content">Belum Ada Template</h3>
+          <p class="text-sm text-base-content/60 mt-1 max-w-sm">
+            Saat ini belum ada template yang siap dipublikasikan ke pasar. Silakan hubungi tim administrasi.
           </p>
         </div>
       ) : (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templatesList.map((tpl) => {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {records.map((tpl) => {
             const badge = getStatusBadge(tpl.status);
-            const isDesigner = currentUser?.role === 'designer';
             return (
-              <div class="card bg-base-100 border border-base-200/80 hover:border-blue-500/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group">
-                <!-- Thumbnail / Header Preview -->
+              <div class="card bg-base-100 border border-base-content/10 shadow-lg hover:shadow-xl hover:border-base-content/20 transition-all rounded-2xl overflow-hidden flex flex-col group">
+                <!-- Thumbnail -->
                 <div class="relative h-48 w-full bg-slate-900 flex items-center justify-center overflow-hidden border-b border-base-200/60">
                   {tpl.thumbnailUrl ? (
                     <img
                       src={tpl.thumbnailUrl}
                       alt={tpl.name}
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                     />
                   ) : (
                     <div class="flex flex-col items-center justify-center text-slate-400 gap-2 p-6 text-center">
                       <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700/60 flex items-center justify-center text-slate-300">
-                        <span class="material-symbols-outlined text-xl">storefront</span>
+                        <span class="material-symbols-outlined">palette</span>
                       </div>
                       <span class="text-xs font-medium text-slate-300">Preview Desain Toko</span>
                     </div>
@@ -107,7 +123,7 @@ const getStatusBadge = (status: string) => {
 
                   <!-- Status Badge -->
                   <div class="absolute top-3 right-3">
-                    <span class={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-sm backdrop-blur-md ${badge.className}`}>
+                    <span class={`badge-custom backdrop-blur-md ${badge.className}`}>
                       {badge.label}
                     </span>
                   </div>
@@ -121,7 +137,7 @@ const getStatusBadge = (status: string) => {
                       <h2 class="text-base font-bold text-base-content line-clamp-1 group-hover:text-primary transition-colors">
                         {tpl.name}
                       </h2>
-                      <span class="text-sm font-extrabold text-blue-600 dark:text-blue-400 flex-shrink-0">
+                      <span class="text-sm font-extrabold text-primary flex-shrink-0">
                         {formatPrice(tpl.price)}
                       </span>
                     </div>
@@ -135,21 +151,21 @@ const getStatusBadge = (status: string) => {
                   <div>
                     <!-- Designer Info -->
                     <div class="flex items-center gap-2 pt-3 border-t border-base-200/70 mb-3.5">
-                      <div class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold text-[10px] flex items-center justify-center">
-                        {tpl.designerName.charAt(0).toUpperCase()}
+                      <div class="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">
+                        {tpl.designerName ? tpl.designerName.charAt(0).toUpperCase() : 'D'}
                       </div>
                       <span class="text-xs text-base-content/70 font-medium truncate">
-                        {tpl.designerName}
+                        {tpl.designerName || 'Desainer'}
                       </span>
                     </div>
 
-                     <!-- Action Buttons -->
+                    <!-- Action Buttons -->
                     <div class="flex flex-col gap-2 pt-1">
                       <a
                         href={`/builder/preview/${tpl.id}`}
                         class="btn btn-outline border-base-300 hover:bg-base-200 btn-sm rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 w-full"
                       >
-                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                        <span class="material-symbols-outlined text-base">visibility</span>
                         <span>Pratinjau Langsung</span>
                       </a>
                       {!isDesigner && (

@@ -97,7 +97,7 @@
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
       <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Kurasi & Review Template</h1>
-      <p class="text-[13px] text-secondary mt-1">Tinjau dan berikan persetujuan untuk template desainer</p>
+      <p class="text-sm text-secondary mt-1">Tinjau dan berikan persetujuan untuk template desainer</p>
     </div>
   </div>
 
@@ -106,7 +106,7 @@
       <button
         type="button"
         on:click={() => handleTabChange(tab)}
-        class="px-3.5 py-1.5 rounded-lg text-[12px] font-bold whitespace-nowrap transition-all cursor-pointer {activeTab === tab ? 'bg-indigo-600 text-white shadow-sm' : 'text-secondary hover:text-main hover:bg-card'}"
+        class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer {activeTab === tab ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:text-main hover:bg-card'}"
       >
         {tab === 'pending' ? 'Perlu Ditinjau' : tab === 'approved' ? 'Disetujui' : tab === 'rejected' ? 'Ditolak' : 'Semua'}
       </button>
@@ -115,27 +115,27 @@
 
   {#if isLoading}
     <div class="flex justify-center items-center py-16 bg-card rounded-2xl border border-light shadow-sm">
-      <span class="loading loading-spinner loading-lg text-indigo-600 dark:text-indigo-400"></span>
+      <span class="loading loading-spinner loading-lg text-primary"></span>
     </div>
   {:else if filteredTemplates.length === 0}
     <div class="bg-card border border-light rounded-2xl py-16 px-8 flex flex-col items-center text-center shadow-sm">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4">
-        <span class="material-symbols-outlined text-[28px] text-muted">inbox</span>
+        <span class="material-symbols-outlined text-3xl text-muted">inbox</span>
       </div>
-      <h4 class="text-[13px] font-bold text-main mb-1.5">Tidak Ada Template</h4>
-      <p class="text-[12px] text-secondary max-w-xs leading-relaxed">Belum ada template dalam kategori status ini.</p>
+      <h4 class="text-sm font-bold text-main mb-1.5">Tidak Ada Template</h4>
+      <p class="text-xs text-secondary max-w-xs leading-relaxed">Belum ada template dalam kategori status ini.</p>
     </div>
   {:else}
     <div class="overflow-x-auto bg-card rounded-2xl border border-light shadow-sm">
       <table class="w-full min-w-[640px]">
         <thead>
           <tr class="bg-nested/60 border-b border-light">
-            <th class="text-left text-[10px] font-extrabold uppercase tracking-widest text-muted px-6 py-3">Template</th>
-            <th class="text-left text-[10px] font-extrabold uppercase tracking-widest text-muted px-4 py-3">Desainer</th>
-            <th class="text-left text-[10px] font-extrabold uppercase tracking-widest text-muted px-4 py-3">Harga</th>
-            <th class="text-left text-[10px] font-extrabold uppercase tracking-widest text-muted px-4 py-3">Tanggal Pengajuan</th>
-            <th class="text-left text-[10px] font-extrabold uppercase tracking-widest text-muted px-4 py-3">Status</th>
-            <th class="text-right text-[10px] font-extrabold uppercase tracking-widest text-muted px-6 py-3">Aksi</th>
+            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Template</th>
+            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Desainer</th>
+            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Harga</th>
+            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Tanggal Pengajuan</th>
+            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Status</th>
+            <th class="text-right text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-light/50">
@@ -153,35 +153,35 @@
                     {/if}
                   </div>
                   <div>
-                    <p class="font-bold text-[12px] text-main">{item.name}</p>
-                    <p class="text-[10px] text-muted line-clamp-1 max-w-[200px]">{item.description || 'Tidak ada deskripsi'}</p>
+                    <p class="font-bold text-xs text-main">{item.name}</p>
+                    <p class="text-xs text-muted line-clamp-1 max-w-[200px]">{item.description || 'Tidak ada deskripsi'}</p>
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-3.5 text-[12px]">
+              <td class="px-4 py-3.5 text-xs">
                 <p class="font-semibold text-main">{item.designerName || 'Desainer'}</p>
-                <p class="text-[10px] text-muted">{item.designerEmail || '-'}</p>
+                <p class="text-xs text-muted">{item.designerEmail || '-'}</p>
               </td>
-              <td class="px-4 py-3.5 font-mono text-[12px] font-bold text-main">
+              <td class="px-4 py-3.5 font-mono text-xs font-bold text-main">
                 {item.price === 0 ? 'Gratis' : formatIdr(item.price)}
               </td>
-              <td class="px-4 py-3.5 text-[12px] text-muted">
+              <td class="px-4 py-3.5 text-xs text-muted">
                 {formatDate(item.createdAt)}
               </td>
               <td class="px-4 py-3.5">
                 {#if item.status === 'pending'}
-                  <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                  <span class="badge-custom badge-custom-amber text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-warning flex-shrink-0"></span>
                     PENDING
                   </span>
                 {:else if item.status === 'approved'}
-                  <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <span class="badge-custom badge-custom-emerald text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0"></span>
                     APPROVED
                   </span>
                 {:else}
-                  <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-full px-2 py-0.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></span>
+                  <span class="badge-custom badge-custom-rose text-[10px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-error flex-shrink-0"></span>
                     REJECTED
                   </span>
                 {/if}
@@ -192,23 +192,23 @@
                     href={`/builder/preview/${item.id}`} 
                     target="_blank" 
                     rel="noreferrer" 
-                    class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
                   >
-                    <span class="material-symbols-outlined text-[15px]">visibility</span>
+                    <span class="material-symbols-outlined text-sm">visibility</span>
                     <span>Pratinjau</span>
                   </a>
                   {#if item.status === 'pending'}
                     <button 
                       type="button" 
                       on:click={() => openApproveModal(item)} 
-                      class="inline-flex items-center text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm shadow-emerald-600/10 active:scale-95 transition-all cursor-pointer"
+                      class="btn btn-xs bg-success border-none text-white font-bold rounded-lg shadow-sm cursor-pointer"
                     >
                       Setujui
                     </button>
                     <button 
                       type="button" 
                       on:click={() => openRejectModal(item)} 
-                      class="inline-flex items-center text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg shadow-sm shadow-rose-600/10 active:scale-95 transition-all cursor-pointer"
+                      class="btn btn-xs bg-error border-none text-white font-bold rounded-lg shadow-sm cursor-pointer"
                     >
                       Tolak
                     </button>
@@ -229,8 +229,8 @@
       <h3 class="font-bold text-sm text-main">Konfirmasi Persetujuan</h3>
       <p class="text-xs text-secondary leading-relaxed">Setujui template <strong>{selectedTemplate.name}</strong> untuk dipublikasikan ke marketplace?</p>
       <div class="flex items-center justify-end gap-2 pt-2">
-        <button type="button" class="inline-flex items-center justify-center text-[12px] font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
-        <button type="button" class="inline-flex items-center justify-center text-[12px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50" on:click={() => submitReview('approve')} disabled={actionLoading}>
+        <button type="button" class="inline-flex items-center justify-center text-xs font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
+        <button type="button" class="btn btn-sm btn-primary text-xs font-bold rounded-xl px-4 py-2.5 transition-all cursor-pointer" on:click={() => submitReview('approve')} disabled={actionLoading}>
           {actionLoading ? 'Memproses...' : 'Setujui Template'}
         </button>
       </div>
@@ -243,10 +243,10 @@
     <div class="bg-card border border-light rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 animate-fade-in">
       <h3 class="font-bold text-sm text-main">Tolak Template</h3>
       <p class="text-xs text-secondary leading-relaxed">Alasan penolakan template <strong>{selectedTemplate.name}</strong>:</p>
-      <textarea bind:value={rejectionReason} placeholder="Alasan penolakan (min 5 karakter)..." class="w-full px-3 py-2 bg-nested/40 text-main border border-light focus:border-indigo-500 rounded-xl text-xs font-semibold focus:outline-none transition-colors h-24"></textarea>
+      <textarea bind:value={rejectionReason} placeholder="Alasan penolakan (min 5 karakter)..." class="w-full px-3 py-2 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-xs font-semibold focus:outline-none transition-colors h-24"></textarea>
       <div class="flex items-center justify-end gap-2 pt-2">
-        <button type="button" class="inline-flex items-center justify-center text-[12px] font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
-        <button type="button" class="inline-flex items-center justify-center text-[12px] font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-4 py-2.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50" on:click={() => submitReview('reject')} disabled={actionLoading || rejectionReason.trim().length < 5}>
+        <button type="button" class="inline-flex items-center justify-center text-xs font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
+        <button type="button" class="btn btn-sm bg-error border-none text-white text-xs font-bold rounded-xl px-4 py-2.5 transition-all cursor-pointer" on:click={() => submitReview('reject')} disabled={actionLoading || rejectionReason.trim().length < 5}>
           {actionLoading ? 'Memproses...' : 'Tolak Template'}
         </button>
       </div>
@@ -257,9 +257,9 @@
 {#if toast}
   <div class="fixed bottom-4 right-4 z-50 transition-all animate-fade-in">
     <div 
-      class="flex items-center gap-2 px-4 py-3 border rounded-xl shadow-lg text-xs {toast.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}"
+      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3 shadow-lg {toast.type === 'success' ? 'alert-success' : 'alert-error'}"
     >
-      <span class="material-symbols-outlined text-[16px] flex-shrink-0">
+      <span class="material-symbols-outlined text-base flex-shrink-0">
         {toast.type === 'success' ? 'check_circle' : 'error'}
       </span>
       <span class="font-bold">{toast.message}</span>

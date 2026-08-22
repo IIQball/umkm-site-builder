@@ -114,17 +114,56 @@
     {/if}
 
     {#if logoType === 'image_only' || logoType === 'image_text'}
+      <!-- Bentuk Logo: Kotak vs Bulat -->
       <div>
-        <label for="logo-image-url" class="block font-medium text-[11px] text-base-content/70 mb-1">
-          URL Gambar / Ikon Logo
-        </label>
+        <span class="block font-medium text-[11px] text-base-content/70 mb-1">Bentuk Logo</span>
+        <div class="grid grid-cols-2 gap-1.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
+          <button
+            type="button"
+            on:click={() => handlePropChange('logoShape', 'square')}
+            class={`py-1 rounded font-medium transition-colors cursor-pointer ${
+              (section.props?.logoShape || 'square') === 'square' ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
+            }`}
+          >
+            Kotak / Default
+          </button>
+          <button
+            type="button"
+            on:click={() => handlePropChange('logoShape', 'circle')}
+            class={`py-1 rounded font-medium transition-colors cursor-pointer ${
+              section.props?.logoShape === 'circle' ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
+            }`}
+          >
+            Bulat (Circle)
+          </button>
+        </div>
+      </div>
+
+      <!-- File Picker Logo Langsung -->
+      <div>
+        <label for="header-logo-upload" class="block font-medium text-[11px] text-base-content/70 mb-1">Upload File Logo</label>
         <input
-          id="logo-image-url"
-          type="text"
-          value={section.props?.logoImageUrl ?? ''}
-          on:input={(e) => handlePropChange('logoImageUrl', e.currentTarget.value)}
-          class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="https://..."
+          id="header-logo-upload"
+          type="file"
+          accept="image/png,image/jpeg,image/jpg"
+          class="block w-full text-xs text-base-content/70 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+          on:change={async (e) => {
+            const file = e.currentTarget.files?.[0];
+            if (!file) return;
+            const signRes = await fetch('/api/media/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ folder: 'templates' }) });
+            if (!signRes.ok) return;
+            const { data: signData } = await signRes.json();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', signData.apiKey);
+            formData.append('timestamp', signData.timestamp);
+            formData.append('signature', signData.signature);
+            formData.append('folder', signData.folder);
+            const cloudRes = await fetch(signData.uploadUrl, { method: 'POST', body: formData });
+            if (!cloudRes.ok) return;
+            const cloudData = await cloudRes.json();
+            handlePropChange('logoImageUrl', cloudData.secure_url);
+          }}
         />
       </div>
     {/if}

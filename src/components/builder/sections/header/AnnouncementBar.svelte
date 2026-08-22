@@ -63,7 +63,7 @@
     >
       <p
         style={textStyleString}
-        class="w-full text-xs sm:text-sm font-medium truncate sm:whitespace-normal leading-tight tracking-wide"
+        class="w-full text-xs sm:text-sm font-medium truncate sm:whitespace-normal leading-none tracking-wide flex items-center justify-center m-0 p-0"
       >
         {announcementText}
       </p>

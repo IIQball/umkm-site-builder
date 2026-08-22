@@ -64,32 +64,32 @@
   tabindex="0"
   aria-valuenow={0}
   aria-label="Resize Top Left"
-  on:pointerdown={(e) => onStartResize(e, nodeKey, 'nw')}
-  class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nwse-resize z-40 hover:scale-125 transition-transform"
+  on:pointerdown|stopPropagation|preventDefault={(e) => onStartResize(e, nodeKey, 'nw')}
+  class="resize-handle absolute -top-2 -left-2 w-3.5 h-3.5 bg-white border-2 border-blue-600 rounded-sm shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
 />
 <div
   role="slider"
   tabindex="0"
   aria-valuenow={0}
   aria-label="Resize Top Right"
-  on:pointerdown={(e) => onStartResize(e, nodeKey, 'ne')}
-  class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nesw-resize z-40 hover:scale-125 transition-transform"
+  on:pointerdown|stopPropagation|preventDefault={(e) => onStartResize(e, nodeKey, 'ne')}
+  class="resize-handle absolute -top-2 -right-2 w-3.5 h-3.5 bg-white border-2 border-blue-600 rounded-sm shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
 />
 <div
   role="slider"
   tabindex="0"
   aria-valuenow={0}
   aria-label="Resize Bottom Left"
-  on:pointerdown={(e) => onStartResize(e, nodeKey, 'sw')}
-  class="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nesw-resize z-40 hover:scale-125 transition-transform"
+  on:pointerdown|stopPropagation|preventDefault={(e) => onStartResize(e, nodeKey, 'sw')}
+  class="resize-handle absolute -bottom-2 -left-2 w-3.5 h-3.5 bg-white border-2 border-blue-600 rounded-sm shadow-md cursor-nesw-resize z-50 hover:scale-125 transition-transform"
 />
 <div
   role="slider"
   tabindex="0"
   aria-valuenow={0}
   aria-label="Resize Bottom Right"
-  on:pointerdown={(e) => onStartResize(e, nodeKey, 'se')}
-  class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-sm shadow cursor-nwse-resize z-40 hover:scale-125 transition-transform"
+  on:pointerdown|stopPropagation|preventDefault={(e) => onStartResize(e, nodeKey, 'se')}
+  class="resize-handle absolute -bottom-2 -right-2 w-3.5 h-3.5 bg-white border-2 border-blue-600 rounded-sm shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
 />
 <!-- Side Edge Handle -->
 <div
@@ -97,6 +97,6 @@
   tabindex="0"
   aria-valuenow={0}
   aria-label="Resize Width"
-  on:pointerdown={(e) => onStartResize(e, nodeKey, 'e')}
-  class="absolute top-1/2 -right-1.5 -translate-y-1/2 w-2 h-4 bg-white border border-blue-600 rounded-sm shadow cursor-ew-resize z-40 hover:scale-125 transition-transform"
+  on:pointerdown|stopPropagation|preventDefault={(e) => onStartResize(e, nodeKey, 'e')}
+  class="resize-handle absolute top-1/2 -right-2 -translate-y-1/2 w-2.5 h-5 bg-white border-2 border-blue-600 rounded-sm shadow-md cursor-ew-resize z-50 hover:scale-125 transition-transform"
 />

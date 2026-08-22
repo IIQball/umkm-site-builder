@@ -3,6 +3,7 @@ const IS_DEBUG = process.env.NODE_ENV !== 'production';
 export const debugLog = (tag: string, ...args: unknown[]) => {
   if (!IS_DEBUG) return;
   // Comment baris di bawah ini untuk menonaktifkan seluruh log secara global:
+  // eslint-disable-next-line no-console
   console.log(`[DEBUG][${tag}]`, ...args);
 };
 
@@ -11,6 +12,7 @@ export const errorLog = (tag: string, ...args: unknown[]) => {
 };
 
 export const infoLog = (tag: string, ...args: unknown[]) => {
+  // eslint-disable-next-line no-console
   console.info(`[INFO][${tag}]`, ...args);
 };
 

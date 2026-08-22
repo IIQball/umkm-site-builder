@@ -324,3 +324,10 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     },
   },
 ];
+
+export const SubmitReviewSchema = z.object({
+  templateId: z.string().min(1, 'templateId is required'),
+});
+
+export type SubmitReview = z.infer<typeof SubmitReviewSchema>;
+

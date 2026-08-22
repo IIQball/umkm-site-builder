@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client';
 import { wallets, walletMutations, commissions, payoutRequests, platformSettings } from '@/db/schema';
 import { eq, desc, lte, and, inArray, sum } from 'drizzle-orm';
+import { AppError } from '@/lib/utils';
 import type { WalletOperationParams, WalletSummary } from '@/types';
 
 export type { WalletOperationParams, WalletSummary };
@@ -48,7 +49,7 @@ export async function creditWallet({
   tx,
 }: WalletOperationParams) {
   if (amount <= 0) {
-    throw new Error('Credit amount must be positive');
+    throw new AppError('Nominal transaksi harus lebih dari 0', 400, undefined, 'INVALID_AMOUNT');
   }
 
   const executeOperation = async (client: DbExecutor) => {
@@ -104,7 +105,7 @@ export async function debitWallet({
   tx,
 }: WalletOperationParams) {
   if (amount <= 0) {
-    throw new Error('Debit amount must be positive');
+    throw new AppError('Nominal transaksi harus lebih dari 0', 400, undefined, 'INVALID_AMOUNT');
   }
 
   const executeOperation = async (client: DbExecutor) => {
@@ -115,14 +116,14 @@ export async function debitWallet({
       .limit(1);
 
     if (!existingWallets.length) {
-      throw new Error('INSUFFICIENT_BALANCE');
+      throw new AppError('Saldo tidak mencukupi untuk melakukan transaksi', 400, undefined, 'INSUFFICIENT_BALANCE');
     }
 
     const wallet = existingWallets[0];
     const currentBalance = Number(wallet.balance);
 
     if (currentBalance < amount) {
-      throw new Error('INSUFFICIENT_BALANCE');
+      throw new AppError('Saldo tidak mencukupi untuk melakukan transaksi', 400, undefined, 'INSUFFICIENT_BALANCE');
     }
 
     const balanceAfter = currentBalance - amount;

@@ -10,32 +10,38 @@
   export let description: string = '';
 </script>
 
-<div class="bg-card border border-main rounded-2xl p-6 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow {borderAccent}">
-  {#if icon}
-    <div class="icon-wrapper absolute right-4 top-5 {iconCls}">
-      <span class="material-symbols-outlined icon-filled text-[20px]">
-        {icon}
-      </span>
+<div class="bg-card border border-light rounded-2xl p-5 relative overflow-hidden shadow-sm transition-all hover:shadow-md {borderAccent}">
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      <p class="text-[11px] font-extrabold uppercase tracking-wider text-muted truncate">{label}</p>
+      <div class="flex items-baseline gap-1.5 mt-2">
+        <p class="text-2xl font-black text-main font-mono tracking-tight leading-none whitespace-nowrap">
+          {value}
+        </p>
+        {#if valueSuffix}
+          <span class="text-xs font-semibold text-muted">{valueSuffix}</span>
+        {/if}
+      </div>
     </div>
-  {/if}
-
-  <p class="text-[10px] font-extrabold uppercase tracking-widest text-muted mb-1">{label}</p>
-
-  <p class="text-[26px] font-black text-main font-mono leading-none mt-2 pr-14 whitespace-nowrap">
-    {value}
-    {#if valueSuffix}
-      <span class="text-sm font-semibold text-muted ml-1">{valueSuffix}</span>
+    {#if icon}
+      <div class="icon-wrapper flex-shrink-0 {iconCls}">
+        <span class="material-symbols-outlined icon-filled text-lg">
+          {icon}
+        </span>
+      </div>
     {/if}
-  </p>
+  </div>
 
   {#if badge}
-    <div class="mt-4">
+    <div class="mt-3.5 flex items-center">
       <span class="badge-custom {badgeCls}">
-        <span class="material-symbols-outlined icon-filled text-[11px]">
-          {#if label === 'Saldo Aktif' || label === 'Saldo Siap Tarik'}
+        <span class="material-symbols-outlined icon-filled text-[12px]">
+          {#if label.includes('Saldo') || label.includes('Disetujui')}
             check_circle
-          {:else if label === 'Total Pendapatan Bersih' || label === 'Total Template' || label === 'Total'}
+          {:else if label.includes('Pendapatan') || label.includes('Total')}
             trending_up
+          {:else if label.includes('Hold') || label.includes('Menunggu')}
+            hourglass_top
           {:else}
             verified
           {/if}
@@ -46,7 +52,7 @@
   {/if}
 
   {#if description}
-    <p class="text-[10px] text-muted mt-3 leading-relaxed border-t border-light pt-2 select-none">
+    <p class="text-[11px] text-muted mt-3 leading-relaxed border-t border-light pt-2.5">
       {description}
     </p>
   {/if}

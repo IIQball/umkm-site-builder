@@ -1,80 +1,31 @@
 import type { APIRoute } from 'astro';
-import { z } from 'zod';
 import { db } from '@/lib/db/client';
 import { bankAccounts, designers, wallets } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { bankAccountSchema } from '@/schemas/designer/bank-account.schema';
-
-interface ApiResponse<T = unknown> {
-  success: boolean;
-  ok: boolean;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-  };
-}
+import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedDesigner(user)) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          ok: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Akses desainer diperlukan',
-          },
-        } as ApiResponse),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+      throw new AppError('Akses desainer diperlukan', 401);
     }
 
     const record = await db.query.bankAccounts.findFirst({
       where: (bankAccounts, { eq }) => eq(bankAccounts.designerId, user.id),
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        ok: true,
-        data: record || null,
-      } as ApiResponse),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        ok: false,
-        error: {
-          code: 'INTERNAL',
-          message: error instanceof Error ? error.message : 'Gagal mengambil rekening bank',
-        },
-      } as ApiResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    return jsonSuccess(record || null, 'Rekening bank berhasil diambil');
+  });
 };
 
 export const POST: APIRoute = async (context): Promise<Response> => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedDesigner(user)) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          ok: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Akses desainer diperlukan',
-          },
-        } as ApiResponse),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+      throw new AppError('Akses desainer diperlukan', 401);
     }
 
     // Ensure designer profile and wallet exist (for admin/superadmin acting as designers)
@@ -94,7 +45,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     const body = await context.request.json().catch(() => ({}));
-    const validated = bankAccountSchema.parse(body);
+    const validated = validate(bankAccountSchema, body);
 
     const existingAccount = await db.select().from(bankAccounts).where(eq(bankAccounts.designerId, user.id)).limit(1);
 
@@ -124,41 +75,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       result = updatedRecord;
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        ok: true,
-        data: result,
-      } as ApiResponse),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          ok: false,
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: error.errors[0]?.message || 'Input tidak valid',
-          },
-        } as ApiResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        ok: false,
-        error: {
-          code: 'INTERNAL',
-          message: error instanceof Error ? error.message : 'Gagal menyimpan rekening bank',
-        },
-      } as ApiResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    return jsonSuccess(result, 'Rekening bank berhasil disimpan');
+  });
 };
 
 export const PUT: APIRoute = POST;
+

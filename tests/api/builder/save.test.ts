@@ -1,8 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST } from '@/pages/api/builder/save';
+import * as authLib from '@/lib/auth';
+
+vi.mock('@/lib/auth', () => ({
+  getAuthenticatedUser: vi.fn(),
+  isAuthorizedDesigner: vi.fn(),
+}));
 
 describe('POST /api/builder/save', () => {
+  const mockGetAuthUser = authLib.getAuthenticatedUser as unknown as Mock;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should return 401 when request has no auth session', async () => {
+    mockGetAuthUser.mockResolvedValue(null);
+
     const request = new Request('http://localhost:4321/api/builder/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -21,6 +35,8 @@ describe('POST /api/builder/save', () => {
   });
 
   it('should return 401 for body with Zod issues when unauthenticated', async () => {
+    mockGetAuthUser.mockResolvedValue(null);
+
     const request = new Request('http://localhost:4321/api/builder/save?templateId=tpl_test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

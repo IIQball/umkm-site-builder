@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client';
 import { payoutRequests, wallets, walletMutations, bankAccounts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
+import { AppError } from '@/lib/utils';
 
 export async function createXenditDisbursement(payoutRequestId: string): Promise<void> {
   const payoutList = await db
@@ -11,7 +12,7 @@ export async function createXenditDisbursement(payoutRequestId: string): Promise
     .limit(1);
 
   if (payoutList.length === 0) {
-    throw new Error('Payout request not found');
+    throw new AppError('Permintaan penarikan dana tidak ditemukan', 404, undefined, 'PAYOUT_NOT_FOUND');
   }
   const payout = payoutList[0];
 
@@ -22,7 +23,7 @@ export async function createXenditDisbursement(payoutRequestId: string): Promise
     .limit(1);
 
   if (bankAccList.length === 0) {
-    throw new Error('Bank account not found');
+    throw new AppError('Rekening bank tidak ditemukan', 404, undefined, 'BANK_ACCOUNT_NOT_FOUND');
   }
   const bankAcc = bankAccList[0];
 
@@ -53,7 +54,10 @@ export async function createXenditDisbursement(payoutRequestId: string): Promise
         updatedAt: new Date(),
       })
       .where(eq(payoutRequests.id, payout.id));
-    throw error;
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(errorMessage, 400, undefined, 'XENDIT_DISBURSEMENT_ERROR');
   }
 }
 
@@ -69,7 +73,7 @@ export async function processDisbursementWebhook(params: {
     .limit(1);
 
   if (payoutList.length === 0) {
-    throw new Error('Payout request not found');
+    throw new AppError('Permintaan penarikan dana tidak ditemukan', 404, undefined, 'PAYOUT_NOT_FOUND');
   }
   const payout = payoutList[0];
 
@@ -109,7 +113,7 @@ export async function processDisbursementWebhook(params: {
         .limit(1);
 
       if (walletList.length === 0) {
-        throw new Error('Wallet not found');
+        throw new AppError('Dompet desainer tidak ditemukan', 404, undefined, 'WALLET_NOT_FOUND');
       }
       const wallet = walletList[0];
       

@@ -114,6 +114,13 @@ describe('E2E Template Marketplace Flow', () => {
 
     // Step 3: Tenant purchases the approved template
     mockGetAuthUser.mockResolvedValueOnce(tenantUser);
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValueOnce([tenantUser]),
+        }),
+      }),
+    });
     mockFindTemplate.mockResolvedValueOnce(approvedTemplate);
     mockFindUserTemplate.mockResolvedValueOnce(null);
     mockCreateInvoice.mockResolvedValueOnce({ id: 'inv_xendit_e2e_123', invoiceNum: 'INV-tenant_1-12345', invoiceUrl: 'https://checkout.xendit.co/web/inv_xendit_e2e_123' });

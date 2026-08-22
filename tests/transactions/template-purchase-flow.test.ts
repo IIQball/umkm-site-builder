@@ -6,6 +6,13 @@ import { xenditClient } from '@/lib/finance/xendit';
 
 vi.mock('@/lib/db/client', () => {
   const mockDb = {
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([{ id: 'user_1', email: 'user@example.com' }]),
+        }),
+      }),
+    }),
     query: {
       templates: {
         findFirst: vi.fn(),

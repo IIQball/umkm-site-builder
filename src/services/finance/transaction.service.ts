@@ -8,7 +8,8 @@ import { transactions, users, templates, userTemplates, commissions, stores } fr
 import { xenditClient } from '@/lib/finance/xendit';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
+import { AppError, formatCurrency } from '@/lib/utils';
 import type { TransactionInitiateInput, TransactionRecord, TransactionType, PaymentStatus } from '@/types';
 
 export const STORE_REGISTRATION_FEE_IDR = 100000;
@@ -23,15 +24,15 @@ export class TransactionService {
     baseUrl: string
   ): Promise<{ invoiceId: string; paymentUrl: string }> {
     const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user.length) throw new Error('User not found');
+    if (!user.length) throw new AppError('User not found', 404);
 
     if (input.type === 'store_registration' && input.amount !== STORE_REGISTRATION_FEE_IDR) {
-      throw new Error(`Invalid amount. Expected ${STORE_REGISTRATION_FEE_IDR}, got ${input.amount}`);
+      throw new AppError(`Invalid amount. Expected ${STORE_REGISTRATION_FEE_IDR}, got ${input.amount}`, 400);
     }
 
     const existingTx = await db.select().from(transactions).where(eq(transactions.userId, userId));
     if (existingTx.some((tx: { status: string }) => tx.status === 'pending')) {
-      throw new Error('Payment already in progress');
+      throw new AppError('Payment already in progress', 400);
     }
 
     const invoiceNum = `INV-${userId}-${Date.now()}`;
@@ -69,6 +70,85 @@ export class TransactionService {
     }
 
     return { invoiceId: externalId, paymentUrl: xenditInvoice.invoiceUrl || '' };
+  }
+
+  async purchaseTemplate(
+    userId: string,
+    templateId: string,
+    baseUrl: string
+  ): Promise<{ isFree: boolean; message?: string; data?: { invoiceUrl: string; invoiceId: string; externalId: string } }> {
+    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user.length) throw new AppError('Harap masuk terlebih dahulu', 401);
+
+    const template = await db.query.templates.findFirst({
+      where: and(eq(templates.id, templateId), eq(templates.status, 'approved')),
+    });
+
+    if (!template) {
+      throw new AppError('Template tidak ditemukan atau belum disetujui', 404);
+    }
+
+    const existingOwnership = await db.query.userTemplates.findFirst({
+      where: and(eq(userTemplates.userId, userId), eq(userTemplates.templateId, templateId)),
+    });
+
+    if (existingOwnership) {
+      throw new AppError('Anda sudah memiliki template ini', 400, undefined, 'TEMPLATE_ALREADY_OWNED');
+    }
+
+    // Free template case
+    if (template.price === 0) {
+      const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      await db.insert(userTemplates).values({
+        id: userTemplateId,
+        userId,
+        templateId: template.id,
+        acquiredAt: new Date(),
+      });
+
+      return { isFree: true, message: 'Template gratis berhasil ditambahkan ke akun Anda' };
+    }
+
+    // Paid template case
+    const invoiceNum = `INV-${userId}-${Date.now()}`;
+
+    const xenditInvoice = await xenditClient.createInvoice({
+      invoiceNum,
+      amount: template.price,
+      payerEmail: user[0].email,
+      description: `Pembelian Template: ${template.name}`,
+      expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
+      failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+      metadata: {
+        userId,
+        type: 'template_purchase',
+        templateId: template.id,
+      },
+    });
+
+    const transactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    await db.insert(transactions).values({
+      id: transactionId,
+      userId,
+      type: 'template_purchase',
+      amount: template.price,
+      status: 'pending',
+      templateId: template.id,
+      externalId: invoiceNum,
+      paymentGatewayRef: xenditInvoice.id,
+      paymentChannel: null,
+      createdAt: new Date(),
+    });
+
+    return {
+      isFree: false,
+      data: {
+        invoiceUrl: xenditInvoice.invoiceUrl || '',
+        invoiceId: xenditInvoice.id,
+        externalId: invoiceNum,
+      },
+    };
   }
 
   async processWebhook(payload: {
@@ -199,11 +279,7 @@ export class TransactionService {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(amount);
+    return formatCurrency(amount);
   }
 }
 

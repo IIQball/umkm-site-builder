@@ -69,8 +69,8 @@
       />
     {:else}
       <div class="absolute inset-0 bg-nested flex flex-col items-center justify-center gap-2">
-        <span class="material-symbols-outlined icon-filled text-[36px] text-muted">storefront</span>
-        <span class="text-[11px] font-medium text-secondary">Preview Belum Tersedia</span>
+        <span class="material-symbols-outlined icon-filled text-4xl text-muted">storefront</span>
+        <span class="text-xs font-medium text-secondary">Preview Belum Tersedia</span>
       </div>
     {/if}
 
@@ -83,7 +83,7 @@
     <!-- Sold count overlay -->
     {#if template.totalSold > 0}
       <div class="absolute top-3 right-3">
-        <span class="text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
+        <span class="text-xs font-bold text-white bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
           {template.totalSold}× terjual
         </span>
       </div>
@@ -93,18 +93,18 @@
   <!-- Card body -->
   <div class="p-4 flex-1 flex flex-col">
     <div class="flex items-start justify-between gap-2 mb-1">
-      <h3 class="text-[13px] font-bold text-main line-clamp-1 flex-1">{template.name}</h3>
-      <span class="text-[12px] font-extrabold text-indigo-600 dark:text-indigo-400 font-mono flex-shrink-0">
+      <h3 class="text-sm font-bold text-main line-clamp-1 flex-1">{template.name}</h3>
+      <span class="text-xs font-extrabold text-primary font-mono flex-shrink-0">
         {formatPrice(template.price)}
       </span>
     </div>
-    <p class="text-[11px] text-secondary line-clamp-2 leading-relaxed flex-1">
+    <p class="text-xs text-secondary line-clamp-2 leading-relaxed flex-1">
       {template.description || 'Tanpa deskripsi'}
     </p>
 
     <!-- Footer: date + actions -->
     <div class="pt-3 mt-3 border-t border-light flex items-center justify-between gap-2">
-      <span class="text-[11px] text-muted">
+      <span class="text-xs text-muted">
         {new Date(template.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
       </span>
 
@@ -113,18 +113,17 @@
         {#if template.status === 'draft'}
           <a
             href={`/builder/${template.id}`}
-            class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-600
-                   hover:bg-indigo-700 rounded-lg px-3 py-1.5 transition-colors active:scale-95"
+            class="btn btn-xs btn-primary text-xs font-bold text-white rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-[13px]">edit</span>
+            <span class="material-symbols-outlined text-sm">edit</span>
             Edit
           </a>
           <button
             type="button"
             disabled={isDeleting}
             on:click={handleDelete}
-            class="inline-flex items-center text-[11px] font-medium text-muted
-                   hover:text-rose-500 hover:bg-rose-50/10 rounded-lg px-2.5 py-1.5 transition-colors"
+            class="inline-flex items-center text-xs font-medium text-muted
+                   hover:text-rose-500 hover:bg-rose-50/10 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer"
           >
             {isDeleting ? '…' : 'Hapus'}
           </button>
@@ -134,16 +133,14 @@
           <button
             type="button"
             on:click={handleShowRejection}
-            class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400
-                   bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 rounded-lg px-2.5 py-1.5 transition-colors"
+            class="badge-custom badge-custom-amber hover:bg-amber-500/20 px-2.5 py-1.5 transition-all cursor-pointer font-bold text-xs flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-[13px]">info</span>
+            <span class="material-symbols-outlined text-sm">info</span>
             Alasan
           </button>
           <a
             href={`/builder/${template.id}`}
-            class="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-600
-                   hover:bg-indigo-700 rounded-lg px-3 py-1.5 transition-colors active:scale-95"
+            class="btn btn-xs btn-primary text-xs font-bold text-white rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
             Edit Ulang
           </a>
@@ -152,10 +149,9 @@
         {#if template.status === 'approved' || template.status === 'pending'}
           <a
             href={`/builder/preview/${template.id}`}
-            class="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary
-                   border border-light hover:border-main hover:bg-nested rounded-lg px-3 py-1.5 transition-colors"
+            class="btn btn-xs btn-outline border-light hover:border-main hover:bg-nested text-xs text-secondary font-semibold rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-[13px]">visibility</span>
+            <span class="material-symbols-outlined text-sm">visibility</span>
             Pratinjau
           </a>
         {/if}
@@ -163,4 +159,3 @@
     </div>
   </div>
 </div>
-

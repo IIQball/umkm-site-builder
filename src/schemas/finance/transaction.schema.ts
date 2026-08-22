@@ -57,3 +57,10 @@ export const XenditWebhookPayloadSchema = z.object({
 }).passthrough();
 
 export type XenditWebhookPayload = z.infer<typeof XenditWebhookPayloadSchema>;
+
+export const TemplatePurchaseInputSchema = z.object({
+  templateId: z.string().min(1, 'templateId is required'),
+});
+
+export type TemplatePurchaseInput = z.infer<typeof TemplatePurchaseInputSchema>;
+

@@ -8,12 +8,20 @@
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let role: "tenant" | "designer" | "admin" = "tenant";
+  let role: "tenant" | "designer" = "tenant";
   let generalError = "";
   let errors: Record<string, string> = {};
   let loading = false;
   let showPassword = false;
   let showConfirmPassword = false;
+
+  const togglePasswordVisibility = () => {
+    showPassword = !showPassword;
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    showConfirmPassword = !showConfirmPassword;
+  };
 
   const handleInput = (field: string) => {
     if (errors[field]) {
@@ -119,7 +127,6 @@
     >
       <option value="tenant">Pemilik Toko (Tenant)</option>
       <option value="designer">Desainer Template (Designer)</option>
-      <option value="admin">Administrator (Admin)</option>
     </select>
     {#if errors.role}
       <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
@@ -153,29 +160,40 @@
       <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi</span>
     </label>
     <div class="relative">
-      <input
-        type={showPassword ? "text" : "password"}
-        id="password"
-        value={password}
-        on:input={(e) => {
-          password = e.currentTarget.value;
-          handleInput("password");
-        }}
-        placeholder="Minimal 8 karakter"
-        class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-        autocomplete="new-password"
-      />
+      {#if showPassword}
+        <input
+          type="text"
+          id="password"
+          bind:value={password}
+          on:input={() => handleInput("password")}
+          placeholder="Minimal 8 karakter"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
+          autocomplete="new-password"
+        />
+      {:else}
+        <input
+          type="password"
+          id="password"
+          bind:value={password}
+          on:input={() => handleInput("password")}
+          placeholder="Minimal 8 karakter"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
+          autocomplete="new-password"
+        />
+      {/if}
       <button
         type="button"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/60 hover:text-base-content transition-colors"
-        on:click={() => (showPassword = !showPassword)}
-        aria-label="Tampilkan atau sembunyikan kata sandi"
+        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+        on:click={togglePasswordVisibility}
+        aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
       >
-        {#if showPassword}
-          <EyeOff size={16} />
-        {:else}
-          <Eye size={16} />
-        {/if}
+        <span class="pointer-events-none flex">
+          {#if showPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </span>
       </button>
     </div>
     {#if errors.password}
@@ -190,29 +208,40 @@
       <span class="label-text font-medium text-base-content/80 text-sm">Konfirmasi Sandi</span>
     </label>
     <div class="relative">
-      <input
-        type={showConfirmPassword ? "text" : "password"}
-        id="confirmPassword"
-        value={confirmPassword}
-        on:input={(e) => {
-          confirmPassword = e.currentTarget.value;
-          handleInput("confirmPassword");
-        }}
-        placeholder="Ketik ulang kata sandi"
-        class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
-        autocomplete="new-password"
-      />
+      {#if showConfirmPassword}
+        <input
+          type="text"
+          id="confirmPassword"
+          bind:value={confirmPassword}
+          on:input={() => handleInput("confirmPassword")}
+          placeholder="Ketik ulang kata sandi"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
+          autocomplete="new-password"
+        />
+      {:else}
+        <input
+          type="password"
+          id="confirmPassword"
+          bind:value={confirmPassword}
+          on:input={() => handleInput("confirmPassword")}
+          placeholder="Ketik ulang kata sandi"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
+          autocomplete="new-password"
+        />
+      {/if}
       <button
         type="button"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/60 hover:text-base-content transition-colors"
-        on:click={() => (showConfirmPassword = !showConfirmPassword)}
-        aria-label="Tampilkan atau sembunyikan konfirmasi kata sandi"
+        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+        on:click={toggleConfirmPasswordVisibility}
+        aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
       >
-        {#if showConfirmPassword}
-          <EyeOff size={16} />
-        {:else}
-          <Eye size={16} />
-        {/if}
+        <span class="pointer-events-none flex">
+          {#if showConfirmPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </span>
       </button>
     </div>
     {#if errors.confirmPassword}

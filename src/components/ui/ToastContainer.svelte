@@ -69,34 +69,34 @@
       <div
         in:fly={{ y: -20, duration: 250 }}
         out:fade={{ duration: 200 }}
-        class={`alert shadow-2xl flex items-start gap-3 pointer-events-auto border ${
+        class={`alert shadow-2xl flex items-center gap-3 pointer-events-auto border-0 py-3 px-4 rounded-xl ${
           item.type === 'success'
-            ? 'alert-success border-success/30 text-success-content'
+            ? 'bg-emerald-600 text-white shadow-emerald-600/30'
             : item.type === 'error'
-            ? 'alert-error border-error/30 text-error-content'
+            ? 'bg-rose-600 text-white shadow-rose-600/30'
             : item.type === 'warning'
-            ? 'alert-warning border-warning/30 text-warning-content'
-            : 'alert-info border-info/30 text-info-content'
+            ? 'bg-amber-500 text-white shadow-amber-500/30'
+            : 'bg-blue-600 text-white shadow-blue-600/30'
         }`}
         role="alert"
       >
-        <div class="shrink-0 mt-0.5">
+        <div class="shrink-0 flex items-center justify-center">
           {#if item.type === 'success'}
-            <CheckCircle2 size={20} class="stroke-current" />
+            <CheckCircle2 size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
           {:else if item.type === 'error'}
-            <AlertCircle size={20} class="stroke-current" />
+            <AlertCircle size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
           {:else if item.type === 'warning'}
-            <AlertTriangle size={20} class="stroke-current" />
+            <AlertTriangle size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
           {:else}
-            <Info size={20} class="stroke-current" />
+            <Info size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
           {/if}
         </div>
 
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 flex flex-col justify-center translate-y-[6px]">
           {#if item.title}
-            <h4 class="font-bold text-sm leading-tight mb-0.5">{item.title}</h4>
+            <h4 class="font-extrabold text-sm leading-tight mb-1 text-white drop-shadow-sm">{item.title}</h4>
           {/if}
-          <p class="text-xs leading-relaxed opacity-95 break-words">{item.message}</p>
+          <p class="text-[13px] font-medium text-white drop-shadow-sm leading-normal break-words">{item.message}</p>
         </div>
 
         <button

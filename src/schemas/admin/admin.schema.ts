@@ -27,3 +27,21 @@ export const commissionSettingsSchema = z.object({
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;
+
+export const adminWhitelistSchema = z.object({
+  name: z.string().min(3, 'Nama minimal 3 karakter'),
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
+  confirmPassword: z.string().min(8, 'Konfirmasi sandi minimal 8 karakter'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Konfirmasi kata sandi tidak cocok",
+  path: ["confirmPassword"],
+});
+
+export type AdminWhitelistInput = z.infer<typeof adminWhitelistSchema>;
+
+export const adminStatusUpdateSchema = z.object({
+  status: z.enum(['active', 'suspended']),
+});
+
+export type AdminStatusUpdateInput = z.infer<typeof adminStatusUpdateSchema>;

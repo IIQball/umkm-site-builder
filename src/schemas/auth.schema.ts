@@ -19,7 +19,7 @@ export const RegisterSchema = z
       .string({ required_error: "Format email tidak valid" })
       .min(1, "Format email tidak valid")
       .email("Format email tidak valid"),
-    role: z.enum(["tenant", "designer", "admin"], {
+    role: z.enum(["tenant", "designer"], {
       errorMap: () => ({ message: "Pilih salah satu peran yang valid" }),
     }),
     password: z

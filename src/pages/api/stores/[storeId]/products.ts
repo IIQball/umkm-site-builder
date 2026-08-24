@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../../lib/db/client';
-import { products } from '../../../../db/schema';
-import { eq, and, isNull, count, desc } from 'drizzle-orm';
+import { products, stores } from '../../../../db/schema';
+import { asc, desc, eq, and, count, isNull } from 'drizzle-orm';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
@@ -47,7 +47,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       .where(whereClause)
       .limit(limit)
       .offset(offset)
-      .orderBy(desc(products.createdAt));
+      .orderBy(asc(products.sortOrder), desc(products.createdAt));
 
     const mappedItems = records.map(p => ({
         ...p,
@@ -55,9 +55,19 @@ export const GET: APIRoute = async ({ params, request }) => {
         imageUrl: Array.isArray(p.imageUrls) && p.imageUrls.length > 0 ? p.imageUrls[0] : ''
     }));
 
+    const storeRecord = await db.select({ waNumber: stores.waNumber })
+      .from(stores)
+      .where(eq(stores.id, storeId))
+      .limit(1);
+    
+    const waNumber = storeRecord.length > 0 ? storeRecord[0].waNumber : null;
+
     return new Response(JSON.stringify({
       ok: true,
       data: mappedItems,
+      store: {
+        waNumber
+      },
       pagination: {
         total,
         page,

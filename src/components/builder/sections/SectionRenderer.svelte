@@ -11,6 +11,7 @@
 
   export let section: TemplateSection;
   export let isActive: boolean = false;
+  export let storeId: string | null = null;
 
   const isDarkColor = (color?: string): boolean => {
     if (!color || color === 'transparent') return false;
@@ -85,7 +86,7 @@
       {:else if section.type === 'features'}
         <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
       {:else if section.type === 'product_catalog'}
-        <ProductCatalog props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <ProductCatalog props={{...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined)}} styles={section.styles || {}} sectionId={section.id} {isActive} />
       {:else if section.type === 'testimonials'}
         <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
       {:else if section.type === 'faq'}

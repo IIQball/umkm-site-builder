@@ -18,6 +18,7 @@
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
+  export let storeId: string | null = null;
 
   let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   let isDark = false;
@@ -215,7 +216,7 @@
       {:else}
         <div class="flex flex-col w-full min-w-0 transition-all">
           {#each sections as section (section.id)}
-            <SectionRenderer {section} isActive={false} />
+            <SectionRenderer {section} isActive={false} {storeId} />
           {/each}
         </div>
       {/if}

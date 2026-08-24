@@ -1,6 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
     "jsxImportSource": "svelte",
     "baseUrl": ".",
     "ignoreDeprecations": "5.0",

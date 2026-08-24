@@ -55,11 +55,11 @@
             on:change={(e) => handleArrayItemChange('testimonials', index, 'rating', Number(e.currentTarget.value))}
             class="w-20 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-base-content text-xs focus:outline-none focus:border-blue-500"
           >
-            <option value={5}>⭐⭐⭐⭐⭐</option>
-            <option value={4}>⭐⭐⭐⭐</option>
-            <option value={3}>⭐⭐⭐</option>
-            <option value={2}>⭐⭐</option>
-            <option value={1}>⭐</option>
+            <option value={5}>Bintang 5</option>
+            <option value={4}>Bintang 4</option>
+            <option value={3}>Bintang 3</option>
+            <option value={2}>Bintang 2</option>
+            <option value={1}>Bintang 1</option>
           </select>
           <div class="flex items-center">
             <button

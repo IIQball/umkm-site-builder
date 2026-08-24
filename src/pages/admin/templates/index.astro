@@ -2,9 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateReviewPanel from '@/components/admin/TemplateReviewPanel.svelte';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { db } from '@/lib/db/client';
-import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc } from 'drizzle-orm';
+import { getTemplatesForAdmin } from '@/services';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
@@ -15,29 +13,9 @@ if (!isAuthorizedAdmin(user)) {
   return Astro.redirect('/dashboard');
 }
 
-let initialTemplates: any[] = [];
+let initialTemplates: Awaited<ReturnType<typeof getTemplatesForAdmin>> = [];
 try {
-  const records = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      status: templates.status,
-      rejectionReason: templates.rejectionReason,
-      createdAt: templates.createdAt,
-      designerId: templates.designerId,
-      designerName: users.name,
-      designerEmail: users.email,
-    })
-    .from(templates)
-    .leftJoin(designers, eq(templates.designerId, designers.userId))
-    .leftJoin(users, eq(designers.userId, users.id))
-    .where(isNull(templates.deletedAt))
-    .orderBy(desc(templates.createdAt));
-
-  initialTemplates = records;
+  initialTemplates = await getTemplatesForAdmin();
 } catch {
   initialTemplates = [];
 }
@@ -46,5 +24,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
 ---
 
 <DashboardLayout title="Kurasi Template" breadcrumb="Admin / Kurasi Template">
-  <TemplateReviewPanel client:load {initialTemplatesJson} />
+  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8 animate-fade-in">
+    <TemplateReviewPanel client:load {initialTemplatesJson} />
+  </div>
 </DashboardLayout>

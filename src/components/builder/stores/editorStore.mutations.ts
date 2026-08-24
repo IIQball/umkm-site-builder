@@ -40,7 +40,7 @@ export async function applySubmitReview(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: template.name, description: template.description, price: template.price, thumbnailUrl: template.thumbnailUrl, config: template.config }),
     });
-    const response = await fetch('/api/templates/submit-review', {
+    const response = await fetch('/api/designer/templates/submit-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ templateId: template.id }),
@@ -165,7 +165,7 @@ export function applyAddNode(
       }
     } else if (s.type === 'features') {
       const items = Array.isArray(currentProps.features) ? [...currentProps.features] : [];
-      items.push({ icon: '⭐', title: 'Fitur Baru', description: 'Keunggulan produk dan layanan Anda.' });
+      items.push({ icon: 'star', title: 'Fitur Baru', description: 'Keunggulan produk dan layanan Anda.' });
       currentProps.features = items;
       selectedNodeKey = `item_${items.length - 1}`;
     } else if (s.type === 'product_catalog') {

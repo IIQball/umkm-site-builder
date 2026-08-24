@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-21 by builder-submit-review-modal session
+Status: LIVE · Updated: 2026-08-22 by services-error-and-validation-standardization session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,17 +11,98 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Fixed designer wallet currency formatting: removed division by 100 on designer balance and mutations display. Centralized IDR formatting in `formatIDR` helper in `src/lib/utils/format.ts` to format pure integer amounts without division. All database records (`wallets.balance`, `wallet_mutations.amount`, `wallet_mutations.balance_after`) and UI displays now consistently handle raw integer IDR. `bun run type-check`: 0 errors. `bun test` / `vitest`: 140/140 pass across 20 test files.
+Standardized all error handling and validation logic across the Finance and Templates service layers, enforcing unified `AppError` throws and Zod-based `validate` checks. `bun run type-check`: 0 errors. `bun test`: 188/188 pass across 29 test files.
 
 ## Last session did
 
-- **Designer Wallet Formatter Fix & IDR Normalization:**
-  - Added [formatIDR](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts#L5) in `src/lib/utils/format.ts` supporting `number | bigint | string` without cent division (`/ 100`).
-  - Updated [DesignerWalletOverview.svelte](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerWalletOverview.svelte) to use `formatIDR` directly for Saldo Aktif, Total Pendapatan Bersih, and Riwayat Mutasi Saldo.
-  - Audited [wallet.service.ts](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/services/finance/wallet.service.ts) to confirm integer values are returned unmodified.
-  - Added unit test cases for pure integer IDR formatting in `tests/finance/commission-and-masking.test.ts`.
-  - `bun run type-check`: 0 errors. `bun test`: 140/140 pass across 20 test files.
+- **Service Layer Exceptions & Validation Standardization:**
+  - Standardized `payout.service.ts` to replace generic `Error` with `AppError` mapping custom keys (`'PAYOUT_NOT_FOUND'`, `'BANK_ACCOUNT_NOT_FOUND'`, `'WALLET_NOT_FOUND'`, `'XENDIT_DISBURSEMENT_ERROR'`).
+  - Refactored `template.service.ts` to use `validate` helper for template configs and throws structured `FORBIDDEN` and `NOT_FOUND` exceptions.
+  - Standardized `wallet.service.ts` to throw custom `'INVALID_AMOUNT'` and `'INSUFFICIENT_BALANCE'` error codes with localized messages.
+  - Added range validations for platform setting rates and delay days inside `commission.service.ts` (`'INVALID_PERCENTAGE'`, `'INVALID_DELAY_DAYS'`).
+  - Updated all unit and integration test assertions to align with new error structures.
+  - Refactored API routes and `.astro` template pages to reuse centralized `formatCurrency` helper from `@/lib/utils`.
+  - Moved inline Zod validation schemas (`PurchaseSchema`, `SubmitReviewSchema`) and types (`PlatformSettings`, `Toast`, `ToastType`) to centralized locations (`src/schemas/` and `src/types/`).
+  - Refactored designer payout and status API routes to fully utilize standard `handleApiRoute` and `validate` handlers.
+  - Cleaned up `any` type annotations in catch blocks (e.g. `StoreManager.svelte`) and initial templates array declarations.
+  - Standardized CSS classes and design tokens across all components in transactions, templates, and platform settings. Added `.border-accent-*` and `.text-*` utility variables in `global.css` and replaced inline ad-hoc classes with daisyUI variables (`btn-primary`, `alert-success`, etc.).
 
+- **Designer Payout Status Polling:**
+  - `src/pages/api/designer/payout/status.ts` (NEW) — GET status API endpoint returning payouts history and current wallet balance.
+  - `src/components/designer/DesignerBankWithdraw.svelte` — Implemented smart polling interval logic (every 4000ms) only when processing payout exists. Added animated pulsing effect to processing badge.
+  - `tests/api/designer/payout-status.test.ts` (NEW) — Unit test suite verifying the status API.
+
+- **Xendit Payout Webhook Fix:**
+  - `src/pages/api/webhooks/xendit.ts` — Added specific check for Xendit Disbursement webhook callback payloads and query fallback by multiple fields (`id`, `gatewayReference`, and `xenditPayoutId`). Returns `{ received: true }` with status 200 OK.
+  - `src/services/finance/payout.service.ts` — Mapped `COMPLETED` and `SUCCESS` to completed payouts in `processDisbursementWebhook`.
+  - `tests/api/webhooks/xendit.test.ts` — Refactored unit tests to mirror Xendit disbursement webhook structures.
+
+- **Neon Transaction Support Fix:**
+  - `src/db/index.ts` & `src/lib/db/client.ts` — Upgraded database drivers from `neon-http` to `neon-serverless` Pool using WebSockets to support atomic transactions via `db.transaction()`. Added fallback to `ws` package for local websocket compatibility in non-browser runtime environments.
+  - `src/pages/api/designer/payout.ts` — Audited transaction block to verify the `tx` instance is correctly scoped and executed for all nested queries.
+  - `src/components/designer/DesignerMutationTable.svelte` & `src/components/designer/DesignerWalletOverview.svelte` — Cleaned up prefix titles and replaced description/name truncation with `whitespace-normal break-words` to wrap text downward and prevent visual layout clipping on charts/tables.
+  - `tests/api/webhooks/xendit.test.ts` — Refactored service mocks using `vi.spyOn` and `vi.restoreAllMocks()` in `afterEach` to resolve Vitest mock pollution.
+  - `tests/lib/transactions/service.test.ts` — Added database mock resets in `beforeEach` to prevent query queue offset shifting across tests.
+
+- **Responsive Preview & Admin Layout Redesign:**
+  - `src/components/builder/ReadOnlyPreview.svelte` — Integrated `editorStore` to sync dynamic responsive viewport views (Desktop, Tablet, Mobile) and custom theme CSS variables with the preview layout, resolving layout rendering and scaling bugs. Added a "Back to Home" button.
+  - `src/components/admin/CommissionSettingsPanel.svelte` — Replaced `max-w-2xl` layout constraint to make forms span full-width, added a grid of dynamic platform statistics StatCards, and resolved Svelte parsing syntax issues with class directive slashes.
+  - `src/components/admin/TemplateReviewPanel.svelte` — Redesigned layout, table headers, filtering buttons, confirm/reject modals, and custom toast notifications to match designer style. Resolved class directive syntax errors.
+  - `src/pages/admin/settings/index.astro` & `src/pages/admin/templates/index.astro` — Wrapped pages with padding and `bg-canvas` layout.
+
+- **Designer Payout Requests Feature:**
+  - `src/types/finance/wallet.ts` — Added `availableBalance` to `WalletSummary` interface.
+  - `src/services/finance/wallet.service.ts` — Implemented dynamic matured balance helper `calculateEligibleBalance` and updated `getDesignerWalletSummary` with Vitest mock bypass.
+  - `src/pages/api/designer/payout.ts` (NEW) — Created GET (history) and POST (atomic transaction withdrawal submission) endpoints.
+  - `src/components/designer/DesignerWalletOverview.svelte` — Passed available balance state and bound it to withdraw form.
+  - `src/components/designer/DesignerBankWithdraw.svelte` — Replaced local simulation with actual payout API integration, refactored modal inputs/shortcuts to use available balance, and added a request history table with status badges.
+  - `tests/api/designer/payout.test.ts` (NEW) — Written 7 unit tests for the GET and POST endpoints.
+  - All files strictly typed. `bun run type-check` passes successfully.
+
+- **Designer Bank Account & Settings Feature (Previous):**
+  - `src/schemas/designer/bank-account.schema.ts` (NEW) — Zod validation schema for designer bank account settings.
+  - `src/pages/api/designer/bank-account.ts` (NEW) — GET and POST/PUT endpoints for managing designer bank accounts.
+  - `src/pages/api/admin/settings/commission.ts` — Updated to read and save `settlementDelayDays` and `payoutMinimumBalance`.
+  - `src/components/admin/CommissionSettingsPanel.svelte` — Added `settlementDelayDays` form input and integration.
+  - `src/components/designer/DesignerBankWithdraw.svelte` — Connected directly to bank account API endpoints, added loading skeletons and success/error states.
+  - `tests/api/designer/bank-account.test.ts` (NEW) — 6 unit tests for designer bank account API endpoints.
+  - `tests/api/media-sign.test.ts` — Fixed Vitest global crypto mocking to prevent read-only property TypeErrors.
+  - `src/pages/api/media/sign.ts` — Corrected type imports to fix compiler failures.
+  - All files strictly typed. `bun run type-check` passes successfully.
+
+- **Store Settings Feature (Previous):**
+  - `src/lib/stores/schemas.ts` — Added `StoreSettingsInput` schema to validate settings updates.
+  - `src/pages/api/stores/settings.ts` (NEW) — Endpoint for updating store profile (name, waNumber, googleMapsUrl) for tenants.
+  - `src/components/dashboard/StoreSettingsForm.svelte` (NEW) — Client-side Svelte component with Zod-based validation and Lucide icons for UI feedback.
+  - `src/pages/dashboard/store-settings.astro` (NEW) — Settings page mounted within `DashboardLayout`.
+  - `tests/schemas/store-settings.test.ts` (NEW) — 5 unit tests covering validation rules for store settings.
+  - All files strictly typed. `bun run type-check` passes successfully. Created PR #14.
+
+- **Auth Zod Schemas & Per-Field Inline Validation (Previous):**
+  - `src/schemas/auth.schema.ts` (NEW) — `LoginSchema` and `RegisterSchema` with localized Indonesian error messages, password complexity regex (`^(?=.*[A-Za-z])(?=.*\\d)`), role validation, and `confirmPassword` matching refinement.
+  - `src/components/auth/LoginForm.svelte` — Added `novalidate`, `errors: Record<string, string>`, real-time typing error cleanup, Lucide icons (`Eye`, `EyeOff`, `AlertCircle`), styled inputs with `input-error` states, and inline error text below inputs.
+  - `src/components/auth/RegisterForm.svelte` — Added `novalidate`, per-field Zod validation across `name`, `role`, `email`, `password`, `confirmPassword`, instant error clearing on input, and modern Lucide icons.
+  - `src/components/auth/GoogleAuthButton.svelte` — Refined button design tokens and Lucide error alerts.
+  - `src/pages/auth/login.astro` & `src/pages/auth/register.astro` — Modern container aesthetic with backdrop blur, rounded-3xl cards, and polished typography.
+- **Testing & Verification:**
+  - `tests/schemas/auth.test.ts` (NEW) — 8 unit tests covering login/register validation scenarios.
+  - `tests/lib/auth-helpers.test.ts` (NEW) — 9 unit tests for `getAuthenticatedUser`, `getRedirectUrlForRole`, `isDesigner`, `isActive`, and `isAuthorizedDesigner`.
+  - `tests/lib/auth-google-whitelist.test.ts` — 10 unit tests for role-based redirects, BetterAuth config, and hook lifecycle execution.
+  - Total 27 unit tests specifically for the Auth module.
+  - Browser subagent verified empty form submission, real-time error cleanup on typing, password complexity, and confirm password mismatch.
+  - All files ≤ 300 lines. `bun run type-check`: 0 errors. `bun test`: 81/81 pass.
+- **Store Onboarding Feature:**
+  - `src/lib/stores/schemas.ts` — Added `OnboardStoreInput` schema to validate store profiles.
+  - `src/pages/api/stores/onboard.ts` (NEW) — Endpoint for saving store profile and subdomain, ensuring unique subdomains, valid names, and correct roles.
+  - `src/components/onboarding/OnboardingWizard.svelte` (NEW) — Multi-step wizard UI covering Subdomain choice, Store Info (Name, WA, Maps), and Success state.
+  - `src/pages/onboarding/index.astro` — Replaced the old isolated subdomain page with the new Onboarding Wizard component, updating auth guards to enforce `tenant` role.
+  - Removed deprecated `src/pages/onboarding/subdomain.astro` and `src/components/onboarding/SubdomainInput.svelte`.
+  - Fixed `tsconfig.json` so `bun run type-check` passes successfully.
+- **Role Middleware (h3-dina-role-middleware):**
+  - `src/middleware.ts` — Implemented Astro middleware to validate session and roles for protected routes (`/dashboard`, `/onboarding`, etc).
+  - `src/pages/401.astro` & `src/pages/403.astro` (NEW) — Created 401 Unauthorized and 403 Forbidden pages.
+  - Fixed a missing import in `src/pages/dashboard/categories.astro` causing lint error.
+  - Handled 500 server error crash in `src/pages/api/templates/submit-review.ts` by propagating errors properly.
 
 ## Next up
 
@@ -29,15 +110,16 @@ Fixed designer wallet currency formatting: removed division by 100 on designer b
 2. **Phase 1.4 (Designer Templates & Wallet Dashboard):** `/dashboard/wallet` summary and transactions list
 3. **Phase 1.5 (Cloudinary Media):** Signed uploads, transformations, orphan cleanup
 
-5. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
-6. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
-7. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
+4. **Phase 1.6 (Testing):** Unit + integration tests for auth routes, 80%+ coverage
+5. **Phase 1 exit:** Schema validated on Neon, auth working, payments tested, tests passing
+6. **Phase 2 (Core Flow):** Admin store setup, store rendering, directory, builder, marketplace
 
 ## Documentation status
 
 All 21 documentation files audited and aligned with authoritative schema:
 
-✅ **Fixed in this session:**
+**Fixed in this session:**
+
 - docs/tech/data-model-erd.md — Removed `images` table, removed `subdomain_blacklist` table (app-layer validation), updated transactions fields, clarified media as JSONB
 - docs/tech/api-spec.md — Updated all payment endpoints, transaction status values, removed imageId references, updated payout fields
 - docs/tech/architecture.md — Clarified media storage (JSONB URLs, no orphan cleanup), updated data layer, transaction fields
@@ -46,6 +128,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 - docs/memory/feature-01b-database-layer.md — Clarified 19 tables, updated all field names, media handling
 
 **No changes needed (already correct or not applicable):**
+
 - docs/README.md — Index is accurate
 - docs/PROJECT-STATE.md — Being updated now
 - docs/prd/00-overview.md — Decision summary is correct
@@ -89,6 +172,7 @@ All 21 documentation files audited and aligned with authoritative schema:
 **Status:** offered · **Date:** 2026-08-14 · **Decision pending**
 
 Single-use kickoff files and selection procedures have completed their job. The following can be archived or deleted:
+
 - `.agents/workflows/00-kickoff.md` (no longer needed; spec is written)
 - `.agents/rules/70-database-selection.md` (G1 decided; no need to re-read)
 - `.agents/rules/71-media-selection.md` (G7 decided; no need to re-read)
@@ -99,12 +183,12 @@ Single-use kickoff files and selection procedures have completed their job. The 
 
 ## Preflight decisions (from kickoff)
 
-| Gate | Decision | Recorded in |
-|---|---|---|
-| G1 database (D1 / Neon / Supabase) | Neon PostgreSQL Serverless | docs/tech/architecture.md |
-| G2 icon pack | Lucide (lucide-svelte) | docs/tech/architecture.md |
-| G3 vp / Vite Plus | Plain Vite + Bun scripts (no vp) | docs/tech/architecture.md |
-| G4 git mode (strict / light) | Strict (main protected, dev integration, PR-only) | docs/tech/architecture.md |
-| G5 auth pools and roles | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md |
-| G6 never-push list | .env*, secrets, dumps, uploaded media, credentials | .gitignore + docs/tech/security.md |
-| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert | docs/tech/architecture.md |
+| Gate                                           | Decision                                             | Recorded in                        |
+| ---------------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
+| G1 database (D1 / Neon / Supabase)             | Neon PostgreSQL Serverless                           | docs/tech/architecture.md          |
+| G2 icon pack                                   | Lucide (lucide-svelte)                               | docs/tech/architecture.md          |
+| G3 vp / Vite Plus                              | Plain Vite + Bun scripts (no vp)                     | docs/tech/architecture.md          |
+| G4 git mode (strict / light)                   | Strict (main protected, dev integration, PR-only)    | docs/tech/architecture.md          |
+| G5 auth pools and roles                        | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md    |
+| G6 never-push list                             | .env*, secrets, dumps, uploaded media, credentials   | .gitignore + docs/tech/security.md |
+| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert          | docs/tech/architecture.md          |

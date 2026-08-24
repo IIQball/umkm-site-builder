@@ -301,4 +301,61 @@ a:hover {
   color: #fbbf24 !important;
 }
 
+/* Filled Material Icons Utility */
+.icon-filled {
+  font-variation-settings: 'FILL' 1 !important;
+}
 
+/* Custom Warning Badge */
+.badge-custom-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  color: #d97706 !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+:global(html[data-theme="dark"]) .badge-custom-warning {
+  color: #fbbf24 !important;
+}
+
+/* Border Accent Helper Classes */
+.border-accent-primary {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-primary) !important;
+}
+.border-accent-success {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-success) !important;
+}
+.border-accent-warning {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-warning) !important;
+}
+.border-accent-error {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-error) !important;
+}
+.border-accent-muted {
+  border-top-width: 2px !important;
+  border-top-style: solid !important;
+  border-top-color: var(--color-text-light) !important;
+}
+
+/* Custom Text Colors */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+.text-success {
+  color: var(--color-success) !important;
+}
+.text-error {
+  color: var(--color-error) !important;
+}
+.text-warning {
+  color: var(--color-warning) !important;
+}
+.text-info {
+  color: var(--color-info) !important;
+}

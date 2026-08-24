@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from '@/pages/api/templates/index';
+import { GET } from '@/pages/api/public/templates/index';
 
 describe('GET /api/templates', () => {
   it('should return 200 and a list of public templates', async () => {

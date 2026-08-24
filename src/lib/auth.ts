@@ -197,7 +197,6 @@ export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
 }
 
 export function getRedirectUrlForRole(role?: string | null): string {
-  if (role === 'designer') return '/designer/templates';
-  if (role === 'admin' || role === 'superadmin') return '/admin';
+  if (role === 'designer') return '/designer/wallet';
   return '/dashboard';
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { toast, type Toast } from '@/lib/toast';
+import { toast } from '@/lib/toast';
+import type { Toast } from '@/types';
 import { get } from 'svelte/store';
 
 describe('Global Toast Store', () => {

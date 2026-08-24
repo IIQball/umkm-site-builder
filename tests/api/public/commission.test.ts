@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from '@/pages/api/settings/commission';
+import { GET } from '@/pages/api/public/commission';
 import { getPlatformFeePercentage } from '@/services/finance';
 
 describe('GET /api/settings/commission', () => {

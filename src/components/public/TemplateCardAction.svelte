@@ -21,7 +21,7 @@
     successMessage = '';
 
     try {
-      const response = await fetch('/api/transactions/template-purchase', {
+      const response = await fetch('/api/tenant/transactions/template-purchase', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,13 +55,13 @@
 
 <div class="w-full flex flex-col gap-1">
   {#if errorMessage}
-    <div class="alert alert-error text-white text-[11px] py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
+    <div class="alert alert-error text-white text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
       <span>{errorMessage}</span>
     </div>
   {/if}
 
   {#if successMessage}
-    <div class="alert alert-success text-white text-[11px] py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
+    <div class="alert alert-success text-white text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
       <CheckCircle size={14} />
       <span>{successMessage}</span>
     </div>

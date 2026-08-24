@@ -22,6 +22,8 @@ export type ReviewTemplateInput = z.infer<typeof reviewTemplateSchema>;
 
 export const commissionSettingsSchema = z.object({
   platformFeePercentage: z.number().int().min(0).max(100),
+  payoutMinimumBalance: z.number().int().min(0).optional(),
+  settlementDelayDays: z.number().int().min(0).optional(),
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;

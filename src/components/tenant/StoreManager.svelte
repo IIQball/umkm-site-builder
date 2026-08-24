@@ -53,8 +53,9 @@
       };
       isEditing = false;
       success = "Profil toko berhasil diperbarui.";
-    } catch (err: any) {
-      error = err.message || "Gagal menyimpan data toko.";
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Gagal menyimpan data toko.";
+      error = errorMsg;
     } finally {
       loading = false;
     }

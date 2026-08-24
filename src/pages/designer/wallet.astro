@@ -3,7 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
-import { commissions } from '@/db/schema';
+import { commissions, platformSettings } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
 
@@ -25,6 +25,9 @@ const [soldInfo] = await db
   .from(commissions)
   .where(eq(commissions.designerId, user.id));
 const totalTemplatesSold = soldInfo?.count || 0;
+
+const settingsList = await db.select().from(platformSettings).limit(1);
+const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
 ---
 
 <DashboardLayout title="Dompet & Keuangan" breadcrumb="Dompet">
@@ -32,7 +35,7 @@ const totalTemplatesSold = soldInfo?.count || 0;
     <!-- Page header -->
     <div class="mb-6">
       <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Dashboard Keuangan</h1>
-      <p class="text-[13px] text-secondary mt-1">
+      <p class="text-sm text-secondary mt-1">
         Pantau pendapatan bersih, mutasi dompet, dan distribusi komisi penjualan template.
       </p>
     </div>
@@ -43,6 +46,7 @@ const totalTemplatesSold = soldInfo?.count || 0;
       walletSummary={walletSummary}
       totalNetIncome={totalNetIncome}
       totalTemplatesSold={totalTemplatesSold}
+      settlementDelayDays={settlementDelayDays}
     />
   </div>
 </DashboardLayout>

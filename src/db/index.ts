@@ -1,6 +1,12 @@
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import * as schema from './schema';
+import ws from 'ws';
+
+// Setup WebSocket untuk runtime Node/Bun lokal jika diperlukan
+if (typeof WebSocket === 'undefined') {
+  neonConfig.webSocketConstructor = ws;
+}
 
 // Mendukung pembacaan env lewat Vite (import.meta.env) maupun Node.js (process.env)
 const databaseUrl = 
@@ -12,12 +18,11 @@ if (!databaseUrl) {
 }
 
 /**
- * Initialize Drizzle ORM with Neon HTTP client
- * Uses serverless HTTP driver for Cloudflare Workers compatibility
+ * Initialize Drizzle ORM with Neon Serverless driver and Pool
+ * Supports transaction capabilities via WebSockets/Pool
  */
-const sql = neon(databaseUrl);
-
-export const db = drizzle(sql, { schema });
+const pool = new Pool({ connectionString: databaseUrl });
+export const db = drizzle(pool, { schema });
 
 // Export schema for use in other files
 export * from './schema';

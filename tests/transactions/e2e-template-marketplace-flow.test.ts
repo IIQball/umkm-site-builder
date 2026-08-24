@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST as reviewTemplateApi } from '@/pages/api/admin/templates/[id]/review';
 import { saveSettings as saveCommissionApi } from '@/pages/api/admin/settings/commission';
-import { POST as purchaseTemplateApi } from '@/pages/api/transactions/template-purchase';
+import { POST as purchaseTemplateApi } from '@/pages/api/tenant/transactions/template-purchase';
 import { POST as xenditWebhookApi } from '@/pages/api/webhooks/xendit';
 import { db } from '@/lib/db/client';
 import * as authLib from '@/lib/auth';
@@ -114,6 +114,13 @@ describe('E2E Template Marketplace Flow', () => {
 
     // Step 3: Tenant purchases the approved template
     mockGetAuthUser.mockResolvedValueOnce(tenantUser);
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValueOnce([tenantUser]),
+        }),
+      }),
+    });
     mockFindTemplate.mockResolvedValueOnce(approvedTemplate);
     mockFindUserTemplate.mockResolvedValueOnce(null);
     mockCreateInvoice.mockResolvedValueOnce({ id: 'inv_xendit_e2e_123', invoiceNum: 'INV-tenant_1-12345', invoiceUrl: 'https://checkout.xendit.co/web/inv_xendit_e2e_123' });

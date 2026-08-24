@@ -1,7 +1,7 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { RegisterSchema } from "@/schemas/auth.schema";
-  import { Eye, EyeOff, AlertCircle } from "lucide-svelte";
+  import { Eye, EyeOff } from "lucide-svelte";
   import GoogleAuthButton from "./GoogleAuthButton.svelte";
 
   let name = "";
@@ -80,17 +80,16 @@
   };
 </script>
 
-<form novalidate on:submit={handleSubmit} class="space-y-4">
+<form novalidate on:submit={handleSubmit} class="space-y-2 w-full">
   {#if generalError}
-    <div class="alert alert-error shadow-sm rounded-xl p-3 flex items-start gap-2.5 text-xs text-error-content">
-      <AlertCircle size={16} class="shrink-0 mt-0.5" />
-      <span>{generalError}</span>
+    <div class="p-2 rounded-lg bg-error/10 text-error text-sm font-medium border border-error/20 text-center w-full">
+      {generalError}
     </div>
   {/if}
 
-  <div class="form-control">
-    <label class="label pt-0 pb-1" for="name">
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/70">Nama Lengkap</span>
+  <div class="form-control w-full">
+    <label class="label pt-0 pb-0.5" for="name">
+      <span class="label-text font-medium text-base-content/80 text-sm">Nama Lengkap</span>
     </label>
     <input
       type="text"
@@ -98,42 +97,40 @@
       bind:value={name}
       on:input={() => handleInput("name")}
       placeholder="Nama lengkap Anda"
-      class="input input-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:ring-2 focus:ring-primary/20 transition-all text-sm h-11 {errors.name ? 'input-error border-error focus:ring-error/20' : ''}"
+      class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.name ? 'input-error' : ''}"
       autocomplete="name"
     />
     {#if errors.name}
-      <span class="text-xs text-error mt-1.5 flex items-center gap-1.5 font-medium">
-        <AlertCircle size={13} class="shrink-0" />
+      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
         {errors.name}
       </span>
     {/if}
   </div>
 
-  <div class="form-control">
-    <label class="label pt-0 pb-1" for="role">
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/70">Peran Akun</span>
+  <div class="form-control w-full">
+    <label class="label pt-0 pb-0.5" for="role">
+      <span class="label-text font-medium text-base-content/80 text-sm">Peran Akun</span>
     </label>
     <select
       id="role"
       bind:value={role}
       on:change={() => handleInput("role")}
-      class="select select-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:ring-2 focus:ring-primary/20 transition-all text-sm h-11 {errors.role ? 'select-error border-error focus:ring-error/20' : ''}"
+      class="select select-sm h-10 select-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.role ? 'select-error' : ''}"
     >
       <option value="tenant">Pemilik Toko (Tenant)</option>
       <option value="designer">Desainer Template (Designer)</option>
       <option value="admin">Administrator (Admin)</option>
     </select>
     {#if errors.role}
-      <span class="text-xs text-error mt-1.5 flex items-center gap-1.5 font-medium">
-        <AlertCircle size={13} class="shrink-0" />
+      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
         {errors.role}
       </span>
     {/if}
   </div>
 
-  <div class="form-control">
-    <label class="label pt-0 pb-1" for="email">
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/70">Email</span>
+  <div class="form-control w-full">
+    <label class="label pt-0 pb-0.5" for="email">
+      <span class="label-text font-medium text-base-content/80 text-sm">Email</span>
     </label>
     <input
       type="email"
@@ -141,20 +138,19 @@
       bind:value={email}
       on:input={() => handleInput("email")}
       placeholder="anda@contoh.com"
-      class="input input-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:ring-2 focus:ring-primary/20 transition-all text-sm h-11 {errors.email ? 'input-error border-error focus:ring-error/20' : ''}"
+      class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.email ? 'input-error' : ''}"
       autocomplete="email"
     />
     {#if errors.email}
-      <span class="text-xs text-error mt-1.5 flex items-center gap-1.5 font-medium">
-        <AlertCircle size={13} class="shrink-0" />
+      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
         {errors.email}
       </span>
     {/if}
   </div>
 
-  <div class="form-control">
-    <label class="label pt-0 pb-1" for="password">
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/70">Kata Sandi</span>
+  <div class="form-control w-full">
+    <label class="label pt-0 pb-0.5" for="password">
+      <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi</span>
     </label>
     <div class="relative">
       <input
@@ -165,8 +161,8 @@
           password = e.currentTarget.value;
           handleInput("password");
         }}
-        placeholder="Minimal 8 karakter (huruf & angka)"
-        class="input input-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:ring-2 focus:ring-primary/20 transition-all text-sm h-11 pr-10 {errors.password ? 'input-error border-error focus:ring-error/20' : ''}"
+        placeholder="Minimal 8 karakter"
+        class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
         autocomplete="new-password"
       />
       <button
@@ -176,23 +172,22 @@
         aria-label="Tampilkan atau sembunyikan kata sandi"
       >
         {#if showPassword}
-          <EyeOff size={18} />
+          <EyeOff size={16} />
         {:else}
-          <Eye size={18} />
+          <Eye size={16} />
         {/if}
       </button>
     </div>
     {#if errors.password}
-      <span class="text-xs text-error mt-1.5 flex items-center gap-1.5 font-medium">
-        <AlertCircle size={13} class="shrink-0" />
+      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
         {errors.password}
       </span>
     {/if}
   </div>
 
-  <div class="form-control">
-    <label class="label pt-0 pb-1" for="confirmPassword">
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/70">Konfirmasi Kata Sandi</span>
+  <div class="form-control w-full">
+    <label class="label pt-0 pb-0.5" for="confirmPassword">
+      <span class="label-text font-medium text-base-content/80 text-sm">Konfirmasi Sandi</span>
     </label>
     <div class="relative">
       <input
@@ -204,7 +199,7 @@
           handleInput("confirmPassword");
         }}
         placeholder="Ketik ulang kata sandi"
-        class="input input-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:ring-2 focus:ring-primary/20 transition-all text-sm h-11 pr-10 {errors.confirmPassword ? 'input-error border-error focus:ring-error/20' : ''}"
+        class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
         autocomplete="new-password"
       />
       <button
@@ -214,36 +209,35 @@
         aria-label="Tampilkan atau sembunyikan konfirmasi kata sandi"
       >
         {#if showConfirmPassword}
-          <EyeOff size={18} />
+          <EyeOff size={16} />
         {:else}
-          <Eye size={18} />
+          <Eye size={16} />
         {/if}
       </button>
     </div>
     {#if errors.confirmPassword}
-      <span class="text-xs text-error mt-1.5 flex items-center gap-1.5 font-medium">
-        <AlertCircle size={13} class="shrink-0" />
+      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
         {errors.confirmPassword}
       </span>
     {/if}
   </div>
 
-  <div class="form-control pt-2">
-    <button type="submit" class="btn btn-primary w-full rounded-xl h-11 text-sm font-semibold shadow-md hover:shadow-lg transition-all" disabled={loading}>
+  <div class="pt-2 w-full flex justify-center">
+    <button type="submit" class="btn btn-primary btn-sm h-10 rounded-full font-semibold w-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" disabled={loading}>
       {#if loading}
         <span class="loading loading-spinner loading-sm"></span>
-        <span>Memproses...</span>
-      {:else}
-        <span>Buat Akun</span>
       {/if}
+      Buat Akun
     </button>
   </div>
 </form>
 
-<div class="divider my-5 text-xs text-base-content/40 uppercase font-medium">Atau lanjutkan dengan</div>
+<div class="divider text-[10px] text-base-content/40 uppercase font-medium my-3 w-full">Atau lanjutkan dengan</div>
 
-<GoogleAuthButton />
+<div class="w-full">
+  <GoogleAuthButton />
+</div>
 
-<p class="text-xs text-center text-base-content/60 pt-3 leading-relaxed">
+<p class="text-xs text-center text-base-content/60 pt-2 leading-relaxed">
   Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="link link-primary font-medium">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="link link-primary font-medium">Kebijakan Privasi</a>.
 </p>

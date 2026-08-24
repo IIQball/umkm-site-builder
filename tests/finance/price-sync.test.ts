@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { POST as createDraftPost, PATCH as submitDraftPatch } from '@/pages/api/templates/draft';
-import { POST as templatePurchasePost } from '@/pages/api/transactions/template-purchase';
+import { POST as createDraftPost, PATCH as submitDraftPatch } from '@/pages/api/designer/templates/draft';
+import { POST as templatePurchasePost } from '@/pages/api/tenant/transactions/template-purchase';
 import { transactionService } from '@/services/finance/transaction.service';
 import { db } from '@/lib/db/client';
 import { xenditClient } from '@/lib/finance/xendit';
@@ -41,7 +41,7 @@ vi.mock('@/lib/auth', () => ({
   isActive: vi.fn((u) => !!u && u.status === 'active'),
   isAdmin: vi.fn((u) => !!u && (u.role === 'admin' || u.role === 'superadmin')),
   isAuthorizedAdmin: vi.fn((u) => !!u && u.status === 'active' && (u.role === 'admin' || u.role === 'superadmin')),
-  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/templates' : (role === 'admin' || role === 'superadmin' ? '/admin' : '/dashboard')),
+  getRedirectUrlForRole: vi.fn((role) => role === 'designer' ? '/designer/wallet' : '/dashboard'),
   auth: { api: { getSession: vi.fn() } },
 }));
 
@@ -110,6 +110,13 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
     it('should update template price as exact IDR integer 50000 on submit patch', async () => {
       let updatedValues: { price?: number } = {};
 
+      mockDb.query.templates.findFirst.mockResolvedValueOnce({
+        id: 'tpl_123',
+        designerId: 'usr_designer_1',
+        status: 'draft',
+        config: { theme: {}, sections: [] },
+      });
+
       mockDb.update.mockReturnValueOnce({
         set: vi.fn().mockImplementation((val) => {
           updatedValues = val as { price?: number };
@@ -148,6 +155,14 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
   describe('2. Template Purchase Transaction Initiation', () => {
     it('should create Xendit invoice and transaction record with exact IDR 50000', async () => {
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'usr_designer_1', email: 'designer@example.com' }]),
+          }),
+        }),
+      });
+
       mockDb.query.templates.findFirst.mockResolvedValueOnce({
         id: 'tpl_123',
         name: 'Template Batik Modern',

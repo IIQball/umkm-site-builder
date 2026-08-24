@@ -4,6 +4,20 @@ import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet, debitWallet, getDesignerWalletSummary } from '@/services/finance/wallet.service';
 import { db } from '@/lib/db/client';
 
+interface WalletUpdatePayload {
+  balance?: number;
+  availableBalance?: number;
+  updatedAt?: Date;
+}
+
+interface MutationInsertPayload {
+  type?: 'CREDIT' | 'DEBIT';
+  amount?: number;
+  balanceAfter?: number;
+  description?: string;
+  referenceId?: string;
+}
+
 // Mock DB
 vi.mock('@/lib/db/client', () => {
   const mockDb = {
@@ -152,7 +166,7 @@ describe('Finance Commission Engine & Input Masking Suite', () => {
       });
 
       // Mock wallet update
-      let updatedBalance: any = null;
+      let updatedBalance: WalletUpdatePayload = null as unknown as WalletUpdatePayload;
       mockDb.update.mockReturnValueOnce({
         set: vi.fn().mockImplementation((val) => {
           updatedBalance = val;
@@ -163,7 +177,7 @@ describe('Finance Commission Engine & Input Masking Suite', () => {
       });
 
       // Mock wallet mutation insert
-      let insertedMutation: any = null;
+      let insertedMutation: MutationInsertPayload = null as unknown as MutationInsertPayload;
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockImplementation((val) => {
           insertedMutation = val;
@@ -197,7 +211,7 @@ describe('Finance Commission Engine & Input Masking Suite', () => {
           amount: 0,
           description: 'Invalid credit',
         })
-      ).rejects.toThrow('Credit amount must be positive');
+      ).rejects.toThrow('Nominal transaksi harus lebih dari 0');
     });
 
     it('should debit wallet balance and record DEBIT mutation accurately', async () => {
@@ -220,7 +234,7 @@ describe('Finance Commission Engine & Input Masking Suite', () => {
       });
 
       // Mock mutation insert
-      let insertedMutation: any = null;
+      let insertedMutation: MutationInsertPayload = null as unknown as MutationInsertPayload;
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockImplementation((val) => {
           insertedMutation = val;
@@ -260,7 +274,7 @@ describe('Finance Commission Engine & Input Masking Suite', () => {
           amount: 50000,
           description: 'Payout attempt',
         })
-      ).rejects.toThrow('INSUFFICIENT_BALANCE');
+      ).rejects.toThrow('Saldo tidak mencukupi untuk melakukan transaksi');
     });
 
     it('should get designer wallet summary with 0 fallback if no wallet exists', async () => {

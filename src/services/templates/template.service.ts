@@ -1,6 +1,13 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
 import { eq, isNull, desc, and } from 'drizzle-orm';
+import { AppError, validate } from '@/lib/utils';
+import {
+  TemplateConfigSchema,
+  DEFAULT_TEMPLATE_SECTIONS,
+  DEFAULT_TEMPLATE_THEME,
+  type TemplateConfig,
+} from '@/schemas';
 import type { PublicTemplateItem } from '@/types';
 
 export type { PublicTemplateItem };
@@ -42,4 +49,257 @@ export async function getPublicTemplates(): Promise<PublicTemplateItem[]> {
   } catch {
     return [];
   }
+}
+
+export async function getTemplatesForAdmin(statusFilter?: string | null) {
+  let conditions = isNull(templates.deletedAt);
+  if (statusFilter && ['pending', 'approved', 'rejected'].includes(statusFilter)) {
+    conditions = and(conditions, eq(templates.status, statusFilter as 'pending' | 'approved' | 'rejected'))!;
+  }
+
+  const records = await db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      description: templates.description,
+      thumbnailUrl: templates.thumbnailUrl,
+      price: templates.price,
+      status: templates.status,
+      rejectionReason: templates.rejectionReason,
+      createdAt: templates.createdAt,
+      designerId: templates.designerId,
+      designerName: users.name,
+      designerEmail: users.email,
+    })
+    .from(templates)
+    .leftJoin(designers, eq(templates.designerId, designers.userId))
+    .leftJoin(users, eq(designers.userId, users.id))
+    .where(conditions)
+    .orderBy(desc(templates.createdAt));
+
+  return records;
+}
+
+export async function reviewTemplate(
+  templateId: string,
+  action: 'approve' | 'reject',
+  rejectionReason: string | null | undefined,
+  adminUserId: string
+) {
+  const existingTemplate = await db.query.templates.findFirst({
+    where: (t) => and(eq(t.id, templateId), isNull(t.deletedAt)),
+  });
+
+  if (!existingTemplate) {
+    throw new AppError('Template tidak ditemukan', 404, undefined, 'NOT_FOUND');
+  }
+
+  if (existingTemplate.status !== 'pending') {
+    throw new AppError('Hanya template dengan status pending yang dapat ditinjau', 400);
+  }
+
+  const updatePayload =
+    action === 'approve'
+      ? {
+          status: 'approved' as const,
+          approvedBy: adminUserId,
+          rejectionReason: null,
+          updatedAt: new Date(),
+        }
+      : {
+          status: 'rejected' as const,
+          rejectionReason: rejectionReason || null,
+          updatedAt: new Date(),
+        };
+
+  const [updatedData] = await db
+    .update(templates)
+    .set(updatePayload)
+    .where(eq(templates.id, templateId))
+    .returning();
+
+  return updatedData;
+}
+
+export async function getTemplateById(templateId: string, userId: string, userRole: string) {
+  const template = await db.query.templates.findFirst({
+    where: eq(templates.id, templateId),
+  });
+
+  if (!template) {
+    throw new AppError('Template tidak ditemukan', 404, undefined, 'NOT_FOUND');
+  }
+
+  // Permission/Ownership check: must be owner, admin, or superadmin
+  const isOwner = template.designerId === userId;
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+  if (!isOwner && !isPrivileged && template.status !== 'approved') {
+    throw new AppError('Akses ditolak: Anda tidak memiliki hak akses', 403, undefined, 'FORBIDDEN');
+  }
+
+  return template;
+}
+
+export async function createTemplateDraft(
+  data: {
+    name: string;
+    description?: string | null;
+    thumbnailUrl?: string | null;
+    price?: number;
+  },
+  designerId: string
+) {
+  const templateId = `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  const [newTemplate] = await db
+    .insert(templates)
+    .values({
+      id: templateId,
+      name: data.name,
+      description: data.description,
+      thumbnailUrl: data.thumbnailUrl,
+      price: data.price ?? 0,
+      designerId,
+      status: 'draft',
+      config: {
+        theme: DEFAULT_TEMPLATE_THEME,
+        sections: DEFAULT_TEMPLATE_SECTIONS,
+      },
+    })
+    .returning();
+
+  return newTemplate;
+}
+
+export async function updateTemplateDraft(
+  templateId: string,
+  data: {
+    name?: string;
+    description?: string | null;
+    thumbnailUrl?: string | null;
+    price?: number;
+    config?: TemplateConfig;
+  },
+  userId: string,
+  userRole: string
+) {
+  const template = await db.query.templates.findFirst({
+    where: eq(templates.id, templateId),
+  });
+
+  if (!template) {
+    throw new AppError('Template tidak ditemukan', 404, undefined, 'NOT_FOUND');
+  }
+
+  // Ownership check: must be owner, admin, or superadmin
+  const isOwner = template.designerId === userId;
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+  if (!isOwner && !isPrivileged) {
+    throw new AppError('Akses ditolak: Anda tidak memiliki hak akses', 403, undefined, 'FORBIDDEN');
+  }
+
+  const updateData: Partial<typeof templates.$inferInsert> = {
+    updatedAt: new Date(),
+  };
+
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.thumbnailUrl !== undefined) updateData.thumbnailUrl = data.thumbnailUrl;
+  if (data.price !== undefined) updateData.price = data.price;
+  if (data.config !== undefined) updateData.config = data.config;
+
+  const [updated] = await db
+    .update(templates)
+    .set(updateData)
+    .where(eq(templates.id, templateId))
+    .returning();
+
+  return updated;
+}
+
+export async function submitTemplateForReview(
+  templateId: string,
+  userId: string,
+  userRole: string,
+  patchData?: {
+    name: string;
+    description?: string | null;
+    thumbnailUrl?: string | null;
+    price: number;
+    config: TemplateConfig;
+  }
+) {
+  const template = await db.query.templates.findFirst({
+    where: eq(templates.id, templateId),
+  });
+
+  if (!template) {
+    throw new AppError('Template tidak ditemukan', 404, undefined, 'NOT_FOUND');
+  }
+
+  const isOwner = template.designerId === userId;
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+  if (!isOwner && !isPrivileged) {
+    throw new AppError('Akses ditolak: Anda tidak memiliki hak akses', 403, undefined, 'FORBIDDEN');
+  }
+
+  if (template.status !== 'draft' && !isPrivileged) {
+    throw new AppError('Template must be in draft status to submit', 400);
+  }
+
+  const configToValidate = patchData ? patchData.config : template.config;
+  validate(TemplateConfigSchema, configToValidate);
+
+  const updatePayload: Partial<typeof templates.$inferInsert> = {
+    status: 'pending',
+    updatedAt: new Date(),
+  };
+
+  if (patchData) {
+    updatePayload.name = patchData.name;
+    updatePayload.description = patchData.description;
+    updatePayload.thumbnailUrl = patchData.thumbnailUrl;
+    updatePayload.price = patchData.price;
+    updatePayload.config = patchData.config;
+  }
+
+  const [updated] = await db
+    .update(templates)
+    .set(updatePayload)
+    .where(eq(templates.id, templateId))
+    .returning();
+
+  return updated;
+}
+
+export async function deleteTemplateDraft(
+  templateId: string,
+  userId: string,
+  userRole: string
+) {
+  const template = await db.query.templates.findFirst({
+    where: eq(templates.id, templateId),
+  });
+
+  if (!template) {
+    throw new AppError('Template tidak ditemukan', 404, undefined, 'NOT_FOUND');
+  }
+
+  const isOwner = template.designerId === userId;
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+  if (!isOwner && !isPrivileged) {
+    throw new AppError('Akses ditolak: Anda tidak memiliki hak akses', 403, undefined, 'FORBIDDEN');
+  }
+
+  if (template.status !== 'draft' && template.status !== 'rejected' && !isPrivileged) {
+    throw new AppError('Only draft or rejected templates can be deleted', 400);
+  }
+
+  await db
+    .update(templates)
+    .set({
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(templates.id, templateId));
 }

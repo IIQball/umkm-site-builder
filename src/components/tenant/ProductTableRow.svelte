@@ -4,8 +4,12 @@
   import type { products as productsSchema } from "../../db/schema";
 
   type Product = InferSelectModel<typeof productsSchema>;
+  type Category = { id: string; name: string };
 
   export let product: Product;
+  export let categories: Category[] = [];
+
+  $: categoryName = categories.find(c => c.id === product.categoryId)?.name ?? "-";
 
   const dispatch = createEventDispatcher<{
     edit: Product;
@@ -23,7 +27,7 @@
   <td class="px-4 py-3">
     <div class="flex items-center gap-3">
       <div class="avatar">
-        <div class="mask mask-squircle w-10 h-10 bg-base-200 flex items-center justify-center overflow-hidden border border-base-300/50">
+        <div class="mask mask-squircle w-12 h-12 bg-base-200 flex items-center justify-center overflow-hidden border border-base-200 shadow-sm">
           {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && (product.imageUrls[0].url || typeof product.imageUrls[0] === "string")}
             <img src={product.imageUrls[0].url || product.imageUrls[0]} alt={product.name} class="object-cover w-full h-full" />
           {:else}
@@ -39,6 +43,11 @@
       </div>
     </div>
   </td>
+  <td class="px-4 py-3 whitespace-nowrap">
+    <span class="badge font-medium border-none shadow-sm bg-base-200 text-base-content/70">
+      {categoryName}
+    </span>
+  </td>
   <td class="px-4 py-3">
     <div class="max-w-xs text-xs text-base-content/70 line-clamp-2 leading-relaxed" title={product.description || ""}>
       {product.description || "-"}
@@ -48,19 +57,19 @@
     Rp {product.basePrice.toLocaleString("id-ID")}
   </td>
   <td class="px-4 py-3">
-    <div class="flex items-center gap-2">
-      <span class="badge badge-sm font-medium {product.isAvailable ? 'bg-success/15 text-success-content border-none' : 'bg-base-200 text-base-content/60 border-none'}">
+    <div class="flex items-center gap-2.5">
+      <span class="badge font-medium border-none shadow-sm {product.isAvailable ? 'bg-success/10 text-success' : 'bg-base-200 text-base-content/60'}">
         {product.isAvailable ? "Tersedia" : "Kosong"}
       </span>
-      <input type="checkbox" class="toggle toggle-xs toggle-success" checked={product.isAvailable} on:change={handleToggle} />
+      <input type="checkbox" class="toggle toggle-sm toggle-success" checked={product.isAvailable} on:change={handleToggle} />
     </div>
   </td>
   <td class="px-4 py-3 text-right">
     <div class="flex justify-end gap-2">
-      <button class="btn btn-sm btn-info btn-outline" on:click={() => dispatch('edit', product)}>
+      <button class="btn btn-sm btn-ghost bg-base-200 hover:bg-base-300 text-base-content/80 font-medium rounded-xl" on:click={() => dispatch('edit', product)}>
         Edit
       </button>
-      <button class="btn btn-sm btn-error btn-outline" on:click={() => dispatch('delete', product.id)}>
+      <button class="btn btn-sm btn-ghost hover:bg-error/10 hover:text-error text-error/80 font-medium rounded-xl" on:click={() => dispatch('delete', product.id)}>
         Hapus
       </button>
     </div>

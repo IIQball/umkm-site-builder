@@ -36,7 +36,7 @@
 
 <button 
   type="button" 
-  class="btn btn-outline w-full rounded-xl h-11 text-sm font-medium gap-3 border-base-300 hover:bg-base-200/60 hover:text-base-content hover:border-base-300 transition-all shadow-sm" 
+  class="btn btn-outline w-full rounded-full h-10 btn-sm text-sm font-medium gap-3 border-base-content/20 hover:bg-base-200/60 hover:text-base-content hover:border-base-content/30 transition-all shadow-sm" 
   on:click={handleGoogleSignIn}
   disabled={loading}
 >

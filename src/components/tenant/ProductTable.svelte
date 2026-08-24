@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
@@ -14,6 +14,26 @@
   export let categories: Category[];
 
   let products: Product[] = [];
+  let searchCategoryName = "";
+  $: filteredProducts = products.filter(p => {
+    if (!searchCategoryName || searchCategoryName.toLowerCase() === "semua kategori") return true;
+    const catName = categories.find(c => c.id === p.categoryId)?.name || "";
+    return catName.toLowerCase().includes(searchCategoryName.toLowerCase());
+  });
+
+  $: displayedCategories = categories.filter(c => 
+    !searchCategoryName || 
+    searchCategoryName.toLowerCase() === "semua kategori" || 
+    c.name.toLowerCase().includes(searchCategoryName.toLowerCase())
+  );
+
+  let isDropdownOpen = false;
+
+  const selectCategory = (name: string) => {
+    searchCategoryName = name;
+    isDropdownOpen = false;
+  };
+
   let loading = true;
   let error = "";
 
@@ -86,13 +106,24 @@
     }
   }
 
+  const handleOpenAdd = () => openAddModal();
+
   onMount(() => {
     if (storeId) fetchProducts();
+    if (typeof window !== "undefined") {
+      window.addEventListener("open-add-product", handleOpenAdd);
+    }
+  });
+
+  onDestroy(() => {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("open-add-product", handleOpenAdd);
+    }
   });
 
   // Derived stats
-  $: totalProducts = products.length;
-  $: activeProducts = products.filter((p) => p.isAvailable).length;
+  $: totalProducts = filteredProducts.length;
+  $: activeProducts = filteredProducts.filter((p) => p.isAvailable).length;
   $: inactiveProducts = totalProducts - activeProducts;
 </script>
 
@@ -120,30 +151,63 @@
 
   <!-- Kontainer Tabel Utama -->
   <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden p-6 mb-8">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <h2 class="text-2xl font-bold tracking-tight text-base-content">
         Daftar Produk
       </h2>
-      <button
-        class="btn bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm rounded-xl px-5"
-        on:click={openAddModal}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2.5"
-            d="M12 4v16m8-8H4"
-          />
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
-        Tambah Produk
-      </button>
+        <div class="dropdown dropdown-end {isDropdownOpen ? 'dropdown-open' : ''}">
+          <div class="relative w-full min-w-[160px] max-w-[200px]">
+            <input 
+              id="categorySearchInput"
+              type="text"
+              placeholder="Ketik kategori..."
+              bind:value={searchCategoryName}
+              on:focus={() => isDropdownOpen = true}
+              on:blur={() => setTimeout(() => isDropdownOpen = false, 200)}
+              class="input input-bordered input-sm bg-base-100 w-full pr-8"
+            />
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div 
+              class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer"
+              on:mousedown|preventDefault={() => {
+                if (isDropdownOpen) {
+                  isDropdownOpen = false;
+                  document.getElementById('categorySearchInput')?.blur();
+                } else {
+                  isDropdownOpen = true;
+                  document.getElementById('categorySearchInput')?.focus();
+                }
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          <ul class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-xl w-52 mt-1 max-h-60 overflow-y-auto border border-base-200">
+            <li>
+              <button type="button" class="font-medium cursor-pointer text-base-content w-full text-left" on:click={() => selectCategory("Semua Kategori")}>
+                Semua Kategori
+              </button>
+            </li>
+            {#each displayedCategories as category}
+              <li>
+                <button type="button" class="cursor-pointer text-base-content w-full text-left" on:click={() => selectCategory(category.name)}>
+                  {category.name}
+                </button>
+              </li>
+            {/each}
+            {#if displayedCategories.length === 0}
+              <li class="px-4 py-2 text-xs text-base-content/50 text-center">Kategori tidak ditemukan</li>
+            {/if}
+          </ul>
+        </div>
+      </div>
     </div>
 
   {#if error}
@@ -192,15 +256,23 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-base-200">
-          {#each products as product}
-            <ProductTableRow
-              {product}
-              {categories}
-              on:edit={(e) => openEditModal(e.detail)}
-              on:delete={(e) => openDeleteModal(e.detail)}
-              on:toggle={handleToggleEvent}
-            />
-          {/each}
+          {#if filteredProducts.length === 0}
+            <tr>
+              <td colspan="6" class="text-center py-8 text-base-content/50">
+                Tidak ada produk di kategori ini.
+              </td>
+            </tr>
+          {:else}
+            {#each filteredProducts as product}
+              <ProductTableRow
+                {product}
+                {categories}
+                on:edit={(e) => openEditModal(e.detail)}
+                on:delete={(e) => openDeleteModal(e.detail)}
+                on:toggle={handleToggleEvent}
+              />
+            {/each}
+          {/if}
         </tbody>
       </table>
     </div>

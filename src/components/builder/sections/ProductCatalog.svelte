@@ -3,14 +3,25 @@
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { Package, ShoppingBag, MessageCircle } from 'lucide-svelte';
   import { DEFAULT_DEMO_PRODUCTS, getBadgeColorClass, getCardPresetClass } from './productCatalog.helpers';
+  import { onMount } from 'svelte';
 
-  export let props: ProductCatalogProps = {};
+  export let props: ProductCatalogProps & { storeId?: string } = {};
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
 
+  $: activeStoreId = props.storeId || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('storeId') : null);
+  let dynamicProducts: ProductItem[] = [];
+  let categories: { id: string; name: string; slug: string }[] = [];
+  let activeCategoryId: string = 'all';
+  let currentPage = 1;
+  let totalPages = 1;
+  let isLoading = false;
+
   $: rawProducts = Array.isArray(props?.products) ? props.products : [];
-  $: products = (rawProducts.length > 0 ? rawProducts : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+  $: products = activeStoreId 
+    ? dynamicProducts 
+    : ((rawProducts.length > 0 ? rawProducts : DEFAULT_DEMO_PRODUCTS) as ProductItem[]);
   $: isMobileView = $editorStore?.viewMode === 'mobile';
   $: isTabletView = $editorStore?.viewMode === 'tablet';
   $: hasCustomColor = !!styles?.color;
@@ -81,6 +92,65 @@
     draggedIdx = null;
     dropTargetIdx = null;
   };
+
+  const fetchCategories = async (storeId: string) => {
+    try {
+      const res = await fetch(`/api/categories?storeId=${storeId}`);
+      if (res.ok) {
+        categories = await res.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch categories:', e);
+    }
+  };
+
+  const fetchProducts = async (storeId: string, page: number, categoryId: string, append = false) => {
+    if (isLoading) return;
+    isLoading = true;
+    try {
+      const url = new URL(`/api/stores/${storeId}/products`, window.location.origin);
+      url.searchParams.set('page', page.toString());
+      url.searchParams.set('limit', '12');
+      if (categoryId && categoryId !== 'all') {
+        url.searchParams.set('categoryId', categoryId);
+      }
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const { data, pagination } = await res.json();
+        if (append) {
+          dynamicProducts = [...dynamicProducts, ...data];
+        } else {
+          dynamicProducts = data;
+        }
+        currentPage = pagination.page;
+        totalPages = pagination.totalPages;
+      }
+    } catch (e) {
+      console.error('Failed to fetch products:', e);
+    } finally {
+      isLoading = false;
+    }
+  };
+
+  onMount(() => {
+    if (activeStoreId) {
+      fetchCategories(activeStoreId);
+      fetchProducts(activeStoreId, 1, 'all');
+    }
+  });
+
+  const handleCategorySelect = (categoryId: string) => {
+    if (!activeStoreId || activeCategoryId === categoryId) return;
+    activeCategoryId = categoryId;
+    currentPage = 1;
+    fetchProducts(activeStoreId, 1, categoryId, false);
+  };
+
+  const handleLoadMore = () => {
+    if (!activeStoreId || currentPage >= totalPages) return;
+    fetchProducts(activeStoreId, currentPage + 1, activeCategoryId, true);
+  };
 </script>
 
 <div class="max-w-6xl mx-auto w-full">
@@ -94,8 +164,44 @@
     </p>
   </div>
 
+  <!-- Category Tabs -->
+  {#if activeStoreId && categories.length > 0}
+    <div class="flex items-center justify-center mb-8">
+      <div class="flex overflow-x-auto hide-scrollbar gap-2 px-2 py-1 max-w-full">
+        <button 
+          type="button" 
+          on:click={() => handleCategorySelect('all')}
+          class={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+            activeCategoryId === 'all' 
+              ? 'bg-blue-600 text-white shadow-md' 
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          Semua
+        </button>
+        {#each categories as category}
+          <button 
+            type="button" 
+            on:click={() => handleCategorySelect(category.id)}
+            class={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+              activeCategoryId === category.id 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            {category.name}
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
   <!-- Product Grid -->
-  {#if products.length === 0}
+  {#if isLoading && currentPage === 1}
+    <div class="py-12 flex justify-center">
+      <div class="loading loading-spinner loading-lg text-blue-500"></div>
+    </div>
+  {:else if products.length === 0}
     <div class="p-8 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-center text-slate-400 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center gap-2">
       <ShoppingBag size={28} class="text-slate-300 dark:text-slate-600" />
       <p class="text-xs">Belum ada produk di katalog. Tambahkan item di panel samping.</p>
@@ -171,5 +277,24 @@
         </div>
       {/each}
     </div>
+
+    <!-- Load More Pagination -->
+    {#if activeStoreId && currentPage < totalPages}
+      <div class="mt-10 flex justify-center">
+        <button 
+          type="button" 
+          on:click={handleLoadMore}
+          disabled={isLoading}
+          class="btn btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 px-8 rounded-full font-semibold shadow-sm cursor-pointer"
+        >
+          {#if isLoading}
+            <span class="loading loading-spinner loading-sm"></span>
+            Memuat...
+          {:else}
+            Muat Lebih Banyak
+          {/if}
+        </button>
+      </div>
+    {/if}
   {/if}
 </div>

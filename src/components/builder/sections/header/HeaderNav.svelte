@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Menu, X } from 'lucide-svelte';
-  import { editorStore, activeNodeId } from '../../stores/editorStore';
+  import { editorStore, canvasStore, activeNodeId } from '../../stores/editorStore';
   import type { HeaderAnnouncementProps } from '@/types';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile' || $editorStore?.viewMode === 'tablet';
+  $: isMobileView = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';
   $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
   $: navGap = props.navGap || 'normal';
   $: navFontSize = props.navFontSize || '14px';

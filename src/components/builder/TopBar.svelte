@@ -15,7 +15,7 @@
     Grid,
     Grid2X2,
   } from 'lucide-svelte';
-  import { editorStore, canUndo, canRedo } from './stores/editorStore';
+  import { editorStore, canvasStore, canUndo, canRedo } from './stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
 
   export let templateId: string = '';
@@ -49,7 +49,7 @@
 
   const handleMarginChange = (e: Event) => {
     const target = e.currentTarget as HTMLSelectElement;
-    editorStore.setCanvasMargin(target.value as '16px' | '24px' | '32px' | '48px');
+    canvasStore.setCanvasMargin(target.value as '16px' | '24px' | '32px' | '48px');
   };
 
   const getStatusBadge = (s: string) => {
@@ -177,9 +177,9 @@
     <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
       <button
         type="button"
-        on:click={() => editorStore.toggleColumnGrid()}
+        on:click={() => canvasStore.toggleColumnGrid()}
         class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          $editorStore.showColumnGrid
+          $canvasStore.showColumnGrid
             ? 'bg-primary text-white font-semibold shadow-sm animate-none'
             : 'text-base-content/60 hover:text-base-content'
         }`}
@@ -190,9 +190,9 @@
       </button>
       <button
         type="button"
-        on:click={() => editorStore.togglePixelGrid()}
+        on:click={() => canvasStore.togglePixelGrid()}
         class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          $editorStore.showPixelGrid
+          $canvasStore.showPixelGrid
             ? 'bg-primary text-white font-semibold shadow-sm'
             : 'text-base-content/60 hover:text-base-content'
         }`}
@@ -206,7 +206,7 @@
     <div class="hidden xl:flex items-center gap-1.5 bg-base-200/80 px-2.5 py-1 rounded-lg border border-base-300 dark:border-slate-800 text-xs">
       <span class="text-xs text-base-content/60 font-medium">Margin:</span>
       <select
-        value={$editorStore.canvasMargin}
+        value={$canvasStore.canvasMargin}
         on:change={handleMarginChange}
         class="bg-transparent text-base-content text-xs font-semibold focus:outline-none cursor-pointer"
       >
@@ -223,15 +223,15 @@
     <!-- Canvas Preview Theme Mode (Light / Dark) -->
     <button
       type="button"
-      on:click={() => editorStore.togglePreviewTheme()}
+      on:click={() => canvasStore.togglePreviewTheme()}
       class={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-base-300 dark:border-slate-800 text-xs font-medium transition-colors cursor-pointer ${
-        $editorStore.previewTheme === 'dark'
+        $canvasStore.previewTheme === 'dark'
           ? 'bg-slate-800 text-amber-400 border-slate-700'
           : 'bg-base-200 text-slate-700 hover:bg-base-300'
       }`}
       title="Preview Canvas Mode: Light / Dark"
     >
-      {#if $editorStore.previewTheme === 'dark'}
+      {#if $canvasStore.previewTheme === 'dark'}
         <Moon size={13} class="text-amber-400" />
         <span class="text-xs font-semibold">Dark</span>
       {:else}

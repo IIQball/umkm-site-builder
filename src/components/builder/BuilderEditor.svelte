@@ -4,7 +4,7 @@
   import LayerPanel from './LayerPanel.svelte';
   import Canvas from './Canvas.svelte';
   import PropertyInspector from './PropertyInspector.svelte';
-  import { editorStore, activeSection } from './stores/editorStore';
+  import { editorStore, canvasStore, activeSection } from './stores/editorStore';
 
   export let templateId: string;
   export let platformFeePercentage: number = 30;
@@ -49,7 +49,7 @@
 
   const handleSelectSection = (id: string | null) => {
     console.log('[Builder] Selected section:', id);
-    editorStore.selectSection(id);
+    canvasStore.selectSection(id);
   };
 
   const handleKeydown = (e: KeyboardEvent) => {
@@ -71,7 +71,7 @@
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
         e.preventDefault();
-        editorStore.toggleColumnGrid();
+        canvasStore.toggleColumnGrid();
       }
     }
   };
@@ -109,11 +109,11 @@
       templatePrice={$editorStore.template.price}
       {platformFeePercentage}
       status={$editorStore.template.status}
-      viewMode={$editorStore.viewMode}
+      viewMode={$canvasStore.viewMode}
       isDirty={$editorStore.isDirty}
       saving={$editorStore.isSaving}
       saveSuccess={$editorStore.saveSuccess}
-      onViewModeChange={(mode) => editorStore.setViewMode(mode)}
+      onViewModeChange={(mode) => canvasStore.setViewMode(mode)}
       onSave={() => editorStore.save()}
       onSubmit={() => editorStore.submitReview()}
     />
@@ -123,9 +123,9 @@
       <!-- Left Panel: Layers / Sections -->
       <LayerPanel
         sections={$editorStore.template.config.sections}
-        selectedSectionId={$editorStore.selectedSectionId}
-        selectedNodeId={$editorStore.selectedNodeId}
-        onSelectNode={(secId, nodeId) => editorStore.selectNode(secId, nodeId)}
+        selectedSectionId={$canvasStore.selectedSectionId}
+        selectedNodeId={$canvasStore.selectedNodeId}
+        onSelectNode={(secId, nodeId) => canvasStore.selectNode(secId, nodeId)}
         onAddSection={(type) => editorStore.addSection(type)}
         onDeleteSection={(id) => editorStore.deleteSection(id)}
         onReorderSection={(id, dir) => editorStore.reorderSection(id, dir)}
@@ -134,8 +134,8 @@
       <!-- Middle Panel: Canvas Preview -->
       <Canvas
         sections={$editorStore.template.config.sections}
-        selectedSectionId={$editorStore.selectedSectionId}
-        viewMode={$editorStore.viewMode}
+        selectedSectionId={$canvasStore.selectedSectionId}
+        viewMode={$canvasStore.viewMode}
         onSelectSection={handleSelectSection}
       />
 

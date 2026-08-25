@@ -21,6 +21,8 @@
   export let totalTemplatesSold: number;
   export let settlementDelayDays = 7;
 
+  type WalletMutation = (typeof walletSummary.mutations)[number];
+
   const handleBalanceUpdate = (e: Event) => {
     const customEvent = e as CustomEvent;
     walletSummary.balance = customEvent.detail.balance;
@@ -36,12 +38,12 @@
     // Load persisted mock withdrawals
     const saved = localStorage.getItem('designer_mock_mutations');
     if (saved) {
-      const mockMuts = JSON.parse(saved);
+      const mockMuts: WalletMutation[] = JSON.parse(saved);
       const existingIds = new Set(walletSummary.mutations.map(m => m.id));
-      const toAdd = mockMuts.filter((m: any) => !existingIds.has(m.id));
+      const toAdd = mockMuts.filter((m) => !existingIds.has(m.id));
       if (toAdd.length > 0) {
         walletSummary.mutations = [...toAdd, ...walletSummary.mutations];
-        const totalDebits = toAdd.reduce((sum: number, m: any) => sum + m.amount, 0);
+        const totalDebits = toAdd.reduce((sum: number, m) => sum + m.amount, 0);
         walletSummary.balance = Math.max(0, walletSummary.balance - totalDebits);
       }
     }

@@ -30,7 +30,7 @@ module.exports = {
       plugins: ["@typescript-eslint"],
       rules: {
         "no-console": ["warn", { "allow": ["warn", "error"] }],
-        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-explicit-any": "error",
       },
     },
     {

@@ -68,7 +68,7 @@
     }
   }
 
-  let pollingInterval: any = null;
+  let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   async function pollStatus() {
     try {

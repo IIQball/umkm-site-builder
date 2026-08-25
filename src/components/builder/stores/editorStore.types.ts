@@ -40,15 +40,34 @@ export interface EditorTemplate {
   config: TemplateConfig;
 }
 
-export interface EditorState {
-  template: EditorTemplate | null;
+export interface CanvasState {
   selectedSectionId: string | null;
   selectedNodeId: string | null;
+  hoveredNodeId: string | null;
   viewMode: 'desktop' | 'tablet' | 'mobile';
+  gridActive: boolean;
+  zoom: number;
   canvasMargin: '16px' | '24px' | '32px' | '48px';
   showColumnGrid: boolean;
   showPixelGrid: boolean;
   previewTheme: 'light' | 'dark';
+}
+
+export const initialCanvasState: CanvasState = {
+  selectedSectionId: null,
+  selectedNodeId: null,
+  hoveredNodeId: null,
+  viewMode: 'desktop',
+  gridActive: false,
+  zoom: 100,
+  canvasMargin: '24px',
+  showColumnGrid: false,
+  showPixelGrid: false,
+  previewTheme: 'light',
+};
+
+export interface DocumentState {
+  template: EditorTemplate | null;
   isDirty: boolean;
   isSaving: boolean;
   saveSuccess: boolean;
@@ -59,18 +78,16 @@ export interface EditorState {
   };
 }
 
-export const initialState: EditorState = {
+export const initialDocumentState: DocumentState = {
   template: null,
-  selectedSectionId: null,
-  selectedNodeId: null,
-  viewMode: 'desktop',
-  canvasMargin: '24px',
-  showColumnGrid: false,
-  showPixelGrid: false,
-  previewTheme: 'light',
   isDirty: false,
   isSaving: false,
   saveSuccess: false,
   error: null,
   history: { past: [], future: [] },
 };
+
+// Legacy / Combined EditorState alias for backward compatibility
+export type EditorState = DocumentState;
+export const initialState = initialDocumentState;
+

@@ -1,17 +1,18 @@
 <script lang="ts">
   import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Sliders, Palette, Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import type { NodeStyles } from '@/types';
   import { fontSizes, fontWeights, radiusPresets, buttonPaddings, shadowPresets, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
 
   export let section: TemplateSection;
   export let nodeId: string;
   export let onUpdate: (section: TemplateSection) => void;
 
-  $: nodeStyles = ((section.props?.nodeStyles as Record<string, any>)?.[nodeId] || {}) as Record<string, string>;
+  $: nodeStyles = ((section.props?.nodeStyles as Record<string, NodeStyles> | undefined)?.[nodeId] || {}) as Record<string, string>;
 
   const handleStyleChange = (key: string, value: string) => {
     const currentProps = section.props || {};
-    const currentNodeStyles = (currentProps.nodeStyles as Record<string, any>) || {};
+    const currentNodeStyles = (currentProps.nodeStyles as Record<string, NodeStyles> | undefined) || {};
     const updatedForThisNode = { ...(currentNodeStyles[nodeId] || {}), [key]: value };
     onUpdate({ ...section, props: { ...currentProps, nodeStyles: { ...currentNodeStyles, [nodeId]: updatedForThisNode } } });
   };

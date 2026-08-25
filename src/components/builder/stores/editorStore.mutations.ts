@@ -1,10 +1,10 @@
 import type { TemplateConfig } from '@/schemas';
-import type { EditorState, EditorTemplate } from './editorStore.types';
+import type { DocumentState, EditorTemplate } from './editorStore.types';
 
-type Updater = (fn: (s: EditorState) => EditorState) => void;
+type Updater = (fn: (s: DocumentState) => DocumentState) => void;
 
 export async function applySave(
-  state: EditorState,
+  state: DocumentState,
   update: Updater
 ): Promise<void> {
   if (!state.template || state.isSaving) return;
@@ -28,7 +28,7 @@ export async function applySave(
 }
 
 export async function applySubmitReview(
-  state: EditorState,
+  state: DocumentState,
   update: Updater
 ): Promise<boolean> {
   if (!state.template || state.isSaving) return false;
@@ -57,17 +57,16 @@ export async function applySubmitReview(
   }
 }
 
-
 /**
  * Handles deleteNode logic per section type.
- * Returns updated sections array.
+ * Returns updated DocumentState.
  */
 export function applyDeleteNode(
-  state: EditorState,
+  state: DocumentState,
   sectionId: string,
   nodeId: string,
-  pushHistory: (state: EditorState, config: TemplateConfig) => EditorState
-): EditorState {
+  pushHistory: (state: DocumentState, config: TemplateConfig) => DocumentState
+): DocumentState {
   if (!state.template) return state;
 
   const sections = state.template.config.sections.map((s) => {
@@ -113,23 +112,20 @@ export function applyDeleteNode(
     return { ...s, props: currentProps };
   });
 
-  return {
-    ...pushHistory(state, { ...state.template.config, sections }),
-    selectedNodeId: null,
-  };
+  return pushHistory(state, { ...state.template.config, sections });
 }
 
 /**
  * Handles addNode logic per section type.
- * Returns updated state with selectedNodeId set to new node key.
+ * Returns updated state and selectedNodeId.
  */
 export function applyAddNode(
-  state: EditorState,
+  state: DocumentState,
   sectionId: string,
   nodeType: string,
-  pushHistory: (state: EditorState, config: TemplateConfig) => EditorState
-): EditorState {
-  if (!state.template) return state;
+  pushHistory: (state: DocumentState, config: TemplateConfig) => DocumentState
+): { state: DocumentState; selectedNodeId: string | null } {
+  if (!state.template) return { state, selectedNodeId: null };
   let selectedNodeKey: string | null = null;
 
   const sections = state.template.config.sections.map((s) => {
@@ -189,7 +185,8 @@ export function applyAddNode(
   });
 
   return {
-    ...pushHistory(state, { ...state.template.config, sections }),
+    state: pushHistory(state, { ...state.template.config, sections }),
     selectedNodeId: selectedNodeKey,
   };
 }
+

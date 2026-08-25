@@ -4,6 +4,55 @@
 
 import { z } from 'zod';
 
+export const ColorTokenSchema = z.enum([
+  'primary',
+  'secondary',
+  'accent',
+  'background',
+  'surface',
+  'text_primary',
+  'text_muted',
+  'transparent',
+]);
+
+export type ColorToken = z.infer<typeof ColorTokenSchema>;
+
+export const HeaderAnnouncementPresetSchema = z.enum(['default_split', 'centered_stacked', 'compact_inline']);
+export type HeaderAnnouncementPreset = z.infer<typeof HeaderAnnouncementPresetSchema>;
+
+export const HeroPresetSchema = z.enum(['split_left_text', 'split_right_text', 'centered_minimal', 'full_banner_overlay']);
+export type HeroPreset = z.infer<typeof HeroPresetSchema>;
+
+export const FeaturesPresetSchema = z.enum(['grid_3_cards', 'horizontal_list', 'banner_inline_bar']);
+export type FeaturesPreset = z.infer<typeof FeaturesPresetSchema>;
+
+export const ProductCatalogPresetSchema = z.enum(['grid_standard', 'carousel_scroll', 'list_compact']);
+export type ProductCatalogPreset = z.infer<typeof ProductCatalogPresetSchema>;
+
+export const TestimonialsPresetSchema = z.enum(['masonry_grid', 'single_spotlight', 'chat_bubble_flow']);
+export type TestimonialsPreset = z.infer<typeof TestimonialsPresetSchema>;
+
+export const FAQPresetSchema = z.enum(['accordion_single_col', 'split_faq_sidebar', 'grid_2_col_cards']);
+export type FAQPreset = z.infer<typeof FAQPresetSchema>;
+
+export const GoogleMapsPresetSchema = z.enum(['fullwidth_map', 'split_map_info', 'compact_boxed']);
+export type GoogleMapsPreset = z.infer<typeof GoogleMapsPresetSchema>;
+
+export const FooterPresetSchema = z.enum(['multi_column', 'centered_simple', 'cta_focused']);
+export type FooterPreset = z.infer<typeof FooterPresetSchema>;
+
+export const SectionLayoutPresetSchema = z.union([
+  HeaderAnnouncementPresetSchema,
+  HeroPresetSchema,
+  FeaturesPresetSchema,
+  ProductCatalogPresetSchema,
+  TestimonialsPresetSchema,
+  FAQPresetSchema,
+  GoogleMapsPresetSchema,
+  FooterPresetSchema,
+]);
+export type SectionLayoutPreset = z.infer<typeof SectionLayoutPresetSchema>;
+
 export const TemplateStylesSchema = z.object({
   display: z.enum(['flex', 'grid', 'block']).or(z.string()).optional(),
   alignItems: z.string().optional(),
@@ -13,8 +62,9 @@ export const TemplateStylesSchema = z.object({
   margin: z.string().optional(),
   fontSize: z.string().optional(),
   fontWeight: z.string().optional(),
-  color: z.string().optional(),
-  backgroundColor: z.string().optional(),
+  textColorToken: ColorTokenSchema.optional(),
+  bgColorToken: ColorTokenSchema.optional(),
+  borderColorToken: ColorTokenSchema.optional(),
   borderRadius: z.string().optional(),
 }).passthrough();
 
@@ -27,8 +77,10 @@ export const TemplateSectionSchema = z.object({
     'product_catalog',
     'testimonials',
     'faq',
+    'google_maps',
     'footer',
   ]),
+  layoutPreset: z.string().optional(),
   props: z.record(z.unknown()).optional(),
   styles: TemplateStylesSchema.optional(),
 });
@@ -36,6 +88,7 @@ export const TemplateSectionSchema = z.object({
 export const ThemeColorsSchema = z.object({
   primary: z.string().optional(),
   secondary: z.string().optional(),
+  accent: z.string().optional(),
   background: z.string().optional(),
   surface: z.string().optional(),
   textPrimary: z.string().optional(),
@@ -131,6 +184,7 @@ export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
   colors: {
     primary: '#3b82f6',
     secondary: '#64748b',
+    accent: '#f59e0b',
     background: '#ffffff',
     surface: '#f8fafc',
     textPrimary: '#0f172a',
@@ -181,6 +235,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
   {
     id: 'section-1',
     type: 'header_announcement',
+    layoutPreset: 'default_split',
     props: {
       showAnnouncement: true,
       announcementText: 'Diskon 20% khusus hari ini',
@@ -204,7 +259,8 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       navHoverColor: '#2563eb',
     },
     styles: {
-      backgroundColor: '#ffffff',
+      bgColorToken: 'surface',
+      textColorToken: 'text_primary',
       padding: '0px',
       display: 'block',
     },
@@ -212,6 +268,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
   {
     id: 'section-2',
     type: 'hero',
+    layoutPreset: 'split_left_text',
     props: {
       tagName: 'h1',
       title: 'Selamat datang di toko kami',
@@ -221,14 +278,16 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       ctaLink: '#catalog',
     },
     styles: {
+      bgColorToken: 'background',
+      textColorToken: 'text_primary',
       padding: '64px 32px',
-      backgroundColor: '#ffffff',
       textAlign: 'center',
     },
   },
   {
     id: 'section-3',
     type: 'features',
+    layoutPreset: 'grid_3_cards',
     props: {
       features: [
         {
@@ -249,28 +308,32 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       ],
     },
     styles: {
+      bgColorToken: 'surface',
+      textColorToken: 'text_primary',
       display: 'grid',
       gap: '24px',
       padding: '48px 32px',
-      backgroundColor: '#f9fafb',
     },
   },
   {
     id: 'section-4',
     type: 'product_catalog',
+    layoutPreset: 'grid_standard',
     props: {
       products: [],
     },
     styles: {
+      bgColorToken: 'background',
+      textColorToken: 'text_primary',
       display: 'grid',
       gap: '20px',
       padding: '48px 32px',
-      backgroundColor: '#ffffff',
     },
   },
   {
     id: 'section-5',
     type: 'testimonials',
+    layoutPreset: 'masonry_grid',
     props: {
       testimonials: [
         {
@@ -282,15 +345,17 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       ],
     },
     styles: {
+      bgColorToken: 'surface',
+      textColorToken: 'text_primary',
       display: 'grid',
       gap: '24px',
       padding: '48px 32px',
-      backgroundColor: '#f3f4f6',
     },
   },
   {
     id: 'section-6',
     type: 'faq',
+    layoutPreset: 'accordion_single_col',
     props: {
       faqs: [
         {
@@ -304,21 +369,23 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       ],
     },
     styles: {
+      bgColorToken: 'background',
+      textColorToken: 'text_primary',
       padding: '48px 32px',
-      backgroundColor: '#ffffff',
     },
   },
   {
     id: 'section-7',
     type: 'footer',
+    layoutPreset: 'multi_column',
     props: {
       whatsappNumber: '',
       address: '',
       copyrightText: '© 2024 Toko Kami. Semua hak dilindungi.',
     },
     styles: {
-      backgroundColor: '#1f2937',
-      color: '#ffffff',
+      bgColorToken: 'surface',
+      textColorToken: 'text_primary',
       padding: '32px',
       textAlign: 'center',
     },

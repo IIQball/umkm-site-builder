@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { editorStore } from '../stores/editorStore';
+  import { editorStore, canvasStore } from '../stores/editorStore';
   import type { FeaturesProps, SectionStyles } from '@/types';
   import { ShieldCheck, Truck, Award, Star } from 'lucide-svelte';
 
@@ -28,8 +28,8 @@
         },
       ];
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile';
-  $: isTabletView = $editorStore?.viewMode === 'tablet';
+  $: isMobileView = $canvasStore?.viewMode === 'mobile';
+  $: isTabletView = $canvasStore?.viewMode === 'tablet';
   $: hasCustomColor = !!styles?.color;
 
   let draggedIdx: number | null = null;

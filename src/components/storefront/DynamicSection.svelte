@@ -8,7 +8,7 @@
 
   export let section: {
     type: string;
-    props?: Record<string, any>;
+    props?: Record<string, unknown>;
     id?: string;
   };
 

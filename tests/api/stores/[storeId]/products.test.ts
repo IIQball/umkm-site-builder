@@ -51,10 +51,20 @@ describe('Store Products API', () => {
       })
     };
 
-    // First call to db.select is for count, second is for records
+    // Mock chain for store query
+    const storeChain = {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([{ waNumber: '6281234567890' }])
+        })
+      })
+    };
+
+    // First call to db.select is for count, second is for records, third is for store
     (db.select as Mock)
       .mockReturnValueOnce(countChain)
-      .mockReturnValueOnce(recordsChain);
+      .mockReturnValueOnce(recordsChain)
+      .mockReturnValueOnce(storeChain);
 
     const request = new Request('http://localhost/api/stores/store-1/products?page=1&limit=10');
     const context = { request, url: new URL(request.url), params: { storeId: 'store-1' } } as unknown as APIContext;
@@ -97,9 +107,18 @@ describe('Store Products API', () => {
       })
     };
 
+    const storeChain = {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([{ waNumber: '6281234567890' }])
+        })
+      })
+    };
+
     (db.select as Mock)
       .mockReturnValueOnce(countChain)
-      .mockReturnValueOnce(recordsChain);
+      .mockReturnValueOnce(recordsChain)
+      .mockReturnValueOnce(storeChain);
 
     const request = new Request('http://localhost/api/stores/store-1/products?categoryId=cat-1');
     const context = { request, url: new URL(request.url), params: { storeId: 'store-1' } } as unknown as APIContext;

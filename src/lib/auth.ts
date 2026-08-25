@@ -196,6 +196,15 @@ export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
   return isActive(user) && isAdmin(user);
 }
 
+export function isSuperAdmin(user: AuthenticatedUser | null): boolean {
+  if (!user) return false;
+  return user.role === 'superadmin';
+}
+
+export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): boolean {
+  return isActive(user) && isSuperAdmin(user);
+}
+
 export function getRedirectUrlForRole(role?: string | null): string {
   if (role === 'designer') return '/designer/wallet';
   return '/dashboard';

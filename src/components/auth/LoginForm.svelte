@@ -11,6 +11,10 @@
   let loading = false;
   let showPassword = false;
 
+  const togglePasswordVisibility = () => {
+    showPassword = !showPassword;
+  };
+
   const handleInput = (field: string) => {
     if (errors[field]) {
       errors = { ...errors, [field]: "" };
@@ -102,29 +106,40 @@
       <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi</span>
     </label>
     <div class="relative">
-      <input
-        type={showPassword ? "text" : "password"}
-        id="password"
-        value={password}
-        on:input={(e) => {
-          password = e.currentTarget.value;
-          handleInput("password");
-        }}
-        placeholder="Masukkan kata sandi"
-        class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-        autocomplete="current-password"
-      />
+      {#if showPassword}
+        <input
+          type="text"
+          id="password"
+          bind:value={password}
+          on:input={() => handleInput("password")}
+          placeholder="Masukkan kata sandi"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
+          autocomplete="current-password"
+        />
+      {:else}
+        <input
+          type="password"
+          id="password"
+          bind:value={password}
+          on:input={() => handleInput("password")}
+          placeholder="Masukkan kata sandi"
+          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
+          autocomplete="current-password"
+        />
+      {/if}
       <button
         type="button"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 text-base-content/60 hover:text-base-content transition-colors"
-        on:click={() => (showPassword = !showPassword)}
-        aria-label="Tampilkan atau sembunyikan kata sandi"
+        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+        on:click={togglePasswordVisibility}
+        aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
       >
-        {#if showPassword}
-          <EyeOff size={16} />
-        {:else}
-          <Eye size={16} />
-        {/if}
+        <span class="pointer-events-none flex">
+          {#if showPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </span>
       </button>
     </div>
     {#if errors.password}

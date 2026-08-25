@@ -1,0 +1,135 @@
+<script lang="ts">
+  import type { AuthenticatedUser } from '@/lib/auth';
+  import type { NavItem } from './sidebar.helpers';
+  import { createEventDispatcher } from 'svelte';
+
+  export let user: AuthenticatedUser;
+  export let generalItems: NavItem[] = [];
+  export let accountItems: NavItem[] = [];
+  export let flatItems: NavItem[] = [];
+  export let drawerOpen = false;
+  export let currentPath = '';
+
+  const dispatch = createEventDispatcher<{
+    openDrawer: void;
+    closeDrawer: void;
+    signOut: void;
+  }>();
+
+  $: isDesigner = user.role === 'designer';
+  $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
+
+  const isActive = (href: string): boolean => {
+    if (href === '/dashboard') return currentPath === '/dashboard';
+    return currentPath.startsWith(href);
+  };
+</script>
+
+<!-- # MOBILE — FAB + SLIDE-OVER DRAWER -->
+<button
+  type="button"
+  on:click={() => dispatch('openDrawer')}
+  class="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:bg-primary/95 active:scale-95 transition-all cursor-pointer"
+  aria-label="Buka menu navigasi"
+>
+  <span class="material-symbols-outlined text-xl">menu</span>
+</button>
+
+{#if drawerOpen}
+  <button
+    type="button"
+    class="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm cursor-pointer border-none"
+    on:click={() => dispatch('closeDrawer')}
+    aria-label="Tutup menu"
+  ></button>
+{/if}
+
+<!-- Drawer panel -->
+<div
+  class="md:hidden fixed top-0 right-0 z-50 h-full w-72 bg-card shadow-2xl flex flex-col transition-transform duration-300 ease-in-out border-l border-light"
+  style="transform: translateX({drawerOpen ? '0' : '100%'})"
+  aria-hidden={!drawerOpen}
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menu navigasi"
+>
+  <div class="flex items-center justify-between h-14 px-4 border-b border-light">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-black text-sm shadow-sm">
+        <span class="material-symbols-outlined icon-filled text-sm">storefront</span>
+      </div>
+      <span class="font-bold text-sm text-main">UMKM Builder</span>
+    </div>
+    <button
+      type="button"
+      on:click={() => dispatch('closeDrawer')}
+      class="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-nested transition-colors cursor-pointer"
+      aria-label="Tutup menu"
+    >
+      <span class="material-symbols-outlined text-sm">close</span>
+    </button>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="Menu utama mobile">
+    {#if isDesigner}
+      <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2 pb-2">General</p>
+      {#each generalItems as item}
+        {@const active = isActive(item.href)}
+        <a
+          href={item.href}
+          on:click={() => dispatch('closeDrawer')}
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
+        >
+          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="flex-1">{item.label}</span>
+          {#if active}<span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>{/if}
+        </a>
+      {/each}
+      <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2 pb-2 pt-4">Account</p>
+      {#each accountItems as item}
+        {@const active = isActive(item.href)}
+        <a
+          href={item.href}
+          on:click={() => dispatch('closeDrawer')}
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
+        >
+          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="flex-1">{item.label}</span>
+        </a>
+      {/each}
+    {:else}
+      {#each flatItems as item}
+        {@const active = isActive(item.href)}
+        <a
+          href={item.href}
+          on:click={() => dispatch('closeDrawer')}
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-nested hover:text-main'}"
+        >
+          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="flex-1">{item.label}</span>
+          {#if active}<span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>{/if}
+        </a>
+      {/each}
+    {/if}
+  </nav>
+
+  <div class="border-t border-light p-3 space-y-1">
+    <div class="flex items-center gap-2.5 px-2 py-2">
+      <div class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-sm">
+        {userInitial}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-main truncate">{user.name ?? user.email}</p>
+        <span class="text-xs font-bold text-primary">{user.role}</span>
+      </div>
+    </div>
+    <button
+      type="button"
+      on:click={() => dispatch('signOut')}
+      class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-rose-500 hover:bg-rose-50/10 transition-colors cursor-pointer"
+    >
+      <span class="material-symbols-outlined text-sm">logout</span>
+      <span>Keluar</span>
+    </button>
+  </div>
+</div>

@@ -11,6 +11,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role === 'designer') return Astro.redirect('/designer/wallet');
+if (user.role === 'superadmin') return Astro.redirect('/admin/whitelist');
 
 ---
 
@@ -43,8 +44,8 @@ if (user.role === 'designer') return Astro.redirect('/designer/wallet');
       </div>
     )}
 
-    {/* ── Admin / Superadmin Dashboard ── */}
-    {(user.role === 'admin' || user.role === 'superadmin') && (
+    {/* ── Admin Dashboard ── */}
+    {user.role === 'admin' && (
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
           <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Transaksi</p>

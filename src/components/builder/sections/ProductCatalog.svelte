@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { editorStore } from "../stores/editorStore";
+  import { editorStore, canvasStore } from "../stores/editorStore";
   import type {
     ProductCatalogProps,
     SectionStyles,
@@ -38,8 +38,8 @@
     : ((rawProducts.length > 0
         ? rawProducts
         : DEFAULT_DEMO_PRODUCTS) as ProductItem[]);
-  $: isMobileView = $editorStore?.viewMode === "mobile";
-  $: isTabletView = $editorStore?.viewMode === "tablet";
+  $: isMobileView = $canvasStore?.viewMode === "mobile";
+  $: isTabletView = $canvasStore?.viewMode === "tablet";
   $: hasCustomColor = !!styles?.color;
 
   $: colDesktop = Number(props?.columnsDesktop ?? styles?.columnsDesktop ?? 3);
@@ -390,15 +390,15 @@
 
             {#if isInlinePrice}
               <div
-                class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2"
+                class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2"
               >
-                <div>
+                <div class="min-w-0">
                   <span
                     class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight"
                     >Harga</span
                   >
                   <p
-                    class="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400 font-mono"
+                    class="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400 font-mono truncate"
                   >
                     Rp {typeof product.price === "number"
                       ? product.price.toLocaleString("id-ID")
@@ -421,7 +421,7 @@
                     if (isActive) e.preventDefault();
                   }}
                   style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
-                  class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}
+                  class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${ctaBtnRadiusClass}`}
                 >
                   {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
                   <span>Beli Sekarang</span>

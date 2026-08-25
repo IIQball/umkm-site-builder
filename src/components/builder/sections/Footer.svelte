@@ -1,19 +1,19 @@
 <script lang="ts">
   import { MessageCircle, MapPin } from 'lucide-svelte';
-  import { editorStore } from '../stores/editorStore';
+  import { canvasStore } from '../stores/editorStore';
   import type { FooterProps, SectionStyles } from '@/types';
 
   export let props: FooterProps = {};
   export let styles: SectionStyles = {};
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile';
-  $: isTabletView = $editorStore?.viewMode === 'tablet';
+  $: isMobileView = $canvasStore?.viewMode === 'mobile';
+  $: isTabletView = $canvasStore?.viewMode === 'tablet';
   $: whatsappNumber = props?.whatsappNumber || '';
   $: address = props?.address || '';
   $: copyrightText = props?.copyrightText || '© 2026 Toko Kami. Semua hak dilindungi.';
 
-  const isDarkColor = (color?: string): boolean => {
-    if (!color || color === 'transparent') return true;
+  const isDarkColor = (color?: unknown): boolean => {
+    if (typeof color !== 'string' || !color || color === 'transparent') return true;
     if (color.startsWith('#')) {
       const hex = color.replace('#', '');
       const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;

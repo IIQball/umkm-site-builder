@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import type { APIContext } from 'astro';
 import { GET, POST, PATCH, DELETE } from '../../../src/pages/api/categories/index';
 import { db } from '../../../src/db';
 
@@ -22,14 +23,15 @@ describe('Categories API', () => {
 
   it('GET returns categories for store', async () => {
     const mockCategories = [{ id: '1', name: 'Test' }];
-    (db.select as any).mockReturnValue({
+    (db.select as unknown as Mock).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue(mockCategories),
       }),
     });
 
     const request = new Request('http://localhost/api/categories?storeId=store-1');
-    const response = (await GET({ request } as any)) as Response;
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const response = (await GET(context)) as Response;
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -38,8 +40,8 @@ describe('Categories API', () => {
 
   it('POST creates a category', async () => {
     // No existing slug conflict
-    (db.query.storeCategories.findFirst as any).mockResolvedValue(null);
-    (db.insert as any).mockReturnValue({
+    (db.query.storeCategories.findFirst as unknown as Mock).mockResolvedValue(null);
+    (db.insert as unknown as Mock).mockReturnValue({
       values: vi.fn().mockResolvedValue({}),
     });
 
@@ -47,18 +49,19 @@ describe('Categories API', () => {
       method: 'POST',
       body: JSON.stringify({ storeId: 's1', name: 'New', slug: 'new' }),
     });
-    const response = (await POST({ request } as any)) as Response;
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const response = (await POST(context)) as Response;
 
     expect(response.status).toBe(201);
   });
 
   it('PATCH updates a category', async () => {
     // findFirst for current category
-    (db.query.storeCategories.findFirst as any)
-      .mockResolvedValueOnce({ id: '1', storeId: 's1', slug: 'old' })  // current cat
-      .mockResolvedValueOnce(null);  // no slug conflict
+    (db.query.storeCategories.findFirst as unknown as Mock)
+      .mockResolvedValueOnce({ id: '1', storeId: 's1', slug: 'old' }) // current cat
+      .mockResolvedValueOnce(null); // no slug conflict
 
-    (db.update as any).mockReturnValue({
+    (db.update as unknown as Mock).mockReturnValue({
       set: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue({}),
       }),
@@ -68,19 +71,20 @@ describe('Categories API', () => {
       method: 'PATCH',
       body: JSON.stringify({ id: '1', name: 'Updated', slug: 'up' }),
     });
-    const response = (await PATCH({ request } as any)) as Response;
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const response = (await PATCH(context)) as Response;
 
     expect(response.status).toBe(200);
   });
 
   it('DELETE soft deletes a category', async () => {
     // findFirst returns the category to delete
-    (db.query.storeCategories.findFirst as any).mockResolvedValue({
+    (db.query.storeCategories.findFirst as unknown as Mock).mockResolvedValue({
       id: '1',
       slug: 'test-slug',
     });
 
-    (db.update as any).mockReturnValue({
+    (db.update as unknown as Mock).mockReturnValue({
       set: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue({}),
       }),
@@ -89,7 +93,8 @@ describe('Categories API', () => {
     const request = new Request('http://localhost/api/categories?id=1', {
       method: 'DELETE',
     });
-    const response = (await DELETE({ request } as any)) as Response;
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const response = (await DELETE(context)) as Response;
 
     expect(response.status).toBe(200);
   });

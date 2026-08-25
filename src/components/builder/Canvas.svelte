@@ -2,7 +2,7 @@
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
   import type { TemplateSection, TemplateTheme } from '@/schemas';
-  import { editorStore } from './stores/editorStore';
+  import { editorStore, canvasStore } from './stores/editorStore';
   import { MoveVertical, MoveHorizontal } from 'lucide-svelte';
 
   export let sections: TemplateSection[] = [];
@@ -17,7 +17,7 @@
   let currentDragTooltip = '';
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
-  $: isDarkPreview = $editorStore.previewTheme === 'dark';
+  $: isDarkPreview = $canvasStore.previewTheme === 'dark';
 
   $: canvasCssVars = [
     `--theme-primary: ${theme.colors?.primary || '#3b82f6'}`,
@@ -46,7 +46,7 @@
   const handleCanvasBackgroundClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement | null;
     if (target?.classList?.contains('canvas-backdrop')) {
-      editorStore.deselectAll();
+      canvasStore.deselectAll();
     }
   };
 
@@ -132,7 +132,7 @@
   };
 </script>
 
-<svelte:window on:keydown={(e) => e.key === 'Escape' && editorStore.deselectAll()} />
+<svelte:window on:keydown={(e) => e.key === 'Escape' && canvasStore.deselectAll()} />
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
 <main
@@ -143,7 +143,7 @@
 >
   <!-- Frame Container with flat pixel-perfect viewport boundaries -->
   <div
-    data-theme={$editorStore.previewTheme}
+    data-theme={$canvasStore.previewTheme}
     style={canvasCssVars}
     class={`relative transition-all duration-300 ease-in-out shadow-2xl my-2 sm:my-4 flex flex-col box-border overflow-x-hidden ${
       isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
@@ -158,8 +158,8 @@
     <!-- Figma-Style Layout Grid Guides (Overlay) -->
     <LayoutGridOverlay
       {viewMode}
-      showColumnGrid={$editorStore.showColumnGrid}
-      showPixelGrid={$editorStore.showPixelGrid}
+      showColumnGrid={$canvasStore.showColumnGrid}
+      showPixelGrid={$canvasStore.showPixelGrid}
     />
 
     {#if sections.length === 0}

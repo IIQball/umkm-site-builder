@@ -7,6 +7,7 @@ import {
   MessageSquare,
   HelpCircle,
   PanelBottom,
+  MapPin,
   Heading,
   FileText,
   Image,
@@ -23,6 +24,7 @@ export const sectionTypeLabels: Record<TemplateSection['type'], string> = {
   product_catalog: 'Katalog Produk',
   testimonials: 'Testimoni Pelanggan',
   faq: 'FAQ (Tanya Jawab)',
+  google_maps: 'Google Maps & Lokasi',
   footer: 'Footer & Kontak',
 };
 
@@ -33,6 +35,7 @@ export const sectionTypeIcons: Record<TemplateSection['type'], ComponentType> = 
   product_catalog: ShoppingBag,
   testimonials: MessageSquare,
   faq: HelpCircle,
+  google_maps: MapPin,
   footer: PanelBottom,
 };
 
@@ -43,6 +46,7 @@ export const sectionTypes: TemplateSection['type'][] = [
   'product_catalog',
   'testimonials',
   'faq',
+  'google_maps',
   'footer',
 ];
 
@@ -103,6 +107,11 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
       });
       return list;
     }
+    case 'google_maps':
+      return [
+        { id: 'address', name: 'Alamat Lokasi', icon: MapPin },
+        { id: 'map', name: 'Peta Interaktif', icon: Image },
+      ];
     case 'footer':
       return [
         { id: 'whatsapp', name: 'WhatsApp Contact', icon: MessageSquare },

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { editorStore } from '../stores/editorStore';
+  import { editorStore, canvasStore } from '../stores/editorStore';
   import type { TestimonialsProps, SectionStyles, TestimonialItem } from '@/types';
   import { Star } from 'lucide-svelte';
 
@@ -18,8 +18,8 @@
         },
       ]) as TestimonialItem[];
 
-  $: isMobileView = $editorStore?.viewMode === 'mobile';
-  $: isTabletView = $editorStore?.viewMode === 'tablet';
+  $: isMobileView = $canvasStore?.viewMode === 'mobile';
+  $: isTabletView = $canvasStore?.viewMode === 'tablet';
   $: hasCustomColor = !!styles?.color;
 
   let draggedIdx: number | null = null;

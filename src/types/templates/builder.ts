@@ -1,12 +1,42 @@
 import type { ComponentType } from 'svelte';
 
+export type ColorToken =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'background'
+  | 'surface'
+  | 'text_primary'
+  | 'text_muted'
+  | 'transparent';
+
+export type HeaderAnnouncementPreset = 'default_split' | 'centered_stacked' | 'compact_inline';
+export type HeroPreset = 'split_left_text' | 'split_right_text' | 'centered_minimal' | 'full_banner_overlay';
+export type FeaturesPreset = 'grid_3_cards' | 'horizontal_list' | 'banner_inline_bar';
+export type ProductCatalogPreset = 'grid_standard' | 'carousel_scroll' | 'list_compact';
+export type TestimonialsPreset = 'masonry_grid' | 'single_spotlight' | 'chat_bubble_flow';
+export type FAQPreset = 'accordion_single_col' | 'split_faq_sidebar' | 'grid_2_col_cards';
+export type GoogleMapsPreset = 'fullwidth_map' | 'split_map_info' | 'compact_boxed';
+export type FooterPreset = 'multi_column' | 'centered_simple' | 'cta_focused';
+
+export type SectionLayoutPreset =
+  | HeaderAnnouncementPreset
+  | HeroPreset
+  | FeaturesPreset
+  | ProductCatalogPreset
+  | TestimonialsPreset
+  | FAQPreset
+  | GoogleMapsPreset
+  | FooterPreset;
+
 export interface NodeStyles {
   textAlign?: 'left' | 'center' | 'right' | 'justify' | string;
-  color?: string;
+  textColorToken?: ColorToken;
+  bgColorToken?: ColorToken;
+  borderColorToken?: ColorToken;
   fontFamily?: string;
   fontSize?: string;
   fontWeight?: string;
-  backgroundColor?: string;
   borderRadius?: string;
   padding?: string;
   boxShadow?: string;
@@ -16,14 +46,15 @@ export interface NodeStyles {
   width?: string;
   animation?: string;
   hoverEffect?: 'scale' | 'lift' | 'glow' | string;
+  [key: string]: unknown;
 }
 
 export interface HeaderAnnouncementProps {
   showAnnouncement?: boolean;
   announcementText?: string;
   announcementAlign?: 'center' | 'left' | string;
-  announcementBgColor?: string;
-  announcementTextColor?: string;
+  announcementBgColorToken?: ColorToken;
+  announcementTextColorToken?: ColorToken;
   announcementPaddingY?: string;
   logoType?: 'image_only' | 'text_only' | 'image_text' | string;
   logoText?: string;
@@ -31,14 +62,14 @@ export interface HeaderAnnouncementProps {
   logoImageHeight?: number | string;
   logoTextSize?: 'sm' | 'base' | 'lg' | 'xl' | '2xl' | string;
   logoTextWeight?: 'normal' | 'semibold' | 'bold' | string;
-  logoTextColor?: string;
+  logoTextColorToken?: ColorToken;
   navLinks?: string[];
   navGap?: 'compact' | 'normal' | 'relaxed' | string | number;
   navFontSize?: '12px' | '14px' | '16px' | '18px' | string;
   navFontWeight?: '400' | '500' | '600' | string;
   navTextTransform?: 'none' | 'uppercase' | 'capitalize' | string;
-  navColor?: string;
-  navHoverColor?: string;
+  navColorToken?: ColorToken;
+  navHoverColorToken?: ColorToken;
   ctaText?: string;
   ctaLink?: string;
   nodeStyles?: Record<string, NodeStyles>;
@@ -132,6 +163,19 @@ export interface FAQProps {
   [key: string]: unknown;
 }
 
+export interface GoogleMapsProps {
+  apiKey?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  zoom?: number;
+  mapHeight?: string;
+  showMarker?: boolean;
+  markerTitle?: string;
+  nodeStyles?: Record<string, NodeStyles>;
+  [key: string]: unknown;
+}
+
 export interface FooterProps {
   logoText?: string;
   logoImageUrl?: string;
@@ -158,6 +202,7 @@ export type SectionPropsMap = {
   product_catalog: ProductCatalogProps;
   testimonials: TestimonialsProps;
   faq: FAQProps;
+  google_maps: GoogleMapsProps;
   footer: FooterProps;
 };
 
@@ -187,8 +232,9 @@ export interface SelectedElement {
 }
 
 export interface SectionStyles {
-  backgroundColor?: string;
-  color?: string;
+  textColorToken?: ColorToken;
+  bgColorToken?: ColorToken;
+  borderColorToken?: ColorToken;
   padding?: string;
   paddingTop?: string;
   paddingBottom?: string;

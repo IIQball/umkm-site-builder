@@ -54,6 +54,22 @@
     { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' },
   ];
 
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const setCanvasCssVar = (prop: string, val: string) => {
+    if (typeof document === 'undefined') return;
+    const canvasContainers = document.querySelectorAll<HTMLElement>('[data-theme]');
+    canvasContainers.forEach((el) => el.style.setProperty(prop, val));
+  };
+
+  const debouncedUpdateGlobalTheme = (updates: Partial<TemplateTheme>, delay: number = 300) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      editorStore.updateGlobalTheme(updates);
+      debounceTimer = null;
+    }, delay);
+  };
+
   const getScaleData = (tag: string): Record<string, string> => {
     const record = typography as Record<string, Record<string, string> | undefined>;
     return record?.[tag] || {};
@@ -68,7 +84,31 @@
     return buttons[key as 'primary' | 'secondary'] || {};
   };
 
-  const updateColor = (key: string, value: string) => {
+  const colorCssVarMap: Record<string, string> = {
+    primary: '--theme-primary',
+    secondary: '--theme-secondary',
+    background: '--theme-bg',
+    surface: '--theme-surface',
+    textPrimary: '--theme-text-primary',
+    textMuted: '--theme-text-muted',
+  };
+
+  const updateColorOptimistic = (key: string, value: string) => {
+    const cssVar = colorCssVarMap[key];
+    if (cssVar) setCanvasCssVar(cssVar, value);
+    debouncedUpdateGlobalTheme({
+      colors: { [key]: value },
+      ...(key === 'primary' ? { primaryColor: value } : {}),
+    });
+  };
+
+  const updateColorImmediate = (key: string, value: string) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    const cssVar = colorCssVarMap[key];
+    if (cssVar) setCanvasCssVar(cssVar, value);
     editorStore.updateGlobalTheme({
       colors: { [key]: value },
       ...(key === 'primary' ? { primaryColor: value } : {}),
@@ -76,6 +116,8 @@
   };
 
   const updateTypography = (key: string, value: unknown) => {
+    if (key === 'headingFont') setCanvasCssVar('--theme-font-heading', String(value));
+    if (key === 'bodyFont') setCanvasCssVar('--theme-font-body', String(value));
     editorStore.updateGlobalTheme({
       typography: { [key]: value },
       ...(key === 'bodyFont' ? { fontFamily: String(value) } : {}),
@@ -84,15 +126,38 @@
 
   const updateScale = (tag: string, field: string, value: string) => {
     const current = getScaleData(tag);
-    updateTypography(tag, { ...current, [field]: value });
+    if (field === 'fontSize') setCanvasCssVar(`--theme-text-${tag}`, value);
+    editorStore.updateGlobalTheme({
+      typography: { [tag]: { ...current, [field]: value } },
+    });
   };
 
-  const updateButtonVariant = (variantKey: string, key: string, value: string) => {
+  const updateButtonVariantOptimistic = (variantKey: string, key: string, value: string) => {
+    if (variantKey === 'primary' && key === 'backgroundColor') setCanvasCssVar('--theme-btn-primary-bg', value);
+    if (variantKey === 'primary' && key === 'textColor') setCanvasCssVar('--theme-btn-primary-text', value);
+    if (variantKey === 'secondary' && key === 'backgroundColor') setCanvasCssVar('--theme-btn-secondary-bg', value);
+    if (variantKey === 'secondary' && key === 'textColor') setCanvasCssVar('--theme-btn-secondary-text', value);
+    if (variantKey === 'outline' && key === 'borderColor') setCanvasCssVar('--theme-btn-outline-border', value);
+    if (variantKey === 'outline' && key === 'textColor') setCanvasCssVar('--theme-btn-outline-text', value);
+
     const variant = variantKey as 'primary' | 'secondary' | 'outline';
     const current = buttons[variant] || {};
-    editorStore.updateGlobalTheme({
+    debouncedUpdateGlobalTheme({
       buttons: { [variant]: { ...current, [key]: value } },
     });
+  };
+
+  const updateButtonRadius = (value: string) => {
+    setCanvasCssVar('--theme-btn-radius', value);
+    editorStore.updateGlobalTheme({ buttons: { borderRadius: value } });
+  };
+
+  const updateLayoutParam = (key: string, value: string) => {
+    if (key === 'maxWidth') setCanvasCssVar('--theme-max-width', value);
+    if (key === 'horizontalMarginDesktop') setCanvasCssVar('--theme-safe-zone-desktop', value);
+    if (key === 'horizontalMarginTablet') setCanvasCssVar('--theme-safe-zone-tablet', value);
+    if (key === 'horizontalMarginMobile') setCanvasCssVar('--theme-safe-zone-mobile', value);
+    editorStore.updateGlobalTheme({ layout: { [key]: value } });
   };
 </script>
 
@@ -135,8 +200,8 @@
           <div>
             <label for={`color-${item.key}`} class="block font-semibold text-base-content/80 mb-1">{item.label}</label>
             <div class="flex items-center gap-2">
-              <input id={`color-${item.key}`} type="color" value={val} on:input={(e) => updateColor(item.key, e.currentTarget.value)} class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent" />
-              <input type="text" value={val} on:input={(e) => updateColor(item.key, e.currentTarget.value)} class="flex-1 px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content font-mono uppercase text-xs" />
+              <input id={`color-${item.key}`} type="color" value={val} on:input={(e) => updateColorOptimistic(item.key, e.currentTarget.value)} on:change={(e) => updateColorImmediate(item.key, e.currentTarget.value)} class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent" />
+              <input type="text" value={val} on:input={(e) => updateColorOptimistic(item.key, e.currentTarget.value)} on:change={(e) => updateColorImmediate(item.key, e.currentTarget.value)} class="flex-1 px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content font-mono uppercase text-xs" />
             </div>
           </div>
         {/each}
@@ -181,7 +246,7 @@
           <span class="block font-semibold text-base-content/80 mb-1">Global Border Radius</span>
           <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
             {#each radiusPresets as rp}
-              <button type="button" on:click={() => editorStore.updateGlobalTheme({ buttons: { borderRadius: rp.value } })} class={`py-1 rounded font-medium transition-colors cursor-pointer ${(buttons.borderRadius || '8px') === rp.value ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}>{rp.label}</button>
+              <button type="button" on:click={() => updateButtonRadius(rp.value)} class={`py-1 rounded font-medium transition-colors cursor-pointer ${(buttons.borderRadius || '8px') === rp.value ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}>{rp.label}</button>
             {/each}
           </div>
         </div>
@@ -198,14 +263,14 @@
                 <div>
                   <span class="text-[10px] text-base-content/60">Background</span>
                   <div class="flex items-center gap-1.5 mt-0.5">
-                    <input type="color" value={bData.backgroundColor || b.defaultBg} on:input={(e) => updateButtonVariant(b.key, 'backgroundColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
+                    <input type="color" value={bData.backgroundColor || b.defaultBg} on:input={(e) => updateButtonVariantOptimistic(b.key, 'backgroundColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
                     <span class="font-mono text-[10px]">{bData.backgroundColor || b.defaultBg}</span>
                   </div>
                 </div>
                 <div>
                   <span class="text-[10px] text-base-content/60">Warna Teks</span>
                   <div class="flex items-center gap-1.5 mt-0.5">
-                    <input type="color" value={bData.textColor || b.defaultText} on:input={(e) => updateButtonVariant(b.key, 'textColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
+                    <input type="color" value={bData.textColor || b.defaultText} on:input={(e) => updateButtonVariantOptimistic(b.key, 'textColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
                     <span class="font-mono text-[10px]">{bData.textColor || b.defaultText}</span>
                   </div>
                 </div>
@@ -219,14 +284,14 @@
               <div>
                 <span class="text-[10px] text-base-content/60">Warna Border</span>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <input type="color" value={buttons.outline?.borderColor || '#3b82f6'} on:input={(e) => updateButtonVariant('outline', 'borderColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
+                  <input type="color" value={buttons.outline?.borderColor || '#3b82f6'} on:input={(e) => updateButtonVariantOptimistic('outline', 'borderColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
                   <span class="font-mono text-[10px]">{buttons.outline?.borderColor || '#3b82f6'}</span>
                 </div>
               </div>
               <div>
                 <span class="text-[10px] text-base-content/60">Warna Teks</span>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <input type="color" value={buttons.outline?.textColor || '#3b82f6'} on:input={(e) => updateButtonVariant('outline', 'textColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
+                  <input type="color" value={buttons.outline?.textColor || '#3b82f6'} on:input={(e) => updateButtonVariantOptimistic('outline', 'textColor', e.currentTarget.value)} class="w-6 h-6 rounded border border-base-300 dark:border-slate-700 cursor-pointer" />
                   <span class="font-mono text-[10px]">{buttons.outline?.textColor || '#3b82f6'}</span>
                 </div>
               </div>
@@ -238,7 +303,7 @@
       <div class="space-y-4">
         <div>
           <label for="layout-max-width" class="block font-semibold text-base-content/80 mb-1">Max-Width Konten Global</label>
-          <select id="layout-max-width" value={layout.maxWidth || '1200px'} on:change={(e) => editorStore.updateGlobalTheme({ layout: { maxWidth: e.currentTarget.value } })} class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none">
+          <select id="layout-max-width" value={layout.maxWidth || '1200px'} on:change={(e) => updateLayoutParam('maxWidth', e.currentTarget.value)} class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none">
             {#each maxWidthOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
           </select>
         </div>
@@ -247,15 +312,15 @@
           <span class="block font-bold text-xs text-base-content uppercase tracking-wider">Safe Zone Horizontal Margin</span>
           <div>
             <label for="layout-margin-desktop" class="block text-[11px] font-semibold text-base-content/80 mb-1">Desktop Margin (Safe Zone)</label>
-            <input id="layout-margin-desktop" type="text" value={layout.horizontalMarginDesktop || '32px'} on:change={(e) => editorStore.updateGlobalTheme({ layout: { horizontalMarginDesktop: e.currentTarget.value } })} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="32px" />
+            <input id="layout-margin-desktop" type="text" value={layout.horizontalMarginDesktop || '32px'} on:change={(e) => updateLayoutParam('horizontalMarginDesktop', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="32px" />
           </div>
           <div>
             <label for="layout-margin-tablet" class="block text-[11px] font-semibold text-base-content/80 mb-1">Tablet Margin (Safe Zone)</label>
-            <input id="layout-margin-tablet" type="text" value={layout.horizontalMarginTablet || '24px'} on:change={(e) => editorStore.updateGlobalTheme({ layout: { horizontalMarginTablet: e.currentTarget.value } })} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="24px" />
+            <input id="layout-margin-tablet" type="text" value={layout.horizontalMarginTablet || '24px'} on:change={(e) => updateLayoutParam('horizontalMarginTablet', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="24px" />
           </div>
           <div>
             <label for="layout-margin-mobile" class="block text-[11px] font-semibold text-base-content/80 mb-1">Mobile Margin (Safe Zone)</label>
-            <input id="layout-margin-mobile" type="text" value={layout.horizontalMarginMobile || '16px'} on:change={(e) => editorStore.updateGlobalTheme({ layout: { horizontalMarginMobile: e.currentTarget.value } })} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="16px" />
+            <input id="layout-margin-mobile" type="text" value={layout.horizontalMarginMobile || '16px'} on:change={(e) => updateLayoutParam('horizontalMarginMobile', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono" placeholder="16px" />
           </div>
         </div>
       </div>

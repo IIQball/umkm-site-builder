@@ -72,8 +72,12 @@ function createCanvasStore() {
       update((state) => ({ ...state, showPixelGrid: !state.showPixelGrid }));
     },
 
+    setActiveMargin(activeMargin: '16px' | '24px' | '32px' | '48px') {
+      update((state) => ({ ...state, activeMargin, canvasMargin: activeMargin }));
+    },
+
     setCanvasMargin(canvasMargin: '16px' | '24px' | '32px' | '48px') {
-      update((state) => ({ ...state, canvasMargin }));
+      update((state) => ({ ...state, canvasMargin, activeMargin: canvasMargin }));
     },
 
     setPreviewTheme(previewTheme: 'light' | 'dark') {
@@ -124,10 +128,30 @@ const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
  */
 function createDocumentStore() {
   const { subscribe, set, update } = writable<DocumentState>(initialDocumentState);
+  let lastThemeHistoryTime = 0;
 
   const pushHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
     if (!state.template) return state;
+    lastThemeHistoryTime = 0;
     const past = [...state.history.past, clone(state.template.config)].slice(-20);
+    return {
+      ...state,
+      template: { ...state.template, config: newConfig },
+      history: { past, future: [] },
+      isDirty: true,
+    };
+  };
+
+  const pushThemeHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
+    if (!state.template) return state;
+    const now = Date.now();
+    const shouldMerge = now - lastThemeHistoryTime < 400 && state.history.past.length > 0;
+    lastThemeHistoryTime = now;
+
+    const past = shouldMerge
+      ? state.history.past
+      : [...state.history.past, clone(state.template.config)].slice(-20);
+
     return {
       ...state,
       template: { ...state.template, config: newConfig },
@@ -240,6 +264,62 @@ function createDocumentStore() {
       });
     },
 
+    updateDesignSystemTheme(section: string, updates: Record<string, unknown>) {
+      update((state) => {
+        if (!state.template) return state;
+        const currentTheme = (state.template.config.theme || {}) as Record<string, unknown>;
+        const existingSection = (currentTheme[section] || {}) as Record<string, unknown>;
+        const updatedTheme = {
+          ...DEFAULT_TEMPLATE_THEME,
+          ...currentTheme,
+          [section]: { ...existingSection, ...updates },
+        } as TemplateTheme;
+        return pushThemeHistory(state, { ...state.template.config, theme: updatedTheme });
+      });
+    },
+
+    updateSectionSpacing(sectionId: string, spacingConfig: { paddingY: number; paddingX: number; gap: number }) {
+      update((state) => {
+        if (!state.template) return state;
+        const sections = state.template.config.sections.map((s) => {
+          if (s.id !== sectionId) return s;
+          return {
+            ...s,
+            styles: {
+              ...(s.styles || {}),
+              padding: `${spacingConfig.paddingY}px ${spacingConfig.paddingX}px`,
+              paddingTop: `${spacingConfig.paddingY}px`,
+              paddingBottom: `${spacingConfig.paddingY}px`,
+              gap: `${spacingConfig.gap}px`,
+            },
+          };
+        });
+        return pushHistory(state, { ...state.template.config, sections });
+      });
+    },
+
+    updateNodeSpacing(sectionId: string, nodeId: string, spacingConfig: { marginTop?: number; marginBottom?: number; padding?: number }) {
+      update((state) => {
+        if (!state.template) return state;
+        const sections = state.template.config.sections.map((s) => {
+          if (s.id !== sectionId) return s;
+          const currentProps = s.props || {};
+          const currentStyles = (currentProps.nodeStyles as Record<string, Record<string, unknown>>) || {};
+          const existingNodeStyle = currentStyles[nodeId] || {};
+          const spacingUpdates: Record<string, unknown> = {};
+          if (spacingConfig.marginTop !== undefined) spacingUpdates.marginTop = `${spacingConfig.marginTop}px`;
+          if (spacingConfig.marginBottom !== undefined) spacingUpdates.marginBottom = `${spacingConfig.marginBottom}px`;
+          if (spacingConfig.padding !== undefined) spacingUpdates.padding = `${spacingConfig.padding}px`;
+          const updatedForNode = { ...existingNodeStyle, ...spacingUpdates };
+          return {
+            ...s,
+            props: { ...currentProps, nodeStyles: { ...currentStyles, [nodeId]: updatedForNode } },
+          };
+        });
+        return pushHistory(state, { ...state.template.config, sections });
+      });
+    },
+
     updateGlobalTheme(themeUpdates: Partial<TemplateTheme>) {
       update((state) => {
         if (!state.template) return state;
@@ -260,7 +340,7 @@ function createDocumentStore() {
           },
           layout: { ...(currentTheme.layout || {}), ...(updates.layout || {}) },
         };
-        return pushHistory(state, { ...state.template.config, theme: newTheme });
+        return pushThemeHistory(state, { ...state.template.config, theme: newTheme });
       });
     },
 
@@ -410,6 +490,9 @@ function createDocumentStore() {
     },
     setViewMode(viewMode: 'desktop' | 'tablet' | 'mobile') {
       canvasStore.setViewMode(viewMode);
+    },
+    setActiveMargin(activeMargin: '16px' | '24px' | '32px' | '48px') {
+      canvasStore.setActiveMargin(activeMargin);
     },
     setCanvasMargin(canvasMargin: '16px' | '24px' | '32px' | '48px') {
       canvasStore.setCanvasMargin(canvasMargin);

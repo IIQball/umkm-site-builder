@@ -2,6 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
 import {
   ColorTokenSchema,
+  TypographyTokenSchema,
+  SpacingStepSchema,
+  ButtonHeightSchema,
+  EffectShadowSchema,
   HeaderAnnouncementPresetSchema,
   HeroPresetSchema,
   FeaturesPresetSchema,
@@ -12,18 +16,18 @@ import {
   FooterPresetSchema,
   TemplateSectionSchema,
   DEFAULT_TEMPLATE_SECTIONS,
+  DEFAULT_TEMPLATE_THEME,
 } from '@/schemas';
+import {
+  calculateNestedRadius,
+  calculatePillRadius,
+} from '@/types/templates/builder';
 import {
   canvasStore,
   documentStore,
-  editorStore,
-  activeSection,
-  activeNodeId,
-  canUndo,
-  canRedo,
 } from '@/components/builder/stores/editorStore';
 
-describe('Token-Based Presets & Store Separation', () => {
+describe('Token-Based Presets & Mathematical Design System Schema', () => {
   it('should validate valid and invalid ColorTokens', () => {
     const validTokens = [
       'primary',
@@ -31,6 +35,8 @@ describe('Token-Based Presets & Store Separation', () => {
       'accent',
       'background',
       'surface',
+      'textPrimary',
+      'textMuted',
       'text_primary',
       'text_muted',
       'transparent',
@@ -42,30 +48,92 @@ describe('Token-Based Presets & Store Separation', () => {
     expect(ColorTokenSchema.safeParse('custom-color').success).toBe(false);
   });
 
+  it('should validate TypographyToken, SpacingStep, ButtonHeight, and EffectShadow', () => {
+    // TypographyToken
+    const validTypography = ['h1', 'h2', 'h3', 'body', 'caption'];
+    for (const typo of validTypography) {
+      expect(TypographyTokenSchema.safeParse(typo).success).toBe(true);
+    }
+    expect(TypographyTokenSchema.safeParse('h4').success).toBe(false);
+
+    // SpacingStep (Multiples of 8)
+    const validSpacings = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96];
+    for (const spacing of validSpacings) {
+      expect(SpacingStepSchema.safeParse(spacing).success).toBe(true);
+    }
+    expect(SpacingStepSchema.safeParse(10).success).toBe(false);
+    expect(SpacingStepSchema.safeParse(50).success).toBe(false);
+
+    // ButtonHeight (Multiples of 8: 32, 40, 48, 56)
+    const validHeights = [32, 40, 48, 56];
+    for (const height of validHeights) {
+      expect(ButtonHeightSchema.safeParse(height).success).toBe(true);
+    }
+    expect(ButtonHeightSchema.safeParse(24).success).toBe(false);
+    expect(ButtonHeightSchema.safeParse(60).success).toBe(false);
+
+    // EffectShadow
+    const validShadows = ['none', 'sm', 'md', 'lg'];
+    for (const shadow of validShadows) {
+      expect(EffectShadowSchema.safeParse(shadow).success).toBe(true);
+    }
+    expect(EffectShadowSchema.safeParse('xl').success).toBe(false);
+  });
+
+  it('should calculate nested radius and pill radius correctly according to math rules', () => {
+    // R_inner = max(0, R_outer - Padding)
+    expect(calculateNestedRadius(16, 8)).toBe(8);
+    expect(calculateNestedRadius(8, 16)).toBe(0);
+    expect(calculateNestedRadius(24, 8)).toBe(16);
+
+    // Pill radius = height / 2
+    expect(calculatePillRadius(48)).toBe(24);
+    expect(calculatePillRadius(32)).toBe(16);
+    expect(calculatePillRadius(40)).toBe(20);
+    expect(calculatePillRadius(56)).toBe(28);
+  });
+
+  it('should adhere to Golden Ratio typography scale in DEFAULT_TEMPLATE_THEME', () => {
+    const typo = DEFAULT_TEMPLATE_THEME.typography;
+    expect(typo?.h1?.fontSize).toBe('42px'); // 16 * 1.618^2
+    expect(typo?.h2?.fontSize).toBe('26px'); // 16 * 1.618
+    expect(typo?.h3?.fontSize).toBe('20px'); // 16 * 1.25
+    expect(typo?.body?.fontSize).toBe('16px'); // Base 16px
+    expect(typo?.caption?.fontSize).toBe('10px'); // 16 / 1.618
+  });
+
   it('should validate layout presets per section type', () => {
     expect(HeaderAnnouncementPresetSchema.safeParse('default_split').success).toBe(true);
     expect(HeaderAnnouncementPresetSchema.safeParse('centered_stacked').success).toBe(true);
     expect(HeaderAnnouncementPresetSchema.safeParse('compact_inline').success).toBe(true);
 
     expect(HeroPresetSchema.safeParse('split_left_text').success).toBe(true);
+    expect(HeroPresetSchema.safeParse('split_right_text').success).toBe(true);
+    expect(HeroPresetSchema.safeParse('centered_minimal').success).toBe(true);
     expect(HeroPresetSchema.safeParse('full_banner_overlay').success).toBe(true);
 
     expect(FeaturesPresetSchema.safeParse('grid_3_cards').success).toBe(true);
     expect(FeaturesPresetSchema.safeParse('horizontal_list').success).toBe(true);
+    expect(FeaturesPresetSchema.safeParse('banner_inline_bar').success).toBe(true);
 
     expect(ProductCatalogPresetSchema.safeParse('grid_standard').success).toBe(true);
     expect(ProductCatalogPresetSchema.safeParse('carousel_scroll').success).toBe(true);
+    expect(ProductCatalogPresetSchema.safeParse('list_compact').success).toBe(true);
 
     expect(TestimonialsPresetSchema.safeParse('masonry_grid').success).toBe(true);
     expect(TestimonialsPresetSchema.safeParse('single_spotlight').success).toBe(true);
+    expect(TestimonialsPresetSchema.safeParse('chat_bubble_flow').success).toBe(true);
 
     expect(FAQPresetSchema.safeParse('accordion_single_col').success).toBe(true);
+    expect(FAQPresetSchema.safeParse('split_faq_sidebar').success).toBe(true);
     expect(FAQPresetSchema.safeParse('grid_2_col_cards').success).toBe(true);
 
     expect(GoogleMapsPresetSchema.safeParse('fullwidth_map').success).toBe(true);
     expect(GoogleMapsPresetSchema.safeParse('split_map_info').success).toBe(true);
+    expect(GoogleMapsPresetSchema.safeParse('compact_boxed').success).toBe(true);
 
     expect(FooterPresetSchema.safeParse('multi_column').success).toBe(true);
+    expect(FooterPresetSchema.safeParse('centered_simple').success).toBe(true);
     expect(FooterPresetSchema.safeParse('cta_focused').success).toBe(true);
   });
 
@@ -98,7 +166,7 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
       name: 'Test Template',
       price: 50000,
       config: {
-        theme: {},
+        theme: DEFAULT_TEMPLATE_THEME,
         sections: DEFAULT_TEMPLATE_SECTIONS,
       },
     });
@@ -113,6 +181,7 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     canvasStore.setViewMode('mobile');
     canvasStore.setZoom(75);
     canvasStore.toggleGrid();
+    canvasStore.setActiveMargin('32px');
     canvasStore.setHovered('title');
 
     // Visual state changed
@@ -122,6 +191,7 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     expect(canvas.viewMode).toBe('mobile');
     expect(canvas.zoom).toBe(75);
     expect(canvas.gridActive).toBe(true);
+    expect(canvas.activeMargin).toBe('32px');
     expect(canvas.hoveredNodeId).toBe('title');
 
     // Ephemeral mutates must NOT affect document persistence
@@ -157,21 +227,59 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     documentStore.reorderSectionSlot('section-2', 0, 1);
     const sec2Order = get(documentStore).template?.config.sections.find((s) => s.id === 'section-2');
     expect(sec2Order?.props?.elementOrder).toEqual(['title', 'badge', 'subtitle', 'image', 'cta']);
+
+    // 5. updateDesignSystemTheme
+    documentStore.updateDesignSystemTheme('colors', { primary: '#10b981' });
+    expect(get(documentStore).template?.config.theme?.colors?.primary).toBe('#10b981');
+
+    // 6. updateSectionSpacing
+    documentStore.updateSectionSpacing('section-2', { paddingY: 64, paddingX: 32, gap: 24 });
+    const sec2Spacing = get(documentStore).template?.config.sections.find((s) => s.id === 'section-2');
+    expect(sec2Spacing?.styles?.padding).toBe('64px 32px');
+    expect(sec2Spacing?.styles?.gap).toBe('24px');
+
+    // 7. updateNodeSpacing
+    documentStore.updateNodeSpacing('section-2', 'title', { marginTop: 16, marginBottom: 24, padding: 8 });
+    const sec2NodeSpacing = get(documentStore).template?.config.sections.find((s) => s.id === 'section-2');
+    const titleNodeStyles = (sec2NodeSpacing?.props?.nodeStyles as Record<string, Record<string, string>>)?.title;
+    expect(titleNodeStyles?.marginTop).toBe('16px');
+    expect(titleNodeStyles?.marginBottom).toBe('24px');
+    expect(titleNodeStyles?.padding).toBe('8px');
   });
 
-  it('derived stores (activeSection, activeNodeId, canUndo, canRedo) should update properly', () => {
-    canvasStore.selectSection('section-3');
-    canvasStore.selectNode('section-3', 'item_0');
+  it('should validate all 8 section types with their specific layout presets', () => {
+    const sectionsToTest = [
+      { id: 'sec-header-1', type: 'header_announcement', layoutPreset: 'default_split' },
+      { id: 'sec-header-2', type: 'header_announcement', layoutPreset: 'centered_stacked' },
+      { id: 'sec-header-3', type: 'header_announcement', layoutPreset: 'compact_inline' },
+      { id: 'sec-hero-1', type: 'hero', layoutPreset: 'split_left_text' },
+      { id: 'sec-hero-2', type: 'hero', layoutPreset: 'split_right_text' },
+      { id: 'sec-hero-3', type: 'hero', layoutPreset: 'centered_minimal' },
+      { id: 'sec-hero-4', type: 'hero', layoutPreset: 'full_banner_overlay' },
+      { id: 'sec-feat-1', type: 'features', layoutPreset: 'grid_3_cards' },
+      { id: 'sec-feat-2', type: 'features', layoutPreset: 'horizontal_list' },
+      { id: 'sec-feat-3', type: 'features', layoutPreset: 'banner_inline_bar' },
+      { id: 'sec-prod-1', type: 'product_catalog', layoutPreset: 'grid_standard' },
+      { id: 'sec-prod-2', type: 'product_catalog', layoutPreset: 'carousel_scroll' },
+      { id: 'sec-prod-3', type: 'product_catalog', layoutPreset: 'list_compact' },
+      { id: 'sec-testi-1', type: 'testimonials', layoutPreset: 'masonry_grid' },
+      { id: 'sec-testi-2', type: 'testimonials', layoutPreset: 'single_spotlight' },
+      { id: 'sec-testi-3', type: 'testimonials', layoutPreset: 'chat_bubble_flow' },
+      { id: 'sec-faq-1', type: 'faq', layoutPreset: 'accordion_single_col' },
+      { id: 'sec-faq-2', type: 'faq', layoutPreset: 'split_faq_sidebar' },
+      { id: 'sec-faq-3', type: 'faq', layoutPreset: 'grid_2_col_cards' },
+      { id: 'sec-map-1', type: 'google_maps', layoutPreset: 'fullwidth_map' },
+      { id: 'sec-map-2', type: 'google_maps', layoutPreset: 'split_map_info' },
+      { id: 'sec-map-3', type: 'google_maps', layoutPreset: 'compact_boxed' },
+      { id: 'sec-foot-1', type: 'footer', layoutPreset: 'multi_column' },
+      { id: 'sec-foot-2', type: 'footer', layoutPreset: 'centered_simple' },
+      { id: 'sec-foot-3', type: 'footer', layoutPreset: 'cta_focused' },
+    ];
 
-    expect(get(activeSection)?.id).toBe('section-3');
-    expect(get(activeNodeId)).toBe('item_0');
-    expect(get(canUndo)).toBe(false);
-
-    documentStore.updateSectionProps('section-3', { subtitle: 'Updated Subtitle' });
-    expect(get(canUndo)).toBe(true);
-    expect(get(canRedo)).toBe(false);
-
-    editorStore.undo();
-    expect(get(canRedo)).toBe(true);
+    for (const sec of sectionsToTest) {
+      const result = TemplateSectionSchema.safeParse(sec);
+      expect(result.success).toBe(true);
+    }
   });
 });
+

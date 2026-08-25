@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-22 by services-error-and-validation-standardization session
+Status: LIVE · Updated: 2026-08-25 by feature/virda-token-preset-builder-refactor session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,9 +11,40 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Standardized all error handling and validation logic across the Finance and Templates service layers, enforcing unified `AppError` throws and Zod-based `validate` checks. `bun run type-check`: 0 errors. `bun test`: 188/188 pass across 29 test files.
+Implemented Svelte store split (`canvasStore` ephemeral vs `documentStore` persistent), mathematical design tokens schema, CSS variables engine, dynamic grid sync, 8 layout preset sections, token-based inspector controls locked to 8pt grid, and async Cloudinary media cleanup. `bun run type-check`: 0 errors. `bun run lint`: 0 warnings. `bun test`: 204/204 pass across 32 test files.
 
 ## Last session did
+
+- **Inspector Controls, 8pt Spacing Adjuster, & Media Cleanup (Step 4):**
+  - Refactored `SectionLayoutPanel.svelte`: Added visual Layout Preset selector thumbnails for all section types, Up/Down slot reordering via `editorStore.reorderSectionSlot`, and 8pt-locked controls for Gap (8px-48px), Vertical Padding (24px-96px), Horizontal Padding (16px-40px), and Margin (0px-64px).
+  - Refactored `SectionAppearancePanel.svelte`: Eliminated free `<input type="color">` and free text inputs. Replaced with Token-Based color dropdowns (`textPrimary`, `textMuted`, `primary`, `secondary`, `white`, `canvas`, `surface`, `transparent`).
+  - Refactored `NodeContentForm.svelte`: Replaced title color/bg pickers with Token Dropdowns, added Golden Ratio Typography scale selector (`h1`, `h2`, `h3`, `body`), added Button Token controls (Variant: `primary`/`secondary`/`outline`, Height: `32px`/`40px`/`48px`/`56px`), and added 8pt locked margin controls.
+  - Refactored `ImageUpload.svelte`: Ensured async conversion to WebP and implemented asynchronous asset deletion (`deleteCloudinaryAsset`) via `/api/media/delete` on image replacement and removal.
+
+- **8 Preset Sections with 8pt Grid & Concentric Radius (Step 3):**
+  - Refactored all 8 builder section components to strictly eliminate hardcoded hex colors / arbitrary spacing and use 8pt grid + CSS variables:
+    * `HeaderAnnouncement.svelte`: `default_split`, `centered_stacked`, `compact_inline` (h-14 / 56px single row).
+    * `Hero.svelte`: `split_left_text`, `split_right_text`, `centered_minimal`, `full_banner_overlay` (Nested radius outer 16px, padding 8px, inner 8px; Pill badges).
+    * `Features.svelte`: `grid_3_cards`, `horizontal_list`, `banner_inline_bar` (h-16 / 64px ribbon bar).
+    * `ProductCatalog.svelte`: `grid_standard`, `carousel_scroll` (snap-scroll), `list_compact` (Nested radius card 16px, inner thumbnail 8px).
+    * `Testimonials.svelte`: `masonry_grid`, `single_spotlight`, `chat_bubble_flow` (Pill avatars 48px, star rating gap 8px).
+    * `FAQ.svelte`: `accordion_single_col`, `split_faq_sidebar`, `grid_2_col_cards` (Nested radius containers).
+    * `GoogleMaps.svelte`: `fullwidth_map`, `split_map_info`, `compact_boxed` (Heights 320px, 400px, 480px; floating cards p-6 / 24px).
+    * `Footer.svelte`: `multi_column`, `centered_simple`, `cta_focused` (Floating WhatsApp CTA banner -mt-16 offset).
+  - Updated `SectionRenderer.svelte` to support `GoogleMaps.svelte` and propagate `layoutPreset`.
+  - Added full `data-node="[nodeKey]"` tree across all 8 section components.
+  - Added unit test cases for all 8 preset variants in `tests/schemas/template-tokens-presets.test.ts`.
+
+- **Store Split & Mathematical Design System Tokens (Step 1 & 2):**
+  - Created `src/lib/utils/designMath.ts` with concentric nested radius ($R_{inner} = \max(0, R_{outer} - \text{Padding})$), pill radius ($Height / 2$), and Golden Ratio typography scale helpers.
+  - Refactored `src/components/builder/stores/editorStore.ts` into ephemeral `canvasStore` (viewport, zoom, grid, margin selection without polluting undo history) and persistent `documentStore` with 400ms consecutive theme history merge.
+  - Updated `src/schemas/templates/template.schema.ts` and `src/types/templates/builder.ts` with `ColorToken`, `TypographyToken`, `SpacingStep` (8px scale), `ButtonHeight`, `EffectShadow`, and 8 section layout preset definitions.
+  - Injected 5 design system pillars as CSS custom variables into `Canvas.svelte`.
+  - Dynamically synchronized `LayoutGridOverlay.svelte` with active breakpoint safe zone margin and grid columns (12/8/4).
+  - Implemented 0ms optimistic visual feedback on input events and 300ms debounced persistence in `GlobalThemeInspector.svelte`.
+  - Added unit test suites in `tests/utils/design-math.test.ts` and `tests/schemas/template-tokens-presets.test.ts`.
+
+
 
 - **Service Layer Exceptions & Validation Standardization:**
   - Standardized `payout.service.ts` to replace generic `Error` with `AppError` mapping custom keys (`'PAYOUT_NOT_FOUND'`, `'BANK_ACCOUNT_NOT_FOUND'`, `'WALLET_NOT_FOUND'`, `'XENDIT_DISBURSEMENT_ERROR'`).

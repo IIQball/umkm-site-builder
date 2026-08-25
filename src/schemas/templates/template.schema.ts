@@ -12,10 +12,41 @@ export const ColorTokenSchema = z.enum([
   'surface',
   'text_primary',
   'text_muted',
+  'textPrimary',
+  'textMuted',
   'transparent',
 ]);
 
 export type ColorToken = z.infer<typeof ColorTokenSchema>;
+
+export const TypographyTokenSchema = z.enum(['h1', 'h2', 'h3', 'body', 'caption']);
+export type TypographyToken = z.infer<typeof TypographyTokenSchema>;
+
+export const SpacingStepSchema = z.union([
+  z.literal(0),
+  z.literal(8),
+  z.literal(16),
+  z.literal(24),
+  z.literal(32),
+  z.literal(40),
+  z.literal(48),
+  z.literal(56),
+  z.literal(64),
+  z.literal(80),
+  z.literal(96),
+]);
+export type SpacingStep = z.infer<typeof SpacingStepSchema>;
+
+export const ButtonHeightSchema = z.union([
+  z.literal(32),
+  z.literal(40),
+  z.literal(48),
+  z.literal(56),
+]);
+export type ButtonHeight = z.infer<typeof ButtonHeightSchema>;
+
+export const EffectShadowSchema = z.enum(['none', 'sm', 'md', 'lg']);
+export type EffectShadow = z.infer<typeof EffectShadowSchema>;
 
 export const HeaderAnnouncementPresetSchema = z.enum(['default_split', 'centered_stacked', 'compact_inline']);
 export type HeaderAnnouncementPreset = z.infer<typeof HeaderAnnouncementPresetSchema>;
@@ -193,11 +224,11 @@ export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
   typography: {
     headingFont: 'Inter, sans-serif',
     bodyFont: 'Inter, sans-serif',
-    h1: { fontSize: '36px', lineHeight: '1.2', fontWeight: '700' },
-    h2: { fontSize: '28px', lineHeight: '1.25', fontWeight: '700' },
-    h3: { fontSize: '22px', lineHeight: '1.3', fontWeight: '600' },
-    body: { fontSize: '15px', lineHeight: '1.6', fontWeight: '400' },
-    caption: { fontSize: '13px', lineHeight: '1.5', fontWeight: '400' },
+    h1: { fontSize: '42px', lineHeight: '1.2', fontWeight: '700' },
+    h2: { fontSize: '26px', lineHeight: '1.25', fontWeight: '700' },
+    h3: { fontSize: '20px', lineHeight: '1.3', fontWeight: '600' },
+    body: { fontSize: '16px', lineHeight: '1.6', fontWeight: '400' },
+    caption: { fontSize: '10px', lineHeight: '1.5', fontWeight: '400' },
   },
   buttons: {
     borderRadius: '8px',

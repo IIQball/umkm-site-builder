@@ -12,15 +12,8 @@
   export let onPropChange: (key: string, value: unknown) => void = () => {};
   export let onSectionUpdate: (section: TemplateSection) => void = () => {};
 
-  let heading: string = (section.styles?.heading as string) ?? '';
-  let primaryColor: string = (section.styles?.primaryColor as string) ?? '#000000';
-
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onSectionUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onSectionUpdate);
-
-  const handleStyleChange = (updated: Record<string, string>) => {
-    onPropChange('styles', updated);
-  };
 
   // Helper aman untuk membaca style node tanpa error type '{}'
   function getTitleStyle(property: 'color' | 'backgroundColor'): string {
@@ -195,6 +188,45 @@
       default: return id;
     }
   };
+  // Token-Based Color Presets for Nodes
+  const nodeTextColorOptions = [
+    { value: '', label: 'Default (Tema)' },
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
+    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: '#ffffff', label: 'Putih Bersih (White)' },
+  ];
+
+  const nodeBgColorOptions = [
+    { value: 'transparent', label: 'Transparan' },
+    { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas' },
+    { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+  ];
+
+  const nodeMarginOptions = [
+    { value: '0px', label: '0px (Tanpa Jarak)' },
+    { value: '8px', label: '8px (Ketat)' },
+    { value: '16px', label: '16px (Normal)' },
+    { value: '24px', label: '24px (Renggang)' },
+    { value: '32px', label: '32px (Lebar)' },
+    { value: '48px', label: '48px (Sangat Lebar)' },
+  ];
+
+  const btnVariantOptions = [
+    { value: 'primary', label: 'Primary Brand (Solid)' },
+    { value: 'secondary', label: 'Secondary Brand (Solid)' },
+    { value: 'outline', label: 'Outline (Garis Tepi)' },
+  ];
+
+  const btnHeightOptions = [
+    { value: '32px', label: '32px (Compact)' },
+    { value: '40px', label: '40px (Normal)' },
+    { value: '48px', label: '48px (Large)' },
+    { value: '56px', label: '56px (Jumbo)' },
+  ];
 </script>
 
 <div class="p-4 space-y-4 text-xs text-base-content/80">
@@ -204,7 +236,7 @@
       <span>Edit Konten: {getNodeLabel(nodeId)}</span>
     </div>
     <p class="text-[11px] text-base-content/60">
-      Pilih gambar atau atur konten elemen secara langsung.
+      Atur konten dan styling token elemen secara presisi pada 8pt grid.
     </p>
   </div>
 
@@ -394,7 +426,7 @@
       </div>
       
       <div>
-        <label for="node-tag-name" class="block font-semibold text-base-content/80 mb-1">HTML Tag Heading</label>
+        <label for="node-tag-name" class="block font-semibold text-base-content/80 mb-1">Skala Tipografi (Golden Ratio)</label>
         <select
           id="node-tag-name"
           value={section.props?.tagName ?? 'h1'}
@@ -405,57 +437,48 @@
           }}
           class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none focus:border-blue-500"
         >
-          <option value="h1">H1 (Primary Heading)</option>
-          <option value="h2">H2 (Secondary Heading)</option>
-          <option value="h3">H3 (Sub Heading)</option>
-          <option value="p">Paragraph (Text Biasa)</option>
+          <option value="h1">H1 (Heading 1 - 42px)</option>
+          <option value="h2">H2 (Heading 2 - 26px)</option>
+          <option value="h3">H3 (Heading 3 - 20px)</option>
+          <option value="p">Body Text (16px)</option>
         </select>
       </div>
 
-      <!-- Pilihan Warna Teks & Latar Belakang Title -->
-      <div class="pt-2 border-t border-base-300 dark:border-slate-800 space-y-2">
-        <span class="block font-semibold text-base-content/80 text-[11px]">Warna & Latar Judul</span>
+      <!-- Pilihan Warna Teks & Latar Belakang Title (Token Dropdown) -->
+      <div class="pt-2 border-t border-base-300 dark:border-slate-800 space-y-3">
+        <span class="block font-bold text-base-content/80 text-[11px] uppercase tracking-wider">Warna Token Judul</span>
         
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label for="node-title-color" class="block text-[10px] text-base-content/60 mb-1">Warna Teks</label>
-            <div class="flex items-center gap-1.5">
-              <input
-                id="node-title-color"
-                type="color"
-                value={getTitleStyle('color') || '#ffffff'}
-                on:input={(e) => {
-                  editorStore.updateNodeStyles(section.id, 'title', { color: e.currentTarget.value });
-                }}
-                class="w-8 h-8 rounded border border-base-300 cursor-pointer p-0 bg-transparent"
-              />
-              <span class="text-[11px] font-mono text-base-content/70">{getTitleStyle('color') || 'Default'}</span>
-            </div>
+            <label for="node-title-color-select" class="block text-[10px] font-semibold text-base-content/60 mb-1">Warna Teks</label>
+            <select
+              id="node-title-color-select"
+              value={getTitleStyle('color')}
+              on:change={(e) => {
+                editorStore.updateNodeStyles(section.id, 'title', { color: e.currentTarget.value });
+              }}
+              class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+            >
+              {#each nodeTextColorOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
           </div>
 
           <div>
-            <label for="node-title-bg" class="block text-[10px] text-base-content/60 mb-1">Background Judul</label>
-            <div class="flex items-center gap-1.5">
-              <input
-                id="node-title-bg"
-                type="color"
-                value={getTitleStyle('backgroundColor') && getTitleStyle('backgroundColor') !== 'transparent' ? getTitleStyle('backgroundColor') : '#000000'}
-                on:input={(e) => {
-                  editorStore.updateNodeStyles(section.id, 'title', { backgroundColor: e.currentTarget.value });
-                }}
-                class="w-8 h-8 rounded border border-base-300 cursor-pointer p-0 bg-transparent"
-              />
-              <button
-                type="button"
-                on:click={() => {
-                  editorStore.updateNodeStyles(section.id, 'title', { backgroundColor: 'transparent' });
-                }}
-                class="px-2 py-1 text-[10px] font-semibold rounded bg-base-200 hover:bg-base-300 text-base-content/80 transition-colors cursor-pointer"
-                title="Hapus background (transparan)"
-              >
-                Hapus BG
-              </button>
-            </div>
+            <label for="node-title-bg-select" class="block text-[10px] font-semibold text-base-content/60 mb-1">Background Judul</label>
+            <select
+              id="node-title-bg-select"
+              value={getTitleStyle('backgroundColor') || 'transparent'}
+              on:change={(e) => {
+                editorStore.updateNodeStyles(section.id, 'title', { backgroundColor: e.currentTarget.value });
+              }}
+              class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+            >
+              {#each nodeBgColorOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
           </div>
         </div>
       </div>
@@ -592,10 +615,75 @@
           placeholder="#catalog"
         />
       </div>
+
+      <!-- Button Token Controls -->
+      <div class="pt-2 border-t border-base-300 dark:border-slate-800 grid grid-cols-2 gap-2">
+        <div>
+          <label for="node-cta-variant" class="block text-[10px] font-semibold text-base-content/60 mb-1">Varian Tombol</label>
+          <select
+            id="node-cta-variant"
+            value={section.props?.btnVariant || 'primary'}
+            on:change={(e) => onPropChange('btnVariant', e.currentTarget.value)}
+            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          >
+            {#each btnVariantOptions as opt}
+              <option value={opt.value}>{opt.label}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div>
+          <label for="node-cta-height" class="block text-[10px] font-semibold text-base-content/60 mb-1">Tinggi Tombol</label>
+          <select
+            id="node-cta-height"
+            value={section.props?.btnHeight || '48px'}
+            on:change={(e) => onPropChange('btnHeight', e.currentTarget.value)}
+            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          >
+            {#each btnHeightOptions as opt}
+              <option value={opt.value}>{opt.label}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
     </div>
   {/if}
 
-  <div class="pt-4 border-t border-base-200 dark:border-slate-800 flex flex-col gap-2">
+  <!-- Node Spacing Controls (8pt Locked) -->
+  <div class="p-3 bg-base-200/40 dark:bg-slate-900/60 border border-base-300 dark:border-slate-800 rounded-xl space-y-2">
+    <span class="block font-bold text-base-content/70 text-[11px] uppercase tracking-wider">
+      Jarak Margin Elemen (8pt Grid)
+    </span>
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label for="node-margin-top" class="block text-[10px] font-semibold text-base-content/60 mb-1">Margin Atas</label>
+        <select
+          id="node-margin-top"
+          on:change={(e) => editorStore.updateNodeSpacing(section.id, nodeId, { marginTop: parseInt(e.currentTarget.value) || 0 })}
+          class="w-full px-2 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each nodeMarginOptions as opt}
+            <option value={opt.value}>{opt.label}</option>
+          {/each}
+        </select>
+      </div>
+
+      <div>
+        <label for="node-margin-bottom" class="block text-[10px] font-semibold text-base-content/60 mb-1">Margin Bawah</label>
+        <select
+          id="node-margin-bottom"
+          on:change={(e) => editorStore.updateNodeSpacing(section.id, nodeId, { marginBottom: parseInt(e.currentTarget.value) || 0 })}
+          class="w-full px-2 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each nodeMarginOptions as opt}
+            <option value={opt.value}>{opt.label}</option>
+          {/each}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-2 border-t border-base-200 dark:border-slate-800 flex flex-col gap-2">
     <button
       type="button"
       on:click={() => {
@@ -614,30 +702,5 @@
     >
       Kembali ke Setting Section
     </button>
-  </div>
-
-  <!-- Styles Section -->
-  <div class="p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl space-y-2 mb-2">
-    <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-semibold">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-      <span>Style Options</span>
-    </div>
-    <div class="space-y-3">
-      <div>
-        <label for="style-heading-level" class="block text-sm font-medium text-base-content/80 mb-1">Heading Level</label>
-        <select id="style-heading-level" bind:value={heading} on:change={() => handleStyleChange({ ...section.styles, heading })} class="w-full px-3 py-2 bg-base-200/50 border border-base-300 rounded-lg text-base-content focus:outline-none">
-          <option value="h1">H1 (Primary)</option>
-          <option value="h2">H2 (Secondary)</option>
-          <option value="h3">H3 (Sub)</option>
-          <option value="h4">H4</option>
-          <option value="h5">H5</option>
-          <option value="h6">H6</option>
-        </select>
-      </div>
-      <div>
-        <label for="style-primary-color" class="block text-sm font-medium text-base-content/80 mb-1">Primary Color</label>
-        <input id="style-primary-color" type="color" bind:value={primaryColor} on:input={(e) => handleStyleChange({ ...section.styles, primaryColor: e.currentTarget.value })} class="w-full h-10 p-1 bg-base-200/50 border border-base-300 rounded-lg" />
-      </div>
-    </div>
   </div>
 </div>

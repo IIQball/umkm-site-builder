@@ -3,6 +3,7 @@
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
   import type { TemplateSection, TemplateTheme } from '@/schemas';
   import { editorStore, canvasStore } from './stores/editorStore';
+  import { calculateGoldenRatioTypography } from '@/lib/utils/designMath';
   import { MoveVertical, MoveHorizontal } from 'lucide-svelte';
 
   export let sections: TemplateSection[] = [];
@@ -18,18 +19,53 @@
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
   $: isDarkPreview = $canvasStore.previewTheme === 'dark';
+  $: colors = theme.colors || {};
+  $: typography = theme.typography || {};
+  $: buttons = (theme.buttons || {}) as Record<string, any>;
+  $: layout = theme.layout || {};
+
+  $: baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16;
+  $: goldenRatio = calculateGoldenRatioTypography(baseFontSize);
 
   $: canvasCssVars = [
-    `--theme-primary: ${theme.colors?.primary || '#3b82f6'}`,
-    `--theme-secondary: ${theme.colors?.secondary || '#64748b'}`,
-    `--theme-bg: ${isDarkPreview ? '#090d16' : (theme.colors?.background || '#ffffff')}`,
-    `--theme-surface: ${isDarkPreview ? '#111827' : (theme.colors?.surface || '#f8fafc')}`,
-    `--theme-text-primary: ${isDarkPreview ? '#f8fafc' : (theme.colors?.textPrimary || '#0f172a')}`,
-    `--theme-text-muted: ${isDarkPreview ? '#94a3b8' : (theme.colors?.textMuted || '#64748b')}`,
-    `--theme-font-heading: ${theme.typography?.headingFont || 'Inter, sans-serif'}`,
-    `--theme-font-body: ${theme.typography?.bodyFont || 'Inter, sans-serif'}`,
-    `--theme-btn-radius: ${theme.buttons?.borderRadius || '8px'}`,
-    `--theme-max-width: ${theme.layout?.maxWidth || '1200px'}`,
+    /* 1. Warna */
+    `--theme-primary: ${colors.primary || '#3b82f6'}`,
+    `--theme-secondary: ${colors.secondary || '#64748b'}`,
+    `--theme-bg: ${isDarkPreview ? '#090d16' : (colors.background || '#ffffff')}`,
+    `--theme-surface: ${isDarkPreview ? '#111827' : (colors.surface || '#f8fafc')}`,
+    `--theme-text-primary: ${isDarkPreview ? '#f8fafc' : (colors.textPrimary || '#0f172a')}`,
+    `--theme-text-muted: ${isDarkPreview ? '#94a3b8' : (colors.textMuted || '#64748b')}`,
+
+    /* 2. Tipografi Golden Ratio */
+    `--theme-font-heading: ${typography.headingFont || 'Inter, sans-serif'}`,
+    `--theme-font-body: ${typography.bodyFont || 'Inter, sans-serif'}`,
+    `--theme-text-h1: ${typography.h1?.fontSize || `${goldenRatio.h1}px`}`,
+    `--theme-text-h2: ${typography.h2?.fontSize || `${goldenRatio.h2}px`}`,
+    `--theme-text-h3: ${typography.h3?.fontSize || `${goldenRatio.h3}px`}`,
+    `--theme-text-body: ${typography.body?.fontSize || `${goldenRatio.body}px`}`,
+    `--theme-text-caption: ${typography.caption?.fontSize || `${goldenRatio.caption}px`}`,
+
+    /* 3. Tombol & Radius */
+    `--theme-btn-height: ${buttons.height || 40}px`,
+    `--theme-btn-radius: ${buttons.borderRadius || '8px'}`,
+    `--theme-btn-primary-bg: ${buttons.primary?.backgroundColor || colors.primary || '#3b82f6'}`,
+    `--theme-btn-primary-text: ${buttons.primary?.textColor || '#ffffff'}`,
+    `--theme-btn-secondary-bg: ${buttons.secondary?.backgroundColor || '#f1f5f9'}`,
+    `--theme-btn-secondary-text: ${buttons.secondary?.textColor || '#0f172a'}`,
+    `--theme-btn-outline-border: ${buttons.outline?.borderColor || colors.primary || '#3b82f6'}`,
+    `--theme-btn-outline-text: ${buttons.outline?.textColor || colors.primary || '#3b82f6'}`,
+
+    /* 4. Grid & Spacing */
+    `--theme-grid-gutter: 24px`,
+    `--theme-max-width: ${layout.maxWidth || '1200px'}`,
+    `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
+    `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
+    `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
+
+    /* 5. Effects */
+    `--theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)`,
+    `--theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1)`,
+    `--theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1)`,
   ].join('; ');
 
   const parsePx = (val: unknown, defaultVal: number = 0): number => {

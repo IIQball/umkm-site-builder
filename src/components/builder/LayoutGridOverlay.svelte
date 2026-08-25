@@ -1,10 +1,23 @@
 <script lang="ts">
+  import { canvasStore, editorStore } from './stores/editorStore';
+
   export let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   export let showColumnGrid: boolean = false;
   export let showPixelGrid: boolean = false;
+  export let gutter: number = 24;
 
-  $: columnsCount = viewMode === 'desktop' ? 12 : viewMode === 'tablet' ? 8 : 4;
+  $: currentViewMode = viewMode || $canvasStore.viewMode || 'desktop';
+  $: columnsCount = currentViewMode === 'desktop' ? 12 : currentViewMode === 'tablet' ? 8 : 4;
   $: columnsArray = Array.from({ length: columnsCount });
+
+  $: layoutTheme = $editorStore.template?.config.theme?.layout || {};
+  $: activeMargin = $canvasStore.activeMargin;
+
+  $: safeZoneMargin = currentViewMode === 'desktop'
+    ? (layoutTheme.horizontalMarginDesktop || activeMargin || '32px')
+    : currentViewMode === 'tablet'
+    ? (layoutTheme.horizontalMarginTablet || activeMargin || '24px')
+    : (layoutTheme.horizontalMarginMobile || activeMargin || '16px');
 </script>
 
 {#if showColumnGrid || showPixelGrid}
@@ -19,10 +32,13 @@
 
     <!-- Column Grid Overlay (Figma-Style) -->
     {#if showColumnGrid}
-      <div class="w-full h-full max-w-full mx-auto px-4 sm:px-6 md:px-8 box-border">
+      <div
+        class="w-full h-full max-w-full mx-auto box-border transition-all duration-200"
+        style={`padding-left: ${safeZoneMargin}; padding-right: ${safeZoneMargin};`}
+      >
         <div
-          class="w-full h-full grid gap-3 sm:gap-4 md:gap-6 box-border"
-          style={`grid-template-columns: repeat(${columnsCount}, minmax(0, 1fr));`}
+          class="w-full h-full grid box-border transition-all duration-200"
+          style={`grid-template-columns: repeat(${columnsCount}, minmax(0, 1fr)); gap: ${gutter}px;`}
         >
           {#each columnsArray as _, i}
             <div
@@ -37,3 +53,4 @@
     {/if}
   </div>
 {/if}
+

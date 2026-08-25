@@ -166,10 +166,28 @@
     uploadProgress = 0;
   }
 
+  // -- Cleanup Cloudinary Asset --
+  async function deleteCloudinaryAsset(urlToDelete: string) {
+    if (!urlToDelete || !urlToDelete.includes('cloudinary.com')) return;
+    try {
+      await fetch('/api/media/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlToDelete }),
+      });
+    } catch {
+      // Background cleanup best-effort
+    }
+  }
+
   // -- Remove image --
-  function removeImage(index: number) {
+  async function removeImage(index: number) {
+    const urlToRemove = uploadedUrls[index];
     const newUrls = uploadedUrls.filter((_, i) => i !== index);
     onUpload(newUrls);
+    if (urlToRemove) {
+      await deleteCloudinaryAsset(urlToRemove);
+    }
   }
 
   // -- Drag and drop handlers --

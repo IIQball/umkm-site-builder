@@ -1,315 +1,317 @@
 <script lang="ts">
-  import { editorStore, activeNodeId, activeSection } from '../stores/editorStore';
+  import { editorStore } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
-  import HeroElementToolbar from './hero/HeroElementToolbar.svelte';
+  import { ShoppingBag } from 'lucide-svelte';
 
   export let props: HeroProps = {};
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
+  export let layoutPreset: string = 'split_left_text';
 
-  $: isSectionSelected = isActive || $activeSection?.id === sectionId;
+  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'split_left_text';
   $: tagName = props?.tagName || 'h1';
   $: title = props?.title || 'Selamat datang di toko kami';
   $: subtitle = props?.subtitle || 'Produk berkualitas dengan harga terjangkau';
-  $: imageUrl = props?.imageUrl || '';
-  $: imageMode = (props?.imageMode as 'element' | 'background') || 'element';
+  $: imageUrl = props?.imageUrl || 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=1200&q=80';
   $: ctaText = props?.ctaText || 'Lihat Katalog';
+  $: ctaLink = props?.ctaLink || '#products';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
-  $: nodeStylesMap = props?.nodeStyles || {};
 
-  const defaultOrder = ['badge', 'title', 'subtitle', 'image', 'cta'];
-  $: elementOrder = Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-    ? props.elementOrder
-    : defaultOrder;
-
-  const defaultPositions: Record<string, { x: number; y: number; w: number }> = {
-    badge:    { x: 35, y: 40,  w: 30 },
-    title:    { x: 15, y: 100, w: 70 },
-    subtitle: { x: 20, y: 240, w: 60 },
-    image:    { x: 15, y: 340, w: 70 },
-    cta:      { x: 38, y: 440, w: 24 },
-  };
-
-  let isDraggingNode = false;
-  let isResizingNode = false;
-  let currentKey: string | null = null;
-  let startX = 0;
-  let startY = 0;
-  let isDraggingBg = false;
-  let bgStartX = 0;
-  let bgStartY = 0;
-  
-  $: bgPosX = parseInt(String(styles?.backgroundPositionX ?? '50'), 10) || 50;
-  $: bgPosY = parseInt(String(styles?.backgroundPositionY ?? '50'), 10) || 50;
-
-  let initialNodeX = 0;
-  let initialNodeY = 0;
-  let initialNodeW = 0;
-  let resizeTooltip = '';
-
-  const getNodePos = (key: string) => {
-    const custom = (nodeStylesMap[key] || {}) as Record<string, string | undefined>;
-    const fallback = defaultPositions[key] || { x: 10, y: 10, w: 50 };
-    return {
-      x: custom.left !== undefined ? parseFloat(custom.left) : fallback.x,
-      y: custom.top !== undefined ? parseFloat(custom.top) : fallback.y,
-      w: custom.width !== undefined ? parseFloat(custom.width) : fallback.w,
-    };
-  };
-
-  const selectNodeDirectly = (e: Event, key: string) => {
+  const selectNode = (e: MouseEvent, key: string) => {
     e.stopPropagation();
     editorStore.selectSection(sectionId);
     editorStore.selectNode(sectionId, key);
   };
 
-  const handleBgPointerDown = (e: PointerEvent) => {
-    if (imageMode !== 'background' || !imageUrl) return;
-    const target = e.target as HTMLElement;
-    if (target.closest('.group\\/elem') || target.closest('.resize-handle') || target.closest('.toolbar-btn')) return;
-
-    e.stopPropagation();
-    editorStore.selectSection(sectionId);
-
-    isDraggingBg = true;
-    bgStartX = e.clientX;
-    bgStartY = e.clientY;
-    const initialBgX = bgPosX;
-    const initialBgY = bgPosY;
-
-    const onBgPointerMove = (moveEv: PointerEvent) => {
-      if (!isDraggingBg) return;
-      const dx = moveEv.clientX - bgStartX;
-      const dy = moveEv.clientY - bgStartY;
-
-      // Geser titik fokus background 0% - 100%
-      const newX = Math.max(0, Math.min(100, initialBgX + Math.round(dx / 5)));
-      const newY = Math.max(0, Math.min(100, initialBgY + Math.round(dy / 5)));
-
-      editorStore.updateSectionStyles(sectionId, {
-        backgroundPositionX: `${newX}%`,
-        backgroundPositionY: `${newY}%`,
-      });
-    };
-
-    const onBgPointerUp = () => {
-      isDraggingBg = false;
-      window.removeEventListener('pointermove', onBgPointerMove);
-      window.removeEventListener('pointerup', onBgPointerUp);
-    };
-
-    window.addEventListener('pointermove', onBgPointerMove);
-    window.addEventListener('pointerup', onBgPointerUp);
-  };
-
-  const handlePointerDown = (e: PointerEvent, key: string) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('.resize-handle') || target.closest('.toolbar-btn')) return;
-    
-    e.stopPropagation();
-    
-    editorStore.selectSection(sectionId);
-    editorStore.selectNode(sectionId, key);
-
-    isDraggingNode = true;
-    currentKey = key;
-    startX = e.clientX;
-    startY = e.clientY;
-
-    const pos = getNodePos(key);
-    initialNodeX = pos.x;
-    initialNodeY = pos.y;
-
-    const onPointerMove = (moveEv: PointerEvent) => {
-      if (!isDraggingNode || !currentKey) return;
-      const dx = moveEv.clientX - startX;
-      const dy = moveEv.clientY - startY;
-
-      const container = document.getElementById(`section-hero-${sectionId}`);
-      const containerWidth = container?.offsetWidth || 1000;
-      const dxPercent = (dx / containerWidth) * 100;
-
-      const newX = Math.max(0, Math.min(95, initialNodeX + dxPercent));
-      const newY = Math.max(0, initialNodeY + dy);
-
-      editorStore.updateNodeStyles(sectionId, currentKey, {
-        left: `${newX.toFixed(1)}%`,
-        top: `${newY.toFixed(0)}px`,
-        position: 'absolute',
-      });
-    };
-
-    const onPointerUp = () => {
-      isDraggingNode = false;
-      currentKey = null;
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  };
-
-  const handleKeydown = (e: KeyboardEvent, key: string) => {
+  const selectNodeKey = (e: KeyboardEvent, key: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
       e.stopPropagation();
       editorStore.selectSection(sectionId);
       editorStore.selectNode(sectionId, key);
     }
   };
-
-  const startNodeResize = (e: PointerEvent, key: string, handle: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    isResizingNode = true;
-    currentKey = key;
-    startX = e.clientX;
-    startY = e.clientY;
-
-    const pos = getNodePos(key);
-    initialNodeW = pos.w;
-
-    const onPointerMove = (moveEv: PointerEvent) => {
-      const dx = moveEv.clientX - startX;
-      const container = document.getElementById(`section-hero-${sectionId}`);
-      const containerWidth = container?.offsetWidth || 1000;
-      const dxPercent = (dx / containerWidth) * 100;
-
-      let newW = initialNodeW;
-      if (handle.includes('e')) newW = Math.max(10, Math.min(100, initialNodeW + dxPercent));
-      if (handle.includes('w')) newW = Math.max(10, Math.min(100, initialNodeW - dxPercent));
-
-      resizeTooltip = `Width: ${newW.toFixed(0)}%`;
-      editorStore.updateNodeStyles(sectionId, key, { width: `${newW.toFixed(1)}%` });
-    };
-
-    const onPointerUp = () => {
-      isResizingNode = false;
-      resizeTooltip = '';
-      currentKey = null;
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  };
-
-  const buildCustomStyles = (key: string) => {
-    const custom = nodeStylesMap[key] || {};
-    const rules: string[] = [];
-    if (custom.color) rules.push(`color: ${custom.color}`);
-    if (custom.fontSize) rules.push(`font-size: ${custom.fontSize}`);
-    if (custom.textAlign) rules.push(`text-align: ${custom.textAlign}`);
-    if (custom.backgroundColor) rules.push(`background-color: ${custom.backgroundColor}`);
-    if (custom.borderRadius) rules.push(`border-radius: ${custom.borderRadius}`);
-    return rules.join('; ');
-  };
 </script>
 
-<!-- Hero Section Container -->
-<section
-  id={`section-hero-${sectionId}`}
-  class="relative w-full !p-0 !m-0 overflow-hidden select-none outline-none block"
-  style="min-height: {styles?.minHeight || '650px'}; height: {styles?.height || 'auto'}; {styles?.backgroundColor ? `background-color: ${styles.backgroundColor};` : ''}"
-  on:pointerdown={handleBgPointerDown}
+<div
+  data-node="hero_container"
+  class={`relative w-full overflow-hidden box-border select-none ${isActive ? 'relative z-10' : ''}`}
+  style="min-height: {styles?.minHeight || 'auto'};"
 >
-  <!-- Background Image Mode: Full edge-to-edge & Draggable Focus Position -->
-  {#if imageMode === 'background' && imageUrl}
-    <div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
-      <img
-        src={imageUrl}
-        alt="Hero Background"
-        class="w-full h-full object-cover select-none pointer-events-none"
-        style="object-position: {bgPosX}% {bgPosY}%;"
-      />
-      <!-- Overlay transparan gelap agar teks tetap terbaca -->
-      <div class="absolute inset-0 bg-slate-950/40 pointer-events-none"></div>
-    </div>
-  {/if}
-
-  <!-- Background Backdrop Click Handler -->
-  <button
-    type="button"
-    tabindex="-1"
-    aria-label="Pilih Hero Section"
-    on:click|stopPropagation={() => editorStore.selectSection(sectionId)}
-    class="absolute inset-0 w-full h-full bg-transparent border-0 p-0 m-0 cursor-move focus:outline-none z-0"
-  ></button>
-
-  {#each elementOrder as key (key)}
-    <!-- Jika imageMode === 'background', sembunyikan rendering elemen image di canvas absolute -->
-    {#if !(key === 'image' && imageMode === 'background')}
-      {@const isElementActive = isSectionSelected && $activeNodeId === key}
-      {@const pos = getNodePos(key)}
-
-      <div
-        role="button"
-        tabindex="0"
-        aria-label={`Elemen ${key}`}
-        on:pointerdown|capture={(e) => handlePointerDown(e, key)}
-        on:click|capture={(e) => selectNodeDirectly(e, key)}
-        on:keydown={(e) => handleKeydown(e, key)}
-        style="left: {pos.x}%; top: {pos.y}px; width: {pos.w}%; position: absolute;"
-        class="group/elem transition-shadow cursor-move z-10 {
-          isElementActive
-            ? 'ring-2 ring-blue-500 rounded-lg shadow-lg bg-blue-500/5 !z-30'
-            : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/60 rounded-lg'
-        }"
-      >
-        {#if isElementActive}
-          <HeroElementToolbar
-            nodeKey={key}
-            index={elementOrder.indexOf(key)}
-            total={elementOrder.length}
-            {sectionId}
-            {isResizingNode}
-            {resizeTooltip}
-            onMoveElement={() => {}}
-            onStartResize={startNodeResize}
+  {#if activePreset === 'full_banner_overlay'}
+    <!-- Preset 4: Full Banner Overlay -->
+    <div class="relative w-full min-h-[480px] sm:min-h-[560px] flex items-center justify-center text-center px-4 sm:px-6 py-16">
+      {#if imageUrl}
+        <div class="absolute inset-0 w-full h-full z-0 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt="Banner Hero"
+            class="w-full h-full object-cover select-none pointer-events-none"
           />
-        {/if}
+          <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-[1px] pointer-events-none"></div>
+        </div>
+      {/if}
 
-        <!-- Badge -->
-        {#if key === 'badge' && badgeText}
-          <div style={buildCustomStyles('badge')} class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 shadow-sm w-full truncate pointer-events-none">
+      <div class="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-4 text-white">
+        {#if badgeText}
+          <div
+            data-node="badge"
+            role="button"
+            tabindex="0"
+            on:click={(e) => selectNode(e, 'badge')}
+            on:keydown={(e) => selectNodeKey(e, 'badge')}
+            class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-md border border-white/30 cursor-pointer shadow-sm"
+          >
             <span>{badgeText}</span>
           </div>
+        {/if}
 
-        <!-- Title -->
-        {:else if key === 'title'}
-          <svelte:element
-            this={tagName || 'h1'}
-            style="background-color: transparent; {buildCustomStyles('title')}"
-            class="font-black tracking-tight leading-tight w-full break-words text-2xl sm:text-4xl lg:text-5xl {imageMode === 'background' && !nodeStylesMap?.title?.color ? 'text-white' : 'text-slate-900 dark:text-white'} pointer-events-none"
-          >
-            {title}
-          </svelte:element>
-          
-        <!-- Subtitle -->
-        {:else if key === 'subtitle'}
-          <p style={buildCustomStyles('subtitle')} class="leading-relaxed w-full break-words text-slate-600 dark:text-slate-300 text-sm sm:text-base pointer-events-none">
+        <svelte:element
+          this={tagName || 'h1'}
+          data-node="title"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'title')}
+          on:keydown={(e) => selectNodeKey(e, 'title')}
+          class="font-black tracking-tight leading-tight text-3xl sm:text-5xl drop-shadow-md cursor-pointer"
+        >
+          {title}
+        </svelte:element>
+
+        <div
+          data-node="subtitle"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'subtitle')}
+          on:keydown={(e) => selectNodeKey(e, 'subtitle')}
+          class="cursor-pointer"
+        >
+          <p class="text-sm sm:text-lg text-slate-100 max-w-xl leading-relaxed drop-shadow">
             {subtitle}
           </p>
+        </div>
 
-        <!-- Image (Mode Elemen Bebas) -->
-        {:else if key === 'image' && imageUrl}
-          <div class="w-full overflow-hidden rounded-xl shadow-sm border border-slate-200 pointer-events-none">
-            <img src={imageUrl} alt="Banner" class="w-full h-auto object-cover max-h-[500px]" />
-          </div>
-
-        <!-- CTA Button -->
-        {:else if key === 'cta'}
-          <div
-            style={buildCustomStyles('cta')}
-            class="w-full inline-flex items-center justify-center text-center px-6 py-3 font-semibold rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-all pointer-events-none"
-          >
-            {ctaText}
+        {#if ctaText}
+          <div data-node="cta" class="mt-2">
+            <a
+              href={ctaLink}
+              style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              class="inline-flex items-center justify-center px-8 font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            >
+              <ShoppingBag size={18} class="mr-2" />
+              <span>{ctaText}</span>
+            </a>
           </div>
         {/if}
       </div>
-    {/if}
-  {/each}
-</section>
+    </div>
+
+  {:else if activePreset === 'centered_minimal'}
+    <!-- Preset 3: Centered Minimal -->
+    <div class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 py-12 sm:py-16 flex flex-col items-center text-center gap-6">
+      {#if badgeText}
+        <div
+          data-node="badge"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'badge')}
+          on:keydown={(e) => selectNodeKey(e, 'badge')}
+          class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-blue-50 text-[var(--theme-primary,#2563eb)] text-xs font-bold border border-blue-200 cursor-pointer shadow-sm"
+        >
+          <span>{badgeText}</span>
+        </div>
+      {/if}
+
+      <svelte:element
+        this={tagName || 'h1'}
+        data-node="title"
+        role="button"
+        tabindex="0"
+        on:click={(e) => selectNode(e, 'title')}
+        on:keydown={(e) => selectNodeKey(e, 'title')}
+        class="font-black tracking-tight leading-tight text-3xl sm:text-5xl text-[var(--theme-text-primary,#0f172a)] max-w-3xl cursor-pointer"
+      >
+        {title}
+      </svelte:element>
+
+      <div
+        data-node="subtitle"
+        role="button"
+        tabindex="0"
+        on:click={(e) => selectNode(e, 'subtitle')}
+        on:keydown={(e) => selectNodeKey(e, 'subtitle')}
+        class="cursor-pointer"
+      >
+        <p class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] max-w-2xl leading-relaxed">
+          {subtitle}
+        </p>
+      </div>
+
+      {#if ctaText}
+        <div data-node="cta">
+          <a
+            href={ctaLink}
+            style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+            class="inline-flex items-center justify-center px-8 font-bold text-sm shadow-md hover:scale-105 active:scale-95 transition-transform"
+          >
+            <ShoppingBag size={18} class="mr-2" />
+            <span>{ctaText}</span>
+          </a>
+        </div>
+      {/if}
+
+      <!-- Showcase Gambar 16:9 dengan Concentric Nested Radius (Outer 16px, Padding 8px, Inner 8px) -->
+      {#if imageUrl}
+        <div data-node="image" class="w-full max-w-4xl mt-4 p-2 rounded-2xl bg-base-200/60 dark:bg-slate-800/60 border border-base-300 dark:border-slate-800 shadow-lg">
+          <img
+            src={imageUrl}
+            alt="Hero Showcase"
+            class="w-full aspect-[16/9] object-cover rounded-lg"
+          />
+        </div>
+      {/if}
+    </div>
+
+  {:else if activePreset === 'split_right_text'}
+    <!-- Preset 2: Split Right Text (Image Left, Text Right) -->
+    <div class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+      <!-- Left: Image Showcase with Concentric Nested Radius -->
+      <div data-node="image" class="md:col-span-6 w-full">
+        {#if imageUrl}
+          <div class="p-2 rounded-2xl bg-base-200/60 dark:bg-slate-800/60 border border-base-300 dark:border-slate-800 shadow-md">
+            <img
+              src={imageUrl}
+              alt="Hero Preview"
+              class="w-full aspect-[4/3] object-cover rounded-lg"
+            />
+          </div>
+        {/if}
+      </div>
+
+      <!-- Right: Text & CTA -->
+      <div class="md:col-span-6 flex flex-col items-start text-left gap-4">
+        {#if badgeText}
+          <div
+            data-node="badge"
+            role="button"
+            tabindex="0"
+            on:click={(e) => selectNode(e, 'badge')}
+            on:keydown={(e) => selectNodeKey(e, 'badge')}
+            class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-blue-50 text-[var(--theme-primary,#2563eb)] text-xs font-bold border border-blue-200 cursor-pointer shadow-sm"
+          >
+            <span>{badgeText}</span>
+          </div>
+        {/if}
+
+        <svelte:element
+          this={tagName || 'h1'}
+          data-node="title"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'title')}
+          on:keydown={(e) => selectNodeKey(e, 'title')}
+          class="font-black tracking-tight leading-tight text-3xl sm:text-4xl lg:text-5xl text-[var(--theme-text-primary,#0f172a)] cursor-pointer"
+        >
+          {title}
+        </svelte:element>
+
+        <div
+          data-node="subtitle"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'subtitle')}
+          on:keydown={(e) => selectNodeKey(e, 'subtitle')}
+          class="cursor-pointer"
+        >
+          <p class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] leading-relaxed">
+            {subtitle}
+          </p>
+        </div>
+
+        {#if ctaText}
+          <div data-node="cta" class="pt-2">
+            <a
+              href={ctaLink}
+              style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              class="inline-flex items-center justify-center px-6 font-bold text-sm shadow-md hover:scale-105 active:scale-95 transition-transform"
+            >
+              <ShoppingBag size={18} class="mr-2" />
+              <span>{ctaText}</span>
+            </a>
+          </div>
+        {/if}
+      </div>
+    </div>
+
+  {:else}
+    <!-- Preset 1 (Default): Split Left Text (Text Left, Image Right) -->
+    <div class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+      <!-- Left: Text & CTA -->
+      <div class="md:col-span-6 flex flex-col items-start text-left gap-4">
+        {#if badgeText}
+          <div
+            data-node="badge"
+            role="button"
+            tabindex="0"
+            on:click={(e) => selectNode(e, 'badge')}
+            on:keydown={(e) => selectNodeKey(e, 'badge')}
+            class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-blue-50 text-[var(--theme-primary,#2563eb)] text-xs font-bold border border-blue-200 cursor-pointer shadow-sm"
+          >
+            <span>{badgeText}</span>
+          </div>
+        {/if}
+
+        <svelte:element
+          this={tagName || 'h1'}
+          data-node="title"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'title')}
+          on:keydown={(e) => selectNodeKey(e, 'title')}
+          class="font-black tracking-tight leading-tight text-3xl sm:text-4xl lg:text-5xl text-[var(--theme-text-primary,#0f172a)] cursor-pointer"
+        >
+          {title}
+        </svelte:element>
+
+        <div
+          data-node="subtitle"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode(e, 'subtitle')}
+          on:keydown={(e) => selectNodeKey(e, 'subtitle')}
+          class="cursor-pointer"
+        >
+          <p class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] leading-relaxed">
+            {subtitle}
+          </p>
+        </div>
+
+        {#if ctaText}
+          <div data-node="cta" class="pt-2">
+            <a
+              href={ctaLink}
+              style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              class="inline-flex items-center justify-center px-6 font-bold text-sm shadow-md hover:scale-105 active:scale-95 transition-transform"
+            >
+              <ShoppingBag size={18} class="mr-2" />
+              <span>{ctaText}</span>
+            </a>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Right: Image Showcase with Concentric Nested Radius (Outer 16px, Padding 8px, Inner 8px) -->
+      <div data-node="image" class="md:col-span-6 w-full">
+        {#if imageUrl}
+          <div class="p-2 rounded-2xl bg-base-200/60 dark:bg-slate-800/60 border border-base-300 dark:border-slate-800 shadow-md">
+            <img
+              src={imageUrl}
+              alt="Hero Preview"
+              class="w-full aspect-[4/3] object-cover rounded-lg"
+            />
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>

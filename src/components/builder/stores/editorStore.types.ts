@@ -47,6 +47,7 @@ export interface CanvasState {
   viewMode: 'desktop' | 'tablet' | 'mobile';
   gridActive: boolean;
   zoom: number;
+  activeMargin: '16px' | '24px' | '32px' | '48px';
   canvasMargin: '16px' | '24px' | '32px' | '48px';
   showColumnGrid: boolean;
   showPixelGrid: boolean;
@@ -60,6 +61,7 @@ export const initialCanvasState: CanvasState = {
   viewMode: 'desktop',
   gridActive: false,
   zoom: 100,
+  activeMargin: '24px',
   canvasMargin: '24px',
   showColumnGrid: false,
   showPixelGrid: false,

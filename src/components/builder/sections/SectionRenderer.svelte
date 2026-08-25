@@ -7,14 +7,15 @@
   import ProductCatalog from './ProductCatalog.svelte';
   import Testimonials from './Testimonials.svelte';
   import FAQ from './FAQ.svelte';
+  import GoogleMaps from './GoogleMaps.svelte';
   import Footer from './Footer.svelte';
 
   export let section: TemplateSection;
   export let isActive: boolean = false;
   export let storeId: string | null = null;
 
-  const isDarkColor = (color?: string): boolean => {
-    if (!color || color === 'transparent') return false;
+  const isDarkColor = (color?: unknown): boolean => {
+    if (typeof color !== 'string' || !color || color === 'transparent') return false;
     if (color.startsWith('#')) {
       const hex = color.replace('#', '');
       const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;
@@ -78,21 +79,23 @@
   class="relative transition-all box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
 >
   {#if section.type === 'header_announcement'}
-    <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+    <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
   {:else}
     <div class={`${containerClass} min-w-0 box-border`} style={containerStyle}>
       {#if section.type === 'hero'}
-        <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'features'}
-        <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'product_catalog'}
-        <ProductCatalog props={{...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined)}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <ProductCatalog props={{...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined)}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'testimonials'}
-        <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'faq'}
-        <FAQ props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} />
+        <FAQ props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
+      {:else if section.type === 'google_maps'}
+        <GoogleMaps props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'footer'}
-        <Footer props={section.props || {}} styles={section.styles || {}} />
+        <Footer props={section.props || {}} styles={section.styles || {}} layoutPreset={section.layoutPreset} />
       {/if}
     </div>
   {/if}

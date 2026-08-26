@@ -79,10 +79,16 @@
     }
   }
 
-  const handleToggleEvent = (
-    e: CustomEvent<{ product: Product; newStatus: boolean }>,
-  ) => {
+  function handleToggleEvent(e: CustomEvent<{ product: Product, newStatus: boolean }>) {
     toggleStatus(e.detail.product, e.detail.newStatus);
+  }
+
+  function handleEdit(e: CustomEvent<Product>) {
+    openEditModal(e.detail);
+  }
+
+  function handleDelete(e: CustomEvent<string>) {
+    openDeleteModal(e.detail);
   }
 
   const fetchProducts = async () => {
@@ -267,8 +273,8 @@
               <ProductTableRow
                 {product}
                 {categories}
-                on:edit={(e) => openEditModal(e.detail)}
-                on:delete={(e) => openDeleteModal(e.detail)}
+                on:edit={handleEdit}
+                on:delete={handleDelete}
                 on:toggle={handleToggleEvent}
               />
             {/each}

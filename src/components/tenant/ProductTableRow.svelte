@@ -38,7 +38,15 @@
       <div>
         <div class="font-semibold text-base-content">{product.name}</div>
         {#if Array.isArray(product.variants) && product.variants.length > 0}
-          <div class="text-xs text-base-content/50 font-medium mt-0.5">{product.variants.length} varian</div>
+          {@const groups = product.variants}
+          {@const hasGroups = groups.length > 0 && typeof groups[0] === 'object' && groups[0] !== null && 'groupName' in groups[0]}
+          {#if hasGroups}
+            <div class="text-xs text-base-content/50 font-medium mt-0.5">
+              {groups.length} grup: {groups.map(g => g.groupName).join(', ')}
+            </div>
+          {:else}
+            <div class="text-xs text-base-content/50 font-medium mt-0.5">{product.variants.length} varian</div>
+          {/if}
         {/if}
       </div>
     </div>

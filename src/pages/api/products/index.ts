@@ -1,8 +1,9 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../lib/db/client';
 import { products } from '../../../db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, desc } from 'drizzle-orm';
 import { z } from 'zod';
+import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 
 const productInput = z.object({
   storeId: z.string().min(1),
@@ -10,7 +11,7 @@ const productInput = z.object({
   name: z.string().min(2),
   slug: z.string().min(2),
   basePrice: z.number().min(0),
-  variants: z.array(z.unknown()).default([]),
+  variants: ProductVariantsSchema.default([]),
   description: z.string().optional(),
   imageUrls: z.array(z.string().url()).default([]),
   isAvailable: z.boolean().default(true),
@@ -31,7 +32,7 @@ export const GET: APIRoute = async ({ request }) => {
 
     const query = db.select().from(products).where(
       and(eq(products.storeId, storeId), isNull(products.deletedAt))
-    );
+    ).orderBy(desc(products.createdAt));
     const allProducts = await query;
 
     return new Response(JSON.stringify({ ok: true, data: allProducts }), {

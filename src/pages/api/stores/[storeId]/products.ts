@@ -52,7 +52,8 @@ export const GET: APIRoute = async ({ params, request }) => {
     const mappedItems = records.map(p => ({
         ...p,
         price: p.basePrice,
-        imageUrl: Array.isArray(p.imageUrls) && p.imageUrls.length > 0 ? p.imageUrls[0] : ''
+        imageUrl: Array.isArray(p.imageUrls) && p.imageUrls.length > 0 ? p.imageUrls[0] : '',
+        variants: Array.isArray(p.variants) ? p.variants : [],
     }));
 
     const storeRecord = await db.select({ waNumber: stores.waNumber })

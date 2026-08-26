@@ -3,6 +3,7 @@ import { db } from '../../../lib/db/client';
 import { products } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 
 import { deleteFromCloudinary } from '../../../lib/cloudinary';
 
@@ -12,7 +13,7 @@ const productUpdateInput = z.object({
   name: z.string().min(2).optional(),
   slug: z.string().min(2).optional(),
   basePrice: z.number().min(0).optional(),
-  variants: z.array(z.unknown()).optional(),
+  variants: ProductVariantsSchema.optional(),
   description: z.string().optional(),
   imageUrls: z.array(z.string().url()).optional(),
   isAvailable: z.boolean().optional(),

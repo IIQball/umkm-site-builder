@@ -79,6 +79,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect('/401');
     }
     
+    // Jika akun ditangguhkan
+    if ((user as any).status === 'suspended') {
+      return context.redirect('/auth/login?error=account_suspended');
+    }
+
     // Jika sudah login tapi role tidak sesuai
     if (!protectedRoute.roles.includes(user.role as string)) {
       return context.redirect('/403');

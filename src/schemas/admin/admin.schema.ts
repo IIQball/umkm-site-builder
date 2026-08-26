@@ -42,6 +42,18 @@ export type AdminWhitelistInput = z.infer<typeof adminWhitelistSchema>;
 
 export const adminStatusUpdateSchema = z.object({
   status: z.enum(['active', 'suspended']),
-});
+  suspendReason: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.status === 'suspended') {
+      return typeof data.suspendReason === 'string' && data.suspendReason.trim().length >= 5;
+    }
+    return true;
+  },
+  {
+    message: 'Alasan penangguhan wajib diisi minimal 5 karakter',
+    path: ['suspendReason'],
+  }
+);
 
 export type AdminStatusUpdateInput = z.infer<typeof adminStatusUpdateSchema>;

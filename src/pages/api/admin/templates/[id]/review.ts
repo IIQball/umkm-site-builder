@@ -22,7 +22,8 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
     const body = await context.request.json().catch(() => ({}));
     const validatedInput = validate(reviewTemplateSchema, body);
 
-    const updatedData = await reviewTemplate(templateId, validatedInput.action, validatedInput.rejectionReason, user.id);
+    const action: 'approved' | 'rejected' = validatedInput.action === 'approve' ? 'approved' : 'rejected';
+    const updatedData = await reviewTemplate(templateId, action, validatedInput.rejectionReason, user.id);
 
     const res = jsonSuccess(updatedData, 'Status template berhasil diperbarui');
     const responseBody = await res.json();

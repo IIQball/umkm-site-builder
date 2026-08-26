@@ -1,0 +1,88 @@
+export interface LayoutPresetItem {
+  id: string;
+  label: string;
+  desc: string;
+}
+
+export const PRESETS_BY_SECTION_TYPE: Record<string, LayoutPresetItem[]> = {
+  header_announcement: [
+    { id: 'default_split', label: 'Split Default', desc: 'Logo kiri, Nav tengah, Tombol kanan' },
+    { id: 'centered_stacked', label: 'Centered Stacked', desc: 'Logo atas, Nav horizontal di tengah' },
+    { id: 'compact_inline', label: 'Compact Inline', desc: 'Single-row ringkas 56px' },
+    { id: 'floating_pill', label: 'Floating Pill', desc: 'Navbar melayang dengan pill radius' },
+    { id: 'centered_inline', label: 'Centered Inline', desc: 'Logo di tengah, nav kiri & tombol kanan' },
+    { id: 'sidebar_drawer_trigger', label: 'Sidebar Drawer Trigger', desc: 'Tombol pemicu drawer menu kanan' },
+    { id: 'top_contact_bar', label: 'Top Contact Bar', desc: 'Bar atas 2 tingkat dengan jam & telepon' },
+    { id: 'minimal_borderless', label: 'Minimal Borderless', desc: 'Transparan tanpa border di atas hero' },
+  ],
+  hero: [
+    { id: 'split_left_text', label: 'Split Kiri', desc: 'Teks di kiri, Gambar di kanan' },
+    { id: 'split_right_text', label: 'Split Kanan', desc: 'Gambar di kiri, Teks di kanan' },
+    { id: 'centered_minimal', label: 'Centered Minimal', desc: 'Teks tengah + showcase gambar' },
+    { id: 'full_banner_overlay', label: 'Full Banner Overlay', desc: 'Background foto penuh + teks kontras' },
+    { id: 'hero_card_overlap', label: 'Card Overlap', desc: 'Kartu putih melayang di atas foto full-bleed' },
+    { id: 'split_multi_badges', label: 'Split Multi Badges', desc: 'Headline + badge fitur & grid 2 gambar offset' },
+    { id: 'hero_triple_highlights', label: 'Triple Highlights', desc: 'Split 2 kolom + 3 kartu ringkasan angka' },
+    { id: 'hero_search_focused', label: 'Search Focused', desc: 'Layout terpusat dengan search bar 56px' },
+  ],
+  features: [
+    { id: 'grid_3_cards', label: 'Grid 3 Kartu', desc: '3 Kolom kartu keunggulan' },
+    { id: 'horizontal_list', label: 'Horizontal List', desc: 'Daftar baris ke samping' },
+    { id: 'banner_inline_bar', label: 'Banner Ribbon Bar', desc: 'Pita bar horizontal 64px' },
+    { id: 'grid_4_compact', label: 'Grid 4 Compact', desc: '4 Kartu ringkas sejajar 3 kolom' },
+    { id: 'numbered_process', label: 'Numbered Process', desc: 'Langkah pemesanan 01, 02, 03 berurutan' },
+    { id: 'feature_bento_grid', label: 'Bento Grid', desc: '1 Kartu utama besar + 2 kartu bertumpuk' },
+    { id: 'icon_pill_chips', label: 'Icon Pill Chips', desc: 'Kumpulan chip pill berjejer flex wrap' },
+    { id: 'split_image_feature', label: 'Split Image Feature', desc: 'Foto toko kiri + 4 checklist keunggulan kanan' },
+  ],
+  product_catalog: [
+    { id: 'grid_standard', label: 'Grid Standar (3 Kolom)', desc: 'Grid seimbang 3 kolom produk' },
+    { id: 'carousel_scroll', label: 'Horizontal Carousel', desc: 'Slider gulir horizontal' },
+    { id: 'list_compact', label: 'List View Ringkas', desc: 'Daftar baris horizontal efisien' },
+    { id: 'grid_2_col_large', label: 'Grid 2 Kolom Besar', desc: 'Tampilan foto produk 2 kolom' },
+    { id: 'featured_hero_product', label: 'Featured Product + Grid', desc: '1 Produk hero besar + 3 grid samping' },
+    { id: 'masonry_catalog', label: 'Masonry Pinterest Style', desc: 'Grid variasi tinggi kartu' },
+    { id: 'horizontal_card_slider', label: 'Horizontal Card Slider', desc: 'Kartu landscape dengan tombol aksi' },
+    { id: 'catalog_table_menu', label: 'Menu Table List', desc: 'Tabel daftar harga cocok untuk resto/kafe' },
+  ],
+  testimonials: [
+    { id: 'masonry_grid', label: 'Masonry Grid 3 Kolom', desc: 'Grid 3 kartu ulasan' },
+    { id: 'single_spotlight', label: 'Single Hero Spotlight', desc: '1 Ulasan bintang 5 besar terpusat' },
+    { id: 'chat_bubble_flow', label: 'Chat Bubble Flow', desc: 'Obrolan bubble WhatsApp' },
+    { id: 'testimonial_marquee_slider', label: 'Infinite Marquee Slider', desc: 'Slider berjalan otomatis' },
+    { id: 'large_quote_cards', label: 'Large Quote 2 Kolom', desc: '2 Kartu kutipan testimoni' },
+    { id: 'two_column_cards', label: 'Two Column Cards', desc: '2 Kolom kartu ulasan seimbang' },
+    { id: 'statistics_with_review', label: 'Review + Stat Summary', desc: '3 Angka statistik + 2 kartu ulasan' },
+    { id: 'compact_badge_grid', label: 'Compact Badges Grid', desc: '4 Kartu badge ulasan rating mikro' },
+  ],
+  faq: [
+    { id: 'accordion_single_col', label: 'Accordion Standar', desc: 'Daftar pertanyaan buka-tutup 1 kolom' },
+    { id: 'split_faq_sidebar', label: 'Split Kolom + Kontak', desc: 'Kolom info kiri + Accordion kanan' },
+    { id: 'grid_2_col_cards', label: 'Grid 2 Kolom Selalu Terbuka', desc: 'Kartu tanya-jawab 2 kolom' },
+    { id: 'categorized_tabs_faq', label: 'Categorized Tabbed FAQ', desc: 'FAQ dengan filter kategori tab' },
+    { id: 'faq_contact_banner_bottom', label: 'Accordion + Banner Bantuan', desc: 'Accordion + kartu CTA bantuan' },
+    { id: 'two_column_accordion', label: 'Two Column Accordion', desc: 'Accordion 2 kolom rapat' },
+    { id: 'searchable_faq_box', label: 'Searchable FAQ Box', desc: 'Search box live filter di atas' },
+    { id: 'bubble_chat_faq', label: 'Bubble Chat Style FAQ', desc: 'Format pesan percakapan tanya-jawab' },
+  ],
+  google_maps: [
+    { id: 'fullwidth_map', label: 'Peta Lebar Penuh', desc: 'Tampilan peta membentang penuh 100%' },
+    { id: 'split_map_info', label: 'Split Peta & Jam Buka', desc: 'Kartu alamat kiri + Peta kanan' },
+    { id: 'compact_boxed', label: 'Compact Boxed Map', desc: 'Peta boxed di dalam kontainer kartu' },
+    { id: 'card_overlay_center', label: 'Card Overlay Center', desc: 'Peta full width + kartu info di tengah' },
+    { id: 'multi_branch_map', label: 'Multi Branch Selector', desc: 'Tab pilihan 3 cabang toko' },
+    { id: 'route_guide_map', label: 'Route Guide + Peta', desc: '3 Petunjuk arah + Peta' },
+    { id: 'minimal_map_action', label: 'Minimal Map Bar', desc: 'Peta ringkas + floating button rute' },
+    { id: 'full_bleed_with_hours_pill', label: 'Full Bleed + Hours Pill', desc: 'Peta luas + pill jam operasional' },
+  ],
+  footer: [
+    { id: 'multi_column', label: 'Multi-Column (4 Kolom)', desc: 'Footer lengkap 4 kolom' },
+    { id: 'centered_simple', label: 'Centered Simple', desc: 'Logo & tautan terpusat di tengah' },
+    { id: 'cta_focused', label: 'CTA WhatsApp Focused', desc: 'Kartu ajakan chat WhatsApp dominan' },
+    { id: 'minimal_stacked', label: 'Minimal Stacked', desc: 'Logo atas -> Link tengah -> Copyright bawah' },
+    { id: 'newsletter_footer', label: 'Newsletter Subscription', desc: 'Kotak langganan promo + 3 kolom' },
+    { id: 'two_column_clean', label: 'Two Column Clean', desc: 'Logo kiri, kontak & jam operasional kanan' },
+    { id: 'floating_bottom_bar', label: 'Floating Bottom Bar', desc: 'Bottom bar melayang dengan tombol WhatsApp' },
+    { id: 'app_store_style_footer', label: 'Badge & Sosmed Dominan', desc: 'Footer dengan badge sertifikasi & sosmed' },
+  ],
+};

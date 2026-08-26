@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import type { FAQItem } from '@/types/templates';
   import {
     makeHandleArrayItemChange,
     makeHandleAddArrayItem,
@@ -15,11 +16,6 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
-
-  interface FAQItem {
-    question?: string;
-    answer?: string;
-  }
 
   $: faqs = (section.props?.faqs as FAQItem[]) || [];
 </script>

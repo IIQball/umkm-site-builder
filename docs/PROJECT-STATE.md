@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-26 by feature/virda-single-image-purge-video session
+Status: LIVE · Updated: 2026-08-26 by feature/virda-audit-refactoring-modules session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,13 +11,24 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed Single-Image Upload Integration & Purge of All Video Configurations:
-1. **Purged All Video Presets & Configurations**: Completely removed `hero_video_mockup` and `video_story_testimonials` across Zod schemas (`template.schema.ts`), TypeScript types (`builder.ts`), inspector preset selector (`SectionLayoutPanel.svelte`), section components (`Hero.svelte`, `Testimonials.svelte`), and test suites. Sections now strictly adhere to 8 static-image presets each.
-2. **Single-Image Only & Conversion Pipeline**: Enforced strict input file validation (`maxFiles={1}`, formats: `JPG`, `JPEG`, `PNG`, maks 5MB) -> otomatis dikonversi via HTML5 Canvas ke format `WebP` dengan ukuran `≤200KB` -> diunggah dan ditampilkan sebagai URL publik Cloudinary WebP di `ImageUpload.svelte`.
-3. **Inspector Forms Integration**: Integrated `ImageUpload.svelte` in `HeaderContent.svelte`, `HeaderLogoPanel.svelte`, `HeroContent.svelte`, `FeaturesContent.svelte`, `TestimonialsContent.svelte`, and `GoogleMapsContent.svelte`.
-4. **Validation**: `bun run type-check`: 0 errors, 0 warnings. `bun run lint`: 0 warnings, 0 errors. `bun test`: 213/213 pass.
+Completed Strict Codebase Audit & Refactoring across **Templates**, **Transactions / Finance**, and **Platform Settings / Admin**:
+1. **Modularization & Line Limit Compliance**: Zero files across `src/` exceed 300 lines of code. Large panels, sections, stores, and schemas were split into focused sub-components and isolated helper modules (`*.helpers.ts`).
+2. **Centralized TypeScript Types & Zod Schemas**: All data structures and schemas are centralized in `src/types/` and `src/schemas/`.
+3. **Robust Error Handling**: Standardized HTTP status codes (200, 201, 400, 401, 403, 404, 500) and strict Zod runtime payload validation across all API routes.
+4. **Validation Suite Passed 100%**:
+   - `bun run lint`: **0 errors, 0 warnings**
+   - `bun run type-check`: **0 errors, 0 warnings** (`svelte-check` 100% clean)
+   - `bun test`: **213/213 pass** (767 assertions across 33 test files)
+   - `bun run build`: **Success** (Server & client production bundle built cleanly)
 
 ## Last session did
+
+- **Strict Codebase Audit & Refactoring:**
+  - Modularized `src/components/builder/stores/` (`editorStore.ts`, `documentStore.ts`, `canvasStore.ts`, `editorStore.types.ts`, `documentStore.helpers.ts`, `editorStore.mutations.ts`).
+  - Modularized section renderers into dedicated preset sub-components under `src/components/builder/sections/` (`faq/`, `footer/`, `maps/`, `catalog/`, `hero/`, `testimonials/`, `features/`).
+  - Standardized types across `src/types/templates/`, `src/types/finance/`, `src/types/admin/`, `src/types/common/`.
+  - Harmonized Drizzle ORM schema definitions in `src/db/schema/` (`stores.ts`, `auth.ts`, `relations.ts`).
+  - Validated strict compliance: `bun run lint` (0 errors), `bun run type-check` (0 errors), `bun test` (213 passing), `bun run build` (0 build errors).
 
 - **Single-Image Input Integration & Video Configurations Purge:**
   - `src/components/shared/ImageUpload.svelte`: Validasi input JPG/PNG/JPEG (maks 5MB) -> konversi otomatis WebP (maks 200KB) -> upload Cloudinary WebP.

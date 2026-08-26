@@ -2,8 +2,8 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ReadOnlyPreview from '@/components/builder/ReadOnlyPreview.svelte';
 import { db } from '@/lib/db/client';
-import { templates, stores } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { templates, stores, userTemplates } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import type { EditorTemplate } from '@/components/builder/stores/editorStore';
 import type { TemplateConfig } from '@/schemas';
@@ -14,7 +14,7 @@ const currentUser = await getAuthenticatedUser(Astro.request);
 const { templateId } = Astro.params;
 
 if (!templateId) {
-  return Astro.redirect('/');
+  return Astro.redirect('/templates');
 }
 
 const templateRecord = await db.query.templates.findFirst({
@@ -22,10 +22,45 @@ const templateRecord = await db.query.templates.findFirst({
 });
 
 if (!templateRecord) {
-  return new Response('Template tidak ditemukan', { status: 404 });
+  return Astro.redirect('/templates');
 }
 
 const isOwner = !!currentUser && currentUser.id === templateRecord.designerId;
+const isDesigner = currentUser?.role === 'designer';
+
+let tenantStoreId: string | null = null;
+let isOwned = false;
+
+if (currentUser) {
+  if (currentUser.role === 'tenant') {
+    const storeRecord = await db.query.stores.findFirst({
+      where: eq(stores.userId, currentUser.id),
+    });
+    if (storeRecord) {
+      tenantStoreId = storeRecord.id;
+    }
+  }
+
+  const owned = await db.query.userTemplates.findFirst({
+    where: and(
+      eq(userTemplates.userId, currentUser.id),
+      eq(userTemplates.templateId, templateRecord.id)
+    ),
+  });
+  isOwned = !!owned;
+}
+
+const rawConfig = templateRecord.config;
+let parsedConfig: TemplateConfig;
+if (typeof rawConfig === 'string') {
+  try {
+    parsedConfig = JSON.parse(rawConfig);
+  } catch {
+    parsedConfig = { sections: [], theme: {} } as unknown as TemplateConfig;
+  }
+} else {
+  parsedConfig = (rawConfig || { sections: [], theme: {} }) as TemplateConfig;
+}
 
 const previewTemplate: EditorTemplate = {
   id: templateRecord.id,
@@ -35,20 +70,19 @@ const previewTemplate: EditorTemplate = {
   price: templateRecord.price,
   status: templateRecord.status,
   rejectionReason: templateRecord.rejectionReason,
-  config: templateRecord.config as TemplateConfig,
+  config: parsedConfig,
 };
-
-let tenantStoreId: string | null = null;
-if (currentUser && currentUser.role === 'tenant') {
-  const storeRecord = await db.query.stores.findFirst({
-    where: eq(stores.userId, currentUser.id),
-  });
-  if (storeRecord) {
-    tenantStoreId = storeRecord.id;
-  }
-}
 ---
 
-<BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
-  <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} storeId={tenantStoreId} />
+<BaseLayout title={`Pratinjau: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
+  <ReadOnlyPreview
+    client:load
+    template={previewTemplate}
+    isOwner={isOwner}
+    isDesigner={isDesigner}
+    isLoggedIn={!!currentUser}
+    isOwned={isOwned}
+    storeId={tenantStoreId}
+  />
 </BaseLayout>
+

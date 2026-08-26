@@ -41,15 +41,25 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(payoutSchema, body);
-    const { amount, bankAccountId } = validated;
+    const { amount } = validated;
+    const requestedBankAccountId = validated.bankAccountId;
 
     // 1. Verify bank account exists and belongs to the designer
-    const bankAcc = await db.query.bankAccounts.findFirst({
-      where: (bankAccounts, { and, eq }) => and(eq(bankAccounts.id, bankAccountId), eq(bankAccounts.designerId, user.id)),
-    });
+    let bankAcc;
+    if (requestedBankAccountId) {
+      bankAcc = await db.query.bankAccounts.findFirst({
+        where: (bankAccounts, { and, eq }) => and(eq(bankAccounts.id, requestedBankAccountId), eq(bankAccounts.designerId, user.id)),
+      });
+    } else {
+      bankAcc = await db.query.bankAccounts.findFirst({
+        where: (bankAccounts, { eq }) => eq(bankAccounts.designerId, user.id),
+      });
+    }
+
     if (!bankAcc) {
       throw new AppError('Rekening bank tidak ditemukan', 400, undefined, 'VALIDATION_ERROR');
     }
+    const bankAccountId = bankAcc.id;
 
     // 2. Verify amount is >= payoutMinimumBalance
     const settingsList = await db.select().from(platformSettings).limit(1);

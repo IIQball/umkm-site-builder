@@ -152,7 +152,7 @@
       viewMode={$canvasStore.viewMode}
       isDirty={$editorStore.isDirty}
       saving={$editorStore.isSaving}
-      saveSuccess={$editorStore.saveSuccess}
+      saveSuccess={!$editorStore.isDirty}
       onViewModeChange={(mode) => canvasStore.setViewMode(mode)}
       onSave={() => editorStore.save()}
       onSubmit={() => editorStore.submitReview()}

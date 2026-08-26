@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import type { TestimonialItem } from '@/types/templates';
   import {
     makeHandleArrayItemChange,
     makeHandleAddArrayItem,
@@ -16,13 +17,6 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
-
-  interface TestimonialItem {
-    avatar?: string;
-    customerName?: string;
-    rating?: number;
-    comment?: string;
-  }
 
   $: testimonials = (section.props?.testimonials as TestimonialItem[]) || [];
 </script>
@@ -54,13 +48,13 @@
           <select
             value={item.rating ?? 5}
             on:change={(e) => handleArrayItemChange('testimonials', index, 'rating', Number(e.currentTarget.value))}
-            class="w-24 px-2 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded-lg text-base-content text-xs focus:outline-none focus:border-blue-500 font-medium"
+            class="w-28 px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded-lg text-base-content text-xs focus:outline-none focus:border-blue-500 font-medium"
           >
-            <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
-            <option value={4}>⭐⭐⭐⭐ (4)</option>
-            <option value={3}>⭐⭐⭐ (3)</option>
-            <option value={2}>⭐⭐ (2)</option>
-            <option value={1}>⭐ (1)</option>
+            <option value={5}>Bintang 5 (5)</option>
+            <option value={4}>Bintang 4 (4)</option>
+            <option value={3}>Bintang 3 (3)</option>
+            <option value={2}>Bintang 2 (2)</option>
+            <option value={1}>Bintang 1 (1)</option>
           </select>
           <div class="flex items-center gap-0.5">
             <button

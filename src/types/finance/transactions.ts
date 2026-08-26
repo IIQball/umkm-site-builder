@@ -96,9 +96,11 @@ export interface TransactionRecord {
 export interface CheckoutPageData {
   invoiceId: string;
   amount: number;
-  amountFormatted: string;
-  paymentUrl: string;
-  status: PaymentStatus;
-  expiresAt: string;
+  amountFormatted?: string;
+  paymentUrl?: string;
+  invoiceUrl?: string;
+  status: PaymentStatus | string;
+  expiresAt?: string;
+  expiryDate?: string | null;
   paymentMethod?: string;
 }

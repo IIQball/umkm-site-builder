@@ -1,10 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
-
-  type Product = InferSelectModel<typeof productsSchema>;
-  type Category = { id: string; name: string };
+  import type { Product, Category } from "@/types/common";
 
   export let product: Product;
   export let categories: Category[] = [];

@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
-  import ImageUpload from "../shared/ImageUpload.svelte";
-
-  type Product = InferSelectModel<typeof productsSchema>;
-  type Category = { id: string; name: string };
+  import { createEventDispatcher } from 'svelte';
+  import type { Product, Category } from '@/types/common';
+  import ImageUpload from '../shared/ImageUpload.svelte';
+  import {
+    parseProductVariants,
+    formatInitialVariantsText,
+    submitProductForm,
+  } from './productForm.helpers';
+  import { Loader2 } from 'lucide-svelte';
 
   export let showModal = false;
   export let storeId: string;
@@ -16,353 +18,198 @@
   let dialogElement: HTMLDialogElement;
   let formLoading = false;
   let wasOpen = false;
-  let errorMessage = "";
+  let errorMessage = '';
 
   // Form fields
-  let name = "";
-  let categoryId = "";
+  let name = '';
+  let categoryId = '';
   let basePrice = 0;
-  let description = "";
+  let description = '';
   let isAvailable = true;
   let sortOrder = 0;
   let imageUrls: string[] = [];
-  let variantsText = "";
+  let variantsText = '';
 
-  // React to showModal changes safely to prevent continuous resetting
   $: if (showModal && !wasOpen) {
     wasOpen = true;
-    errorMessage = "";
-
-    // Initialize form fields only once when opening
+    errorMessage = '';
     if (editingProduct) {
       name = editingProduct.name;
       categoryId = editingProduct.categoryId;
       basePrice = editingProduct.basePrice;
-      description = editingProduct.description || "";
-      isAvailable = editingProduct.isAvailable;
+      description = editingProduct.description || '';
+      isAvailable = editingProduct.isAvailable ?? true;
       sortOrder = editingProduct.sortOrder;
-
-      variantsText = Array.isArray(editingProduct.variants)
-        ? editingProduct.variants
-            .map((v: unknown) => {
-              if (typeof v === "object" && v !== null && "name" in v) {
-                return String((v as { name: string }).name);
-              }
-              return JSON.stringify(v);
-            })
-            .join(", ")
-        : "";
-
-      imageUrls = Array.isArray(editingProduct.imageUrls)
-        ? editingProduct.imageUrls.map(String)
-        : [];
+      variantsText = formatInitialVariantsText(editingProduct);
+      imageUrls = Array.isArray(editingProduct.imageUrls) ? [...editingProduct.imageUrls] : [];
     } else {
-      name = "";
-      categoryId = categories.length > 0 ? categories[0].id : "";
+      name = '';
+      categoryId = categories[0]?.id || '';
       basePrice = 0;
-      description = "";
+      description = '';
       isAvailable = true;
       sortOrder = 0;
-      variantsText = "";
+      variantsText = '';
       imageUrls = [];
     }
+  }
 
-    if (dialogElement && !dialogElement.open) {
-      dialogElement.showModal();
-    }
-  } else if (!showModal && wasOpen) {
+  $: if (!showModal) {
     wasOpen = false;
-    if (dialogElement && dialogElement.open) {
+  }
+
+  $: if (dialogElement) {
+    if (showModal && !dialogElement.open) {
+      dialogElement.showModal();
+    } else if (!showModal && dialogElement.open) {
       dialogElement.close();
     }
   }
 
-  const handlePriceInput = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    // Remove all non-digit characters
-    const rawValue = target.value.replace(/\D/g, "");
-    basePrice = rawValue ? parseInt(rawValue, 10) : 0;
+  function handleClose() {
+    dispatch('close');
+  }
 
-    // Update cursor position properly (optional but good practice)
-    const formatted = basePrice ? basePrice.toLocaleString("id-ID") : "";
-    target.value = formatted;
-  };
-
-  const closeModal = () => {
-    showModal = false;
-    errorMessage = "";
-  };
-
-  let fieldErrors: Record<string, string> = {};
-
-  const handleSaveProduct = async () => {
-    errorMessage = "";
-    fieldErrors = {};
-    let isValid = true;
-
-    if (!name || name.trim().length < 2) {
-      fieldErrors.name = "Nama produk wajib diisi (minimal 2 karakter)";
-      isValid = false;
-    }
-    if (!categoryId) {
-      fieldErrors.categoryId = "Kategori produk wajib dipilih";
-      isValid = false;
-    }
-    if (basePrice < 0 || isNaN(basePrice)) {
-      fieldErrors.basePrice = "Harga dasar tidak valid";
-      isValid = false;
-    }
-    if (imageUrls.length === 0) {
-      fieldErrors.imageUrls = "Mohon unggah minimal 1 gambar produk";
-      isValid = false;
-    }
-
-    if (!isValid) return;
-
+  async function handleSubmit() {
     formLoading = true;
+    errorMessage = '';
+
     try {
-      const finalSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      const url = editingProduct
-        ? `/api/products/${editingProduct.id}`
-        : "/api/products";
-      const method = editingProduct ? "PUT" : "POST";
-
-      const parsedVariants = variantsText
-        .split(",")
-        .map((v) => ({ name: v.trim() }))
-        .filter((v) => v.name);
-
-      const payload = {
-        storeId,
-        categoryId,
+      const variants = parseProductVariants(variantsText);
+      await submitProductForm(storeId, editingProduct, {
         name,
-        slug: finalSlug,
+        categoryId,
         basePrice,
         description,
         isAvailable,
         sortOrder,
-        variants: parsedVariants,
         imageUrls,
-      };
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        variants,
       });
-      const data = await res.json();
 
-      if (data.ok) {
-        closeModal();
-        dispatch("success");
-      } else {
-        let errorMsg = data.error.message;
-        if (errorMsg === "Validation failed") {
-          errorMsg = "Pastikan semua form wajib sudah terisi dengan benar.";
-        }
-        errorMessage = "Gagal menyimpan: " + errorMsg;
-      }
-    } catch (e: unknown) {
-      errorMessage =
-        "Error: " +
-        (e instanceof Error ? e.message : "Terjadi kesalahan tidak dikenal");
+      dispatch('saved');
+      handleClose();
+    } catch (err: any) {
+      errorMessage = err.message || 'Terjadi kesalahan sistem';
     } finally {
       formLoading = false;
     }
-  };
+  }
 </script>
 
 <dialog
-  class="modal backdrop-blur-sm"
   bind:this={dialogElement}
-  on:close={closeModal}
+  class="modal modal-bottom sm:modal-middle"
+  on:close={handleClose}
 >
-  <div class="modal-box rounded-2xl p-6 md:p-8">
-    <h3 class="font-bold text-xl mb-6 text-base-content tracking-tight">
-      {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
+  <div class="modal-box max-w-2xl bg-base-100 dark:bg-slate-900 border border-base-200 dark:border-slate-800 text-xs">
+    <h3 class="font-bold text-base text-base-content mb-4">
+      {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
     </h3>
 
     {#if errorMessage}
-      <div class="alert alert-error mb-4 shadow-sm">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="stroke-current shrink-0 h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          ><path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-          /></svg
-        >
-        <span>{errorMessage}</span>
+      <div class="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
+        {errorMessage}
       </div>
     {/if}
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-name"
-        ><span class="label-text font-medium text-base-content/80"
-          >Nama Produk</span
-        ></label
-      >
-      <input
-        id="product-name"
-        type="text"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        class:input-error={fieldErrors.name}
-        bind:value={name}
-      />
-      {#if fieldErrors.name}
-        <span class="text-error text-xs mt-1">{fieldErrors.name}</span>
-      {/if}
-    </div>
-
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-category"
-        ><span class="label-text font-medium text-base-content/80"
-          >Kategori</span
-        ></label
-      >
-      <select
-        id="product-category"
-        class="select select-bordered w-full rounded-xl bg-base-100"
-        class:select-error={fieldErrors.categoryId}
-        bind:value={categoryId}
-      >
-        {#if categories.length === 0}
-          <option value="" disabled>Belum ada kategori</option>
-        {/if}
-        {#each categories as cat}
-          <option value={cat.id}>{cat.name}</option>
-        {/each}
-      </select>
-      {#if fieldErrors.categoryId}
-        <span class="text-error text-xs mt-1">{fieldErrors.categoryId}</span>
-      {/if}
-    </div>
-
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-price"
-        ><span class="label-text font-medium text-base-content/80"
-          >Harga Dasar</span
-        ></label
-      >
-      <input
-        id="product-price"
-        type="text"
-        inputmode="numeric"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        class:input-error={fieldErrors.basePrice}
-        value={basePrice ? basePrice.toLocaleString("id-ID") : ""}
-        on:input={handlePriceInput}
-        placeholder="0"
-      />
-      {#if fieldErrors.basePrice}
-        <span class="text-error text-xs mt-1">{fieldErrors.basePrice}</span>
-      {/if}
-    </div>
-
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-desc"
-        ><span class="label-text font-medium text-base-content/80"
-          >Deskripsi</span
-        ></label
-      >
-      <textarea
-        id="product-desc"
-        class="textarea textarea-bordered w-full rounded-xl bg-base-100"
-        bind:value={description}
-      ></textarea>
-    </div>
-
-    <div class="form-control w-full mb-4 mt-2">
-      <div class="label">
-        <span class="label-text font-medium text-base-content/80"
-          >Gambar Produk</span
-        >
-      </div>
-      <div
-        class="border rounded-2xl p-2 bg-base-100"
-        class:border-error={fieldErrors.imageUrls}
-      >
-        <ImageUpload
-          folder="products"
-          maxFiles={1}
-          existingUrls={imageUrls}
-          onUpload={(urls) => {
-            imageUrls = urls;
-            fieldErrors.imageUrls = "";
-          }}
-        />
-      </div>
-      {#if fieldErrors.imageUrls}
-        <span class="text-error text-xs mt-1">{fieldErrors.imageUrls}</span>
-      {/if}
-    </div>
-
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-variants"
-        ><span class="label-text font-medium text-base-content/80"
-          >Variasi (pisahkan dengan koma)</span
-        ></label
-      >
-      <input
-        id="product-variants"
-        type="text"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        bind:value={variantsText}
-        placeholder="Merah, Biru, Hijau"
-      />
-    </div>
-
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-sort"
-        ><span class="label-text font-medium text-base-content/80"
-          >Urutan Tampil</span
-        ></label
-      >
-      <input
-        id="product-sort"
-        type="text"
-        inputmode="numeric"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        value={sortOrder}
-        on:input={(e) =>
-          (sortOrder = parseInt(e.currentTarget.value.replace(/\D/g, "")) || 0)}
-      />
-    </div>
-
-    <div class="form-control mb-4">
-      <label class="label cursor-pointer" for="product-avail">
-        <span class="label-text font-medium text-base-content/80">Tersedia</span
-        >
+    <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+      <div class="space-y-1">
+        <label for="prod-name" class="block font-semibold text-base-content/80">Nama Produk</label>
         <input
-          id="product-avail"
-          type="checkbox"
-          class="toggle toggle-primary"
-          bind:checked={isAvailable}
+          id="prod-name"
+          type="text"
+          bind:value={name}
+          required
+          placeholder="Nama produk dagangan"
+          class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-xl focus:outline-none focus:border-primary"
         />
-      </label>
-    </div>
+      </div>
 
-    <div class="modal-action mt-8">
-      <button class="btn btn-ghost rounded-xl" on:click={closeModal}
-        >Batal</button
-      >
-      <button
-        class="btn rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm"
-        on:click={handleSaveProduct}
-        disabled={formLoading}
-      >
-        {#if formLoading}
-          <span class="loading loading-spinner"></span>
-        {/if}
-        Simpan
-      </button>
-    </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label for="prod-cat" class="block font-semibold text-base-content/80">Kategori</label>
+          <select
+            id="prod-cat"
+            bind:value={categoryId}
+            required
+            class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-xl"
+          >
+            {#each categories as category}
+              <option value={category.id}>{category.name}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label for="prod-price" class="block font-semibold text-base-content/80">Harga Dasar (Rp)</label>
+          <input
+            id="prod-price"
+            type="number"
+            bind:value={basePrice}
+            required
+            min="0"
+            class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-xl"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label for="prod-desc" class="block font-semibold text-base-content/80">Deskripsi Produk</label>
+        <textarea
+          id="prod-desc"
+          bind:value={description}
+          rows="3"
+          placeholder="Deskripsi singkat produk..."
+          class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-xl"
+        ></textarea>
+      </div>
+
+      <div class="space-y-1">
+        <label for="prod-variants" class="block font-semibold text-base-content/80">Varian (Pisahkan dengan koma)</label>
+        <input
+          id="prod-variants"
+          type="text"
+          bind:value={variantsText}
+          placeholder="Contoh: Merah, Biru, Hijau atau S, M, L"
+          class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-xl"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <ImageUpload
+          bind:value={imageUrls}
+          maxFiles={4}
+          folder={`stores/${storeId}/products`}
+          label="Foto Produk"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <input
+          id="prod-avail"
+          type="checkbox"
+          bind:checked={isAvailable}
+          class="checkbox checkbox-primary checkbox-sm"
+        />
+        <label for="prod-avail" class="font-medium text-base-content cursor-pointer">Produk Tersedia untuk Dijual</label>
+      </div>
+
+      <div class="modal-action pt-4 border-t border-base-200 dark:border-slate-800">
+        <button type="button" class="btn btn-ghost btn-sm" on:click={handleClose}>
+          Batal
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary btn-sm"
+          disabled={formLoading}
+        >
+          {#if formLoading}
+            <Loader2 size={13} class="animate-spin" />
+          {/if}
+          <span>{editingProduct ? 'Simpan Perubahan' : 'Tambah Produk'}</span>
+        </button>
+      </div>
+    </form>
   </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
 </dialog>

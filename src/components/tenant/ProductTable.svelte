@@ -1,14 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
 
-  import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
+  import type { Product, Category } from "@/types/common";
   import ProductFormModal from "./ProductFormModal.svelte";
   import ProductDeleteModal from "./ProductDeleteModal.svelte";
   import ProductTableRow from "./ProductTableRow.svelte";
-
-  type Product = InferSelectModel<typeof productsSchema>;
-  type Category = { id: string; name: string };
 
   export let storeId: string;
   export let categories: Category[];

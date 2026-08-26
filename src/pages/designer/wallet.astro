@@ -3,8 +3,8 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
-import { commissions, platformSettings } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { commissions, platformSettings, bankAccounts, payoutRequests } from '@/db/schema';
+import { eq, sql, desc } from 'drizzle-orm';
 import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
 
 export const prerender = false;
@@ -28,6 +28,20 @@ const totalTemplatesSold = soldInfo?.count || 0;
 
 const settingsList = await db.select().from(platformSettings).limit(1);
 const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
+
+// Fetch bank account directly server-side
+const bankAccountRecord = await db.query.bankAccounts.findFirst({
+  where: eq(bankAccounts.designerId, user.id),
+});
+
+// Fetch payout history directly server-side
+const payoutRecords = await db.query.payoutRequests.findMany({
+  where: eq(payoutRequests.designerId, user.id),
+  with: {
+    bankAccount: true,
+  },
+  orderBy: [desc(payoutRequests.createdAt)],
+});
 ---
 
 <DashboardLayout title="Dompet & Keuangan" breadcrumb="Dompet">
@@ -47,6 +61,8 @@ const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlement
       totalNetIncome={totalNetIncome}
       totalTemplatesSold={totalTemplatesSold}
       settlementDelayDays={settlementDelayDays}
+      initialBankAccount={bankAccountRecord || null}
+      initialPayoutHistory={payoutRecords || []}
     />
   </div>
 </DashboardLayout>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import type { WalletMutation } from '@/types/finance';
   import DesignerStatCards from './DesignerStatCards.svelte';
   import DesignerMutationTable from './DesignerMutationTable.svelte';
   import DesignerBankWithdraw from './DesignerBankWithdraw.svelte';
@@ -7,21 +8,13 @@
   export let walletSummary: {
     balance: number;
     availableBalance: number;
-    mutations: Array<{
-      id: string;
-      amount: number;
-      balanceAfter: number;
-      type: 'CREDIT' | 'DEBIT';
-      description: string;
-      referenceId: string | null;
-      createdAt: Date | string;
-    }>;
+    mutations: WalletMutation[];
   };
   export let totalNetIncome: number;
   export let totalTemplatesSold: number;
   export let settlementDelayDays = 7;
-
-  type WalletMutation = (typeof walletSummary.mutations)[number];
+  export let initialBankAccount: import('@/types/finance').BankAccount | null = null;
+  export let initialPayoutHistory: import('@/types/finance').PayoutHistoryItem[] = [];
 
   const handleBalanceUpdate = (e: Event) => {
     const customEvent = e as CustomEvent;
@@ -116,6 +109,8 @@
     bind:balance={walletSummary.balance}
     bind:availableBalance={walletSummary.availableBalance}
     {settlementDelayDays}
+    {initialBankAccount}
+    {initialPayoutHistory}
   />
 
   <!-- Row 2: Analytics 2-col -->

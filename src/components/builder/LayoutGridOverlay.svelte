@@ -1,5 +1,6 @@
 <script lang="ts">
   import { canvasStore, editorStore } from './stores/editorStore';
+  import { DEFAULT_TEMPLATE_THEME } from '@/schemas';
 
   export let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   export let showColumnGrid: boolean = false;
@@ -10,7 +11,7 @@
   $: columnsCount = currentViewMode === 'desktop' ? 12 : currentViewMode === 'tablet' ? 8 : 4;
   $: columnsArray = Array.from({ length: columnsCount });
 
-  $: layoutTheme = $editorStore.template?.config.theme?.layout || {};
+  $: layoutTheme = $editorStore.template?.config.theme?.layout || DEFAULT_TEMPLATE_THEME.layout;
   $: activeMargin = $canvasStore.activeMargin;
 
   $: safeZoneMargin = currentViewMode === 'desktop'

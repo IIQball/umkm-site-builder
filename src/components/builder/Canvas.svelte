@@ -1,7 +1,7 @@
 <script lang="ts">
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
-  import type { TemplateSection, TemplateTheme } from '@/schemas';
+  import { DEFAULT_TEMPLATE_THEME, type TemplateSection, type TemplateTheme } from '@/schemas';
   import { editorStore, canvasStore } from './stores/editorStore';
   import { calculateGoldenRatioTypography } from '@/lib/utils/designMath';
   import { MoveVertical, MoveHorizontal } from 'lucide-svelte';
@@ -17,12 +17,12 @@
   let startValue = 0;
   let currentDragTooltip = '';
 
-  $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
-  $: isDarkPreview = $canvasStore.previewTheme === 'dark';
-  $: colors = theme.colors || {};
-  $: typography = theme.typography || {};
+  $: theme = ($editorStore.template?.config?.theme || DEFAULT_TEMPLATE_THEME) as TemplateTheme;
+  $: isDarkPreview = $canvasStore.editorTheme === 'dark';
+  $: colors = theme.colors;
+  $: typography = theme.typography;
   $: buttons = (theme.buttons || {}) as Record<string, any>;
-  $: layout = theme.layout || {};
+  $: layout = theme.layout;
 
   $: baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16;
   $: goldenRatio = calculateGoldenRatioTypography(baseFontSize);

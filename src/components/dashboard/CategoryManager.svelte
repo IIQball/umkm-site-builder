@@ -1,11 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  
-  interface Category {
-    id: string;
-    name: string;
-    description: string | null;
-  }
+  import type { Category } from '@/types/common';
 
   let categories: Category[] = [];
   let isLoading = true;

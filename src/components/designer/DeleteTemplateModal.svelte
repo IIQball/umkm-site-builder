@@ -5,8 +5,13 @@
   export let isOpen = false;
   export let mode: 'single' | 'bulk' = 'single';
   export let templateName = '';
+  export let targetTemplate: { name: string } | null = null;
   export let selectedCount = 0;
   export let isDeleting = false;
+  export let onConfirm: (() => void) | undefined = undefined;
+  export let onClose: (() => void) | undefined = undefined;
+
+  $: displayName = templateName || targetTemplate?.name || '';
 
   const dispatch = createEventDispatcher<{
     confirm: void;
@@ -15,11 +20,13 @@
 
   const handleConfirm = () => {
     if (isDeleting) return;
+    if (onConfirm) onConfirm();
     dispatch('confirm');
   };
 
   const handleCancel = () => {
     if (isDeleting) return;
+    if (onClose) onClose();
     dispatch('cancel');
   };
 
@@ -66,7 +73,7 @@
             {#if mode === 'bulk'}
               Anda akan menghapus <strong class="text-main font-bold">{selectedCount} template</strong> yang dipilih secara permanen dari basis data.
             {:else}
-              Apakah Anda yakin ingin menghapus template <strong class="text-main font-bold">"{templateName}"</strong> secara permanen?
+              Apakah Anda yakin ingin menghapus template <strong class="text-main font-bold">"{displayName}"</strong> secara permanen?
             {/if}
           </p>
         </div>

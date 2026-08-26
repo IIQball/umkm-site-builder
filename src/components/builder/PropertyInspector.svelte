@@ -11,7 +11,7 @@
   import type { TemplateSection } from '@/schemas';
   import { editorStore, canvasStore, activeNodeId } from './stores/editorStore';
 
-  export let section: TemplateSection | undefined = undefined;
+  export let section: TemplateSection | null | undefined = undefined;
   export let onSectionUpdate: (section: TemplateSection) => void;
 
   let activeTab: 'content' | 'styles' = 'content';

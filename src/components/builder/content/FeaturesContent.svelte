@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import type { FeatureItem } from '@/types/templates';
   import {
     makeHandlePropChange,
     makeHandleArrayItemChange,
@@ -12,12 +13,6 @@
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
-
-  interface FeatureItem {
-    icon?: string;
-    title?: string;
-    description?: string;
-  }
 
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
   $: handleArrayItemChange = makeHandleArrayItemChange(section, onUpdate);

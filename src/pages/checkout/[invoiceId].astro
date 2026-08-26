@@ -1,9 +1,8 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
-import PaymentModal from '@/components/checkout/PaymentModal.svelte';
+import InvoiceCard from '@/components/checkout/InvoiceCard.svelte';
 import { transactionService } from '@/services';
-import { formatCurrency } from '@/lib/utils/format';
 import type { CheckoutPageData } from '@/types';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
@@ -16,7 +15,6 @@ if (!invoiceId) {
   return Astro.redirect('/');
 }
 
-// Auth guard: must be logged in to view checkout
 const currentUser = await getAuthenticatedUser(Astro.request);
 if (!currentUser) {
   return Astro.redirect(`/auth/login?redirect=/checkout/${invoiceId}`);
@@ -33,7 +31,6 @@ try {
   if (!transaction) {
     error = 'Tagihan tidak ditemukan atau telah kedaluwarsa';
   } else {
-    // Ownership check: only transaction owner or admin can view
     const isOwner = transaction.userId === currentUser.id;
     const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
     if (!isOwner && !isAdmin) {
@@ -48,279 +45,41 @@ try {
           templateName = tpl.name;
         }
       }
-
-      let paymentUrl = '';
-      if (transaction.status === 'pending') {
-        paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || '';
-      }
-
       pageData = {
-        invoiceId: transaction.externalId,
-        amount: transaction.amount,
-        amountFormatted: formatCurrency(transaction.amount),
-        paymentUrl,
+        invoiceId: transaction.id,
         status: transaction.status,
-        expiresAt: '',
-        paymentMethod: transaction.paymentChannel,
+        amount: transaction.amount,
+        expiryDate: transaction.expiryDate?.toISOString() || null,
+        invoiceUrl: transaction.invoiceUrl || '',
       };
     }
   }
-} catch (err) {
-  error = 'Gagal memuat rincian pembayaran';
+} catch {
+  error = 'Gagal memuat informasi tagihan';
 }
-
-const isTemplatePurchase = transactionType === 'template_purchase';
-const checkoutTitle = isTemplatePurchase ? 'Pembayaran Template' : 'Pembayaran Aktivasi Toko';
-const checkoutMetaTitle = `${checkoutTitle} - UMKM Builder`;
-const checkoutDescription = isTemplatePurchase
-  ? (pageData?.status === 'success'
-      ? `Pembayaran berhasil. Template ${templateName ? `"${templateName}"` : ''} kini telah menjadi milik Anda.`
-      : `Selesaikan pembayaran untuk membeli template ${templateName ? `"${templateName}"` : ''}`)
-  : (pageData?.status === 'success'
-      ? 'Pembayaran berhasil dilakukan. Toko online Anda kini telah aktif.'
-      : 'Selesaikan pembayaran untuk mengaktifkan toko online Anda');
-const lineItemTitle = isTemplatePurchase
-  ? (templateName ? `Template: ${templateName}` : 'Pembelian Template')
-  : 'Biaya Aktivasi Toko';
-const lineItemSubtitle = isTemplatePurchase
-  ? 'Desain Template Website UMKM Siap Pakai'
-  : 'Paket Toko Online UMKM';
 ---
 
-<BaseLayout title={checkoutMetaTitle} description={checkoutDescription}>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-
-  <div class="min-h-screen bg-base-200 flex flex-col justify-center items-center py-10 px-4 text-base-content antialiased">
-    <div class="w-full max-w-lg">
-
-      <!-- 403 Access Denied -->
-      {accessDenied && (
-        <div class="p-8 rounded-2xl bg-base-100 border border-base-content/10 shadow-lg text-center space-y-3">
-          <span class="material-symbols-outlined text-error text-5xl">lock</span>
-          <h2 class="text-lg font-bold text-base-content">Akses Ditolak</h2>
-          <p class="text-sm text-base-content/60">Anda tidak memiliki akses ke halaman pembayaran ini.</p>
-          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl">Ke Dashboard</a>
+<BaseLayout title="Detail Pembayaran Tagihan">
+  <main class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl w-full space-y-6">
+      {accessDenied ? (
+        <div class="p-8 text-center bg-base-100 dark:bg-slate-900 border border-base-200 dark:border-slate-800 rounded-3xl space-y-4">
+          <h2 class="text-xl font-bold text-rose-500">Akses Ditolak</h2>
+          <p class="text-xs text-base-content/60">Anda tidak memiliki izin untuk melihat tagihan ini.</p>
+          <a href="/dashboard" class="inline-block px-4 py-2 bg-primary text-white text-xs font-semibold rounded-xl">Kembali ke Dashboard</a>
+        </div>
+      ) : error || !pageData ? (
+        <div class="p-8 text-center bg-base-100 dark:bg-slate-900 border border-base-200 dark:border-slate-800 rounded-3xl space-y-4">
+          <h2 class="text-xl font-bold text-rose-500">Tagihan Tidak Ditemukan</h2>
+          <p class="text-xs text-base-content/60">{error || 'Data tagihan tidak tersedia.'}</p>
+          <a href="/" class="inline-block px-4 py-2 bg-primary text-white text-xs font-semibold rounded-xl">Kembali ke Beranda</a>
+        </div>
+      ) : (
+        <div class="space-y-6">
+          <TransactionStatus client:load invoiceId={pageData.invoiceId} initialStatus={pageData.status} />
+          <InvoiceCard client:load pageData={pageData} transactionType={transactionType} templateName={templateName} />
         </div>
       )}
-
-      <!-- Error Alert -->
-      {!accessDenied && error && (
-        <div class="alert alert-error shadow-lg text-white text-xs rounded-xl flex items-start gap-2 mb-4">
-          <span class="material-symbols-outlined text-lg shrink-0">error</span>
-          <div>
-            <h3 class="font-bold">Terjadi Kesalahan</h3>
-            <p>{error}</p>
-          </div>
-        </div>
-      )}
-
-      <!-- Loading State Skeleton -->
-      {!pageData && !error && (
-        <div class="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl bg-base-100 border border-base-content/10">
-          <div class="flex flex-col items-center justify-center py-20">
-            <span class="loading loading-spinner loading-lg text-primary"></span>
-            <p class="text-xs text-base-content/60 mt-4 font-medium">Memuat data tagihan...</p>
-          </div>
-        </div>
-      )}
-
-      <!-- Main Unified Checkout Card -->
-      {pageData && (
-        <main class="w-full max-w-lg bg-base-100 rounded-2xl shadow-2xl border border-base-content/10 overflow-hidden relative">
-          
-          <!-- Top Section / Breadcrumb & Status -->
-          <div class="px-6 py-4 border-b border-base-content/10 flex justify-between items-center bg-base-100">
-            <a 
-              href="/" 
-              class="inline-flex items-center gap-2 text-xs font-semibold text-base-content/70 hover:text-primary transition-colors"
-            >
-              <span class="material-symbols-outlined text-base">arrow_back</span>
-              Kembali ke Beranda
-            </a>
-            
-            {pageData.status === 'success' ? (
-              <div class="badge-custom badge-custom-emerald px-3 py-1 text-xs font-semibold border">
-                <div class="w-1.5 h-1.5 bg-success rounded-full"></div>
-                Lunas
-              </div>
-            ) : pageData.status === 'failed' ? (
-              <div class="badge-custom badge-custom-rose px-3 py-1 text-xs font-semibold border">
-                <div class="w-1.5 h-1.5 bg-error rounded-full"></div>
-                Gagal
-              </div>
-            ) : pageData.status === 'expired' ? (
-              <div class="badge-custom badge-custom-warning px-3 py-1 text-xs font-semibold border">
-                <div class="w-1.5 h-1.5 bg-warning rounded-full"></div>
-                Kedaluwarsa
-              </div>
-            ) : (
-              <div class="badge-custom badge-custom-amber px-3 py-1 text-xs font-semibold border animate-pulse">
-                <div class="w-1.5 h-1.5 bg-warning rounded-full"></div>
-                Menunggu Pembayaran
-              </div>
-            )}
-          </div>
-
-          <!-- Header Content (Centered) -->
-          <div class="p-6 md:p-8 space-y-6">
-            <div class="text-center space-y-2">
-              {pageData.status === 'success' && (
-                <div class="w-12 h-12 icon-wrapper icon-wrapper-emerald rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-                  <span class="material-symbols-outlined text-3xl font-bold">check</span>
-                </div>
-              )}
-              <h1 class="text-2xl font-extrabold tracking-tight text-base-content">{checkoutTitle}</h1>
-              <p class="text-xs text-base-content/70 max-w-sm mx-auto leading-relaxed">
-                {checkoutDescription}
-              </p>
-            </div>
-
-            <!-- Inner Nested Invoice Card -->
-            <div class="bg-base-200/60 rounded-xl border border-base-content/10 p-5 space-y-5">
-              
-              <!-- Reference Box -->
-              <div class="flex items-center justify-between bg-base-100 p-3 rounded-lg border border-base-content/10 shadow-sm">
-                <div>
-                  <p class="text-xs font-medium text-base-content/60 mb-0.5">No. Referensi Tagihan</p>
-                  <p class="text-xs font-mono font-bold text-base-content tracking-wide">{pageData.invoiceId}</p>
-                </div>
-                <button 
-                  type="button" 
-                  class="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content" 
-                  title="Salin Nomor Referensi"
-                  onclick={`
-                    navigator.clipboard.writeText('${pageData.invoiceId}');
-                    const toast = document.getElementById('copy_toast');
-                    if (toast) {
-                      toast.classList.remove('hidden');
-                      toast.classList.add('opacity-100');
-                      setTimeout(() => {
-                        toast.classList.remove('opacity-100');
-                        toast.classList.add('opacity-0');
-                        setTimeout(() => toast.classList.add('hidden'), 200);
-                      }, 2200);
-                    }
-                  `}
-                >
-                  <span class="material-symbols-outlined text-base">content_copy</span>
-                </button>
-              </div>
-
-              <!-- Line Items -->
-              <div class="space-y-3 pt-1">
-                <div class="flex justify-between items-start border-b border-base-content/10 pb-3">
-                  <div class="max-w-[70%]">
-                    <p class="text-xs font-semibold text-base-content">{lineItemTitle}</p>
-                    <p class="text-xs text-base-content/60">{lineItemSubtitle}</p>
-                  </div>
-                  <p class="text-xs font-semibold text-base-content">{pageData.amountFormatted}</p>
-                </div>
-              </div>
-
-              <!-- Total Amount (Centered) -->
-              <div class="pt-1 flex flex-col items-center justify-center space-y-1 text-center">
-                <p class="text-xs font-bold text-base-content/60 uppercase tracking-widest">Total Pembayaran</p>
-                <p class="text-3xl font-black text-base-content tracking-tight">{pageData.amountFormatted}</p>
-                
-                {pageData.status === 'pending' && (
-                  <p class="text-xs text-warning mt-2 inline-flex items-center gap-1 bg-warning/10 px-2.5 py-1 rounded-md font-medium border border-warning/20">
-                    <span class="material-symbols-outlined text-sm">schedule</span>
-                    Berlaku hingga 24 jam ke depan
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <!-- Action Button & Poller -->
-            {pageData.status === 'pending' ? (
-              <div class="space-y-3 pt-1">
-                {pageData.paymentUrl ? (
-                  <button 
-                    type="button"
-                    class="btn btn-primary w-full text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none"
-                    onclick="document.getElementById('payment_modal')?.showModal()"
-                  >
-                    <span>Lanjutkan ke Pembayaran</span>
-                    <span class="material-symbols-outlined text-base">payment</span>
-                  </button>
-                ) : (
-                  <button 
-                    type="button"
-                    class="btn btn-primary w-full text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none"
-                    onclick="window.location.href = '/checkout/' + window.location.pathname.split('/').pop()"
-                  >
-                    <span>Muat Ulang Halaman</span>
-                    <span class="material-symbols-outlined text-base">refresh</span>
-                  </button>
-                )}
-                
-                <TransactionStatus 
-                  {invoiceId} 
-                  onStatusUpdate={(status) => {
-                    if (status === 'success') {
-                      const modal = document.getElementById('payment_modal');
-                      if (modal instanceof HTMLDialogElement) {
-                        modal.close();
-                      }
-                      window.location.reload();
-                    }
-                  }}
-                  client:load 
-                />
-              </div>
-            ) : pageData.status === 'success' ? (
-              <div class="space-y-3 pt-1">
-                <a 
-                  href={isTemplatePurchase ? "/templates" : "/dashboard"} 
-                  class="btn btn-primary w-full text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex justify-center items-center gap-2 border-none text-center"
-                >
-                  <span>{isTemplatePurchase ? "Kembali ke Katalog Template" : "Menuju Dashboard"}</span>
-                  <span class="material-symbols-outlined text-base">{isTemplatePurchase ? "storefront" : "dashboard"}</span>
-                </a>
-                
-                <TransactionStatus {invoiceId} client:load />
-              </div>
-            ) : null}
-
-            <!-- Payment Modal -->
-            {pageData.paymentUrl && (
-              <PaymentModal 
-                paymentUrl={pageData.paymentUrl}
-                onClose={() => {}}
-                client:load
-              />
-            )}
-
-          </div>
-
-          <!-- Footer Info Inside Main Card -->
-          <div class="bg-base-200/40 p-4 border-t border-base-content/10 flex flex-col items-center justify-center gap-2 text-xs text-base-content/60">
-            <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm text-success">lock</span>
-              Transaksi aman dan terverifikasi otomatis
-            </div>
-            <div class="flex gap-4 text-base-content/70 font-medium">
-              <a class="hover:text-primary underline decoration-base-content/20 underline-offset-2 transition-colors" href="#">Pusat Bantuan</a>
-              <span class="text-base-content/30">•</span>
-              <a class="hover:text-primary underline decoration-base-content/20 underline-offset-2 transition-colors" href="#">Hubungi Kami</a>
-            </div>
-          </div>
-
-        </main>
-      )}
-
     </div>
-
-    <!-- Copy Toast Floating Notification -->
-    <div
-      id="copy_toast"
-      class="toast toast-top toast-end fixed z-50 p-4 transition-all duration-200 hidden opacity-0"
-    >
-      <div class="alert alert-success shadow-xl text-white text-xs font-semibold py-2.5 px-4 gap-2 rounded-xl flex items-center">
-        <span class="material-symbols-outlined text-base">check_circle</span>
-        <span>Nomor referensi berhasil disalin</span>
-      </div>
-    </div>
-
-  </div>
+  </main>
 </BaseLayout>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import type { ProductItem } from '@/types/templates';
   import {
     makeHandlePropChange,
     makeHandleArrayItemChange,
@@ -17,13 +18,6 @@
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
-
-  interface ProductItem {
-    name?: string;
-    price?: number;
-    imageUrl?: string;
-    badge?: string;
-  }
 
   $: subtitle = (section.props?.subtitle as string) ?? '';
   $: products = (section.props?.products as ProductItem[]) || [];

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
+  import type { NodeOption } from '@/types/templates';
   import { editorStore } from '../stores/editorStore';
 
   export let section: TemplateSection;
@@ -9,8 +10,6 @@
     editorStore.addNode(section.id, nodeType);
     onClose();
   };
-
-  type NodeOption = { type: string; label: string };
 
   const heroNodes: NodeOption[] = [
     { type: 'badge', label: '+ Promo Badge' },

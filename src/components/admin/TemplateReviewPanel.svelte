@@ -1,20 +1,5 @@
-<script context="module" lang="ts">
-  export type AdminTemplateItem = {
-    id: string;
-    name: string;
-    description: string | null;
-    thumbnailUrl: string | null;
-    price: number;
-    status: 'draft' | 'pending' | 'approved' | 'rejected';
-    rejectionReason: string | null;
-    createdAt: string;
-    designerId: string;
-    designerName: string | null;
-    designerEmail: string | null;
-  };
-</script>
-
 <script lang="ts">
+  import type { AdminTemplateItem } from '@/types/templates';
   export let initialTemplatesJson: string = '[]';
   let templates: AdminTemplateItem[] = JSON.parse(initialTemplatesJson);
   const statusTabs: Array<'pending' | 'approved' | 'rejected' | 'all'> = ['pending', 'approved', 'rejected', 'all'];

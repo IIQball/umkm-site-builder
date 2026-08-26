@@ -1,4 +1,5 @@
 import type { ComponentType } from 'svelte';
+import type { VariantGroup } from '../../schemas/product-variant.schema';
 
 export type ColorToken =
   | 'primary'
@@ -131,6 +132,7 @@ export interface ProductItem {
   imageUrl?: string;
   description?: string;
   badge?: string;
+  variants?: VariantGroup[];
 }
 
 export interface ProductCatalogProps {

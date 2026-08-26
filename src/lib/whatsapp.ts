@@ -9,7 +9,7 @@ export function formatWhatsAppNumber(phone: string): string {
   return cleaned;
 }
 
-export function generateWhatsAppOrderUrl(phone: string, productName: string, productPrice?: number): string {
+export function generateWhatsAppOrderUrl(phone: string, productName: string, productPrice?: number, variantInfo?: string): string {
   const formattedPhone = formatWhatsAppNumber(phone);
   if (!formattedPhone) return '';
 
@@ -17,7 +17,10 @@ export function generateWhatsAppOrderUrl(phone: string, productName: string, pro
   if (typeof productPrice === 'number') {
     message += ` (Rp ${productPrice.toLocaleString('id-ID')})`;
   }
-  message += '.\n\nBerikut detail pesanan saya:\n- Nama:\n- Alamat Lengkap:\n- Jumlah Pesanan:\n- Catatan Tambahan:';
+  if (variantInfo) {
+    message += `\n*Varian: ${variantInfo}*`;
+  }
+  message += '.\n\nBerikut detail pesanan saya:\n- Nama:\n- Nomor Telepon:\n- Alamat Lengkap:\n- Opsi Pengantaran:\n- Jumlah Pesanan:\n- Catatan Tambahan:';
 
   return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
 }

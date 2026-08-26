@@ -23,7 +23,9 @@ describe('Products API', () => {
       const mockProducts = [{ id: '1', name: 'Produk Test' }];
       (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(mockProducts),
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue(mockProducts),
+          }),
         }),
       });
 

@@ -110,7 +110,7 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     }
 
     const url = new URL(context.request.url);
-    const templateId = url.searchParams.get('templateId');
+    const templateId = url.searchParams.get('id') || url.searchParams.get('templateId');
 
     if (!templateId) {
       throw new AppError('templateId is required', 400);

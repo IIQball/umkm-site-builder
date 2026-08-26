@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc, and } from 'drizzle-orm';
+import { eq, isNull, desc, and, inArray } from 'drizzle-orm';
 import { AppError, validate } from '@/lib/utils';
 import {
   TemplateConfigSchema,
@@ -292,14 +292,66 @@ export async function deleteTemplateDraft(
   }
 
   if (template.status !== 'draft' && template.status !== 'rejected' && !isPrivileged) {
-    throw new AppError('Only draft or rejected templates can be deleted', 400);
+    throw new AppError('Hanya template draft atau ditolak yang dapat dihapus', 400);
   }
 
-  await db
-    .update(templates)
-    .set({
-      deletedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(templates.id, templateId));
+  try {
+    await db.delete(templates).where(eq(templates.id, templateId));
+  } catch (err: unknown) {
+    const errObj = err as { code?: string; message?: string };
+    if (errObj.code === '23503') {
+      throw new AppError('Template memiliki riwayat transaksi dan tidak dapat dihapus permanen', 400);
+    }
+    throw err;
+  }
+}
+
+export async function batchDeleteTemplates(
+  templateIds: string[],
+  userId: string,
+  userRole: string
+) {
+  if (!templateIds || templateIds.length === 0) {
+    return { count: 0 };
+  }
+
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+  const filterCondition = isPrivileged
+    ? inArray(templates.id, templateIds)
+    : and(
+        inArray(templates.id, templateIds),
+        eq(templates.designerId, userId)
+      );
+
+  const matched = await db
+    .select({ id: templates.id, status: templates.status })
+    .from(templates)
+    .where(filterCondition);
+
+  if (matched.length === 0) {
+    throw new AppError('Tidak ada template yang cocok untuk dihapus', 404);
+  }
+
+  const eligibleIds = isPrivileged
+    ? matched.map((t) => t.id)
+    : matched.filter((t) => t.status === 'draft' || t.status === 'rejected').map((t) => t.id);
+
+  if (eligibleIds.length === 0) {
+    throw new AppError('Hanya template berstatus draft atau ditolak yang dapat dihapus', 400);
+  }
+
+  try {
+    const deleted = await db
+      .delete(templates)
+      .where(inArray(templates.id, eligibleIds))
+      .returning({ id: templates.id });
+
+    return { count: deleted.length };
+  } catch (err: unknown) {
+    const errObj = err as { code?: string; message?: string };
+    if (errObj.code === '23503') {
+      throw new AppError('Beberapa template memiliki riwayat transaksi dan tidak dapat dihapus permanen', 400);
+    }
+    throw err;
+  }
 }

@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-26 by feature/virda-token-preset-builder-refactor session
+Status: LIVE · Updated: 2026-08-26 by feature/virda-dynamic-store-bindings session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,16 +11,45 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed rigorous header and canvas viewport realignment across all 3 breakpoints (Desktop, Tablet, Mobile): Refactored `Canvas.svelte` with centered preview frame (`max-w-[1200px]` on desktop, `768px` on tablet, `375px` on mobile) within a flex-centered overflow-auto workspace backdrop; synchronized dynamic CSS variable `--active-safe-zone` across `LayoutGridOverlay.svelte`, `HeaderAnnouncement.svelte`, `AnnouncementBar.svelte`, `Hero.svelte`, and `SectionRenderer.svelte`; eliminated inner padding offsets on `HeaderLogo.svelte` and `HeaderNav.svelte` to ensure zero off-grid misalignment at Column 1 and Column 12/8/4; set 64px standard navbar height. `bun run type-check`: 0 errors. `bun run lint`: 0 warnings. `bun test`: 205/205 pass.
+Completed Dynamic Store Binding Migration for WhatsApp & Google Maps:
+1. **Builder Inspector Form Cleanup**: Removed hardcoded WhatsApp/phone and physical address/Google Maps input fields from template inspector content panels (`FooterContent.svelte`, `ContentTab.svelte`, and new `GoogleMapsContent.svelte`).
+2. **Informative Badges**: Replaced manual inputs with clean status badges: *"Nomor WhatsApp: Mengikuti data profil toko otomatis"* and *"Lokasi Peta: Mengikuti data lokasi toko otomatis"*.
+3. **Dynamic Section Rendering & Fallbacks**: `HeaderAnnouncement.svelte`, `Hero.svelte`, `Footer.svelte`, `FAQ.svelte`, and `GoogleMaps.svelte` bind automatically to tenant profile data (`props.waNumber` / `props.googleMapsUrl`) with demo fallbacks for designer canvas preview.
+4. **Validation**: `bun run type-check`: 0 errors, 0 warnings. `bun run lint`: 0 warnings, 0 errors. `bun test`: 213/213 pass.
 
 ## Last session did
 
-- **Header & Canvas Viewport Realignment (3 Breakpoints Audit):**
-  - `src/components/builder/Canvas.svelte`: Refactored `<main>` to `flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950` with centered `#canvas-frame` (`max-w-[1200px]` desktop, `768px` tablet, `375px` mobile) avoiding sidebar collision. Added `--active-safe-zone` CSS variable matching active viewport mode (`32px` desktop, `24px` tablet, `16px` mobile).
-  - `src/components/builder/LayoutGridOverlay.svelte`: Bound 12/8/4 column guides directly to `padding-left/right: var(--active-safe-zone)`.
-  - `src/components/builder/sections/HeaderAnnouncement.svelte` & `src/components/builder/sections/header/AnnouncementBar.svelte`: Implemented full-bleed 100% outer bar backgrounds with inner container constrained to `--active-safe-zone`, with 64px min-height navbar.
-  - `src/components/builder/sections/header/HeaderLogo.svelte` & `HeaderNav.svelte`: Removed internal `p-1` padding offsets so Logo touches Column 1 and Navigation/CTA/Hamburger touches Column 12 (Desktop), Column 8 (Tablet), and Column 4 (Mobile) with pixel precision.
-  - Full validation passed: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (205 tests passing).
+- **Dynamic Store Binding for WhatsApp & Google Maps (Removed Hardcoded Template Inputs):**
+  - `src/components/builder/content/FooterContent.svelte`: Replaced manual inputs for phone and address with dynamic store binding badges. Retained editable brand logo text, tagline, and copyright.
+  - `src/components/builder/content/GoogleMapsContent.svelte`: Created informative dynamic binding panel informing designers that map location follows tenant store profile.
+  - `src/components/builder/ContentTab.svelte`: Registered `GoogleMapsContent` for `section.type === 'google_maps'`.
+  - `src/components/builder/sections/GoogleMaps.svelte`: Added support for dynamic `props.googleMapsUrl` / `props.mapsUrl` with fallback demo embed.
+  - `src/components/builder/sections/HeaderAnnouncement.svelte`, `Hero.svelte`, `FAQ.svelte`, `Footer.svelte`: Linked all WhatsApp CTA buttons dynamically to `https://wa.me/{storeWaNumber}` with builder demo fallback.
+  - `src/schemas/templates/template.schema.ts`: Cleaned default footer section props to eliminate static empty strings for store tenant properties.
+  - Verification: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (213 tests passing).
+  - `src/schemas/templates/template.schema.ts`: Added `TemplateBatchDeleteSchema` (validates `templateIds: string[]`).
+  - `src/services/templates/template.service.ts`: Updated `deleteTemplateDraft` to perform hard delete via `db.delete(templates)` and added `batchDeleteTemplates` with ownership and status restrictions (only draft or rejected templates).
+  - `src/pages/api/designer/templates/draft.ts`: Updated `DELETE` endpoint to support both `?id=` and `?templateId=` parameters with hard delete execution.
+  - `src/pages/api/designer/templates/batch-delete.ts`: Created batch delete API endpoint with Zod validation.
+  - `src/components/designer/DeleteTemplateModal.svelte`: Created reusable hard delete confirmation modal with danger trash icon, dynamic description, permanent deletion warning callout, and loading state.
+  - `src/components/designer/DesignerTemplateCard.svelte`: Added selection mode checkbox at top-left, card selection toggle, and delete event emission to trigger modal.
+  - `src/components/designer/DesignerTemplateManager.svelte`: Created reactive templates list manager with live tab counts, bulk selection toggle, Select All button, sticky floating action bar (`Hapus Terpilih (N)`), rejection modal handler, and toast alerts.
+  - `src/pages/designer/templates.astro`: Connected `DesignerTemplateManager` with server-rendered initial template list.
+  - `tests/api/designer/templates/delete.test.ts`: Added unit and API tests for single draft delete and batch deletion endpoints.
+  - Full verification suite passed: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (213 tests passing).
+  - `src/schemas/templates/template.schema.ts` & `src/types/templates/builder.ts`:
+    - `HeaderAnnouncement`: Added `floating_pill`, `centered_inline`, `sidebar_drawer_trigger`, `top_contact_bar`, `minimal_borderless`.
+    - `Hero`: Added `hero_card_overlap`, `split_multi_badges`, `hero_video_mockup`, `hero_triple_highlights`, `hero_search_focused`.
+    - `Features`: Added `grid_4_compact`, `numbered_process`, `feature_bento_grid`, `icon_pill_chips`, `split_image_feature`.
+    - `ProductCatalog`: Added `grid_2_col_large`, `featured_hero_product`, `masonry_catalog`, `horizontal_card_slider`, `catalog_table_menu`.
+    - `Testimonials`: Added `testimonial_marquee_slider`, `large_quote_cards`, `video_story_testimonials`, `statistics_with_review`, `compact_badge_grid`.
+    - `FAQ`: Added `categorized_tabs_faq`, `faq_contact_banner_bottom`, `two_column_accordion`, `searchable_faq_box`, `bubble_chat_faq`.
+    - `GoogleMaps`: Added `card_overlay_center`, `multi_branch_map`, `route_guide_map`, `minimal_map_action`, `full_bleed_with_hours_pill`.
+    - `Footer`: Added `minimal_stacked`, `newsletter_footer`, `two_column_clean`, `floating_bottom_bar`, `app_store_style_footer`.
+  - `src/components/builder/inspector/SectionLayoutPanel.svelte`: Updated `presetsBySectionType` with labels and descriptions for all 8 preset options per section type.
+  - `src/components/builder/sections/`: Implemented all new preset layouts across `HeaderAnnouncement.svelte`, `Hero.svelte`, `Features.svelte`, `ProductCatalog.svelte`, `Testimonials.svelte`, `FAQ.svelte`, `GoogleMaps.svelte`, and `Footer.svelte`.
+  - `tests/schemas/template-tokens-presets.test.ts`: Expanded unit test assertions validating all 65 preset variations across all 8 section types.
+  - Validation: `bun run type-check` (0 errors, 0 warnings), `bun run lint` (0 errors, 0 warnings), `bun test` (205 tests passing).
 
 - **Strict Grid & Margin Realignment for All 8 Sections (Zero Off-Grid Leaks):**
   - `src/components/builder/LayoutGridOverlay.svelte`: Added `max-width: var(--theme-max-width, 1200px)` matching the exact content column boundaries across wide desktop viewports.

@@ -103,38 +103,126 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
   });
 
   it('should validate layout presets per section type', () => {
-    expect(HeaderAnnouncementPresetSchema.safeParse('default_split').success).toBe(true);
-    expect(HeaderAnnouncementPresetSchema.safeParse('centered_stacked').success).toBe(true);
-    expect(HeaderAnnouncementPresetSchema.safeParse('compact_inline').success).toBe(true);
+    const headerPresets = [
+      'default_split',
+      'centered_stacked',
+      'compact_inline',
+      'floating_pill',
+      'centered_inline',
+      'sidebar_drawer_trigger',
+      'top_contact_bar',
+      'minimal_borderless',
+    ];
+    for (const p of headerPresets) {
+      expect(HeaderAnnouncementPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(HeaderAnnouncementPresetSchema.safeParse('unknown_preset').success).toBe(false);
 
-    expect(HeroPresetSchema.safeParse('split_left_text').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('split_right_text').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('centered_minimal').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('full_banner_overlay').success).toBe(true);
+    const heroPresets = [
+      'split_left_text',
+      'split_right_text',
+      'centered_minimal',
+      'full_banner_overlay',
+      'hero_card_overlap',
+      'split_multi_badges',
+      'hero_video_mockup',
+      'hero_triple_highlights',
+      'hero_search_focused',
+    ];
+    for (const p of heroPresets) {
+      expect(HeroPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(HeroPresetSchema.safeParse('unknown_hero').success).toBe(false);
 
-    expect(FeaturesPresetSchema.safeParse('grid_3_cards').success).toBe(true);
-    expect(FeaturesPresetSchema.safeParse('horizontal_list').success).toBe(true);
-    expect(FeaturesPresetSchema.safeParse('banner_inline_bar').success).toBe(true);
+    const featuresPresets = [
+      'grid_3_cards',
+      'horizontal_list',
+      'banner_inline_bar',
+      'grid_4_compact',
+      'numbered_process',
+      'feature_bento_grid',
+      'icon_pill_chips',
+      'split_image_feature',
+    ];
+    for (const p of featuresPresets) {
+      expect(FeaturesPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(FeaturesPresetSchema.safeParse('unknown_features').success).toBe(false);
 
-    expect(ProductCatalogPresetSchema.safeParse('grid_standard').success).toBe(true);
-    expect(ProductCatalogPresetSchema.safeParse('carousel_scroll').success).toBe(true);
-    expect(ProductCatalogPresetSchema.safeParse('list_compact').success).toBe(true);
+    const catalogPresets = [
+      'grid_standard',
+      'carousel_scroll',
+      'list_compact',
+      'grid_2_col_large',
+      'featured_hero_product',
+      'masonry_catalog',
+      'horizontal_card_slider',
+      'catalog_table_menu',
+    ];
+    for (const p of catalogPresets) {
+      expect(ProductCatalogPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(ProductCatalogPresetSchema.safeParse('unknown_catalog').success).toBe(false);
 
-    expect(TestimonialsPresetSchema.safeParse('masonry_grid').success).toBe(true);
-    expect(TestimonialsPresetSchema.safeParse('single_spotlight').success).toBe(true);
-    expect(TestimonialsPresetSchema.safeParse('chat_bubble_flow').success).toBe(true);
+    const testimonialsPresets = [
+      'masonry_grid',
+      'single_spotlight',
+      'chat_bubble_flow',
+      'testimonial_marquee_slider',
+      'large_quote_cards',
+      'video_story_testimonials',
+      'statistics_with_review',
+      'compact_badge_grid',
+    ];
+    for (const p of testimonialsPresets) {
+      expect(TestimonialsPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(TestimonialsPresetSchema.safeParse('unknown_testi').success).toBe(false);
 
-    expect(FAQPresetSchema.safeParse('accordion_single_col').success).toBe(true);
-    expect(FAQPresetSchema.safeParse('split_faq_sidebar').success).toBe(true);
-    expect(FAQPresetSchema.safeParse('grid_2_col_cards').success).toBe(true);
+    const faqPresets = [
+      'accordion_single_col',
+      'split_faq_sidebar',
+      'grid_2_col_cards',
+      'categorized_tabs_faq',
+      'faq_contact_banner_bottom',
+      'two_column_accordion',
+      'searchable_faq_box',
+      'bubble_chat_faq',
+    ];
+    for (const p of faqPresets) {
+      expect(FAQPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(FAQPresetSchema.safeParse('unknown_faq').success).toBe(false);
 
-    expect(GoogleMapsPresetSchema.safeParse('fullwidth_map').success).toBe(true);
-    expect(GoogleMapsPresetSchema.safeParse('split_map_info').success).toBe(true);
-    expect(GoogleMapsPresetSchema.safeParse('compact_boxed').success).toBe(true);
+    const mapPresets = [
+      'fullwidth_map',
+      'split_map_info',
+      'compact_boxed',
+      'card_overlay_center',
+      'multi_branch_map',
+      'route_guide_map',
+      'minimal_map_action',
+      'full_bleed_with_hours_pill',
+    ];
+    for (const p of mapPresets) {
+      expect(GoogleMapsPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(GoogleMapsPresetSchema.safeParse('unknown_map').success).toBe(false);
 
-    expect(FooterPresetSchema.safeParse('multi_column').success).toBe(true);
-    expect(FooterPresetSchema.safeParse('centered_simple').success).toBe(true);
-    expect(FooterPresetSchema.safeParse('cta_focused').success).toBe(true);
+    const footerPresets = [
+      'multi_column',
+      'centered_simple',
+      'cta_focused',
+      'minimal_stacked',
+      'newsletter_footer',
+      'two_column_clean',
+      'floating_bottom_bar',
+      'app_store_style_footer',
+    ];
+    for (const p of footerPresets) {
+      expect(FooterPresetSchema.safeParse(p).success).toBe(true);
+    }
+    expect(FooterPresetSchema.safeParse('unknown_footer').success).toBe(false);
   });
 
   it('should validate sections with layoutPreset and token-based styles', () => {
@@ -255,31 +343,86 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
 
   it('should validate all 8 section types with their specific layout presets', () => {
     const sectionsToTest = [
+      // Header (8 presets)
       { id: 'sec-header-1', type: 'header_announcement', layoutPreset: 'default_split' },
       { id: 'sec-header-2', type: 'header_announcement', layoutPreset: 'centered_stacked' },
       { id: 'sec-header-3', type: 'header_announcement', layoutPreset: 'compact_inline' },
+      { id: 'sec-header-4', type: 'header_announcement', layoutPreset: 'floating_pill' },
+      { id: 'sec-header-5', type: 'header_announcement', layoutPreset: 'centered_inline' },
+      { id: 'sec-header-6', type: 'header_announcement', layoutPreset: 'sidebar_drawer_trigger' },
+      { id: 'sec-header-7', type: 'header_announcement', layoutPreset: 'top_contact_bar' },
+      { id: 'sec-header-8', type: 'header_announcement', layoutPreset: 'minimal_borderless' },
+
+      // Hero (9 presets)
       { id: 'sec-hero-1', type: 'hero', layoutPreset: 'split_left_text' },
       { id: 'sec-hero-2', type: 'hero', layoutPreset: 'split_right_text' },
       { id: 'sec-hero-3', type: 'hero', layoutPreset: 'centered_minimal' },
       { id: 'sec-hero-4', type: 'hero', layoutPreset: 'full_banner_overlay' },
+      { id: 'sec-hero-5', type: 'hero', layoutPreset: 'hero_card_overlap' },
+      { id: 'sec-hero-6', type: 'hero', layoutPreset: 'split_multi_badges' },
+      { id: 'sec-hero-7', type: 'hero', layoutPreset: 'hero_video_mockup' },
+      { id: 'sec-hero-8', type: 'hero', layoutPreset: 'hero_triple_highlights' },
+      { id: 'sec-hero-9', type: 'hero', layoutPreset: 'hero_search_focused' },
+
+      // Features (8 presets)
       { id: 'sec-feat-1', type: 'features', layoutPreset: 'grid_3_cards' },
       { id: 'sec-feat-2', type: 'features', layoutPreset: 'horizontal_list' },
       { id: 'sec-feat-3', type: 'features', layoutPreset: 'banner_inline_bar' },
+      { id: 'sec-feat-4', type: 'features', layoutPreset: 'grid_4_compact' },
+      { id: 'sec-feat-5', type: 'features', layoutPreset: 'numbered_process' },
+      { id: 'sec-feat-6', type: 'features', layoutPreset: 'feature_bento_grid' },
+      { id: 'sec-feat-7', type: 'features', layoutPreset: 'icon_pill_chips' },
+      { id: 'sec-feat-8', type: 'features', layoutPreset: 'split_image_feature' },
+
+      // Product Catalog (8 presets)
       { id: 'sec-prod-1', type: 'product_catalog', layoutPreset: 'grid_standard' },
       { id: 'sec-prod-2', type: 'product_catalog', layoutPreset: 'carousel_scroll' },
       { id: 'sec-prod-3', type: 'product_catalog', layoutPreset: 'list_compact' },
+      { id: 'sec-prod-4', type: 'product_catalog', layoutPreset: 'grid_2_col_large' },
+      { id: 'sec-prod-5', type: 'product_catalog', layoutPreset: 'featured_hero_product' },
+      { id: 'sec-prod-6', type: 'product_catalog', layoutPreset: 'masonry_catalog' },
+      { id: 'sec-prod-7', type: 'product_catalog', layoutPreset: 'horizontal_card_slider' },
+      { id: 'sec-prod-8', type: 'product_catalog', layoutPreset: 'catalog_table_menu' },
+
+      // Testimonials (8 presets)
       { id: 'sec-testi-1', type: 'testimonials', layoutPreset: 'masonry_grid' },
       { id: 'sec-testi-2', type: 'testimonials', layoutPreset: 'single_spotlight' },
       { id: 'sec-testi-3', type: 'testimonials', layoutPreset: 'chat_bubble_flow' },
+      { id: 'sec-testi-4', type: 'testimonials', layoutPreset: 'testimonial_marquee_slider' },
+      { id: 'sec-testi-5', type: 'testimonials', layoutPreset: 'large_quote_cards' },
+      { id: 'sec-testi-6', type: 'testimonials', layoutPreset: 'video_story_testimonials' },
+      { id: 'sec-testi-7', type: 'testimonials', layoutPreset: 'statistics_with_review' },
+      { id: 'sec-testi-8', type: 'testimonials', layoutPreset: 'compact_badge_grid' },
+
+      // FAQ (8 presets)
       { id: 'sec-faq-1', type: 'faq', layoutPreset: 'accordion_single_col' },
       { id: 'sec-faq-2', type: 'faq', layoutPreset: 'split_faq_sidebar' },
       { id: 'sec-faq-3', type: 'faq', layoutPreset: 'grid_2_col_cards' },
+      { id: 'sec-faq-4', type: 'faq', layoutPreset: 'categorized_tabs_faq' },
+      { id: 'sec-faq-5', type: 'faq', layoutPreset: 'faq_contact_banner_bottom' },
+      { id: 'sec-faq-6', type: 'faq', layoutPreset: 'two_column_accordion' },
+      { id: 'sec-faq-7', type: 'faq', layoutPreset: 'searchable_faq_box' },
+      { id: 'sec-faq-8', type: 'faq', layoutPreset: 'bubble_chat_faq' },
+
+      // Google Maps (8 presets)
       { id: 'sec-map-1', type: 'google_maps', layoutPreset: 'fullwidth_map' },
       { id: 'sec-map-2', type: 'google_maps', layoutPreset: 'split_map_info' },
       { id: 'sec-map-3', type: 'google_maps', layoutPreset: 'compact_boxed' },
+      { id: 'sec-map-4', type: 'google_maps', layoutPreset: 'card_overlay_center' },
+      { id: 'sec-map-5', type: 'google_maps', layoutPreset: 'multi_branch_map' },
+      { id: 'sec-map-6', type: 'google_maps', layoutPreset: 'route_guide_map' },
+      { id: 'sec-map-7', type: 'google_maps', layoutPreset: 'minimal_map_action' },
+      { id: 'sec-map-8', type: 'google_maps', layoutPreset: 'full_bleed_with_hours_pill' },
+
+      // Footer (8 presets)
       { id: 'sec-foot-1', type: 'footer', layoutPreset: 'multi_column' },
       { id: 'sec-foot-2', type: 'footer', layoutPreset: 'centered_simple' },
       { id: 'sec-foot-3', type: 'footer', layoutPreset: 'cta_focused' },
+      { id: 'sec-foot-4', type: 'footer', layoutPreset: 'minimal_stacked' },
+      { id: 'sec-foot-5', type: 'footer', layoutPreset: 'newsletter_footer' },
+      { id: 'sec-foot-6', type: 'footer', layoutPreset: 'two_column_clean' },
+      { id: 'sec-foot-7', type: 'footer', layoutPreset: 'floating_bottom_bar' },
+      { id: 'sec-foot-8', type: 'footer', layoutPreset: 'app_store_style_footer' },
     ];
 
     for (const sec of sectionsToTest) {

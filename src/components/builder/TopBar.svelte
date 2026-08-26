@@ -68,12 +68,12 @@
   <!-- Left info & Editable Title -->
   <div class="flex items-center gap-2.5 min-w-0">
     <a
-      href="/"
+      href="/designer/templates"
       class="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
-      title="Keluar ke Dashboard"
+      title="Kembali ke Daftar Template"
     >
       <ArrowLeft size={13} />
-      <span class="hidden sm:inline">Keluar</span>
+      <span class="hidden sm:inline">Kembali</span>
     </a>
 
     <div class="h-4 w-px bg-slate-200 dark:bg-slate-800" />

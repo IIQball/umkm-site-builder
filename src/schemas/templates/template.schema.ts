@@ -48,28 +48,101 @@ export type ButtonHeight = z.infer<typeof ButtonHeightSchema>;
 export const EffectShadowSchema = z.enum(['none', 'sm', 'md', 'lg']);
 export type EffectShadow = z.infer<typeof EffectShadowSchema>;
 
-export const HeaderAnnouncementPresetSchema = z.enum(['default_split', 'centered_stacked', 'compact_inline']);
+export const HeaderAnnouncementPresetSchema = z.enum([
+  'default_split',
+  'centered_stacked',
+  'compact_inline',
+  'floating_pill',
+  'centered_inline',
+  'sidebar_drawer_trigger',
+  'top_contact_bar',
+  'minimal_borderless',
+]);
 export type HeaderAnnouncementPreset = z.infer<typeof HeaderAnnouncementPresetSchema>;
 
-export const HeroPresetSchema = z.enum(['split_left_text', 'split_right_text', 'centered_minimal', 'full_banner_overlay']);
+export const HeroPresetSchema = z.enum([
+  'split_left_text',
+  'split_right_text',
+  'centered_minimal',
+  'full_banner_overlay',
+  'hero_card_overlap',
+  'split_multi_badges',
+  'hero_video_mockup',
+  'hero_triple_highlights',
+  'hero_search_focused',
+]);
 export type HeroPreset = z.infer<typeof HeroPresetSchema>;
 
-export const FeaturesPresetSchema = z.enum(['grid_3_cards', 'horizontal_list', 'banner_inline_bar']);
+export const FeaturesPresetSchema = z.enum([
+  'grid_3_cards',
+  'horizontal_list',
+  'banner_inline_bar',
+  'grid_4_compact',
+  'numbered_process',
+  'feature_bento_grid',
+  'icon_pill_chips',
+  'split_image_feature',
+]);
 export type FeaturesPreset = z.infer<typeof FeaturesPresetSchema>;
 
-export const ProductCatalogPresetSchema = z.enum(['grid_standard', 'carousel_scroll', 'list_compact']);
+export const ProductCatalogPresetSchema = z.enum([
+  'grid_standard',
+  'carousel_scroll',
+  'list_compact',
+  'grid_2_col_large',
+  'featured_hero_product',
+  'masonry_catalog',
+  'horizontal_card_slider',
+  'catalog_table_menu',
+]);
 export type ProductCatalogPreset = z.infer<typeof ProductCatalogPresetSchema>;
 
-export const TestimonialsPresetSchema = z.enum(['masonry_grid', 'single_spotlight', 'chat_bubble_flow']);
+export const TestimonialsPresetSchema = z.enum([
+  'masonry_grid',
+  'single_spotlight',
+  'chat_bubble_flow',
+  'testimonial_marquee_slider',
+  'large_quote_cards',
+  'video_story_testimonials',
+  'statistics_with_review',
+  'compact_badge_grid',
+]);
 export type TestimonialsPreset = z.infer<typeof TestimonialsPresetSchema>;
 
-export const FAQPresetSchema = z.enum(['accordion_single_col', 'split_faq_sidebar', 'grid_2_col_cards']);
+export const FAQPresetSchema = z.enum([
+  'accordion_single_col',
+  'split_faq_sidebar',
+  'grid_2_col_cards',
+  'categorized_tabs_faq',
+  'faq_contact_banner_bottom',
+  'two_column_accordion',
+  'searchable_faq_box',
+  'bubble_chat_faq',
+]);
 export type FAQPreset = z.infer<typeof FAQPresetSchema>;
 
-export const GoogleMapsPresetSchema = z.enum(['fullwidth_map', 'split_map_info', 'compact_boxed']);
+export const GoogleMapsPresetSchema = z.enum([
+  'fullwidth_map',
+  'split_map_info',
+  'compact_boxed',
+  'card_overlay_center',
+  'multi_branch_map',
+  'route_guide_map',
+  'minimal_map_action',
+  'full_bleed_with_hours_pill',
+]);
 export type GoogleMapsPreset = z.infer<typeof GoogleMapsPresetSchema>;
 
-export const FooterPresetSchema = z.enum(['multi_column', 'centered_simple', 'cta_focused']);
+export const FooterPresetSchema = z.enum([
+  'multi_column',
+  'centered_simple',
+  'cta_focused',
+  'minimal_stacked',
+  'newsletter_footer',
+  'two_column_clean',
+  'floating_bottom_bar',
+  'app_store_style_footer',
+]);
 export type FooterPreset = z.infer<typeof FooterPresetSchema>;
 
 export const SectionLayoutPresetSchema = z.union([
@@ -408,9 +481,9 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     type: 'footer',
     layoutPreset: 'multi_column',
     props: {
-      whatsappNumber: '',
-      address: '',
       copyrightText: '© 2026 Toko Kami. Semua hak dilindungi.',
+      tagline: 'Pusat belanja produk UMKM terpercaya berkualitas tinggi.',
+      logoText: 'TOKO KAMI',
     },
     styles: {
       bgColorToken: 'surface',
@@ -426,4 +499,10 @@ export const SubmitReviewSchema = z.object({
 });
 
 export type SubmitReview = z.infer<typeof SubmitReviewSchema>;
+
+export const TemplateBatchDeleteSchema = z.object({
+  templateIds: z.array(z.string().min(1, 'Template ID tidak boleh kosong')).min(1, 'Pilih setidaknya 1 template untuk dihapus'),
+});
+
+export type TemplateBatchDelete = z.infer<typeof TemplateBatchDeleteSchema>;
 

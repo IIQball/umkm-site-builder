@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { formatIDR } from '@/lib/utils/format';
+  import { CheckSquare, Square, Trash2, Edit3, Eye, AlertCircle } from 'lucide-svelte';
 
   export let template: {
     id: string;
@@ -13,34 +15,41 @@
     totalSold: number;
   };
 
-  let isDeleting = false;
+  export let isSelectionMode = false;
+  export let isSelected = false;
+  export let isDeleting = false;
 
-  const handleDelete = async () => {
-    if (!confirm('Hapus draf ini? Tindakan tidak dapat dibatalkan.')) return;
-    try {
-      isDeleting = true;
-      const res = await fetch(`/api/designer/templates/draft?templateId=${template.id}`, { method: 'DELETE' });
-      const result = await res.json();
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        alert(result.error?.message || 'Gagal menghapus draf');
-      }
-    } catch {
-      alert('Terjadi kesalahan koneksi');
-    } finally {
-      isDeleting = false;
+  const dispatch = createEventDispatcher<{
+    deleteSingle: { template: typeof template };
+    toggleSelect: { templateId: string };
+    showRejection: { template: typeof template };
+  }>();
+
+  const handleCardClick = (e: MouseEvent) => {
+    if (isSelectionMode && isSelectable) {
+      // Don't toggle if clicking on direct interactive link or action button
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) return;
+      dispatch('toggleSelect', { templateId: template.id });
     }
   };
 
-  const handleShowRejection = () => {
-    const nameEl = document.getElementById('rejection_template_name');
-    const reasonEl = document.getElementById('rejection_reason_text');
-    const modal = document.getElementById('rejection_modal') as HTMLDialogElement | null;
-    if (nameEl) nameEl.textContent = template.name;
-    if (reasonEl) reasonEl.textContent = template.rejectionReason || 'Tidak ada alasan terperinci.';
-    modal?.showModal();
+  const handleCheckboxClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (isSelectable) {
+      dispatch('toggleSelect', { templateId: template.id });
+    }
   };
+
+  const handleDeleteClick = () => {
+    dispatch('deleteSingle', { template });
+  };
+
+  const handleShowRejection = () => {
+    dispatch('showRejection', { template });
+  };
+
+  $: isSelectable = template.status === 'draft' || template.status === 'rejected';
 
   const formatPrice = (p: number) => (p === 0 ? 'Gratis' : formatIDR(p));
 
@@ -50,14 +59,51 @@
     rejected: { label: 'Ditolak',         cls: 'badge-custom-rose' },
     draft:    { label: 'Draft',           cls: 'badge-custom-slate' },
   };
-  const statusInfo = statusMap[template.status] ?? statusMap.draft;
+  $: statusInfo = statusMap[template.status] ?? statusMap.draft;
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-  class="template-card bg-card border border-main rounded-2xl overflow-hidden shadow-sm
-         hover:shadow-md hover:border-main transition-all duration-200 flex flex-col group"
+  on:click={handleCardClick}
+  class={`template-card bg-card border rounded-2xl overflow-hidden shadow-sm transition-all duration-200 flex flex-col group relative ${
+    isSelected
+      ? 'border-rose-500 ring-2 ring-rose-400/40 shadow-md bg-rose-50/5 dark:bg-rose-950/10'
+      : 'border-main hover:shadow-md hover:border-main'
+  } ${isSelectionMode && isSelectable ? 'cursor-pointer' : ''}`}
   data-status={template.status}
 >
+  <!-- Bulk Select Checkbox overlay (Top-Left) -->
+  {#if isSelectionMode}
+    <div class="absolute top-3 left-3 z-20">
+      {#if isSelectable}
+        <button
+          type="button"
+          on:click={handleCheckboxClick}
+          class={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-md ${
+            isSelected
+              ? 'bg-rose-600 text-white ring-2 ring-rose-400/50'
+              : 'bg-card/90 text-secondary hover:text-main hover:bg-card border border-light backdrop-blur-md'
+          }`}
+          aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih template'}
+        >
+          {#if isSelected}
+            <CheckSquare size={18} class="stroke-[2.5]" />
+          {:else}
+            <Square size={18} />
+          {/if}
+        </button>
+      {:else}
+        <span
+          class="w-7 h-7 rounded-lg bg-base-300/80 dark:bg-slate-800/80 text-muted flex items-center justify-center shadow-sm cursor-not-allowed opacity-60"
+          title="Hanya template draft atau ditolak yang dapat dihapus"
+        >
+          <Square size={16} />
+        </span>
+      {/if}
+    </div>
+  {/if}
+
   <!-- Thumbnail 16:9 -->
   <div class="relative w-full aspect-video bg-nested overflow-hidden">
     {#if template.thumbnailUrl}
@@ -74,7 +120,8 @@
       </div>
     {/if}
 
-    <div class="absolute top-3 left-3">
+    <!-- Status badge (shifted if selection mode is on) -->
+    <div class={`absolute top-3 ${isSelectionMode ? 'left-12' : 'left-3'} transition-all`}>
       <span class="badge-custom backdrop-blur-sm bg-card/85 {statusInfo.cls}">
         {statusInfo.label}
       </span>
@@ -115,17 +162,18 @@
             href={`/builder/${template.id}`}
             class="btn btn-xs btn-primary text-xs font-bold text-white rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-sm">edit</span>
-            Edit
+            <Edit3 size={13} />
+            <span>Edit</span>
           </a>
           <button
             type="button"
             disabled={isDeleting}
-            on:click={handleDelete}
-            class="inline-flex items-center text-xs font-medium text-muted
-                   hover:text-rose-500 hover:bg-rose-50/10 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer"
+            on:click={handleDeleteClick}
+            class="inline-flex items-center text-xs font-medium text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer"
+            title="Hapus template permanen"
           >
-            {isDeleting ? '…' : 'Hapus'}
+            <Trash2 size={13} class="mr-1" />
+            <span>Hapus</span>
           </button>
         {/if}
 
@@ -135,15 +183,26 @@
             on:click={handleShowRejection}
             class="badge-custom badge-custom-amber hover:bg-amber-500/20 px-2.5 py-1.5 transition-all cursor-pointer font-bold text-xs flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-sm">info</span>
-            Alasan
+            <AlertCircle size={13} />
+            <span>Alasan</span>
           </button>
           <a
             href={`/builder/${template.id}`}
             class="btn btn-xs btn-primary text-xs font-bold text-white rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
-            Edit Ulang
+            <Edit3 size={13} />
+            <span>Edit Ulang</span>
           </a>
+          <button
+            type="button"
+            disabled={isDeleting}
+            on:click={handleDeleteClick}
+            class="inline-flex items-center text-xs font-medium text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer"
+            title="Hapus template permanen"
+          >
+            <Trash2 size={13} class="mr-1" />
+            <span>Hapus</span>
+          </button>
         {/if}
 
         {#if template.status === 'approved' || template.status === 'pending'}
@@ -151,8 +210,8 @@
             href={`/builder/preview/${template.id}`}
             class="btn btn-xs btn-outline border-light hover:border-main hover:bg-nested text-xs text-secondary font-semibold rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
           >
-            <span class="material-symbols-outlined text-sm">visibility</span>
-            Pratinjau
+            <Eye size={13} />
+            <span>Pratinjau</span>
           </a>
         {/if}
       </div>

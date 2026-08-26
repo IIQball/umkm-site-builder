@@ -6,6 +6,7 @@
   import ProductCatalogContent from './content/ProductCatalogContent.svelte';
   import TestimonialsContent from './content/TestimonialsContent.svelte';
   import FaqContent from './content/FaqContent.svelte';
+  import GoogleMapsContent from './content/GoogleMapsContent.svelte';
   import FooterContent from './content/FooterContent.svelte';
 
   export let section: TemplateSection;
@@ -25,6 +26,8 @@
     <TestimonialsContent {section} {onUpdate} />
   {:else if section.type === 'faq'}
     <FaqContent {section} {onUpdate} />
+  {:else if section.type === 'google_maps'}
+    <GoogleMapsContent {section} />
   {:else if section.type === 'footer'}
     <FooterContent {section} {onUpdate} />
   {/if}

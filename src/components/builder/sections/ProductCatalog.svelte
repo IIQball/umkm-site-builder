@@ -50,6 +50,12 @@
   $: colMobile = Number(props?.columnsMobile ?? styles?.columnsMobile ?? 1);
 
   $: gridColClass = (() => {
+    if (activePreset === 'grid_2_col_large') {
+      return isMobileView ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2';
+    }
+    if (activePreset === 'masonry_catalog') {
+      return isMobileView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+    }
     if (isMobileView) return colMobile === 2 ? "grid-cols-2" : "grid-cols-1";
     if (isTabletView) return colTablet === 3 ? "grid-cols-3" : "grid-cols-2";
     const m = colMobile === 2 ? "grid-cols-2" : "grid-cols-1";
@@ -77,7 +83,7 @@
     props?.cardPreset ?? styles?.cardPreset ?? "elevated_shadow",
   );
   $: isHorizontalLayout =
-    cardPreset === "horizontal" && (!isMobileView || colMobile === 1);
+    (cardPreset === "horizontal" || activePreset === 'horizontal_card_slider') && (!isMobileView || colMobile === 1);
   $: cardRadiusVal = String(
     props?.cardRadius ?? styles?.cardRadius ?? "smooth",
   );
@@ -261,7 +267,7 @@
   };
 </script>
 
-<div class="w-full">
+<div class="w-full box-border py-12">
   <!-- Section Header -->
   <div class="mb-8 text-center">
     <h2
@@ -311,7 +317,7 @@
     </div>
   {/if}
 
-  <!-- Product Grid -->
+  <!-- Catalog View -->
   {#if isLoading && currentPage === 1}
     <div class="py-12 flex justify-center">
       <div class="loading loading-spinner loading-lg text-blue-500"></div>
@@ -325,16 +331,142 @@
         Belum ada produk di katalog. Tambahkan item di panel samping.
       </p>
     </div>
+  {:else if activePreset === 'catalog_table_menu'}
+    <!-- Preset E: Table Menu List (Clean Striped Menu List with 48px mini thumb & instant order button) -->
+    <div class="w-full overflow-x-auto rounded-2xl border border-base-200 dark:border-slate-800 bg-[var(--theme-surface,#ffffff)] dark:bg-slate-900 shadow-sm">
+      <table class="w-full text-left text-xs sm:text-sm">
+        <thead class="bg-base-200/60 dark:bg-slate-800/80 text-[var(--theme-text-primary,#0f172a)] font-bold border-b border-base-200 dark:border-slate-800">
+          <tr>
+            <th class="p-4">Item Menu / Produk</th>
+            <th class="p-4 hidden sm:table-cell">Deskripsi</th>
+            <th class="p-4">Harga</th>
+            <th class="p-4 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-base-200 dark:divide-slate-800">
+          {#each products as product}
+            <tr class="hover:bg-base-100/50 dark:hover:bg-slate-800/50 transition-colors">
+              <td class="p-4 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
+                  {#if product.imageUrl}
+                    <img src={product.imageUrl} alt={product.name} class="w-full h-full object-cover" />
+                  {:else}
+                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                      <Package size={16} />
+                    </div>
+                  {/if}
+                </div>
+                <div>
+                  <p class="font-bold text-[var(--theme-text-primary,#0f172a)]">{product.name || "Nama Produk"}</p>
+                  {#if product.badge}
+                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 mt-0.5 sm:hidden">{product.badge}</span>
+                  {/if}
+                </div>
+              </td>
+              <td class="p-4 hidden sm:table-cell text-xs text-[var(--theme-text-muted,#64748b)] max-w-xs truncate">
+                {product.description || "-"}
+              </td>
+              <td class="p-4 font-mono font-bold text-[var(--theme-primary,#2563eb)] whitespace-nowrap">
+                Rp {typeof product.price === "number" ? product.price.toLocaleString("id-ID") : product.price || "0"}
+              </td>
+              <td class="p-4 text-right">
+                <a
+                  href={activeStoreId && storeWaNumber
+                    ? generateWhatsAppOrderUrl(storeWaNumber, product.name || "", typeof product.price === "number" ? product.price : undefined)
+                    : "#"}
+                  target={activeStoreId && storeWaNumber ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:brightness-105"
+                >
+                  <MessageCircle size={12} />
+                  <span class="hidden sm:inline">Pesan</span>
+                </a>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+
+  {:else if activePreset === 'featured_hero_product' && products.length >= 3}
+    {@const heroProd = products[0]}
+    <!-- Preset B: Featured Hero Product (1 large card left Col 1-7, 2 small cards right Col 8-12) -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch w-full">
+      <div class="md:col-span-7 p-6 rounded-3xl bg-[var(--theme-surface,#ffffff)] dark:bg-slate-900 border border-base-200 dark:border-slate-800 shadow-md flex flex-col justify-between">
+        <div class="w-full aspect-[16/10] rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4 relative">
+          {#if heroProd.imageUrl}
+            <img src={heroProd.imageUrl} alt={heroProd.name} class="w-full h-full object-cover" />
+          {/if}
+          {#if heroProd.badge}
+            <span class="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow">{heroProd.badge}</span>
+          {/if}
+        </div>
+        <div>
+          <h3 class="text-xl sm:text-2xl font-black text-[var(--theme-text-primary,#0f172a)] mb-2">{heroProd.name}</h3>
+          <p class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)] mb-4 line-clamp-3">{heroProd.description}</p>
+          <div class="flex items-center justify-between pt-4 border-t border-base-200 dark:border-slate-800">
+            <p class="text-xl font-extrabold text-[var(--theme-primary,#2563eb)] font-mono">
+              Rp {typeof heroProd.price === "number" ? heroProd.price.toLocaleString("id-ID") : heroProd.price}
+            </p>
+            <a
+              href={activeStoreId && storeWaNumber
+                ? generateWhatsAppOrderUrl(storeWaNumber, heroProd.name || "", typeof heroProd.price === "number" ? heroProd.price : undefined)
+                : "#products"}
+              target={activeStoreId && storeWaNumber ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+              class="px-6 py-2.5 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+            >
+              Beli Sekarang
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Small Products Stacked on Right (Col 8-12) -->
+      <div class="md:col-span-5 flex flex-col gap-6">
+        {#each products.slice(1, 3) as p}
+          <div class="p-4 rounded-2xl bg-[var(--theme-surface,#ffffff)] dark:bg-slate-900 border border-base-200 dark:border-slate-800 shadow-sm flex gap-4 items-center flex-1">
+            <div class="w-28 h-28 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
+              {#if p.imageUrl}
+                <img src={p.imageUrl} alt={p.name} class="w-full h-full object-cover" />
+              {/if}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-sm text-[var(--theme-text-primary,#0f172a)] truncate">{p.name}</h4>
+              <p class="text-xs font-mono font-bold text-[var(--theme-primary,#2563eb)] mt-1">
+                Rp {typeof p.price === "number" ? p.price.toLocaleString("id-ID") : p.price}
+              </p>
+              <a
+                href={activeStoreId && storeWaNumber
+                  ? generateWhatsAppOrderUrl(storeWaNumber, p.name || "", typeof p.price === "number" ? p.price : undefined)
+                  : "#products"}
+                target={activeStoreId && storeWaNumber ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                class="inline-block mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+              >
+                Pesan
+              </a>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+
   {:else}
+    <!-- Grid Standard / Masonry / 2-Col Large / Carousel Scroll / List Compact -->
     <div
       data-node="product_grid"
-      class={activePreset === 'carousel_scroll'
+      class={activePreset === 'carousel_scroll' || activePreset === 'horizontal_card_slider'
         ? "flex overflow-x-auto gap-4 pb-4 snap-x no-scrollbar w-full"
         : activePreset === 'list_compact'
           ? "flex flex-col gap-4 w-full"
           : `grid ${gridColClass} ${gridGapClass}`}
     >
       {#each products as product, index (product.name + index)}
+        {@const isEven = index % 2 === 0}
         <div
           data-node="product_card"
           role="listitem"
@@ -344,31 +476,47 @@
           on:dragleave={() => (dropTargetIdx = null)}
           on:drop={(e) => onDrop(e, index)}
           class={`relative overflow-hidden transition-all duration-200 ${cardRadiusClass} ${cardPresetClass} ${
-            activePreset === 'carousel_scroll' ? "min-w-[260px] max-w-[280px] snap-start flex flex-col" : isHorizontalLayout || activePreset === 'list_compact' ? "flex flex-row items-stretch" : "flex flex-col"
+            activePreset === 'carousel_scroll'
+              ? "min-w-[260px] max-w-[280px] snap-start flex flex-col"
+              : activePreset === 'horizontal_card_slider'
+                ? "min-w-[320px] sm:min-w-[420px] snap-start flex flex-row items-stretch"
+                : isHorizontalLayout || activePreset === 'list_compact'
+                  ? "flex flex-row items-stretch"
+                  : "flex flex-col"
           } ${isActive ? "cursor-grab active:cursor-grabbing" : ""} ${
             dropTargetIdx === index ? "ring-2 ring-blue-500 shadow-xl" : ""
           } ${draggedIdx === index ? "opacity-30" : ""}`}
         >
-          <!-- Image with Nested Radius (16 - 8 = 8px inside card) -->
+          <!-- Image with Nested Radius -->
           <div
             data-node="product_image"
-            class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${isHorizontalLayout || activePreset === 'list_compact' ? "w-32 sm:w-44 flex-shrink-0" : "w-full"}`}
+            class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${
+              isHorizontalLayout || activePreset === 'list_compact' || activePreset === 'horizontal_card_slider'
+                ? "w-32 sm:w-44 flex-shrink-0"
+                : "w-full"
+            }`}
           >
             {#if product.imageUrl}
               <img
                 src={product.imageUrl}
                 alt={product.name || "Produk"}
-                class={`${imageAspectClass} transition-transform duration-300 hover:scale-105`}
+                class={`${
+                  activePreset === 'masonry_catalog'
+                    ? isEven ? 'aspect-square w-full object-cover' : 'aspect-[3/4] w-full object-cover'
+                    : imageAspectClass
+                } transition-transform duration-300 hover:scale-105`}
                 loading="lazy"
               />
             {:else}
               <div
-                class={`w-full ${isHorizontalLayout || activePreset === 'list_compact' ? "h-full min-h-[140px]" : "h-48"} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}
+                class={`w-full ${
+                  isHorizontalLayout || activePreset === 'list_compact' || activePreset === 'horizontal_card_slider'
+                    ? "h-full min-h-[140px]"
+                    : "h-48"
+                } flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}
               >
                 <Package size={26} class="text-slate-300 dark:text-slate-600" />
-                <span class="text-[10px] font-medium text-slate-400"
-                  >Foto Produk</span
-                >
+                <span class="text-[10px] font-medium text-slate-400">Foto Produk</span>
               </div>
             {/if}
             {#if product.badge}
@@ -383,7 +531,11 @@
 
           <!-- Details -->
           <div
-            class={`p-4 flex-1 flex flex-col justify-between ${isHorizontalLayout || activePreset === 'list_compact' ? "min-w-0" : ""}`}
+            class={`p-4 flex-1 flex flex-col justify-between ${
+              isHorizontalLayout || activePreset === 'list_compact' || activePreset === 'horizontal_card_slider'
+                ? "min-w-0"
+                : ""
+            }`}
           >
             <div>
               <h3

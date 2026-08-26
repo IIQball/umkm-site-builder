@@ -4,8 +4,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { templates, commissions } from '@/db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
-import DesignerTemplateCard from '@/components/designer/DesignerTemplateCard.svelte';
-import StatCard from '@/components/ui/StatCard.svelte';
+import DesignerTemplateManager from '@/components/designer/DesignerTemplateManager.svelte';
 
 export const prerender = false;
 
@@ -30,198 +29,38 @@ const templatesList = await db
   .leftJoin(commissions, eq(templates.id, commissions.templateId))
   .where(and(eq(templates.designerId, user.id), isNull(templates.deletedAt)))
   .groupBy(
-    templates.id, templates.name, templates.description, templates.price,
-    templates.thumbnailUrl, templates.status, templates.rejectionReason, templates.createdAt,
+    templates.id,
+    templates.name,
+    templates.description,
+    templates.price,
+    templates.thumbnailUrl,
+    templates.status,
+    templates.rejectionReason,
+    templates.createdAt,
   )
   .orderBy(desc(templates.createdAt));
-
-const counts = {
-  all:      templatesList.length,
-  draft:    templatesList.filter((t) => t.status === 'draft').length,
-  pending:  templatesList.filter((t) => t.status === 'pending').length,
-  approved: templatesList.filter((t) => t.status === 'approved').length,
-  rejected: templatesList.filter((t) => t.status === 'rejected').length,
-};
-
-type FilterKey = keyof typeof counts;
-
-const tabs: Array<{ key: FilterKey; label: string }> = [
-  { key: 'all',      label: 'Semua' },
-  { key: 'draft',    label: 'Draft' },
-  { key: 'pending',  label: 'Menunggu Review' },
-  { key: 'approved', label: 'Disetujui' },
-  { key: 'rejected', label: 'Ditolak' },
-];
 ---
 
 <DashboardLayout title="Template Saya" breadcrumb="Template Saya">
   <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
-
     <!-- Page header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
         <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Koleksi Template Desain</h1>
         <p class="text-sm text-secondary mt-1">
-          Kelola, buat, dan pantau status publikasi template toko UMKM Anda.
+          Kelola, buat, pantau status publikasi, dan hapus template toko UMKM Anda.
         </p>
       </div>
       <a
         href="/builder/new"
-        class="btn btn-primary text-sm font-bold rounded-xl px-5 py-2.5 transition-all flex-shrink-0"
+        class="btn btn-primary text-sm font-bold rounded-xl px-5 py-2.5 transition-all flex-shrink-0 flex items-center gap-1.5"
       >
         <span class="material-symbols-outlined text-sm">add</span>
-        Buat Desain Baru
+        <span>Buat Desain Baru</span>
       </a>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-      <StatCard 
-        label="Total Template" 
-        value={counts.all} 
-        icon="layers" 
-        iconCls="icon-wrapper-indigo" 
-        borderAccent="border-t-2 border-t-indigo-400" 
-        badge="Koleksi"
-        badgeCls="badge-custom-indigo"
-      />
-      <StatCard 
-        label="Disetujui" 
-        value={counts.approved} 
-        icon="check_circle" 
-        iconCls="icon-wrapper-emerald" 
-        borderAccent="border-t-2 border-t-emerald-400" 
-        badge="Aktif"
-        badgeCls="badge-custom-emerald"
-      />
-      <StatCard 
-        label="Menunggu Review" 
-        value={counts.pending} 
-        icon="hourglass_top" 
-        iconCls="icon-wrapper-amber" 
-        borderAccent="border-t-2 border-t-amber-400" 
-        badge="Antrean"
-        badgeCls="badge-custom-warning"
-      />
-      <StatCard 
-        label="Draft" 
-        value={counts.draft} 
-        icon="edit_note" 
-        iconCls="icon-wrapper-slate" 
-        borderAccent="border-t-2 border-t-slate-400" 
-        badge="Revisi"
-        badgeCls="badge-custom-slate"
-      />
-    </div>
-
-    <!-- Filter + Grid container — matches wallet panel style -->
-    <div class="bg-card border border-light rounded-2xl shadow-sm overflow-hidden">
-      <!-- Filter tabs header -->
-      <div class="px-6 py-4 border-b border-light flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h3 class="text-sm font-bold text-main">Daftar Template</h3>
-          <p class="text-xs text-muted mt-0.5">Filter berdasarkan status publikasi</p>
-        </div>
-        <div class="flex items-center gap-1 bg-nested border border-light rounded-xl p-1 overflow-x-auto flex-shrink-0">
-          {tabs.map((tab) => (
-            <button
-              type="button"
-              class={`tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${tab.key === 'all' ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:text-main hover:bg-card'}`}
-              data-filter={tab.key}
-            >
-              {tab.label}
-              <span class={`text-xs font-bold ${tab.key === 'all' ? 'bg-white/20 text-white' : 'bg-nested border border-light text-secondary'} rounded-md px-1.5 py-0.5 leading-none`}>
-                {counts[tab.key]}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <!-- Templates grid or empty state -->
-      <div class="p-6">
-        {templatesList.length === 0 ? (
-          <div class="py-12 flex flex-col items-center text-center">
-            <div class="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto mb-4">
-              <span class="material-symbols-outlined icon-filled text-3xl">layers</span>
-            </div>
-            <h3 class="text-sm font-bold text-main">Belum Ada Template</h3>
-            <p class="text-xs text-secondary mt-1.5 mb-6 max-w-xs mx-auto leading-relaxed">
-              Mulai rancang dan publikasikan template toko online UMKM pertama Anda.
-            </p>
-            <a
-              href="/builder/new"
-              class="btn btn-primary text-xs font-bold rounded-xl px-6 py-2.5 flex items-center gap-2"
-            >
-              <span class="material-symbols-outlined text-sm">add</span>
-              Buat Template Baru
-            </a>
-          </div>
-        ) : (
-          <div id="templates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templatesList.map((tpl) => (
-              <DesignerTemplateCard client:load template={tpl} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <!-- Interactive Manager Component -->
+    <DesignerTemplateManager client:load initialTemplates={templatesList} />
   </div>
-
-  <!-- Rejection modal -->
-  <dialog id="rejection_modal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box rounded-2xl border border-light shadow-2xl p-6 bg-card max-w-sm">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="w-9 h-9 rounded-xl bg-error/10 border border-error/20 text-error flex items-center justify-center">
-          <span class="material-symbols-outlined icon-filled text-sm text-error">warning</span>
-        </div>
-        <h3 class="text-sm font-bold text-error">Alasan Penolakan</h3>
-      </div>
-      <p id="rejection_template_name" class="text-xs font-bold text-secondary mb-2"></p>
-      <div class="bg-error/10 border border-error/20 text-error rounded-xl p-4 text-xs font-medium leading-relaxed font-mono">
-        <p id="rejection_reason_text"></p>
-      </div>
-      <div class="modal-action mt-5">
-        <form method="dialog">
-          <button class="inline-flex items-center px-5 py-2 text-xs font-bold text-main
-                         border border-light rounded-xl hover:bg-nested transition-colors">
-            Tutup
-          </button>
-        </form>
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop"><button>close</button></form>
-  </dialog>
-
-  <script is:inline>
-    // Segmented filter tabs logic
-    document.querySelectorAll('.tab-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const filter = btn.getAttribute('data-filter');
-
-        document.querySelectorAll('.tab-btn').forEach((b) => {
-          b.classList.remove('bg-primary', 'text-white', 'shadow-sm');
-          b.classList.add('text-slate-500', 'hover:text-slate-800', 'hover:bg-slate-50');
-          // Reset badge style
-          const badge = b.querySelector('span:last-child');
-          if (badge) {
-            badge.classList.remove('bg-white/20', 'text-white');
-            badge.classList.add('bg-slate-100', 'text-slate-500');
-          }
-        });
-
-        btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
-        btn.classList.remove('text-slate-500', 'hover:text-slate-800', 'hover:bg-slate-50');
-        const badge = btn.querySelector('span:last-child');
-        if (badge) {
-          badge.classList.add('bg-white/20', 'text-white');
-          badge.classList.remove('bg-slate-100', 'text-slate-500');
-        }
-
-        document.querySelectorAll('.template-card').forEach((card) => {
-          const status = card.getAttribute('data-status');
-          card.style.display = (filter === 'all' || status === filter) ? '' : 'none';
-        });
-      });
-    });
-  </script>
 </DashboardLayout>

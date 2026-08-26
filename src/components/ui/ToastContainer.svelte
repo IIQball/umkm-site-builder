@@ -29,6 +29,11 @@
           'Akun Google ini belum terdaftar di sistem. Silakan hubungi Administrator untuk mendaftarkan akun Anda.',
           'Akses Akun Dibatasi'
         );
+      } else if (errorParam?.toLowerCase() === 'account_suspended' || errorDesc?.toLowerCase() === 'account_suspended') {
+        toast.error(
+          'Akun Anda telah ditangguhkan. Silakan hubungi Administrator untuk informasi lebih lanjut.',
+          'Akses Ditolak'
+        );
       } else {
         toast.error(
           errorDesc || errorParam || 'Terjadi kesalahan saat memproses permintaan.',

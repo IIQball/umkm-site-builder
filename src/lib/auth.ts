@@ -70,6 +70,12 @@ export const auth = betterAuth({
           throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
         }
       }
+      if (err?.message === "ACCOUNT_SUSPENDED") {
+        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
+        if (typeof redirectCtx?.redirect === "function") {
+          throw redirectCtx.redirect("/auth/login?error=account_suspended");
+        }
+      }
     },
   },
   databaseHooks: {
@@ -113,6 +119,29 @@ export const auth = betterAuth({
               balance: 0,
             }).onConflictDoNothing();
           }
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session, ctx) => {
+          const user = await db.query.users.findFirst({
+            where: (u) => eq(u.id, session.userId),
+          });
+
+          if (user?.status === 'suspended') {
+            const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
+            if (typeof redirectCtx?.redirect === "function") {
+              throw redirectCtx.redirect("/auth/login?error=account_suspended");
+            }
+            throw new APIError("UNAUTHORIZED", {
+              message: "ACCOUNT_SUSPENDED",
+            });
+          }
+
+          return {
+            data: session,
+          };
         },
       },
     },

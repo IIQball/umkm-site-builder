@@ -89,6 +89,8 @@ import RegisterForm from "@/components/auth/RegisterForm.svelte";
 </BaseLayout>
 
 <script>
+  import { toast } from '@/lib/toast';
+
   document.addEventListener('DOMContentLoaded', () => {
     const authWrapper = document.getElementById('auth-wrapper');
     const btnsToRegister = document.querySelectorAll('.btn-to-register');
@@ -96,6 +98,7 @@ import RegisterForm from "@/components/auth/RegisterForm.svelte";
 
     // Cek parameter URL untuk langsung membuka tab daftar
     const urlParams = new URLSearchParams(window.location.search);
+    
     if (urlParams.get('mode') === 'register') {
       authWrapper?.classList.add('is-register');
       document.title = "Daftar - UMKM Site Builder";

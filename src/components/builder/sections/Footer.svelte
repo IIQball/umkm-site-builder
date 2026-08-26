@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MessageCircle, MapPin, Phone, Mail } from 'lucide-svelte';
+  import { MessageCircle, MapPin } from 'lucide-svelte';
   import { canvasStore } from '../stores/editorStore';
   import type { FooterProps, SectionStyles } from '@/types';
 
@@ -18,7 +18,7 @@
 
 <footer
   data-node="footer_container"
-  class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto box-border pt-12 pb-6 px-4 sm:px-6 select-none"
+  class="w-full box-border pt-12 pb-6 select-none"
 >
   {#if activePreset === 'cta_focused'}
     <!-- Preset 3: CTA Focused (Floating Banner Card on Top) -->

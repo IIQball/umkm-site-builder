@@ -10,11 +10,9 @@
   $: imageAspect = String(section?.props?.imageAspectRatio ?? section?.styles?.imageAspectRatio ?? 'square');
   $: badgePos = String(section?.props?.badgePosition ?? section?.styles?.badgePosition ?? 'top_left');
   $: badgeColor = String(section?.props?.badgeColor ?? section?.styles?.badgeColor ?? 'rose');
-  $: nameSize = String(section?.props?.productNameSize ?? section?.styles?.productNameSize ?? 'base');
-  $: nameWeight = String(section?.props?.productNameWeight ?? section?.styles?.productNameWeight ?? 'bold');
   $: pricePlacement = String(section?.props?.pricePlacement ?? section?.styles?.pricePlacement ?? 'stacked');
   $: ctaWidth = String(section?.props?.ctaButtonWidth ?? section?.styles?.ctaButtonWidth ?? 'full');
-  $: ctaColor = String(section?.props?.ctaButtonColor ?? section?.styles?.ctaButtonColor ?? '#059669');
+  $: ctaColor = String(section?.props?.ctaButtonColor ?? section?.styles?.ctaButtonColor ?? 'var(--theme-primary, #2563eb)');
   $: ctaRadius = String(section?.props?.ctaButtonRadius ?? section?.styles?.ctaButtonRadius ?? 'smooth');
   $: showWA = (section?.props?.showWhatsAppIcon ?? section?.styles?.showWhatsAppIcon) !== false;
 
@@ -32,6 +30,13 @@
     { key: 'blue', bg: 'bg-blue-600' },
     { key: 'violet', bg: 'bg-violet-600' },
     { key: 'slate', bg: 'bg-slate-900' },
+  ];
+
+  const ctaColorTokenOptions = [
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Tema)' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: '#059669', label: 'Emerald / WhatsApp Hijau' },
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Gelap Kontras (Dark)' },
   ];
 </script>
 
@@ -59,10 +64,10 @@
 
     <!-- Corner Radius -->
     <div>
-      <span class="block font-semibold mb-1 text-base-content/90">Corner Radius</span>
+      <span class="block font-semibold mb-1 text-base-content/90">Corner Radius (Nested 8pt)</span>
       <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
         {#each [
-          { key: 'sharp', label: 'Sharp' },
+          { key: 'sharp', label: '0px' },
           { key: 'rounded', label: '8px' },
           { key: 'smooth', label: '16px' },
           { key: 'extra_rounded', label: '24px' },
@@ -102,22 +107,22 @@
     </div>
   </div>
 
-  <!-- Badge & Typography -->
+  <!-- Badge & Tata Letak -->
   <div class="space-y-3 p-3 bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 rounded-xl">
     <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 border-b border-amber-200/60 dark:border-amber-900/40 pb-1.5">
       <Tag size={14} class="text-amber-600 dark:text-amber-400" />
-      <span>Detail Elemen & Typography</span>
+      <span>Detail Elemen & Badge</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
       <div>
-        <span class="block font-semibold mb-1 text-base-content/90">Posisi Badge</span>
+        <span class="block font-semibold mb-1 text-base-content/90">Posisi Badge (Pill)</span>
         <div class="grid grid-cols-2 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
-          {#each [{ key: 'top_left', label: 'Top-Left' }, { key: 'top_right', label: 'Top-Right' }] as pos}
+          {#each [{ key: 'top_left', label: 'Kiri' }, { key: 'top_right', label: 'Kanan' }] as pos}
             <button type="button" on:click={() => onConfigChange('badgePosition', pos.key)}
               class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${
                 badgePos === pos.key || (pos.key === 'top_left' && !badgePos)
-                  ? 'bg-base-100 text-amber-700 dark:text-amber-400 shadow-sm'
+                  ? 'bg-base-100 text-amber-700 dark:text-amber-400 shadow-sm font-bold'
                   : 'text-base-content/60 hover:text-base-content'
               }`}>
               {pos.label}
@@ -144,37 +149,6 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-2">
-      <div>
-        <span class="block font-semibold mb-1 text-base-content/90">Ukuran Judul</span>
-        <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
-          {#each [{ key: 'sm', label: 'SM' }, { key: 'base', label: 'Base' }, { key: 'lg', label: 'LG' }] as size}
-            <button type="button" on:click={() => onConfigChange('productNameSize', size.key)}
-              class={`py-1 text-[11px] font-semibold rounded transition-all cursor-pointer ${
-                nameSize === size.key || (size.key === 'base' && !nameSize)
-                  ? 'bg-base-100 text-amber-700 dark:text-amber-400 shadow-sm'
-                  : 'text-base-content/60'
-              }`}>
-              {size.label}
-            </button>
-          {/each}
-        </div>
-      </div>
-
-      <div>
-        <label for="catalog-title-weight" class="block font-semibold mb-1 text-base-content/90">Ketebalan</label>
-        <select id="catalog-title-weight" value={nameWeight}
-          on:change={(e) => onConfigChange('productNameWeight', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-amber-500">
-          <option value="normal">Normal</option>
-          <option value="medium">Medium</option>
-          <option value="semibold">Semibold</option>
-          <option value="bold">Bold</option>
-          <option value="extrabold">Extrabold</option>
-        </select>
-      </div>
-    </div>
-
     <!-- Price Placement -->
     <div>
       <span class="block font-semibold mb-1 text-base-content/90">Tata Letak Harga & Tombol</span>
@@ -185,7 +159,7 @@
               ? 'bg-base-100 text-amber-700 dark:text-amber-400 font-bold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
           }`}>
-          Stacked
+          Stacked (Vertikal)
         </button>
         <button type="button" on:click={() => { onConfigChange('pricePlacement', 'inline'); onConfigChange('ctaButtonWidth', 'compact'); }}
           class={`py-1.5 text-xs font-semibold rounded transition-all cursor-pointer ${
@@ -193,7 +167,7 @@
               ? 'bg-base-100 text-amber-700 dark:text-amber-400 font-bold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
           }`}>
-          Inline
+          Inline (Sejajar)
         </button>
       </div>
     </div>
@@ -214,7 +188,7 @@
             <button type="button" on:click={() => onConfigChange('ctaButtonWidth', w.key)}
               class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${
                 ctaWidth === w.key || (w.key === 'full' && !ctaWidth)
-                  ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm'
+                  ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm font-bold'
                   : 'text-base-content/60 hover:text-base-content'
               }`}>
               {w.label}
@@ -226,11 +200,11 @@
         <span class="block font-semibold mb-1 text-base-content/90">Icon WA</span>
         <div class="grid grid-cols-2 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
           <button type="button" on:click={() => onConfigChange('showWhatsAppIcon', true)}
-            class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${showWA ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}>
+            class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${showWA ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm font-bold' : 'text-base-content/60 hover:text-base-content'}`}>
             Tampil
           </button>
           <button type="button" on:click={() => onConfigChange('showWhatsAppIcon', false)}
-            class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${!showWA ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}>
+            class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${!showWA ? 'bg-base-100 text-violet-700 dark:text-violet-400 shadow-sm font-bold' : 'text-base-content/60 hover:text-base-content'}`}>
             Sembunyi
           </button>
         </div>
@@ -238,18 +212,18 @@
     </div>
 
     <div>
-      <span class="block font-semibold mb-1 text-base-content/90">Kelengkungan Tombol</span>
+      <span class="block font-semibold mb-1 text-base-content/90">Kelengkungan Tombol (Radius)</span>
       <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
         {#each [
-          { key: 'sharp', label: 'Sharp' },
+          { key: 'sharp', label: '0px' },
           { key: 'rounded', label: '8px' },
-          { key: 'smooth', label: '12px' },
+          { key: 'smooth', label: '16px' },
           { key: 'pill', label: 'Pill' },
         ] as r}
           <button type="button" on:click={() => onConfigChange('ctaButtonRadius', r.key)}
             class={`py-1 text-[10px] font-semibold rounded transition-all cursor-pointer ${
               ctaRadius === r.key || (r.key === 'smooth' && !ctaRadius)
-                ? 'bg-violet-600 text-white shadow-sm'
+                ? 'bg-violet-600 text-white shadow-sm font-bold'
                 : 'text-base-content/70 hover:text-base-content hover:bg-base-100/60'
             }`}>
             {r.label}
@@ -259,16 +233,18 @@
     </div>
 
     <div>
-      <label for="catalog-cta-color" class="block font-semibold mb-1 text-base-content/90">Warna Tombol CTA</label>
-      <div class="flex items-center gap-2">
-        <input id="catalog-cta-color" type="color" value={ctaColor}
-          on:input={(e) => onConfigChange('ctaButtonColor', e.currentTarget.value)}
-          class="w-8 h-8 rounded-lg border border-base-300 dark:border-slate-700 bg-base-100 cursor-pointer p-0.5" />
-        <input type="text" value={ctaColor}
-          on:input={(e) => onConfigChange('ctaButtonColor', e.currentTarget.value)}
-          class="flex-1 px-2.5 py-1.5 bg-base-100 border border-base-300 dark:border-slate-800 rounded-lg text-base-content font-mono focus:outline-none focus:border-violet-500"
-          placeholder="#059669" />
-      </div>
+      <label for="catalog-cta-color-select" class="block font-semibold mb-1 text-base-content/90">Warna Tombol CTA (Token)</label>
+      <select
+        id="catalog-cta-color-select"
+        value={ctaColor}
+        on:change={(e) => onConfigChange('ctaButtonColor', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-violet-500"
+      >
+        {#each ctaColorTokenOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 </div>
+

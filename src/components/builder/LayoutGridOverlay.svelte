@@ -33,8 +33,8 @@
     <!-- Column Grid Overlay (Figma-Style) -->
     {#if showColumnGrid}
       <div
-        class="w-full h-full max-w-full mx-auto box-border transition-all duration-200"
-        style={`padding-left: ${safeZoneMargin}; padding-right: ${safeZoneMargin};`}
+        class="w-full h-full mx-auto box-border transition-all duration-200"
+        style={`padding-left: var(--active-safe-zone, ${safeZoneMargin}); padding-right: var(--active-safe-zone, ${safeZoneMargin});`}
       >
         <div
           class="w-full h-full grid box-border transition-all duration-200"

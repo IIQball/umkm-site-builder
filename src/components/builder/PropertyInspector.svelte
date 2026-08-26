@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Sliders, Type, ChevronRight } from 'lucide-svelte';
+  import { Sliders, Type, ChevronRight, PanelRightClose } from 'lucide-svelte';
   import ContentTab from './ContentTab.svelte';
   import StylesTab from './StylesTab.svelte';
   import NodeStylesTab from './NodeStylesTab.svelte';
@@ -9,7 +9,7 @@
   import HeaderLogoPanel from './inspector/header/HeaderLogoPanel.svelte';
   import HeaderNavPanel from './inspector/header/HeaderNavPanel.svelte';
   import type { TemplateSection } from '@/schemas';
-  import { editorStore, activeNodeId } from './stores/editorStore';
+  import { editorStore, canvasStore, activeNodeId } from './stores/editorStore';
 
   export let section: TemplateSection | undefined = undefined;
   export let onSectionUpdate: (section: TemplateSection) => void;
@@ -50,31 +50,56 @@
   };
 </script>
 
-<aside class="w-80 flex-shrink-0 bg-base-100 border-l border-base-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-base-content transition-colors">
+<aside class="w-80 flex-shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-slate-800 dark:text-slate-200 transition-colors">
   {#if !section}
-    <GlobalThemeInspector />
+    <div class="relative flex-1 flex flex-col overflow-hidden">
+      <!-- Close button overlay for Global Theme Inspector -->
+      <button
+        type="button"
+        on:click={() => canvasStore.toggleRightSidebar()}
+        class="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200/80 border border-transparent hover:border-base-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+        title="Tutup Inspector (Ctrl+/)"
+        aria-label="Tutup Inspector"
+      >
+        <PanelRightClose size={15} />
+      </button>
+      <GlobalThemeInspector />
+    </div>
   {:else}
     <!-- Section & Node Breadcrumb Header -->
-    <div class="px-4 py-3 border-b border-base-200 dark:border-slate-800 flex flex-col gap-1 bg-base-100">
-      <div class="flex items-center gap-1.5 text-xs text-base-content/60">
-        <button
-          type="button"
-          on:click={() => editorStore.selectNode(section.id, null)}
-          class={`font-semibold hover:text-base-content transition-colors uppercase tracking-wider cursor-pointer ${
-            !$activeNodeId ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-base-content/60 hover:underline'
-          }`}
-        >
-          {section.type.replace('_', ' ')}
-        </button>
+    <div class="px-4 py-3 border-b border-base-200 dark:border-slate-800 flex items-start justify-between gap-2 bg-base-100">
+      <div class="flex flex-col gap-1 min-w-0 flex-1">
+        <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+          <button
+            type="button"
+            on:click={() => editorStore.selectNode(section.id, null)}
+            class={`font-semibold hover:text-base-content transition-colors uppercase tracking-wider cursor-pointer truncate ${
+              !$activeNodeId ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-base-content/60 hover:underline'
+            }`}
+          >
+            {section.type.replace('_', ' ')}
+          </button>
 
-        {#if $activeNodeId}
-          <ChevronRight size={13} class="text-base-content/40" />
-          <span class="text-blue-600 dark:text-blue-400 font-semibold truncate">
-            {getNodeLabel($activeNodeId)}
-          </span>
-        {/if}
+          {#if $activeNodeId}
+            <ChevronRight size={13} class="text-base-content/40 flex-shrink-0" />
+            <span class="text-blue-600 dark:text-blue-400 font-semibold truncate">
+              {getNodeLabel($activeNodeId)}
+            </span>
+          {/if}
+        </div>
+        <p class="text-[10px] text-base-content/40 font-mono">{section.id}</p>
       </div>
-      <p class="text-[10px] text-base-content/40 font-mono">{section.id}</p>
+
+      <!-- Close Inspector Button -->
+      <button
+        type="button"
+        on:click={() => canvasStore.toggleRightSidebar()}
+        class="p-1 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200 border border-transparent hover:border-base-300 dark:hover:border-slate-700 transition-colors cursor-pointer flex-shrink-0"
+        title="Tutup Inspector (Ctrl+/)"
+        aria-label="Tutup Inspector"
+      >
+        <PanelRightClose size={15} />
+      </button>
     </div>
 
     <!-- Contextual Node Inspector (when a specific sub-element is selected) -->

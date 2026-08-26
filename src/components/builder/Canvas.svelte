@@ -61,6 +61,7 @@
     `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
     `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
     `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
+    `--active-safe-zone: ${viewMode === 'mobile' ? (layout.horizontalMarginMobile || '16px') : viewMode === 'tablet' ? (layout.horizontalMarginTablet || '24px') : (layout.horizontalMarginDesktop || '32px')}`,
 
     /* 5. Effects */
     `--theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)`,
@@ -174,21 +175,22 @@
 <main
   tabindex="-1"
   on:click={handleCanvasBackgroundClick}
-  class="canvas-backdrop flex-1 h-full overflow-y-auto overflow-x-hidden bg-base-200/60 p-2 sm:p-4 md:p-6 flex justify-center items-start select-none transition-colors"
+  class="canvas-backdrop flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950 select-none transition-colors"
   aria-label="Editor Canvas"
 >
   <!-- Frame Container with flat pixel-perfect viewport boundaries -->
   <div
+    id="canvas-frame"
     data-theme={$canvasStore.previewTheme}
-    style={canvasCssVars}
-    class={`relative transition-all duration-300 ease-in-out shadow-2xl my-2 sm:my-4 flex flex-col box-border overflow-x-hidden ${
+    style="{canvasCssVars}; {viewMode === 'desktop' ? 'width: 100%; max-width: 1200px;' : viewMode === 'tablet' ? 'width: 768px; min-width: 768px; max-width: 768px;' : 'width: 375px; min-width: 375px; max-width: 375px;'}"
+    class={`relative transition-all duration-300 ease-in-out flex flex-col box-border overflow-x-hidden ${
       isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
     } ${
       viewMode === 'desktop'
-        ? 'w-full max-w-6xl min-h-[800px] border border-base-300 dark:border-slate-800'
+        ? 'w-full max-w-[1200px] min-h-screen shadow-xl mx-auto my-0'
         : viewMode === 'tablet'
-        ? 'w-[768px] max-w-full min-h-[800px] border border-slate-400 dark:border-slate-700 mx-auto'
-        : 'w-[375px] max-w-full min-h-[667px] border border-slate-400 dark:border-slate-700 mx-auto'
+        ? 'w-[768px] shrink-0 min-h-screen shadow-2xl mx-auto my-0 rounded-xl border border-slate-300 dark:border-slate-700'
+        : 'w-[375px] shrink-0 min-h-screen shadow-2xl mx-auto my-0 rounded-2xl border border-slate-300 dark:border-slate-700'
     }`}
   >
     <!-- Figma-Style Layout Grid Guides (Overlay) -->

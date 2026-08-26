@@ -77,7 +77,7 @@
 
 <div
   data-node="features_container"
-  class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto box-border"
+  class="w-full box-border"
 >
   {#if activePreset === 'banner_inline_bar'}
     <!-- Preset 3: Banner Inline Bar (Ribbon h-16 / 64px horizontal strip) -->

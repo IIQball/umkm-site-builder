@@ -32,7 +32,7 @@
     const rules: string[] = [];
     const defaultTextColor = isDarkColor(s.backgroundColor || '#ffffff') ? '#f8fafc' : '#0f172a';
 
-    const defaultPadding = section?.type === 'header_announcement' ? '0px' : '48px 24px';
+    const defaultPadding = '0px';
     rules.push(`background-color: ${s.backgroundColor || 'transparent'}`);
     rules.push(`color: ${s.color || defaultTextColor}`);
     rules.push(`padding: ${s.padding || defaultPadding}`);
@@ -44,6 +44,8 @@
     if (s.marginBottom) rules.push(`margin-bottom: ${s.marginBottom}`);
     if (s.paddingTop) rules.push(`padding-top: ${s.paddingTop}`);
     if (s.paddingBottom) rules.push(`padding-bottom: ${s.paddingBottom}`);
+    if (s.paddingLeft) rules.push(`padding-left: ${s.paddingLeft}`);
+    if (s.paddingRight) rules.push(`padding-right: ${s.paddingRight}`);
     if (s.fontSize) rules.push(`font-size: ${s.fontSize}`);
     if (s.fontWeight) rules.push(`font-weight: ${s.fontWeight}`);
     if (s.display) rules.push(`display: ${s.display}`);
@@ -66,8 +68,8 @@
   $: inlineStyle = buildStyle(section?.styles);
   $: containerWidthMode = section?.styles?.containerWidth || 'boxed';
   $: containerClass = containerWidthMode === 'full'
-    ? 'w-full max-w-full px-3.5 sm:px-6 md:px-8'
-    : 'mx-auto w-full max-w-full px-3.5 sm:px-6 md:px-8';
+    ? 'w-full max-w-full'
+    : 'mx-auto w-full max-w-full';
   $: containerStyle = containerWidthMode === 'full'
     ? ''
     : 'max-width: var(--theme-max-width, 1200px);';
@@ -76,15 +78,15 @@
 <section
   id={section.id}
   style={inlineStyle}
-  class="relative transition-all box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
+  class="relative box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
 >
   {#if section.type === 'header_announcement'}
     <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
+  {:else if section.type === 'hero'}
+    <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
   {:else}
-    <div class={`${containerClass} min-w-0 box-border`} style={containerStyle}>
-      {#if section.type === 'hero'}
-        <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'features'}
+    <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); {containerStyle}">
+      {#if section.type === 'features'}
         <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
       {:else if section.type === 'product_catalog'}
         <ProductCatalog props={{...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined)}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
@@ -102,6 +104,25 @@
 </section>
 
 <style>
+  .section-safe-container {
+    padding-left: var(--theme-safe-zone-desktop, 32px);
+    padding-right: var(--theme-safe-zone-desktop, 32px);
+  }
+
+  @media (max-width: 1024px) {
+    .section-safe-container {
+      padding-left: var(--theme-safe-zone-tablet, 24px);
+      padding-right: var(--theme-safe-zone-tablet, 24px);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .section-safe-container {
+      padding-left: var(--theme-safe-zone-mobile, 16px);
+      padding-right: var(--theme-safe-zone-mobile, 16px);
+    }
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

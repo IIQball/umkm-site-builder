@@ -69,6 +69,7 @@
         id="style-animation"
         value={section.styles?.animation || 'none'}
         on:change={(e) => onStyleChange('animation', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('animation', e.currentTarget.value)}
         class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
       >
         {#each animationOptions as a}
@@ -87,6 +88,7 @@
             id="style-anim-dur"
             value={section.styles?.animationDuration || '600ms'}
             on:change={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
+            on:input={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
             class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
           >
             {#each durationOptions as d}
@@ -102,6 +104,7 @@
             id="style-anim-delay"
             value={section.styles?.animationDelay || '0ms'}
             on:change={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
+            on:input={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
             class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
           >
             {#each delayOptions as del}
@@ -156,6 +159,7 @@
         id="style-bg-token"
         value={section.styles?.backgroundColor || 'transparent'}
         on:change={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
         class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
       >
         {#each bgTokenOptions as bg}
@@ -172,6 +176,7 @@
         id="style-text-token"
         value={section.styles?.color || ''}
         on:change={(e) => onStyleChange('color', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('color', e.currentTarget.value)}
         class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
       >
         {#each textTokenOptions as txt}

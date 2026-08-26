@@ -6,20 +6,36 @@
   export let onConfigChange: (key: string, value: unknown) => void;
 
   $: align = section.props?.announcementAlign || 'center';
-  $: bgColor = section.props?.announcementBgColor || '#2563eb';
-  $: textColor = section.props?.announcementTextColor || '#ffffff';
-  $: paddingY = section.props?.announcementPaddingY || '8px';
+  $: bgColor = (section.props?.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
+  $: textColor = (section.props?.announcementTextColor as string) || '#ffffff';
+  $: paddingY = (section.props?.announcementPaddingY as string) || '8px';
 
   const paddingPresets = [
-    { label: 'Ramping (6px)', value: '6px' },
-    { label: 'Normal (8px)', value: '8px' },
-    { label: 'Lebar (12px)', value: '12px' },
+    { label: '8px (Normal)', value: '8px' },
+    { label: '16px (Sedang)', value: '16px' },
+    { label: '24px (Lebar)', value: '24px' },
+  ];
+
+  const bgTokenOptions = [
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
+    { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas' },
+    { value: 'transparent', label: 'Transparan' },
+  ];
+
+  const textTokenOptions = [
+    { value: '#ffffff', label: 'Putih Bersih (White)' },
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
+    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
   ];
 </script>
 
 <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
-    <Megaphone size={14} class="text-blue-500" />
+    <Megaphone size={14} class="text-[var(--theme-primary,#2563eb)]" />
     <span>Gaya Announcement Bar</span>
   </div>
 
@@ -50,50 +66,40 @@
     </div>
   </div>
 
-  <!-- Colors: Background & Text -->
-  <div class="grid grid-cols-2 gap-2">
+  <!-- Token-based Colors: Background & Text -->
+  <div class="space-y-2">
     <div>
-      <label for="announcement-bg-color" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Background</label>
-      <div class="flex items-center gap-1.5">
-        <input
-          id="announcement-bg-color"
-          type="color"
-          value={bgColor}
-          on:input={(e) => onConfigChange('announcementBgColor', e.currentTarget.value)}
-          class="w-7 h-7 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent"
-        />
-        <input
-          type="text"
-          value={bgColor}
-          on:input={(e) => onConfigChange('announcementBgColor', e.currentTarget.value)}
-          class="w-full px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-[11px] text-base-content font-mono focus:outline-none focus:border-blue-500"
-        />
-      </div>
+      <label for="announcement-bg-token" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Background (Token)</label>
+      <select
+        id="announcement-bg-token"
+        value={bgColor}
+        on:change={(e) => onConfigChange('announcementBgColor', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each bgTokenOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
 
     <div>
-      <label for="announcement-text-color" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Teks</label>
-      <div class="flex items-center gap-1.5">
-        <input
-          id="announcement-text-color"
-          type="color"
-          value={textColor}
-          on:input={(e) => onConfigChange('announcementTextColor', e.currentTarget.value)}
-          class="w-7 h-7 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent"
-        />
-        <input
-          type="text"
-          value={textColor}
-          on:input={(e) => onConfigChange('announcementTextColor', e.currentTarget.value)}
-          class="w-full px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-[11px] text-base-content font-mono focus:outline-none focus:border-blue-500"
-        />
-      </div>
+      <label for="announcement-text-token" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Teks (Token)</label>
+      <select
+        id="announcement-text-token"
+        value={textColor}
+        on:change={(e) => onConfigChange('announcementTextColor', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each textTokenOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 
-  <!-- Vertical Padding Presets -->
+  <!-- Vertical Padding Presets (8pt scale) -->
   <div>
-    <span class="block font-medium text-[11px] text-base-content/70 mb-1">Padding Vertikal Bar</span>
+    <span class="block font-medium text-[11px] text-base-content/70 mb-1">Padding Vertikal Bar (8pt Grid)</span>
     <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
       {#each paddingPresets as preset}
         <button
@@ -103,9 +109,10 @@
             paddingY === preset.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
           }`}
         >
-          {preset.label.split(' ')[0]}
+          {preset.value}
         </button>
       {/each}
     </div>
   </div>
 </div>
+

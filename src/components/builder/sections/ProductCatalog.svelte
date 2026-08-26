@@ -152,7 +152,7 @@
           ? "rounded-full"
           : "rounded-xl";
   $: ctaBtnColor = String(
-    props?.ctaButtonColor ?? styles?.ctaButtonColor ?? "#059669",
+    props?.ctaButtonColor ?? styles?.ctaButtonColor ?? "var(--theme-primary, #2563eb)",
   );
   $: ctaBtnTextColor = String(
     props?.ctaButtonTextColor ?? styles?.ctaButtonTextColor ?? "#ffffff",
@@ -261,7 +261,7 @@
   };
 </script>
 
-<div class="max-w-6xl mx-auto w-full">
+<div class="w-full">
   <!-- Section Header -->
   <div class="mb-8 text-center">
     <h2

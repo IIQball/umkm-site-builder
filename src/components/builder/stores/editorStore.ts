@@ -91,6 +91,33 @@ function createCanvasStore() {
       }));
     },
 
+    toggleLeftSidebar() {
+      update((state) => ({ ...state, leftSidebarOpen: !state.leftSidebarOpen }));
+    },
+
+    toggleRightSidebar() {
+      update((state) => ({ ...state, rightSidebarOpen: !state.rightSidebarOpen }));
+    },
+
+    setLeftSidebar(open: boolean) {
+      update((state) => ({ ...state, leftSidebarOpen: open }));
+    },
+
+    setRightSidebar(open: boolean) {
+      update((state) => ({ ...state, rightSidebarOpen: open }));
+    },
+
+    toggleEditorTheme() {
+      update((state) => ({
+        ...state,
+        editorTheme: state.editorTheme === 'light' ? 'dark' : 'light',
+      }));
+    },
+
+    setEditorTheme(editorTheme: 'light' | 'dark') {
+      update((state) => ({ ...state, editorTheme }));
+    },
+
     deselectAll() {
       update((state) => ({
         ...state,
@@ -128,25 +155,13 @@ const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
  */
 function createDocumentStore() {
   const { subscribe, set, update } = writable<DocumentState>(initialDocumentState);
-  let lastThemeHistoryTime = 0;
+  let lastHistoryTime = 0;
 
   const pushHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
     if (!state.template) return state;
-    lastThemeHistoryTime = 0;
-    const past = [...state.history.past, clone(state.template.config)].slice(-20);
-    return {
-      ...state,
-      template: { ...state.template, config: newConfig },
-      history: { past, future: [] },
-      isDirty: true,
-    };
-  };
-
-  const pushThemeHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
-    if (!state.template) return state;
     const now = Date.now();
-    const shouldMerge = now - lastThemeHistoryTime < 400 && state.history.past.length > 0;
-    lastThemeHistoryTime = now;
+    const shouldMerge = now - lastHistoryTime < 350 && state.history.past.length > 0;
+    lastHistoryTime = now;
 
     const past = shouldMerge
       ? state.history.past
@@ -158,6 +173,10 @@ function createDocumentStore() {
       history: { past, future: [] },
       isDirty: true,
     };
+  };
+
+  const pushThemeHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
+    return pushHistory(state, newConfig);
   };
 
   return {
@@ -385,7 +404,7 @@ function createDocumentStore() {
           id: newId,
           type,
           layoutPreset: getDefaultLayoutPreset(type),
-          styles: { padding: '48px 24px', bgColorToken: 'surface', textColorToken: 'text_primary', textAlign: 'center' },
+          styles: { padding: '0px', paddingTop: '0px', paddingBottom: '0px', paddingLeft: '0px', paddingRight: '0px', bgColorToken: 'surface', textColorToken: 'text_primary', textAlign: 'center' },
           props: {},
         };
         const sections = [...state.template.config.sections, newSection];
@@ -508,6 +527,15 @@ function createDocumentStore() {
     },
     setPreviewTheme(previewTheme: 'light' | 'dark') {
       canvasStore.setPreviewTheme(previewTheme);
+    },
+    toggleLeftSidebar() {
+      canvasStore.toggleLeftSidebar();
+    },
+    toggleRightSidebar() {
+      canvasStore.toggleRightSidebar();
+    },
+    toggleEditorTheme() {
+      canvasStore.toggleEditorTheme();
     },
   };
 }

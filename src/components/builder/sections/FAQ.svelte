@@ -72,7 +72,7 @@
 
 <div
   data-node="faq_container"
-  class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto box-border py-12"
+  class="w-full box-border py-12"
 >
   {#if activePreset === 'split_faq_sidebar'}
     <!-- Preset 2: Split FAQ Sidebar (Left Heading & Contact Card, Right Accordions) -->

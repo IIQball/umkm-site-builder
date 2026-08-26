@@ -5,6 +5,17 @@
 
   export let section: TemplateSection;
   export let onStyleChange: (key: string, value: string) => void;
+  export let onStylesChange: ((updates: Record<string, string | undefined>) => void) | undefined = undefined;
+
+  const applyStyles = (updates: Record<string, string | undefined>) => {
+    if (onStylesChange) {
+      onStylesChange(updates);
+    } else {
+      for (const [k, v] of Object.entries(updates)) {
+        onStyleChange(k, v || '');
+      }
+    }
+  };
 
   // Preset definitions mapped per section type
   const presetsBySectionType: Record<string, Array<{ id: string; label: string; desc: string }>> = {
@@ -87,7 +98,7 @@
     editorStore.reorderSectionSlot(section.id, fromIdx, toIdx);
   };
 
-  // Locked 8pt Spacing Options
+  // Locked 8pt Spacing Options with 0px (Default / Ikut Margin)
   const gapOptions = [
     { value: '', label: 'Default (16px)' },
     { value: '8px', label: '8px (Ketat)' },
@@ -99,19 +110,24 @@
   ];
 
   const paddingYOptions = [
-    { value: '24px', label: '24px (Kecil)' },
+    { value: '0px', label: '0px (Default / Ikut Margin)' },
+    { value: '16px', label: '16px (Kecil)' },
+    { value: '24px', label: '24px (Standar)' },
     { value: '32px', label: '32px (Sedang)' },
-    { value: '48px', label: '48px (Standar)' },
+    { value: '48px', label: '48px (Lebar)' },
     { value: '64px', label: '64px (Besar)' },
     { value: '80px', label: '80px (Jumbo)' },
     { value: '96px', label: '96px (Maksimal)' },
   ];
 
   const paddingXOptions = [
+    { value: '0px', label: '0px (Default / Ikut Margin)' },
+    { value: '8px', label: '8px (Ketat)' },
     { value: '16px', label: '16px (Kecil)' },
     { value: '24px', label: '24px (Standar)' },
     { value: '32px', label: '32px (Sedang)' },
     { value: '40px', label: '40px (Besar)' },
+    { value: '48px', label: '48px (Lebar)' },
   ];
 
   const marginOptions = [
@@ -125,11 +141,17 @@
   ];
 
   const setEdgeToEdge = () => {
-    onStyleChange('containerWidth', 'full');
-    onStyleChange('padding', '32px 16px');
-    onStyleChange('margin', '0px');
-    onStyleChange('marginTop', '0px');
-    onStyleChange('marginBottom', '0px');
+    applyStyles({
+      containerWidth: 'full',
+      padding: '0px',
+      paddingTop: '0px',
+      paddingBottom: '0px',
+      paddingLeft: '0px',
+      paddingRight: '0px',
+      margin: '0px',
+      marginTop: '0px',
+      marginBottom: '0px',
+    });
   };
 </script>
 
@@ -269,6 +291,7 @@
         id="style-gap-select"
         value={section.styles?.gap || ''}
         on:change={(e) => onStyleChange('gap', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('gap', e.currentTarget.value)}
         class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
       >
         {#each gapOptions as opt}
@@ -285,11 +308,22 @@
         </label>
         <select
           id="style-pad-top"
-          value={section.styles?.paddingTop || '48px'}
+          value={section.styles?.paddingTop || '0px'}
           on:change={(e) => {
             const val = e.currentTarget.value;
-            onStyleChange('paddingTop', val);
-            onStyleChange('paddingBottom', val);
+            applyStyles({
+              paddingTop: val,
+              paddingBottom: val,
+              padding: `${val} ${section.styles?.paddingLeft || '0px'}`,
+            });
+          }}
+          on:input={(e) => {
+            const val = e.currentTarget.value;
+            applyStyles({
+              paddingTop: val,
+              paddingBottom: val,
+              padding: `${val} ${section.styles?.paddingLeft || '0px'}`,
+            });
           }}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
         >
@@ -305,11 +339,22 @@
         </label>
         <select
           id="style-pad-x"
-          value={section.styles?.paddingLeft || '24px'}
+          value={section.styles?.paddingLeft || '0px'}
           on:change={(e) => {
             const val = e.currentTarget.value;
-            onStyleChange('paddingLeft', val);
-            onStyleChange('paddingRight', val);
+            applyStyles({
+              paddingLeft: val,
+              paddingRight: val,
+              padding: `${section.styles?.paddingTop || '0px'} ${val}`,
+            });
+          }}
+          on:input={(e) => {
+            const val = e.currentTarget.value;
+            applyStyles({
+              paddingLeft: val,
+              paddingRight: val,
+              padding: `${section.styles?.paddingTop || '0px'} ${val}`,
+            });
           }}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
         >
@@ -330,6 +375,7 @@
           id="style-margin-top-select"
           value={section.styles?.marginTop || '0px'}
           on:change={(e) => onStyleChange('marginTop', e.currentTarget.value)}
+          on:input={(e) => onStyleChange('marginTop', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each marginOptions as m}
@@ -346,6 +392,7 @@
           id="style-margin-bot-select"
           value={section.styles?.marginBottom || '0px'}
           on:change={(e) => onStyleChange('marginBottom', e.currentTarget.value)}
+          on:input={(e) => onStyleChange('marginBottom', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each marginOptions as m}

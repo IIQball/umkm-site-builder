@@ -13,11 +13,6 @@ module.exports = {
     "eslint:recommended",
     "prettier",
   ],
-  ignorePatterns: [
-    "BuilderEditor.svelte",
-    "ContentTab.svelte",
-    "LayerPanel.svelte",
-  ],
   overrides: [
     {
       files: ["*.ts", "*.tsx"],

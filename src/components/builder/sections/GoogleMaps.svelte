@@ -20,7 +20,7 @@
 <div
   id={sectionId ? `map-${sectionId}` : undefined}
   data-node="maps_container"
-  class={`w-full max-w-[var(--theme-max-width,1200px)] mx-auto box-border py-12 ${isActive ? 'relative z-10' : ''}`}
+  class={`w-full box-border py-12 ${isActive ? 'relative z-10' : ''}`}
 >
   {#if activePreset === 'split_map_info'}
     <!-- Preset 2: Split Map Info (2-Col: Left Address & Hours, Right Map Frame) -->

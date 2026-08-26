@@ -54,20 +54,10 @@
     { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' },
   ];
 
-  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
   const setCanvasCssVar = (prop: string, val: string) => {
     if (typeof document === 'undefined') return;
     const canvasContainers = document.querySelectorAll<HTMLElement>('[data-theme]');
     canvasContainers.forEach((el) => el.style.setProperty(prop, val));
-  };
-
-  const debouncedUpdateGlobalTheme = (updates: Partial<TemplateTheme>, delay: number = 300) => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      editorStore.updateGlobalTheme(updates);
-      debounceTimer = null;
-    }, delay);
   };
 
   const getScaleData = (tag: string): Record<string, string> => {
@@ -96,23 +86,14 @@
   const updateColorOptimistic = (key: string, value: string) => {
     const cssVar = colorCssVarMap[key];
     if (cssVar) setCanvasCssVar(cssVar, value);
-    debouncedUpdateGlobalTheme({
+    editorStore.updateGlobalTheme({
       colors: { [key]: value },
       ...(key === 'primary' ? { primaryColor: value } : {}),
     });
   };
 
   const updateColorImmediate = (key: string, value: string) => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-    const cssVar = colorCssVarMap[key];
-    if (cssVar) setCanvasCssVar(cssVar, value);
-    editorStore.updateGlobalTheme({
-      colors: { [key]: value },
-      ...(key === 'primary' ? { primaryColor: value } : {}),
-    });
+    updateColorOptimistic(key, value);
   };
 
   const updateTypography = (key: string, value: unknown) => {
@@ -142,7 +123,7 @@
 
     const variant = variantKey as 'primary' | 'secondary' | 'outline';
     const current = buttons[variant] || {};
-    debouncedUpdateGlobalTheme({
+    editorStore.updateGlobalTheme({
       buttons: { [variant]: { ...current, [key]: value } },
     });
   };

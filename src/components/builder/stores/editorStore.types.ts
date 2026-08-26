@@ -52,6 +52,9 @@ export interface CanvasState {
   showColumnGrid: boolean;
   showPixelGrid: boolean;
   previewTheme: 'light' | 'dark';
+  leftSidebarOpen: boolean;
+  rightSidebarOpen: boolean;
+  editorTheme: 'light' | 'dark';
 }
 
 export const initialCanvasState: CanvasState = {
@@ -66,6 +69,9 @@ export const initialCanvasState: CanvasState = {
   showColumnGrid: false,
   showPixelGrid: false,
   previewTheme: 'light',
+  leftSidebarOpen: true,
+  rightSidebarOpen: true,
+  editorTheme: 'light',
 };
 
 export interface DocumentState {

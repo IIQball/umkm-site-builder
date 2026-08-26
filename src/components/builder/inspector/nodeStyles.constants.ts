@@ -1,21 +1,17 @@
 export const fontFamilies = [
   { label: 'Default (Inter)', value: 'Inter, sans-serif' },
-  { label: 'Poppins (Modern)', value: 'Poppins, sans-serif' },
-  { label: 'Roboto (Clean)', value: 'Roboto, sans-serif' },
+  { label: 'Plus Jakarta Sans (Modern)', value: '"Plus Jakarta Sans", sans-serif' },
+  { label: 'Poppins (Geometric)', value: 'Poppins, sans-serif' },
   { label: 'Playfair Display (Serif/Elegant)', value: "'Playfair Display', serif" },
-  { label: 'Montserrat (Bold)', value: 'Montserrat, sans-serif' },
+  { label: 'Outfit (Clean)', value: 'Outfit, sans-serif' },
 ];
 
 export const fontSizes = [
-  { label: 'Extra Small (12px)', value: '12px' },
-  { label: 'Small (14px)', value: '14px' },
-  { label: 'Base (16px)', value: '16px' },
-  { label: 'Large (18px)', value: '18px' },
-  { label: 'XL (20px)', value: '20px' },
-  { label: '2XL (24px)', value: '24px' },
-  { label: '3XL (30px)', value: '30px' },
-  { label: '4XL (36px)', value: '36px' },
-  { label: '5XL (48px)', value: '48px' },
+  { label: 'Caption / Badge (10px)', value: 'var(--theme-text-caption, 10px)' },
+  { label: 'Body Text (16px)', value: 'var(--theme-text-body, 16px)' },
+  { label: 'H3 - Subtitle / Card (20px)', value: 'var(--theme-text-h3, 20px)' },
+  { label: 'H2 - Section Heading (26px)', value: 'var(--theme-text-h2, 26px)' },
+  { label: 'H1 - Hero Title (42px)', value: 'var(--theme-text-h1, 42px)' },
 ];
 
 export const fontWeights = [
@@ -28,23 +24,23 @@ export const fontWeights = [
 
 export const radiusPresets = [
   { label: 'Kotak (0px)', value: '0px' },
-  { label: 'Sedikit (6px)', value: '6px' },
-  { label: 'Sedang (12px)', value: '12px' },
-  { label: 'Bulat (24px)', value: '24px' },
-  { label: 'Pill (9999px)', value: '9999px' },
+  { label: 'Kecil (8px)', value: '8px' },
+  { label: 'Sedang (16px)', value: '16px' },
+  { label: 'Besar (24px)', value: '24px' },
+  { label: 'Pill Radius (Full)', value: '9999px' },
 ];
 
 export const buttonPaddings = [
-  { label: 'Kompak', value: '8px 16px' },
-  { label: 'Normal', value: '12px 24px' },
-  { label: 'Besar', value: '16px 32px' },
+  { label: 'Kompak (8px 16px)', value: '8px 16px' },
+  { label: 'Normal (12px 24px)', value: '12px 24px' },
+  { label: 'Besar (16px 32px)', value: '16px 32px' },
 ];
 
 export const shadowPresets = [
   { label: 'Tanpa Shadow', value: 'none' },
-  { label: 'Soft Shadow', value: '0 4px 6px -1px rgb(0 0 0 / 0.1)' },
-  { label: 'Glow Blue', value: '0 10px 25px -5px rgba(59, 130, 246, 0.4)' },
-  { label: 'Deep Shadow', value: '0 20px 25px -5px rgb(0 0 0 / 0.2)' },
+  { label: 'Soft Shadow (sm)', value: '0 1px 2px 0 rgb(0 0 0 / 0.05)' },
+  { label: 'Medium Shadow (md)', value: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' },
+  { label: 'Large Shadow (lg)', value: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' },
 ];
 
 export const nodeAnimationOptions = [
@@ -62,3 +58,4 @@ export const hoverOptions = [
   { value: 'lift', label: 'Lift Up (-4px)' },
   { value: 'glow', label: 'Glow Shadow' },
 ];
+

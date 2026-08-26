@@ -72,7 +72,7 @@
 
 <div
   data-node="testimonials_container"
-  class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto box-border py-12"
+  class="w-full box-border py-12"
 >
   <div class="mb-8 text-center px-2">
     <h2 class={`text-2xl sm:text-3xl font-black tracking-tight mb-2 ${hasCustomColor ? '' : 'text-[var(--theme-text-primary,#0f172a)]'}`}>

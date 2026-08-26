@@ -7,110 +7,92 @@
 
   $: logoType = section.props?.logoType || 'image_text';
   $: logoHeight = Number(section.props?.logoImageHeight) || 40;
-  $: logoTextSize = section.props?.logoTextSize || 'lg';
-  $: logoTextWeight = section.props?.logoTextWeight || 'bold';
-  $: logoTextColor = section.props?.logoTextColor || '#0f172a';
+  $: logoTextColor = (section.props?.logoTextColor as string) || 'var(--theme-text-primary, #0f172a)';
+  $: logoTypographyToken = (section.props?.logoTypographyToken as string) || 'h3';
 
-  const textSizeOptions = [
-    { label: 'SM (14px)', value: 'sm' },
-    { label: 'Base (16px)', value: 'base' },
-    { label: 'LG (18px)', value: 'lg' },
-    { label: 'XL (20px)', value: 'xl' },
-    { label: '2XL (24px)', value: '2xl' },
+  const logoHeightOptions = [
+    { label: '24px', value: 24 },
+    { label: '32px', value: 32 },
+    { label: '40px', value: 40 },
+    { label: '48px', value: 48 },
+    { label: '56px', value: 56 },
   ];
 
-  const textWeightOptions = [
-    { label: 'Normal (400)', value: 'normal' },
-    { label: 'Semibold (600)', value: 'semibold' },
-    { label: 'Bold (700)', value: 'bold' },
+  const typographyTokenOptions = [
+    { label: 'H2 (Heading 2 - 26px)', value: 'h2' },
+    { label: 'H3 (Brand Title - 20px)', value: 'h3' },
+    { label: 'Body (Standar - 16px)', value: 'body' },
+  ];
+
+  const textTokenOptions = [
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
+    { value: '#ffffff', label: 'Putih Bersih (White)' },
   ];
 </script>
 
 <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
-    <ImageIcon size={14} class="text-blue-500" />
+    <ImageIcon size={14} class="text-[var(--theme-primary,#2563eb)]" />
     <span>Gaya & Ukuran Logo</span>
   </div>
 
-  <!-- Image Sizing Slider (if image_only or image_text) -->
+  <!-- Image Sizing (8pt grid locked: 24, 32, 40, 48, 56) -->
   {#if logoType === 'image_only' || logoType === 'image_text'}
     <div>
       <div class="flex items-center justify-between text-[11px] font-medium text-base-content/70 mb-1">
-        <span>Tinggi Gambar Logo</span>
+        <span>Tinggi Gambar Logo (8pt Grid)</span>
         <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">{logoHeight}px</span>
       </div>
-      <input
-        type="range"
-        min="24"
-        max="80"
-        step="2"
-        value={logoHeight}
-        on:input={(e) => onConfigChange('logoImageHeight', Number(e.currentTarget.value))}
-        class="w-full h-1.5 bg-base-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-      />
-      <div class="flex justify-between text-[9px] text-base-content/40 mt-1">
-        <span>24px (Kecil)</span>
-        <span>40px (Default)</span>
-        <span>80px (Besar)</span>
+      <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
+        {#each logoHeightOptions as opt}
+          <button
+            type="button"
+            on:click={() => onConfigChange('logoImageHeight', opt.value)}
+            class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
+              logoHeight === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
+            }`}
+          >
+            {opt.label}
+          </button>
+        {/each}
       </div>
     </div>
   {/if}
 
-  <!-- Text Sizing Preset (if text_only or image_text) -->
+  <!-- Text Sizing & Tokens (Golden Ratio) -->
   {#if logoType === 'text_only' || logoType === 'image_text'}
-    <div class="space-y-3 pt-1">
+    <div class="space-y-2 pt-1">
       <div>
-        <label for="logo-text-size-select" class="block font-medium text-[11px] text-base-content/70 mb-1">Ukuran Font Nama Toko</label>
-        <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[10px]">
-          {#each textSizeOptions as opt}
-            <button
-              type="button"
-              on:click={() => onConfigChange('logoTextSize', opt.value)}
-              class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
-                logoTextSize === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
-              }`}
-            >
-              {opt.value.toUpperCase()}
-            </button>
+        <label for="logo-typography-token" class="block font-medium text-[11px] text-base-content/70 mb-1">Skala Tipografi Nama Toko</label>
+        <select
+          id="logo-typography-token"
+          value={logoTypographyToken}
+          on:change={(e) => onConfigChange('logoTypographyToken', e.currentTarget.value)}
+          class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each typographyTokenOptions as opt}
+            <option value={opt.value}>{opt.label}</option>
           {/each}
-        </div>
+        </select>
       </div>
 
       <div>
-        <label for="logo-text-weight-select" class="block font-medium text-[11px] text-base-content/70 mb-1">Ketebalan Font (Weight)</label>
-        <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
-          {#each textWeightOptions as opt}
-            <button
-              type="button"
-              on:click={() => onConfigChange('logoTextWeight', opt.value)}
-              class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
-                logoTextWeight === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
-              }`}
-            >
-              {opt.label.split(' ')[0]}
-            </button>
+        <label for="logo-text-token" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Teks Brand (Token)</label>
+        <select
+          id="logo-text-token"
+          value={logoTextColor}
+          on:change={(e) => onConfigChange('logoTextColor', e.currentTarget.value)}
+          class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each textTokenOptions as opt}
+            <option value={opt.value}>{opt.label}</option>
           {/each}
-        </div>
-      </div>
-
-      <div>
-        <label for="logo-text-color" class="block font-medium text-[11px] text-base-content/70 mb-1">Warna Teks Brand</label>
-        <div class="flex items-center gap-1.5">
-          <input
-            id="logo-text-color"
-            type="color"
-            value={logoTextColor || '#0f172a'}
-            on:input={(e) => onConfigChange('logoTextColor', e.currentTarget.value)}
-            class="w-7 h-7 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent"
-          />
-          <input
-            type="text"
-            value={logoTextColor || '#0f172a'}
-            on:input={(e) => onConfigChange('logoTextColor', e.currentTarget.value)}
-            class="w-full px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-[11px] text-base-content font-mono focus:outline-none focus:border-blue-500"
-          />
-        </div>
+        </select>
       </div>
     </div>
   {/if}
 </div>
+

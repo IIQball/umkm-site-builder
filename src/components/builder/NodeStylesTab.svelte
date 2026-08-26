@@ -24,6 +24,33 @@
     { value: 'right', icon: AlignRight, title: 'Rata Kanan' },
     { value: 'justify', icon: AlignJustify, title: 'Rata Kiri-Kanan' },
   ];
+
+  const textTokenOptions = [
+    { value: '', label: 'Default (Warisan Tema)' },
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Primary)' },
+    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Muted)' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: '#ffffff', label: 'Putih Bersih' },
+  ];
+
+  const bgTokenOptions = [
+    { value: 'transparent', label: 'Transparan' },
+    { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas' },
+    { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: '#ffffff', label: 'Putih Bersih' },
+  ];
+
+  const marginPresets = [
+    { label: '0px', value: '0px' },
+    { label: '8px', value: '8px' },
+    { label: '16px', value: '16px' },
+    { label: '24px', value: '24px' },
+    { label: '32px', value: '32px' },
+    { label: '48px', value: '48px' },
+  ];
 </script>
 
 <div class="p-4 space-y-5 text-xs text-base-content/80">
@@ -61,14 +88,15 @@
 
     <div class="grid grid-cols-2 gap-2">
       <div>
-        <label for="node-font-size" class="block font-medium mb-1 text-base-content/80">Ukuran Font</label>
+        <label for="node-font-size" class="block font-medium mb-1 text-base-content/80">Skala Tipografi (Golden Ratio)</label>
         <select
           id="node-font-size"
           value={nodeStyles.fontSize || ''}
           on:change={(e) => handleStyleChange('fontSize', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('fontSize', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
-          <option value="">Default</option>
+          <option value="">Default (Warisan Tema)</option>
           {#each fontSizes as s}
             <option value={s.value}>{s.label}</option>
           {/each}
@@ -80,6 +108,7 @@
           id="node-font-weight"
           value={nodeStyles.fontWeight || ''}
           on:change={(e) => handleStyleChange('fontWeight', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('fontWeight', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
           <option value="">Default</option>
@@ -91,51 +120,41 @@
     </div>
   </div>
 
-  <!-- Colors -->
+  <!-- Colors (Token Dropdowns) -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Palette size={13} class="text-blue-500" />
-      <span>Warna Elemen</span>
+      <span>Warna Elemen (Token)</span>
     </div>
 
     <div>
-      <label for="node-text-color" class="block font-medium mb-1 text-base-content/80">Warna Teks</label>
-      <div class="flex items-center gap-2">
-        <input
-          id="node-text-color"
-          type="color"
-          value={nodeStyles.color || '#0f172a'}
-          on:input={(e) => handleStyleChange('color', e.currentTarget.value)}
-          class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 bg-base-100 dark:bg-slate-950 cursor-pointer p-0.5"
-        />
-        <input
-          type="text"
-          value={nodeStyles.color || ''}
-          on:input={(e) => handleStyleChange('color', e.currentTarget.value)}
-          class="flex-1 px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. #2563eb"
-        />
-      </div>
+      <label for="node-text-color" class="block font-medium mb-1 text-base-content/80">Warna Teks (Token)</label>
+      <select
+        id="node-text-color"
+        value={nodeStyles.color || ''}
+        on:change={(e) => handleStyleChange('color', e.currentTarget.value)}
+        on:input={(e) => handleStyleChange('color', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each textTokenOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
 
     <div>
-      <label for="node-bg-color" class="block font-medium mb-1 text-base-content/80">Warna Background</label>
-      <div class="flex items-center gap-2">
-        <input
-          id="node-bg-color"
-          type="color"
-          value={nodeStyles.backgroundColor || '#ffffff'}
-          on:input={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
-          class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 bg-base-100 dark:bg-slate-950 cursor-pointer p-0.5"
-        />
-        <input
-          type="text"
-          value={nodeStyles.backgroundColor || ''}
-          on:input={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
-          class="flex-1 px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. #eff6ff atau transparent"
-        />
-      </div>
+      <label for="node-bg-color" class="block font-medium mb-1 text-base-content/80">Warna Background (Token)</label>
+      <select
+        id="node-bg-color"
+        value={nodeStyles.backgroundColor || 'transparent'}
+        on:change={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
+        on:input={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each bgTokenOptions as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 
@@ -148,11 +167,12 @@
       </div>
 
       <div>
-        <label for="node-border-radius" class="block font-medium mb-1 text-base-content/80">Kelengkungan Sudut (Radius)</label>
+        <label for="node-border-radius" class="block font-medium mb-1 text-base-content/80">Kelengkungan Sudut (Radius 8pt/Pill)</label>
         <select
           id="node-border-radius"
-          value={nodeStyles.borderRadius || '12px'}
+          value={nodeStyles.borderRadius || '8px'}
           on:change={(e) => handleStyleChange('borderRadius', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('borderRadius', e.currentTarget.value)}
           class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each radiusPresets as r}
@@ -162,7 +182,7 @@
       </div>
 
       <div>
-        <span class="block font-medium mb-1 text-base-content/80">Ukuran Tombol (Padding)</span>
+        <span class="block font-medium mb-1 text-base-content/80">Ukuran Tombol (Padding 8pt)</span>
         <div class="grid grid-cols-3 gap-1">
           {#each buttonPaddings as bp}
             <button
@@ -184,8 +204,9 @@
         <label for="node-shadow" class="block font-medium mb-1 text-base-content/80">Button Shadow</label>
         <select
           id="node-shadow"
-          value={nodeStyles.boxShadow || ''}
+          value={nodeStyles.boxShadow || 'none'}
           on:change={(e) => handleStyleChange('boxShadow', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('boxShadow', e.currentTarget.value)}
           class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each shadowPresets as sh}
@@ -210,6 +231,7 @@
           id="node-animation"
           value={nodeStyles.animation || ''}
           on:change={(e) => handleStyleChange('animation', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('animation', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each nodeAnimationOptions as anim}
@@ -224,6 +246,7 @@
           id="node-hover"
           value={nodeStyles.hoverEffect || ''}
           on:change={(e) => handleStyleChange('hoverEffect', e.currentTarget.value)}
+          on:input={(e) => handleStyleChange('hoverEffect', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
         >
           {#each hoverOptions as hov}
@@ -234,36 +257,43 @@
     </div>
   </div>
 
-  <!-- Margin Per Node -->
+  <!-- Margin Per Node (8pt grid locked) -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <Sliders size={13} class="text-blue-500" />
-      <span>Margin Per Elemen</span>
+      <span>Margin Per Elemen (8pt Grid)</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
       <div>
         <label for="node-margin-top" class="block font-medium mb-1 text-base-content/80">Margin Atas</label>
-        <input
+        <select
           id="node-margin-top"
-          type="text"
-          value={nodeStyles.marginTop || ''}
+          value={nodeStyles.marginTop || '0px'}
+          on:change={(e) => handleStyleChange('marginTop', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('marginTop', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. 0px, 16px"
-        />
+          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each marginPresets as m}
+            <option value={m.value}>{m.label}</option>
+          {/each}
+        </select>
       </div>
       <div>
         <label for="node-margin-bottom" class="block font-medium mb-1 text-base-content/80">Margin Bawah</label>
-        <input
+        <select
           id="node-margin-bottom"
-          type="text"
-          value={nodeStyles.marginBottom || ''}
+          value={nodeStyles.marginBottom || '0px'}
+          on:change={(e) => handleStyleChange('marginBottom', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('marginBottom', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. 16px, 24px"
-        />
+          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+        >
+          {#each marginPresets as m}
+            <option value={m.value}>{m.label}</option>
+          {/each}
+        </select>
       </div>
     </div>
   </div>
 </div>
+

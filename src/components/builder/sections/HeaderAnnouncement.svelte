@@ -19,7 +19,7 @@
 
 <header
   data-node="header_container"
-  class={`w-full flex flex-col box-border select-none transition-colors ${
+  class={`w-full flex flex-col box-border select-none transition-colors relative z-20 ${
     hasCustomBg ? '' : 'bg-[var(--theme-surface,white)] text-[var(--theme-text-primary,#0f172a)]'
   }`}
 >
@@ -35,7 +35,8 @@
     <!-- Centered Stacked Preset -->
     <div
       id={`section-header-nav-${sectionId}`}
-      class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 py-4 flex flex-col items-center justify-center gap-4 border-b border-base-200 dark:border-slate-800"
+      class="header-nav-container w-full mx-auto py-4 flex flex-col items-center justify-center gap-4 border-b border-base-200 dark:border-slate-800 box-border"
+      style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
     >
       <div data-node="logo" class="flex items-center justify-center">
         <HeaderLogo {props} {sectionId} {isActive} />
@@ -49,7 +50,8 @@
     <!-- Compact Inline Preset: Single row h-14 (56px) -->
     <div
       id={`section-header-nav-${sectionId}`}
-      class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4 border-b border-base-200 dark:border-slate-800"
+      class="header-nav-container w-full mx-auto h-14 flex items-center justify-between gap-4 border-b border-base-200 dark:border-slate-800 box-border"
+      style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
     >
       <div data-node="logo" class="flex items-center flex-shrink-0">
         <HeaderLogo {props} {sectionId} {isActive} />
@@ -77,7 +79,8 @@
     <!-- Default Split Preset -->
     <div
       id={`section-header-nav-${sectionId}`}
-      class="w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-6 border-b border-base-200 dark:border-slate-800 min-h-[56px]"
+      class="header-nav-container w-full mx-auto flex items-center justify-between gap-6 border-b border-base-200 dark:border-slate-800 min-h-[64px] box-border"
+      style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); height: 64px;"
     >
       <div data-node="logo" class="flex items-center flex-shrink-0">
         <HeaderLogo {props} {sectionId} {isActive} />

@@ -35,7 +35,6 @@
   let isEditingName = false;
   let nameInputValue = templateName;
 
-
   const focus = (el: HTMLInputElement) => el.focus();
 
   $: nameInputValue = templateName;
@@ -45,11 +44,6 @@
     if (nameInputValue.trim() && nameInputValue !== templateName) {
       editorStore.updateTemplateName(nameInputValue.trim());
     }
-  };
-
-  const handleMarginChange = (e: Event) => {
-    const target = e.currentTarget as HTMLSelectElement;
-    canvasStore.setCanvasMargin(target.value as '16px' | '24px' | '32px' | '48px');
   };
 
   const getStatusBadge = (s: string) => {
@@ -70,17 +64,19 @@
   $: badge = getStatusBadge(status);
 </script>
 
-<header class="h-14 bg-base-100 border-b border-base-200 dark:border-slate-800 px-4 flex items-center justify-between flex-shrink-0 select-none text-base-content transition-colors">
+<header class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between flex-shrink-0 select-none text-slate-900 dark:text-slate-100 transition-colors z-30">
   <!-- Left info & Editable Title -->
-  <div class="flex items-center gap-3 min-w-0">
+  <div class="flex items-center gap-2.5 min-w-0">
     <a
       href="/"
-      class="text-xs font-semibold text-base-content/70 hover:text-base-content transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-base-200 hover:bg-base-300 border border-base-300 dark:border-slate-800"
+      class="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+      title="Keluar ke Dashboard"
     >
       <ArrowLeft size={13} />
-      <span>Keluar</span>
+      <span class="hidden sm:inline">Keluar</span>
     </a>
-    <div class="h-4 w-px bg-base-300 dark:bg-slate-800" />
+
+    <div class="h-4 w-px bg-slate-200 dark:bg-slate-800" />
 
     {#if isEditingName}
       <input
@@ -88,20 +84,20 @@
         bind:value={nameInputValue}
         on:blur={handleNameSave}
         on:keydown={(e) => e.key === 'Enter' && handleNameSave()}
-        class="text-xs font-semibold text-base-content bg-base-200 border border-blue-500 rounded px-2 py-1 focus:outline-none max-w-xs"
+        class="text-xs font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 border border-blue-500 rounded px-2 py-1 focus:outline-none max-w-xs"
         use:focus
       />
     {:else}
       <button
         on:click={() => (isEditingName = true)}
-        class="text-xs sm:text-sm font-semibold text-base-content truncate hover:text-blue-500 hover:bg-base-200/60 px-2 py-0.5 rounded transition-colors text-left"
+        class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 px-2 py-0.5 rounded transition-colors text-left max-w-[140px] sm:max-w-[220px]"
         title="Klik untuk mengubah nama template"
       >
         {templateName}
       </button>
     {/if}
 
-    <span class="badge-custom uppercase tracking-wider {badge.bg}">
+    <span class="badge-custom uppercase tracking-wider hidden md:inline-flex {badge.bg}">
       {badge.label}
     </span>
   </div>
@@ -109,12 +105,12 @@
   <!-- Center: Viewport Switcher & Grid & Undo/Redo -->
   <div class="flex items-center gap-2">
     <!-- Undo / Redo -->
-    <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
+    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
       <button
         type="button"
         on:click={() => editorStore.undo()}
         disabled={!$canUndo}
-        class="p-1 rounded text-base-content/70 hover:text-base-content hover:bg-base-100 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+        class="p-1 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
         title="Undo (Ctrl+Z)"
       >
         <Undo2 size={14} />
@@ -123,7 +119,7 @@
         type="button"
         on:click={() => editorStore.redo()}
         disabled={!$canRedo}
-        class="p-1 rounded text-base-content/70 hover:text-base-content hover:bg-base-100 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+        class="p-1 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
         title="Redo (Ctrl+Y)"
       >
         <Redo2 size={14} />
@@ -131,14 +127,14 @@
     </div>
 
     <!-- View Mode Switcher -->
-    <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
+    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
       <button
         type="button"
         on:click={() => onViewModeChange('desktop')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'desktop'
-            ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-            : 'text-base-content/60 hover:text-base-content'
+            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
         title="Desktop View (1200px)"
       >
@@ -150,8 +146,8 @@
         on:click={() => onViewModeChange('tablet')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'tablet'
-            ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-            : 'text-base-content/60 hover:text-base-content'
+            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
         title="Tablet View (768px Flat Frame)"
       >
@@ -163,8 +159,8 @@
         on:click={() => onViewModeChange('mobile')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'mobile'
-            ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-            : 'text-base-content/60 hover:text-base-content'
+            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
         title="Mobile View (375px Flat Frame)"
       >
@@ -174,14 +170,14 @@
     </div>
 
     <!-- Figma-Style Layout Grid Guides Toggle -->
-    <div class="flex items-center gap-0.5 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
+    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
       <button
         type="button"
         on:click={() => canvasStore.toggleColumnGrid()}
         class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $canvasStore.showColumnGrid
-            ? 'bg-primary text-white font-semibold shadow-sm animate-none'
-            : 'text-base-content/60 hover:text-base-content'
+            ? 'bg-blue-600 text-white font-semibold shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
         title="Toggle Column Grid Guides (Ctrl+G / Shift+G)"
       >
@@ -193,45 +189,31 @@
         on:click={() => canvasStore.togglePixelGrid()}
         class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $canvasStore.showPixelGrid
-            ? 'bg-primary text-white font-semibold shadow-sm'
-            : 'text-base-content/60 hover:text-base-content'
+            ? 'bg-blue-600 text-white font-semibold shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
         title="Toggle 8px Pixel Grid"
       >
         <Grid2X2 size={13} />
       </button>
     </div>
-
-    <!-- Canvas Margin Safe-Zone Preset -->
-    <div class="hidden xl:flex items-center gap-1.5 bg-base-200/80 px-2.5 py-1 rounded-lg border border-base-300 dark:border-slate-800 text-xs">
-      <span class="text-xs text-base-content/60 font-medium">Margin:</span>
-      <select
-        value={$canvasStore.canvasMargin}
-        on:change={handleMarginChange}
-        class="bg-transparent text-base-content text-xs font-semibold focus:outline-none cursor-pointer"
-      >
-        <option value="16px" class="bg-base-100 text-base-content">16px (Tight)</option>
-        <option value="24px" class="bg-base-100 text-base-content">24px (Normal)</option>
-        <option value="32px" class="bg-base-100 text-base-content">32px (Spacious)</option>
-        <option value="48px" class="bg-base-100 text-base-content">48px (Wide)</option>
-      </select>
-    </div>
   </div>
 
-  <!-- Right Actions: Theme Preview Toggle, Save Draft & Submit -->
+  <!-- Right Actions: Editor Theme Toggle, Save Draft, Submit & Right Sidebar Toggle -->
   <div class="flex items-center gap-2">
-    <!-- Canvas Preview Theme Mode (Light / Dark) -->
+    <!-- Editor Chrome Theme Toggle (Light / Dark) -->
     <button
       type="button"
-      on:click={() => canvasStore.togglePreviewTheme()}
-      class={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-base-300 dark:border-slate-800 text-xs font-medium transition-colors cursor-pointer ${
-        $canvasStore.previewTheme === 'dark'
-          ? 'bg-slate-800 text-amber-400 border-slate-700'
-          : 'bg-base-200 text-slate-700 hover:bg-base-300'
+      on:click={() => canvasStore.toggleEditorTheme()}
+      class={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+        $canvasStore.editorTheme === 'dark'
+          ? 'bg-slate-800 text-amber-400 border-slate-700 hover:bg-slate-700'
+          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
       }`}
-      title="Preview Canvas Mode: Light / Dark"
+      title={`Editor Theme: ${$canvasStore.editorTheme === 'dark' ? 'Dark' : 'Light'}`}
+      aria-label="Toggle Editor Theme"
     >
-      {#if $canvasStore.previewTheme === 'dark'}
+      {#if $canvasStore.editorTheme === 'dark'}
         <Moon size={13} class="text-amber-400" />
         <span class="text-xs font-semibold">Dark</span>
       {:else}
@@ -242,12 +224,12 @@
 
     <!-- Save Status Message -->
     {#if saveSuccess}
-      <div class="hidden sm:flex items-center gap-1 text-xs text-success">
+      <div class="hidden sm:flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
         <CheckCircle2 size={13} />
         <span>Tersimpan</span>
       </div>
     {:else if isDirty}
-      <span class="hidden sm:inline text-xs text-warning font-medium">Belum disimpan</span>
+      <span class="hidden sm:inline text-xs text-amber-600 dark:text-amber-400 font-medium">Belum disimpan</span>
     {/if}
 
     <!-- Save Button -->
@@ -255,7 +237,7 @@
       type="button"
       on:click={onSave}
       disabled={saving}
-      class="flex items-center gap-1.5 px-3 py-1.5 bg-base-200 hover:bg-base-300 disabled:opacity-50 text-base-content rounded-lg text-xs font-semibold border border-base-300 dark:border-slate-800 transition-colors cursor-pointer"
+      class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
       title="Simpan Perubahan (Ctrl+S)"
     >
       {#if saving}
@@ -275,7 +257,7 @@
       class="btn btn-sm btn-primary text-xs font-semibold text-white transition-all flex items-center gap-1.5 cursor-pointer"
     >
       <Send size={13} />
-      <span>{status === 'pending' ? 'Menunggu Review' : 'Ajukan Review'}</span>
+      <span class="hidden sm:inline">{status === 'pending' ? 'Menunggu Review' : 'Ajukan Review'}</span>
     </button>
   </div>
 </header>

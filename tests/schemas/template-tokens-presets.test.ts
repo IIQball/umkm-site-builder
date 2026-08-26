@@ -183,6 +183,9 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     canvasStore.toggleGrid();
     canvasStore.setActiveMargin('32px');
     canvasStore.setHovered('title');
+    canvasStore.toggleLeftSidebar();
+    canvasStore.toggleRightSidebar();
+    canvasStore.toggleEditorTheme();
 
     // Visual state changed
     const canvas = get(canvasStore);
@@ -193,6 +196,9 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     expect(canvas.gridActive).toBe(true);
     expect(canvas.activeMargin).toBe('32px');
     expect(canvas.hoveredNodeId).toBe('title');
+    expect(canvas.leftSidebarOpen).toBe(false);
+    expect(canvas.rightSidebarOpen).toBe(false);
+    expect(canvas.editorTheme).toBe('dark');
 
     // Ephemeral mutates must NOT affect document persistence
     expect(get(documentStore).isDirty).toBe(false);
@@ -279,6 +285,34 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
     for (const sec of sectionsToTest) {
       const result = TemplateSectionSchema.safeParse(sec);
       expect(result.success).toBe(true);
+    }
+  });
+
+  it('should verify Hero presets and layout configurations', () => {
+    const fullBannerHero = {
+      id: 'sec-hero-full',
+      type: 'hero',
+      layoutPreset: 'full_banner_overlay',
+      props: {
+        title: 'Full Bleed Banner',
+        subtitle: 'Hero Background 100% Bleed',
+        imageUrl: 'https://images.unsplash.com/photo-1555421689-491a97ff2040',
+        ctaText: 'Belanja Sekarang',
+        ctaLink: '#products',
+        badgeText: 'Promo Toko',
+      },
+      styles: {
+        minHeight: '560px',
+        paddingTop: '64px',
+        paddingBottom: '64px',
+      },
+    };
+
+    const parsed = TemplateSectionSchema.safeParse(fullBannerHero);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.layoutPreset).toBe('full_banner_overlay');
+      expect(parsed.data.styles?.minHeight).toBe('560px');
     }
   });
 });

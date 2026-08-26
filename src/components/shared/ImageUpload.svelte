@@ -1,66 +1,98 @@
 <script lang="ts">
-  import { Upload, X, AlertCircle, Image as ImageIcon, Loader2 } from 'lucide-svelte';
+  import { Upload, X, AlertCircle, Loader2 } from 'lucide-svelte';
 
   // -- Props --
-  export let folder: 'products' | 'templates' | 'stores' = 'products';
-  export let maxFiles: number = 5;
+  export let folder: 'products' | 'templates' | 'stores' = 'templates';
+  export let maxFiles: number = 1;
   export let maxSizeMB: number = 5;
   export let existingUrls: string[] = [];
+  export let value: string = '';
+  export let compact: boolean = false;
+  export let label: string = '';
   export let onUpload: (urls: string[]) => void = () => {};
+  export let onSingleUpload: (url: string) => void = () => {};
+  export let onChange: (url: string) => void = () => {};
 
   // -- State --
   let uploadedUrls: string[] = [];
-  
+
   // Sync state when parent resets or changes the prop
-  $: uploadedUrls = existingUrls;
-  
+  $: {
+    if (value) {
+      uploadedUrls = [value];
+    } else if (existingUrls && existingUrls.length > 0) {
+      uploadedUrls = existingUrls.slice(0, maxFiles);
+    } else {
+      uploadedUrls = [];
+    }
+  }
+
   let isDragging = false;
   let isUploading = false;
   let uploadProgress = 0;
   let errorMessage = '';
   let fileInput: HTMLInputElement;
 
-  $: canAddMore = uploadedUrls.length < maxFiles;
-
-  // -- WebP conversion via Canvas --
+  // -- Konversi Otomatis JPG/PNG ke WebP dengan target ukuran <= 200KB --
   async function convertToWebP(file: File): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        let { width, height } = img;
+        const MAX_WIDTH = 1920;
+        const MAX_HEIGHT = 1080;
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width / height > MAX_WIDTH / MAX_HEIGHT) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          } else {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('Canvas context tidak tersedia'));
           return;
         }
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('Gagal konversi ke WebP'));
-            }
-          },
-          'image/webp',
-          0.85,
-        );
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Kompresi bertahap menuju target <= 200KB
+        let quality = 0.8;
+        const tryExport = (q: number) => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return reject(new Error('Gagal konversi ke WebP'));
+              if (blob.size > 200 * 1024 && q > 0.4) {
+                tryExport(q - 0.15);
+              } else {
+                resolve(blob);
+              }
+            },
+            'image/webp',
+            q,
+          );
+        };
+        tryExport(quality);
       };
       img.onerror = () => reject(new Error('Gagal memuat gambar'));
       img.src = URL.createObjectURL(file);
     });
   }
 
-  // -- Validate file before processing --
+  // -- Validasi Input File: Hanya menerima JPG, JPEG, dan PNG dengan maks 5MB --
   function validateFile(file: File): string | null {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
-      return 'Format harus PNG atau JPG';
+      return 'Format file harus JPG, JPEG, atau PNG';
     }
     if (file.size > maxSizeMB * 1024 * 1024) {
-      return `Ukuran maksimal ${maxSizeMB}MB`;
+      return `Ukuran file maksimal ${maxSizeMB}MB`;
     }
     return null;
   }
@@ -75,21 +107,21 @@
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.error?.message || 'Gagal mendapatkan signature');
+      throw new Error(data.error?.message || 'Gagal mendapatkan signature upload');
     }
 
     const data = await response.json();
     return data.data;
   }
 
-  // -- Upload to Cloudinary via XHR (for progress) --
+  // -- Upload ke Cloudinary via XHR --
   async function uploadToCloudinary(
     blob: Blob,
     params: { signature: string; timestamp: string; apiKey: string; folder: string; uploadUrl: string },
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
-      formData.append('file', blob, 'image.webp');
+      formData.append('file', blob, `${Date.now()}_img.webp`);
       formData.append('api_key', params.apiKey);
       formData.append('timestamp', params.timestamp);
       formData.append('signature', params.signature);
@@ -121,52 +153,7 @@
     });
   }
 
-  // -- Main upload handler --
-  async function handleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-
-    errorMessage = '';
-
-    const remaining = maxFiles - uploadedUrls.length;
-    if (remaining <= 0) {
-      errorMessage = `Maksimal ${maxFiles} gambar`;
-      return;
-    }
-
-    const filesToProcess = Array.from(files).slice(0, remaining);
-
-    for (const file of filesToProcess) {
-      const validationError = validateFile(file);
-      if (validationError) {
-        errorMessage = validationError;
-        continue;
-      }
-
-      try {
-        isUploading = true;
-        uploadProgress = 0;
-
-        // Convert to WebP
-        const webpBlob = await convertToWebP(file);
-
-        // Get signed params
-        const params = await getSignedParams();
-
-        // Upload directly to Cloudinary
-        const url = await uploadToCloudinary(webpBlob, params);
-
-        const newUrls = [...uploadedUrls, url];
-        onUpload(newUrls);
-      } catch (error) {
-        errorMessage = error instanceof Error ? error.message : 'Upload gagal';
-      }
-    }
-
-    isUploading = false;
-    uploadProgress = 0;
-  }
-
-  // -- Cleanup Cloudinary Asset --
+  // -- Hapus file lama di Cloudinary jika diganti --
   async function deleteCloudinaryAsset(urlToDelete: string) {
     if (!urlToDelete || !urlToDelete.includes('cloudinary.com')) return;
     try {
@@ -176,21 +163,71 @@
         body: JSON.stringify({ url: urlToDelete }),
       });
     } catch {
-      // Background cleanup best-effort
+      // Best-effort background cleanup
+    }
+  }
+
+  // -- Main upload handler --
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+
+    errorMessage = '';
+
+    const file = files[0];
+    const validationError = validateFile(file);
+    if (validationError) {
+      errorMessage = validationError;
+      return;
+    }
+
+    try {
+      isUploading = true;
+      uploadProgress = 15;
+
+      // Konversi otomatis JPG/PNG -> WebP (<=200KB)
+      const webpBlob = await convertToWebP(file);
+      uploadProgress = 45;
+
+      const params = await getSignedParams();
+      uploadProgress = 65;
+
+      const newUrl = await uploadToCloudinary(webpBlob, params);
+      uploadProgress = 100;
+
+      const oldUrl = uploadedUrls[0];
+      if (maxFiles === 1) {
+        uploadedUrls = [newUrl];
+        if (oldUrl && oldUrl !== newUrl) {
+          deleteCloudinaryAsset(oldUrl);
+        }
+      } else {
+        uploadedUrls = [...uploadedUrls, newUrl].slice(0, maxFiles);
+      }
+
+      onUpload(uploadedUrls);
+      onSingleUpload(newUrl);
+      onChange(newUrl);
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'Upload gagal';
+    } finally {
+      isUploading = false;
+      uploadProgress = 0;
     }
   }
 
   // -- Remove image --
-  async function removeImage(index: number) {
+  async function removeImage(index: number = 0) {
     const urlToRemove = uploadedUrls[index];
     const newUrls = uploadedUrls.filter((_, i) => i !== index);
+    uploadedUrls = newUrls;
     onUpload(newUrls);
+    onSingleUpload('');
+    onChange('');
     if (urlToRemove) {
       await deleteCloudinaryAsset(urlToRemove);
     }
   }
 
-  // -- Drag and drop handlers --
   function handleDragOver(event: DragEvent) {
     event.preventDefault();
     isDragging = true;
@@ -207,7 +244,7 @@
   }
 
   function handleClick() {
-    if (canAddMore && !isUploading) {
+    if (!isUploading) {
       fileInput.click();
     }
   }
@@ -219,93 +256,85 @@
   }
 </script>
 
-<div class="space-y-3">
-  <!-- Drop Zone -->
-  {#if canAddMore}
+<div class="space-y-2">
+  {#if label}
+    <span class="block font-medium text-[11px] text-base-content/70">{label}</span>
+  {/if}
+
+  <!-- Preview Card if Image Exists (Menampilkan hasil format WebP dari Cloudinary) -->
+  {#if uploadedUrls.length > 0 && maxFiles === 1}
+    <div class="relative group rounded-xl overflow-hidden bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 shadow-sm">
+      <div class="aspect-video w-full flex items-center justify-center bg-slate-950/5 relative overflow-hidden">
+        <img
+          src={uploadedUrls[0]}
+          alt="Preview WebP"
+          class="w-full h-full object-cover"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <button
+            type="button"
+            class="px-3 py-1.5 rounded-lg bg-white/90 hover:bg-white text-slate-900 text-xs font-semibold shadow transition-all cursor-pointer"
+            on:click|stopPropagation={handleClick}
+            disabled={isUploading}
+          >
+            Ganti Gambar
+          </button>
+          <button
+            type="button"
+            class="p-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-600 text-white shadow transition-all cursor-pointer"
+            on:click|stopPropagation={() => removeImage(0)}
+            aria-label="Hapus gambar"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  {:else}
+    <!-- Drop Zone / Upload Button -->
     <button
       type="button"
-      class="card w-full rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer
-        {isDragging ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50 hover:bg-base-50'}
+      class="w-full rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer flex flex-col items-center justify-center
+        {compact ? 'py-4 px-3' : 'py-6 px-4'}
+        {isDragging ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20' : 'border-base-300 dark:border-slate-800 hover:border-blue-500/60 bg-base-100 dark:bg-slate-950'}
         {isUploading ? 'pointer-events-none opacity-60' : ''}"
       on:dragover={handleDragOver}
       on:dragleave={handleDragLeave}
       on:drop={handleDrop}
       on:click={handleClick}
       disabled={isUploading}
-      aria-label="Seret gambar atau klik untuk upload"
+      aria-label="Upload gambar"
     >
-      <div class="card-body items-center text-center py-8">
-        {#if isUploading}
-          <Loader2 size={32} class="text-primary animate-spin" />
-          <p class="text-sm text-base-content/70">Mengupload... {uploadProgress}%</p>
-          <progress
-            class="progress progress-primary w-56"
-            value={uploadProgress}
-            max="100"
-          ></progress>
-        {:else}
-          <Upload size={32} class="text-base-content/40" />
-          <p class="text-sm font-medium text-base-content/70">
-            Seret gambar ke sini atau <span class="text-primary">klik untuk pilih</span>
-          </p>
-          <p class="text-xs text-base-content/40">
-            PNG, JPG dan JPEG. Maks {maxSizeMB}MB. {uploadedUrls.length}/{maxFiles} gambar.
-          </p>
-        {/if}
-      </div>
+      {#if isUploading}
+        <Loader2 size={compact ? 20 : 26} class="text-blue-500 animate-spin mb-1.5" />
+        <p class="text-[11px] font-medium text-base-content/70">Mengompresi ke WebP & Upload... {uploadProgress}%</p>
+      {:else}
+        <Upload size={compact ? 18 : 24} class="text-base-content/40 mb-1.5" />
+        <p class="text-xs font-semibold text-base-content/80">
+          <span class="text-blue-600 dark:text-blue-400">Pilih file JPG/PNG</span> atau seret ke sini
+        </p>
+        <p class="text-[10px] text-base-content/50 mt-0.5">
+          JPG, JPEG, PNG (Maks 5MB &bull; Auto WebP &le;200KB)
+        </p>
+      {/if}
     </button>
   {/if}
 
-  <!-- Hidden file input -->
+  <!-- Hidden file input: Hanya menerima JPG, JPEG, dan PNG -->
   <input
     bind:this={fileInput}
     type="file"
     accept="image/png,image/jpeg,image/jpg"
-    multiple={maxFiles > 1}
     class="hidden"
     on:change={handleFileSelect}
   />
 
   <!-- Error message -->
   {#if errorMessage}
-    <div class="alert alert-error text-sm rounded-xl shadow-sm">
-      <AlertCircle size={16} />
+    <div class="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+      <AlertCircle size={14} class="flex-shrink-0" />
       <span>{errorMessage}</span>
-    </div>
-  {/if}
-
-  <!-- Preview grid -->
-  {#if uploadedUrls.length > 0}
-    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-      {#each uploadedUrls as url, index}
-        <div class="relative group rounded-2xl overflow-hidden aspect-square bg-base-100 border border-base-200 shadow-sm">
-          <img
-            src={url}
-            alt="Gambar produk {index + 1}"
-            class="w-full h-full object-cover"
-            loading="lazy"
-          />
-          <button
-            type="button"
-            class="btn btn-circle btn-error btn-xs absolute top-2 right-2
-              opacity-0 group-hover:opacity-100 transition-opacity"
-            on:click|stopPropagation={() => removeImage(index)}
-            aria-label="Hapus gambar {index + 1}"
-          >
-            <X size={12} />
-          </button>
-        </div>
-      {/each}
-    </div>
-  {/if}
-
-  <!-- Empty state (no images and can't add more) -->
-  {#if uploadedUrls.length === 0 && !canAddMore}
-    <div class="card rounded-2xl bg-base-50 border border-base-200 py-6">
-      <div class="card-body items-center text-center">
-        <ImageIcon size={32} class="text-base-content/30" />
-        <p class="text-sm text-base-content/50">Belum ada gambar</p>
-      </div>
     </div>
   {/if}
 </div>

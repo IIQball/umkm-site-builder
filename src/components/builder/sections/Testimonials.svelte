@@ -1,7 +1,7 @@
 <script lang="ts">
   import { editorStore, canvasStore } from '../stores/editorStore';
   import type { TestimonialsProps, SectionStyles, TestimonialItem } from '@/types';
-  import { Star, MessageCircle, Play, TrendingUp, Users, Award, Quote } from 'lucide-svelte';
+  import { Star, MessageCircle, TrendingUp, Users, Award, Quote } from 'lucide-svelte';
 
   export let props: TestimonialsProps = {};
   export let styles: SectionStyles = {};
@@ -163,36 +163,39 @@
       {/each}
     </div>
 
-  {:else if activePreset === 'video_story_testimonials'}
-    <!-- Preset C: Video Story 9:16 Testimonials (4 vertical story cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-      {#each testimonials.slice(0, 4) as item, idx}
+  {:else if activePreset === 'two_column_cards'}
+    <!-- Preset C: Two Column Cards (2 Column Clean Testimonial Grid) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mx-auto">
+      {#each testimonials.slice(0, 4) as item}
         <div
           data-node="testimonial_card"
-          class="relative aspect-[9/16] rounded-3xl overflow-hidden shadow-lg border border-base-200 dark:border-slate-800 group bg-slate-900"
+          class="p-6 rounded-2xl bg-[var(--theme-surface,#ffffff)] border border-base-200 dark:border-slate-800 shadow-sm flex flex-col justify-between text-left hover:border-blue-500/40 transition-colors"
         >
-          <img
-            src={`https://images.unsplash.com/photo-${1534528741775 + idx}?auto=format&fit=crop&w=600&q=80`}
-            alt={item.customerName}
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-between p-5 text-white">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 backdrop-blur-md">Ulasan Video</span>
-              <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <Play size={12} class="fill-white ml-0.5" />
-              </div>
+          <div>
+            <div data-node="testimonial_rating" class="flex items-center gap-1 mb-3">
+              {#each Array(item.rating || 5) as _}
+                <Star size={16} class="fill-amber-400 text-amber-400" />
+              {/each}
             </div>
-            <div class="text-left">
-              <div class="flex items-center gap-0.5 mb-2">
-                {#each Array(5) as _}
-                  <Star size={12} class="fill-amber-400 text-amber-400" />
-                {/each}
+            <p data-node="testimonial_comment" class="text-sm text-[var(--theme-text-primary,#0f172a)] leading-relaxed italic mb-6">
+              "{item.comment}"
+            </p>
+          </div>
+          <div data-node="testimonial_author" class="flex items-center gap-3 pt-4 border-t border-base-100 dark:border-slate-800/80">
+            {#if item.avatar}
+              <img
+                src={item.avatar}
+                alt={item.customerName}
+                class="w-10 h-10 rounded-full object-cover border border-base-200"
+              />
+            {:else}
+              <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/60 text-[var(--theme-primary,#2563eb)] font-bold text-sm flex items-center justify-center flex-shrink-0 shadow-inner">
+                {(item.customerName || 'P').charAt(0).toUpperCase()}
               </div>
-              <p class="text-xs italic text-slate-100 line-clamp-3 mb-3 font-medium leading-relaxed">
-                "{item.comment}"
-              </p>
-              <p class="font-bold text-sm text-white">{item.customerName}</p>
+            {/if}
+            <div>
+              <p class="font-bold text-sm text-[var(--theme-text-primary,#0f172a)]">{item.customerName}</p>
+              <p class="text-[11px] text-[var(--theme-text-muted,#64748b)]">Pelanggan Terverifikasi</p>
             </div>
           </div>
         </div>

@@ -27,7 +27,7 @@
   {:else if section.type === 'faq'}
     <FaqContent {section} {onUpdate} />
   {:else if section.type === 'google_maps'}
-    <GoogleMapsContent {section} />
+    <GoogleMapsContent {section} {onUpdate} />
   {:else if section.type === 'footer'}
     <FooterContent {section} {onUpdate} />
   {/if}

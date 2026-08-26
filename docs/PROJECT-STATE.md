@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-26 by feature/virda-dynamic-store-bindings session
+Status: LIVE · Updated: 2026-08-26 by feature/virda-single-image-purge-video session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,15 +11,22 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed Dynamic Store Binding Migration for WhatsApp & Google Maps:
-1. **Builder Inspector Form Cleanup**: Removed hardcoded WhatsApp/phone and physical address/Google Maps input fields from template inspector content panels (`FooterContent.svelte`, `ContentTab.svelte`, and new `GoogleMapsContent.svelte`).
-2. **Informative Badges**: Replaced manual inputs with clean status badges: *"Nomor WhatsApp: Mengikuti data profil toko otomatis"* and *"Lokasi Peta: Mengikuti data lokasi toko otomatis"*.
-3. **Dynamic Section Rendering & Fallbacks**: `HeaderAnnouncement.svelte`, `Hero.svelte`, `Footer.svelte`, `FAQ.svelte`, and `GoogleMaps.svelte` bind automatically to tenant profile data (`props.waNumber` / `props.googleMapsUrl`) with demo fallbacks for designer canvas preview.
+Completed Single-Image Upload Integration & Purge of All Video Configurations:
+1. **Purged All Video Presets & Configurations**: Completely removed `hero_video_mockup` and `video_story_testimonials` across Zod schemas (`template.schema.ts`), TypeScript types (`builder.ts`), inspector preset selector (`SectionLayoutPanel.svelte`), section components (`Hero.svelte`, `Testimonials.svelte`), and test suites. Sections now strictly adhere to 8 static-image presets each.
+2. **Single-Image Only & Conversion Pipeline**: Enforced strict input file validation (`maxFiles={1}`, formats: `JPG`, `JPEG`, `PNG`, maks 5MB) -> otomatis dikonversi via HTML5 Canvas ke format `WebP` dengan ukuran `≤200KB` -> diunggah dan ditampilkan sebagai URL publik Cloudinary WebP di `ImageUpload.svelte`.
+3. **Inspector Forms Integration**: Integrated `ImageUpload.svelte` in `HeaderContent.svelte`, `HeaderLogoPanel.svelte`, `HeroContent.svelte`, `FeaturesContent.svelte`, `TestimonialsContent.svelte`, and `GoogleMapsContent.svelte`.
 4. **Validation**: `bun run type-check`: 0 errors, 0 warnings. `bun run lint`: 0 warnings, 0 errors. `bun test`: 213/213 pass.
 
 ## Last session did
 
-- **Dynamic Store Binding for WhatsApp & Google Maps (Removed Hardcoded Template Inputs):**
+- **Single-Image Input Integration & Video Configurations Purge:**
+  - `src/components/shared/ImageUpload.svelte`: Validasi input JPG/PNG/JPEG (maks 5MB) -> konversi otomatis WebP (maks 200KB) -> upload Cloudinary WebP.
+  - `src/schemas/templates/template.schema.ts` & `src/types/templates/builder.ts`: Purged `hero_video_mockup` and replaced `video_story_testimonials` with `two_column_cards`.
+  - `src/components/builder/sections/Hero.svelte` & `Testimonials.svelte`: Removed all video tags, mockups, and `Play` icon imports.
+  - `src/components/builder/inspector/SectionLayoutPanel.svelte`: Updated layout preset options for Hero and Testimonials.
+  - `src/components/builder/content/`: Integrated `ImageUpload.svelte` into `HeaderContent.svelte`, `HeroContent.svelte`, `FeaturesContent.svelte`, `TestimonialsContent.svelte`, `GoogleMapsContent.svelte`, and `HeaderLogoPanel.svelte`.
+  - `tests/schemas/template-tokens-presets.test.ts`: Updated test assertions to validate 8 static layout presets per section.
+  - Verification: `bun run type-check` (0 errors, 0 warnings), `bun run lint` (0 warnings, 0 errors), `bun test` (213 tests passing).
   - `src/components/builder/content/FooterContent.svelte`: Replaced manual inputs for phone and address with dynamic store binding badges. Retained editable brand logo text, tagline, and copyright.
   - `src/components/builder/content/GoogleMapsContent.svelte`: Created informative dynamic binding panel informing designers that map location follows tenant store profile.
   - `src/components/builder/ContentTab.svelte`: Registered `GoogleMapsContent` for `section.type === 'google_maps'`.

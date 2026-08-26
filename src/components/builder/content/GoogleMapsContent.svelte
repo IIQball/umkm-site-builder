@@ -1,10 +1,15 @@
 <script lang="ts">
   import { MapPin, Info } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import { makeHandlePropChange } from './content.helpers';
+  import ImageUpload from '@/components/shared/ImageUpload.svelte';
 
-  export let section: TemplateSection | undefined = undefined;
-  // Use section to prevent unused property warning
+  export let section: TemplateSection;
+  export let onUpdate: (section: TemplateSection) => void = () => {};
+
+  $: handlePropChange = makeHandlePropChange(section, onUpdate);
   $: currentPreset = section?.layoutPreset || 'fullwidth_map';
+  $: imageUrl = (section?.props?.imageUrl as string) || '';
 </script>
 
 <div class="space-y-4">
@@ -19,6 +24,19 @@
         Koordinat dan alamat Google Maps disinkronkan secara otomatis dari data profil toko tenant. Di kanvas editor desainer ini ditampilkan pratinjau dummy toko contoh ({currentPreset}).
       </p>
     </div>
+  </div>
+
+  <!-- Store Front Thumbnail Upload -->
+  <div class="p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800 space-y-2">
+    <span class="block font-semibold text-xs text-base-content/80">Foto Tampak Depan Toko / Thumbnail Map</span>
+    <ImageUpload
+      value={imageUrl}
+      maxFiles={1}
+      folder="templates"
+      compact={true}
+      label="Thumbnail Tampak Depan"
+      onSingleUpload={(url) => handlePropChange('imageUrl', url)}
+    />
   </div>
 
   <div class="p-3 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-xl text-xs text-base-content/70 flex items-center gap-2">

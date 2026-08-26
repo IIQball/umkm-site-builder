@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Image as ImageIcon } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import ImageUpload from '@/components/shared/ImageUpload.svelte';
 
   export let section: TemplateSection;
   export let onConfigChange: (key: string, value: unknown) => void;
@@ -9,6 +10,7 @@
   $: logoHeight = Number(section.props?.logoImageHeight) || 40;
   $: logoTextColor = (section.props?.logoTextColor as string) || 'var(--theme-text-primary, #0f172a)';
   $: logoTypographyToken = (section.props?.logoTypographyToken as string) || 'h3';
+  $: logoImageUrl = (section.props?.logoImageUrl as string) || '';
 
   const logoHeightOptions = [
     { label: '24px', value: 24 },
@@ -39,25 +41,36 @@
     <span>Gaya & Ukuran Logo</span>
   </div>
 
-  <!-- Image Sizing (8pt grid locked: 24, 32, 40, 48, 56) -->
+  <!-- Image Upload & Sizing (8pt grid locked: 24, 32, 40, 48, 56) -->
   {#if logoType === 'image_only' || logoType === 'image_text'}
-    <div>
-      <div class="flex items-center justify-between text-[11px] font-medium text-base-content/70 mb-1">
-        <span>Tinggi Gambar Logo (8pt Grid)</span>
-        <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">{logoHeight}px</span>
-      </div>
-      <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
-        {#each logoHeightOptions as opt}
-          <button
-            type="button"
-            on:click={() => onConfigChange('logoImageHeight', opt.value)}
-            class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
-              logoHeight === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
-            }`}
-          >
-            {opt.label}
-          </button>
-        {/each}
+    <div class="space-y-2">
+      <ImageUpload
+        value={logoImageUrl}
+        maxFiles={1}
+        folder="templates"
+        compact={true}
+        label="File Gambar Logo"
+        onSingleUpload={(url) => onConfigChange('logoImageUrl', url)}
+      />
+
+      <div>
+        <div class="flex items-center justify-between text-[11px] font-medium text-base-content/70 mb-1">
+          <span>Tinggi Gambar Logo (8pt Grid)</span>
+          <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">{logoHeight}px</span>
+        </div>
+        <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
+          {#each logoHeightOptions as opt}
+            <button
+              type="button"
+              on:click={() => onConfigChange('logoImageHeight', opt.value)}
+              class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
+                logoHeight === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
+              }`}
+            >
+              {opt.label}
+            </button>
+          {/each}
+        </div>
       </div>
     </div>
   {/if}

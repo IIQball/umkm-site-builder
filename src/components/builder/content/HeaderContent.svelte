@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown, Megaphone, Image as ImageIcon, Menu } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import ImageUpload from '@/components/shared/ImageUpload.svelte';
   import {
     makeHandlePropChange,
     makeHandleAddArrayItem,
@@ -18,6 +19,7 @@
 
   $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
   $: logoType = section.props?.logoType || 'image_text';
+  $: logoImageUrl = (section.props?.logoImageUrl as string) || '';
   $: navLinks = (section.props?.navLinks as string[]) || [];
 </script>
 
@@ -141,29 +143,13 @@
 
       <!-- File Picker Logo Langsung -->
       <div>
-        <label for="header-logo-upload" class="block font-medium text-[11px] text-base-content/70 mb-1">Upload File Logo</label>
-        <input
-          id="header-logo-upload"
-          type="file"
-          accept="image/png,image/jpeg,image/jpg"
-          class="block w-full text-xs text-base-content/70 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-          on:change={async (e) => {
-            const file = e.currentTarget.files?.[0];
-            if (!file) return;
-            const signRes = await fetch('/api/media/sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ folder: 'templates' }) });
-            if (!signRes.ok) return;
-            const { data: signData } = await signRes.json();
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('api_key', signData.apiKey);
-            formData.append('timestamp', signData.timestamp);
-            formData.append('signature', signData.signature);
-            formData.append('folder', signData.folder);
-            const cloudRes = await fetch(signData.uploadUrl, { method: 'POST', body: formData });
-            if (!cloudRes.ok) return;
-            const cloudData = await cloudRes.json();
-            handlePropChange('logoImageUrl', cloudData.secure_url);
-          }}
+        <ImageUpload
+          value={logoImageUrl}
+          maxFiles={1}
+          folder="templates"
+          compact={true}
+          label="File Gambar Logo"
+          onSingleUpload={(url) => handlePropChange('logoImageUrl', url)}
         />
       </div>
     {/if}

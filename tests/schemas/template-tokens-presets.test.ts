@@ -125,7 +125,6 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
       'full_banner_overlay',
       'hero_card_overlap',
       'split_multi_badges',
-      'hero_video_mockup',
       'hero_triple_highlights',
       'hero_search_focused',
     ];
@@ -170,7 +169,7 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
       'chat_bubble_flow',
       'testimonial_marquee_slider',
       'large_quote_cards',
-      'video_story_testimonials',
+      'two_column_cards',
       'statistics_with_review',
       'compact_badge_grid',
     ];
@@ -353,16 +352,15 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
       { id: 'sec-header-7', type: 'header_announcement', layoutPreset: 'top_contact_bar' },
       { id: 'sec-header-8', type: 'header_announcement', layoutPreset: 'minimal_borderless' },
 
-      // Hero (9 presets)
+      // Hero (8 presets)
       { id: 'sec-hero-1', type: 'hero', layoutPreset: 'split_left_text' },
       { id: 'sec-hero-2', type: 'hero', layoutPreset: 'split_right_text' },
       { id: 'sec-hero-3', type: 'hero', layoutPreset: 'centered_minimal' },
       { id: 'sec-hero-4', type: 'hero', layoutPreset: 'full_banner_overlay' },
       { id: 'sec-hero-5', type: 'hero', layoutPreset: 'hero_card_overlap' },
       { id: 'sec-hero-6', type: 'hero', layoutPreset: 'split_multi_badges' },
-      { id: 'sec-hero-7', type: 'hero', layoutPreset: 'hero_video_mockup' },
-      { id: 'sec-hero-8', type: 'hero', layoutPreset: 'hero_triple_highlights' },
-      { id: 'sec-hero-9', type: 'hero', layoutPreset: 'hero_search_focused' },
+      { id: 'sec-hero-7', type: 'hero', layoutPreset: 'hero_triple_highlights' },
+      { id: 'sec-hero-8', type: 'hero', layoutPreset: 'hero_search_focused' },
 
       // Features (8 presets)
       { id: 'sec-feat-1', type: 'features', layoutPreset: 'grid_3_cards' },
@@ -390,7 +388,7 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
       { id: 'sec-testi-3', type: 'testimonials', layoutPreset: 'chat_bubble_flow' },
       { id: 'sec-testi-4', type: 'testimonials', layoutPreset: 'testimonial_marquee_slider' },
       { id: 'sec-testi-5', type: 'testimonials', layoutPreset: 'large_quote_cards' },
-      { id: 'sec-testi-6', type: 'testimonials', layoutPreset: 'video_story_testimonials' },
+      { id: 'sec-testi-6', type: 'testimonials', layoutPreset: 'two_column_cards' },
       { id: 'sec-testi-7', type: 'testimonials', layoutPreset: 'statistics_with_review' },
       { id: 'sec-testi-8', type: 'testimonials', layoutPreset: 'compact_badge_grid' },
 

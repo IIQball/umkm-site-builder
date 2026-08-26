@@ -1,7 +1,7 @@
 <script lang="ts">
   import { editorStore } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
-  import { ShoppingBag, Search, Play, CheckCircle2, ShieldCheck, Truck, Clock } from 'lucide-svelte';
+  import { ShoppingBag, Search, CheckCircle2, ShieldCheck, Truck, Clock } from 'lucide-svelte';
 
   export let props: HeroProps = {};
   export let styles: SectionStyles = {};
@@ -237,75 +237,6 @@
               alt="Preview 2"
               class="w-full aspect-square object-cover rounded-lg"
             />
-          </div>
-        </div>
-      </div>
-
-    {:else if activePreset === 'hero_video_mockup'}
-      <!-- Preset C: Hero Video Mockup (Centered top headline + 16:9 video frame below) -->
-      <div class="py-12 flex flex-col items-center text-center gap-6">
-        {#if badgeText}
-          <div
-            data-node="badge"
-            role="button"
-            tabindex="0"
-            on:click={(e) => selectNode(e, 'badge')}
-            on:keydown={(e) => selectNodeKey(e, 'badge')}
-            class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-blue-50 text-[var(--theme-primary,#2563eb)] text-xs font-bold border border-blue-200 cursor-pointer shadow-sm"
-          >
-            <span>{badgeText}</span>
-          </div>
-        {/if}
-
-        <svelte:element
-          this={tagName || 'h1'}
-          data-node="title"
-          role="button"
-          tabindex="0"
-          on:click={(e) => selectNode(e, 'title')}
-          on:keydown={(e) => selectNodeKey(e, 'title')}
-          class="font-black tracking-tight leading-tight text-3xl sm:text-5xl text-[var(--theme-text-primary,#0f172a)] max-w-3xl cursor-pointer"
-        >
-          {title}
-        </svelte:element>
-
-        <div
-          data-node="subtitle"
-          role="button"
-          tabindex="0"
-          on:click={(e) => selectNode(e, 'subtitle')}
-          on:keydown={(e) => selectNodeKey(e, 'subtitle')}
-          class="cursor-pointer"
-        >
-          <p class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] max-w-2xl leading-relaxed">
-            {subtitle}
-          </p>
-        </div>
-
-        {#if ctaText}
-          <div data-node="cta">
-            <a
-              href={ctaLink}
-              style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-              class="inline-flex items-center justify-center px-8 font-bold text-sm shadow-md hover:scale-105 active:scale-95 transition-transform"
-            >
-              <ShoppingBag size={18} class="mr-2" />
-              <span>{ctaText}</span>
-            </a>
-          </div>
-        {/if}
-
-        <!-- 16:9 Mockup Screen with Play Button -->
-        <div data-node="image" class="w-full max-w-4xl mt-4 relative rounded-2xl overflow-hidden shadow-2xl border border-base-300 dark:border-slate-800 group">
-          <img
-            src={imageUrl}
-            alt="Video Preview Mockup"
-            class="w-full aspect-[16/9] object-cover"
-          />
-          <div class="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 dark:bg-slate-900/90 text-[var(--theme-primary,#2563eb)] flex items-center justify-center shadow-xl backdrop-blur-md cursor-pointer hover:scale-110 active:scale-95 transition-transform">
-              <Play size={28} class="fill-current ml-1" />
-            </div>
           </div>
         </div>
       </div>

@@ -67,7 +67,6 @@ export const HeroPresetSchema = z.enum([
   'full_banner_overlay',
   'hero_card_overlap',
   'split_multi_badges',
-  'hero_video_mockup',
   'hero_triple_highlights',
   'hero_search_focused',
 ]);
@@ -103,7 +102,7 @@ export const TestimonialsPresetSchema = z.enum([
   'chat_bubble_flow',
   'testimonial_marquee_slider',
   'large_quote_cards',
-  'video_story_testimonials',
+  'two_column_cards',
   'statistics_with_review',
   'compact_badge_grid',
 ]);

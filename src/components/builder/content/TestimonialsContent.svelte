@@ -7,6 +7,7 @@
     makeHandleRemoveArrayItem,
     makeHandleMoveArrayItem,
   } from './content.helpers';
+  import ImageUpload from '@/components/shared/ImageUpload.svelte';
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
@@ -28,40 +29,40 @@
 
 <div class="space-y-3">
   <div class="flex items-center justify-between">
-    <span class="block font-semibold text-base-content/80">Daftar Testimoni</span>
+    <span class="block font-semibold text-xs text-base-content/80">Daftar Testimoni Pelanggan</span>
     <button
       type="button"
-      on:click={() => handleAddArrayItem('testimonials', { customerName: 'Nama Pelanggan', rating: 5, comment: 'Pelayanan sangat ramah dan memuaskan!' })}
-      class="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-400 cursor-pointer"
+      on:click={() => handleAddArrayItem('testimonials', { customerName: 'Nama Pelanggan', rating: 5, comment: 'Pelayanan sangat ramah dan memuaskan!', avatar: '' })}
+      class="flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
     >
-      <Plus size={12} />
+      <Plus size={13} />
       <span>Tambah Testimoni</span>
     </button>
   </div>
 
   <div class="space-y-3">
     {#each testimonials as item, index}
-      <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-lg space-y-2">
+      <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-xl space-y-2.5">
         <div class="flex items-center justify-between gap-2">
           <input
             type="text"
             value={item.customerName ?? ''}
             on:input={(e) => handleArrayItemChange('testimonials', index, 'customerName', e.currentTarget.value)}
-            class="flex-1 px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-base-content focus:outline-none focus:border-blue-500"
+            class="flex-1 px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded-lg text-base-content text-xs focus:outline-none focus:border-blue-500 font-semibold"
             placeholder="Nama Pelanggan"
           />
           <select
             value={item.rating ?? 5}
             on:change={(e) => handleArrayItemChange('testimonials', index, 'rating', Number(e.currentTarget.value))}
-            class="w-20 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-base-content text-xs focus:outline-none focus:border-blue-500"
+            class="w-24 px-2 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded-lg text-base-content text-xs focus:outline-none focus:border-blue-500 font-medium"
           >
-            <option value={5}>Bintang 5</option>
-            <option value={4}>Bintang 4</option>
-            <option value={3}>Bintang 3</option>
-            <option value={2}>Bintang 2</option>
-            <option value={1}>Bintang 1</option>
+            <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
+            <option value={4}>⭐⭐⭐⭐ (4)</option>
+            <option value={3}>⭐⭐⭐ (3)</option>
+            <option value={2}>⭐⭐ (2)</option>
+            <option value={1}>⭐ (1)</option>
           </select>
-          <div class="flex items-center">
+          <div class="flex items-center gap-0.5">
             <button
               type="button"
               on:click={() => handleMoveArrayItem('testimonials', index, 'up')}
@@ -90,13 +91,25 @@
             </button>
           </div>
         </div>
+
         <textarea
           value={item.comment ?? ''}
           on:input={(e) => handleArrayItemChange('testimonials', index, 'comment', e.currentTarget.value)}
           rows="2"
-          class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-base-content focus:outline-none focus:border-blue-500"
-          placeholder="Ulasan pelanggan..."
+          class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded-lg text-base-content text-xs focus:outline-none focus:border-blue-500 resize-y"
+          placeholder="Isi ulasan/testimoni pelanggan..."
         />
+
+        <div class="pt-1">
+          <ImageUpload
+            value={item.avatar ?? ''}
+            maxFiles={1}
+            folder="templates"
+            compact={true}
+            label="Foto Profil Pelanggan (Avatar)"
+            onSingleUpload={(url) => handleArrayItemChange('testimonials', index, 'avatar', url)}
+          />
+        </div>
       </div>
     {/each}
   </div>

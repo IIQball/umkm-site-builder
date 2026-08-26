@@ -9,9 +9,9 @@
   $: showAnnouncement = props.showAnnouncement ?? true;
   $: announcementText = props.announcementText ?? 'Diskon 20% khusus hari ini';
   $: align = props.announcementAlign ?? 'center';
-  $: bgColor = props.announcementBgColor || '#2563eb';
-  $: textColor = props.announcementTextColor || '#ffffff';
-  $: paddingY = props.announcementPaddingY || '8px';
+  $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
+  $: textColor = (props.announcementTextColor as string) || '#ffffff';
+  $: paddingY = (props.announcementPaddingY as string) || '8px';
 
   $: nodeStyles = props?.nodeStyles?.announcement || {};
   $: isNodeActive = isActive && $activeNodeId === 'announcement';
@@ -25,7 +25,7 @@
   $: textStyleString = [
     `color: ${textColor}`,
     `text-align: ${align === 'left' ? 'left' : 'center'}`,
-    nodeStyles.fontSize ? `font-size: ${nodeStyles.fontSize}` : '',
+    nodeStyles.fontSize ? `font-size: ${nodeStyles.fontSize}` : 'font-size: var(--theme-text-caption, 10px)',
     nodeStyles.fontWeight ? `font-weight: ${nodeStyles.fontWeight}` : '',
     nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : '',
   ].filter(Boolean).join('; ');
@@ -57,9 +57,10 @@
     }`}
   >
     <div
-      class={`w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center ${
+      class={`announcement-inner-container w-full mx-auto flex items-center ${
         align === 'left' ? 'justify-start text-left' : 'justify-center text-center'
-      } min-w-0`}
+      } min-w-0 box-border`}
+      style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
     >
       <p
         style={textStyleString}

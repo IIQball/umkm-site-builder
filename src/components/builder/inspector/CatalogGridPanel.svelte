@@ -79,15 +79,16 @@
   <!-- Grid Gap -->
   <div>
     <label for="catalog-gap" class="block font-semibold mb-1 text-base-content/90">Jarak Antar Kartu (Grid Gap)</label>
-    <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
+    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800">
       {#each [
-        { val: 'compact', label: 'Compact (12px)' },
-        { val: 'normal', label: 'Normal (20px)' },
-        { val: 'relaxed', label: 'Relaxed (32px)' },
+        { val: '8px', label: '8px' },
+        { val: '16px', label: '16px' },
+        { val: '24px', label: '24px' },
+        { val: '32px', label: '32px' },
       ] as g}
         <button type="button" on:click={() => onConfigChange('gridGap', g.val)}
           class={`py-1.5 text-[11px] font-medium rounded transition-all cursor-pointer ${
-            gridGapVal === g.val || (g.val === 'normal' && !gridGapVal)
+            gridGapVal === g.val || (g.val === '16px' && !gridGapVal)
               ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm'
               : 'text-base-content/70 hover:text-base-content'
           }`}>

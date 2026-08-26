@@ -12,10 +12,41 @@ export const ColorTokenSchema = z.enum([
   'surface',
   'text_primary',
   'text_muted',
+  'textPrimary',
+  'textMuted',
   'transparent',
 ]);
 
 export type ColorToken = z.infer<typeof ColorTokenSchema>;
+
+export const TypographyTokenSchema = z.enum(['h1', 'h2', 'h3', 'body', 'caption']);
+export type TypographyToken = z.infer<typeof TypographyTokenSchema>;
+
+export const SpacingStepSchema = z.union([
+  z.literal(0),
+  z.literal(8),
+  z.literal(16),
+  z.literal(24),
+  z.literal(32),
+  z.literal(40),
+  z.literal(48),
+  z.literal(56),
+  z.literal(64),
+  z.literal(80),
+  z.literal(96),
+]);
+export type SpacingStep = z.infer<typeof SpacingStepSchema>;
+
+export const ButtonHeightSchema = z.union([
+  z.literal(32),
+  z.literal(40),
+  z.literal(48),
+  z.literal(56),
+]);
+export type ButtonHeight = z.infer<typeof ButtonHeightSchema>;
+
+export const EffectShadowSchema = z.enum(['none', 'sm', 'md', 'lg']);
+export type EffectShadow = z.infer<typeof EffectShadowSchema>;
 
 export const HeaderAnnouncementPresetSchema = z.enum(['default_split', 'centered_stacked', 'compact_inline']);
 export type HeaderAnnouncementPreset = z.infer<typeof HeaderAnnouncementPresetSchema>;
@@ -193,11 +224,11 @@ export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
   typography: {
     headingFont: 'Inter, sans-serif',
     bodyFont: 'Inter, sans-serif',
-    h1: { fontSize: '36px', lineHeight: '1.2', fontWeight: '700' },
-    h2: { fontSize: '28px', lineHeight: '1.25', fontWeight: '700' },
-    h3: { fontSize: '22px', lineHeight: '1.3', fontWeight: '600' },
-    body: { fontSize: '15px', lineHeight: '1.6', fontWeight: '400' },
-    caption: { fontSize: '13px', lineHeight: '1.5', fontWeight: '400' },
+    h1: { fontSize: '42px', lineHeight: '1.2', fontWeight: '700' },
+    h2: { fontSize: '26px', lineHeight: '1.25', fontWeight: '700' },
+    h3: { fontSize: '20px', lineHeight: '1.3', fontWeight: '600' },
+    body: { fontSize: '16px', lineHeight: '1.6', fontWeight: '400' },
+    caption: { fontSize: '10px', lineHeight: '1.5', fontWeight: '400' },
   },
   buttons: {
     borderRadius: '8px',
@@ -240,23 +271,21 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       showAnnouncement: true,
       announcementText: 'Diskon 20% khusus hari ini',
       announcementAlign: 'center',
-      announcementBgColor: '#2563eb',
+      announcementBgColor: 'var(--theme-primary, #2563eb)',
       announcementTextColor: '#ffffff',
       announcementPaddingY: '8px',
       logoType: 'image_text',
       logoText: 'Toko UMKM',
       logoImageUrl: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100',
-      logoImageHeight: 36,
-      logoTextSize: 'lg',
-      logoTextWeight: 'bold',
-      logoTextColor: '#0f172a',
+      logoImageHeight: 40,
+      logoTypographyToken: 'h3',
+      logoTextColor: 'var(--theme-text-primary, #0f172a)',
       navLinks: ['Beranda', 'Produk', 'Tentang', 'Kontak'],
-      navGap: 'normal',
-      navFontSize: '14px',
-      navFontWeight: '500',
+      navGap: '16px',
+      navTypographyToken: 'body',
       navTextTransform: 'none',
-      navColor: '#475569',
-      navHoverColor: '#2563eb',
+      navColor: 'var(--theme-text-muted, #64748b)',
+      navHoverColor: 'var(--theme-primary, #2563eb)',
     },
     styles: {
       bgColorToken: 'surface',
@@ -280,7 +309,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     styles: {
       bgColorToken: 'background',
       textColorToken: 'text_primary',
-      padding: '64px 32px',
+      padding: '0px',
       textAlign: 'center',
     },
   },
@@ -312,7 +341,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       textColorToken: 'text_primary',
       display: 'grid',
       gap: '24px',
-      padding: '48px 32px',
+      padding: '0px',
     },
   },
   {
@@ -326,8 +355,8 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       bgColorToken: 'background',
       textColorToken: 'text_primary',
       display: 'grid',
-      gap: '20px',
-      padding: '48px 32px',
+      gap: '24px',
+      padding: '0px',
     },
   },
   {
@@ -349,7 +378,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       textColorToken: 'text_primary',
       display: 'grid',
       gap: '24px',
-      padding: '48px 32px',
+      padding: '0px',
     },
   },
   {
@@ -371,7 +400,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     styles: {
       bgColorToken: 'background',
       textColorToken: 'text_primary',
-      padding: '48px 32px',
+      padding: '0px',
     },
   },
   {
@@ -381,12 +410,12 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     props: {
       whatsappNumber: '',
       address: '',
-      copyrightText: '© 2024 Toko Kami. Semua hak dilindungi.',
+      copyrightText: '© 2026 Toko Kami. Semua hak dilindungi.',
     },
     styles: {
       bgColorToken: 'surface',
       textColorToken: 'text_primary',
-      padding: '32px',
+      padding: '0px',
       textAlign: 'center',
     },
   },

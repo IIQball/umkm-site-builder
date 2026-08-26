@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ChevronUp, ChevronDown, ChevronRight, Trash2, Plus, Layers } from 'lucide-svelte';
+  import { ChevronUp, ChevronDown, ChevronRight, Trash2, Plus, Layers, PanelLeftClose } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
-  import { editorStore } from './stores/editorStore';
+  import { editorStore, canvasStore } from './stores/editorStore';
   import { getSectionNodes, sectionTypeLabels, sectionTypeIcons, sectionTypes } from './layer/layerPanel.helpers';
   import AddNodeDropdown from './layer/AddNodeDropdown.svelte';
 
@@ -48,24 +48,25 @@
   };
 </script>
 
-<aside class="w-72 flex-shrink-0 bg-base-100 border-r border-base-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-base-content transition-colors">
-  <!-- Header -->
-  <div class="p-3 border-b border-base-200 dark:border-slate-800 flex items-center justify-between">
-    <div class="flex items-center gap-2 text-base-content">
-      <Layers size={16} class="text-blue-600 dark:text-blue-400" />
-      <span class="text-xs font-semibold uppercase tracking-wider text-base-content/80">Tree Layers ({sections.length})</span>
+<aside class="w-72 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-slate-800 dark:text-slate-200 transition-colors">
+  <!-- Header with Title, Add Section & Close Button -->
+  <div class="p-3 border-b border-base-200 dark:border-slate-800 flex items-center justify-between gap-1.5">
+    <div class="flex items-center gap-2 text-base-content min-w-0 flex-1">
+      <Layers size={16} class="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+      <span class="text-xs font-bold uppercase tracking-wider text-base-content/90 truncate">Layers ({sections.length})</span>
     </div>
 
-    <!-- Add Section Dropdown -->
-    <div class="relative">
-      <button
-        type="button"
-        on:click={() => (isAddMenuOpen = !isAddMenuOpen)}
-        class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-base-content bg-base-200 hover:bg-base-300 rounded-md border border-base-300 dark:border-slate-700 transition-colors cursor-pointer"
-      >
-        <Plus size={13} />
-        <span>Tambah</span>
-      </button>
+    <div class="flex items-center gap-1 flex-shrink-0">
+      <!-- Add Section Dropdown -->
+      <div class="relative">
+        <button
+          type="button"
+          on:click={() => (isAddMenuOpen = !isAddMenuOpen)}
+          class="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-base-content bg-base-200 hover:bg-base-300 rounded-md border border-base-300 dark:border-slate-700 transition-colors cursor-pointer"
+        >
+          <Plus size={13} />
+          <span>Tambah</span>
+        </button>
 
       {#if isAddMenuOpen}
         <button
@@ -91,7 +92,19 @@
         </div>
       {/if}
     </div>
+
+    <!-- Close Left Sidebar Button -->
+    <button
+      type="button"
+      on:click={() => canvasStore.toggleLeftSidebar()}
+      class="p-1 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200 border border-transparent hover:border-base-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+      title="Tutup Sidebar Kiri (Ctrl+\)"
+      aria-label="Tutup Sidebar Kiri"
+    >
+      <PanelLeftClose size={15} />
+    </button>
   </div>
+</div>
 
   <!-- Section & Node Tree -->
   <div class="flex-1 overflow-y-auto p-2 space-y-1">

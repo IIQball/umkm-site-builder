@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, Eye, EyeOff, UserPlus, Lock, X } from 'lucide-svelte';
+  import { Plus, Eye, EyeOff, UserPlus, X } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
 

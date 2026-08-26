@@ -12,9 +12,24 @@
       styles: { ...(section.styles || {}), [key]: value || undefined },
     });
   };
+
+  const handleStylesChange = (updates: Record<string, string | undefined>) => {
+    const nextStyles = { ...(section.styles || {}) };
+    for (const [k, v] of Object.entries(updates)) {
+      if (v === undefined || v === '') {
+        delete nextStyles[k];
+      } else {
+        nextStyles[k] = v;
+      }
+    }
+    onUpdate({
+      ...section,
+      styles: nextStyles,
+    });
+  };
 </script>
 
 <div class="space-y-5">
-  <SectionLayoutPanel {section} onStyleChange={handleStyleChange} />
+  <SectionLayoutPanel {section} onStyleChange={handleStyleChange} onStylesChange={handleStylesChange} />
   <SectionAppearancePanel {section} onStyleChange={handleStyleChange} />
 </div>

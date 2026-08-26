@@ -18,6 +18,9 @@
   export let styles: SectionStyles = {};
   export let sectionId: string = "";
   export let isActive: boolean = false;
+  export let layoutPreset: string = "grid_standard";
+
+  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || "grid_standard";
 
   $: activeStoreId =
     props.storeId ||
@@ -149,7 +152,7 @@
           ? "rounded-full"
           : "rounded-xl";
   $: ctaBtnColor = String(
-    props?.ctaButtonColor ?? styles?.ctaButtonColor ?? "#059669",
+    props?.ctaButtonColor ?? styles?.ctaButtonColor ?? "var(--theme-primary, #2563eb)",
   );
   $: ctaBtnTextColor = String(
     props?.ctaButtonTextColor ?? styles?.ctaButtonTextColor ?? "#ffffff",
@@ -258,7 +261,7 @@
   };
 </script>
 
-<div class="max-w-6xl mx-auto w-full">
+<div class="w-full">
   <!-- Section Header -->
   <div class="mb-8 text-center">
     <h2
@@ -323,9 +326,17 @@
       </p>
     </div>
   {:else}
-    <div class={`grid ${gridColClass} ${gridGapClass}`}>
+    <div
+      data-node="product_grid"
+      class={activePreset === 'carousel_scroll'
+        ? "flex overflow-x-auto gap-4 pb-4 snap-x no-scrollbar w-full"
+        : activePreset === 'list_compact'
+          ? "flex flex-col gap-4 w-full"
+          : `grid ${gridColClass} ${gridGapClass}`}
+    >
       {#each products as product, index (product.name + index)}
         <div
+          data-node="product_card"
           role="listitem"
           draggable={isActive}
           on:dragstart={(e) => onDragStart(e, index)}
@@ -333,14 +344,15 @@
           on:dragleave={() => (dropTargetIdx = null)}
           on:drop={(e) => onDrop(e, index)}
           class={`relative overflow-hidden transition-all duration-200 ${cardRadiusClass} ${cardPresetClass} ${
-            isHorizontalLayout ? "flex flex-row items-stretch" : "flex flex-col"
+            activePreset === 'carousel_scroll' ? "min-w-[260px] max-w-[280px] snap-start flex flex-col" : isHorizontalLayout || activePreset === 'list_compact' ? "flex flex-row items-stretch" : "flex flex-col"
           } ${isActive ? "cursor-grab active:cursor-grabbing" : ""} ${
             dropTargetIdx === index ? "ring-2 ring-blue-500 shadow-xl" : ""
           } ${draggedIdx === index ? "opacity-30" : ""}`}
         >
-          <!-- Image -->
+          <!-- Image with Nested Radius (16 - 8 = 8px inside card) -->
           <div
-            class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${isHorizontalLayout ? "w-32 sm:w-44 flex-shrink-0" : "w-full"}`}
+            data-node="product_image"
+            class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${isHorizontalLayout || activePreset === 'list_compact' ? "w-32 sm:w-44 flex-shrink-0" : "w-full"}`}
           >
             {#if product.imageUrl}
               <img
@@ -351,7 +363,7 @@
               />
             {:else}
               <div
-                class={`w-full ${isHorizontalLayout ? "h-full min-h-[140px]" : "h-48"} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}
+                class={`w-full ${isHorizontalLayout || activePreset === 'list_compact' ? "h-full min-h-[140px]" : "h-48"} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}
               >
                 <Package size={26} class="text-slate-300 dark:text-slate-600" />
                 <span class="text-[10px] font-medium text-slate-400"
@@ -360,9 +372,9 @@
               </div>
             {/if}
             {#if product.badge}
-              <div class={`absolute ${badgePosClass} z-10`}>
+              <div data-node="product_badge" class={`absolute ${badgePosClass} z-10`}>
                 <span
-                  class={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${badgeColorClass}`}
+                  class={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${badgeColorClass}`}
                   >{product.badge}</span
                 >
               </div>
@@ -371,17 +383,18 @@
 
           <!-- Details -->
           <div
-            class={`p-3.5 sm:p-4 flex-1 flex flex-col justify-between ${isHorizontalLayout ? "min-w-0" : ""}`}
+            class={`p-4 flex-1 flex flex-col justify-between ${isHorizontalLayout || activePreset === 'list_compact' ? "min-w-0" : ""}`}
           >
             <div>
               <h3
-                class={`mb-1.5 text-slate-900 dark:text-white line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}
+                data-node="product_title"
+                class={`mb-1.5 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}
               >
                 {product.name || "Nama Produk"}
               </h3>
               {#if product.description}
                 <p
-                  class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-1"
+                  class="text-xs text-[var(--theme-text-muted,#64748b)] line-clamp-2 leading-relaxed mb-1"
                 >
                   {product.description}
                 </p>
@@ -392,71 +405,76 @@
               <div
                 class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2"
               >
-                <div class="min-w-0">
+                <div data-node="product_price" class="min-w-0">
                   <span
                     class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight"
                     >Harga</span
                   >
                   <p
-                    class="text-sm sm:text-base font-extrabold text-blue-600 dark:text-blue-400 font-mono truncate"
+                    class="text-sm sm:text-base font-extrabold text-[var(--theme-primary,#2563eb)] font-mono truncate"
                   >
                     Rp {typeof product.price === "number"
                       ? product.price.toLocaleString("id-ID")
                       : product.price || "0"}
                   </p>
                 </div>
-                <a
-                  href={activeStoreId && storeWaNumber
-                    ? generateWhatsAppOrderUrl(
-                        storeWaNumber,
-                        product.name || "",
-                        typeof product.price === "number"
-                          ? product.price
-                          : undefined,
-                      )
-                    : "#"}
-                  target={activeStoreId && storeWaNumber ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  on:click={(e) => {
-                    if (isActive) e.preventDefault();
-                  }}
-                  style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
-                  class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${ctaBtnRadiusClass}`}
-                >
-                  {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
-                  <span>Beli Sekarang</span>
-                </a>
+                <div data-node="product_cta">
+                  <a
+                    href={activeStoreId && storeWaNumber
+                      ? generateWhatsAppOrderUrl(
+                          storeWaNumber,
+                          product.name || "",
+                          typeof product.price === "number"
+                            ? product.price
+                            : undefined,
+                        )
+                      : "#"}
+                    target={activeStoreId && storeWaNumber ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    on:click={(e) => {
+                      if (isActive) e.preventDefault();
+                    }}
+                    style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                    class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${ctaBtnRadiusClass}`}
+                  >
+                    {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
+                    <span>Beli Sekarang</span>
+                  </a>
+                </div>
               </div>
             {:else}
               <div class="mt-2">
                 <p
-                  class="text-base sm:text-lg font-extrabold text-blue-600 dark:text-blue-400 mb-3 font-mono"
+                  data-node="product_price"
+                  class="text-base sm:text-lg font-extrabold text-[var(--theme-primary,#2563eb)] mb-3 font-mono"
                 >
                   Rp {typeof product.price === "number"
                     ? product.price.toLocaleString("id-ID")
                     : product.price || "0"}
                 </p>
-                <a
-                  href={activeStoreId && storeWaNumber
-                    ? generateWhatsAppOrderUrl(
-                        storeWaNumber,
-                        product.name || "",
-                        typeof product.price === "number"
-                          ? product.price
-                          : undefined,
-                      )
-                    : "#"}
-                  target={activeStoreId && storeWaNumber ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  on:click={(e) => {
-                    if (isActive) e.preventDefault();
-                  }}
-                  style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
-                  class={`${ctaWidthClass} text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}
-                >
-                  {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
-                  <span>Beli Sekarang</span>
-                </a>
+                <div data-node="product_cta">
+                  <a
+                    href={activeStoreId && storeWaNumber
+                      ? generateWhatsAppOrderUrl(
+                          storeWaNumber,
+                          product.name || "",
+                          typeof product.price === "number"
+                            ? product.price
+                            : undefined,
+                        )
+                      : "#"}
+                    target={activeStoreId && storeWaNumber ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    on:click={(e) => {
+                      if (isActive) e.preventDefault();
+                    }}
+                    style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
+                    class={`${ctaWidthClass} text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}
+                  >
+                    {#if showWhatsAppIcon}<MessageCircle size={14} />{/if}
+                    <span>Beli Sekarang</span>
+                  </a>
+                </div>
               </div>
             {/if}
           </div>

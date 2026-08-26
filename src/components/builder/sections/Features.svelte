@@ -7,7 +7,9 @@
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
+  export let layoutPreset: string = 'grid_3_cards';
 
+  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'grid_3_cards';
   $: features = Array.isArray(props?.features) && props.features.length > 0
     ? props.features
     : [
@@ -29,8 +31,6 @@
       ];
 
   $: isMobileView = $canvasStore?.viewMode === 'mobile';
-  $: isTabletView = $canvasStore?.viewMode === 'tablet';
-  $: hasCustomColor = !!styles?.color;
 
   let draggedIdx: number | null = null;
   let dropTargetIdx: number | null = null;
@@ -75,102 +75,123 @@
   };
 </script>
 
-<div class="max-w-6xl mx-auto w-full box-border">
-  {#if features.length === 3}
-    <!-- Asymmetric Bento Layout for 3 items (Hero card + 2-card stack) -->
-    <div class={`grid ${isMobileView ? 'grid-cols-1' : isTabletView ? 'grid-cols-1 md:grid-cols-12' : 'grid-cols-1 md:grid-cols-12'} gap-4 sm:gap-5 w-full`}>
-      <!-- First Feature: Hero Card -->
-      <div
-        role="listitem"
-        draggable={isActive}
-        on:dragstart={(e) => onDragStart(e, 0)}
-        on:dragover={(e) => onDragOver(e, 0)}
-        on:dragleave={() => (dropTargetIdx = null)}
-        on:drop={(e) => onDrop(e, 0)}
-        class={`${isMobileView ? 'col-span-1 p-4' : 'md:col-span-7 p-5 sm:p-7'} bg-white rounded-2xl border transition-all flex flex-col justify-between text-left min-w-0 ${
-          isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
-        } ${dropTargetIdx === 0 ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200/80 shadow-sm'} ${
-          draggedIdx === 0 ? 'opacity-30' : ''
-        }`}
-      >
-        <div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 sm:mb-5 border border-blue-100/80">
-            <svelte:component this={renderIcon(features[0].icon)} size={22} />
+<div
+  data-node="features_container"
+  class="w-full box-border"
+>
+  {#if activePreset === 'banner_inline_bar'}
+    <!-- Preset 3: Banner Inline Bar (Ribbon h-16 / 64px horizontal strip) -->
+    <div class="w-full py-4 px-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-around gap-6">
+      {#each features as feature, index (feature.title + index)}
+        <div
+          data-node="feature_card"
+          class="flex items-center gap-3 min-w-0"
+        >
+          <!-- Nested radius: container 16px, inner icon pill/8px -->
+          <div data-node="feature_icon" class="w-10 h-10 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center flex-shrink-0 border border-blue-100">
+            <svelte:component this={renderIcon(feature.icon)} size={18} />
           </div>
-          <h3 class={`text-base sm:text-lg font-bold mb-2 ${hasCustomColor ? '' : 'text-slate-900'}`}>
-            {features[0].title}
-          </h3>
-          <p class={`text-xs sm:text-sm leading-relaxed ${hasCustomColor ? 'opacity-80' : 'text-slate-600'}`}>
-            {features[0].description}
-          </p>
+          <div class="min-w-0">
+            <h4 data-node="feature_title" class="text-xs sm:text-sm font-bold text-[var(--theme-text-primary,#0f172a)] truncate">
+              {feature.title}
+            </h4>
+            <p data-node="feature_desc" class="text-[11px] text-[var(--theme-text-muted,#64748b)] hidden sm:block truncate">
+              {feature.description}
+            </p>
+          </div>
         </div>
+      {/each}
+    </div>
 
-        <div class="mt-5 pt-3 sm:mt-6 sm:pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-blue-600">
-          <span>Keunggulan Utama Toko</span>
-        </div>
+  {:else if activePreset === 'horizontal_list'}
+    <!-- Preset 2: Horizontal List (2-Col: Left Heading, Right 16px-gap rows) -->
+    <div class="py-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      <!-- Left Heading -->
+      <div class="md:col-span-4 md:sticky md:top-8 flex flex-col gap-2 text-left">
+        <h2 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight">
+          {props?.title || 'Keunggulan Produk Kami'}
+        </h2>
+        <p class="text-sm text-[var(--theme-text-muted,#64748b)] leading-relaxed">
+          {props?.subtitle || 'Standar mutu dan komitmen terbaik untuk kepuasan setiap pelanggan.'}
+        </p>
       </div>
 
-      <!-- Second & Third Features (Stack) -->
-      <div class={`${isMobileView ? 'col-span-1' : 'md:col-span-5'} flex flex-col gap-4 sm:gap-5 w-full min-w-0`}>
-        {#each features.slice(1) as feature, subIndex (feature.title + subIndex)}
+      <!-- Right Feature Rows -->
+      <div class="md:col-span-8 flex flex-col gap-4">
+        {#each features as feature, index (feature.title + index)}
           <div
+            data-node="feature_card"
             role="listitem"
             draggable={isActive}
-            on:dragstart={(e) => onDragStart(e, subIndex + 1)}
-            on:dragover={(e) => onDragOver(e, subIndex + 1)}
+            on:dragstart={(e) => onDragStart(e, index)}
+            on:dragover={(e) => onDragOver(e, index)}
             on:dragleave={() => (dropTargetIdx = null)}
-            on:drop={(e) => onDrop(e, subIndex + 1)}
-            class={`bg-white p-4 sm:p-6 rounded-2xl border transition-all flex flex-col justify-between text-left flex-1 min-w-0 ${
-              isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
-            } ${dropTargetIdx === subIndex + 1 ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200/80 shadow-sm'} ${
-              draggedIdx === subIndex + 1 ? 'opacity-30' : ''
-            }`}
+            on:drop={(e) => onDrop(e, index)}
+            class="p-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex items-start gap-4 transition-all hover:border-blue-300"
           >
-            <div class="flex items-start gap-3 sm:gap-4">
-              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100/80">
-                <svelte:component this={renderIcon(feature.icon)} size={18} />
-              </div>
-              <div class="min-w-0">
-                <h3 class={`text-sm sm:text-base font-bold mb-1 ${hasCustomColor ? '' : 'text-slate-900'}`}>
-                  {feature.title}
-                </h3>
-                <p class={`text-xs leading-relaxed ${hasCustomColor ? 'opacity-80' : 'text-slate-600'}`}>
-                  {feature.description}
-                </p>
-              </div>
+            <div data-node="feature_icon" class="w-12 h-12 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center flex-shrink-0 border border-blue-100">
+              <svelte:component this={renderIcon(feature.icon)} size={22} />
+            </div>
+            <div class="min-w-0 flex-1 text-left">
+              <h3 data-node="feature_title" class="text-base font-bold text-[var(--theme-text-primary,#0f172a)] mb-1">
+                {feature.title}
+              </h3>
+              <p data-node="feature_desc" class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)] leading-relaxed">
+                {feature.description}
+              </p>
             </div>
           </div>
         {/each}
       </div>
     </div>
+
   {:else}
-    <!-- Dynamic Responsive Grid for custom number of features -->
-    <div class={`grid ${isMobileView ? 'grid-cols-1' : isTabletView ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'} gap-4 sm:gap-5 w-full`}>
-      {#each features as feature, index (feature.title + index)}
-        <div
-          role="listitem"
-          draggable={isActive}
-          on:dragstart={(e) => onDragStart(e, index)}
-          on:dragover={(e) => onDragOver(e, index)}
-          on:dragleave={() => (dropTargetIdx = null)}
-          on:drop={(e) => onDrop(e, index)}
-          class={`bg-white p-4 sm:p-6 rounded-2xl border transition-all flex flex-col items-start text-left min-w-0 ${
-            isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
-          } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-slate-200/80 shadow-sm'} ${
-            draggedIdx === index ? 'opacity-30' : ''
-          }`}
-        >
-          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 sm:mb-4 border border-blue-100/80">
-            <svelte:component this={renderIcon(feature.icon)} size={20} />
-          </div>
-          <h3 class={`text-sm sm:text-base font-bold mb-1 ${hasCustomColor ? '' : 'text-slate-900'}`}>
-            {feature.title}
-          </h3>
-          <p class={`text-xs leading-relaxed ${hasCustomColor ? 'opacity-80' : 'text-slate-600'}`}>
-            {feature.description}
-          </p>
+    <!-- Preset 1 (Default): Grid 3 Cards (py-12 = 48px, gap-6 = 24px, card p-6 = 24px) -->
+    <div class="py-12">
+      {#if props?.title}
+        <div class="mb-8 text-center">
+          <h2 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight mb-2">
+            {props.title}
+          </h2>
+          {#if props.subtitle}
+            <p class="text-sm text-[var(--theme-text-muted,#64748b)] max-w-xl mx-auto">
+              {props.subtitle}
+            </p>
+          {/if}
         </div>
-      {/each}
+      {/if}
+
+      <div class={`grid ${isMobileView ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'} gap-6 w-full`}>
+        {#each features as feature, index (feature.title + index)}
+          <div
+            data-node="feature_card"
+            role="listitem"
+            draggable={isActive}
+            on:dragstart={(e) => onDragStart(e, index)}
+            on:dragover={(e) => onDragOver(e, index)}
+            on:dragleave={() => (dropTargetIdx = null)}
+            on:drop={(e) => onDrop(e, index)}
+            class={`p-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border transition-all flex flex-col justify-between text-left min-w-0 ${
+              isActive ? 'cursor-grab active:cursor-grabbing hover:border-blue-400' : ''
+            } ${dropTargetIdx === index ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg' : 'border-base-200 dark:border-slate-800 shadow-sm'} ${
+              draggedIdx === index ? 'opacity-30' : ''
+            }`}
+          >
+            <div>
+              <!-- Nested radius: Card radius 16px (rounded-2xl) with p-6 (24px) -> Icon radius 8px (rounded-lg) -->
+              <div data-node="feature_icon" class="w-12 h-12 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center mb-4 border border-blue-100">
+                <svelte:component this={renderIcon(feature.icon)} size={22} />
+              </div>
+              <h3 data-node="feature_title" class="text-base sm:text-lg font-bold mb-2 text-[var(--theme-text-primary,#0f172a)]">
+                {feature.title}
+              </h3>
+              <p data-node="feature_desc" class="text-xs sm:text-sm leading-relaxed text-[var(--theme-text-muted,#64748b)]">
+                {feature.description}
+              </p>
+            </div>
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
 </div>

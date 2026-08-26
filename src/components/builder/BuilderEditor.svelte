@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { PanelLeft, PanelRight, Sliders } from 'lucide-svelte';
   import TopBar from './TopBar.svelte';
   import LayerPanel from './LayerPanel.svelte';
   import Canvas from './Canvas.svelte';
@@ -12,6 +13,14 @@
   let loading = true;
   let fetchError: string | null = null;
 
+  $: if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('data-theme', $canvasStore.editorTheme);
+    if ($canvasStore.editorTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
 
   const fetchTemplate = async () => {
     loading = true;
@@ -34,7 +43,6 @@
       }
 
       editorStore.init(result.data);
-      console.log('[Builder] Template loaded successfully:', result.data.id);
     } catch (err) {
       fetchError = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('[Builder] Error loading template:', err);
@@ -48,11 +56,29 @@
   });
 
   const handleSelectSection = (id: string | null) => {
-    console.log('[Builder] Selected section:', id);
     canvasStore.selectSection(id);
   };
 
+  const handleSelectNode = (secId: string, nodeId: string | null) => {
+    canvasStore.selectNode(secId, nodeId);
+  };
+
+  const handleAddSection = (type: import('@/schemas').TemplateSection['type']) => {
+    editorStore.addSection(type);
+  };
+
+  const handleDeleteSection = (id: string) => {
+    editorStore.deleteSection(id);
+  };
+
+  const handleReorderSection = (id: string, dir: 'up' | 'down') => {
+    editorStore.reorderSection(id, dir);
+  };
+
   const handleKeydown = (e: KeyboardEvent) => {
+    const tag = (e.target as HTMLElement)?.tagName;
+    const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
     if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
       if (e.shiftKey) {
         e.preventDefault();
@@ -68,10 +94,19 @@
       e.preventDefault();
       editorStore.save();
     } else if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') || (e.shiftKey && e.key.toLowerCase() === 'g')) {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+      if (!isInput) {
         e.preventDefault();
         canvasStore.toggleColumnGrid();
+      }
+    } else if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
+      if (!isInput) {
+        e.preventDefault();
+        canvasStore.toggleLeftSidebar();
+      }
+    } else if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+      if (!isInput) {
+        e.preventDefault();
+        canvasStore.toggleRightSidebar();
       }
     }
   };
@@ -79,11 +114,16 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class="flex flex-col h-full w-full bg-base-100 text-base-content overflow-hidden transition-colors">
+<div
+  data-theme={$canvasStore.editorTheme}
+  class={`builder-root h-screen w-full flex flex-col transition-colors overflow-hidden ${
+    $canvasStore.editorTheme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'
+  }`}
+>
   {#if loading}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">
       <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      <p class="text-xs font-medium text-base-content/60">Memuat workspace template...</p>
+      <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Memuat workspace template...</p>
     </div>
   {:else if fetchError || $editorStore.error && !$editorStore.template}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4 p-8 text-center">
@@ -91,8 +131,8 @@
         !
       </div>
       <div>
-        <h2 class="text-base font-bold text-base-content">Gagal Memuat Template</h2>
-        <p class="text-xs text-base-content/60 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
+        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Gagal Memuat Template</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
       </div>
       <button
         on:click={fetchTemplate}
@@ -118,18 +158,32 @@
       onSubmit={() => editorStore.submitReview()}
     />
 
-    <!-- Main Workspace: 3 Columns -->
-    <div class="flex flex-1 w-full overflow-hidden bg-base-100">
+    <!-- Main Workspace: Left Sidebar, Canvas, Right Sidebar -->
+    <div class="flex flex-1 w-full overflow-hidden relative">
       <!-- Left Panel: Layers / Sections -->
-      <LayerPanel
-        sections={$editorStore.template.config.sections}
-        selectedSectionId={$canvasStore.selectedSectionId}
-        selectedNodeId={$canvasStore.selectedNodeId}
-        onSelectNode={(secId, nodeId) => canvasStore.selectNode(secId, nodeId)}
-        onAddSection={(type) => editorStore.addSection(type)}
-        onDeleteSection={(id) => editorStore.deleteSection(id)}
-        onReorderSection={(id, dir) => editorStore.reorderSection(id, dir)}
-      />
+      {#if $canvasStore.leftSidebarOpen}
+        <LayerPanel
+          sections={$editorStore.template.config.sections}
+          selectedSectionId={$canvasStore.selectedSectionId}
+          selectedNodeId={$canvasStore.selectedNodeId}
+          onSelectNode={handleSelectNode}
+          onAddSection={handleAddSection}
+          onDeleteSection={handleDeleteSection}
+          onReorderSection={handleReorderSection}
+        />
+      {:else}
+        <!-- Floating Button to Open Left Sidebar -->
+        <button
+          type="button"
+          on:click={() => canvasStore.toggleLeftSidebar()}
+          class="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 shadow-md transition-all cursor-pointer text-xs font-semibold"
+          title="Buka Sidebar Kiri (Layers Tree) - Ctrl+\"
+          aria-label="Buka Sidebar Kiri"
+        >
+          <PanelLeft size={14} class="text-blue-500" />
+          <span class="hidden sm:inline">Layers</span>
+        </button>
+      {/if}
 
       <!-- Middle Panel: Canvas Preview -->
       <Canvas
@@ -140,10 +194,25 @@
       />
 
       <!-- Right Panel: Property Inspector -->
-      <PropertyInspector
-        section={$activeSection}
-        onSectionUpdate={(section) => editorStore.updateSection(section)}
-      />
+      {#if $canvasStore.rightSidebarOpen}
+        <PropertyInspector
+          section={$activeSection}
+          onSectionUpdate={(section) => editorStore.updateSection(section)}
+        />
+      {:else}
+        <!-- Floating Button to Open Right Sidebar -->
+        <button
+          type="button"
+          on:click={() => canvasStore.toggleRightSidebar()}
+          class="absolute top-3 right-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 shadow-md transition-all cursor-pointer text-xs font-semibold"
+          title="Buka Sidebar Kanan (Inspector) - Ctrl+/"
+          aria-label="Buka Sidebar Kanan"
+        >
+          <Sliders size={14} class="text-blue-500" />
+          <span class="hidden sm:inline">Inspector</span>
+          <PanelRight size={14} />
+        </button>
+      {/if}
     </div>
   {/if}
 </div>

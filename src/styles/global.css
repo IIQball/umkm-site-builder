@@ -7,7 +7,8 @@
 
 /* Theme Semantic Tokens - Light Mode */
 :root,
-html[data-theme="light"] {
+html[data-theme="light"],
+[data-theme="light"] {
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   
   --color-primary: #2563eb;
@@ -41,7 +42,9 @@ html[data-theme="light"] {
 }
 
 /* Theme Semantic Tokens - Dark Mode */
-html[data-theme="dark"] {
+html[data-theme="dark"],
+[data-theme="dark"],
+.dark {
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   
   --color-primary: #3b82f6;

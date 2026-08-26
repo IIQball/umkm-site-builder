@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-22 by services-error-and-validation-standardization session
+Status: LIVE · Updated: 2026-08-26 by feature/virda-token-preset-builder-refactor session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,9 +11,95 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Standardized all error handling and validation logic across the Finance and Templates service layers, enforcing unified `AppError` throws and Zod-based `validate` checks. `bun run type-check`: 0 errors. `bun test`: 188/188 pass across 29 test files.
+Completed rigorous header and canvas viewport realignment across all 3 breakpoints (Desktop, Tablet, Mobile): Refactored `Canvas.svelte` with centered preview frame (`max-w-[1200px]` on desktop, `768px` on tablet, `375px` on mobile) within a flex-centered overflow-auto workspace backdrop; synchronized dynamic CSS variable `--active-safe-zone` across `LayoutGridOverlay.svelte`, `HeaderAnnouncement.svelte`, `AnnouncementBar.svelte`, `Hero.svelte`, and `SectionRenderer.svelte`; eliminated inner padding offsets on `HeaderLogo.svelte` and `HeaderNav.svelte` to ensure zero off-grid misalignment at Column 1 and Column 12/8/4; set 64px standard navbar height. `bun run type-check`: 0 errors. `bun run lint`: 0 warnings. `bun test`: 205/205 pass.
 
 ## Last session did
+
+- **Header & Canvas Viewport Realignment (3 Breakpoints Audit):**
+  - `src/components/builder/Canvas.svelte`: Refactored `<main>` to `flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950` with centered `#canvas-frame` (`max-w-[1200px]` desktop, `768px` tablet, `375px` mobile) avoiding sidebar collision. Added `--active-safe-zone` CSS variable matching active viewport mode (`32px` desktop, `24px` tablet, `16px` mobile).
+  - `src/components/builder/LayoutGridOverlay.svelte`: Bound 12/8/4 column guides directly to `padding-left/right: var(--active-safe-zone)`.
+  - `src/components/builder/sections/HeaderAnnouncement.svelte` & `src/components/builder/sections/header/AnnouncementBar.svelte`: Implemented full-bleed 100% outer bar backgrounds with inner container constrained to `--active-safe-zone`, with 64px min-height navbar.
+  - `src/components/builder/sections/header/HeaderLogo.svelte` & `HeaderNav.svelte`: Removed internal `p-1` padding offsets so Logo touches Column 1 and Navigation/CTA/Hamburger touches Column 12 (Desktop), Column 8 (Tablet), and Column 4 (Mobile) with pixel precision.
+  - Full validation passed: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (205 tests passing).
+
+- **Strict Grid & Margin Realignment for All 8 Sections (Zero Off-Grid Leaks):**
+  - `src/components/builder/LayoutGridOverlay.svelte`: Added `max-width: var(--theme-max-width, 1200px)` matching the exact content column boundaries across wide desktop viewports.
+  - `src/components/builder/sections/HeaderAnnouncement.svelte` & `src/components/builder/sections/header/AnnouncementBar.svelte`: Replaced `px-4 sm:px-6` and `max-w-6xl` with unified `.header-nav-container` and `.announcement-inner-container` using `--theme-safe-zone-...` (Desktop 32px, Tablet 24px, Mobile 16px) and `max-width: 1200px`, aligning the Logo precisely to Column 1 and CTA/Contact to Column 12.
+  - `src/components/builder/sections/Hero.svelte`: Removed hardcoded safe-zone fallback calculation in favor of media query `.hero-inner-safe-zone` (Desktop 32px, Tablet 24px, Mobile 16px) with full bleed background image/overlay.
+  - `src/components/builder/sections/Features.svelte`, `ProductCatalog.svelte`, `Testimonials.svelte`, `FAQ.svelte`, `GoogleMaps.svelte`, `Footer.svelte`: Purged redundant inner `max-w-6xl`, `max-w-[var(--theme-max-width,1200px)]`, and `px-4 sm:px-6` wrappers so that outer `.section-safe-container` in `SectionRenderer.svelte` serves as the single source of truth for grid margins.
+  - Full validation passed: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (205 tests passing).
+
+- **Device Preview Viewport Width Resizing & 0px Margin Default:**
+  - `src/components/builder/Canvas.svelte`: Fixed tablet (`768px`) and mobile (`375px`) viewport resizing with strict explicit width bounds (`width: 768px` / `width: 375px`, `min-width`, `max-width`, and `shrink-0`), centered inside scrollable backdrop (`overflow-x-auto p-0 sm:p-4 md:p-6`).
+  - `src/components/builder/sections/SectionRenderer.svelte`: Standardized `defaultPadding` to `'0px'` for all sections, with inner container `.section-safe-container` dynamically bound to responsive design system safe zones (`32px` desktop, `24px` tablet, `16px` mobile).
+  - `src/components/builder/sections/Hero.svelte`: Standardized vertical padding fallback to `0px` and horizontal padding fallback to `activeSafeZone` when `paddingLeft`/`paddingRight` is `'0px'` or undefined.
+  - `src/components/builder/inspector/SectionLayoutPanel.svelte`: Added `{ value: '0px', label: '0px (Default / Ikut Margin)' }` as the top default option for both vertical and horizontal padding dropdowns, and updated `setEdgeToEdge` preset.
+  - `src/schemas/templates/template.schema.ts` & `src/components/builder/stores/editorStore.ts`: Updated all default template sections and newly created sections to initialize with `padding: '0px'`.
+
+- **Zero-Latency Real-Time Preview & Inspector Synchronization:**
+  - `GlobalThemeInspector.svelte`: Removed artificial `300ms` debounce timer; all theme color and button variant edits now update Svelte store instantly and synchronously.
+  - `GeneralStylesTab.svelte` & `SectionLayoutPanel.svelte`: Added `onStylesChange` / `handleStylesChange` batch update support so vertical padding (`paddingTop` + `paddingBottom` + `padding`) and horizontal padding (`paddingLeft` + `paddingRight` + `padding`) are applied in a single atomic update without stale closure overwrites.
+  - Added `on:input` in addition to `on:change` on all select dropdowns across inspector panels (`SectionLayoutPanel.svelte`, `SectionAppearancePanel.svelte`, `NodeStylesTab.svelte`) for instant reaction upon user selection.
+  - `SectionRenderer.svelte`: Added `padding-left` and `padding-right` rules; removed `transition-all` on the `<section>` wrapper to eliminate sluggish animation delays on style adjustments.
+  - `Hero.svelte`: Bound custom `paddingLeft` and `paddingRight` if explicitly configured on section styles, with fallback to responsive safe-zones.
+  - `editorStore.ts`: Streamlined history snapshots in `pushHistory` with a `< 350ms` merge window for zero-latency rapid edits.
+
+- **Full-Bleed Canvas Architecture & Hero Section Constraints Refactor:**
+  - `src/components/builder/Canvas.svelte`: Removed `max-w-6xl` and horizontal padding from desktop canvas container so background layers span 100% of the canvas workspace uninterrupted (`w-full min-h-screen relative flex flex-col`).
+  - `src/components/builder/sections/Hero.svelte`:
+    - Outer Section: `<section id="hero-section" data-node="hero_container" class="relative w-full overflow-hidden ...">` with 100% edge-to-edge full width and vertical margins only (`margin-top: {marginTop}px; margin-bottom: {marginBottom}px`).
+    - Full Banner Overlay: Image background and dark overlay span 100% full bleed.
+    - Inner Content: `<div class="hero-inner-safe-zone relative z-10 w-full mx-auto box-border">` with `max-width: var(--theme-max-width, 1200px)` and responsive safe zone padding (`32px` desktop, `24px` tablet, `16px` mobile).
+  - `src/components/builder/sections/SectionRenderer.svelte`: Configured `defaultPadding` to `'0px'` for Hero and Header, disabling outer container constraints.
+  - `tests/schemas/template-tokens-presets.test.ts`: Validated Hero presets, full banner overlay, and safe zone token schemas.
+  - Validation: `bun run type-check` (0 errors, 0 warnings from svelte-check), `bun run lint` (0 errors, 0 warnings), `bun test` (205/205 pass).
+
+- **TopBar Cleanup, Figma-Style Sidebar Toggles, & Editor Chrome Theme Sync:**
+  - `TopBar.svelte`: Removed the manual `Margin: ... (Normal)` select dropdown. Added Figma-style Left Sidebar toggle button (`PanelLeft` / `PanelLeftClose`) and Right Sidebar toggle button (`PanelRight` / `PanelRightClose`). Added Editor Chrome Theme toggle (`Sun` / `Moon`) linked to `canvasStore.editorTheme`.
+  - `editorStore.types.ts` & `editorStore.ts`: Added ephemeral `leftSidebarOpen` (default: true), `rightSidebarOpen` (default: true), and `editorTheme` (default: 'light') to `CanvasState` along with toggle and setter actions (`toggleLeftSidebar`, `toggleRightSidebar`, `toggleEditorTheme`, `setLeftSidebar`, `setRightSidebar`, `setEditorTheme`).
+  - `BuilderEditor.svelte`: Master root layout now applies `$canvasStore.editorTheme === 'dark'` classes (`dark bg-slate-950 text-slate-100` vs `bg-slate-100 text-slate-800`), conditionally renders `LayerPanel` and `PropertyInspector` based on store state, and added keyboard shortcuts (`Ctrl+\` for Left Sidebar, `Ctrl+/` for Right Sidebar).
+  - `Canvas.svelte`: Backdrop workspace background updated to `bg-slate-100 dark:bg-slate-950` with the inner `#canvas-container` strictly isolated and driven by template CSS variables (`--theme-bg`, `--theme-surface`, etc.).
+  - `LayerPanel.svelte` & `PropertyInspector.svelte`: Adjusted aside chrome styles to `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200`.
+  - Expanded unit test assertions in `tests/schemas/template-tokens-presets.test.ts` to cover sidebar toggles and editorTheme state.
+
+- **Total Purge of Redundant Inline Styling Controls & Strict Responsive Hardening:**
+  - `GlobalThemeInspector.svelte`: Isolated `<input type="color">` exclusively to the global theme inspector panel.
+  - `HeaderAnnouncementPanel.svelte`: Replaced raw color pickers with Token-based `<select>` options (`bgTokenOptions`, `textTokenOptions`) and 8pt-locked vertical padding presets (`8px`, `16px`, `24px`).
+  - `HeaderLogoPanel.svelte`: Replaced hex color picker with token select, removed arbitrary font sizes (`sm`, `base`, `lg`, `xl`, `2xl`) and weights in favor of Golden Ratio scale tokens (`h2`, `h3`, `body`), and locked logo height slider to 8pt presets (`24px`, `32px`, `40px`, `48px`, `56px`).
+  - `HeaderNavPanel.svelte`: Replaced raw hex inputs with Token-based `<select>` for default/hover colors, replaced arbitrary font sizes with Golden Ratio tokens (`body` 16px / `caption` 10px), and locked nav gap to 8pt scale (`8px`, `16px`, `24px`, `32px`).
+  - `CatalogCardPanel.svelte`: Replaced CTA button color input with Token select (`ctaColorTokenOptions`), removed arbitrary title font size/weight controls in favor of Golden Ratio `h3`, and locked corner radius & button radius to 8pt scale and pill rules.
+  - `CatalogGridPanel.svelte`: Locked grid gap presets to 8pt scale (`8px`, `16px`, `24px`, `32px`).
+  - `NodeStylesTab.svelte`: Purged free color inputs and text inputs in favor of token dropdowns, mapped font sizes to Golden Ratio tokens, and locked margin controls to 8pt grid (`0px`, `8px`, `16px`, `24px`, `32px`, `48px`).
+  - `nodeStyles.constants.ts`: Purged arbitrary font sizes and hex shadows; mapped to Golden Ratio tokens and 8pt scales.
+  - `HeroContent.svelte`: Locked canvas minHeight to 8pt scale presets (`480px`, `560px`, `640px`, `auto`).
+  - `DEFAULT_TEMPLATE_SECTIONS` in `template.schema.ts`: Replaced hardcoded hex colors and arbitrary sizes with CSS variable design tokens (`var(--theme-primary, #2563eb)`, `var(--theme-text-primary, #0f172a)`, `var(--theme-text-muted, #64748b)`).
+  - All 8 builder section components verified for Mobile-First responsiveness, safe zones (`var(--theme-safe-zone-desktop/tablet/mobile)`), concentric nested radius, and pill avatar/badge radius.
+  - Full test suite passed (204 tests), TypeScript check passed (0 errors), ESLint passed (0 warnings).
+
+- **8 Preset Sections with 8pt Grid & Concentric Radius (Step 3):**
+  - Refactored all 8 builder section components to strictly eliminate hardcoded hex colors / arbitrary spacing and use 8pt grid + CSS variables:
+    * `HeaderAnnouncement.svelte`: `default_split`, `centered_stacked`, `compact_inline` (h-14 / 56px single row).
+    * `Hero.svelte`: `split_left_text`, `split_right_text`, `centered_minimal`, `full_banner_overlay` (Nested radius outer 16px, padding 8px, inner 8px; Pill badges).
+    * `Features.svelte`: `grid_3_cards`, `horizontal_list`, `banner_inline_bar` (h-16 / 64px ribbon bar).
+    * `ProductCatalog.svelte`: `grid_standard`, `carousel_scroll` (snap-scroll), `list_compact` (Nested radius card 16px, inner thumbnail 8px).
+    * `Testimonials.svelte`: `masonry_grid`, `single_spotlight`, `chat_bubble_flow` (Pill avatars 48px, star rating gap 8px).
+    * `FAQ.svelte`: `accordion_single_col`, `split_faq_sidebar`, `grid_2_col_cards` (Nested radius containers).
+    * `GoogleMaps.svelte`: `fullwidth_map`, `split_map_info`, `compact_boxed` (Heights 320px, 400px, 480px; floating cards p-6 / 24px).
+    * `Footer.svelte`: `multi_column`, `centered_simple`, `cta_focused` (Floating WhatsApp CTA banner -mt-16 offset).
+  - Updated `SectionRenderer.svelte` to support `GoogleMaps.svelte` and propagate `layoutPreset`.
+  - Added full `data-node="[nodeKey]"` tree across all 8 section components.
+  - Added unit test cases for all 8 preset variants in `tests/schemas/template-tokens-presets.test.ts`.
+
+- **Store Split & Mathematical Design System Tokens (Step 1 & 2):**
+  - Created `src/lib/utils/designMath.ts` with concentric nested radius ($R_{inner} = \max(0, R_{outer} - \text{Padding})$), pill radius ($Height / 2$), and Golden Ratio typography scale helpers.
+  - Refactored `src/components/builder/stores/editorStore.ts` into ephemeral `canvasStore` (viewport, zoom, grid, margin selection without polluting undo history) and persistent `documentStore` with 400ms consecutive theme history merge.
+  - Updated `src/schemas/templates/template.schema.ts` and `src/types/templates/builder.ts` with `ColorToken`, `TypographyToken`, `SpacingStep` (8px scale), `ButtonHeight`, `EffectShadow`, and 8 section layout preset definitions.
+  - Injected 5 design system pillars as CSS custom variables into `Canvas.svelte`.
+  - Dynamically synchronized `LayoutGridOverlay.svelte` with active breakpoint safe zone margin and grid columns (12/8/4).
+  - Implemented 0ms optimistic visual feedback on input events and 300ms debounced persistence in `GlobalThemeInspector.svelte`.
+  - Added unit test suites in `tests/utils/design-math.test.ts` and `tests/schemas/template-tokens-presets.test.ts`.
+
+
 
 - **Service Layer Exceptions & Validation Standardization:**
   - Standardized `payout.service.ts` to replace generic `Error` with `AppError` mapping custom keys (`'PAYOUT_NOT_FOUND'`, `'BANK_ACCOUNT_NOT_FOUND'`, `'WALLET_NOT_FOUND'`, `'XENDIT_DISBURSEMENT_ERROR'`).

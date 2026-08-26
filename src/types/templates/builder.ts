@@ -6,9 +6,27 @@ export type ColorToken =
   | 'accent'
   | 'background'
   | 'surface'
+  | 'textPrimary'
+  | 'textMuted'
   | 'text_primary'
   | 'text_muted'
   | 'transparent';
+
+export type TypographyToken = 'h1' | 'h2' | 'h3' | 'body' | 'caption';
+
+export type SpacingStep = 0 | 8 | 16 | 24 | 32 | 40 | 48 | 56 | 64 | 80 | 96;
+
+export type ButtonHeight = 32 | 40 | 48 | 56;
+
+export type EffectShadow = 'none' | 'sm' | 'md' | 'lg';
+
+export type GlobalRadiusToken = 'sharp' | 'sm' | 'md' | 'lg' | 'pill';
+
+export {
+  calculateNestedRadius,
+  calculatePillRadius,
+  calculateGoldenRatioTypography,
+} from '@/lib/utils/designMath';
 
 export type HeaderAnnouncementPreset = 'default_split' | 'centered_stacked' | 'compact_inline';
 export type HeroPreset = 'split_left_text' | 'split_right_text' | 'centered_minimal' | 'full_banner_overlay';

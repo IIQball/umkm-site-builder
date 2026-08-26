@@ -11,35 +11,23 @@
   $: logoText = props.logoText ?? 'Toko UMKM';
   $: logoImageUrl = props.logoImageUrl || '';
   $: logoHeight = Number(props.logoImageHeight) || 40;
-  $: logoTextSize = props.logoTextSize || 'lg';
-  $: logoTextWeight = props.logoTextWeight || 'bold';
-  $: logoTextColor = props.logoTextColor || '';
+  $: logoTextColor = (props.logoTextColor as string) || 'var(--theme-text-primary, #0f172a)';
+  $: logoTypographyToken = (props.logoTypographyToken as string) || 'h3';
 
   $: nodeStyles = props?.nodeStyles?.logo || {};
   $: isNodeActive = isActive && $activeNodeId === 'logo';
 
-  const textSizeClassMap: Record<string, string> = {
-    sm: 'text-sm',
-    base: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-    '2xl': 'text-2xl',
+  const typoTokenMap: Record<string, string> = {
+    h2: 'var(--theme-text-h2, 26px)',
+    h3: 'var(--theme-text-h3, 20px)',
+    body: 'var(--theme-text-body, 16px)',
   };
-
-  const textWeightClassMap: Record<string, string> = {
-    normal: 'font-normal',
-    semibold: 'font-semibold',
-    bold: 'font-bold',
-  };
-
-  $: textClass = `${textSizeClassMap[logoTextSize] || 'text-lg'} ${textWeightClassMap[logoTextWeight] || 'font-bold'}`;
 
   $: textInlineStyle = [
-    logoTextColor ? `color: ${logoTextColor}` : '',
-    nodeStyles.color ? `color: ${nodeStyles.color}` : '',
-    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : '',
-    nodeStyles.fontSize ? `font-size: ${nodeStyles.fontSize}` : '',
-    nodeStyles.fontWeight ? `font-weight: ${nodeStyles.fontWeight}` : '',
+    `color: ${nodeStyles.color || logoTextColor}`,
+    `font-size: ${nodeStyles.fontSize || typoTokenMap[logoTypographyToken] || 'var(--theme-text-h3, 20px)'}`,
+    `font-weight: ${nodeStyles.fontWeight || '700'}`,
+    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-heading, inherit)',
   ].filter(Boolean).join('; ');
 
   const handleClick = (e: MouseEvent) => {
@@ -60,7 +48,7 @@
   tabindex="0"
   on:click={handleClick}
   on:keydown={handleKeyDown}
-  class={`flex items-center gap-2.5 cursor-pointer rounded-lg p-1 transition-all select-none flex-shrink-0 ${
+  class={`flex items-center gap-2.5 cursor-pointer rounded-lg transition-all select-none flex-shrink-0 ${
     isNodeActive
       ? 'ring-2 ring-blue-500 bg-blue-50/30 dark:bg-blue-950/30'
       : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
@@ -88,7 +76,7 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class={`${textClass} tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px]`}
+      class="tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px]"
     >
       {logoText || 'Nama Toko'}
     </span>

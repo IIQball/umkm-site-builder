@@ -9,12 +9,11 @@
 
   $: isMobileView = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';
   $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
-  $: navGap = props.navGap || 'normal';
-  $: navFontSize = props.navFontSize || '14px';
-  $: navFontWeight = props.navFontWeight || '500';
+  $: navGap = props.navGap || '16px';
+  $: navTypographyToken = (props.navTypographyToken as string) || 'body';
   $: navTextTransform = props.navTextTransform || 'none';
-  $: navColor = props.navColor || '#475569';
-  $: navHoverColor = props.navHoverColor || '#2563eb';
+  $: navColor = (props.navColor as string) || 'var(--theme-text-muted, #64748b)';
+  $: navHoverColor = (props.navHoverColor as string) || 'var(--theme-primary, #2563eb)';
   $: ctaText = props.ctaText || '';
   $: ctaLink = props.ctaLink || '#';
 
@@ -28,24 +27,29 @@
 
   const gapValueMap: Record<string, string> = {
     compact: '12px',
-    normal: '20px',
-    relaxed: '32px',
+    normal: '16px',
+    relaxed: '24px',
   };
 
-  $: gapPx = typeof navGap === 'number' ? `${navGap}px` : gapValueMap[navGap] || navGap || '20px';
+  $: gapPx = typeof navGap === 'number' ? `${navGap}px` : gapValueMap[navGap] || navGap || '16px';
 
   $: navStyleString = [
     `gap: ${gapPx}`,
-    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : '',
+    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-body, inherit)',
   ].filter(Boolean).join('; ');
+
+  const typoTokenMap: Record<string, string> = {
+    body: 'var(--theme-text-body, 16px)',
+    caption: 'var(--theme-text-caption, 10px)',
+  };
 
   const getLinkStyle = (index: number) => {
     const isHovered = hoveredIdx === index;
     const color = isHovered ? navHoverColor : (nodeStyles.color || navColor);
     return [
       `color: ${color}`,
-      `font-size: ${nodeStyles.fontSize || navFontSize}`,
-      `font-weight: ${nodeStyles.fontWeight || navFontWeight}`,
+      `font-size: ${nodeStyles.fontSize || typoTokenMap[navTypographyToken] || 'var(--theme-text-body, 16px)'}`,
+      `font-weight: ${nodeStyles.fontWeight || '500'}`,
       `text-transform: ${navTextTransform}`,
       'transition: color 0.15s ease, transform 0.15s ease',
     ].filter(Boolean).join('; ');
@@ -100,7 +104,7 @@
   aria-label="Header Navigation"
   on:click={handleNavContainerClick}
   on:keydown={handleNavContainerKeyDown}
-  class={`relative flex items-center justify-end rounded-lg p-1 transition-all cursor-pointer ${
+  class={`relative flex items-center justify-end rounded-lg transition-all cursor-pointer ${
     isNodeActive
       ? 'ring-2 ring-blue-500 bg-blue-50/20 dark:bg-blue-950/20'
       : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/40'

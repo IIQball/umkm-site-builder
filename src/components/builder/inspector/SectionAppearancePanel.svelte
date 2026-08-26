@@ -28,28 +28,50 @@
     { value: '500ms', label: '500ms' },
   ];
 
-
-
   const alignButtons = [
     { value: 'left', icon: AlignLeft, title: 'Rata Kiri' },
     { value: 'center', icon: AlignCenter, title: 'Rata Tengah' },
     { value: 'right', icon: AlignRight, title: 'Rata Kanan' },
   ];
+
+  // Token-Based Color Presets
+  const textTokenOptions = [
+    { value: '', label: 'Default (Mengikuti Tema)' },
+    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
+    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+    { value: '#ffffff', label: 'Putih Bersih (White)' },
+  ];
+
+  const bgTokenOptions = [
+    { value: 'transparent', label: 'Transparan' },
+    { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas (Canvas)' },
+    { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
+    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
+  ];
 </script>
 
-<div class="space-y-5">
-  <!-- Animation -->
+<div class="space-y-6">
+  <!-- 1. Animation -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Sparkles size={13} class="text-blue-500" />
+    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
+      <Sparkles size={13} class="text-[var(--theme-primary,#2563eb)]" />
       <span>Animasi Entrance & Transisi</span>
     </div>
 
     <div>
-      <label for="style-animation" class="block font-medium mb-1 text-base-content/80">Entrance Animation</label>
-      <select id="style-animation" value={section.styles?.animation || 'none'}
+      <label for="style-animation" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Entrance Animation
+      </label>
+      <select
+        id="style-animation"
+        value={section.styles?.animation || 'none'}
         on:change={(e) => onStyleChange('animation', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500">
+        on:input={(e) => onStyleChange('animation', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      >
         {#each animationOptions as a}
           <option value={a.value}>{a.label}</option>
         {/each}
@@ -59,20 +81,32 @@
     {#if section.styles?.animation && section.styles?.animation !== 'none'}
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label for="style-anim-dur" class="block font-medium mb-1 text-base-content/80">Durasi</label>
-          <select id="style-anim-dur" value={section.styles?.animationDuration || '600ms'}
+          <label for="style-anim-dur" class="block font-semibold text-[11px] text-base-content/80 mb-1">
+            Durasi
+          </label>
+          <select
+            id="style-anim-dur"
+            value={section.styles?.animationDuration || '600ms'}
             on:change={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
-            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500">
+            on:input={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
+            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          >
             {#each durationOptions as d}
               <option value={d.value}>{d.label}</option>
             {/each}
           </select>
         </div>
         <div>
-          <label for="style-anim-delay" class="block font-medium mb-1 text-base-content/80">Delay</label>
-          <select id="style-anim-delay" value={section.styles?.animationDelay || '0ms'}
+          <label for="style-anim-delay" class="block font-semibold text-[11px] text-base-content/80 mb-1">
+            Delay
+          </label>
+          <select
+            id="style-anim-delay"
+            value={section.styles?.animationDelay || '0ms'}
             on:change={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
-            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500">
+            on:input={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
+            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          >
             {#each delayOptions as del}
               <option value={del.value}>{del.label}</option>
             {/each}
@@ -82,66 +116,74 @@
     {/if}
   </div>
 
-  <!-- Typography -->
+  <!-- 2. Typography Alignment -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Type size={13} class="text-blue-500" />
-      <span>Typography & Text Align</span>
+    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
+      <Type size={13} class="text-[var(--theme-primary,#2563eb)]" />
+      <span>Typography Alignment</span>
     </div>
 
     <div>
-      <span class="block font-medium mb-1 text-base-content/80">Text Align</span>
-      <div class="grid grid-cols-3 gap-1 bg-base-200/60 p-1 rounded-md border border-base-300 dark:border-slate-700">
+      <span class="block font-semibold text-xs text-base-content/80 mb-1">Perataan Teks (Text Align)</span>
+      <div class="grid grid-cols-3 gap-1 bg-base-200/60 p-1 rounded-lg border border-base-300 dark:border-slate-700">
         {#each alignButtons as btn}
-          <button type="button" on:click={() => onStyleChange('textAlign', btn.value)}
+          <button
+            type="button"
+            on:click={() => onStyleChange('textAlign', btn.value)}
             class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
               section.styles?.textAlign === btn.value || (btn.value === 'left' && !section.styles?.textAlign)
-                ? 'bg-base-100 text-base-content font-semibold shadow-sm'
+                ? 'bg-base-100 text-base-content font-bold shadow-sm'
                 : 'text-base-content/60 hover:text-base-content'
-            }`} title={btn.title}>
+            }`}
+            title={btn.title}
+          >
             <svelte:component this={btn.icon} size={14} />
           </button>
         {/each}
       </div>
     </div>
-
-    <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[11px] text-blue-600 dark:text-blue-400">
-      <span class="font-semibold block mb-0.5">Tip Tipografi Global:</span>
-      Font family dan skala hierarki diatur secara terpusat di <strong>Global Design System</strong> (klik area kosong kanvas).
-    </div>
   </div>
 
-  <!-- Colors -->
+  <!-- 3. Token-Based Colors -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <PaintBucket size={13} class="text-blue-500" />
-      <span>Warna Background & Teks Section</span>
+    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
+      <PaintBucket size={13} class="text-[var(--theme-primary,#2563eb)]" />
+      <span>Warna Background & Teks (Token Sistem)</span>
     </div>
 
     <div>
-      <label for="style-bg-color" class="block font-medium mb-1 text-base-content/80">Warna Background Section</label>
-      <div class="flex items-center gap-2">
-        <input id="style-bg-color" type="color" value={section.styles?.backgroundColor || '#ffffff'}
-          on:input={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
-          class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 bg-base-100 dark:bg-slate-950 cursor-pointer p-0.5" />
-        <input type="text" value={section.styles?.backgroundColor || ''}
-          on:input={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
-          class="flex-1 px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. #0f172a" />
-      </div>
+      <label for="style-bg-token" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Background Section
+      </label>
+      <select
+        id="style-bg-token"
+        value={section.styles?.backgroundColor || 'transparent'}
+        on:change={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each bgTokenOptions as bg}
+          <option value={bg.value}>{bg.label}</option>
+        {/each}
+      </select>
     </div>
 
     <div>
-      <label for="style-text-color" class="block font-medium mb-1 text-base-content/80">Warna Teks Utama</label>
-      <div class="flex items-center gap-2">
-        <input id="style-text-color" type="color" value={section.styles?.color || '#0f172a'}
-          on:input={(e) => onStyleChange('color', e.currentTarget.value)}
-          class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 bg-base-100 dark:bg-slate-950 cursor-pointer p-0.5" />
-        <input type="text" value={section.styles?.color || ''}
-          on:input={(e) => onStyleChange('color', e.currentTarget.value)}
-          class="flex-1 px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="e.g. #ffffff" />
-      </div>
+      <label for="style-text-token" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Warna Teks Section
+      </label>
+      <select
+        id="style-text-token"
+        value={section.styles?.color || ''}
+        on:change={(e) => onStyleChange('color', e.currentTarget.value)}
+        on:input={(e) => onStyleChange('color', e.currentTarget.value)}
+        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      >
+        {#each textTokenOptions as txt}
+          <option value={txt.value}>{txt.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 </div>
+

@@ -8,7 +8,6 @@
 
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
   $: subtitle = (section.props?.subtitle as string) ?? '';
-  $: currentHeight = parseInt(String(section.styles?.minHeight ?? '650'), 10) || 650;
   $: imageUrl = (section.props?.imageUrl as string) ?? '';
   $: imageMode = (section.props?.imageMode as 'element' | 'background') ?? 'element';
 
@@ -283,25 +282,32 @@
     </div>
   </div>
 
-  <!-- Pengaturan Tinggi Section Canvas -->
+  <!-- Pengaturan Tinggi Section Canvas (8pt Grid) -->
   <div class="pt-3 border-t border-base-300 dark:border-slate-800">
-    <label for="hero-height" class="block font-semibold text-xs text-base-content/80 mb-1">Tinggi Section Canvas (px)</label>
-    <input
-      id="hero-height"
-      type="number"
-      min="400"
-      max="1400"
-      step="50"
-      value={currentHeight}
-      on:input={(e) => onUpdate({
-        ...section,
-        styles: {
-          ...(section.styles || {}),
-          minHeight: `${e.currentTarget.value}px`
-        }
-      })}
-      class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
-      placeholder="650"
-    />
+    <span class="block font-semibold text-xs text-base-content/80 mb-1">Tinggi Minimum Hero (8pt Grid)</span>
+    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-xs">
+      {#each [
+        { label: '480px', value: '480px' },
+        { label: '560px', value: '560px' },
+        { label: '640px', value: '640px' },
+        { label: 'Auto', value: 'auto' },
+      ] as h}
+        <button
+          type="button"
+          on:click={() => onUpdate({
+            ...section,
+            styles: {
+              ...(section.styles || {}),
+              minHeight: h.value,
+            }
+          })}
+          class={`py-1.5 rounded font-medium transition-colors cursor-pointer text-center ${
+            (section.styles?.minHeight || '560px') === h.value ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60'
+          }`}
+        >
+          {h.label}
+        </button>
+      {/each}
+    </div>
   </div>
 </div>

@@ -484,15 +484,18 @@ Untuk membantu desainer menghasilkan tata letak yang presisi, editor builder dil
 
 ---
 
-### 4. Responsiveness & Preview System
+### 4. Responsiveness & Preview System (True Viewport Simulation)
 
-Sistem peninjauan viewport (Desktop, Tablet, Mobile) dirancang agar stabil di workspace editor builder:
-* **Scale-To-Fit (Auto-scaling Container)**: Canvas frame (`#canvas-frame`) menggunakan aturan style:
-  ```css
-  width: 100%;
-  max-width: [TargetWidth]px;
-  ```
-  Di mana `TargetWidth` untuk desktop adalah `1200px`, tablet `768px`, dan mobile `375px`. Hal ini menjamin jika ukuran workspace berkurang (karena sidebar kiri & kanan terbuka), canvas akan otomatis menyusut secara simetris tanpa memotong visual layout grid dan tanpa menampilkan scrollbar horizontal yang mengganggu.
+Sistem peninjauan viewport (Desktop, Tablet, Mobile) dirancang menggunakan **True Viewport Simulation** via CSS Transform Scale:
+* **Fixed Viewport Widths (Kaku & Uncollapsed)**:
+  * **Desktop**: `width: 1200px`
+  * **Tablet**: `width: 768px`
+  * **Mobile**: `width: 375px`
+* **Dynamic Scale Calculation (`scaleRatio`)**:
+  * Mengukur lebar kontainer workspace tengah yang tersedia (`availableWidth = containerWidth - paddingHorizontal`).
+  * Jika `availableWidth < targetWidth`, rasio skala dihitung otomatis: `scaleRatio = availableWidth / targetWidth` (maksimal 1.0).
+  * Menyelaraskan ukuran wrapper terluar (`canvas-scale-container`) dengan lebar `targetWidth * scaleRatio` dan tinggi `canvasHeight * scaleRatio` agar scrollbar vertikal browser bergerak presisi tanpa ghost whitespace.
+  * Menerapkan style `transform: scale(${scaleRatio}); transform-origin: top left;` pada `#canvas-frame` agar semua media query dan layout CSS desktop (1200px) tetap merender tampilan desktop asli tanpa runtuh menjadi tampilan mobile saat workspace menyempit.
 * **Sharp Corners Consistency (Konsistensi Sudut Tajam)**: Seluruh preview (Desktop, Tablet, Mobile) pada editor builder (`Canvas.svelte`) dan penampil baca-saja (`ReadOnlyPreview.svelte`) diatur konsisten menggunakan **sudut tajam** (`rounded-none` / tidak melengkung) pada batas tepian frame kanvasnya untuk representasi visual yang akurat.
 * **Theme Synchronization**: Canvas preview mendukung transisi instan Light / Dark mode yang secara dinamis menyuntikkan CSS variables tema (`--theme-bg`, `--theme-text-primary`, dll.) ke dalam cakupan rendering section.
 

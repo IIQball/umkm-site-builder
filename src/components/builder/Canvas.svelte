@@ -17,6 +17,18 @@
   let startValue = 0;
   let currentDragTooltip = '';
 
+  let containerWidth = 0;
+  let canvasHeight = 0;
+
+  $: targetWidth = viewMode === 'desktop' ? 1200 : viewMode === 'tablet' ? 768 : 375;
+  $: paddingHorizontal = 48; // 24px left + 24px right padding
+  $: availableWidth = Math.max(0, containerWidth - paddingHorizontal);
+  $: autoScale = (availableWidth > 0 && availableWidth < targetWidth)
+    ? (availableWidth / targetWidth)
+    : 1;
+  $: userZoom = ($canvasStore.zoom && $canvasStore.zoom !== 100) ? ($canvasStore.zoom / 100) : 1;
+  $: scaleRatio = Number(Math.min(1, Math.max(0.1, autoScale * userZoom)).toFixed(4));
+
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
   $: isDarkPreview = $canvasStore.previewTheme === 'dark';
   $: colors = theme.colors || {};
@@ -95,7 +107,7 @@
     startValue = parsePx(section.styles?.marginTop, 0);
 
     const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaY = moveEvent.clientY - dragStartY;
+      const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
       const newMarginTop = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
       currentDragTooltip = `Margin Top: ${newMarginTop}px`;
       editorStore.updateSectionStyles(section.id, {
@@ -121,7 +133,7 @@
     startValue = parsePx(section.styles?.marginBottom, 0);
 
     const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaY = moveEvent.clientY - dragStartY;
+      const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
       const newMarginBottom = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
       currentDragTooltip = `Margin Bottom: ${newMarginBottom}px`;
       editorStore.updateSectionStyles(section.id, {
@@ -150,7 +162,7 @@
     const startPadX = parts.length > 1 ? parts[1] : padY;
 
     const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = Math.abs(moveEvent.clientX - dragStartX);
+      const deltaX = Math.abs(moveEvent.clientX - dragStartX) / (scaleRatio || 1);
       const newPadX = Math.max(8, Math.min(120, startPadX + Math.round(deltaX / 2)));
       currentDragTooltip = `Padding: ${padY}px ${newPadX}px`;
       editorStore.updateSectionStyles(section.id, {
@@ -173,112 +185,121 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
 <main
+  bind:clientWidth={containerWidth}
   tabindex="-1"
   on:click={handleCanvasBackgroundClick}
   class="canvas-backdrop flex-1 w-full h-full overflow-auto flex items-start justify-center min-w-0 p-6 bg-slate-100 dark:bg-slate-950 select-none transition-colors"
   aria-label="Editor Canvas"
 >
-  <!-- Frame Container with flat pixel-perfect viewport boundaries -->
+  <!-- Scaler Wrapper that preserves accurate flow bounds and vertical scrollbar height -->
   <div
-    id="canvas-frame"
-    data-theme={$canvasStore.previewTheme}
-    style="{canvasCssVars}; {viewMode === 'desktop' ? 'width: 100%; max-width: 1200px;' : viewMode === 'tablet' ? 'width: 768px; max-width: 100%; margin-left: auto; margin-right: auto;' : 'width: 375px; max-width: 100%; margin-left: auto; margin-right: auto;'}"
-    class={`relative transition-all duration-300 ease-in-out flex flex-col box-border overflow-x-hidden ${
-      isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
-    } ${
-      viewMode === 'desktop'
-        ? 'w-full max-w-[1200px] min-h-screen shadow-xl mx-auto my-0'
-        : viewMode === 'tablet'
-        ? 'w-full max-w-[768px] min-h-screen shadow-2xl mx-auto my-0 border border-slate-300 dark:border-slate-700'
-        : 'w-full max-w-[375px] min-h-screen shadow-2xl mx-auto my-0 border border-slate-300 dark:border-slate-700'
-    }`}
+    class="canvas-scale-container relative flex-shrink-0 transition-all duration-300 ease-out"
+    style="width: {targetWidth * scaleRatio}px; height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : 'auto'}; min-height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : '100%'};"
   >
-    <!-- Figma-Style Layout Grid Guides (Overlay) -->
-    <LayoutGridOverlay
-      {viewMode}
-      showColumnGrid={$canvasStore.showColumnGrid}
-      showPixelGrid={$canvasStore.showPixelGrid}
-    />
+    <!-- Frame Container with fixed viewport width, scaled via CSS transform -->
+    <div
+      id="canvas-frame"
+      bind:clientHeight={canvasHeight}
+      data-theme={$canvasStore.previewTheme}
+      style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
+      class={`transition-transform duration-300 ease-out flex flex-col box-border overflow-x-hidden ${
+        isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
+      } ${
+        viewMode === 'desktop'
+          ? 'min-h-screen shadow-xl border border-slate-300 dark:border-slate-700'
+          : viewMode === 'tablet'
+          ? 'min-h-screen shadow-2xl border border-slate-300 dark:border-slate-700'
+          : 'min-h-screen shadow-2xl border border-slate-300 dark:border-slate-700'
+      }`}
+    >
+      <!-- Figma-Style Layout Grid Guides (Overlay) -->
+      <LayoutGridOverlay
+        {viewMode}
+        showColumnGrid={$canvasStore.showColumnGrid}
+        showPixelGrid={$canvasStore.showPixelGrid}
+      />
 
-    {#if sections.length === 0}
-      <div class="p-16 text-center text-slate-400">
-        <p class="text-sm">Tidak ada section untuk ditampilkan.</p>
-      </div>
-    {:else}
-      <div class="flex flex-col w-full min-w-0 transition-all">
-        {#each sections as section (section.id)}
-          <div
-            role="button"
-            tabindex="0"
-            on:click={(e) => handleSelect(section.id, e)}
-            on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectSection(section.id)}
-            class={`relative w-full text-left transition-all cursor-pointer ${
-              selectedSectionId === section.id
-                ? 'ring-2 ring-blue-500 ring-inset z-20'
-                : 'hover:ring-1 hover:ring-blue-400/50 hover:ring-inset'
-            }`}
-          >
-            <!-- Active Section Overlays & Spacing Drag Handles -->
-            {#if selectedSectionId === section.id}
-              <!-- Selection Badge -->
-              <div class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow z-30 pointer-events-none uppercase tracking-wider">
-                {section.type.replace('_', ' ')}
-              </div>
+      {#if sections.length === 0}
+        <div class="p-16 text-center text-slate-400">
+          <p class="text-sm">Tidak ada section untuk ditampilkan.</p>
+        </div>
+      {:else}
+        <div class="flex flex-col w-full min-w-0 transition-all">
+          {#each sections as section (section.id)}
+            <div
+              role="button"
+              tabindex="0"
+              on:click={(e) => handleSelect(section.id, e)}
+              on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectSection(section.id)}
+              class={`relative w-full text-left transition-all cursor-pointer ${
+                selectedSectionId === section.id
+                  ? 'ring-2 ring-blue-500 ring-inset z-20'
+                  : 'hover:ring-1 hover:ring-blue-400/50 hover:ring-inset'
+              }`}
+            >
+              <!-- Active Section Overlays & Spacing Drag Handles -->
+              {#if selectedSectionId === section.id}
+                <!-- Selection Badge -->
+                <div class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow z-30 pointer-events-none uppercase tracking-wider">
+                  {section.type.replace('_', ' ')}
+                </div>
 
-              <!-- Drag Info Tooltip -->
-              {#if isDraggingSpacing && currentDragTooltip}
-                <div class="absolute top-2 right-2 bg-slate-900 text-blue-400 border border-blue-500/40 text-[10px] font-mono font-bold px-2.5 py-1 rounded shadow-lg z-40 pointer-events-none">
-                  {currentDragTooltip}
+                <!-- Drag Info Tooltip -->
+                {#if isDraggingSpacing && currentDragTooltip}
+                  <div class="absolute top-2 right-2 bg-slate-900 text-blue-400 border border-blue-500/40 text-[10px] font-mono font-bold px-2.5 py-1 rounded shadow-lg z-40 pointer-events-none">
+                    {currentDragTooltip}
+                  </div>
+                {/if}
+
+                <!-- Top Spacing Handle (Margin Top) -->
+                <div
+                  role="slider"
+                  tabindex="0"
+                  aria-valuenow={startValue}
+                  aria-label="Drag to adjust margin top"
+                  on:pointerdown={(e) => startTopMarginDrag(e, section)}
+                  class="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
+                  title="Tarik untuk mengatur jarak atas (Margin Top)"
+                >
+                  <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
+                  <span class="text-[9px] tracking-tight">Jarak Atas</span>
+                </div>
+
+                <!-- Bottom Spacing Handle (Margin Bottom) -->
+                <div
+                  role="slider"
+                  tabindex="0"
+                  aria-valuenow={startValue}
+                  aria-label="Drag to adjust margin bottom"
+                  on:pointerdown={(e) => startBottomMarginDrag(e, section)}
+                  class="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
+                  title="Tarik untuk mengatur jarak bawah (Margin Bottom)"
+                >
+                  <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
+                  <span class="text-[9px] tracking-tight">Jarak Bawah</span>
+                </div>
+
+                <!-- Right Side Padding Handle -->
+                <div
+                  role="slider"
+                  tabindex="0"
+                  aria-valuenow={startValue}
+                  aria-label="Drag to adjust horizontal padding"
+                  on:pointerdown={(e) => startSidePaddingDrag(e, section)}
+                  class="absolute top-1/2 -right-3 -translate-y-1/2 w-5 h-16 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg cursor-ew-resize z-30 flex items-center justify-center transition-all group"
+                  title="Tarik untuk mengatur padding horizontal"
+                >
+                  <MoveHorizontal size={12} class="opacity-90 group-hover:scale-110 transition-transform" />
                 </div>
               {/if}
 
-              <!-- Top Spacing Handle (Margin Top) -->
-              <div
-                role="slider"
-                tabindex="0"
-                aria-valuenow={startValue}
-                aria-label="Drag to adjust margin top"
-                on:pointerdown={(e) => startTopMarginDrag(e, section)}
-                class="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
-                title="Tarik untuk mengatur jarak atas (Margin Top)"
-              >
-                <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
-                <span class="text-[9px] tracking-tight">Jarak Atas</span>
-              </div>
-
-              <!-- Bottom Spacing Handle (Margin Bottom) -->
-              <div
-                role="slider"
-                tabindex="0"
-                aria-valuenow={startValue}
-                aria-label="Drag to adjust margin bottom"
-                on:pointerdown={(e) => startBottomMarginDrag(e, section)}
-                class="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
-                title="Tarik untuk mengatur jarak bawah (Margin Bottom)"
-              >
-                <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
-                <span class="text-[9px] tracking-tight">Jarak Bawah</span>
-              </div>
-
-              <!-- Right Side Padding Handle -->
-              <div
-                role="slider"
-                tabindex="0"
-                aria-valuenow={startValue}
-                aria-label="Drag to adjust horizontal padding"
-                on:pointerdown={(e) => startSidePaddingDrag(e, section)}
-                class="absolute top-1/2 -right-3 -translate-y-1/2 w-5 h-16 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg cursor-ew-resize z-30 flex items-center justify-center transition-all group"
-                title="Tarik untuk mengatur padding horizontal"
-              >
-                <MoveHorizontal size={12} class="opacity-90 group-hover:scale-110 transition-transform" />
-              </div>
-            {/if}
-
-            <SectionRenderer {section} isActive={selectedSectionId === section.id} />
-          </div>
-        {/each}
-      </div>
-    {/if}
+              <SectionRenderer {section} isActive={selectedSectionId === section.id} />
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
 </main>
+
 

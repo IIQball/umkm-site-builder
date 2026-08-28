@@ -23,6 +23,16 @@
   let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   let isDark = false;
 
+  let containerWidth = 0;
+  let canvasHeight = 0;
+
+  $: targetWidth = viewMode === 'desktop' ? 1200 : viewMode === 'tablet' ? 768 : 375;
+  $: paddingHorizontal = 48;
+  $: availableWidth = Math.max(0, containerWidth - paddingHorizontal);
+  $: scaleRatio = (availableWidth > 0 && availableWidth < targetWidth)
+    ? Number(Math.max(0.1, availableWidth / targetWidth).toFixed(4))
+    : 1;
+
   $: sections = template?.config?.sections || [];
   $: theme = template?.config?.theme || {};
 
@@ -196,30 +206,39 @@
   </header>
 
   <!-- Read-Only Canvas Area -->
-  <main class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center items-start bg-base-200/60">
+  <main
+    bind:clientWidth={containerWidth}
+    class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center items-start bg-base-200/60 min-w-0"
+  >
     <div
-      style={canvasCssVars}
-      class={`relative transition-all duration-300 ease-in-out shadow-2xl my-4 flex flex-col box-border overflow-x-hidden ${
-        isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
-      } ${
-        viewMode === 'desktop'
-          ? 'w-full max-w-6xl min-h-[800px] border border-base-300 dark:border-slate-800'
-          : viewMode === 'tablet'
-          ? 'w-full max-w-[768px] min-h-[800px] border border-slate-400 dark:border-slate-700 mx-auto'
-          : 'w-full max-w-[375px] min-h-[667px] border border-slate-400 dark:border-slate-700 mx-auto'
-      }`}
+      class="canvas-scale-container relative flex-shrink-0 transition-all duration-300 ease-out"
+      style="width: {targetWidth * scaleRatio}px; height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : 'auto'}; min-height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : '100%'};"
     >
-      {#if sections.length === 0}
-        <div class="p-16 text-center text-slate-400">
-          <p class="text-sm">Belum ada section yang dikonfigurasi.</p>
-        </div>
-      {:else}
-        <div class="flex flex-col w-full min-w-0 transition-all">
-          {#each sections as section (section.id)}
-            <SectionRenderer {section} isActive={false} {storeId} />
-          {/each}
-        </div>
-      {/if}
+      <div
+        bind:clientHeight={canvasHeight}
+        style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
+        class={`transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
+          isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
+        } ${
+          viewMode === 'desktop'
+            ? 'min-h-[800px] border border-base-300 dark:border-slate-800'
+            : viewMode === 'tablet'
+            ? 'min-h-[800px] border border-slate-400 dark:border-slate-700'
+            : 'min-h-[667px] border border-slate-400 dark:border-slate-700'
+        }`}
+      >
+        {#if sections.length === 0}
+          <div class="p-16 text-center text-slate-400">
+            <p class="text-sm">Belum ada section yang dikonfigurasi.</p>
+          </div>
+        {:else}
+          <div class="flex flex-col w-full min-w-0 transition-all">
+            {#each sections as section (section.id)}
+              <SectionRenderer {section} isActive={false} {storeId} />
+            {/each}
+          </div>
+        {/if}
+      </div>
     </div>
   </main>
 </div>

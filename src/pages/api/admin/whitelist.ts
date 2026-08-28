@@ -54,7 +54,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           role: 'admin'
         },
         headers: new Headers()
-      });
+      }) as unknown as { user?: { id: string } };
       if (res && res.user) {
         newUserId = res.user.id;
         // Hapus session yang terbuat otomatis saat register agar aman

@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
 import { GET, PUT } from '../../../src/pages/api/products/[id]/variants';
 import { db } from '../../../src/lib/db/client';
 
 // Mock DB client
-vi.mock('../../../../src/lib/db/client', () => ({
+vi.mock('../../../src/lib/db/client', () => ({
   db: {
     select: vi.fn(),
     update: vi.fn(),
@@ -39,7 +39,7 @@ describe('Variants API', () => {
     it('returns variants for a product', async () => {
       // First call: product lookup, second call: store lookup
       let callCount = 0;
-      (db.select as Mock).mockImplementation(() => {
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return {
@@ -73,7 +73,7 @@ describe('Variants API', () => {
     });
 
     it('returns 404 for nonexistent product', async () => {
-      (db.select as Mock).mockReturnValue({
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([]),
         }),
@@ -140,7 +140,7 @@ describe('Variants API', () => {
 
     it('returns 400 for invalid variant data', async () => {
       let callCount = 0;
-      (db.select as Mock).mockImplementation(() => {
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return {
@@ -190,7 +190,7 @@ describe('Variants API', () => {
       ];
 
       let callCount = 0;
-      (db.select as Mock).mockImplementation(() => {
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return {
@@ -206,7 +206,7 @@ describe('Variants API', () => {
         };
       });
 
-      (db.update as Mock).mockReturnValue({
+      (db.update as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([
@@ -238,7 +238,7 @@ describe('Variants API', () => {
 
     it('returns 403 for non-owner', async () => {
       let callCount = 0;
-      (db.select as Mock).mockImplementation(() => {
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return {

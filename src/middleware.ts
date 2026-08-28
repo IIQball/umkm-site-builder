@@ -80,7 +80,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
     
     // Jika akun ditangguhkan
-    if ((user as any).status === 'suspended') {
+    if ((user as { status?: string }).status === 'suspended') {
       return context.redirect('/auth/login?error=account_suspended');
     }
 

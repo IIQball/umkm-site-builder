@@ -8,3 +8,5 @@ export * from './auth';
 export * from './finance';
 export * from './templates';
 export * from './common';
+export * from './media';
+

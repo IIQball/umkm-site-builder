@@ -35,6 +35,7 @@ One pack. Never a second. No emojis as substitutes.
 | loading | loading-spinner | checkout page, PaymentStatus.svelte |
 | link | link, link-hover | checkout page |
 | progress | progress-primary | shared/ImageUpload.svelte |
+| modal | modal, modal-open, modal-box, modal-action | dashboard/ConfirmTemplateModal.svelte |
 
 ## 3.1 Composite components (project-specific)
 

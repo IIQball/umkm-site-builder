@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-28 by feature/h6-fauzan-inject-blueprint session
+Status: LIVE · Updated: 2026-08-29 by feature/h8-fauzan-apply-template session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,13 +11,19 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed the blueprint injection feature for tenants. Added the `/dashboard/templates` gallery page where tenants can browse approved templates and apply them directly to their store with a single click. The backend endpoint `POST /api/stores/[storeId]/apply-template` handles ownership verification for paid templates, fetches the latest template config, and atomically updates the store's `customization` column. Passed 9 new unit tests. Code passes `type-check` and successfully builds.
+Extracted template ownership validation into a dedicated service layer (`store-template.service.ts`) and added a confirmation modal before applying templates. The API route now delegates to the service for cleaner separation of concerns. All 260 tests pass, type-check and lint are green.
 
 ## Last session did
 
-- **Template Blueprint Injection Feature (Phase 2):**
-  - `src/pages/api/stores/[storeId]/apply-template.ts`: Created new POST endpoint to apply template blueprints to a tenant's store. Includes security checks for tenant role, store ownership, template approval status, and purchase verification for paid templates. Safely applies the `template.config` to the `store.customization` column using Drizzle ORM.
-  - `src/components/dashboard/TemplateGallery.svelte`: Created a frontend component to fetch and display approved public templates. Handles "Apply Template" state with visual indicators for currently active template and toast notifications for success/error handling.
+- **Apply Template Service Extraction & Confirmation Modal:**
+  - `src/services/store-template.service.ts` (NEW): Created service with `validateTemplateOwnership()` and `applyTemplateToStore()`. Validates store existence, store ownership, template approval status, and paid template purchase verification via `userTemplates` table. Throws structured `AppError` with codes `STORE_NOT_FOUND`, `STORE_FORBIDDEN`, `TEMPLATE_NOT_FOUND`.
+  - `src/components/dashboard/ConfirmTemplateModal.svelte` (NEW): daisyUI modal with warning icon, current/new theme comparison, loading state, Escape key dismiss, backdrop click dismiss. Dispatches `confirm`/`cancel` events.
+  - `src/pages/api/stores/[storeId]/apply-template.ts`: Refactored to use `validateTemplateOwnership` and `applyTemplateToStore` from service layer instead of inline DB queries.
+  - `src/components/dashboard/TemplateGallery.svelte`: Integrated `ConfirmTemplateModal` — clicking "Terapkan Template" now opens confirmation modal before executing the API call.
+  - `src/services/index.ts`: Added barrel export for `store-template.service`.
+  - `tests/services/store-template.service.test.ts` (NEW): 7 unit tests covering store not found, store forbidden, template not found, free template ownership, paid template not purchased, paid template purchased, and applyTemplateToStore DB call.
+  - `tests/api/stores/[storeId]/apply-template.test.ts`: Refactored to mock service layer instead of raw DB calls for cleaner test isolation.
+  - Total test count: 260 (all passing). Type check: 0 errors, 0 warnings. Lint: 0 errors, 0 warnings.
   - `src/pages/dashboard/templates.astro`: Created the Astro page wrapper to mount `TemplateGallery.svelte`, enforcing tenant role access and fetching the current `store.templateId`.
   - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added "Pilih Template" navigation item under the tenant sidebar section.
   - `tests/api/stores/[storeId]/apply-template.test.ts`: Added 9 new unit tests covering all authorization paths, ownership checks, missing data validation, and successful application of both free and paid templates.

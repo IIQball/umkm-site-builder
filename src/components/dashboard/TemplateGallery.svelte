@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Loader2, CheckCircle, AlertCircle, Palette, Eye, Sparkles } from 'lucide-svelte';
+  import ConfirmTemplateModal from './ConfirmTemplateModal.svelte';
 
   export let storeId = '';
   export let currentTemplateId = '';
@@ -20,6 +21,12 @@
   let toastStatus: 'idle' | 'success' | 'error' = 'idle';
   let toastMessage = '';
 
+  let modalOpen = false;
+  let pendingTemplateId = '';
+  let pendingTemplateName = '';
+
+  $: currentTemplateName = templates.find((t) => t.id === currentTemplateId)?.name || '';
+
   async function fetchTemplates() {
     loading = true;
     error = '';
@@ -38,8 +45,15 @@
     }
   }
 
-  async function applyTemplate(templateId: string) {
+  function requestApply(templateId: string, templateName: string) {
+    pendingTemplateId = templateId;
+    pendingTemplateName = templateName;
+    modalOpen = true;
+  }
+
+  async function confirmApply() {
     if (applyingId) return;
+    const templateId = pendingTemplateId;
     applyingId = templateId;
     toastStatus = 'idle';
 
@@ -70,8 +84,17 @@
       toastMessage = 'Terjadi kesalahan jaringan';
     } finally {
       applyingId = '';
+      modalOpen = false;
+      pendingTemplateId = '';
+      pendingTemplateName = '';
       setTimeout(() => { toastStatus = 'idle'; }, 4000);
     }
+  }
+
+  function cancelApply() {
+    modalOpen = false;
+    pendingTemplateId = '';
+    pendingTemplateName = '';
   }
 
   function formatPrice(price: number): string {
@@ -169,7 +192,7 @@
                 <button
                   class="btn btn-sm btn-primary w-full"
                   disabled={!!applyingId}
-                  on:click={() => applyTemplate(tpl.id)}
+                  on:click={() => requestApply(tpl.id, tpl.name)}
                 >
                   {#if applyingId === tpl.id}
                     <Loader2 size={14} class="animate-spin" />
@@ -187,3 +210,12 @@
     </div>
   {/if}
 </div>
+
+<ConfirmTemplateModal
+  open={modalOpen}
+  templateName={pendingTemplateName}
+  {currentTemplateName}
+  loading={!!applyingId}
+  on:confirm={confirmApply}
+  on:cancel={cancelApply}
+/>

@@ -46,3 +46,14 @@ export const CLOUDINARY_VARIANTS = {
 } as const;
 
 export type CloudinaryVariant = keyof typeof CLOUDINARY_VARIANTS;
+
+/**
+ * Options schema for Media Cleanup service and endpoint
+ */
+export const MediaCleanupOptionsSchema = z.object({
+  olderThanHours: z.number().int().nonnegative().optional().default(24),
+  dryRun: z.boolean().optional().default(false),
+});
+
+export type MediaCleanupOptions = z.infer<typeof MediaCleanupOptionsSchema>;
+

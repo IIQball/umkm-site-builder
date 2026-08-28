@@ -49,20 +49,31 @@ umkm-site-builder/
 ├── public/                                     # Aset statis (gambar, font, logo)
 │
 ├── src/                                        # Kode sumber utama aplikasi
-│   ├── components/                             # Komponen UI modular berbasis Svelte
+│   ├── components/                             # Komponen UI modular berbasis Svelte & Astro
 │   │   ├── admin/
 │   │   │   ├── whitelist/
 │   │   │   │   ├── AdminAddModal.svelte        # Modal tambah whitelist email admin
-│   │   │   │   ├── AdminEditModal.svelte       # Modal edit data whitelist admin
-│   │   │   │   └── AdminWhitelistManager.svelte# Panel manajemen whitelist email Google Auth
+│   │   │   │   ├── AdminConfirmModal.svelte    # Modal konfirmasi penghapusan whitelist
+│   │   │   │   ├── AdminDetailModal.svelte     # Modal detail data whitelist admin
+│   │   │   │   ├── AdminWhitelistTable.svelte  # Tabel daftar whitelist admin
+│   │   │   │   └── whitelist.types.ts          # Tipe data whitelist admin
+│   │   │   ├── AdminUserDetailModal.svelte     # Modal detail data user admin
+│   │   │   ├── AdminUserSuspendModal.svelte    # Modal suspend/aktifkan user admin
+│   │   │   ├── AdminWhitelistPanel.svelte      # Panel whitelist email Google Auth admin
 │   │   │   ├── CommissionSettingsPanel.svelte  # Form fee %, minimum payout, & settlement delay
-│   │   │   └── TemplateReviewPanel.svelte      # Panel review & verifikasi template desainer
+│   │   │   ├── TemplateReviewPanel.svelte      # Panel review & verifikasi template desainer
+│   │   │   └── UserManagementPanel.svelte      # Panel manajemen pengguna platform
 │   │   ├── auth/
+│   │   │   ├── GoogleAuthButton.svelte         # Tombol login Google SSO BetterAuth
 │   │   │   ├── LoginForm.svelte                # Form login tenant, designer, dan admin
-│   │   │   ├── RegisterForm.svelte             # Form registrasi tenant baru
-│   │   │   └── GoogleAuthButton.svelte         # Tombol login Google SSO BetterAuth
+│   │   │   └── RegisterForm.svelte             # Form registrasi tenant baru
 │   │   ├── builder/
 │   │   │   ├── content/
+│   │   │   │   ├── content.helpers.ts          # Helper pengisian konten section builder
+│   │   │   │   ├── FaqContent.svelte           # Form inspector konten FAQ section
+│   │   │   │   ├── FeaturesContent.svelte      # Form inspector konten features section
+│   │   │   │   ├── FooterContent.svelte        # Form inspector konten footer section
+│   │   │   │   ├── HeaderContent.svelte        # Form inspector konten header section
 │   │   │   │   ├── HeroContent.svelte          # Form inspector konten hero section
 │   │   │   │   ├── ProductCatalogContent.svelte# Form inspector data produk katalog
 │   │   │   │   └── TestimonialsContent.svelte  # Form inspector isi ulasan/testimonial
@@ -71,6 +82,16 @@ umkm-site-builder/
 │   │   │   │   │   ├── HeaderAnnouncementPanel.svelte # Panel teks pengumuman header
 │   │   │   │   │   ├── HeaderLogoPanel.svelte  # Panel upload/URL logo toko
 │   │   │   │   │   └── HeaderNavPanel.svelte   # Panel menu navigasi menu header
+│   │   │   │   ├── node-forms/
+│   │   │   │   │   ├── AnnouncementNodeForm.svelte # Form spesifik node pengumuman
+│   │   │   │   │   ├── HeroElementNodeForms.svelte # Form elemen visual/teks hero
+│   │   │   │   │   ├── LogoNodeForm.svelte     # Form logo toko pada header
+│   │   │   │   │   └── NavLinksNodeForm.svelte # Form menu navigasi
+│   │   │   │   ├── theme/
+│   │   │   │   │   ├── ThemeButtonsTab.svelte  # Tab kustomisasi tombol tema builder
+│   │   │   │   │   ├── ThemeColorsTab.svelte   # Tab kustomisasi palet warna tema builder
+│   │   │   │   │   ├── ThemeLayoutTab.svelte   # Tab layout spacing tema builder
+│   │   │   │   │   └── ThemeTypographyTab.svelte # Tab kustomisasi font tema builder
 │   │   │   │   ├── CatalogCardPanel.svelte     # Panel pengubah style kartu produk
 │   │   │   │   ├── CatalogGridPanel.svelte     # Panel layout grid katalog produk
 │   │   │   │   ├── catalogStyles.helpers.ts    # Fungsi helper styling css katalog
@@ -78,10 +99,14 @@ umkm-site-builder/
 │   │   │   │   ├── GeneralStylesTab.svelte     # Tab layout jarak & padding section
 │   │   │   │   ├── GlobalThemeInspector.svelte # Panel warna dasar tema template builder
 │   │   │   │   ├── HeaderStylesTab.svelte      # Tab konfigurasi gaya navigasi header
+│   │   │   │   ├── imageUpload.helpers.ts      # Helper validasi/upload gambar
+│   │   │   │   ├── nodeContent.constants.ts    # Konstanta isi konten default node
 │   │   │   │   ├── NodeContentForm.svelte      # Form input konten dinamis tiap block
 │   │   │   │   ├── nodeStyles.constants.ts     # Konstanta default style CSS node block
 │   │   │   │   ├── SectionAppearancePanel.svelte # Panel background & border-radius section
 │   │   │   │   ├── SectionLayoutPanel.svelte    # Panel layout flex/grid section
+│   │   │   │   ├── SectionPresetSelector.svelte# Panel pemilihan preset section siap pakai
+│   │   │   │   ├── SectionSlotReorder.svelte   # Panel drag-and-drop slots section
 │   │   │   │   └── StyleSelector.svelte        # Dropdown pemilih varian style visual
 │   │   │   ├── layer/
 │   │   │   │   ├── AddNodeDropdown.svelte      # Tombol nambah block section baru
@@ -110,13 +135,14 @@ umkm-site-builder/
 │   │   │   │   ├── SectionRenderer.svelte      # Renderer block layout editor no-code
 │   │   │   │   └── Testimonials.svelte         # Komponen visual ulasan/testimoni pelanggan
 │   │   │   ├── stores/
+│   │   │   │   ├── canvasStore.ts              # Svelte store state kanvas & grid guides
+│   │   │   │   ├── documentStore.ts            # Svelte store status loading & status saving dokumen
 │   │   │   │   ├── editorStore.mutations.ts    # Operasi mutasi state no-code (save, update)
 │   │   │   │   ├── editorStore.ts              # Svelte writable store state builder editor
 │   │   │   │   └── editorStore.types.ts        # Tipe TypeScript state editor builder
 │   │   │   ├── BuilderEditor.svelte            # Halaman utama editor visual no-code builder
 │   │   │   ├── Canvas.svelte                   # Lembar kerja visual kanvas editor builder
 │   │   │   ├── ContentTab.svelte               # Tab pengisian teks & gambar konten node
-│   │   │   ├── HistoryPanel.svelte             # Panel riwayat undo / redo perubahan
 │   │   │   ├── LayerPanel.svelte               # Panel pohon layer hirarki section template
 │   │   │   ├── LayoutGridOverlay.svelte        # Overlay panduan kolom Figma 12/8/4 & pixel grid
 │   │   │   ├── NewTemplateForm.svelte          # Form pembuatan template draft desainer
@@ -144,12 +170,14 @@ umkm-site-builder/
 │   │   │   ├── StoreSettingsForm.svelte        # Konfigurasi WhatsApp, Google Maps, & profil toko
 │   │   │   └── TemplateGallery.svelte          # Galeri pilihan template desain toko
 │   │   ├── designer/
+│   │   │   ├── DesignerBankModal.svelte        # Modal data rekening bank desainer
 │   │   │   ├── DesignerBankWithdraw.svelte     # Form rekening bank & modal payout desainer
 │   │   │   ├── DesignerMutationTable.svelte    # Tabel daftar mutasi keuangan desainer
+│   │   │   ├── DesignerPayoutHistoryTable.svelte # Tabel riwayat payout desainer
 │   │   │   ├── DesignerStatCards.svelte        # Ringkasan balance, komisi, & template terjual
 │   │   │   ├── DesignerTemplateCard.svelte     # Kartu template buatan desainer (status review)
 │   │   │   ├── DesignerWalletOverview.svelte   # Ringkasan dompet desainer & tombol withdraw
-│   │   │   └── StatCard.svelte                 # Komponen modular card ringkasan statistik
+│   │   │   └── DesignerWithdrawModal.svelte    # Modal konfirmasi withdraw desainer
 │   │   ├── onboarding/
 │   │   │   └── OnboardingWizard.svelte         # Form inisialisasi subdomain & toko baru tenant
 │   │   ├── public/
@@ -168,39 +196,40 @@ umkm-site-builder/
 │   │   │   ├── ProductFormModal.svelte         # Modal tambah/edit data produk toko
 │   │   │   ├── ProductTable.svelte             # Tabel daftar produk dagangan tenant
 │   │   │   ├── ProductTableRow.svelte          # Baris data produk toko tenant
-│   │   │   └── StoreManager.svelte             # Panel monitoring list toko tenant
+│   │   │   └── StoreManager.svelte             # Panel monitoring penjualan tenant
 │   │   └── ui/
-│   │       ├── StatCard.svelte                 # Komponen modular kartu ringkasan statistik
-│   │       └── ToastContainer.svelte           # Container penampil alert melayang (toast)
+│   │       ├── StatCard.svelte                 # Komponen card ringkasan statistik modular
+│   │       ├── ToastContainer.svelte           # Kontainer notifikasi toast mengambang
+│   │       └── WhatsAppIcon.svelte             # Ikon WhatsApp SVG modular
 │   │
-│   ├── db/                                     # Integrasi Drizzle ORM
-│   │   ├── index.ts                            # Inisialisasi koneksi Drizzle Neon Serverless
-│   │   ├── schema.ts                           # Skema tabel database (users, stores, wallets)
-│   │   └── seed.ts                             # Skrip otomatisasi pengisian data awal (seeding)
+│   ├── db/
+│   │   ├── index.ts                        # Koneksi database Drizzle & adapter serverless
+│   │   ├── schema.ts                       # Skema relasi database & tabel SaaS Drizzle
+│   │   └── seed.ts                         # Script seeding data demo database
 │   │
-│   ├── env.d.ts                                # Deklarasi tipe environment Astro
+│   ├── env.d.ts                            # Deklarasi global compiler TypeScript Astro
 │   │
-│   ├── layouts/                                # Master layout pembungkus halaman Astro
-│   │   ├── BaseLayout.astro                    # Layout dasar HTML publik
-│   │   ├── DashboardLayout.astro               # Layout panel dashboard & kontrol internal
-│   │   └── StorefrontLayout.astro              # Layout website toko tenant publik
+│   ├── layouts/
+│   │   ├── BaseLayout.astro                # Layout dasar halaman publik web
+│   │   ├── DashboardLayout.astro           # Layout terproteksi admin/tenant/designer
+│   │   └── StorefrontLayout.astro          # Layout storefront khusus tenant (subdomain)
 │   │
-│   ├── lib/                                    # Kumpulan pustaka pembantu & inisialisasi SDK
+│   ├── lib/
 │   │   ├── auth/
-│   │   │   └── .gitkeep                        # Penahan folder auth
+│   │   │   └── .gitkeep                        # Penahan folder git
 │   │   ├── config/
-│   │   │   └── app.ts                          # Konfigurasi nama aplikasi & tautan menu navigasi
+│   │   │   └── app.ts                          # Konfigurasi konstanta platform & branding
 │   │   ├── db/
-│   │   │   └── client.ts                       # Klien koneksi Drizzle & tipe DbExecutor
+│   │   │   └── client.ts                       # Klien database siap pakai
 │   │   ├── errors/
-│   │   │   └── .gitkeep                        # Penahan folder errors
+│   │   │   └── .gitkeep                        # Penahan folder git
 │   │   ├── finance/
-│   │   │   ├── index.ts                        # Ekspor modul finansial
-│   │   │   └── xendit.ts                       # Klien SDK Xendit untuk e-invoice & disbursement
+│   │   │   ├── index.ts                        # Ekspor helper finance
+│   │   │   └── xendit.ts                       # Integrasi SDK e-invoice & payout Xendit
 │   │   ├── routes/
-│   │   │   └── .gitkeep                        # Penahan folder routes
+│   │   │   └── .gitkeep                        # Penahan folder git
 │   │   ├── stores/
-│   │   │   └── schemas.ts                      # Skema pembantu frontend store
+│   │   │   └── schemas.ts                      # Skema validasi state svelte store
 │   │   ├── utils/
 │   │   │   ├── api-handler.ts                  # Pembungkus standar API route handler
 │   │   │   ├── designMath.ts                   # Utilitas rumus radius & Golden Ratio
@@ -223,16 +252,24 @@ umkm-site-builder/
 │   │   │   │   └── index.astro                 # Halaman panel konfigurasi komisi & delay admin
 │   │   │   ├── templates/
 │   │   │   │   └── index.astro                 # Halaman approval pengajuan template desainer
+│   │   │   ├── users/
+│   │   │   │   └── index.astro                 # Halaman manajemen pengguna platform oleh admin
 │   │   │   └── whitelist/
 │   │   │       └── index.astro                 # Halaman kelola whitelist akses Google Admin
 │   │   ├── api/
 │   │   │   ├── admin/
+│   │   │   │   ├── media/
+│   │   │   │   │   └── cleanup.ts              # POST pembersihan aset gambar orphan
 │   │   │   │   ├── settings/
 │   │   │   │   │   └── commission.ts           # GET & PUT parameter komisi & settlement delay
 │   │   │   │   ├── templates/
 │   │   │   │   │   ├── index.ts                # GET daftar template yang membutuhkan review
 │   │   │   │   │   └── [id]/
 │   │   │   │   │       └── review.ts           # POST menyetujui / menolak template desainer
+│   │   │   │   ├── users/
+│   │   │   │   │   ├── index.ts                # GET daftar user platform & monitoring
+│   │   │   │   │   └── [userId]/
+│   │   │   │   │       └── status.ts           # PATCH mengubah status aktif/suspend user
 │   │   │   │   └── whitelist.ts                # GET & POST/PUT/DELETE whitelist email admin
 │   │   │   ├── auth/
 │   │   │   │   ├── [...all].ts                 # Rute callback end-point BetterAuth
@@ -254,7 +291,9 @@ umkm-site-builder/
 │   │   │   │   └── sign.ts                     # POST generate Cloudinary upload signature
 │   │   │   ├── products/
 │   │   │   │   ├── [id].ts                     # PUT & DELETE edit/hapus produk toko tenant
-│   │   │   │   └── index.ts                    # GET & POST manajemen produk toko tenant
+│   │   │   │   ├── index.ts                    # GET & POST manajemen produk toko tenant
+│   │   │   │   └── [id]/
+│   │   │   │       └── variants.ts             # GET & POST/PUT/DELETE varian produk
 │   │   │   ├── public/
 │   │   │   │   ├── templates/
 │   │   │   │   │   └── index.ts                # GET katalog template publik siap pakai
@@ -265,13 +304,13 @@ umkm-site-builder/
 │   │   │   ├── storefront/
 │   │   │   │   └── catalog.ts                  # GET daftar katalog produk untuk storefront
 │   │   │   ├── stores/
-│   │   │   │   ├── [storeId]/
-│   │   │   │   │   ├── apply-template.ts       # POST menerapkan template ke toko tenant
-│   │   │   │   │   └── products.ts             # GET daftar produk toko publik & filter kategori
 │   │   │   │   ├── check-subdomain.ts          # GET verifikasi status subdomain baru
 │   │   │   │   ├── onboard.ts                  # POST aktivasi awal nama subdomain toko
 │   │   │   │   ├── register-subdomain.ts       # POST daftarkan rute dns subdomain ke serverless
-│   │   │   │   └── settings.ts                 # GET & POST data visual setting toko tenant
+│   │   │   │   ├── settings.ts                 # GET & POST data visual setting toko tenant
+│   │   │   │   └── [storeId]/
+│   │   │   │       ├── apply-template.ts       # POST menerapkan template ke toko tenant
+│   │   │   │       └── products.ts             # GET daftar produk toko publik & filter kategori
 │   │   │   ├── tenant/
 │   │   │   │   └── transactions/
 │   │   │   │       ├── initiate.ts             # POST inisiasi tagihan registrasi toko
@@ -332,7 +371,8 @@ umkm-site-builder/
 │   │   │   └── template.schema.ts              # Skema Zod visual draf & metadata template
 │   │   ├── auth.schema.ts                      # Skema Zod validasi kredensial pengguna
 │   │   ├── index.ts                            # Pendaftaran sentral ekspor seluruh skema Zod
-│   │   └── media.schema.ts                     # Skema Zod upload data berkas gambar
+│   │   ├── media.schema.ts                     # Skema Zod upload data berkas gambar
+│   │   └── product-variant.schema.ts           # Skema Zod varian produk
 │   │
 │   ├── services/                               # Lapisan domain logika bisnis (Pure Services)
 │   │   ├── finance/
@@ -341,8 +381,12 @@ umkm-site-builder/
 │   │   │   ├── payout.service.ts               # Logika transaksi penarikan dana desainer
 │   │   │   ├── transaction.service.ts          # Logika pembuatan invoice & aktivasi toko
 │   │   │   └── wallet.service.ts               # Ledger mutasi wallet & hitung saldo matang
+│   │   ├── media/
+│   │   │   ├── cleanup.service.ts              # Logika deteksi & pembersihan orphan media Cloudinary
+│   │   │   └── index.ts                        # Ekspor layanan media
 │   │   ├── templates/
 │   │   │   ├── index.ts                        # Ekspor layanan template
+│   │   │   ├── template.admin.service.ts       # Logika review & verifikasi template admin
 │   │   │   └── template.service.ts             # Logika database template & status review
 │   │   └── index.ts                            # Ekspor sentral layanan bisnis
 │   │
@@ -350,6 +394,8 @@ umkm-site-builder/
 │   │   └── global.css                          # Variabel Tailwind, gaya global, & reset CSS
 │   │
 │   └── types/                                  # Deklarasi tipe TypeScript global
+│       ├── admin/
+│       │   └── index.ts                        # Tipe data manajemen user & status admin
 │       ├── auth/
 │       │   └── index.ts                        # Tipe data detail otentikasi user & role
 │       ├── common/
@@ -361,6 +407,8 @@ umkm-site-builder/
 │       │   ├── index.ts                        # Ekspor tipe finansial
 │       │   ├── transactions.ts                 # Tipe invoice transaksi & log webhook
 │       │   └── wallet.ts                       # Tipe ledger wallet, mutasi, & detail payout
+│       ├── media/
+│       │   └── index.ts                        # Ekspor tipe data media/upload
 │       ├── templates/
 │       │   ├── builder.ts                      # Tipe data visual block editor no-code
 │       │   ├── index.ts                        # Ekspor tipe template
@@ -380,7 +428,8 @@ umkm-site-builder/
 │   │   │   ├── payout-status.test.ts           # Uji API status penarikan dana desainer
 │   │   │   └── payout.test.ts                  # Uji API pencairan komisi desainer
 │   │   ├── products/
-│   │   │   └── index.test.ts                   # Uji API CRUD produk toko tenant
+│   │   │   ├── index.test.ts                   # Uji API CRUD produk toko tenant
+│   │   │   └── variants.test.ts                # Uji API CRUD varian produk
 │   │   ├── public/
 │   │   │   ├── templates/
 │   │   │   │   └── index.test.ts               # Uji API katalog template publik
@@ -395,7 +444,6 @@ umkm-site-builder/
 │   │   │   └── xendit.test.ts                  # Uji penanganan webhook e-invoice Xendit
 │   │   ├── check-subdomain.test.ts             # Uji validasi subdomain input Zod
 │   │   └── media-sign.test.ts                  # Uji Cloudinary signed upload generator
-│   │   └── variants.test.ts                    # Uji API CRUD varian produk
 │   ├── finance/
 │   │   ├── commission-and-masking.test.ts      # Uji engine komisi & masking nominal rupiah
 │   │   ├── payout-disbursement.test.ts         # Uji webhook disbursement & saldo payout
@@ -410,19 +458,20 @@ umkm-site-builder/
 │   ├── schemas/
 │   │   ├── auth.test.ts                        # Uji validasi kredensial pengguna Zod
 │   │   ├── media.test.ts                       # Uji validasi Zod payload media
+│   │   ├── product-variant.test.ts             # Uji validasi Zod payload varian produk
 │   │   ├── store-settings.test.ts              # Uji validasi input setting tokomu
 │   │   ├── template-tokens-presets.test.ts     # Uji token warna, typo, 8pt preset, & safe-zone
 │   │   └── template.test.ts                    # Uji validasi Zod visual data template
+│   ├── services/
+│   │   └── media-cleanup.test.ts               # Uji garbage collection orphan image Cloudinary
 │   ├── transactions/
 │   │   ├── e2e-template-marketplace-flow.test.ts # Uji e2e alur template (review -> beli -> lunas)
 │   │   ├── template-purchase-flow.test.ts      # Uji transaksi pembayaran template desainer
 │   │   └── wallet-and-fulfillment.test.ts      # Uji trigger pemenuhan invoice & kredit wallet
 │   └── utils/
-│   │   ├── api-handler.test.ts                 # Uji wrapper standar error handler HTTP API
-│   │   ├── design-math.test.ts                 # Uji rumus concentric radius, pill, & debounce
-│   │   └── validation.test.ts                  # Uji wrapper validasi Zod & formatted error
-│   │
-│   └── setup.ts                                # Setup environment testing Vitest
+│       ├── api-handler.test.ts                 # Uji wrapper standar error handler HTTP API
+│       ├── design-math.test.ts                 # Uji rumus concentric radius, pill, & debounce
+│       └── validation.test.ts                  # Uji wrapper validasi Zod & formatted error
 │
 ├── astro.config.mjs                            # Konfigurasi Astro Framework
 ├── drizzle.config.ts                           # Konfigurasi Drizzle ORM

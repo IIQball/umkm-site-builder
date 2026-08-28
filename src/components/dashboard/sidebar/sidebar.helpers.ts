@@ -11,6 +11,7 @@ export const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
   ];
   if (role === 'tenant') return [
     { label: 'Dashboard',       href: '/dashboard',            icon: 'dashboard' },
+    { label: 'Pilih Template',  href: '/dashboard/templates',  icon: 'palette' },
     { label: 'Produk',          href: '/dashboard/products',   icon: 'inventory_2' },
     { label: 'Kategori',        href: '/dashboard/categories', icon: 'category' },
     { label: 'Pengaturan Toko', href: '/dashboard/store',      icon: 'store' },

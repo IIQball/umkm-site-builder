@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-26 by feature/virda-token-preset-builder-refactor session
+Status: LIVE · Updated: 2026-08-28 by feature/h6-fauzan-inject-blueprint session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,9 +11,17 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed rigorous header and canvas viewport realignment across all 3 breakpoints (Desktop, Tablet, Mobile): Refactored `Canvas.svelte` with centered preview frame (`max-w-[1200px]` on desktop, `768px` on tablet, `375px` on mobile) within a flex-centered overflow-auto workspace backdrop; synchronized dynamic CSS variable `--active-safe-zone` across `LayoutGridOverlay.svelte`, `HeaderAnnouncement.svelte`, `AnnouncementBar.svelte`, `Hero.svelte`, and `SectionRenderer.svelte`; eliminated inner padding offsets on `HeaderLogo.svelte` and `HeaderNav.svelte` to ensure zero off-grid misalignment at Column 1 and Column 12/8/4; set 64px standard navbar height. `bun run type-check`: 0 errors. `bun run lint`: 0 warnings. `bun test`: 205/205 pass.
+Completed the blueprint injection feature for tenants. Added the `/dashboard/templates` gallery page where tenants can browse approved templates and apply them directly to their store with a single click. The backend endpoint `POST /api/stores/[storeId]/apply-template` handles ownership verification for paid templates, fetches the latest template config, and atomically updates the store's `customization` column. Passed 9 new unit tests. Code passes `type-check` and successfully builds.
 
 ## Last session did
+
+- **Template Blueprint Injection Feature (Phase 2):**
+  - `src/pages/api/stores/[storeId]/apply-template.ts`: Created new POST endpoint to apply template blueprints to a tenant's store. Includes security checks for tenant role, store ownership, template approval status, and purchase verification for paid templates. Safely applies the `template.config` to the `store.customization` column using Drizzle ORM.
+  - `src/components/dashboard/TemplateGallery.svelte`: Created a frontend component to fetch and display approved public templates. Handles "Apply Template" state with visual indicators for currently active template and toast notifications for success/error handling.
+  - `src/pages/dashboard/templates.astro`: Created the Astro page wrapper to mount `TemplateGallery.svelte`, enforcing tenant role access and fetching the current `store.templateId`.
+  - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added "Pilih Template" navigation item under the tenant sidebar section.
+  - `tests/api/stores/[storeId]/apply-template.test.ts`: Added 9 new unit tests covering all authorization paths, ownership checks, missing data validation, and successful application of both free and paid templates.
+  - Total test count: 237 (232 passed, 5 previously existing unrelated failures). Build and Type Check pass successfully.
 
 - **Header & Canvas Viewport Realignment (3 Breakpoints Audit):**
   - `src/components/builder/Canvas.svelte`: Refactored `<main>` to `flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950` with centered `#canvas-frame` (`max-w-[1200px]` desktop, `768px` tablet, `375px` mobile) avoiding sidebar collision. Added `--active-safe-zone` CSS variable matching active viewport mode (`32px` desktop, `24px` tablet, `16px` mobile).

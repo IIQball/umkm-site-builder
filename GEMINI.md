@@ -470,7 +470,7 @@ Sistem builder UMKM Site Builder menerapkan manipulasi layout yang fleksibel dan
   * **Top Margin Handler**: Menyesuaikan `marginTop` section (rentang valid: `0px` hingga `160px`).
   * **Bottom Margin Handler**: Menyesuaikan `marginBottom` section (rentang valid: `0px` hingga `160px`).
   * **Horizontal Padding Handler**: Menyesuaikan padding sisi kiri/kanan section (rentang valid: `8px` hingga `120px`).
-* **Debounced State Mutations**: Perubahan jarak (margin/padding) saat di-drag secara real-time dimutasi ke `editorStore` tanpa memicu re-render berat pada seluruh silsilah komponen (menggunakan tracking pointer gesture).
+* **Transient Drag State & Single-Step History**: Perubahan jarak (margin/padding) saat proses drag berlangsung (`pointermove`) menggunakan lokal state ephemeral (`transientStyles`) untuk rendering visual real-time 60fps tanpa membebani history stack. Tepat saat interaksi drag selesai (`pointerup`), sistem mengeksekusi `commitStyles` yang mencatat tepat 1 snapshot history ke `editorStore`, sehingga aksi `Ctrl+Z` (Undo) langsung mengembalikan nilai jarak ke kondisi awal dalam 1 langkah.
 
 ---
 

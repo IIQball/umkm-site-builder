@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
   import type { TemplateSection, TemplateTheme } from '@/schemas';
@@ -16,6 +17,26 @@
   let dragStartX = 0;
   let startValue = 0;
   let currentDragTooltip = '';
+  let transientStyles: Record<string, Record<string, string>> = {};
+  let activeCleanup: (() => void) | null = null;
+
+  onDestroy(() => {
+    if (activeCleanup) {
+      activeCleanup();
+    }
+  });
+
+  $: renderedSections = sections.map((s) => {
+    const override = transientStyles[s.id];
+    if (!override) return s;
+    return {
+      ...s,
+      styles: {
+        ...(s.styles || {}),
+        ...override,
+      },
+    };
+  });
 
   let containerWidth = 0;
   let canvasHeight = 0;
@@ -99,9 +120,16 @@
     }
   };
 
+  const commitStyles = (sectionId: string, styles: Record<string, string>) => {
+    if (!styles || Object.keys(styles).length === 0) return;
+    editorStore.updateSectionStyles(sectionId, styles);
+  };
+
   const startTopMarginDrag = (e: PointerEvent, section: TemplateSection) => {
     e.stopPropagation();
     e.preventDefault();
+    if (activeCleanup) activeCleanup();
+
     isDraggingSpacing = true;
     dragStartY = e.clientY;
     startValue = parsePx(section.styles?.marginTop, 0);
@@ -110,15 +138,30 @@
       const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
       const newMarginTop = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
       currentDragTooltip = `Margin Top: ${newMarginTop}px`;
-      editorStore.updateSectionStyles(section.id, {
-        marginTop: `${newMarginTop}px`,
-      });
+      transientStyles = {
+        ...transientStyles,
+        [section.id]: {
+          ...(transientStyles[section.id] || {}),
+          marginTop: `${newMarginTop}px`,
+        },
+      };
     };
 
     const onPointerUp = () => {
+      const finalStyles = transientStyles[section.id];
+      transientStyles = {};
+      if (activeCleanup) activeCleanup();
+      if (finalStyles) {
+        commitStyles(section.id, finalStyles);
+      }
+    };
+
+    activeCleanup = () => {
       isDraggingSpacing = false;
+      currentDragTooltip = '';
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
+      activeCleanup = null;
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -128,6 +171,8 @@
   const startBottomMarginDrag = (e: PointerEvent, section: TemplateSection) => {
     e.stopPropagation();
     e.preventDefault();
+    if (activeCleanup) activeCleanup();
+
     isDraggingSpacing = true;
     dragStartY = e.clientY;
     startValue = parsePx(section.styles?.marginBottom, 0);
@@ -136,15 +181,30 @@
       const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
       const newMarginBottom = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
       currentDragTooltip = `Margin Bottom: ${newMarginBottom}px`;
-      editorStore.updateSectionStyles(section.id, {
-        marginBottom: `${newMarginBottom}px`,
-      });
+      transientStyles = {
+        ...transientStyles,
+        [section.id]: {
+          ...(transientStyles[section.id] || {}),
+          marginBottom: `${newMarginBottom}px`,
+        },
+      };
     };
 
     const onPointerUp = () => {
+      const finalStyles = transientStyles[section.id];
+      transientStyles = {};
+      if (activeCleanup) activeCleanup();
+      if (finalStyles) {
+        commitStyles(section.id, finalStyles);
+      }
+    };
+
+    activeCleanup = () => {
       isDraggingSpacing = false;
+      currentDragTooltip = '';
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
+      activeCleanup = null;
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -154,6 +214,8 @@
   const startSidePaddingDrag = (e: PointerEvent, section: TemplateSection) => {
     e.stopPropagation();
     e.preventDefault();
+    if (activeCleanup) activeCleanup();
+
     isDraggingSpacing = true;
     dragStartX = e.clientX;
     const paddingStr = section.styles?.padding || '48px 24px';
@@ -165,15 +227,30 @@
       const deltaX = Math.abs(moveEvent.clientX - dragStartX) / (scaleRatio || 1);
       const newPadX = Math.max(8, Math.min(120, startPadX + Math.round(deltaX / 2)));
       currentDragTooltip = `Padding: ${padY}px ${newPadX}px`;
-      editorStore.updateSectionStyles(section.id, {
-        padding: `${padY}px ${newPadX}px`,
-      });
+      transientStyles = {
+        ...transientStyles,
+        [section.id]: {
+          ...(transientStyles[section.id] || {}),
+          padding: `${padY}px ${newPadX}px`,
+        },
+      };
     };
 
     const onPointerUp = () => {
+      const finalStyles = transientStyles[section.id];
+      transientStyles = {};
+      if (activeCleanup) activeCleanup();
+      if (finalStyles) {
+        commitStyles(section.id, finalStyles);
+      }
+    };
+
+    activeCleanup = () => {
       isDraggingSpacing = false;
+      currentDragTooltip = '';
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
+      activeCleanup = null;
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -219,13 +296,13 @@
         showPixelGrid={$canvasStore.showPixelGrid}
       />
 
-      {#if sections.length === 0}
+      {#if renderedSections.length === 0}
         <div class="p-16 text-center text-slate-400">
           <p class="text-sm">Tidak ada section untuk ditampilkan.</p>
         </div>
       {:else}
         <div class="flex flex-col w-full min-w-0 transition-all">
-          {#each sections as section (section.id)}
+          {#each renderedSections as section (section.id)}
             <div
               role="button"
               tabindex="0"

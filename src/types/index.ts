@@ -3,6 +3,7 @@
  * Re-exports all domain types
  */
 
+export * from './admin';
 export * from './auth';
 export * from './finance';
 export * from './templates';

@@ -1,17 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { formatIDR } from '@/lib/utils/format';
+  import { Building2, ArrowUpRight, AlertTriangle, Info } from 'lucide-svelte';
+  import type { BankAccount, PayoutHistoryItem } from '@/types';
+  import DesignerBankModal from './DesignerBankModal.svelte';
+  import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
+  import DesignerPayoutHistoryTable from './DesignerPayoutHistoryTable.svelte';
 
   export let balance: number;
   export let availableBalance: number;
   export let settlementDelayDays = 7;
-
-  interface BankAccount {
-    id: string;
-    bankName: string;
-    accountNumber: string;
-    holderName: string;
-  }
 
   let bankAccount: BankAccount | null = null;
   let showBankModal = false;
@@ -32,23 +30,8 @@
   let isLoading = false;
   let apiError = '';
 
-  const popularBanks = ['BCA', 'Mandiri', 'BNI', 'BRI', 'CIMB Niaga', 'Permata'];
-
   // Payout request history
-  let payoutHistory: Array<{
-    id: string;
-    amount: number;
-    status: string;
-    gatewayMessage: string | null;
-    xenditPayoutId?: string | null;
-    gatewayReference?: string | null;
-    createdAt: string;
-    bankAccount?: {
-      bankName: string;
-      accountNumber: string;
-      accountHolder: string;
-    };
-  }> = [];
+  let payoutHistory: PayoutHistoryItem[] = [];
   let isLoadingPayouts = false;
   let minPayoutLimit = 50000;
 
@@ -279,8 +262,8 @@
   <div class="bg-card border border-light rounded-2xl p-6 shadow-sm flex flex-col justify-between">
     <div>
       <div class="flex items-center gap-2 mb-3">
-        <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm text-primary">account_balance</span>
+        <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+          <Building2 size={16} />
         </div>
         <h3 class="text-sm font-bold text-main">Rekening Bank Tujuan</h3>
       </div>
@@ -290,29 +273,29 @@
           <div class="h-4 bg-nested rounded w-1/3 mx-auto"></div>
           <div class="h-3 bg-nested rounded w-1/2 mx-auto"></div>
         </div>
+      {:else if bankAccount}
+        <div class="bg-nested border border-light rounded-xl p-4 space-y-2 mt-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Bank</span>
+            <span class="text-xs font-bold text-main">{bankAccount.bankName}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nomor Rekening</span>
+            <span class="text-xs font-semibold text-main font-mono">{bankAccount.accountNumber}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nama Pemilik</span>
+            <span class="text-xs font-semibold text-main">{bankAccount.holderName}</span>
+          </div>
+        </div>
       {:else}
-        {#if bankAccount}
-          <div class="bg-nested border border-light rounded-xl p-4 space-y-2 mt-2">
-            <div class="flex justify-between items-center">
-              <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Bank</span>
-              <span class="text-xs font-bold text-main">{bankAccount.bankName}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nomor Rekening</span>
-              <span class="text-xs font-semibold text-main font-mono">{bankAccount.accountNumber}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nama Pemilik</span>
-              <span class="text-xs font-semibold text-main">{bankAccount.holderName}</span>
-            </div>
+        <div class="bg-warning/10 border border-dashed border-warning/20 rounded-xl p-5 text-center my-2 text-warning">
+          <div class="w-6 h-6 mx-auto mb-1 flex items-center justify-center">
+            <AlertTriangle size={20} />
           </div>
-        {:else}
-          <div class="bg-warning/10 border border-dashed border-warning/20 rounded-xl p-5 text-center my-2 text-warning">
-            <span class="material-symbols-outlined text-xl mb-1">warning_amber</span>
-            <p class="text-xs font-medium">Belum ada rekening bank terhubung.</p>
-            <p class="text-xs text-warning/80 mt-0.5">Hubungkan rekening terlebih dahulu untuk melakukan penarikan dana.</p>
-          </div>
-        {/if}
+          <p class="text-xs font-medium">Belum ada rekening bank terhubung.</p>
+          <p class="text-xs text-warning/80 mt-0.5">Hubungkan rekening terlebih dahulu untuk melakukan penarikan dana.</p>
+        </div>
       {/if}
     </div>
 
@@ -321,7 +304,7 @@
         type="button"
         on:click={openBankModal}
         disabled={isLoading}
-        class="btn btn-sm text-xs font-bold text-main bg-nested hover:bg-nested/80 rounded-xl py-2 px-4 transition-colors disabled:opacity-50"
+        class="btn btn-sm text-xs font-bold text-main bg-nested hover:bg-nested/80 rounded-xl py-2 px-4 transition-colors disabled:opacity-50 cursor-pointer"
       >
         {bankAccount ? 'Ganti Rekening' : 'Hubungkan Rekening'}
       </button>
@@ -332,8 +315,8 @@
   <div class="bg-card border border-light rounded-2xl p-6 shadow-sm flex flex-col justify-between">
     <div>
       <div class="flex items-center gap-2 mb-3">
-        <div class="w-8 h-8 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm text-success">output</span>
+        <div class="w-8 h-8 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center text-success">
+          <ArrowUpRight size={16} />
         </div>
         <h3 class="text-sm font-bold text-main">Tarik Dana Ke Rekening</h3>
       </div>
@@ -356,7 +339,9 @@
 
       {#if availableBalance === 0 && balance > 0}
         <div class="mt-3 p-3 bg-info/10 border border-info/20 rounded-xl flex gap-2">
-          <span class="material-symbols-outlined text-info text-sm flex-shrink-0">info</span>
+          <div class="w-4 h-4 text-info flex-shrink-0 flex items-center justify-center">
+            <Info size={14} />
+          </div>
           <p class="text-xs text-info leading-normal mb-0">
             Dana Anda sebesar {formatIDR(balance)} sedang dalam masa penahanan (settlement hold {settlementDelayDays} hari) dan akan otomatis masuk ke Saldo Tersedia setelah masa hold selesai.
           </p>
@@ -369,7 +354,7 @@
         type="button"
         disabled={!bankAccount || availableBalance < minPayoutLimit || isLoading}
         on:click={() => showWithdrawModal = true}
-        class="btn btn-primary w-full text-xs font-bold text-white disabled:bg-nested disabled:text-muted rounded-xl py-2 px-4 transition-colors text-center"
+        class="btn btn-primary w-full text-xs font-bold text-white disabled:bg-nested disabled:text-muted rounded-xl py-2 px-4 transition-colors text-center cursor-pointer"
       >
         {#if !bankAccount}
           Hubungkan Rekening Terlebih Dahulu
@@ -385,279 +370,35 @@
   </div>
 </div>
 
-<!-- Modal: Link/Change Bank Account -->
-{#if showBankModal}
-  <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-      <div class="flex justify-between items-center pb-2 border-b border-light">
-        <h3 class="text-sm font-bold text-main">{bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}</h3>
-        <button type="button" on:click={() => showBankModal = false} disabled={isLoading} class="text-muted hover:text-main flex items-center disabled:opacity-50 cursor-pointer">
-          <span class="material-symbols-outlined text-sm">close</span>
-        </button>
-      </div>
+<!-- Modals -->
+<DesignerBankModal
+  showModal={showBankModal}
+  {bankAccount}
+  bind:inputBankName
+  bind:inputAccountNumber
+  bind:inputHolderName
+  {isLoading}
+  {apiError}
+  onSave={saveBankAccount}
+  onClose={() => showBankModal = false}
+/>
 
-      <div class="space-y-3">
-        <div class="space-y-1">
-          <label class="text-xs font-extrabold uppercase tracking-widest text-muted" for="select-bank">Nama Bank</label>
-          <select
-            id="select-bank"
-            bind:value={inputBankName}
-            disabled={isLoading}
-            class="w-full bg-nested border border-light rounded-xl px-3 py-2 text-xs text-main outline-none focus:border-primary disabled:opacity-50"
-          >
-            {#each popularBanks as bank}
-              <option value={bank}>{bank}</option>
-            {/each}
-          </select>
-        </div>
+<DesignerWithdrawModal
+  showModal={showWithdrawModal}
+  {withdrawSuccess}
+  {bankAccount}
+  {balance}
+  {availableBalance}
+  bind:withdrawAmount
+  {withdrawError}
+  {isWithdrawing}
+  {minPayoutLimit}
+  onWithdraw={handleWithdraw}
+  onClose={closeWithdrawModal}
+/>
 
-        <div class="space-y-1">
-          <label class="text-xs font-extrabold uppercase tracking-widest text-muted" for="input-norek">Nomor Rekening</label>
-          <input
-            id="input-norek"
-            type="text"
-            placeholder="Contoh: 7128391829"
-            bind:value={inputAccountNumber}
-            disabled={isLoading}
-            class="w-full bg-nested border border-light rounded-xl px-3 py-2 text-xs text-main outline-none focus:border-primary font-mono disabled:opacity-50"
-          />
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-xs font-extrabold uppercase tracking-widest text-muted" for="input-nama">Nama Pemilik Rekening</label>
-          <input
-            id="input-nama"
-            type="text"
-            placeholder="Nama lengkap sesuai tabungan"
-            bind:value={inputHolderName}
-            disabled={isLoading}
-            class="w-full bg-nested border border-light rounded-xl px-3 py-2 text-xs text-main outline-none focus:border-primary disabled:opacity-50"
-          />
-        </div>
-        
-        {#if apiError}
-          <div class="text-xs font-semibold text-error pt-1">{apiError}</div>
-        {/if}
-      </div>
-
-      <div class="flex gap-2 pt-2">
-        <button
-          type="button"
-          on:click={() => showBankModal = false}
-          disabled={isLoading}
-          class="btn btn-sm text-xs font-bold text-secondary bg-nested hover:bg-nested/80 rounded-xl py-2 px-3 transition-colors border border-light disabled:opacity-50 cursor-pointer"
-        >
-          Batal
-        </button>
-        <button
-          type="button"
-          on:click={saveBankAccount}
-          disabled={isLoading}
-          class="btn btn-sm btn-primary text-xs font-bold text-white rounded-xl py-2 px-3 transition-colors text-center flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          {#if isLoading}
-            <span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            Menyimpan...
-          {:else}
-            Simpan Rekening
-          {/if}
-        </button>
-      </div>
-    </div>
-  </div>
-{/if}
-
-<!-- Modal: Withdraw Money -->
-{#if showWithdrawModal}
-  <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-      {#if withdrawSuccess}
-        <div class="text-center py-6 space-y-4">
-          <div class="w-12 h-12 rounded-full bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto">
-            <span class="material-symbols-outlined text-sm">done</span>
-          </div>
-          <div class="space-y-1">
-            <h4 class="text-sm font-bold text-main">Permintaan Penarikan Dikirim</h4>
-            <p class="text-xs text-secondary px-4">
-              Dana sedang diproses dan akan masuk ke rekening {bankAccount?.bankName} ({bankAccount?.accountNumber}) Anda dalam 1-2 hari kerja.
-            </p>
-          </div>
-          <button
-            type="button"
-            on:click={closeWithdrawModal}
-            class="btn btn-sm btn-primary text-xs font-bold text-white rounded-xl py-2 px-6 transition-colors cursor-pointer"
-          >
-            Selesai
-          </button>
-        </div>
-      {:else}
-        <div class="space-y-4">
-          <div class="flex justify-between items-center pb-2 border-b border-light">
-            <h3 class="text-sm font-bold text-main">Tarik Dana</h3>
-            <button type="button" on:click={closeWithdrawModal} class="text-muted hover:text-main flex items-center cursor-pointer">
-              <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 bg-nested border border-light rounded-xl p-3 text-center">
-            <div class="space-y-0.5">
-              <span class="text-xs font-bold text-muted uppercase">Saldo Aktif</span>
-              <p class="text-xs font-black text-main font-mono">{formatIDR(balance)}</p>
-            </div>
-            <div class="space-y-0.5 border-l border-light">
-              <span class="text-xs font-bold text-success uppercase">Siap Tarik</span>
-              <p class="text-xs font-black text-success font-mono">{formatIDR(availableBalance)}</p>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-xs font-extrabold uppercase tracking-widest text-muted" for="input-amount">Nominal Penarikan</label>
-            <div class="relative">
-              <span class="absolute left-3 top-2.5 text-xs font-bold text-muted">Rp</span>
-              <input
-                id="input-amount"
-                type="number"
-                placeholder="0"
-                bind:value={withdrawAmount}
-                disabled={isWithdrawing}
-                class="w-full bg-nested border border-light rounded-xl pl-9 pr-3 py-2.5 text-xs text-main font-mono outline-none focus:border-primary font-bold"
-              />
-            </div>
-            
-            <div class="flex gap-1.5 pt-1.5">
-              <button
-                type="button"
-                on:click={() => withdrawAmount = String(Math.floor(availableBalance * 0.5))}
-                class="text-xs font-bold bg-nested border border-light text-secondary px-2.5 py-1 rounded-lg hover:bg-nested/80 cursor-pointer"
-              >
-                50%
-              </button>
-              <button
-                type="button"
-                on:click={() => withdrawAmount = String(availableBalance)}
-                class="text-xs font-bold bg-nested border border-light text-secondary px-2.5 py-1 rounded-lg hover:bg-nested/80 cursor-pointer"
-              >
-                100%
-              </button>
-            </div>
-            
-            {#if withdrawError}
-              <p class="text-xs font-semibold text-error mt-1">{withdrawError}</p>
-            {/if}
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button
-              type="button"
-              on:click={closeWithdrawModal}
-              disabled={isWithdrawing}
-              class="btn btn-sm text-xs font-bold text-secondary bg-nested hover:bg-nested/80 rounded-xl py-2 px-3 transition-colors border border-light cursor-pointer"
-            >
-              Batal
-            </button>
-            <button
-              type="button"
-              on:click={handleWithdraw}
-              disabled={isWithdrawing}
-              class="btn btn-sm btn-primary text-xs font-bold text-white rounded-xl py-2 px-3 transition-colors text-center flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              {#if isWithdrawing}
-                <span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                Memproses...
-              {:else}
-                Konfirmasi
-              {/if}
-            </button>
-          </div>
-        </div>
-      {/if}
-    </div>
-  </div>
-{/if}
-
-<!-- Riwayat Penarikan Dana -->
-<div class="bg-card border border-light rounded-2xl p-6 shadow-sm space-y-4 mt-5">
-  <div class="flex items-center justify-between border-b border-light pb-3">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-        <span class="material-symbols-outlined text-sm text-primary">history</span>
-      </div>
-      <h3 class="text-sm font-bold text-main">Riwayat Penarikan Dana</h3>
-    </div>
-  </div>
-
-  {#if isLoadingPayouts}
-    <div class="space-y-3">
-      <div class="h-10 bg-nested rounded-xl animate-pulse"></div>
-      <div class="h-10 bg-nested rounded-xl animate-pulse"></div>
-    </div>
-  {:else}
-    {#if payoutHistory.length === 0}
-      <div class="text-center py-8 text-secondary">
-        <span class="material-symbols-outlined text-3xl text-muted mb-1">receipt_long</span>
-        <p class="text-xs">Belum ada riwayat penarikan dana.</p>
-      </div>
-    {:else}
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-light text-muted uppercase tracking-wider text-xs">
-              <th class="py-2.5 font-extrabold">Tanggal</th>
-              <th class="py-2.5 font-extrabold">Nominal</th>
-              <th class="py-2.5 font-extrabold">Status</th>
-              <th class="py-2.5 font-extrabold">Keterangan</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-light">
-            {#each payoutHistory as payout}
-              <tr>
-                <td class="py-3 text-main font-mono">
-                  {new Date(payout.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </td>
-                <td class="py-3 text-main font-bold font-mono">{formatIDR(payout.amount)}</td>
-                <td class="py-3">
-                  {#if payout.status === 'processing'}
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 animate-pulse">
-                      <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping flex-shrink-0"></span>
-                      Processing
-                    </span>
-                  {:else if payout.status === 'completed'}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20">
-                      Completed
-                    </span>
-                  {:else if payout.status === 'rejected'}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-error/10 text-error border border-error/20">
-                      Rejected
-                    </span>
-                  {:else}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
-                      {payout.status}
-                    </span>
-                  {/if}
-                </td>
-                <td class="py-3 text-secondary">
-                  <div class="truncate max-w-[200px]">
-                    {payout.gatewayMessage || (payout.status === 'processing' ? 'Sedang diproses oleh platform' : payout.status === 'completed' ? 'Dana berhasil ditransfer' : 'Penarikan ditolak')}
-                  </div>
-                  {#if payout.xenditPayoutId || payout.gatewayReference}
-                    <div class="text-xs text-muted font-mono mt-0.5 whitespace-nowrap">
-                      {#if payout.xenditPayoutId}
-                        ID: {payout.xenditPayoutId}
-                      {/if}
-                      {#if payout.xenditPayoutId && payout.gatewayReference}
-                        <span class="mx-1">|</span>
-                      {/if}
-                      {#if payout.gatewayReference}
-                        Ref: {payout.gatewayReference}
-                      {/if}
-                    </div>
-                  {/if}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    {/if}
-  {/if}
-</div>
+<!-- Payout History Table -->
+<DesignerPayoutHistoryTable
+  {payoutHistory}
+  isLoading={isLoadingPayouts}
+/>

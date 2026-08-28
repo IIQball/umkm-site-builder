@@ -2,6 +2,11 @@
   import type { TemplateSection } from '@/schemas';
   import { makeHandlePropChange } from './content.helpers';
   import { Upload, X, Loader2 } from 'lucide-svelte';
+  import {
+    compressToWebP,
+    uploadToCloudinary,
+    deleteOldImage,
+  } from '../inspector/imageUpload.helpers';
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
@@ -15,71 +20,6 @@
   let uploadProgress = 0;
   let errorMessage = '';
   let fileInput: HTMLInputElement;
-
-  // Konversi JPG/PNG -> WebP dengan resolusi wajar & kompresi bertahap agar <= 200KB
-  async function compressToWebP(file: File): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        
-        // Batasi dimensi maksimum agar file ringan dan pas untuk Hero
-        const MAX_WIDTH = 1920;
-        const MAX_HEIGHT = 1080;
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width / height > MAX_WIDTH / MAX_HEIGHT) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          } else {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas context tidak tersedia'));
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Kompresi dinamis menuju target ~200KB
-        let quality = 0.8;
-        const tryExport = (q: number) => {
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) return reject(new Error('Gagal kompresi WebP'));
-              // Jika masih > 200KB dan quality masih bisa diturunkan
-              if (blob.size > 200 * 1024 && q > 0.4) {
-                tryExport(q - 0.15);
-              } else {
-                resolve(blob);
-              }
-            },
-            'image/webp',
-            q
-          );
-        };
-        tryExport(quality);
-      };
-      img.onerror = () => reject(new Error('Gagal memproses gambar'));
-      img.src = URL.createObjectURL(file);
-    });
-  }
-
-  async function deleteOldImage(urlToDelete: string) {
-    if (!urlToDelete || !urlToDelete.includes('cloudinary.com')) return;
-    try {
-      await fetch('/api/media/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: urlToDelete }),
-      });
-    } catch {
-      // Ignore background deletion failure
-    }
-  }
 
   async function handleImageUpload(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -102,48 +42,18 @@
 
     try {
       isUploading = true;
-      uploadProgress = 15;
-
-      const webpBlob = await compressToWebP(file);
-      uploadProgress = 40;
-
-      // Get signed upload token
-      const signRes = await fetch('/api/media/sign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder: 'templates' }),
-      });
-
-      if (!signRes.ok) throw new Error('Gagal mendapatkan izin upload');
-      const { data: signData } = await signRes.json();
-
+      uploadProgress = 30;
+      const webpBlob = await compressToWebP(file, 1920, 1080);
       uploadProgress = 60;
-
-      // Direct upload ke Cloudinary
-      const formData = new FormData();
-      formData.append('file', webpBlob, `${Date.now()}_hero.webp`);
-      formData.append('api_key', signData.apiKey);
-      formData.append('timestamp', signData.timestamp);
-      formData.append('signature', signData.signature);
-      formData.append('folder', signData.folder);
-
-      const cloudRes = await fetch(signData.uploadUrl, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!cloudRes.ok) throw new Error('Upload Cloudinary gagal');
-      const cloudData = await cloudRes.json();
+      const url = await uploadToCloudinary(webpBlob, 'templates', `${Date.now()}_hero.webp`);
       uploadProgress = 100;
 
-      // Hapus gambar lama jika ada pergantian gambar
       const oldUrl = imageUrl;
-      if (oldUrl && oldUrl !== cloudData.secure_url) {
+      if (oldUrl && oldUrl !== url) {
         await deleteOldImage(oldUrl);
       }
 
-      // Update state gambar di template section
-      handlePropChange('imageUrl', cloudData.secure_url);
+      handlePropChange('imageUrl', url);
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Upload gagal';
     } finally {

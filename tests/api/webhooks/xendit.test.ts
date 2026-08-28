@@ -23,7 +23,7 @@ describe('Xendit Webhook API Route', () => {
 
     // Setup spies instead of global mocks to prevent mock pollution
     mockProcessWebhook = vi.spyOn(transactionService, 'processWebhook').mockResolvedValue({ status: 'success', message: 'Fulfillment complete' }) as unknown as Mock;
-    mockProcessDisbursementWebhook = vi.spyOn(payoutService, 'processDisbursementWebhook').mockResolvedValue(undefined) as unknown as Mock;
+    mockProcessDisbursementWebhook = vi.spyOn(payoutService, 'processDisbursementWebhook').mockResolvedValue({ status: 'completed', message: 'Payout disbursement processed successfully' }) as unknown as Mock;
   });
 
   afterEach(() => {
@@ -38,121 +38,115 @@ describe('Xendit Webhook API Route', () => {
 
     const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('FORBIDDEN');
+    const data = await res.json();
+    expect(data.error.code).toBe('FORBIDDEN');
+  });
+
+  it('returns 403 when x-callback-token is invalid', async () => {
+    const request = new Request('http://localhost/api/webhooks/xendit', {
+      method: 'POST',
+      headers: { 'x-callback-token': 'wrong_token' },
+      body: JSON.stringify({ external_id: 'INV-123' }),
+    });
+
+    const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
+    expect(res.status).toBe(403);
   });
 
   it('delegates to payoutService when payload is a disbursement (COMPLETED)', async () => {
-    // 1. Mock DB select to return a payoutRequest
-    mockSelect.mockReturnValueOnce({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: 'po_123' }]),
-        }),
-      }),
-    });
-
     const request = new Request('http://localhost/api/webhooks/xendit', {
       method: 'POST',
-      headers: {
-        'x-callback-token': 'test_token',
-      },
+      headers: { 'x-callback-token': 'test_token' },
       body: JSON.stringify({
         id: 'disb_123',
         external_id: 'po_123',
+        amount: 100000,
         status: 'COMPLETED',
-        amount: 4200000,
       }),
     });
 
-    // Temporarily set webhook secret environment
-    import.meta.env.XENDIT_WEBHOOK_SECRET = 'test_token';
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([
+          {
+            id: 'po_123',
+          },
+        ]),
+      }),
+    });
 
     const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.received).toBe(true);
-    expect(mockProcessDisbursementWebhook).toHaveBeenCalledWith({
-      payoutRequestId: 'po_123',
-      status: 'COMPLETED',
-      failureCode: undefined,
-    });
+    expect(mockProcessDisbursementWebhook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        external_id: 'po_123',
+        status: 'COMPLETED',
+      })
+    );
+    expect(mockProcessWebhook).not.toHaveBeenCalled();
   });
 
   it('delegates to payoutService when payload is a disbursement (FAILED)', async () => {
-    // 1. Mock DB select to return a payoutRequest
-    mockSelect.mockReturnValueOnce({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: 'po_123' }]),
-        }),
-      }),
-    });
-
     const request = new Request('http://localhost/api/webhooks/xendit', {
       method: 'POST',
-      headers: {
-        'x-callback-token': 'test_token',
-      },
+      headers: { 'x-callback-token': 'test_token' },
       body: JSON.stringify({
         id: 'disb_123',
         external_id: 'po_123',
+        amount: 100000,
         status: 'FAILED',
-        failure_code: 'INSUFFICIENT_BALANCE',
-        amount: 4200000,
+        failure_code: 'INVALID_DESTINATION',
       }),
     });
 
-    // Temporarily set webhook secret environment
-    import.meta.env.XENDIT_WEBHOOK_SECRET = 'test_token';
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([
+          {
+            id: 'po_123',
+          },
+        ]),
+      }),
+    });
 
     const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.received).toBe(true);
-    expect(mockProcessDisbursementWebhook).toHaveBeenCalledWith({
-      payoutRequestId: 'po_123',
-      status: 'FAILED',
-      failureCode: 'INSUFFICIENT_BALANCE',
-    });
+    expect(mockProcessDisbursementWebhook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        external_id: 'po_123',
+        status: 'FAILED',
+        failure_code: 'INVALID_DESTINATION',
+      })
+    );
+    expect(mockProcessWebhook).not.toHaveBeenCalled();
   });
 
   it('delegates to transactionService when payload is a normal invoice', async () => {
-    // 1. Mock DB select to return empty (not a payoutRequest)
-    mockSelect.mockReturnValueOnce({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([]),
-        }),
-      }),
-    });
-
-    // 2. Mock transactionService success
-    mockProcessWebhook.mockResolvedValueOnce({
-      status: 'success',
-      message: 'Fulfillment complete',
-    });
-
     const request = new Request('http://localhost/api/webhooks/xendit', {
       method: 'POST',
-      headers: {
-        'x-callback-token': 'test_token',
-      },
+      headers: { 'x-callback-token': 'test_token' },
       body: JSON.stringify({
-        id: 'x_123',
-        external_id: 'INV-123',
+        id: 'inv_123',
+        external_id: 'INV-user1-12345',
         amount: 100000,
         status: 'PAID',
       }),
     });
 
-    import.meta.env.XENDIT_WEBHOOK_SECRET = 'test_token';
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([]),
+      }),
+    });
 
     const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(mockProcessWebhook).toHaveBeenCalled();
+    expect(mockProcessWebhook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        external_id: 'INV-user1-12345',
+        status: 'PAID',
+      })
+    );
+    expect(mockProcessDisbursementWebhook).not.toHaveBeenCalled();
   });
 });

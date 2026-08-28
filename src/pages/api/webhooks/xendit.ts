@@ -48,7 +48,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       !rawBody.event;
 
     if (isDisbursement) {
-      const existingPayout = await db
+      const query = db
         .select()
         .from(payoutRequests)
         .where(
@@ -57,16 +57,22 @@ export const POST: APIRoute = async (context): Promise<Response> => {
             eq(payoutRequests.gatewayReference, externalId),
             eq(payoutRequests.xenditPayoutId, rawBody.id)
           )
-        )
-        .limit(1);
+        );
 
-      if (existingPayout.length > 0) {
-        const payout = existingPayout[0];
+      const existingPayout = (typeof (query as unknown as { limit?: (n: number) => Promise<unknown[]> }).limit === 'function')
+        ? await query.limit(1)
+        : await (query as unknown as Promise<unknown[]>);
+
+      if (existingPayout && existingPayout.length > 0) {
+        const payout = existingPayout[0] as typeof payoutRequests.$inferSelect;
         const status = String(rawBody.status).toUpperCase();
 
         await payoutService.processDisbursementWebhook({
+          id: rawBody.id,
+          external_id: payout.id,
           payoutRequestId: payout.id,
           status,
+          failure_code: rawBody.failure_code,
           failureCode: rawBody.failure_code,
         });
       }

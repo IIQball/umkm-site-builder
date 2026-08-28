@@ -8,15 +8,15 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user) {
-      throw new AppError('Autentikasi diperlukan', 401);
+      throw new AppError('Authentication required', 401);
     }
     if (!isAuthorizedAdmin(user)) {
-      throw new AppError('Akses khusus admin diperlukan', 403);
+      throw new AppError('Admin access required', 403);
     }
 
     const templateId = context.params.id;
     if (!templateId) {
-      throw new AppError('ID Template wajib diisi', 400);
+      throw new AppError('Template ID is required', 400);
     }
 
     const body = await context.request.json().catch(() => ({}));
@@ -24,7 +24,7 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
 
     const updatedData = await reviewTemplate(templateId, validatedInput.action, validatedInput.rejectionReason, user.id);
 
-    const res = jsonSuccess(updatedData, 'Status template berhasil diperbarui');
+    const res = jsonSuccess(updatedData, 'Template status updated successfully');
     const responseBody = await res.json();
     responseBody.template = updatedData;
     return Response.json(responseBody, { status: 200 });
@@ -33,4 +33,3 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
 
 export const POST: APIRoute = handleReview;
 export const PUT: APIRoute = handleReview;
-

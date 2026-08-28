@@ -78,14 +78,14 @@ export class TransactionService {
     baseUrl: string
   ): Promise<{ isFree: boolean; message?: string; data?: { invoiceUrl: string; invoiceId: string; externalId: string } }> {
     const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user.length) throw new AppError('Harap masuk terlebih dahulu', 401);
+    if (!user.length) throw new AppError('Authentication required', 401);
 
     const template = await db.query.templates.findFirst({
       where: and(eq(templates.id, templateId), eq(templates.status, 'approved')),
     });
 
     if (!template) {
-      throw new AppError('Template tidak ditemukan atau belum disetujui', 404);
+      throw new AppError('Template not found or not approved', 404);
     }
 
     const existingOwnership = await db.query.userTemplates.findFirst({
@@ -93,7 +93,7 @@ export class TransactionService {
     });
 
     if (existingOwnership) {
-      throw new AppError('Anda sudah memiliki template ini', 400, undefined, 'TEMPLATE_ALREADY_OWNED');
+      throw new AppError('Template already owned', 400, undefined, 'TEMPLATE_ALREADY_OWNED');
     }
 
     // Free template case
@@ -106,7 +106,7 @@ export class TransactionService {
         acquiredAt: new Date(),
       });
 
-      return { isFree: true, message: 'Template gratis berhasil ditambahkan ke akun Anda' };
+      return { isFree: true, message: 'Free template added to your account successfully' };
     }
 
     // Paid template case

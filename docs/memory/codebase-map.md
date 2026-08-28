@@ -47,7 +47,7 @@ is stale it is worse than empty, because it gets trusted.
 | response shape | src/pages/api/*.ts | `{ ok: true, data: T }` or `{ ok: false, error: { code, message } }` |
 | Xendit client | src/lib/xendit.ts | Invoice creation, signature verification, API calls |
 | Cloudinary lib | src/lib/cloudinary.ts | generateSignedUploadParams(), uploadToCloudinary(), deleteFromCloudinary() |
-| transaction service | src/lib/transactions/service.ts or src/services/transaction.service.ts | Transaction initiation, webhook processing, currency formatting (uses transactions table) |
+| analytics service | src/services/analytics.service.ts | trackEvent(storeId, eventType) — increments totalWaClicks or totalViews on stores table |
 | db client | src/lib/db/client.ts | Lazy-loaded Drizzle ORM singleton |
 | media schemas | src/schemas/media.schema.ts | MediaSignInput, CloudinaryUploadResult, CLOUDINARY_VARIANTS |
 | transaction schemas | src/lib/transactions/schemas.ts | Zod validation for inputs and webhooks |
@@ -62,6 +62,8 @@ is stale it is worse than empty, because it gets trusted.
 | View checkout | GET /checkout/[invoiceId] → getTransactionDetails() → render invoice, amount, status |
 | Poll status | Frontend: TransactionStatus.svelte → GET /api/transactions/status/[invoiceId] → fetch from transactions table |
 | Signed image upload | ImageUpload.svelte → convert WebP → POST /api/media/sign → get params → POST direct to Cloudinary → get URL → store in entity JSONB |
+| Track analytics | POST /api/analytics/track (public) → trackEvent(storeId, eventType) → increment stores.totalViews or stores.totalWaClicks |
+| View analytics | GET /dashboard/analytics (tenant-only) → fetch store stats → TrafficWidget displays views, clicks, conversion rate |
 
 ## 5. Where to add a new X
 

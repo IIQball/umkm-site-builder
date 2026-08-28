@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-28 by feature/h6-fauzan-inject-blueprint session
+Status: LIVE · Updated: 2026-08-29 by feature/h9-fauzan-analytics-track session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,13 +11,19 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Completed the blueprint injection feature for tenants. Added the `/dashboard/templates` gallery page where tenants can browse approved templates and apply them directly to their store with a single click. The backend endpoint `POST /api/stores/[storeId]/apply-template` handles ownership verification for paid templates, fetches the latest template config, and atomically updates the store's `customization` column. Passed 9 new unit tests. Code passes `type-check` and successfully builds.
+Implemented analytics tracking for tenant storefronts. Created `POST /api/analytics/track` endpoint (public, no auth) to record store views and WhatsApp clicks. Built TrafficWidget dashboard showing total views, total clicks, and conversion rate. All 263 tests pass, type-check and lint are green.
 
 ## Last session did
 
-- **Template Blueprint Injection Feature (Phase 2):**
-  - `src/pages/api/stores/[storeId]/apply-template.ts`: Created new POST endpoint to apply template blueprints to a tenant's store. Includes security checks for tenant role, store ownership, template approval status, and purchase verification for paid templates. Safely applies the `template.config` to the `store.customization` column using Drizzle ORM.
-  - `src/components/dashboard/TemplateGallery.svelte`: Created a frontend component to fetch and display approved public templates. Handles "Apply Template" state with visual indicators for currently active template and toast notifications for success/error handling.
+- **Analytics Tracking Feature:**
+  - `src/services/analytics.service.ts` (NEW): Service with `trackEvent(storeId, eventType)`. Accepts 'wa_click' or 'store_view' events. Atomically increments `stores.totalWaClicks` or `stores.totalViews`. Throws structured `AppError` with codes `STORE_NOT_FOUND`, `INVALID_EVENT_TYPE`.
+  - `src/pages/api/analytics/track.ts` (NEW): POST endpoint accepting `storeId` and `eventType`. Public access (no auth required) to allow tracking from storefronts. Validates input via Zod schema.
+  - `src/components/dashboard/TrafficWidget.svelte` (NEW): Displays two stat cards (Total Views with Users icon, WhatsApp Clicks with MessageCircle icon). Shows conversion rate (clicks/views %) with progress bar. Includes manual refresh button with loading state.
+  - `src/pages/dashboard/analytics.astro` (NEW): Tenant-only analytics page. Fetches user's store and passes `storeId` to TrafficWidget. Auth guard redirects to onboarding if no store exists.
+  - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added 'Analitik' nav link (trending_up icon) to tenant sidebar.
+  - `tests/services/analytics.service.test.ts` (NEW): 4 unit tests for service layer (store not found, invalid event type, store_view increment, wa_click increment).
+  - `tests/api/analytics/track.test.ts` (NEW): 6 unit tests for endpoint (validation, success cases, error handling).
+  - Total test count: 263 (all passing). Type check: 0 errors, 0 warnings. Lint: 0 errors, 0 warnings.
   - `src/pages/dashboard/templates.astro`: Created the Astro page wrapper to mount `TemplateGallery.svelte`, enforcing tenant role access and fetching the current `store.templateId`.
   - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added "Pilih Template" navigation item under the tenant sidebar section.
   - `tests/api/stores/[storeId]/apply-template.test.ts`: Added 9 new unit tests covering all authorization paths, ownership checks, missing data validation, and successful application of both free and paid templates.

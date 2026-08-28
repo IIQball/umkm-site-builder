@@ -87,12 +87,18 @@ umkm-site-builder/
 │   │   │   │   ├── AddNodeDropdown.svelte      # Tombol nambah block section baru
 │   │   │   │   └── layerPanel.helpers.ts       # Helper manipulasi susunan layer
 │   │   │   ├── sections/
+│   │   │   │   ├── catalog/
+│   │   │   │   │   ├── ProductCatalogCard.svelte # Komponen visual kartu katalog produk
+│   │   │   │   │   └── ProductCatalogQuickView.svelte # Detail popup cepat ulasan produk
 │   │   │   │   ├── header/
 │   │   │   │   │   ├── AnnouncementBar.svelte  # Baris pengumuman di atas navigasi
 │   │   │   │   │   ├── HeaderLogo.svelte       # Elemen visual logo website toko
 │   │   │   │   │   └── HeaderNav.svelte        # Elemen menu navigasi toko
 │   │   │   │   ├── hero/
-│   │   │   │   │   └── HeroElementToolbar.svelte # Floating toolbar elemen teks/gambar hero
+│   │   │   │   │   ├── HeroCenteredMinimal.svelte # Template hero minimalis tengah
+│   │   │   │   │   ├── HeroElementToolbar.svelte # Floating toolbar elemen teks/gambar hero
+│   │   │   │   │   ├── HeroFullBanner.svelte   # Template hero latar belakang penuh
+│   │   │   │   │   └── HeroSplitLayout.svelte  # Template hero 50/50 visual terpisah
 │   │   │   │   ├── FAQ.svelte                  # Komponen visual Frequently Asked Questions
 │   │   │   │   ├── Features.svelte             # Komponen visual daftar keunggulan/layanan
 │   │   │   │   ├── Footer.svelte               # Komponen visual footer (alamat & sosmed)
@@ -117,9 +123,11 @@ umkm-site-builder/
 │   │   │   ├── NodeStylesTab.svelte            # Tab kustomisasi spesifik style per node
 │   │   │   ├── PropertyInspector.svelte        # Panel samping inspeksi properti node & tema
 │   │   │   ├── ReadOnlyPreview.svelte          # Pratinjau baca-saja live template
+│   │   │   ├── StylesTab.svelte                # Tab helper navigasi styles
 │   │   │   ├── SubmitReviewModal.svelte        # Modal pengajuan review template ke admin
 │   │   │   └── TopBar.svelte                   # Bar atas editor (undo, redo, zoom, breakpoint)
 │   │   ├── checkout/
+│   │   │   ├── CheckoutSummaryCard.svelte      # Ringkasan detail tagihan checkout invoice
 │   │   │   ├── PaymentModal.svelte             # Modal pembayaran invoice Xendit
 │   │   │   └── TransactionStatus.svelte        # Status tagihan invoice (polling & status badge)
 │   │   ├── common/
@@ -133,7 +141,8 @@ umkm-site-builder/
 │   │   │   ├── CategoryManager.svelte          # Pengelola CRUD kategori produk tenant
 │   │   │   ├── DashboardNavbar.svelte          # Navigasi panel dashboard tenant
 │   │   │   ├── Sidebar.svelte                  # Menu navigasi sidebar panel tenant
-│   │   │   └── StoreSettingsForm.svelte        # Konfigurasi WhatsApp, Google Maps, & profil toko
+│   │   │   ├── StoreSettingsForm.svelte        # Konfigurasi WhatsApp, Google Maps, & profil toko
+│   │   │   └── TemplateGallery.svelte          # Galeri pilihan template desain toko
 │   │   ├── designer/
 │   │   │   ├── DesignerBankWithdraw.svelte     # Form rekening bank & modal payout desainer
 │   │   │   ├── DesignerMutationTable.svelte    # Tabel daftar mutasi keuangan desainer
@@ -152,6 +161,7 @@ umkm-site-builder/
 │   │   │   ├── DynamicSection.svelte           # Komponen rendering section dinamis storefront
 │   │   │   ├── Footer.svelte                   # Footer publik website toko tenant
 │   │   │   ├── Hero.svelte                     # Banner hero publik website toko tenant
+│   │   │   ├── ProductGrid.svelte              # Grid daftar produk di storefront
 │   │   │   └── PromoBanner.svelte              # Banner promosi publik website toko tenant
 │   │   ├── tenant/
 │   │   │   ├── ProductDeleteModal.svelte       # Dialog konfirmasi penghapusan produk
@@ -167,6 +177,8 @@ umkm-site-builder/
 │   │   ├── index.ts                            # Inisialisasi koneksi Drizzle Neon Serverless
 │   │   ├── schema.ts                           # Skema tabel database (users, stores, wallets)
 │   │   └── seed.ts                             # Skrip otomatisasi pengisian data awal (seeding)
+│   │
+│   ├── env.d.ts                                # Deklarasi tipe environment Astro
 │   │
 │   ├── layouts/                                # Master layout pembungkus halaman Astro
 │   │   ├── BaseLayout.astro                    # Layout dasar HTML publik
@@ -202,6 +214,8 @@ umkm-site-builder/
 │   │   ├── currency.ts                         # Utilitas manipulasi nilai rupiah
 │   │   ├── toast.ts                            # State store penampil alert notifikasi melayang
 │   │   └── whatsapp.ts                         # Utilitas generator URL chat WhatsApp
+│   │
+│   ├── middleware.ts                           # Middleware otentikasi & pengecekan role
 │   │
 │   ├── pages/                                  # Rute URL halaman file-based routing Astro
 │   │   ├── admin/
@@ -248,8 +262,11 @@ umkm-site-builder/
 │   │   │   │   │   └── status/
 │   │   │   │   │       └── [invoiceId].ts      # GET status invoice transaksi pembayaran
 │   │   │   │   └── commission.ts               # GET persentase split komisi untuk publik
+│   │   │   ├── storefront/
+│   │   │   │   └── catalog.ts                  # GET daftar katalog produk untuk storefront
 │   │   │   ├── stores/
 │   │   │   │   ├── [storeId]/
+│   │   │   │   │   ├── apply-template.ts       # POST menerapkan template ke toko tenant
 │   │   │   │   │   └── products.ts             # GET daftar produk toko publik & filter kategori
 │   │   │   │   ├── check-subdomain.ts          # GET verifikasi status subdomain baru
 │   │   │   │   ├── onboard.ts                  # POST aktivasi awal nama subdomain toko
@@ -276,7 +293,8 @@ umkm-site-builder/
 │   │   │   ├── index.astro                     # Panel dashboard utama monitoring toko tenant
 │   │   │   ├── products.astro                  # Halaman CRUD inventaris produk tenant
 │   │   │   ├── store-settings.astro            # Halaman setting visual, wa, & nama toko
-│   │   │   └── store.astro                     # Halaman pratinjau internal toko tenant
+│   │   │   ├── store.astro                     # Halaman pratinjau internal toko tenant
+│   │   │   └── templates.astro                 # Halaman galeri template desain untuk tenant
 │   │   ├── designer/
 │   │   │   ├── templates.astro                 # Halaman panel daftar template desainer
 │   │   │   └── wallet.astro                    # Halaman pencairan komisi & riwayat desainer
@@ -286,6 +304,7 @@ umkm-site-builder/
 │   │   │   └── templates/
 │   │   │       └── index.astro                 # Halaman landing list katalog template publik
 │   │   ├── storefront/
+│   │   │   ├── [subdomain].astro               # Halaman routing dinamis storefront tenant
 │   │   │   └── index.astro                     # Halaman rendering live storefront toko tenant
 │   │   ├── templates/
 │   │   │   └── index.astro                     # Halaman pasar katalog template market
@@ -336,7 +355,7 @@ umkm-site-builder/
 │       ├── common/
 │       │   ├── api.ts                          # Tipe standard HTTP API responses
 │       │   ├── toast.ts                        # Tipe data notifikasi toast melayang
-│       │   └── index.ts                        # Tipe helper modular
+│       │   └── index.ts                        # Tipe data helper modular
 │       ├── finance/
 │       │   ├── commission.ts                   # Tipe skema bagi hasil komisi
 │       │   ├── index.ts                        # Ekspor tipe finansial
@@ -351,7 +370,7 @@ umkm-site-builder/
 ├── tests/                                      # Suite pengujian unit & integrasi (Vitest)
 │   ├── api/
 │   │   ├── builder/
-│   │   │   └── save.test.ts                    # Uji proteksi penyimpanan revisi builder
+│   │   │   └── save.test.ts                    # Uji proteksi penyimpanan draf builder
 │   │   ├── categories/
 │   │   │   └── index.test.ts                   # Uji API CRUD kategori produk tenant
 │   │   ├── designer/
@@ -366,13 +385,17 @@ umkm-site-builder/
 │   │   │   ├── templates/
 │   │   │   │   └── index.test.ts               # Uji API katalog template publik
 │   │   │   └── commission.test.ts              # Uji API pembacaan komisi untuk publik
+│   │   ├── storefront/
+│   │   │   └── catalog.test.ts                 # Uji API catalog storefront tenant
 │   │   ├── stores/
 │   │   │   └── [storeId]/
+│   │   │       ├── apply-template.test.ts      # Uji fungsionalitas penerapan template ke toko
 │   │   │       └── products.test.ts            # Uji API katalog produk spesifik toko
 │   │   ├── webhooks/
 │   │   │   └── xendit.test.ts                  # Uji penanganan webhook e-invoice Xendit
 │   │   ├── check-subdomain.test.ts             # Uji validasi subdomain input Zod
 │   │   └── media-sign.test.ts                  # Uji Cloudinary signed upload generator
+│   │   └── variants.test.ts                    # Uji API CRUD varian produk
 │   ├── finance/
 │   │   ├── commission-and-masking.test.ts      # Uji engine komisi & masking nominal rupiah
 │   │   ├── payout-disbursement.test.ts         # Uji webhook disbursement & saldo payout
@@ -395,9 +418,11 @@ umkm-site-builder/
 │   │   ├── template-purchase-flow.test.ts      # Uji transaksi pembayaran template desainer
 │   │   └── wallet-and-fulfillment.test.ts      # Uji trigger pemenuhan invoice & kredit wallet
 │   └── utils/
-│       ├── api-handler.test.ts                 # Uji wrapper standar error handler HTTP API
-│       ├── design-math.test.ts                 # Uji rumus concentric radius, pill, & debounce
-│       └── validation.test.ts                  # Uji wrapper validasi Zod & formatted error
+│   │   ├── api-handler.test.ts                 # Uji wrapper standar error handler HTTP API
+│   │   ├── design-math.test.ts                 # Uji rumus concentric radius, pill, & debounce
+│   │   └── validation.test.ts                  # Uji wrapper validasi Zod & formatted error
+│   │
+│   └── setup.ts                                # Setup environment testing Vitest
 │
 ├── astro.config.mjs                            # Konfigurasi Astro Framework
 ├── drizzle.config.ts                           # Konfigurasi Drizzle ORM
@@ -408,249 +433,115 @@ umkm-site-builder/
 
 ---
 
-## 📝 Analisis Struktur & Rekomendasi Perapihan
+## 🛠️ Dokumentasi Visual Template Builder
 
-Secara umum, struktur projek sudah cukup rapi karena memisahkan logic (`services`), validasi (`schemas`), halaman (`pages`), dan komponen visual (`components`) berdasarkan peran/aktor (Admin, Designer, Tenant, Public).
+Berikut adalah detail spesifikasi arsitektur teknis dari no-code visual template builder yang dapat digunakan untuk menganalisis, memperbaiki, atau menambahkan fungsionalitas visual:
 
-### 🔍 Folder Kosong & Kegunaannya:
-1. **`src/lib/errors/`**:
-   - **Tujuan**: Menyimpan kelas error kustom dan handler error terpusat.
-   - **Rekomendasi Berkas**:
-     - `AppError.ts`: Base class error kustom.
-     - `errorFormatter.ts`: Utilitas pemformat error terstandar untuk API Response (`{ success: false, error: { code, message } }`).
-2. **`src/lib/routes/`**:
-   - **Tujuan**: Lokasi definisi rute URL secara statis agar tidak terjadi hardcode rute di seluruh komponen.
-   - **Rekomendasi Berkas**:
-     - `paths.ts`: Konstanta semua rute aplikasi (misal `ADMIN_DASHBOARD = '/admin'`, `DESIGNER_WALLET = '/designer/wallet'`).
-3. **`src/lib/auth/`**:
-   - **Tujuan**: Merapikan berkas otentikasi. Saat ini `auth.ts` dan `auth-client.ts` tercecer di root `src/lib/`.
-   - **Rekomendasi Aksi**: Pindahkan `src/lib/auth.ts` dan `src/lib/auth-client.ts` ke dalam `src/lib/auth/`.
+### 1. Daftar Template Layout & Section yang Tersedia (`src/components/builder/sections/`)
 
-### 💡 Struktur Folder Rekomendasi (Usulan Perbaikan Lengkap):
+* **A. Header Sections (`sections/header/`)**
+  * `AnnouncementBar.svelte`: Bilah pesan teks pengumuman berjalan/statis di bagian paling atas halaman.
+  * `HeaderLogo.svelte`: Area visual untuk memuat dan merender logo toko (mendukung URL gambar atau teks inisial).
+  * `HeaderNav.svelte`: Menu tautan navigasi responsif (Desktop satu baris horizontal, Mobile otomatis runtuh).
 
-Berikut adalah struktur usulan ideal untuk meningkatkan konsistensi peran, skalabilitas, dan kemudahan maintain aplikasi ke depan (tanpa menyentuh `.agents`, `docs`, dan `drizzle`):
+* **B. Hero Sections (`sections/hero/`)**
+  * `HeroCenteredMinimal.svelte`: Banner sambutan dengan teks headline dan subheadline terpusat di tengah dengan CTA minimalis.
+  * `HeroFullBanner.svelte`: Layout hero dengan latar belakang gambar penuh (full-bleed) dilapisi overlay gelap untuk keterbacaan teks kontras tinggi.
+  * `HeroSplitLayout.svelte`: Komposisi asimetris 50/50 (Teks di satu sisi, aset gambar/media di sisi lain).
 
-```
-umkm-site-builder/
-├── public/                                     # Aset statis murni publik (logo, favicon, gambar)
-│
-├── src/                                        # Kode Sumber Utama
-│   ├── components/                             # Komponen UI Svelte modular
-│   │   ├── admin/                              # Komponen UI khusus Admin / Superadmin
-│   │   ├── designer/                           # Komponen UI khusus Desainer Template
-│   │   ├── tenant/                             # [PENYATUAN] Gabungan folder 'tenant' & 'dashboard'
-│   │   │   ├── categories/                     # Manajemen Kategori Produk
-│   │   │   ├── products/                       # CRUD Produk Toko Tenant
-│   │   │   ├── settings/                       # Pengaturan visual & WA website toko
-│   │   │   └── onboarding/                     # Setup subdomain tenant toko baru
-│   │   ├── auth/                               # Form login & registrasi terpadu
-│   │   ├── builder/                            # Editor Visual No-Code (Hero, Catalog, dll)
-│   │   ├── checkout/                           # Tampilan modal & status bayar lunas pembeli
-│   │   └── ui/                                 # Komponen atomik global reusable (Button, Input, Toast)
-│   │
-│   ├── db/                                     # Lapisan database ORM Drizzle
-│   │   ├── index.ts                            # Inisialisasi client database
-│   │   └── schema.ts                           # Skema relasi tabel database
-│   │
-│   ├── layouts/                                # Master layout pembungkus halaman Astro
-│   │   ├── BaseLayout.astro                    # Layout halaman publik
-│   │   ├── AdminLayout.astro                   # Layout panel admin
-│   │   ├── DesignerLayout.astro                # Layout panel desainer
-│   │   └── TenantLayout.astro                  # Layout panel dashboard tenant
-│   │
-│   ├── lib/                                    # Pustaka pembantu & SDK client
-│   │   ├── auth/                               # [PINDAHAN] Modul autentikasi BetterAuth
-│   │   │   ├── client.ts                       # Pindahan dari src/lib/auth-client.ts
-│   │   │   └── server.ts                       # Pindahan dari src/lib/auth.ts
-│   │   ├── errors/                             # [BARU] Custom Error Handling
-│   │   │   ├── AppError.ts                     # Kelas error kustom (Unauthorized, Forbidden)
-│   │   │   └── errorFormatter.ts               # Handler formatting standard API error response
-│   │   ├── routes/                             # [BARU] Route Paths Constants (Anti-Hardcode)
-│   │   │   └── paths.ts                        # Konstanta rute aman internal aplikasi
-│   │   ├── media/                              # Modul media & file upload
-│   │   │   └── cloudinary.ts                   # Klien API integration Cloudinary
-│   │   └── utils/                              # Helper pemformatan data global
-│   │       ├── currency.ts                     # Format IDR Rupiah utility
-│   │       └── format.ts                       # Format tanggal, angka, & waktu
-│   │
-│   ├── pages/                                  # Astro Pages Router (File-Based)
-│   │   ├── admin/                              # Halaman dashboard & approval admin
-│   │   ├── designer/                           # Halaman draf template & wallet desainer
-│   │   ├── tenant/                             # [KONSISTENSI URL] Halaman dashboard toko tenant
-│   │   ├── public/                             # Halaman tamu (landing page, katalog, checkout)
-│   │   └── api/                                # API Endpoint (Struktur sudah sangat rapi)
-│   │       ├── admin/                          # POST/GET khusus Administrator
-│   │       ├── tenant/                         # POST/GET khusus Penyewa Toko (transaksi/setup)
-│   │       ├── designer/                       # POST/GET khusus Desainer Template
-│   │       ├── public/                         # POST/GET tanpa proteksi role (lunas/katalog)
-│   │       └── auth/                           # Handler BetterAuth callback
-│   │
-│   ├── schemas/                                # Skema Validasi Zod
-│   │   ├── admin/                              # Validasi setting komisi platform
-│   │   ├── designer/                           # Validasi bank-account & withdraw
-│   │   ├── tenant/                             # Validasi form produk & kategori
-│   │   └── public/                             # Validasi input umum tamu / auth
-│   │
-│   ├── services/                               # Lapisan Pure Business Logic (Domain)
-│   │   ├── finance/                            # Logika bagi hasil, payout, & webhook lunas
-│   │   └── templates/                          # Logika database template & status review
-│   │
-│   └── types/                                  # TypeScript Type Declarations
-│       ├── auth/
-│       ├── finance/
-│       └── templates/
-│
-├── tests/                                      # Pengujian Vitest (Struktur Sejajar Src)
-│   ├── api/                                    # Tes Fungsionalitas API Route
-│   │   ├── admin/
-│   │   ├── tenant/
-│   │   ├── designer/
-│   │   └── public/
-│   ├── services/                               # Tes Logic Bisnis (Finance, Template)
-│   ├── schemas/                                # Tes Validasi Input Data Zod
-│   └── integration/                            # Tes Alur e2e (Marketplace & Purchase)
-│
-├── astro.config.mjs                            # Konfigurasi integrasi adapter & compiler Astro
-├── drizzle.config.ts                           # Konfigurasi sinkronisasi skema db Drizzle
-├── package.json                                # Bun/npm scripts & dependensi pihak ketiga
-├── tailwind.config.mjs                         # Styling tokens framework Tailwind CSS
-└── vitest.config.ts                            # Parameter runner Vitest unit tests
-```
+* **C. Content & Utility Sections (`sections/`)**
+  * `FAQ.svelte`: Daftar pertanyaan yang sering diajukan menggunakan mekanisme akordeon buka-tutup interaktif.
+  * `Features.svelte`: Susunan grid modular untuk menampilkan keunggulan layanan, fitur, atau poin penting produk.
+  * `GoogleMaps.svelte`: Integrasi rendering iframe lokasi maps fisik toko UMKM.
+  * `Testimonials.svelte`: Grid/kartu berisi ulasan ulasan positif atau kutipan kepuasan pembeli/tamu.
+  * `Footer.svelte`: Bagian kaki halaman yang memuat hak cipta, alamat fisik toko, dan tautan sosial media.
+
+* **D. Katalog Produk (`sections/catalog/`)**
+  * `ProductCatalog.svelte`: Komponen utama untuk memuat, memfilter berdasarkan kategori, dan menampilkan grid produk toko.
+  * `ProductCatalogCard.svelte`: Komponen visual kartu satuan produk (harga, gambar, status stok, tombol interaktif).
+  * `ProductCatalogQuickView.svelte`: Modal popup interaktif untuk melihat rincian detail produk secara instan tanpa berpindah rute halaman.
 
 ---
 
-## 📊 Analisis Perbandingan & Rencana Aksi Perapihan
+### 2. Spacing & Padding System (Sistem Layouting)
 
-Berikut adalah tabel perbandingan antara struktur saat ini dengan struktur usulan rekomendasi, beserta rencana aksi konkret untuk merealisasikannya:
-
-### 1. Tabel Perbandingan Struktur & Perubahan Krusial
-
-| Folder Asal (Saat Ini) | Folder Tujuan (Rekomendasi) | Alasan Perubahan / Perbaikan | Status Perapihan |
-| :--- | :--- | :--- | :--- |
-| `src/components/dashboard/` & `src/components/tenant/` | `src/components/tenant/` | Penyatuan duplikasi folder peran tenant toko (dashboard & tenant terpisah membingungkan). | Perlu Rencana Aksi |
-| `src/components/shared/ImageUpload.svelte` | `src/components/ui/ImageUpload.svelte` | Memindahkan UI atomik global ke dalam folder `ui/` terpadu agar `shared/` bisa dihapus. | Perlu Rencana Aksi |
-| `src/components/ui/ToastContainer.svelte` | `src/components/ui/` | Folder `ui/` diperluas menjadi perpustakaan komponen atomik kustom (Button, Input, dll). | Perlu Rencana Aksi |
-| `src/lib/auth.ts` & `src/lib/auth-client.ts` | `src/lib/auth/server.ts` & `src/lib/auth/client.ts` | Melokalisasi otentikasi BetterAuth agar root `src/lib/` bersih dari berkas-berkas lepasan. | Perlu Rencana Aksi |
-| `src/lib/errors/.gitkeep` (Kosong) | `src/lib/errors/AppError.ts` & `errorFormatter.ts` | Membuat kelas penanganan error kustom terpusat agar format API error seragam. | Perlu Rencana Aksi |
-| `src/lib/routes/.gitkeep` (Kosong) | `src/lib/routes/paths.ts` | Membuat konstanta rute statis terpusat untuk menghindari hardcoding path URL. | Perlu Rencana Aksi |
-| `src/lib/currency.ts` & `src/lib/utils/format.ts` | `src/lib/utils/` | Menggabungkan utilitas format uang rupiah dan formatting umum ke satu tempat terpadu. | Perlu Rencana Aksi |
-| `src/pages/dashboard/` & `src/pages/onboarding/` | `src/pages/tenant/` | Konsistensi URL router. Mengganti `/dashboard` menjadi `/tenant` agar selaras dengan role tenant. | Perlu Rencana Aksi |
-| `src/pages/builder/` | `src/pages/designer/builder/` (atau tetap) | Memindahkan tool builder ke dalam namespace peran desainer karena hanya desainer yang membuat template. | Perlu Rencana Aksi |
-| `tests/...` (Struktur campur) | `tests/...` | Menyeimbangkan dan menyamakan struktur folder file tes agar 100% cocok dengan `src/`. | Perlu Rencana Aksi |
+Sistem builder UMKM Site Builder menerapkan manipulasi layout yang fleksibel dan terstandarisasi dengan karakteristik berikut:
+* **Interactive Spacing Drag-Handles**: Saat sebuah section diklik/aktif dalam editor, handles interaktif akan muncul secara absolut di sekeliling section:
+  * **Top Margin Handler**: Menyesuaikan `marginTop` section (rentang valid: `0px` hingga `160px`).
+  * **Bottom Margin Handler**: Menyesuaikan `marginBottom` section (rentang valid: `0px` hingga `160px`).
+  * **Horizontal Padding Handler**: Menyesuaikan padding sisi kiri/kanan section (rentang valid: `8px` hingga `120px`).
+* **Debounced State Mutations**: Perubahan jarak (margin/padding) saat di-drag secara real-time dimutasi ke `editorStore` tanpa memicu re-render berat pada seluruh silsilah komponen (menggunakan tracking pointer gesture).
 
 ---
 
-### 2. Daftar Rencana Aksi Konkret (Action Items)
+### 3. Grid Overlay Guides (`LayoutGridOverlay.svelte`)
 
-Untuk bertransisi dari versi saat ini ke versi terbersih di atas, berikut langkah-langkah kerja yang harus dilakukan:
-
-- [ ] **Langkah 1: Restrukturisasi `src/lib/`**
-  - Buat folder `src/lib/auth/`. Pindahkan `auth.ts` ke `auth/server.ts` dan `auth-client.ts` ke `auth/client.ts`. Update semua import referensi auth.
-  - Buat berkas `src/lib/errors/AppError.ts` dan `src/lib/errors/errorFormatter.ts`.
-  - Buat berkas `src/lib/routes/paths.ts` dan daftarkan rute utama.
-  - Pindahkan `src/lib/currency.ts` ke `src/lib/utils/currency.ts`.
-
-- [ ] **Langkah 2: Penyatuan Komponen UI Tenant (`src/components/`)**
-  - Pindahkan isi `src/components/dashboard/` (CategoryManager, DashboardNavbar, Sidebar, StoreSettingsForm) ke dalam `src/components/tenant/`.
-  - Pindahkan `src/components/shared/ImageUpload.svelte` ke `src/components/ui/ImageUpload.svelte` dan hapus folder `shared/`.
-  - Sesuaikan semua path import komponen di halaman dashboard / tenant.
-
-- [ ] **Langkah 3: Konsistensi Rute Halaman Tenant (`src/pages/`)**
-  - Ubah folder `src/pages/dashboard/` menjadi `src/pages/tenant/`.
-  - Ubah semua rute redirect di login helper, BetterAuth hooks, dan middleware dari `/dashboard` menuju ke `/tenant`.
-  - Pindahkan halaman onboarding penyewa ke `/tenant/onboarding.astro`.
-
-- [ ] **Langkah 4: Penyesuaian Berkas Pengujian (`tests/`)**
-  - Pindahkan dan sesuaikan letak berkas-berkas di dalam folder `tests/` agar strukturnya sama persis dengan folder `src/` yang baru.
-  - Jalankan `bun run type-check` dan `bun run test:unit` untuk memverifikasi fungsionalitas sistem berjalan 100% normal tanpa ada import pecah.
-```
+Untuk membantu desainer menghasilkan tata letak yang presisi, editor builder dilengkapi dengan **Figma-Style Layout Grid Overlay** yang dapat diaktifkan melalui panel kontrol top bar:
+* **Desktop Grid Guide**: 12-kolom panduan grid dengan jarak gutter `24px` dan safe-margin kiri/kanan sebesar `32px` (atau mengikuti token layout horizontal margin desktop).
+* **Tablet Grid Guide**: 8-kolom panduan grid dengan safe-margin kiri/kanan sebesar `24px`.
+* **Mobile Grid Guide**: 4-kolom panduan grid dengan safe-margin kiri/kanan sebesar `16px`.
+* **Pixel Grid Overlay**: Overlay titik-titik (grid dot pattern) berjarak `8px` untuk memandu alignment mikro.
 
 ---
 
-## 🎨 Analisis Kode CSS Manual & Rencana Standardisasi
+### 4. Responsiveness & Preview System
 
-Berikut adalah temuan berkas-berkas di fitur **Platform Settings, Transaksi, dan Template** yang masih menuliskan kode CSS manual (seperti ukuran pixel ad-hoc `text-[px]`, font weight inline, dan warna hardcoded seperti `text-indigo-600` / `bg-emerald-50` / `text-slate-900`) beserta solusi standardisasinya menggunakan utility classes terpusat di `global.css`.
-
-### 1. Daftar Temuan Berkas & CSS Manual
-
-#### A. Fitur Platform Settings
-- **`src/components/admin/CommissionSettingsPanel.svelte`**
-  - *Temuan awal*: Menggunakan `text-[13px]`, `text-[11px]` untuk ukuran teks manual, border accent manual seperti `border-t-indigo-400`, `border-t-emerald-400`, dan warna manual seperti `text-indigo-600` / `bg-emerald-500/10` / `bg-indigo-600`.
-  - *Status*: **SUDAH DIPERBAIKI** dengan beralih ke variabel desain global (`text-sm`, `text-xs`), menggunakan `.border-accent-*` global, dan mendelegasikan warna button/alert ke class semantic daisyUI (`btn-primary`, `alert-success`, `alert-error`).
-
-#### B. Fitur Transaksi & Checkout
-- **`src/components/checkout/PaymentModal.svelte`**
-  - *Temuan*: Menggunakan utility warna manual: `bg-emerald-500/10`, `text-emerald-600`, `bg-amber-500/10`, `text-amber-600`. Ukuran teks ad-hoc `text-[12px]`, `text-[13px]`.
-- **`src/components/checkout/TransactionStatus.svelte`**
-  - *Temuan*: Menggunakan warna manual `bg-emerald-500/10` dan ukuran teks ad-hoc `text-[12px]`, `text-[14px]`.
-- **`src/pages/checkout/[invoiceId].astro`**
-  - *Temuan*: Menggunakan teks pixel manual `text-[48px]`, `text-[16px]`, `text-[11px]`, `text-[18px]`, `text-[10px]`, `text-[14px]`. Warna manual seperti `text-rose-500`, `text-emerald-500`, `text-slate-500`.
-
-#### C. Fitur Katalog & Builder Template
-- **`src/components/admin/TemplateReviewPanel.svelte`**
-  - *Temuan*: Ukuran teks ad-hoc `text-[13px]`, `text-[11px]`, warna manual `bg-indigo-600`, `hover:bg-indigo-700`, `text-indigo-600`, `bg-emerald-500/10`, `text-emerald-600`.
-- **`src/components/designer/DesignerTemplateCard.svelte`**
-  - *Temuan*: Ukuran teks ad-hoc `text-[11px]`, `text-[13px]`. Warna manual `bg-indigo-600`, `bg-emerald-500/10`.
-- **`src/components/ui/StatCard.svelte`**
-  - *Temuan*: Ukuran teks ad-hoc `text-[20px]`, `text-[10px]`, `text-[26px]`, `text-[11px]`.
-- **`src/pages/templates/index.astro` / `src/pages/public/templates/index.astro`**
-  - *Temuan*: Menggunakan warna manual `bg-emerald-500/10`, `text-emerald-600`, `bg-amber-500/10`, `text-amber-600`, `bg-rose-500/10`, `text-rose-600`. Teks pixel manual `text-[10px]`, `text-[16px]`.
-- **`src/pages/designer/templates.astro`**
-  - *Temuan awal*: Menggunakan button manual `bg-indigo-600 hover:bg-indigo-700 text-[13px]` dan border accent manual `border-t-indigo-400`.
-  - *Status*: **SUDAH DIPERBAIKI** dengan beralih ke `.btn-primary` dan `.border-accent-*` global.
+Sistem peninjauan viewport (Desktop, Tablet, Mobile) dirancang agar stabil di workspace editor builder:
+* **Scale-To-Fit (Auto-scaling Container)**: Canvas frame (`#canvas-frame`) menggunakan aturan style:
+  ```css
+  width: 100%;
+  max-width: [TargetWidth]px;
+  ```
+  Di mana `TargetWidth` untuk desktop adalah `1200px`, tablet `768px`, dan mobile `375px`. Hal ini menjamin jika ukuran workspace berkurang (karena sidebar kiri & kanan terbuka), canvas akan otomatis menyusut secara simetris tanpa memotong visual layout grid dan tanpa menampilkan scrollbar horizontal yang mengganggu.
+* **Sharp Corners Consistency (Konsistensi Sudut Tajam)**: Seluruh preview (Desktop, Tablet, Mobile) pada editor builder (`Canvas.svelte`) dan penampil baca-saja (`ReadOnlyPreview.svelte`) diatur konsisten menggunakan **sudut tajam** (`rounded-none` / tidak melengkung) pada batas tepian frame kanvasnya untuk representasi visual yang akurat.
+* **Theme Synchronization**: Canvas preview mendukung transisi instan Light / Dark mode yang secara dinamis menyuntikkan CSS variables tema (`--theme-bg`, `--theme-text-primary`, dll.) ke dalam cakupan rendering section.
 
 ---
 
-### 2. Panduan Solusi Standardisasi (Definisi di `global.css`)
+### 5. State Management & Operations (`editorStore.ts`)
 
-Untuk merapikan sisa file-file di atas tanpa menuliskan kode CSS manual berulang kali, ikuti aturan kelas global yang telah didefinisikan di `src/styles/global.css`:
+Siklus data visual editor builder dikelola secara terpusat oleh `editorStore` (Svelte Writable Store) dengan arsitektur data sebagai berikut:
+* **Struktur State (`EditorState`)**:
+  * `template`: Objek data template utuh yang sedang diedit (berisi metadata, list `sections`, dan objek `theme`).
+  * `selectedSectionId`: ID unik section yang saat ini dipilih oleh pengguna di canvas atau layer panel.
+  * `history`: Stack riwayat perubahan untuk mendukung fitur undo/redo.
+  * `viewMode`: Mode peninjauan aktif (`desktop` | `tablet` | `mobile`).
+* **Operasi Mutasi State (`editorStore.mutations.ts`)**:
+  * `addSection(type, index)`: Menyisipkan section baru ke posisi tertentu.
+  * `updateSectionContent(id, content)`: Memperbarui data teks/gambar konten di dalam node section.
+  * `updateSectionStyles(id, styles)`: Memperbarui parameter styling (margin, padding, border radius, alignment).
+  * `deleteSection(id)`: Menghapus section dari silsilah visual.
+  * `reorderSections(fromIndex, toIndex)`: Mengubah posisi urutan section (dipicu oleh interaksi drag-and-drop pada Layer Panel).
+  * `undo()` / `redo()`: Berpindah antar snapshot history state.
 
-#### A. Border Accent & Stat Card Top Border
-Gunakan kelas `.border-accent-*` daripada menulis `border-t-2 border-t-...-400` manual:
-```css
-/* Sudah didefinisikan di global.css */
-.border-accent-primary {
-  border-top-width: 2px !important;
-  border-top-style: solid !important;
-  border-top-color: var(--color-primary) !important;
-}
-.border-accent-success {
-  border-top-width: 2px !important;
-  border-top-style: solid !important;
-  border-top-color: var(--color-success) !important;
-}
-.border-accent-warning {
-  border-top-width: 2px !important;
-  border-top-style: solid !important;
-  border-top-color: var(--color-warning) !important;
-}
-.border-accent-error {
-  border-top-width: 2px !important;
-  border-top-style: solid !important;
-  border-top-color: var(--color-error) !important;
-}
-.border-accent-muted {
-  border-top-width: 2px !important;
-  border-top-style: solid !important;
-  border-top-color: var(--color-text-light) !important;
-}
-```
+---
 
-#### B. Semantic Text Colors
-Gunakan kelas `.text-primary`, `.text-success`, dll., daripada warna hex/Tailwind hardcoded (`text-indigo-600`, `text-emerald-500`, dll.):
-```css
-/* Sudah didefinisikan di global.css */
-.text-primary { color: var(--color-primary) !important; }
-.text-success { color: var(--color-success) !important; }
-.text-error { color: var(--color-error) !important; }
-.text-warning { color: var(--color-warning) !important; }
-.text-info { color: var(--color-info) !important; }
-```
+### 6. Inspector & Image Upload Integration
 
-#### C. DaisyUI & Global Text Sizes
-- **Teks pixel manual `text-[13px]` atau `text-[11px]`** harus diganti dengan kelas standar sistem tipografi Tailwind:
-  - `text-[10px]` / `text-[11px]` -> Ganti dengan `text-xs` (atau `.text-xs` yang setara 0.75rem / 12px).
-  - `text-[13px]` -> Ganti dengan `text-sm` (atau `.text-sm` yang setara 0.875rem / 14px).
-  - `text-[14px]` / `text-[15px]` -> Ganti dengan `text-sm`.
-- **Button Utama**: Selalu gunakan `.btn .btn-primary` (atau kelas tombol daisyUI bawaan lainnya seperti `.btn-secondary`, `.btn-ghost`) agar mewarisi warna tema secara konsisten di light/dark mode tanpa menyisipkan utility warna manual.
+Panel kanan editor (`PropertyInspector.svelte`) menyajikan antarmuka pengaturan spesifik berdasarkan node yang sedang aktif:
+* **Tabs Navigasi**:
+  * **Content Tab (`ContentTab.svelte`)**: Mengatur input teks, headline, tautan tombol, dan pilihan gambar/media.
+  * **Styles Tab (`StylesTab.svelte`)**: Mengatur visual theme global seperti tipografi font header/body, warna primer/sekunder, dan radius global.
+  * **NodeStyles Tab (`NodeStylesTab.svelte`)**: Mengatur layout visual tingkat section (alignment, container width, background, margin/padding).
+* **Integrasi Cloudinary Uploader (`ImageUpload.svelte`)**:
+  * Mendukung unggah gambar drag-and-drop dengan feedback indikator progress bar.
+  * Mengambil signed signature secara dinamis dari API endpoint `/api/media/sign` untuk unggah gambar secara langsung dan aman dari client-side ke Cloudinary.
+  * Mendukung penghapusan aset gambar lama dari Cloudinary via API `/api/media/delete` saat gambar diganti atau dihapus.
 
+---
+
+### 7. Rekomendasi Perbaikan & Pengembangan Builder
+
+Berikut adalah analisis rekomendasi perbaikan teknis yang dapat diterapkan pada UMKM Site Builder Builder di masa mendatang:
+* **Viewport Scaling Transform**:
+  * *Masalah*: Di layar beresolusi rendah (seperti laptop 1366x768), sisa ruang workspace tengah setelah dikurangi sidebar kiri (260px) dan kanan (320px) hanya menyisakan sekitar 786px. Mode tablet (768px) atau desktop (1200px) akan terhimpit.
+  * *Solusi*: Terapkan CSS `transform: scale(...)` dinamis pada `#canvas-frame` berdasarkan lebar workspace tersisa agar seluruh kanvas terlihat utuh (fit-to-screen) tanpa memotong detail tata letak asli.
+* **Shadow Drop Indicator pada Reordering Layer**:
+  * *Masalah*: Saat ini reordering section pada `LayerPanel.svelte` bekerja secara instan tanpa indikator drop zone visual yang halus.
+  * *Solusi*: Tambahkan baris bayangan (shadow bar / drop-indicator) yang memandu pengguna di mana posisi section akan diletakkan sebelum pointer dilepas.
+* **Presets Design System Themes**:
+  * *Masalah*: Desainer pemula sering kesulitan mengombinasikan warna/font yang harmonis.
+  * *Solusi*: Sediakan opsi palet tema siap pakai (presets) di `GlobalThemeInspector` seperti *"Classic Clean"*, *"Emerald Organic"*, atau *"Cyber Tech"* agar pengguna dapat langsung mengganti tema warna & font terkurasi dengan sekali klik.
+* **Image Cropper & Aspect Ratio Lock**:
+  * *Masalah*: Gambar yang diunggah pengguna sering merusak proporsi tata letak visual (layout box) karena rasio tinggi-lebar file asli yang tidak seragam.
+  * *Solusi*: Integrasikan pustaka cropping gambar berbasis client-side di `ImageUpload.svelte` agar desainer dapat memotong gambar sesuai aspek rasio target (misal: 1:1 untuk katalog, 16:9 untuk banner hero) sebelum dikirim ke server Cloudinary.

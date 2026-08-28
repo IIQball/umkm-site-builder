@@ -8,9 +8,8 @@ export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     
-    // Check if the requester is an admin or superadmin
     if (!user || !isAuthorizedAdmin(user)) {
-      throw new AppError('Akses khusus admin diperlukan', 403);
+      throw new AppError('Admin access required', 403);
     }
 
     const allUsers = await db.select({
@@ -26,6 +25,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     .where(inArray(users.role, ['tenant', 'designer']))
     .orderBy(desc(users.createdAt));
 
-    return jsonSuccess(allUsers, 'Data pengguna berhasil diambil');
+    return jsonSuccess(allUsers, 'Users fetched successfully');
   });
 };

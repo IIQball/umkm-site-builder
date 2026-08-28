@@ -175,22 +175,22 @@
 <main
   tabindex="-1"
   on:click={handleCanvasBackgroundClick}
-  class="canvas-backdrop flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950 select-none transition-colors"
+  class="canvas-backdrop flex-1 w-full h-full overflow-auto flex items-start justify-center min-w-0 p-6 bg-slate-100 dark:bg-slate-950 select-none transition-colors"
   aria-label="Editor Canvas"
 >
   <!-- Frame Container with flat pixel-perfect viewport boundaries -->
   <div
     id="canvas-frame"
     data-theme={$canvasStore.previewTheme}
-    style="{canvasCssVars}; {viewMode === 'desktop' ? 'width: 100%; max-width: 1200px;' : viewMode === 'tablet' ? 'width: 768px; min-width: 768px; max-width: 768px;' : 'width: 375px; min-width: 375px; max-width: 375px;'}"
+    style="{canvasCssVars}; {viewMode === 'desktop' ? 'width: 100%; max-width: 1200px;' : viewMode === 'tablet' ? 'width: 768px; max-width: 100%; margin-left: auto; margin-right: auto;' : 'width: 375px; max-width: 100%; margin-left: auto; margin-right: auto;'}"
     class={`relative transition-all duration-300 ease-in-out flex flex-col box-border overflow-x-hidden ${
       isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
     } ${
       viewMode === 'desktop'
         ? 'w-full max-w-[1200px] min-h-screen shadow-xl mx-auto my-0'
         : viewMode === 'tablet'
-        ? 'w-[768px] shrink-0 min-h-screen shadow-2xl mx-auto my-0 rounded-xl border border-slate-300 dark:border-slate-700'
-        : 'w-[375px] shrink-0 min-h-screen shadow-2xl mx-auto my-0 rounded-2xl border border-slate-300 dark:border-slate-700'
+        ? 'w-full max-w-[768px] min-h-screen shadow-2xl mx-auto my-0 border border-slate-300 dark:border-slate-700'
+        : 'w-full max-w-[375px] min-h-screen shadow-2xl mx-auto my-0 border border-slate-300 dark:border-slate-700'
     }`}
   >
     <!-- Figma-Style Layout Grid Guides (Overlay) -->

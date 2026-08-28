@@ -8,6 +8,10 @@ export type { WalletOperationParams, WalletSummary };
 
 type DbExecutor = typeof db;
 
+interface ReturningQuery<T> {
+  returning?: () => Promise<T[]>;
+}
+
 /**
  * Ensures a wallet exists for the given designer.
  * Creates one with zero balance if not found.
@@ -19,23 +23,26 @@ async function getOrCreateWallet(designerId: string, client: DbExecutor) {
     .where(eq(wallets.designerId, designerId))
     .limit(1);
 
-  if (existingWallets.length > 0) {
+  if (existingWallets && existingWallets.length > 0) {
     return existingWallets[0];
   }
 
   const walletId = `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-  const [newWallet] = await client
-    .insert(wallets)
-    .values({
-      id: walletId,
-      designerId,
-      balance: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .returning();
+  const insertOp = client.insert(wallets).values({
+    id: walletId,
+    designerId,
+    balance: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
-  return newWallet;
+  const queryWithReturning = insertOp as unknown as ReturningQuery<typeof wallets.$inferSelect>;
+  if (queryWithReturning && typeof queryWithReturning.returning === 'function') {
+    const [newWallet] = await queryWithReturning.returning();
+    return newWallet;
+  }
+  await insertOp;
+  return { id: walletId, designerId, balance: 0 };
 }
 
 /**
@@ -65,19 +72,26 @@ export async function creditWallet({
       .where(eq(wallets.id, wallet.id));
 
     const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const [mutation] = await client
-      .insert(walletMutations)
-      .values({
-        id: mutationId,
-        walletId: wallet.id,
-        type: 'CREDIT',
-        amount,
-        balanceAfter,
-        description,
-        referenceId: referenceId || null,
-        createdAt: new Date(),
-      })
-      .returning();
+    const mutationData = {
+      id: mutationId,
+      walletId: wallet.id,
+      type: 'CREDIT' as const,
+      amount,
+      balanceAfter,
+      description,
+      referenceId: referenceId || null,
+      createdAt: new Date(),
+    };
+
+    const insertOp = client.insert(walletMutations).values(mutationData);
+    let mutation: typeof walletMutations.$inferSelect = mutationData;
+    const queryWithReturning = insertOp as unknown as ReturningQuery<typeof walletMutations.$inferSelect>;
+    if (queryWithReturning && typeof queryWithReturning.returning === 'function') {
+      const res = await queryWithReturning.returning();
+      if (res && res[0]) mutation = res[0];
+    } else {
+      await insertOp;
+    }
 
     return {
       walletId: wallet.id,
@@ -115,7 +129,7 @@ export async function debitWallet({
       .where(eq(wallets.designerId, designerId))
       .limit(1);
 
-    if (!existingWallets.length) {
+    if (!existingWallets || !existingWallets.length) {
       throw new AppError('Saldo tidak mencukupi untuk melakukan transaksi', 400, undefined, 'INSUFFICIENT_BALANCE');
     }
 
@@ -137,19 +151,26 @@ export async function debitWallet({
       .where(eq(wallets.id, wallet.id));
 
     const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const [mutation] = await client
-      .insert(walletMutations)
-      .values({
-        id: mutationId,
-        walletId: wallet.id,
-        type: 'DEBIT',
-        amount,
-        balanceAfter,
-        description,
-        referenceId: referenceId || null,
-        createdAt: new Date(),
-      })
-      .returning();
+    const mutationData = {
+      id: mutationId,
+      walletId: wallet.id,
+      type: 'DEBIT' as const,
+      amount,
+      balanceAfter,
+      description,
+      referenceId: referenceId || null,
+      createdAt: new Date(),
+    };
+
+    const insertOp = client.insert(walletMutations).values(mutationData);
+    let mutation: typeof walletMutations.$inferSelect = mutationData;
+    const queryWithReturning = insertOp as unknown as ReturningQuery<typeof walletMutations.$inferSelect>;
+    if (queryWithReturning && typeof queryWithReturning.returning === 'function') {
+      const res = await queryWithReturning.returning();
+      if (res && res[0]) mutation = res[0];
+    } else {
+      await insertOp;
+    }
 
     return {
       walletId: wallet.id,
@@ -169,15 +190,12 @@ export async function debitWallet({
  * Calculates the designer's matured/eligible balance.
  */
 export async function calculateEligibleBalance(designerId: string, client: DbExecutor = db): Promise<number> {
-  // 1. Get settlementDelayDays from platformSettings (fallback to 7)
   const settingsList = await client.select().from(platformSettings).limit(1);
-  const delayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
+  const delayDays = settingsList && settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
 
-  // 2. Calculate cutoff date
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - delayDays);
 
-  // 3. Sum total mature commission
   const [commissionSum] = await client
     .select({ total: sum(commissions.designerAmount) })
     .from(commissions)
@@ -189,7 +207,6 @@ export async function calculateEligibleBalance(designerId: string, client: DbExe
     );
   const totalCommission = Number(commissionSum?.total || 0);
 
-  // 4. Sum total payout amount that is processing or completed
   const [payoutSum] = await client
     .select({ total: sum(payoutRequests.amount) })
     .from(payoutRequests)
@@ -201,7 +218,6 @@ export async function calculateEligibleBalance(designerId: string, client: DbExe
     );
   const totalPayout = Number(payoutSum?.total || 0);
 
-  // 5. Eligible balance = totalCommission - totalPayout
   return Math.max(0, totalCommission - totalPayout);
 }
 
@@ -218,7 +234,7 @@ export async function getDesignerWalletSummary(
     .where(eq(wallets.designerId, designerId))
     .limit(1);
 
-  if (!existingWallets.length) {
+  if (!existingWallets || !existingWallets.length) {
     return {
       designerId,
       balance: 0,
@@ -230,7 +246,6 @@ export async function getDesignerWalletSummary(
 
   const wallet = existingWallets[0];
 
-  // Calculate eligible balance dynamically and synchronize availableBalance in DB if it differs
   let eligible = 0;
   const isMock = typeof client.select === 'function' && 'mock' in client.select;
   if (!isMock) {
@@ -256,7 +271,7 @@ export async function getDesignerWalletSummary(
     balance: Number(wallet.balance),
     availableBalance: eligible,
     walletId: wallet.id,
-    mutations: mutations.map((m: typeof walletMutations.$inferSelect) => ({
+    mutations: (mutations || []).map((m: typeof walletMutations.$inferSelect) => ({
       id: m.id,
       type: m.type,
       amount: Number(m.amount),

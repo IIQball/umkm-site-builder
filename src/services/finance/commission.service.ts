@@ -44,10 +44,10 @@ export async function updatePlatformSettings(
   dbClient: typeof db = db
 ): Promise<PlatformSettings> {
   if (data.platformFeePercentage < 0 || data.platformFeePercentage > 100) {
-    throw new AppError('Persentase fee platform harus antara 0% hingga 100%', 400, undefined, 'INVALID_PERCENTAGE');
+    throw new AppError('Platform fee percentage must be between 0% and 100%', 400, undefined, 'INVALID_PERCENTAGE');
   }
   if (data.settlementDelayDays !== undefined && data.settlementDelayDays < 0) {
-    throw new AppError('Durasi penahanan settlement tidak boleh negatif', 400, undefined, 'INVALID_DELAY_DAYS');
+    throw new AppError('Settlement delay days cannot be negative', 400, undefined, 'INVALID_DELAY_DAYS');
   }
 
   const existingList = await dbClient.select().from(platformSettings).limit(1);
@@ -129,4 +129,3 @@ export async function calculateCommission(
     platformFeePercentage,
   };
 }
-

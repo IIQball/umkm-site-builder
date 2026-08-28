@@ -9,19 +9,17 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     
-    // Check if the requester is an admin or superadmin
     if (!user || !isAuthorizedAdmin(user)) {
-      throw new AppError('Akses khusus admin diperlukan', 403);
+      throw new AppError('Admin access required', 403);
     }
 
     const userId = context.params.userId;
     if (!userId) {
-      throw new AppError('ID pengguna tidak ditemukan', 400);
+      throw new AppError('User ID is required', 400);
     }
 
-    // You cannot suspend yourself
     if (userId === user.id) {
-      throw new AppError('Anda tidak dapat mengubah status akun Anda sendiri', 403);
+      throw new AppError('Cannot update your own account status', 403);
     }
 
     const body = await context.request.json().catch(() => ({}));
@@ -29,12 +27,11 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
 
     const targetUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     if (targetUser.length === 0) {
-      throw new AppError('Pengguna tidak ditemukan', 404);
+      throw new AppError('User not found', 404);
     }
 
-    // Superadmin is protected from being suspended by regular admins
     if (targetUser[0].role === 'superadmin' && user.role !== 'superadmin') {
-      throw new AppError('Anda tidak memiliki izin untuk mengubah status Super Admin', 403);
+      throw new AppError('Permission denied to update Super Admin status', 403);
     }
 
     const suspendReason = validated.status === 'suspended' ? validated.suspendReason : null;
@@ -51,8 +48,8 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
     }
 
     const message = validated.status === 'active' 
-      ? 'Akun pengguna berhasil diaktifkan kembali' 
-      : 'Akun pengguna berhasil ditangguhkan';
+      ? 'User account activated successfully' 
+      : 'User account suspended successfully';
 
     return jsonSuccess(null, message);
   });

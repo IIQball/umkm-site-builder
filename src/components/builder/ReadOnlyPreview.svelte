@@ -203,10 +203,10 @@
         isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
       } ${
         viewMode === 'desktop'
-          ? 'w-full max-w-6xl min-h-[800px] border border-base-300 dark:border-slate-800 rounded-xl'
+          ? 'w-full max-w-6xl min-h-[800px] border border-base-300 dark:border-slate-800'
           : viewMode === 'tablet'
-          ? 'w-[768px] max-w-full min-h-[800px] border border-slate-400 dark:border-slate-700 mx-auto rounded-2xl'
-          : 'w-[375px] max-w-full min-h-[667px] border border-slate-400 dark:border-slate-700 mx-auto rounded-2xl'
+          ? 'w-full max-w-[768px] min-h-[800px] border border-slate-400 dark:border-slate-700 mx-auto'
+          : 'w-full max-w-[375px] min-h-[667px] border border-slate-400 dark:border-slate-700 mx-auto'
       }`}
     >
       {#if sections.length === 0}

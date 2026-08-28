@@ -1,31 +1,36 @@
 import { db } from '@/lib/db/client';
-import { payoutRequests, wallets, walletMutations, bankAccounts } from '@/db/schema';
+import { payoutRequests, bankAccounts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
+import { creditWallet } from '@/services/finance/wallet.service';
 import { AppError } from '@/lib/utils';
+import type { PayoutStatus, PayoutDisbursementResult } from '@/types';
 
+type DbExecutor = typeof db;
+
+/**
+ * Initiates payout request disbursement to Xendit.
+ */
 export async function createXenditDisbursement(payoutRequestId: string): Promise<void> {
-  const payoutList = await db
+  const [payout] = await db
     .select()
     .from(payoutRequests)
     .where(eq(payoutRequests.id, payoutRequestId))
     .limit(1);
 
-  if (payoutList.length === 0) {
-    throw new AppError('Permintaan penarikan dana tidak ditemukan', 404, undefined, 'PAYOUT_NOT_FOUND');
+  if (!payout) {
+    throw new AppError('Payout request not found', 404, undefined, 'PAYOUT_NOT_FOUND');
   }
-  const payout = payoutList[0];
 
-  const bankAccList = await db
+  const [bankAcc] = await db
     .select()
     .from(bankAccounts)
     .where(eq(bankAccounts.id, payout.bankAccountId))
     .limit(1);
 
-  if (bankAccList.length === 0) {
-    throw new AppError('Rekening bank tidak ditemukan', 404, undefined, 'BANK_ACCOUNT_NOT_FOUND');
+  if (!bankAcc) {
+    throw new AppError('Bank account not found', 404, undefined, 'BANK_ACCOUNT_NOT_FOUND');
   }
-  const bankAcc = bankAccList[0];
 
   try {
     const result = await xenditClient.createDisbursement({
@@ -61,103 +66,103 @@ export async function createXenditDisbursement(payoutRequestId: string): Promise
   }
 }
 
-export async function processDisbursementWebhook(params: {
-  payoutRequestId: string;
-  status: string; // SUCCESS, FAILED, REJECTED
+/**
+ * Handles Xendit webhook callback for payout disbursements.
+ */
+export async function processDisbursementWebhook(payload: {
+  id?: string;
+  external_id?: string;
+  payoutRequestId?: string;
+  amount?: number;
+  status: string;
   failureCode?: string;
-}): Promise<void> {
-  const payoutList = await db
+  failure_code?: string;
+  failure_message?: string;
+  tx?: DbExecutor;
+}): Promise<PayoutDisbursementResult> {
+  const requestId = payload.payoutRequestId || payload.external_id || payload.id;
+  if (!requestId) {
+    return {
+      status: 'ignored',
+      message: 'Missing payout request identifier',
+    };
+  }
+
+  const [payout] = await db
     .select()
     .from(payoutRequests)
-    .where(eq(payoutRequests.id, params.payoutRequestId))
+    .where(eq(payoutRequests.id, requestId))
     .limit(1);
 
-  if (payoutList.length === 0) {
-    throw new AppError('Permintaan penarikan dana tidak ditemukan', 404, undefined, 'PAYOUT_NOT_FOUND');
-  }
-  const payout = payoutList[0];
-
-  // If status is already completed or rejected, do nothing (idempotency)
-  if (payout.status === 'completed' || payout.status === 'rejected') {
-    return;
+  if (!payout) {
+    return {
+      status: 'ignored',
+      message: 'Payout request not found',
+    };
   }
 
-  const normalizedStatus = params.status.toUpperCase();
+  const normalizedStatus = payload.status.toUpperCase();
 
-  if (normalizedStatus === 'SUCCESS' || normalizedStatus === 'COMPLETED') {
+  if (normalizedStatus === 'COMPLETED' || normalizedStatus === 'SUCCESS') {
     await db
       .update(payoutRequests)
       .set({
-        status: 'completed',
+        status: 'completed' as PayoutStatus,
         updatedAt: new Date(),
       })
       .where(eq(payoutRequests.id, payout.id));
-  } else if (normalizedStatus === 'FAILED' || normalizedStatus === 'REJECTED') {
-    // Run atomic transaction to update payoutRequest status and rollback wallet balance
-    await db.transaction(async (tx) => {
-      // 1. Update payoutRequest status to 'rejected'
-      await tx
+
+    return {
+      status: 'completed',
+      message: 'Payout disbursement processed successfully',
+    };
+  }
+
+  if (normalizedStatus === 'FAILED' || normalizedStatus === 'REJECTED') {
+    const reason = payload.failure_message || payload.failureCode || payload.failure_code || 'Disbursement failed on gateway';
+
+    const executeRollback = async (client: DbExecutor) => {
+      await client
         .update(payoutRequests)
         .set({
-          status: 'rejected',
-          gatewayMessage: params.failureCode || 'Disbursement failed',
+          status: 'rejected' as PayoutStatus,
+          gatewayMessage: reason,
           updatedAt: new Date(),
         })
         .where(eq(payoutRequests.id, payout.id));
 
-      // 2. Fetch the wallet
-      const walletList = await tx
-        .select()
-        .from(wallets)
-        .where(eq(wallets.designerId, payout.designerId))
-        .limit(1);
+      await creditWallet({
+        designerId: payout.designerId,
+        amount: payout.amount,
+        description: `Refund Penarikan Dana Gagal (Ref: ${payout.id})`,
+        referenceId: payout.id,
+        tx: client,
+      });
+    };
 
-      if (walletList.length === 0) {
-        throw new AppError('Dompet desainer tidak ditemukan', 404, undefined, 'WALLET_NOT_FOUND');
-      }
-      const wallet = walletList[0];
-      
-      const newBalance = Number(wallet.balance) + payout.amount;
-      const newAvailableBalance = Number(wallet.availableBalance) + payout.amount;
+    if (payload.tx) {
+      await executeRollback(payload.tx);
+    } else if (typeof db.transaction === 'function') {
+      await db.transaction(async (tx) => {
+        await executeRollback(tx as DbExecutor);
+      });
+    } else {
+      await executeRollback(db);
+    }
 
-      // 3. Update wallet balance & availableBalance
-      await tx
-        .update(wallets)
-        .set({
-          balance: newBalance,
-          availableBalance: newAvailableBalance,
-          updatedAt: new Date(),
-        })
-        .where(eq(wallets.id, wallet.id));
-
-      // 4. Record CREDIT mutation for rollback
-      const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      await tx
-        .insert(walletMutations)
-        .values({
-          id: mutationId,
-          walletId: wallet.id,
-          type: 'CREDIT',
-          amount: payout.amount,
-          balanceAfter: newBalance,
-          description: `Rollback penarikan dana gagal (${payout.id})`,
-          createdAt: new Date(),
-        });
-    });
+    return {
+      status: 'rejected',
+      message: 'Payout disbursement failed and balance refunded',
+    };
   }
+
+  return {
+    status: 'ignored',
+    message: `Unhandled disbursement status: ${payload.status}`,
+  };
 }
 
-export class PayoutService {
-  async createXenditDisbursement(payoutRequestId: string): Promise<void> {
-    return createXenditDisbursement(payoutRequestId);
-  }
-  async processDisbursementWebhook(params: {
-    payoutRequestId: string;
-    status: string;
-    failureCode?: string;
-  }): Promise<void> {
-    return processDisbursementWebhook(params);
-  }
-}
-
-export const payoutService = new PayoutService();
+export const payoutService = {
+  createXenditDisbursement,
+  processDisbursementWebhook,
+};

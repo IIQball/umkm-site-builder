@@ -28,6 +28,11 @@ if (!store) {
 
 <DashboardLayout user={user}>
   <div class="container mx-auto px-4 py-8">
-    <TrafficWidget client:load storeId={store.id} />
+    <TrafficWidget 
+      client:load 
+      storeId={store.id} 
+      initialViews={store.totalViews}
+      initialClicks={store.totalWaClicks}
+    />
   </div>
 </DashboardLayout>

@@ -24,7 +24,6 @@ if (!currentUser) {
 let accessDenied = false;
 let pageData: CheckoutPageData | null = null;
 let error: string | null = null;
-let transactionType: 'store_registration' | 'template_purchase' = 'store_registration';
 let templateName = '';
 
 try {
@@ -38,8 +37,7 @@ try {
     if (!isOwner && !isAdmin) {
       accessDenied = true;
     } else {
-      transactionType = transaction.type;
-      if (transaction.type === 'template_purchase' && transaction.templateId) {
+      if (transaction.templateId) {
         const tpl = await db.query.templates.findFirst({
           where: eq(templates.id, transaction.templateId),
         });
@@ -69,23 +67,12 @@ try {
   error = 'Gagal memuat data tagihan';
 }
 
-const isTemplatePurchase = transactionType === 'template_purchase';
-const checkoutTitle = isTemplatePurchase ? 'Pembayaran Template' : 'Pembayaran Aktivasi Toko';
-
-const checkoutMetaTitle = isTemplatePurchase
-  ? `Pembelian Template - ${templateName || 'UMKM Site Builder'}`
-  : 'Aktivasi Toko - UMKM Site Builder';
-
-const checkoutDescription = isTemplatePurchase
-  ? 'Selesaikan pembayaran untuk menerapkan template desain toko UMKM Anda'
-  : 'Selesaikan pembayaran untuk mengaktifkan subdomain toko online UMKM Anda';
-
-const lineItemTitle = isTemplatePurchase
-  ? `Pembelian Template "${templateName || 'Desain UMKM'}"`
-  : 'Biaya Aktivasi Toko';
-const lineItemSubtitle = isTemplatePurchase
-  ? 'Desain Template Website UMKM Siap Pakai'
-  : 'Paket Toko Online UMKM';
+const isTemplatePurchase = true;
+const checkoutTitle = 'Pembayaran Template';
+const checkoutMetaTitle = `Pembelian Template - ${templateName || 'UMKM Site Builder'}`;
+const checkoutDescription = 'Selesaikan pembayaran untuk menerapkan template desain toko UMKM Anda';
+const lineItemTitle = `Pembelian Template "${templateName || 'Desain UMKM'}"`;
+const lineItemSubtitle = 'Desain Template Website UMKM Siap Pakai';
 ---
 
 <BaseLayout title={checkoutMetaTitle} description={checkoutDescription}>

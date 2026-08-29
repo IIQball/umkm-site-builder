@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatCurrency } from '@/lib/utils/format';
+  import { Badge, Button } from '@/components/ui';
 
   export let template: {
     id: string;
@@ -44,13 +45,22 @@
 
   const formatPrice = (p: number) => (p === 0 ? 'Gratis' : formatCurrency(p));
 
-  const statusMap: Record<string, { label: string; bg: string; text: string; border: string; dot: string }> = {
-    approved: { label: 'Disetujui', bg: 'bg-emerald-500/15', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/25', dot: 'bg-emerald-500' },
-    pending:  { label: 'Menunggu Review', bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/25', dot: 'bg-amber-500 animate-pulse' },
-    rejected: { label: 'Ditolak', bg: 'bg-rose-500/15', text: 'text-rose-600 dark:text-rose-400', border: 'border-rose-500/25', dot: 'bg-rose-500' },
-    draft:    { label: 'Draft', bg: 'bg-slate-500/15', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-500/25', dot: 'bg-slate-500' },
+  const statusVariantMap: Record<string, 'emerald' | 'amber' | 'rose' | 'slate'> = {
+    approved: 'emerald',
+    pending: 'amber',
+    rejected: 'rose',
+    draft: 'slate',
   };
-  const statusInfo = statusMap[template.status] ?? statusMap.draft;
+
+  const statusLabelMap: Record<string, string> = {
+    approved: 'Disetujui',
+    pending: 'Menunggu Review',
+    rejected: 'Ditolak',
+    draft: 'Draft',
+  };
+
+  $: variant = statusVariantMap[template.status] || 'slate';
+  $: label = statusLabelMap[template.status] || 'Draft';
 </script>
 
 <div
@@ -79,10 +89,9 @@
 
     <!-- Status Badge -->
     <div class="absolute top-3 left-3 z-10">
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-3xs font-bold uppercase tracking-wider backdrop-blur-md bg-card/90 border {statusInfo.border} {statusInfo.text} shadow-2xs">
-        <span class="w-1.5 h-1.5 rounded-full {statusInfo.dot}"></span>
-        {statusInfo.label}
-      </span>
+      <Badge {variant} dot pulse={template.status === 'pending'} size="sm">
+        {label}
+      </Badge>
     </div>
 
     <!-- Sold count overlay -->
@@ -128,42 +137,46 @@
           >
             {isDeleting ? '...' : 'Hapus'}
           </button>
-          <a
+          <Button
             href={`/builder/${template.id}`}
-            class="btn btn-xs text-2xs font-bold text-white bg-primary hover:bg-primary/90 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1 shadow-2xs"
+            variant="primary"
+            size="sm"
           >
             <span class="material-symbols-outlined text-xs">edit</span>
-            Edit
-          </a>
+            <span>Edit</span>
+          </Button>
         {/if}
 
         {#if template.status === 'rejected'}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             on:click={handleShowRejection}
-            class="text-2xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer flex items-center gap-1"
           >
             <span class="material-symbols-outlined text-xs">info</span>
-            Alasan
-          </button>
-          <a
+            <span>Alasan</span>
+          </Button>
+          <Button
             href={`/builder/${template.id}`}
-            class="btn btn-xs text-2xs font-bold text-white bg-primary hover:bg-primary/90 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1 shadow-2xs"
+            variant="primary"
+            size="sm"
           >
             Edit Ulang
-          </a>
+          </Button>
         {/if}
 
         {#if template.status === 'approved' || template.status === 'pending'}
-          <a
+          <Button
             href={`/builder/preview/${template.id}`}
-            class="btn btn-xs text-2xs font-bold text-main bg-nested hover:bg-nested/80 border border-light rounded-xl px-3 py-1.5 transition-all flex items-center gap-1 shadow-2xs"
+            variant="secondary"
+            size="sm"
           >
             <span class="material-symbols-outlined text-xs">visibility</span>
-            Pratinjau
-          </a>
+            <span>Pratinjau</span>
+          </Button>
         {/if}
       </div>
     </div>
   </div>
 </div>
+

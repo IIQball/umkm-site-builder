@@ -1,7 +1,10 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
+import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  plugins: [svelte({ preprocess: [vitePreprocess()], compilerOptions: { dev: true } }) as any],
   test: {
     globals: true,
     environment: 'node',
@@ -20,3 +23,4 @@ export default defineConfig({
     },
   },
 });
+

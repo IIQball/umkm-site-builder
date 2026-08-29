@@ -2,6 +2,7 @@
   import { ShieldCheck, CheckCircle, Ban, Info, CheckCircle2, Trash2 } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
   import type { AdminEntry } from './whitelist.types';
+  import { Badge } from '@/components/ui';
 
   export let admins: AdminEntry[] = [];
   export let isFetching = true;
@@ -64,13 +65,15 @@
               </td>
               <td class="px-6 py-4">
                 {#if admin.status === 'active'}
-                  <span class="badge-custom badge-custom-emerald text-3xs">
-                    <CheckCircle size={12} strokeWidth={3} /> Aktif
-                  </span>
+                  <Badge variant="emerald" size="sm">
+                    <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
+                    Aktif
+                  </Badge>
                 {:else}
-                  <span class="badge-custom badge-custom-rose text-3xs">
-                    <Ban size={12} strokeWidth={3} /> Diblokir
-                  </span>
+                  <Badge variant="rose" size="sm">
+                    <Ban size={12} strokeWidth={3} class="mr-1 inline" />
+                    Diblokir
+                  </Badge>
                 {/if}
               </td>
               <td class="px-6 py-4 hidden md:table-cell text-secondary text-xs font-medium">

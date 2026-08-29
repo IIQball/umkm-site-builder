@@ -98,7 +98,7 @@ export const POST: APIRoute = async ({ request }) => {
       userId: user.id,
       templateId: 'default',
       waNumber: '',
-      status: 'pending',
+      status: 'active',
     });
 
     return new Response(

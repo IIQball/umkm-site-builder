@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ArrowLeft, Check, Copy, Clock, CreditCard, RefreshCw, LayoutDashboard, Palette, ShieldCheck } from 'lucide-svelte';
   import type { CheckoutPageData } from '@/types';
+  import { Badge } from '@/components/ui';
   import TransactionStatus from './TransactionStatus.svelte';
   import PaymentModal from './PaymentModal.svelte';
 
@@ -35,25 +36,21 @@
     </a>
     
     {#if pageData.status === 'success'}
-      <div class="badge-custom badge-custom-emerald px-3 py-1 text-xs font-semibold border flex items-center gap-1.5">
-        <div class="w-1.5 h-1.5 bg-success rounded-full"></div>
+      <Badge variant="emerald" dot size="sm">
         Lunas
-      </div>
+      </Badge>
     {:else if pageData.status === 'failed'}
-      <div class="badge-custom badge-custom-rose px-3 py-1 text-xs font-semibold border flex items-center gap-1.5">
-        <div class="w-1.5 h-1.5 bg-error rounded-full"></div>
+      <Badge variant="rose" dot size="sm">
         Gagal
-      </div>
+      </Badge>
     {:else if pageData.status === 'expired'}
-      <div class="badge-custom badge-custom-warning px-3 py-1 text-xs font-semibold border flex items-center gap-1.5">
-        <div class="w-1.5 h-1.5 bg-warning rounded-full"></div>
+      <Badge variant="warning" dot size="sm">
         Kedaluwarsa
-      </div>
+      </Badge>
     {:else}
-      <div class="badge-custom badge-custom-amber px-3 py-1 text-xs font-semibold border animate-pulse flex items-center gap-1.5">
-        <div class="w-1.5 h-1.5 bg-warning rounded-full"></div>
+      <Badge variant="amber" dot pulse size="sm">
         Menunggu Pembayaran
-      </div>
+      </Badge>
     {/if}
   </div>
 

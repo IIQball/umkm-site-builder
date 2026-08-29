@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { Search, UserX, CheckCircle2, AlertCircle } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
+  import { Badge } from '@/components/ui';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
 
@@ -211,17 +212,13 @@
               </td>
               <td class="px-4 py-3.5">
                 {#if item.status === 'active'}
-                  <span class="badge-custom badge-custom-emerald text-[10px]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0"></span>
+                  <Badge variant="emerald" dot size="sm">
                     AKTIF
-                  </span>
+                  </Badge>
                 {:else}
-                  <div class="flex items-center">
-                    <span class="badge-custom badge-custom-rose text-[10px]">
-                      <span class="w-1.5 h-1.5 rounded-full bg-error flex-shrink-0"></span>
-                      DITANGGUHKAN
-                    </span>
-                  </div>
+                  <Badge variant="rose" dot size="sm">
+                    DITANGGUHKAN
+                  </Badge>
                 {/if}
               </td>
               <td class="px-6 py-3.5 text-right">

@@ -5,6 +5,8 @@ import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { platformSettings } from '@/db/schema';
 
+export const prerender = false;
+
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
   return Astro.redirect('/auth/login');
@@ -15,18 +17,30 @@ if (!isAuthorizedAdmin(user)) {
 }
 
 let initialFeePercentage = 30;
+let initialSettlementDelayDays = 7;
+
 try {
   const records = await db.select().from(platformSettings).limit(1);
-  if (records.length > 0 && typeof records[0].platformFeePercentage === 'number') {
-    initialFeePercentage = records[0].platformFeePercentage;
+  if (records.length > 0) {
+    if (typeof records[0].platformFeePercentage === 'number') {
+      initialFeePercentage = records[0].platformFeePercentage;
+    }
+    if (typeof records[0].settlementDelayDays === 'number') {
+      initialSettlementDelayDays = records[0].settlementDelayDays;
+    }
   }
 } catch {
   initialFeePercentage = 30;
+  initialSettlementDelayDays = 7;
 }
 ---
 
-<DashboardLayout title="Pengaturan Komisi" breadcrumb="Admin / Pengaturan Komisi">
-  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8 animate-fade-in">
-    <CommissionSettingsPanel client:load {initialFeePercentage} />
+<DashboardLayout title="Pengaturan Komisi" breadcrumb="Admin / Pengaturan Platform">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <CommissionSettingsPanel
+      client:load
+      {initialFeePercentage}
+      {initialSettlementDelayDays}
+    />
   </div>
 </DashboardLayout>

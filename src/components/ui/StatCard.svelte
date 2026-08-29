@@ -70,6 +70,25 @@
   };
 
   $: t = themeStyles[colorTheme] || themeStyles.indigo;
+  $: valueLength = displayValue ? displayValue.length : 0;
+
+  $: valueFontSize =
+    valueLength > 18
+      ? 'text-base sm:text-lg xl:text-xl'
+      : valueLength > 14
+      ? 'text-lg sm:text-xl xl:text-2xl'
+      : valueLength > 10
+      ? 'text-xl sm:text-2xl xl:text-2.5xl'
+      : 'text-2xl sm:text-3xl xl:text-3.5xl';
+
+  $: heroValueFontSize =
+    valueLength > 18
+      ? 'text-lg sm:text-xl xl:text-2xl'
+      : valueLength > 14
+      ? 'text-xl sm:text-2xl xl:text-3xl'
+      : valueLength > 10
+      ? 'text-2xl sm:text-3xl xl:text-3.5xl'
+      : 'text-3xl sm:text-4xl xl:text-5xl';
 
   onMount(() => {
     let target = 0;
@@ -116,8 +135,8 @@
 
 {#if isHero}
   <!-- Hero Card Variant (Rich Royal Gradient with Ambient Glow & Smooth Top Beam) -->
-  <div class="bg-gradient-to-br from-[#5551FF] via-[#6366F1] to-[#4338CA] dark:from-[#2d2b6e] dark:via-[#3730a3] dark:to-[#1e1b60] text-white rounded-3xl p-6 md:p-7 shadow-xl shadow-indigo-500/25 dark:shadow-indigo-900/40 relative overflow-hidden flex flex-col justify-between min-h-[185px] w-full transition-all hover:shadow-2xl hover:shadow-indigo-500/35 group animate-fade-in-up {delayClass}">
-    <!-- Smooth top accent luminous beam (fades softly to transparent at both ends) -->
+  <div class="bg-gradient-to-br from-[#5551FF] via-[#6366F1] to-[#4338CA] dark:from-[#2d2b6e] dark:via-[#3730a3] dark:to-[#1e1b60] text-white rounded-3xl p-5 sm:p-6 md:p-7 shadow-xl shadow-indigo-500/25 dark:shadow-indigo-900/40 relative overflow-hidden flex flex-col justify-between min-h-[190px] w-full transition-all hover:shadow-2xl hover:shadow-indigo-500/35 group animate-fade-in-up {delayClass}">
+    <!-- Smooth top accent luminous beam -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-white/80 to-transparent rounded-full z-20 pointer-events-none"></div>
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/5 h-3 bg-white/20 blur-md rounded-full pointer-events-none z-10"></div>
 
@@ -125,27 +144,27 @@
     <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/15 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -left-10 -top-10 w-36 h-36 bg-indigo-300/20 rounded-full blur-2xl pointer-events-none"></div>
 
-    <!-- Header: Icon + Label + Action Button -->
-    <div class="flex items-start justify-between gap-3 relative z-10">
-      <div class="flex items-center gap-2.5 min-w-0">
+    <!-- Header: Icon + Label + Action Button (wrapping gracefully without overlapping) -->
+    <div class="flex items-start justify-between gap-2.5 relative z-10">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
         <div class="w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
           <span class="material-symbols-outlined text-lg {iconCls}">{icon || 'account_balance_wallet'}</span>
         </div>
-        <p class="text-xs font-bold text-white/90 uppercase tracking-wider">{label}</p>
+        <p class="text-xs font-bold text-white/90 uppercase tracking-wider leading-snug break-words">{label}</p>
       </div>
-      <div class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45 shadow-xs">
-        <span class="material-symbols-outlined text-base">north_east</span>
+      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45 shadow-xs">
+        <span class="material-symbols-outlined text-sm sm:text-base">north_east</span>
       </div>
     </div>
 
-    <!-- Value Body (Expands dynamically, never cuts off) -->
-    <div class="my-4 relative z-10 min-w-0">
-      <div class="flex flex-wrap items-baseline gap-2">
-        <p class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white font-mono tracking-tight leading-tight break-all">
+    <!-- Value Body (Always 100% full, never truncated with ...) -->
+    <div class="my-3.5 relative z-10 min-w-0">
+      <div class="flex flex-wrap items-baseline gap-1.5 min-w-0">
+        <p class="{heroValueFontSize} font-extrabold text-white font-mono tracking-tight leading-tight break-normal">
           {displayValue}
         </p>
         {#if valueSuffix}
-          <span class="text-sm font-semibold text-white/85">{valueSuffix}</span>
+          <span class="text-xs sm:text-sm font-semibold text-white/85 flex-shrink-0">{valueSuffix}</span>
         {/if}
       </div>
     </div>
@@ -153,7 +172,7 @@
     <!-- Footer: Status Pill + Subtitle -->
     <div class="flex flex-wrap items-center justify-between gap-2 relative z-10 pt-2 border-t border-white/20">
       {#if badge}
-        <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold shadow-2xs">
+        <span class="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md text-white border border-white/30 px-2.5 py-0.5 rounded-full text-2xs sm:text-xs font-bold shadow-2xs">
           <span class="material-symbols-outlined text-xs">verified</span>
           {badge}
         </span>
@@ -167,30 +186,32 @@
   </div>
 {:else}
   <!-- Colorful Modern Card Variant (Smooth ambient theme gradient & Smooth Top Beam) -->
-  <div class="bg-card border rounded-3xl p-6 md:p-7 relative overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col justify-between min-h-[185px] w-full {t.card} {borderAccent} group animate-fade-in-up {delayClass}">
-    <!-- Smooth top accent luminous beam (fades softly to transparent at both ends) -->
+  <div class="bg-card border rounded-3xl p-5 sm:p-6 md:p-7 relative overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col justify-between min-h-[190px] w-full {t.card} {borderAccent} group animate-fade-in-up {delayClass}">
+    <!-- Smooth top accent luminous beam -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r {t.beam} rounded-full z-20 pointer-events-none"></div>
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/5 h-3.5 {t.glow} blur-md rounded-full pointer-events-none z-10"></div>
-    <div class="flex items-start justify-between gap-3">
-      <div class="flex items-center gap-2.5 min-w-0">
+    
+    <!-- Header: Icon + Label + Action Button (wrapping gracefully without overlapping) -->
+    <div class="flex items-start justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
         <div class="w-9 h-9 rounded-2xl {t.iconBox} flex items-center justify-center flex-shrink-0 shadow-xs">
           <span class="material-symbols-outlined text-lg {iconCls}">{icon || 'insights'}</span>
         </div>
-        <p class="text-xs font-bold text-muted uppercase tracking-wider">{label}</p>
+        <p class="text-2xs sm:text-xs font-bold text-muted uppercase tracking-wider leading-snug break-words">{label}</p>
       </div>
-      <div class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-main flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45 {t.arrow}">
-        <span class="material-symbols-outlined text-base">north_east</span>
+      <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-main flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45 {t.arrow}">
+        <span class="material-symbols-outlined text-sm sm:text-base">north_east</span>
       </div>
     </div>
 
-    <!-- Value Body (Expands dynamically, never cuts off) -->
-    <div class="my-4 min-w-0">
-      <div class="flex flex-wrap items-baseline gap-2">
-        <p class="text-2xl sm:text-3xl lg:text-3xl font-extrabold text-main font-mono tracking-tight leading-tight break-all">
+    <!-- Value Body (Always 100% full, never truncated with ...) -->
+    <div class="my-3.5 min-w-0">
+      <div class="flex flex-wrap items-baseline gap-1.5 min-w-0">
+        <p class="{valueFontSize} font-extrabold text-main font-mono tracking-tight leading-tight break-normal">
           {displayValue}
         </p>
         {#if valueSuffix}
-          <span class="text-body-sm font-semibold text-muted">{valueSuffix}</span>
+          <span class="text-2xs sm:text-xs font-semibold text-muted flex-shrink-0">{valueSuffix}</span>
         {/if}
       </div>
     </div>
@@ -198,14 +219,16 @@
     <!-- Footer: Status Pill + Subtitle -->
     <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-light">
       {#if badge}
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {t.badge} shadow-2xs">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs sm:text-xs font-bold border {t.badge} shadow-2xs">
           <span class="material-symbols-outlined text-xs">
             {#if label.includes('Saldo') || label.includes('Disetujui')}
               check_circle
-            {:else if label.includes('Pendapatan') || label.includes('Total')}
+            {:else if label.includes('Pendapatan') || label.includes('Total') || label.includes('Pengeluaran')}
               trending_up
-            {:else if label.includes('Hold') || label.includes('Mengendap')}
+            {:else if label.includes('Hold') || label.includes('Mengendap') || label.includes('Menunggu')}
               hourglass_top
+            {:else if label.includes('Batal') || label.includes('Ditolak')}
+              cancel
             {:else}
               verified
             {/if}
@@ -213,7 +236,7 @@
           {badge}
         </span>
       {:else if badgeCls}
-        <span class="badge-custom {badgeCls} text-xs py-1 px-3 rounded-full font-bold">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs sm:text-xs font-bold border {badgeCls} shadow-2xs">
           {badge}
         </span>
       {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { Card, Badge } from '@/components/ui';
   import DesignerStatCards from './DesignerStatCards.svelte';
   import DesignerMutationTable from './DesignerMutationTable.svelte';
   import DesignerBankWithdraw from './DesignerBankWithdraw.svelte';
@@ -123,10 +124,7 @@
   <!-- Row 3: Analytics 2-col (matching reference image Revenue Bar Chart + Donut Ring Chart) -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up delay-300">
     <!-- Left: Weekly Activity Bar Chart (matching image Revenue Chart) -->
-    <div class="bg-card border border-light rounded-3xl p-6 md:p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
-      <!-- Top smooth accent light beam -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-full z-20 pointer-events-none"></div>
-
+    <Card variant="bordered" padding="lg" radius="3xl" beam beamColor="indigo" className="hover:shadow-md transition-all flex flex-col justify-between group">
       <div class="flex items-start justify-between mb-6">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-xs">
@@ -135,7 +133,7 @@
           <div>
             <div class="flex items-baseline gap-2">
               <h3 class="text-heading-md font-bold text-main leading-tight">Aktivitas Pendapatan</h3>
-              <span class="text-3xs font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">7 Hari Terakhir</span>
+              <Badge variant="indigo" size="sm">7 Hari Terakhir</Badge>
             </div>
             <p class="text-body-sm text-secondary mt-0.5">Riwayat komisi CREDIT yang masuk ke dompet</p>
           </div>
@@ -176,13 +174,10 @@
           {/each}
         </div>
       </div>
-    </div>
+    </Card>
 
     <!-- Right: Sales by Template Donut Ring Chart (matching image Sales by Category Donut) -->
-    <div class="bg-card border border-light rounded-3xl p-6 md:p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
-      <!-- Top smooth accent light beam -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-sky-500 to-transparent rounded-full z-20 pointer-events-none"></div>
-
+    <Card variant="bordered" padding="lg" radius="3xl" beam beamColor="sky" className="hover:shadow-md transition-all flex flex-col justify-between group">
       <div class="flex items-start justify-between mb-6">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 flex-shrink-0 shadow-xs">
@@ -191,7 +186,7 @@
           <div>
             <div class="flex items-baseline gap-2">
               <h3 class="text-heading-md font-bold text-main leading-tight">Distribusi Penjualan</h3>
-              <span class="text-3xs font-bold text-sky-600 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">Performa Template</span>
+              <Badge variant="sky" size="sm">Performa Template</Badge>
             </div>
             <p class="text-body-sm text-secondary mt-0.5">Proporsi komisi berdasarkan template terlaris</p>
           </div>
@@ -206,7 +201,7 @@
           <div class="w-12 h-12 rounded-2xl bg-nested flex items-center justify-center text-muted mb-2">
             <span class="material-symbols-outlined text-2xl">pie_chart</span>
           </div>
-          <p class="text-xs text-muted">Belum ada data distribusi penjualan</p>
+          <p class="text-xs text-muted font-sans">Belum ada data distribusi penjualan</p>
         </div>
       {:else}
         <div class="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
@@ -241,7 +236,7 @@
               {/each}
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span class="text-3xs font-bold text-muted uppercase tracking-wider">Top 3</span>
+              <span class="text-3xs font-bold text-muted uppercase tracking-wider font-heading">Top 3</span>
               <span class="text-sm font-extrabold text-main font-mono">100%</span>
             </div>
           </div>
@@ -255,7 +250,7 @@
                 <div class="flex items-center justify-between gap-2 mb-1.5">
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2.5 h-2.5 rounded-full {dotColor} flex-shrink-0 shadow-2xs"></span>
-                    <span class="text-xs font-semibold text-main truncate">{item.name}</span>
+                    <span class="text-xs font-semibold text-main truncate font-sans">{item.name}</span>
                   </div>
                   <span class="text-xs font-bold text-secondary font-mono bg-nested px-2.5 py-0.5 rounded-lg flex-shrink-0 border border-light/80">{item.pct}%</span>
                 </div>
@@ -268,7 +263,7 @@
           </div>
         </div>
       {/if}
-    </div>
+    </Card>
   </div>
 
   <!-- Row 4: Mutation ledger table -->

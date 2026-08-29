@@ -1,31 +1,112 @@
 import type { AuthenticatedUser } from '@/lib/auth';
 
-export type NavItem = { label: string; href: string; icon: string; group?: string };
+export type NavItem = {
+  label: string;
+  href: string;
+  icon: string;
+  group: string;
+};
+
+export type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
+  if (role === 'designer') {
+    return [
+      {
+        title: 'Workspace',
+        items: [
+          { label: 'Dompet & Finansial', href: '/designer/wallet', icon: 'account_balance_wallet', group: 'Workspace' },
+          { label: 'Koleksi Template', href: '/designer/templates', icon: 'grid_view', group: 'Workspace' },
+          { label: 'Pesanan Masuk', href: '/designer/orders', icon: 'shopping_bag', group: 'Workspace' },
+        ],
+      },
+      {
+        title: 'Navigasi',
+        items: [
+          { label: 'Marketplace Publik', href: '/templates', icon: 'storefront', group: 'Navigasi' },
+          { label: 'Profil Desainer', href: '/auth/settings', icon: 'manage_accounts', group: 'Navigasi' },
+        ],
+      },
+    ];
+  }
+
+  if (role === 'tenant') {
+    return [
+      {
+        title: 'Utama',
+        items: [
+          { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', group: 'Utama' },
+          { label: 'Analitik & Performa', href: '/dashboard/analytics', icon: 'trending_up', group: 'Utama' },
+        ],
+      },
+      {
+        title: 'Desain & Pesanan',
+        items: [
+          { label: 'Galeri Template', href: '/dashboard/templates', icon: 'palette', group: 'Desain & Pesanan' },
+          { label: 'Beli Template', href: '/templates', icon: 'shopping_cart', group: 'Desain & Pesanan' },
+          { label: 'Riwayat Pesanan', href: '/dashboard/orders', icon: 'receipt_long', group: 'Desain & Pesanan' },
+        ],
+      },
+      {
+        title: 'Manajemen Toko',
+        items: [
+          { label: 'Katalog Produk', href: '/dashboard/products', icon: 'inventory_2', group: 'Manajemen Toko' },
+          { label: 'Kategori Produk', href: '/dashboard/categories', icon: 'category', group: 'Manajemen Toko' },
+          { label: 'Pengaturan Toko', href: '/dashboard/store', icon: 'store', group: 'Manajemen Toko' },
+        ],
+      },
+    ];
+  }
+
+  if (role === 'admin') {
+    return [
+      {
+        title: 'Ringkasan',
+        items: [
+          { label: 'Dashboard', href: '/dashboard', icon: 'monitoring', group: 'Ringkasan' },
+          { label: 'Mutasi Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Ringkasan' },
+        ],
+      },
+      {
+        title: 'Template & Kurasi',
+        items: [
+          { label: 'Kurasi Template', href: '/admin/templates', icon: 'palette', group: 'Template & Kurasi' },
+          { label: 'Kategori Template', href: '/admin/template-categories', icon: 'category', group: 'Template & Kurasi' },
+        ],
+      },
+      {
+        title: 'Sistem & Pengguna',
+        items: [
+          { label: 'Pengaturan Komisi', href: '/admin/settings', icon: 'tune', group: 'Sistem & Pengguna' },
+          { label: 'Manajemen Pengguna', href: '/admin/users', icon: 'group', group: 'Sistem & Pengguna' },
+        ],
+      },
+    ];
+  }
+
+  if (role === 'superadmin') {
+    return [
+      {
+        title: 'Administrasi Utama',
+        items: [
+          { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: 'admin_panel_settings', group: 'Administrasi Utama' },
+          { label: 'Overview Dashboard', href: '/dashboard', icon: 'dashboard', group: 'Administrasi Utama' },
+        ],
+      },
+    ];
+  }
+
+  return [
+    {
+      title: 'Menu',
+      items: [{ label: 'Dashboard', href: '/dashboard', icon: 'dashboard', group: 'Menu' }],
+    },
+  ];
+};
 
 export const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
-  if (role === 'designer') return [
-    { label: 'Dashboard',         href: '/designer/wallet',    icon: 'account_balance_wallet', group: 'GENERAL' },
-    { label: 'Template Saya',     href: '/designer/templates', icon: 'grid_view',              group: 'GENERAL' },
-    { label: 'Profil Desainer',   href: '/auth/settings',      icon: 'manage_accounts',        group: 'ACCOUNT' },
-    { label: 'Kembali ke Publik', href: '/public/templates',   icon: 'open_in_new',            group: 'ACCOUNT' },
-  ];
-  if (role === 'tenant') return [
-    { label: 'Dashboard',       href: '/dashboard',            icon: 'dashboard' },
-    { label: 'Pilih Template',  href: '/dashboard/templates',  icon: 'palette' },
-    { label: 'Analitik',        href: '/dashboard/analytics',  icon: 'trending_up' },
-    { label: 'Produk',          href: '/dashboard/products',   icon: 'inventory_2' },
-    { label: 'Kategori',        href: '/dashboard/categories', icon: 'category' },
-    { label: 'Pengaturan Toko', href: '/dashboard/store',      icon: 'store' },
-  ];
-  if (role === 'superadmin') return [
-    { label: 'Manage Admin',    href: '/admin/whitelist',      icon: 'admin_panel_settings' },
-  ];
-  if (role === 'admin') return [
-    { label: 'Overview',           href: '/dashboard',          icon: 'monitoring' },
-    { label: 'Kurasi Template',    href: '/admin/templates',    icon: 'palette' },
-    { label: 'Pengaturan Komisi',  href: '/admin/settings',     icon: 'settings' },
-    { label: 'Manajemen User',     href: '/admin/users',        icon: 'group' },
-    { label: 'Transaksi',          href: '/admin/transactions', icon: 'receipt_long' },
-  ];
-  return [{ label: 'Dashboard', href: '/dashboard', icon: 'dashboard' }];
+  return getNavGroups(role).flatMap((g) => g.items);
 };

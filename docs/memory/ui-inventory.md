@@ -36,6 +36,8 @@ One pack. Never a second. No emojis as substitutes.
 | link | link, link-hover | checkout page |
 | progress | progress-primary, progress-success | shared/ImageUpload.svelte, dashboard/TrafficWidget.svelte |
 | stat | implicit via card + flex layout | dashboard/TrafficWidget.svelte (two stat cards) |
+| progress | progress-primary | shared/ImageUpload.svelte |
+| modal | modal, modal-open, modal-box, modal-action | dashboard/ConfirmTemplateModal.svelte |
 
 ## 3.1 Composite components (project-specific)
 

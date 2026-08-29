@@ -7,6 +7,7 @@
   import SidebarMobile from './sidebar/SidebarMobile.svelte';
 
   export let userJson: string;
+  export let currentPath = '';
 
   const user: AuthenticatedUser = JSON.parse(userJson);
   const navItems = getNavItems(user.role);
@@ -17,11 +18,12 @@
 
   let collapsed = false;
   let drawerOpen = false;
-  let currentPath = '';
 
   onMount(() => {
     collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-    currentPath = window.location.pathname;
+    if (!currentPath && typeof window !== 'undefined') {
+      currentPath = window.location.pathname;
+    }
   });
 
   const toggleCollapse = () => {

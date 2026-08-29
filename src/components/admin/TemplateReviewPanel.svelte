@@ -96,7 +96,7 @@
 <div class="space-y-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="text-heading-md text-main">Kurasi & Review Template</h1>
+      <h1 class="text-heading-lg text-main font-bold">Kurasi & Review Template</h1>
       <p class="text-body-base text-secondary mt-0.5">Tinjau dan berikan persetujuan untuk template desainer</p>
     </div>
   </div>
@@ -122,23 +122,23 @@
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4">
         <span class="material-symbols-outlined text-3xl text-muted">inbox</span>
       </div>
-      <h4 class="text-sm font-bold text-main mb-1.5">Tidak Ada Template</h4>
-      <p class="text-xs text-secondary max-w-xs leading-relaxed">Belum ada template dalam kategori status ini.</p>
+      <h4 class="text-heading-md font-bold text-main mb-1.5">Tidak Ada Template</h4>
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed">Belum ada template dalam kategori status ini.</p>
     </div>
   {:else}
     <div class="overflow-x-auto bg-card rounded-2xl border border-light shadow-sm">
       <table class="w-full min-w-[640px]">
         <thead>
           <tr class="bg-nested/60 border-b border-light">
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Template</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Desainer</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Harga</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Tanggal Pengajuan</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Status</th>
-            <th class="text-right text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Aksi</th>
+            <th class="text-left text-label-caps text-muted px-6 py-3">Template</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Desainer</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Harga</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Tanggal Pengajuan</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Status</th>
+            <th class="text-right text-label-caps text-muted px-6 py-3">Aksi</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-light/50">
+        <tbody class="divide-y divide-[var(--color-border-light)]">
           {#each filteredTemplates as item (item.id)}
             <tr class="hover:bg-nested/40 transition-colors">
               <td class="px-6 py-3.5">
@@ -153,19 +153,19 @@
                     {/if}
                   </div>
                   <div>
-                    <p class="font-bold text-xs text-main">{item.name}</p>
-                    <p class="text-xs text-muted line-clamp-1 max-w-[200px]">{item.description || 'Tidak ada deskripsi'}</p>
+                    <p class="font-bold text-sm text-main">{item.name}</p>
+                    <p class="text-body-sm text-muted line-clamp-1 max-w-[200px]">{item.description || 'Tidak ada deskripsi'}</p>
                   </div>
                 </div>
               </td>
               <td class="px-4 py-3.5 text-xs">
                 <p class="font-semibold text-main">{item.designerName || 'Desainer'}</p>
-                <p class="text-xs text-muted">{item.designerEmail || '-'}</p>
+                <p class="text-body-sm text-muted">{item.designerEmail || '-'}</p>
               </td>
               <td class="px-4 py-3.5 font-mono text-xs font-bold text-main">
                 {item.price === 0 ? 'Gratis' : formatIdr(item.price)}
               </td>
-              <td class="px-4 py-3.5 text-xs text-muted">
+              <td class="px-4 py-3.5 text-body-sm text-muted">
                 {formatDate(item.createdAt)}
               </td>
               <td class="px-4 py-3.5">
@@ -226,8 +226,8 @@
 {#if approveModalOpen && selectedTemplate}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-card border border-light rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 animate-fade-in">
-      <h3 class="font-bold text-sm text-main">Konfirmasi Persetujuan</h3>
-      <p class="text-xs text-secondary leading-relaxed">Setujui template <strong>{selectedTemplate.name}</strong> untuk dipublikasikan ke marketplace?</p>
+      <h3 class="text-heading-md font-bold text-main">Konfirmasi Persetujuan</h3>
+      <p class="text-body-sm text-secondary leading-relaxed">Setujui template <strong>{selectedTemplate.name}</strong> untuk dipublikasikan ke marketplace?</p>
       <div class="flex items-center justify-end gap-2 pt-2">
         <button type="button" class="inline-flex items-center justify-center text-xs font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
         <button type="button" class="btn btn-sm btn-primary text-xs font-bold rounded-xl px-4 py-2.5 transition-all cursor-pointer" on:click={() => submitReview('approve')} disabled={actionLoading}>
@@ -241,9 +241,9 @@
 {#if rejectModalOpen && selectedTemplate}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-card border border-light rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 animate-fade-in">
-      <h3 class="font-bold text-sm text-main">Tolak Template</h3>
-      <p class="text-xs text-secondary leading-relaxed">Alasan penolakan template <strong>{selectedTemplate.name}</strong>:</p>
-      <textarea bind:value={rejectionReason} placeholder="Alasan penolakan (min 5 karakter)..." class="w-full px-3 py-2 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-xs font-semibold focus:outline-none transition-colors h-24"></textarea>
+      <h3 class="text-heading-md font-bold text-main">Tolak Template</h3>
+      <p class="text-body-sm text-secondary leading-relaxed">Alasan penolakan template <strong>{selectedTemplate.name}</strong>:</p>
+      <textarea bind:value={rejectionReason} placeholder="Alasan penolakan (min 5 karakter)..." class="w-full px-3 py-2 bg-nested text-main border border-light focus:border-primary rounded-xl text-body-sm font-normal focus:outline-none transition-colors h-24"></textarea>
       <div class="flex items-center justify-end gap-2 pt-2">
         <button type="button" class="inline-flex items-center justify-center text-xs font-bold text-secondary hover:text-main hover:bg-nested rounded-xl px-4 py-2.5 transition-colors cursor-pointer" on:click={closeModal} disabled={actionLoading}>Batal</button>
         <button type="button" class="btn btn-sm bg-error border-none text-white text-xs font-bold rounded-xl px-4 py-2.5 transition-all cursor-pointer" on:click={() => submitReview('reject')} disabled={actionLoading || rejectionReason.trim().length < 5}>

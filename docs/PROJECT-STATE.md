@@ -11,19 +11,14 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Synchronized global typography system across `src/styles/global.css`, `tailwind.config.mjs`, and strictly whitelisted target modules (Templates/Builder, Transaksi/Finance, Platform Settings/Admin) with 0 modifications to blacklisted files. All 278 unit tests passing across 40 test files, 0 typecheck errors, 0 lint warnings.
+Polished the theme toggle button inside the dashboard navbar to support fully reactive Svelte state with rotation transitions, and upgraded the notification badge dot to a pulsing blinking indicator. All 295 unit tests passing across 43 test files, 0 typecheck errors, 0 lint warnings.
 
 ## Last session did
 
-- **Global Typography System Synchronization:**
-  - `src/styles/global.css` & `tailwind.config.mjs`: Registered standard typography utilities (`text-heading-xl`, `text-heading-lg`, `text-heading-md`, `text-tagline`, `text-body-lg`, `text-body-base`, `text-label-caps`, `text-3xs`, `text-2xs`, `text-xs-dense`, `tracking-caps`).
-  - Refactored whitelisted modules strictly:
-    * **Admin / Settings / Whitelist**: `CommissionSettingsPanel.svelte`, `TemplateReviewPanel.svelte`, `UserManagementPanel.svelte`, `AdminWhitelistPanel.svelte`.
-    * **Designer / Finance**: `designer/templates.astro`, `designer/wallet.astro`, `DesignerBankModal.svelte`, `DesignerWithdrawModal.svelte`.
-    * **Checkout**: `CheckoutSummaryCard.svelte`.
-    * **Marketplace & Builder**: `templates/index.astro`, `PropertyInspector.svelte`.
-  - Zero modifications to blacklisted directories (`src/components/tenant/*`, `src/components/storefront/*`, `src/components/onboarding/*`, `src/middleware.ts`, `src/db/schema.ts`).
-  - Full validation: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (278/278 pass).
+- **Dashboard Navbar Controls Refinements:**
+  - `src/components/dashboard/DashboardNavbar.svelte`: Implemented `isDark` state variable loaded on mount, replacing static/contrast button with sun (`light_mode`) and moon (`dark_mode`) icons with rotation hover animations, and made the notification dot a pulsing blinking indicator.
+  - Zero modifications to blacklisted files.
+  - Full validation: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (295/295 passed).
 
 - **Google Maps Section Default Integration:**
   - `src/schemas/templates/template.schema.ts`: Added `google_maps` section into `DEFAULT_TEMPLATE_SECTIONS` (id: `section-7`) placed immediately between `faq` (id: `section-6`) and `footer` (id: `section-8`).

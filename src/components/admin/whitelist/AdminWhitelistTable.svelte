@@ -30,7 +30,7 @@
           <th class="px-6 py-4 text-right">Aksi</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-light/60">
+      <tbody class="divide-y divide-[var(--color-border-light)]">
         {#if isFetching}
           <tr>
             <td colspan="4" class="px-6 py-12 text-center text-muted">

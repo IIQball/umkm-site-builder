@@ -65,7 +65,7 @@
           <Check size={24} />
         </div>
       {/if}
-      <h1 class="text-heading-md font-extrabold tracking-tight text-main">{checkoutTitle}</h1>
+      <h1 class="text-heading-lg font-bold tracking-tight text-main">{checkoutTitle}</h1>
       <p class="text-body-base text-secondary mt-0.5 max-w-sm mx-auto leading-relaxed">
         {checkoutDescription}
       </p>
@@ -76,7 +76,7 @@
       <!-- Reference Box -->
       <div class="flex items-center justify-between bg-card p-3 rounded-lg border border-light shadow-sm">
         <div>
-          <p class="text-xs font-medium text-muted mb-0.5">No. Referensi Tagihan</p>
+          <p class="text-body-sm font-medium text-muted mb-0.5">No. Referensi Tagihan</p>
           <p class="text-xs font-mono font-bold text-main tracking-wide">{pageData.invoiceId}</p>
         </div>
         <button 
@@ -94,7 +94,7 @@
         <div class="flex justify-between items-start border-b border-light pb-3">
           <div class="max-w-[70%]">
             <p class="text-xs font-semibold text-main">{lineItemTitle}</p>
-            <p class="text-xs text-muted">{lineItemSubtitle}</p>
+            <p class="text-body-sm text-muted">{lineItemSubtitle}</p>
           </div>
           <p class="text-xs font-semibold text-main">{pageData.amountFormatted}</p>
         </div>
@@ -103,7 +103,7 @@
       <!-- Total Amount -->
       <div class="pt-1 flex flex-col items-center justify-center space-y-1 text-center">
         <p class="text-label-caps text-muted">Total Pembayaran</p>
-        <p class="text-3xl font-black text-main tracking-tight font-mono">{pageData.amountFormatted}</p>
+        <p class="text-heading-lg font-bold text-main tracking-tight font-mono">{pageData.amountFormatted}</p>
         
         {#if pageData.status === 'pending'}
           <p class="text-xs text-warning mt-2 inline-flex items-center gap-1.5 bg-warning/10 px-2.5 py-1 rounded-md font-medium border border-warning/20">

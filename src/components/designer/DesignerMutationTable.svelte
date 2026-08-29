@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatIDR } from '@/lib/utils/format';
+  import { formatCurrency } from '@/lib/utils/format';
 
   export let mutations: Array<{
     id: string;
@@ -12,6 +12,8 @@
   }>;
 
   let copiedId: string | null = null;
+  let activeFilter: 'ALL' | 'CREDIT' | 'DEBIT' = 'ALL';
+  let searchQuery = '';
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -28,76 +30,135 @@
       day: 'numeric', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
+
+  $: filteredMutations = (mutations || []).filter(m => {
+    const matchesType = activeFilter === 'ALL' || m.type === activeFilter;
+    const matchesSearch = !searchQuery.trim() || 
+      m.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (m.referenceId && m.referenceId.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesType && matchesSearch;
+  });
 </script>
 
-<div class="bg-card border border-light rounded-2xl overflow-hidden shadow-sm">
-  <div class="px-6 py-4 border-b border-light flex items-center justify-between">
+<div class="bg-card border border-light rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all relative">
+  <!-- Top smooth accent light beam -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-violet-500 to-transparent rounded-full z-20 pointer-events-none"></div>
+
+  <!-- Table Header & Controls -->
+  <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div>
-      <h3 class="text-sm font-bold text-main">Riwayat Mutasi & Transaksi</h3>
-      <p class="text-xs text-muted mt-0.5">Buku besar dompet & komisi penjualan</p>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-base">receipt_long</span>
+        </div>
+        <h3 class="text-heading-md text-main font-bold">Riwayat Mutasi & Transaksi</h3>
+      </div>
+      <p class="text-body-sm text-secondary mt-0.5 ml-10.5">Buku besar saldo dompet, komisi penjualan template, dan transfer payout</p>
     </div>
-    {#if mutations.length > 0}
-      <span class="text-xs font-semibold text-secondary bg-nested border border-light rounded-lg px-2.5 py-1">
-        {mutations.length} entri
-      </span>
-    {/if}
+
+    <!-- Filter Tabs & Search Box -->
+    <div class="flex flex-wrap items-center gap-2.5">
+      <!-- Search Input Capsule -->
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="Cari transaksi / Ref ID..."
+          class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
+        />
+      </div>
+
+      <!-- Segmented Type Filter -->
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-xl p-1">
+        <button
+          type="button"
+          on:click={() => activeFilter = 'ALL'}
+          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer {activeFilter === 'ALL' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
+        >
+          Semua ({mutations.length})
+        </button>
+        <button
+          type="button"
+          on:click={() => activeFilter = 'CREDIT'}
+          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {activeFilter === 'CREDIT' ? 'bg-emerald-500 text-white shadow-2xs' : 'text-muted hover:text-success'}"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+          Masuk
+        </button>
+        <button
+          type="button"
+          on:click={() => activeFilter = 'DEBIT'}
+          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {activeFilter === 'DEBIT' ? 'bg-rose-500 text-white shadow-2xs' : 'text-muted hover:text-error'}"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+          Keluar
+        </button>
+      </div>
+    </div>
   </div>
 
-  {#if mutations.length === 0}
+  {#if filteredMutations.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
-      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4">
-        <span class="material-symbols-outlined text-3xl text-muted">receipt_long</span>
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4 text-muted">
+        <span class="material-symbols-outlined text-3xl">receipt_long</span>
       </div>
-      <h4 class="text-sm font-bold text-main mb-1.5">Belum Ada Mutasi</h4>
-      <p class="text-xs text-secondary max-w-xs leading-relaxed">
-        Mutasi saldo dan komisi penjualan template akan dicatat secara otomatis di sini.
+      <h4 class="text-heading-md font-bold text-main mb-1.5">Tidak Ada Mutasi Ditemukan</h4>
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed">
+        {searchQuery ? 'Tidak ada transaksi yang cocok dengan kata kunci pencarian Anda.' : 'Mutasi saldo dan komisi penjualan template akan dicatat secara otomatis di sini.'}
       </p>
     </div>
   {:else}
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[640px]">
+      <table class="w-full min-w-[700px]">
         <thead>
           <tr class="bg-nested/60 border-b border-light">
-            <th class="text-left text-label-caps text-muted px-6 py-3">Tanggal</th>
-            <th class="text-left text-label-caps text-muted px-4 py-3">Tipe</th>
-            <th class="text-left text-label-caps text-muted px-4 py-3">Keterangan</th>
-            <th class="text-left text-label-caps text-muted px-4 py-3">Reference ID</th>
-            <th class="text-right text-label-caps text-muted px-4 py-3">Nominal</th>
-            <th class="text-right text-label-caps text-muted px-6 py-3">Saldo Akhir</th>
+            <th class="text-left text-label-caps text-muted px-6 py-3.5">Transaksi</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3.5">Keterangan</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3.5">Reference ID</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3.5">Tanggal & Waktu</th>
+            <th class="text-right text-label-caps text-muted px-4 py-3.5">Nominal</th>
+            <th class="text-right text-label-caps text-muted px-6 py-3.5">Saldo Akhir</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-light/50">
-          {#each mutations as mut}
-            <tr class="hover:bg-nested/40 transition-colors">
-              <td class="px-6 py-3.5 text-xs text-muted whitespace-nowrap">
-                {formatDate(mut.createdAt)}
+        <tbody class="divide-y divide-[var(--color-border-light)]">
+          {#each filteredMutations as mut}
+            <tr class="hover:bg-nested/40 transition-colors group">
+              <!-- Type Icon + Badge -->
+              <td class="px-6 py-3.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs {mut.type === 'CREDIT' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20'}">
+                    <span class="material-symbols-outlined text-sm">
+                      {mut.type === 'CREDIT' ? 'south_west' : 'north_east'}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-xs font-bold {mut.type === 'CREDIT' ? 'text-success' : 'text-error'} block leading-tight">
+                      {mut.type === 'CREDIT' ? 'Kredit (Masuk)' : 'Debit (Keluar)'}
+                    </span>
+                    <span class="text-[10px] text-muted leading-tight block mt-0.5">
+                      {mut.type === 'CREDIT' ? 'Komisi Penjualan' : 'Payout Transfer'}
+                    </span>
+                  </div>
+                </div>
               </td>
-              <td class="px-4 py-3.5">
-                {#if mut.type === 'CREDIT'}
-                  <span class="badge-custom badge-custom-emerald text-[10px]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-success flex-shrink-0"></span>
-                    CREDIT
-                  </span>
-                {:else}
-                  <span class="badge-custom badge-custom-rose text-[10px]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-error flex-shrink-0"></span>
-                    DEBIT
-                  </span>
-                {/if}
-              </td>
-              <td class="px-4 py-3.5 text-xs font-medium text-main max-w-[180px] whitespace-normal break-words">
+
+              <!-- Description -->
+              <td class="px-4 py-4 text-xs font-semibold text-main max-w-[220px] whitespace-normal">
                 {mut.description}
               </td>
-              <td class="px-4 py-3.5">
+
+              <!-- Reference ID -->
+              <td class="px-4 py-4">
                 {#if mut.referenceId}
                   <button
                     type="button"
                     on:click={() => copyToClipboard(mut.referenceId ?? '')}
-                    class="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-primary hover:bg-primary/10 rounded-lg px-1.5 py-0.5 transition-colors cursor-pointer"
+                    class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-primary hover:text-primary rounded-lg px-2.5 py-1 transition-all cursor-pointer shadow-2xs"
                     title="Salin Reference ID"
                   >
-                    <span class="truncate max-w-[100px]">{mut.referenceId}</span>
-                    <span class="material-symbols-outlined text-sm flex-shrink-0">
+                    <span class="truncate max-w-[110px]">{mut.referenceId}</span>
+                    <span class="material-symbols-outlined text-xs flex-shrink-0">
                       {copiedId === mut.referenceId ? 'check' : 'content_copy'}
                     </span>
                   </button>
@@ -105,15 +166,26 @@
                   <span class="text-xs text-muted">—</span>
                 {/if}
               </td>
+
+              <!-- Date & Time -->
+              <td class="px-4 py-4 text-2xs text-secondary font-medium whitespace-nowrap">
+                {formatDate(mut.createdAt)}
+              </td>
+
+              <!-- Amount -->
               <td
-                class="px-4 py-3.5 text-right font-mono text-xs font-bold whitespace-nowrap"
+                class="px-4 py-4 text-right font-mono text-sm font-extrabold whitespace-nowrap"
                 class:text-success={mut.type === 'CREDIT'}
                 class:text-error={mut.type === 'DEBIT'}
               >
-                {mut.type === 'CREDIT' ? '+' : '-'}{formatIDR(mut.amount)}
+                {mut.type === 'CREDIT' ? '+' : '-'}{formatCurrency(mut.amount)}
               </td>
-              <td class="px-6 py-3.5 text-right font-mono text-xs font-semibold text-secondary whitespace-nowrap">
-                {formatIDR(mut.balanceAfter)}
+
+              <!-- Balance After -->
+              <td class="px-6 py-4 text-right whitespace-nowrap">
+                <span class="font-mono text-xs font-bold text-main bg-nested/80 border border-light px-2.5 py-1 rounded-lg">
+                  {formatCurrency(mut.balanceAfter)}
+                </span>
               </td>
             </tr>
           {/each}

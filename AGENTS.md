@@ -20,3 +20,23 @@ Consult these guides before working on related tasks:
 - [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
 - [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
 - [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+
+## Icon Usage in Astro Pages
+
+**DO NOT import lucide-svelte components directly in `.astro` template markup.**
+
+Astro's TypeScript checker cannot resolve lucide-svelte (Svelte 4 class-based) component props
+(`class`, `size`, `color`), causing false positive TS errors that cannot be suppressed with
+`@ts-ignore` in Astro template syntax.
+
+**Correct pattern — use inline SVG in `.astro` files:**
+
+```astro
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+     fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <polyline points="6 9 12 15 18 9"/>
+</svg>
+```
+
+**lucide-svelte IS fine in `.svelte` components** — only avoid in `.astro` template sections.

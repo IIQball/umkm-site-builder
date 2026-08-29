@@ -28,11 +28,20 @@
 
   $: parsedAmount = parsePriceInput(withdrawAmount);
   $: isConfirmDisabled = isWithdrawing || parsedAmount <= 0 || parsedAmount < minPayoutLimit || parsedAmount > availableBalance;
+
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }
+    };
+  }
 </script>
 
 {#if showModal}
-  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
-    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl transition-transform duration-300 transform scale-100">
+  <div use:portal class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl relative z-10 animate-fade-in">
       {#if withdrawSuccess}
         <div class="text-center py-6 space-y-4">
           <div class="w-12 h-12 rounded-full bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto">
@@ -55,7 +64,7 @@
       {:else}
         <div class="space-y-4">
           <div class="flex justify-between items-center pb-2 border-b border-light">
-            <h3 class="text-base font-bold text-foreground m-0">Tarik Dana</h3>
+            <h3 class="text-heading-md font-bold text-main m-0">Tarik Dana</h3>
             <button type="button" on:click={onClose} class="text-muted hover:text-main flex items-center cursor-pointer p-1">
               <X size={16} />
             </button>
@@ -63,7 +72,7 @@
 
           <div class="grid grid-cols-2 gap-3 bg-nested border border-light rounded-xl p-3 text-center">
             <div class="space-y-0.5">
-              <span class="text-label-caps text-muted-foreground block">Saldo Aktif</span>
+              <span class="text-label-caps text-muted block">Saldo Aktif</span>
               <p class="text-xs font-black text-main font-mono">{formatIDR(balance)}</p>
             </div>
             <div class="space-y-0.5 border-l border-light">
@@ -73,7 +82,7 @@
           </div>
 
           <div class="space-y-1.5">
-            <label class="block text-label-caps text-muted-foreground mb-1.5" for="input-amount">Nominal Penarikan</label>
+            <label class="block text-label-caps text-muted mb-1.5" for="input-amount">Nominal Penarikan</label>
             <div class="relative">
               <span class="absolute left-3.5 top-3 text-xs font-bold text-muted">Rp</span>
               <input

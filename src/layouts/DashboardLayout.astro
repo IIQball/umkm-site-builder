@@ -48,7 +48,7 @@ const userJson = JSON.stringify(user);
     <ToastContainer client:load />
     <div class="flex h-screen overflow-hidden">
       <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
-      {!hideSidebar && <Sidebar client:load userJson={userJson} />}
+      {!hideSidebar && <Sidebar client:load userJson={userJson} currentPath={Astro.url.pathname} />}
 
       <!-- Main: sticky header + scrollable content -->
       <div class="flex flex-col flex-1 min-w-0 overflow-hidden" id="dashboard-main">

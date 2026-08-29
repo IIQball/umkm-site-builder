@@ -17,42 +17,47 @@
 
   $: isDesigner = user.role === 'designer';
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
-  $: sidebarWidth = collapsed ? '72px' : '256px';
+  $: sidebarWidth = collapsed ? '76px' : '260px';
 
   const isActive = (href: string): boolean => {
-    if (href === '/dashboard') return currentPath === '/dashboard';
-    return currentPath.startsWith(href);
+    if (!currentPath) return false;
+    const cleanCurrent = currentPath.replace(/\/$/, '') || '/';
+    const cleanHref = href.replace(/\/$/, '') || '/';
+    if (cleanHref === '/dashboard') return cleanCurrent === '/dashboard';
+    return cleanCurrent === cleanHref || cleanCurrent.startsWith(cleanHref + '/');
   };
 </script>
 
 <aside
-  class="hidden md:flex flex-col bg-card border-r border-light transition-[width] duration-300 ease-in-out overflow-hidden flex-shrink-0 relative z-20"
+  class="hidden md:flex flex-col bg-card border-r border-light transition-[width] duration-300 ease-in-out overflow-hidden flex-shrink-0 relative z-20 shadow-sm select-none"
   style="width: {sidebarWidth}"
   aria-label="Navigasi Dashboard"
 >
-  <!-- Brand -->
-  <div class="flex items-center h-14 px-3 border-b border-light gap-2.5 flex-shrink-0">
+  <!-- Brand Header -->
+  <div class="flex items-center h-16 px-3.5 border-b border-light gap-3 flex-shrink-0">
+    <div class="w-10 h-10 rounded-2xl bg-nested border border-light flex items-center justify-center text-main font-bold shadow-sm flex-shrink-0 group hover:border-primary/40 transition-colors">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-main group-hover:text-primary transition-colors">
+        <path d="M4 7C7 4.5 11 4.5 14 7C17 9.5 21 9.5 24 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M0 12C3 9.5 7 9.5 10 12C13 14.5 17 14.5 20 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M4 17C7 14.5 11 14.5 14 17C17 19.5 21 19.5 24 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    </div>
+
     {#if !collapsed}
-      <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-black text-sm flex-shrink-0 shadow-sm">
-        <span class="material-symbols-outlined icon-filled text-sm">storefront</span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <span class="font-bold text-sm text-main tracking-tight truncate block leading-tight select-none">
+      <div class="flex-1 min-w-0 animate-fade-in">
+        <span class="font-heading font-extrabold text-sm text-main tracking-tight truncate block leading-tight">
           UMKM Builder
         </span>
-        <span class="text-xs text-muted leading-tight select-none">
-          Designer Hub
+        <span class="text-2xs font-medium text-muted leading-tight block truncate mt-0.5">
+          {isDesigner ? 'Designer Workspace' : 'Merchant Portal'}
         </span>
       </div>
-    {:else}
-      <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-black text-sm shadow-sm">
-        <span class="material-symbols-outlined icon-filled text-sm">storefront</span>
-      </div>
     {/if}
+
     <button
       type="button"
       on:click={() => dispatch('toggleCollapse')}
-      class="ml-auto w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-nested transition-colors flex-shrink-0 cursor-pointer"
+      class="ml-auto w-7 h-7 rounded-xl flex items-center justify-center text-muted hover:text-main hover:bg-nested border border-transparent hover:border-light transition-all flex-shrink-0 cursor-pointer"
       title={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
       aria-label={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
     >
@@ -62,89 +67,123 @@
     </button>
   </div>
 
-  <!-- Nav links -->
-  <nav class="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5" aria-label="Menu utama">
+  <!-- Nav Links Rail -->
+  <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-1" aria-label="Menu utama">
     {#if isDesigner}
       <!-- GENERAL group -->
       {#if !collapsed}
-        <p class="text-label-caps text-muted px-2.5 pb-1.5">General</p>
+        <p class="text-label-caps text-muted px-2.5 pb-2">General</p>
       {/if}
       {#each generalItems as item}
         {@const active = isActive(item.href)}
         <a
           href={item.href}
           title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-colors group {active ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
           <span
-            class="material-symbols-outlined text-sm flex-shrink-0 transition-colors"
+            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
             class:icon-filled={active}
           >
             {item.icon}
           </span>
           {#if !collapsed}
-            <span class="truncate leading-none {active ? 'font-semibold' : ''}">{item.label}</span>
+            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
             {#if active}
-              <span class="ml-auto w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>
+              <span class="ml-auto flex items-center justify-center flex-shrink-0">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+              </span>
             {/if}
+          {:else if active}
+            <!-- Mini dot in collapsed mode -->
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
           {/if}
         </a>
       {/each}
 
       <!-- ACCOUNT group -->
       {#if !collapsed}
-        <p class="text-label-caps text-muted px-2.5 pb-1.5 pt-4">Account</p>
+        <p class="text-label-caps text-muted px-2.5 pb-2 pt-5">Account</p>
       {:else}
-        <div class="border-t border-light my-2"></div>
+        <div class="border-t border-light my-3"></div>
       {/if}
       {#each accountItems as item}
         {@const active = isActive(item.href)}
         <a
           href={item.href}
           title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-colors group {active ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
-          <span class="material-symbols-outlined text-sm flex-shrink-0">{item.icon}</span>
+          <span
+            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
+            class:icon-filled={active}
+          >
+            {item.icon}
+          </span>
           {#if !collapsed}
-            <span class="truncate leading-none">{item.label}</span>
+            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
+            {#if active}
+              <span class="ml-auto flex items-center justify-center flex-shrink-0">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+              </span>
+            {/if}
+          {:else if active}
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
           {/if}
         </a>
       {/each}
 
     {:else}
-      <!-- Non-designer: flat list (unchanged behavior) -->
+      <!-- Non-designer flat list -->
       {#each flatItems as item}
         {@const active = isActive(item.href)}
         <a
           href={item.href}
           title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-colors group {active ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
-          <span class="material-symbols-outlined text-sm flex-shrink-0">{item.icon}</span>
+          <span
+            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
+            class:icon-filled={active}
+          >
+            {item.icon}
+          </span>
           {#if !collapsed}
-            <span class="truncate leading-none">{item.label}</span>
+            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
             {#if active}
-              <span class="ml-auto w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>
+              <span class="ml-auto flex items-center justify-center flex-shrink-0">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+              </span>
             {/if}
+          {:else if active}
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
           {/if}
         </a>
       {/each}
     {/if}
   </nav>
 
-  <!-- User footer card -->
-  <div class="border-t border-light p-2.5 flex-shrink-0">
+  <!-- Bottom User Profile & Sign Out -->
+  <div class="border-t border-light p-3 flex-shrink-0">
     {#if !collapsed}
-      <div class="bg-nested border border-light rounded-xl px-3 py-2.5 flex items-center gap-2.5 mb-2">
-        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center
-                    font-bold text-sm flex-shrink-0 shadow-sm">
+      <div class="bg-nested border border-light rounded-2xl p-2.5 flex items-center gap-2.5 mb-2.5 shadow-2xs">
+        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
           {userInitial}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-main truncate leading-tight">
+          <p class="text-xs font-bold text-main truncate leading-tight">
             {user.name ?? user.email}
           </p>
-          <span class="inline-flex items-center text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-1.5 py-0.5 mt-0.5">
+          <span class="inline-flex items-center text-3xs font-bold uppercase tracking-wider text-primary bg-primary/10 rounded-full px-2 py-0.5 mt-0.5">
             {user.role}
           </span>
         </div>
@@ -154,9 +193,9 @@
       type="button"
       on:click={() => dispatch('signOut')}
       title={collapsed ? 'Keluar' : undefined}
-      class="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl text-sm font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+      class="flex items-center gap-3 w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
     >
-      <span class="material-symbols-outlined text-sm flex-shrink-0">logout</span>
+      <span class="material-symbols-outlined text-lg flex-shrink-0">logout</span>
       {#if !collapsed}
         <span>Keluar</span>
       {/if}

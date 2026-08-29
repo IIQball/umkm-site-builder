@@ -20,8 +20,11 @@
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
 
   const isActive = (href: string): boolean => {
-    if (href === '/dashboard') return currentPath === '/dashboard';
-    return currentPath.startsWith(href);
+    if (!currentPath) return false;
+    const cleanCurrent = currentPath.replace(/\/$/, '') || '/';
+    const cleanHref = href.replace(/\/$/, '') || '/';
+    if (cleanHref === '/dashboard') return cleanCurrent === '/dashboard';
+    return cleanCurrent === cleanHref || cleanCurrent.startsWith(cleanHref + '/');
   };
 </script>
 
@@ -78,11 +81,16 @@
         <a
           href={item.href}
           on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
-          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
           <span class="flex-1">{item.label}</span>
-          {#if active}<span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>{/if}
+          {#if active}
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+          {/if}
         </a>
       {/each}
       <p class="text-label-caps text-muted px-2 pb-2 pt-4">Account</p>
@@ -91,10 +99,16 @@
         <a
           href={item.href}
           on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
-          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
           <span class="flex-1">{item.label}</span>
+          {#if active}
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+          {/if}
         </a>
       {/each}
     {:else}
@@ -103,11 +117,16 @@
         <a
           href={item.href}
           on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
-          <span class="material-symbols-outlined text-sm">{item.icon}</span>
+          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
           <span class="flex-1">{item.label}</span>
-          {#if active}<span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>{/if}
+          {#if active}
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+          {/if}
         </a>
       {/each}
     {/if}

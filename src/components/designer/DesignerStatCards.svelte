@@ -10,69 +10,84 @@
 
   $: pendingSettlement = Math.max(0, balance - availableBalance);
 
-  $: cards = [
-    {
-      label: 'Total Saldo',
-      value: formatIDR(balance),
-      badge: pendingSettlement > 0 ? 'Menunggu Masa Hold' : 'Siap Ditarik',
-      badgeCls: pendingSettlement > 0 ? 'badge-custom-warning' : 'badge-custom-emerald',
-      iconCls: 'icon-wrapper-indigo',
-      icon: 'account_balance_wallet',
-      borderAccent: 'border-t-2 border-t-indigo-400',
-    },
-    {
-      label: 'Saldo Siap Tarik',
-      value: formatIDR(availableBalance),
-      badge: availableBalance > 0 ? 'Siap Ditarik' : 'Saldo Nihil',
-      badgeCls: availableBalance > 0 ? 'badge-custom-emerald' : 'badge-custom-sky',
-      iconCls: 'icon-wrapper-emerald',
-      icon: 'check_circle',
-      borderAccent: 'border-t-2 border-t-emerald-400',
-    },
-    {
-      label: 'Dana Mengendap',
-      value: formatIDR(pendingSettlement),
-      badge: pendingSettlement > 0 ? `Hold ${settlementDelayDays} Hari` : 'Nihil',
-      badgeCls: pendingSettlement > 0 ? 'badge-custom-warning' : 'badge-custom-sky',
-      iconCls: 'icon-wrapper-indigo',
-      icon: 'hourglass_empty',
-      borderAccent: 'border-t-2 border-t-amber-400',
-      description: pendingSettlement > 0 ? `Dana hasil transaksi belum melewati batas waktu penahanan (${settlementDelayDays} hari) sesuai kebijakan.` : '',
-    },
-    {
-      label: 'Total Pendapatan Bersih',
-      value: formatIDR(totalNetIncome),
-      badge: '80% Bagian Bersih',
-      badgeCls: 'badge-custom-violet',
-      iconCls: 'icon-wrapper-emerald',
-      icon: 'payments',
-      borderAccent: 'border-t-2 border-t-violet-400',
-    },
-    {
-      label: 'Total Template Terjual',
-      value: `${totalTemplatesSold}`,
-      badge: 'Unit Terjual',
-      badgeCls: 'badge-custom-sky',
-      iconCls: 'icon-wrapper-violet',
-      icon: 'sell',
-      borderAccent: 'border-t-2 border-t-sky-400',
-      valueSuffix: 'Template',
-    },
-  ];
+  $: heroCard = {
+    label: 'Total Saldo Dompet',
+    value: formatIDR(balance),
+    rawValue: balance,
+    badge: pendingSettlement > 0 ? 'Ada Dana Hold' : 'Siap Ditarik',
+    isHero: true,
+    icon: 'account_balance_wallet',
+    footerText: 'Saldo aktif akun desainer',
+    delayClass: 'delay-100',
+  };
+
+  $: readyCard = {
+    label: 'Saldo Siap Tarik',
+    value: formatIDR(availableBalance),
+    rawValue: availableBalance,
+    badge: availableBalance > 0 ? 'Siap Ditarik' : 'Saldo Nihil',
+    colorTheme: 'emerald' as const,
+    icon: 'check_circle',
+    footerText: 'Dapat dicairkan ke bank',
+    delayClass: 'delay-150',
+  };
+
+  $: holdCard = {
+    label: 'Dana Mengendap',
+    value: formatIDR(pendingSettlement),
+    rawValue: pendingSettlement,
+    badge: pendingSettlement > 0 ? `Hold ${settlementDelayDays || 0} Hari` : 'Nihil',
+    colorTheme: 'amber' as const,
+    icon: 'hourglass_top',
+    footerText: `Masa hold ${settlementDelayDays || 0} hari`,
+    delayClass: 'delay-200',
+  };
+
+  $: incomeCard = {
+    label: 'Total Pendapatan Bersih',
+    value: formatIDR(totalNetIncome),
+    rawValue: totalNetIncome,
+    badge: 'Sepanjang Waktu',
+    colorTheme: 'violet' as const,
+    icon: 'payments',
+    footerText: 'Akumulasi seluruh waktu',
+    delayClass: 'delay-250',
+  };
+
+  $: soldCard = {
+    label: 'Total Template Terjual',
+    value: `${totalTemplatesSold}`,
+    rawValue: totalTemplatesSold,
+    badge: 'Unit Terjual',
+    colorTheme: 'sky' as const,
+    icon: 'sell',
+    valueSuffix: 'Template',
+    footerText: 'Total transaksi sukses',
+    delayClass: 'delay-300',
+  };
 </script>
 
-<div class="space-y-4">
-  <!-- Row 1: Wallet status cards (Total Saldo, Saldo Siap Tarik, Dana Mengendap) -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    {#each cards.slice(0, 3) as card}
-      <StatCard {...card} />
-    {/each}
+<div class="space-y-6">
+  <!-- Row 1: Saldo Status Cards (Spacious 3-col grid with Hero Card, never cuts off long numbers) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div class="w-full">
+      <StatCard {...heroCard} />
+    </div>
+    <div class="w-full">
+      <StatCard {...readyCard} />
+    </div>
+    <div class="w-full md:col-span-2 xl:col-span-1">
+      <StatCard {...holdCard} />
+    </div>
   </div>
 
-  <!-- Row 2: Performance stats (Total Pendapatan Bersih, Total Template Terjual) -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {#each cards.slice(3) as card}
-      <StatCard {...card} />
-    {/each}
+  <!-- Row 2: Performance Stats (Spacious 2-col grid) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="w-full">
+      <StatCard {...incomeCard} />
+    </div>
+    <div class="w-full">
+      <StatCard {...soldCard} />
+    </div>
   </div>
 </div>

@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-poppins, 'Poppins')", 'sans-serif'],
-        heading: ["var(--font-poppins, 'Poppins')", 'sans-serif'],
+        sans: ["var(--font-family, 'Poppins')", 'sans-serif'],
+        heading: ["var(--font-heading, 'League Spartan')", 'sans-serif'],
         mono: ['var(--font-geist-mono, monospace)'],
       },
       fontSize: {
@@ -22,6 +22,16 @@ export default {
       colors: {
         'muted-foreground': 'var(--color-text-muted, #64748b)',
         foreground: 'var(--color-text-main, #0f172a)',
+        // Theme semantic tokens — usable as bg-*, text-*, border-*, divide-*
+        canvas: 'var(--color-bg-base)',
+        card: 'var(--color-card-base)',
+        nested: 'var(--color-nested-base)',
+        main: 'var(--color-text-main)',
+        secondary: 'var(--color-text-secondary)',
+        muted: 'var(--color-text-muted)',
+        light: 'var(--color-border-light)',
+        border: 'var(--color-border)',
+        primary: 'var(--color-primary)',
       },
     },
   },

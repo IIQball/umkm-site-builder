@@ -7,13 +7,16 @@
   export let isLoading = false;
 </script>
 
-<div class="bg-card border border-light rounded-2xl p-6 shadow-sm space-y-4 mt-5">
-  <div class="flex items-center justify-between border-b border-light pb-3">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-        <History size={16} />
+<div class="bg-card border border-light rounded-3xl p-6 md:p-7 shadow-xs hover:shadow-sm transition-all space-y-4 mt-6">
+  <div class="flex items-center justify-between border-b border-light pb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+        <History size={18} />
       </div>
-      <h3 class="text-sm font-bold text-main">Riwayat Penarikan Dana</h3>
+      <div>
+        <h3 class="text-heading-md text-main font-bold leading-tight">Riwayat Penarikan Dana</h3>
+        <p class="text-2xs text-muted mt-0.5">Status transfer pencairan dana ke rekening</p>
+      </div>
     </div>
   </div>
 
@@ -40,7 +43,7 @@
             <th class="py-2.5">Keterangan</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-light">
+        <tbody class="divide-y divide-[var(--color-border-light)]">
           {#each payoutHistory as payout}
             <tr>
               <td class="py-3 text-main font-mono">

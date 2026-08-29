@@ -13,13 +13,22 @@
   export let onClose: () => void = () => {};
 
   const popularBanks = ['BCA', 'Mandiri', 'BNI', 'BRI', 'CIMB Niaga', 'Permata'];
+
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }
+    };
+  }
 </script>
 
 {#if showModal}
-  <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+  <div use:portal class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-card border border-light rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-fade-in relative z-10">
       <div class="flex justify-between items-center pb-2 border-b border-light">
-        <h3 class="text-base font-bold text-foreground">{bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}</h3>
+        <h3 class="text-heading-md font-bold text-main">{bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}</h3>
         <button
           type="button"
           on:click={onClose}
@@ -32,7 +41,7 @@
 
       <div class="space-y-3">
         <div class="space-y-1">
-          <label class="block text-label-caps text-muted-foreground mb-1" for="select-bank">Nama Bank</label>
+          <label class="block text-label-caps text-muted mb-1" for="select-bank">Nama Bank</label>
           <select
             id="select-bank"
             bind:value={inputBankName}
@@ -46,7 +55,7 @@
         </div>
 
         <div class="space-y-1">
-          <label class="block text-label-caps text-muted-foreground mb-1" for="input-norek">Nomor Rekening</label>
+          <label class="block text-label-caps text-muted mb-1" for="input-norek">Nomor Rekening</label>
           <input
             id="input-norek"
             type="text"
@@ -58,7 +67,7 @@
         </div>
 
         <div class="space-y-1">
-          <label class="block text-label-caps text-muted-foreground mb-1" for="input-nama">Nama Pemilik Rekening</label>
+          <label class="block text-label-caps text-muted mb-1" for="input-nama">Nama Pemilik Rekening</label>
           <input
             id="input-nama"
             type="text"

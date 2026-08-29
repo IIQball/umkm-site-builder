@@ -6,6 +6,7 @@ import { db } from '@/lib/db/client';
 import { commissions, platformSettings } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
+// Icons rendered as inline SVG to avoid Astro+lucide-svelte TS incompatibility
 
 export const prerender = false;
 
@@ -31,13 +32,46 @@ const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlement
 ---
 
 <DashboardLayout title="Dompet & Keuangan" breadcrumb="Dompet">
-  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
-    <!-- Page header -->
-    <div class="mb-6">
-      <h1 class="text-heading-md text-main">Dashboard Keuangan</h1>
-      <p class="text-body-base text-secondary mt-0.5">
-        Pantau pendapatan bersih, mutasi dompet, dan distribusi komisi penjualan template.
-      </p>
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching reference image with generous spacing) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Hello, {user.name ? user.name.split(' ')[0] : 'Designer'}!</span>
+          <span class="text-2xl animate-bounce">👋</span> <!--sengaja pake emoji, masih nyari icon yang pas-->
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Berikut adalah rangkuman transaksi, riwayat komisi penjualan, dan status saldo dompet keuangan Anda.
+        </p>
+      </div>
+
+      <!-- Quick Filter Dropdown Pill (matching reference image) -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button
+          type="button"
+          class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <span class="text-primary inline-flex">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+          </span>
+          <span>Sepanjang Waktu</span>
+          <span class="text-muted inline-flex">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </span>
+        </button>
+        <button
+          type="button"
+          class="w-10 h-10 rounded-2xl bg-card border border-light flex items-center justify-center text-muted hover:text-primary hover:border-primary/40 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+          title="Pilih Rentang Tanggal"
+          aria-label="Pilih Rentang Tanggal"
+        >
+          <span class="material-symbols-outlined text-base">calendar_today</span>
+        </button>
+      </div>
     </div>
 
     <!-- Wallet overview -->

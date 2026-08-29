@@ -4,7 +4,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { templates, commissions } from '@/db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
-import DesignerTemplateCard from '@/components/designer/DesignerTemplateCard.svelte';
+import DesignerTemplateTable from '@/components/designer/DesignerTemplateTable.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
 
 export const prerender = false;
@@ -42,16 +42,6 @@ const counts = {
   approved: templatesList.filter((t) => t.status === 'approved').length,
   rejected: templatesList.filter((t) => t.status === 'rejected').length,
 };
-
-type FilterKey = keyof typeof counts;
-
-const tabs: Array<{ key: FilterKey; label: string }> = [
-  { key: 'all',      label: 'Semua' },
-  { key: 'draft',    label: 'Draft' },
-  { key: 'pending',  label: 'Menunggu Review' },
-  { key: 'approved', label: 'Disetujui' },
-  { key: 'rejected', label: 'Ditolak' },
-];
 ---
 
 <DashboardLayout title="Template Saya" breadcrumb="Template Saya">
@@ -76,9 +66,10 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
       </a>
     </div>
 
-    <!-- Statcards Grid (matching designer wallet layout) -->
+    <!-- Statcards Grid (animated on client load) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard 
+        client:load
         label="Total Koleksi" 
         value={counts.all} 
         rawValue={counts.all}
@@ -89,6 +80,7 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
         delayClass="delay-100"
       />
       <StatCard 
+        client:load
         label="Disetujui" 
         value={counts.approved} 
         rawValue={counts.approved}
@@ -99,6 +91,7 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
         delayClass="delay-150"
       />
       <StatCard 
+        client:load
         label="Menunggu Review" 
         value={counts.pending} 
         rawValue={counts.pending}
@@ -109,6 +102,7 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
         delayClass="delay-200"
       />
       <StatCard 
+        client:load
         label="Draft & Revisi" 
         value={counts.draft + counts.rejected} 
         rawValue={counts.draft + counts.rejected}
@@ -120,187 +114,10 @@ const tabs: Array<{ key: FilterKey; label: string }> = [
       />
     </div>
 
-    <!-- Filter + Grid container — matching wallet panel style -->
-    <div class="bg-card border border-light rounded-3xl shadow-xs hover:shadow-md transition-all overflow-hidden relative animate-fade-in-up delay-300">
-      <!-- Top smooth accent light beam -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent rounded-full z-20 pointer-events-none"></div>
-
-      <!-- Filter tabs & Search Header -->
-      <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0">
-              <span class="material-symbols-outlined text-base">grid_view</span>
-            </div>
-            <h3 class="text-heading-md text-main font-bold">Katalog Desain Saya</h3>
-          </div>
-          <p class="text-body-sm text-secondary mt-0.5 ml-10.5">Filter dan kelola seluruh draf serta template aktif</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Search Input Capsule -->
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
-            <input
-              id="template-search-input"
-              type="text"
-              placeholder="Cari nama template..."
-              class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
-            />
-          </div>
-
-          <!-- Segmented Filter Pill Tabs -->
-          <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-xl p-1 overflow-x-auto flex-shrink-0">
-            {tabs.map((tab) => (
-              <button
-                type="button"
-                class={`tab-btn flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${tab.key === 'all' ? 'bg-primary text-white shadow-2xs' : 'text-muted hover:text-main'}`}
-                data-filter={tab.key}
-              >
-                <span>{tab.label}</span>
-                <span class={`text-3xs font-extrabold ${tab.key === 'all' ? 'bg-white/20 text-white' : 'bg-card border border-light text-secondary'} rounded-md px-1.5 py-0.5 leading-none`}>
-                  {counts[tab.key]}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <!-- Templates grid or empty state -->
-      <div class="p-6 md:p-7">
-        {templatesList.length === 0 ? (
-          <div class="py-16 flex flex-col items-center text-center">
-            <div class="w-16 h-16 rounded-3xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto mb-4 shadow-xs">
-              <span class="material-symbols-outlined icon-filled text-3xl">palette</span>
-            </div>
-            <h3 class="text-heading-md font-bold text-main">Belum Ada Template Desain</h3>
-            <p class="text-body-sm text-secondary mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
-              Mulai rancang tema toko online UMKM pertama Anda dengan no-code builder visual yang canggih dan mudah.
-            </p>
-            <a
-              href="/builder/new"
-              class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-2xl px-6 py-3 shadow-sm hover:shadow-md transition-all"
-            >
-              <span class="material-symbols-outlined text-sm">add</span>
-              Buat Template Sekarang
-            </a>
-          </div>
-        ) : (
-          <div>
-            <div id="templates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {templatesList.map((tpl) => (
-                <DesignerTemplateCard client:load template={tpl} />
-              ))}
-            </div>
-            <div id="no-search-results" class="py-16 flex-col items-center text-center hidden">
-              <div class="w-12 h-12 rounded-2xl bg-nested flex items-center justify-center text-muted mx-auto mb-3">
-                <span class="material-symbols-outlined text-2xl">search_off</span>
-              </div>
-              <p class="text-sm font-bold text-main">Tidak Ada Template yang Cocok</p>
-              <p class="text-xs text-secondary mt-1">Coba gunakan kata kunci pencarian lain atau pilih tab filter status berbeda.</p>
-            </div>
-          </div>
-        )}
-      </div>
+    <!-- Interactive Template Table (matching Riwayat Mutasi & Transaksi style) -->
+    <div class="animate-fade-in-up delay-300">
+      <DesignerTemplateTable client:load templates={templatesList} />
     </div>
   </div>
-
-  <!-- Rejection modal with modern styling -->
-  <dialog id="rejection_modal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box rounded-3xl border border-light shadow-2xl p-6 md:p-7 bg-card max-w-md">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-xl">error</span>
-        </div>
-        <div>
-          <h3 class="text-heading-md font-bold text-main">Catatan Review Kurator</h3>
-          <p class="text-2xs text-muted">Perbaiki catatan berikut sebelum mengajukan ulang</p>
-        </div>
-      </div>
-      <p id="rejection_template_name" class="text-xs font-bold text-primary mb-2"></p>
-      <div class="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-2xl p-4 text-xs font-medium leading-relaxed font-mono">
-        <p id="rejection_reason_text"></p>
-      </div>
-      <div class="modal-action mt-6">
-        <form method="dialog">
-          <button class="inline-flex items-center px-5 py-2.5 text-xs font-bold text-main bg-nested border border-light rounded-2xl hover:bg-nested/80 transition-all cursor-pointer shadow-2xs">
-            Tutup Catatan
-          </button>
-        </form>
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop"><button>close</button></form>
-  </dialog>
-
-  <script is:inline>
-    // Segmented filter tabs & real-time search logic
-    let activeStatusFilter = 'all';
-    let searchQuery = '';
-
-    const updateVisibility = () => {
-      let visibleCount = 0;
-      const cards = document.querySelectorAll('.template-card');
-      const emptyState = document.getElementById('no-search-results');
-
-      cards.forEach((card) => {
-        const status = card.getAttribute('data-status');
-        const name = card.getAttribute('data-name') || '';
-        
-        const matchesStatus = activeStatusFilter === 'all' || status === activeStatusFilter;
-        const matchesSearch = !searchQuery || name.includes(searchQuery);
-
-        if (matchesStatus && matchesSearch) {
-          card.style.display = '';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      if (emptyState) {
-        if (visibleCount === 0 && cards.length > 0) {
-          emptyState.classList.remove('hidden');
-          emptyState.classList.add('flex');
-        } else {
-          emptyState.classList.add('hidden');
-          emptyState.classList.remove('flex');
-        }
-      }
-    };
-
-    document.querySelectorAll('.tab-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        activeStatusFilter = btn.getAttribute('data-filter') || 'all';
-
-        document.querySelectorAll('.tab-btn').forEach((b) => {
-          b.classList.remove('bg-primary', 'text-white', 'shadow-2xs');
-          b.classList.add('text-muted');
-          const badge = b.querySelector('span:last-child');
-          if (badge) {
-            badge.classList.remove('bg-white/20', 'text-white');
-            badge.classList.add('bg-card', 'border', 'border-light', 'text-secondary');
-          }
-        });
-
-        btn.classList.add('bg-primary', 'text-white', 'shadow-2xs');
-        btn.classList.remove('text-muted');
-        const badge = btn.querySelector('span:last-child');
-        if (badge) {
-          badge.classList.add('bg-white/20', 'text-white');
-          badge.classList.remove('bg-card', 'border', 'border-light', 'text-secondary');
-        }
-
-        updateVisibility();
-      });
-    });
-
-    const searchInput = document.getElementById('template-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        searchQuery = (e.target.value || '').trim().toLowerCase();
-        updateVisibility();
-      });
-    }
-  </script>
 </DashboardLayout>
+

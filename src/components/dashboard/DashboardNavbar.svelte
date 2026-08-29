@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { AuthenticatedUser } from '@/lib/auth';
+  import { Badge } from '@/components/ui';
 
   export let userJson: string;
   export let breadcrumb: string | undefined = undefined;
@@ -8,13 +9,13 @@
   const user: AuthenticatedUser = JSON.parse(userJson);
   const userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
 
-  const roleMeta: Record<string, { label: string; cls: string }> = {
-    superadmin: { label: 'Super Admin', cls: 'badge-custom-rose' },
-    admin:      { label: 'Admin',       cls: 'badge-custom-amber' },
-    designer:   { label: 'Designer',   cls: 'badge-custom-indigo' },
-    tenant:     { label: 'Tenant',     cls: 'badge-custom-emerald' },
+  const roleMeta: Record<string, { label: string; variant: 'rose' | 'amber' | 'indigo' | 'emerald' | 'slate' }> = {
+    superadmin: { label: 'Super Admin', variant: 'rose' },
+    admin:      { label: 'Admin',       variant: 'amber' },
+    designer:   { label: 'Designer',   variant: 'indigo' },
+    tenant:     { label: 'Tenant',     variant: 'emerald' },
   };
-  const role = roleMeta[user.role] ?? { label: user.role, cls: 'badge-custom-slate' };
+  const role = roleMeta[user.role] ?? { label: user.role, variant: 'slate' };
   const homePath = user.role === 'designer' ? '/designer/wallet' : '/dashboard';
 
   let dropdownOpen = false;
@@ -73,9 +74,10 @@
       </span>
     </label>
 
-    <!-- Date pill badge like reference image -->
-    <div class="hidden lg:flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-2xs">
-      <span>Today, {getTodayFormatted()}</span>
+    <!-- Date pill badge -->
+    <div class="hidden lg:inline-flex items-center gap-2 bg-card border border-light px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shadow-xs hover:border-primary/30 transition-colors">
+      <span class="material-symbols-outlined text-sm text-primary flex-shrink-0">calendar_today</span>
+      <span class="text-secondary">Hari ini, <strong class="text-main font-semibold">{getTodayFormatted()}</strong></span>
     </div>
   </div>
 
@@ -154,10 +156,10 @@
         >
           <div class="px-3.5 py-2.5 border-b border-light mb-1">
             <p class="text-xs font-bold text-main truncate">{user.name ?? user.email}</p>
-            <p class="text-2xs text-muted truncate mt-0.5">{user.email}</p>
-            <span class="inline-flex items-center text-3xs font-bold uppercase tracking-wider text-primary bg-primary/10 rounded-full px-2 py-0.5 mt-1.5">
+            <p class="text-2xs text-muted truncate mt-0.5 mb-1.5">{user.email}</p>
+            <Badge variant={role.variant} size="sm">
               {role.label}
-            </span>
+            </Badge>
           </div>
           <a
             href={homePath}

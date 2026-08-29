@@ -83,6 +83,7 @@ export async function createTemplateDraft(
     description?: string | null;
     thumbnailUrl?: string | null;
     price?: number;
+    categoryId?: string | null;
   },
   designerId: string
 ) {
@@ -96,6 +97,7 @@ export async function createTemplateDraft(
       description: data.description,
       thumbnailUrl: data.thumbnailUrl,
       price: data.price ?? 0,
+      categoryId: data.categoryId ?? null,
       designerId,
       status: 'draft',
       config: {
@@ -116,6 +118,7 @@ export async function updateTemplateDraft(
     description?: string | null;
     thumbnailUrl?: string | null;
     price?: number;
+    categoryId?: string | null;
     config?: TemplateConfig;
   },
   userId: string,
@@ -144,6 +147,7 @@ export async function updateTemplateDraft(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.thumbnailUrl !== undefined) updateData.thumbnailUrl = data.thumbnailUrl;
   if (data.price !== undefined) updateData.price = data.price;
+  if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
   if (data.config !== undefined) updateData.config = migrateTemplateConfig(data.config);
 
   const [updated] = await db

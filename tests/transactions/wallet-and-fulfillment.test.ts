@@ -194,16 +194,5 @@ describe('Financial Engine & Ledger Service', () => {
       expect(result.status).toBe('success');
       expect(result.message).toBe('Webhook processed successfully');
     });
-
-    it('should fulfill store_registration transaction by activating store', async () => {
-      mockDb.select.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([{ id: 'txn_reg', userId: 'u_m', type: 'store_registration', storeId: 's_1', amount: 100000, status: 'pending' }]) }),
-      });
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
-
-      const result = await transactionService.processWebhook({ id: 'x_reg', external_id: 'INV-reg', amount: 100000, status: 'SETTLED', paid: true });
-      expect(result.status).toBe('success');
-    });
   });
 });

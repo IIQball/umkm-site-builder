@@ -15,6 +15,7 @@
   import { onMount } from 'svelte';
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';
+  import { Badge } from '@/components/ui';
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
@@ -82,9 +83,9 @@
               <strong>Template Sedang Ditinjau Admin:</strong> Template ini telah diajukan dan sedang menunggu proses validasi serta persetujuan dari tim kurasi admin sebelum diterbitkan ke katalog UMKM.
             </span>
           </div>
-          <span class="badge-custom badge-custom-amber">
+          <Badge variant="amber" size="sm" dot pulse>
             Menunggu Review
-          </span>
+          </Badge>
         </div>
       {:else if template.status === 'approved'}
         <div class="bg-success/10 border-b border-success/20 px-6 py-2.5 flex items-center justify-between text-success">
@@ -94,9 +95,9 @@
               <strong>Template Disetujui dan Live:</strong> Template ini telah lolos kurasi admin dan dapat dibeli oleh pemilik UMKM di katalog marketplace.
             </span>
           </div>
-          <span class="badge-custom badge-custom-emerald">
+          <Badge variant="emerald" size="sm" dot>
             Disetujui
-          </span>
+          </Badge>
         </div>
       {:else if template.status === 'rejected'}
         <div class="bg-error/10 border-b border-error/20 px-6 py-2.5 flex items-center justify-between text-error">
@@ -106,9 +107,9 @@
               <strong>Pengajuan Ditolak:</strong> {template.rejectionReason || 'Desain atau konfigurasi template memerlukan penyesuaian. Silakan perbaiki di editor dan ajukan kembali.'}
             </span>
           </div>
-          <span class="badge-custom badge-custom-rose">
+          <Badge variant="rose" size="sm" dot>
             Ditolak
-          </span>
+          </Badge>
         </div>
       {:else}
         <div class="bg-info/10 border-b border-info/20 px-6 py-2.5 flex items-center justify-between text-info">
@@ -118,9 +119,9 @@
               <strong>Preview Mode (Draft):</strong> Template masih dalam tahap pembuatan dan belum diajukan ke admin.
             </span>
           </div>
-          <span class="badge-custom badge-custom-slate">
+          <Badge variant="slate" size="sm" dot>
             Draft
-          </span>
+          </Badge>
         </div>
       {/if}
     {/if}
@@ -130,9 +131,9 @@
       <!-- Left: Template Name & Back Button -->
       <div class="flex items-center gap-3 min-w-0">
         <a
-          href="/"
+          href="/templates"
           class="inline-flex items-center justify-center p-2 rounded-xl bg-nested hover:bg-nested/80 text-secondary hover:text-main transition-colors cursor-pointer"
-          title="Kembali ke Beranda"
+          title="Kembali ke Daftar Template"
         >
           <ArrowLeft size={16} />
         </a>

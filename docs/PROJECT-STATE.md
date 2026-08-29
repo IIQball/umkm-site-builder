@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-29 by feature/h9-fauzan-analytics-track session
+Status: LIVE · Updated: 2026-08-29 by feature/language-standardization session
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,20 +11,90 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Polished the theme toggle button inside the dashboard navbar to support fully reactive Svelte state with rotation transitions, and upgraded the notification badge dot to a pulsing blinking indicator. All 295 unit tests passing across 43 test files, 0 typecheck errors, 0 lint warnings.
+Frontend UI language has been 100% standardized to Bahasa Indonesia across Template Management, Transactions, Checkout, and Platform Settings, while preserving 100% English for backend architecture (DB schemas, API endpoints, error codes). Created learning proposal for language standard rule. All 44 test suites (306 tests) passing, 0 typecheck errors, 0 lint warnings.
 
-## Last session did
-
-- **Dashboard Navbar Controls Refinements:**
-  - `src/components/dashboard/DashboardNavbar.svelte`: Implemented `isDark` state variable loaded on mount, replacing static/contrast button with sun (`light_mode`) and moon (`dark_mode`) icons with rotation hover animations, and made the notification dot a pulsing blinking indicator.
-  - Zero modifications to blacklisted files.
-  - Full validation: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (295/295 passed).
-
-- **Google Maps Section Default Integration:**
-  - `src/schemas/templates/template.schema.ts`: Added `google_maps` section into `DEFAULT_TEMPLATE_SECTIONS` (id: `section-7`) placed immediately between `faq` (id: `section-6`) and `footer` (id: `section-8`).
-  - `src/components/builder/content/GoogleMapsContent.svelte` (NEW): Created content inspector component allowing real-time modification of `markerTitle`, `address`, `zoom`, and `mapHeight`.
-  - `src/components/builder/registry/index.ts`: Linked `GoogleMapsContent` as `inspectorComponent` and mapped `defaultConfig` to `defaultSectionConfigs['google_maps']`.
-  - `tests/schemas/template.test.ts`: Updated schema unit tests to assert 8 default sections including `google_maps`.
+- **Audit & Cleanup Legacy Registration Payment & Email Activation Flows:**
+  - Removed `isRegistrationPaid` flag and `store_registration` transaction type from schema, services, schemas, and types.
+  - Set `emailVerified: true` as default in `users` table schema and in BetterAuth `databaseHooks.user.create.before` to ensure accounts are immediately active upon registration.
+  - Updated `RegisterForm.svelte` to redirect directly to dashboard (`/dashboard` for tenants, `/designer/wallet` for designers) after signup without email activation gating.
+  - Set newly created stores in `/api/stores/onboard` and `/api/stores/register-subdomain` directly to `status: 'active'`.
+  - Removed obsolete `/api/tenant/transactions/initiate.ts` endpoint and simplified webhook fulfillment logic to strictly handle `template_purchase`.
+  - Cleaned up obsolete tests in `tests/transactions/wallet-and-fulfillment.test.ts` and `tests/lib/transactions/service.test.ts`.
+  - All 45 test files (315 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Public Navbar Redesign & User Profile Dropdown:**
+  - Built interactive [`PublicNavbar.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\common\PublicNavbar.svelte) and integrated with [`Navbar.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\common\Navbar.astro).
+  - Repositioned Theme Toggle before auth actions, added a vertical divider, and created a rich interactive user dropdown menu with role badges, direct role-specific dashboard routing, template navigation, order history, and instant logout action.
+  - Provided responsive mobile navigation drawer with theme switching and auth states.
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Role-Based Marketplace Purchasing & Clean Actions:**
+  - Configured role-based purchasing guard in [`PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\public\PublicTemplateMarketplace.svelte): only tenants (and unauthenticated guests) see the purchase/apply button. Other logged-in roles (`designer`, `admin`, `superadmin`) see a single full-width *Pratinjau Langsung* button.
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Marketplace Cleanups & Type Modularization:**
+  - Extracted public marketplace types (`PublicTemplate`, `CategoryItem`) into dedicated [`marketplace.types.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/public/marketplace.types.ts).
+  - Removed template ID labels from cards and removed "Buka Editor" button for published catalog items.
+  - Set "Pratinjau" button to navigate within the same tab (removed `target="_blank"`).
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Public Templates Marketplace Redesign (`/public/templates` & `/templates`):**
+  - Redesigned public template catalog with modern royal hero banner, category pills rail with count badges, real-time search capsule, and multi-option price filter (`Semua`, `Gratis`, `Berbayar`, `< 50rb`, `50-100rb`, `> 100rb`).
+  - Added multi-criteria sorting (Terbaru, Harga Terendah/Tertinggi, Nama A-Z) and interactive instant purchase / apply flows.
+  - Implemented responsive cards with floating frosted glass category pills, price tags, designer avatars, and full preview/checkout buttons.
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **StatCard & Layout Improvements:**
+  - Redesigned [`StatCard.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/ui/StatCard.svelte) to prevent any title overlap/clipping and removed artificial text truncation on values, ensuring large numbers (e.g. `Rp 8.800.000` or `Rp 10.800.000.000`) always display completely without dots (`...`).
+  - Expanded Commission & Platform Settings form (`CommissionSettingsPanel.svelte`) to `w-full` for optimal responsive stretch.
+  - Standardized font size of `(Hak 70%)` across designer order tables to be balanced and subtle (`text-[10px]`).
+  - Upgraded dashboard StatCard grids to `xl:grid-cols-4` with generous gap spacing.
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Dashboard & Component Refinements:**
+  - Resolved TypeScript comparison errors across `dashboard/orders.astro` and `designer/orders.astro`.
+  - Refined Commission Settings form (`CommissionSettingsPanel.svelte`) with interactive percentage split presets, live range sliders, and settlement delay options.
+  - Enhanced "Tambah Kategori Baru" action button in `TemplateCategoryManager.svelte` with high-contrast vibrant gradient.
+  - Implemented dynamic responsive font scaling in `StatCard.svelte` to prevent value truncation or broken wrapping for large currency amounts.
+  - Polished table action buttons in `OrderHistoryTable.svelte` with distinct gradients and hover effects.
+  - Categorized sidebar navigation into clean, distinct groups for all roles (`tenant`, `designer`, `admin`, `superadmin`).
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Unified UI Redesign across 5 Core Dashboard Pages:**
+  - Redesigned `/designer/orders`, `/admin/templates`, `/admin/template-categories`, `/admin/settings`, and `/dashboard/orders` to align with the visual standard of `/designer/wallet` and `/designer/templates`.
+  - Added animated `StatCard` grids, generous page headers, action pills, top-beam accent cards, structured table search capsules, segmented status filter pills, and unified design system modals.
+  - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
+- **Designer Incoming Template Orders (`/designer/orders`):**
+  - Added `getDesignerIncomingOrders(designerId)` in `transactionService` querying transactions associated with templates created by the designer, joining `template`, `user` (tenant), and `commission` records.
+  - Created [`DesignerOrdersTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerOrdersTable.svelte) with stat summaries (hak komisi lunas, template terjual, total pesanan), filter tabs, search, gross vs net commission columns, and status badges.
+  - Created [`src/pages/designer/orders.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/designer/orders.astro) protected for designers.
+  - Added "Pesanan Masuk" to designer navigation menu in `sidebar.helpers.ts`.
+  - Added unit test cases for `getDesignerIncomingOrders` in `tests/lib/transactions/service.test.ts`.
+- **Tenant Template Purchase Order History (`/dashboard/orders`):**
+  - Added `getTenantOrders(userId)` method in `transactionService` querying `transactions` where `type = 'template_purchase'` with `template` relation.
+  - Created [`OrderHistoryTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/dashboard/OrderHistoryTable.svelte) featuring status filters (`pending`, `paid`, `expired`, `failed`), invoice lookup, direct payment links, and "Terapkan ke Toko" actions.
+  - Created [`src/pages/dashboard/orders.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/dashboard/orders.astro) integrated into `DashboardLayout`.
+  - Added "Riwayat Pesanan" to tenant navigation menu in `sidebar.helpers.ts`.
+  - Added unit test cases for `getTenantOrders` in `tests/lib/transactions/service.test.ts`.
+- **Template Thumbnail & Dynamic DB Categories on Builder New Form:**
+  - Integrated `ImageUpload` into [`NewTemplateForm.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/NewTemplateForm.svelte) with direct Cloudinary upload (folder: `templates`, max: 1 file, 5MB).
+  - Cleaned up static fallback categories from `NewTemplateForm.svelte`; now strictly loads real categories from database / API.
+  - Added real-time image preview in the Marketplace Live Card Mockup on `/builder/new`.
+  - Persisted `thumbnailUrl` into `POST /api/designer/templates/draft`.
+- **Template Categories Management & Builder Integration:**
+  - Added API endpoints: Public `GET /api/public/template-categories` and Admin `GET`, `POST`, `PUT`, `DELETE` at `/api/admin/template-categories/`.
+  - Added service layer in `src/services/template-categories/` with CRUD operations and slug uniqueness validation.
+  - Integrated dynamic template categories into `src/pages/builder/new.astro` and `src/components/builder/NewTemplateForm.svelte` with live category selection and `categoryId` persistence on draft creation.
+  - Created Admin Template Category Manager panel (`src/components/admin/TemplateCategoryManager.svelte`) and page (`src/pages/admin/template-categories/index.astro`).
+  - Added unit test suite in `tests/api/template-categories.test.ts`.
+- **Template Categories Schema & DB Migration (`src/db/schema.ts` & `src/db/seed.ts`):**
+  - Added `templateCategories` table (`id`, `name`, `slug`, `description`, `icon`, `createdAt`, `updatedAt`) with unique index on `slug`.
+  - Added `categoryId` column with foreign key to `templateCategories.id` (`onDelete: 'set null'`) and `templateCategoryIdx` on `templates` table.
+  - Added `templateCategoriesRelations` and updated `templatesRelations` with one relation to `category`.
+  - Executed `bun x drizzle-kit push --force` to Neon PostgreSQL database.
+  - Seeded default categories (`kuliner-makanan`, `fashion-busana`, `jasa-profesional`, `retail-toko-kelontong`).
+- **New Template Wizard Redesign (`src/components/builder/NewTemplateForm.svelte` & `src/pages/builder/new.astro`):**
+  - Redesigned `/builder/new` into a modern 2-column SaaS initialization studio card with top luminous light beam (`indigo-500`).
+  - Added category selector pills and quick pricing preset chips with dynamic income calculator.
+- **Language Standards Rule:**
+  - Committed [`.agents/rules/language-standards.md`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/.agents/rules/language-standards.md) for permanent workspace rule adherence (Backend English, Frontend Bahasa Indonesia).
+- **Test Suite & Verification:**
+  - `bun run type-check`: 0 errors, 0 warnings.
+  - `bun run lint`: 0 warnings, 0 errors.
+  - `bun test:unit`: 44 test suites passed (306/306 unit tests passed).
 
 - **Section Registry Map Architecture (`src/components/builder/registry/`):**
   - `src/components/builder/registry/registry.types.ts` & `index.ts` (NEW): Created centralized `sectionRegistry` map exporting `SectionDefinition` for all 8 section types (`header_announcement`, `hero`, `features`, `product_catalog`, `testimonials`, `faq`, `google_maps`, `footer`) along with `getSectionDefinition`, `getAllSectionDefinitions`, and `registerSection`.

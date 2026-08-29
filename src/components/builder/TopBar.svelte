@@ -17,6 +17,7 @@
   } from 'lucide-svelte';
   import { editorStore, canvasStore, canUndo, canRedo } from './stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
+  import { Badge } from '@/components/ui';
 
   export let templateId: string = '';
   export let templateName: string = 'Template';
@@ -35,13 +36,13 @@
   let isEditingName = false;
   let nameInputValue = templateName;
 
-  const focus = (el: HTMLInputElement) => el.focus();
-
   $: nameInputValue = templateName;
+
+  const focus = (el: HTMLInputElement) => el.focus();
 
   const handleNameSave = () => {
     isEditingName = false;
-    if (nameInputValue.trim() && nameInputValue !== templateName) {
+    if (nameInputValue.trim() && nameInputValue.trim() !== templateName) {
       editorStore.updateTemplateName(nameInputValue.trim());
     }
   };
@@ -49,15 +50,15 @@
   const getStatusBadge = (s: string) => {
     switch (s) {
       case 'draft':
-        return { label: 'Draft', bg: 'badge-custom-amber' };
+        return { label: 'Draft', variant: 'amber' as const };
       case 'pending':
-        return { label: 'Menunggu Review', bg: 'badge-custom-sky' };
+        return { label: 'Menunggu Review', variant: 'sky' as const };
       case 'approved':
-        return { label: 'Disetujui', bg: 'badge-custom-emerald' };
+        return { label: 'Disetujui', variant: 'emerald' as const };
       case 'rejected':
-        return { label: 'Ditolak', bg: 'badge-custom-rose' };
+        return { label: 'Ditolak', variant: 'rose' as const };
       default:
-        return { label: s, bg: 'badge-custom-slate' };
+        return { label: s, variant: 'slate' as const };
     }
   };
 
@@ -97,9 +98,11 @@
       </button>
     {/if}
 
-    <span class="badge-custom uppercase tracking-wider hidden md:inline-flex {badge.bg}">
-      {badge.label}
-    </span>
+    <div class="hidden md:inline-flex">
+      <Badge variant={badge.variant} size="sm" dot pulse={status === 'pending'}>
+        {badge.label}
+      </Badge>
+    </div>
   </div>
 
   <!-- Center: Viewport Switcher & Grid & Undo/Redo -->
@@ -136,7 +139,7 @@
             ? 'bg-card text-main font-semibold shadow-sm'
             : 'text-secondary hover:text-main'
         }`}
-        title="Desktop View (1200px)"
+        title="Tampilan Desktop (1200px)"
       >
         <Monitor size={14} />
         <span class="hidden sm:inline">Desktop</span>
@@ -149,7 +152,7 @@
             ? 'bg-card text-main font-semibold shadow-sm'
             : 'text-secondary hover:text-main'
         }`}
-        title="Tablet View (768px Flat Frame)"
+        title="Tampilan Tablet (768px)"
       >
         <Tablet size={14} />
         <span class="hidden sm:inline">Tablet</span>
@@ -162,10 +165,10 @@
             ? 'bg-card text-main font-semibold shadow-sm'
             : 'text-secondary hover:text-main'
         }`}
-        title="Mobile View (375px Flat Frame)"
+        title="Tampilan Ponsel (375px)"
       >
         <Smartphone size={14} />
-        <span class="hidden sm:inline">Mobile</span>
+        <span class="hidden sm:inline">Ponsel</span>
       </button>
     </div>
 
@@ -179,7 +182,7 @@
             ? 'bg-primary text-white font-semibold shadow-sm'
             : 'text-secondary hover:text-main'
         }`}
-        title="Toggle Column Grid Guides (Ctrl+G / Shift+G)"
+        title="Panduan Kolom Grid (Ctrl+G / Shift+G)"
       >
         <Grid size={13} />
         <span class="hidden md:inline text-xs">Grid</span>
@@ -192,7 +195,7 @@
             ? 'bg-primary text-white font-semibold shadow-sm'
             : 'text-secondary hover:text-main'
         }`}
-        title="Toggle 8px Pixel Grid"
+        title="Panduan Pixel Grid 8px"
       >
         <Grid2X2 size={13} />
       </button>
@@ -210,15 +213,15 @@
           ? 'bg-nested text-warning border-light hover:bg-nested/80'
           : 'bg-nested text-secondary hover:text-main border-light'
       }`}
-      title={`Editor Theme: ${$canvasStore.editorTheme === 'dark' ? 'Dark' : 'Light'}`}
-      aria-label="Toggle Editor Theme"
+      title={`Tema Editor: ${$canvasStore.editorTheme === 'dark' ? 'Gelap' : 'Terang'}`}
+      aria-label="Ganti Tema Editor"
     >
       {#if $canvasStore.editorTheme === 'dark'}
         <Moon size={13} class="text-warning" />
-        <span class="text-xs font-semibold">Dark</span>
+        <span class="text-xs font-semibold">Gelap</span>
       {:else}
         <Sun size={13} class="text-warning" />
-        <span class="text-xs font-semibold">Light</span>
+        <span class="text-xs font-semibold">Terang</span>
       {/if}
     </button>
 

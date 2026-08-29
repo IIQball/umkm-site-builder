@@ -7,32 +7,9 @@ import { z } from 'zod';
 
 export const TransactionInitiateInputSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  type: z.enum(['store_registration', 'template_purchase']),
+  type: z.literal('template_purchase'),
   storeId: z.string().optional(),
   templateId: z.string().optional(),
-}).superRefine((data, ctx) => {
-  // store_registration: storeId dan templateId optional (toko belum ada)
-  if (data.type === 'store_registration') {
-    return;
-  }
-
-  // template_purchase: both storeId dan templateId wajib
-  if (data.type === 'template_purchase') {
-    if (!data.storeId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['storeId'],
-        message: 'storeId is required for template_purchase (tenant must already own a store)',
-      });
-    }
-    if (!data.templateId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['templateId'],
-        message: 'templateId is required for template_purchase',
-      });
-    }
-  }
 });
 
 export type TransactionInitiateInput = z.infer<typeof TransactionInitiateInputSchema>;

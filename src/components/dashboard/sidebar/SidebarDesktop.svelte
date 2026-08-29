@@ -1,12 +1,10 @@
 <script lang="ts">
   import type { AuthenticatedUser } from '@/lib/auth';
-  import type { NavItem } from './sidebar.helpers';
+  import type { NavGroup } from './sidebar.helpers';
   import { createEventDispatcher } from 'svelte';
 
   export let user: AuthenticatedUser;
-  export let generalItems: NavItem[] = [];
-  export let accountItems: NavItem[] = [];
-  export let flatItems: NavItem[] = [];
+  export let navGroups: NavGroup[] = [];
   export let collapsed = false;
   export let currentPath = '';
 
@@ -49,7 +47,7 @@
           UMKM Builder
         </span>
         <span class="text-2xs font-medium text-muted leading-tight block truncate mt-0.5">
-          {isDesigner ? 'Designer Workspace' : 'Merchant Portal'}
+          {isDesigner ? 'Designer Workspace' : user.role === 'admin' || user.role === 'superadmin' ? 'Admin Portal' : 'Merchant Portal'}
         </span>
       </div>
     {/if}
@@ -67,109 +65,55 @@
     </button>
   </div>
 
-  <!-- Nav Links Rail -->
-  <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-1" aria-label="Menu utama">
-    {#if isDesigner}
-      <!-- GENERAL group -->
-      {#if !collapsed}
-        <p class="text-label-caps text-muted px-2.5 pb-2">General</p>
-      {/if}
-      {#each generalItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span
-            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
-            class:icon-filled={active}
-          >
-            {item.icon}
-          </span>
-          {#if !collapsed}
-            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
-            {#if active}
-              <span class="ml-auto flex items-center justify-center flex-shrink-0">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-                </span>
-              </span>
-            {/if}
-          {:else if active}
-            <!-- Mini dot in collapsed mode -->
-            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
-          {/if}
-        </a>
-      {/each}
+  <!-- Nav Links Rail (Grouped for all roles) -->
+  <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-4" aria-label="Menu utama">
+    {#each navGroups as group, groupIdx (group.title)}
+      <div>
+        {#if !collapsed}
+          <p class="text-2xs font-bold font-heading uppercase tracking-wider text-muted px-2.5 pb-2">
+            {group.title}
+          </p>
+        {:else if groupIdx > 0}
+          <div class="border-t border-light my-2"></div>
+        {/if}
 
-      <!-- ACCOUNT group -->
-      {#if !collapsed}
-        <p class="text-label-caps text-muted px-2.5 pb-2 pt-5">Account</p>
-      {:else}
-        <div class="border-t border-light my-3"></div>
-      {/if}
-      {#each accountItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span
-            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
-            class:icon-filled={active}
-          >
-            {item.icon}
-          </span>
-          {#if !collapsed}
-            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
-            {#if active}
-              <span class="ml-auto flex items-center justify-center flex-shrink-0">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-                </span>
+        <div class="space-y-1">
+          {#each group.items as item (item.href)}
+            {@const active = isActive(item.href)}
+            <a
+              href={item.href}
+              title={collapsed ? item.label : undefined}
+              class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active
+                ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold'
+                : 'text-secondary hover:bg-nested hover:text-main'}"
+            >
+              <span
+                class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
+                class:icon-filled={active}
+              >
+                {item.icon}
               </span>
-            {/if}
-          {:else if active}
-            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
-          {/if}
-        </a>
-      {/each}
-
-    {:else}
-      <!-- Non-designer flat list -->
-      {#each flatItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          title={collapsed ? item.label : undefined}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-md shadow-slate-900/10 font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span
-            class="material-symbols-outlined text-lg flex-shrink-0 transition-transform group-hover:scale-105"
-            class:icon-filled={active}
-          >
-            {item.icon}
-          </span>
-          {#if !collapsed}
-            <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">{item.label}</span>
-            {#if active}
-              <span class="ml-auto flex items-center justify-center flex-shrink-0">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+              {#if !collapsed}
+                <span class="truncate leading-none {active ? 'font-bold text-white' : ''}">
+                  {item.label}
                 </span>
-              </span>
-            {/if}
-          {:else if active}
-            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
-          {/if}
-        </a>
-      {/each}
-    {/if}
+                {#if active}
+                  <span class="ml-auto flex items-center justify-center flex-shrink-0">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                    </span>
+                  </span>
+                {/if}
+              {:else if active}
+                <!-- Mini dot in collapsed mode -->
+                <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400"></span>
+              {/if}
+            </a>
+          {/each}
+        </div>
+      </div>
+    {/each}
   </nav>
 
   <!-- Bottom User Profile & Sign Out -->

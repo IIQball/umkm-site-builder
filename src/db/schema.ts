@@ -19,7 +19,7 @@ export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'designer', 'tena
 export const genericStatusEnum = pgEnum('generic_status', ['active', 'suspended']); 
 export const templateStatusEnum = pgEnum('template_status', ['draft', 'pending', 'approved', 'rejected']);
 export const storeStatusEnum = pgEnum('store_status', ['pending', 'active', 'inactive', 'suspended']);
-export const transactionTypeEnum = pgEnum('transaction_type', ['store_registration', 'template_purchase']);
+export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchase']);
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
@@ -32,7 +32,7 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  emailVerified: boolean('email_verified').default(false).notNull(),
+  emailVerified: boolean('email_verified').default(true).notNull(),
   image: text('image'),
 
   role: roleEnum('role').default('tenant').notNull(),
@@ -136,6 +136,20 @@ export const bankAccounts = pgTable('bank_accounts', {
 // 5. TEMPLATES & TRANSACTIONS
 // ==========================================
 
+export const templateCategories = pgTable('template_categories', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  icon: text('icon'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    templateCategorySlugIdx: uniqueIndex('template_categories_slug_idx').on(table.slug),
+  };
+});
+
 export const templates = pgTable('templates', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -148,12 +162,17 @@ export const templates = pgTable('templates', {
   rejectionReason: text('rejection_reason'),
   deleteReason: text('delete_reason'),
   
+  categoryId: text('category_id').references(() => templateCategories.id, { onDelete: 'set null' }),
   designerId: text('designer_id').notNull().references(() => designers.userId),
   approvedBy: text('approved_by').references(() => users.id),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
+}, (table) => {
+  return {
+    templateCategoryIdx: index('templates_category_id_idx').on(table.categoryId),
+  };
 });
 
 export const transactions = pgTable('transactions', {
@@ -232,8 +251,7 @@ export const stores = pgTable('stores', {
   
   waNumber: text('wa_number').notNull(), 
   googleMapsUrl: text('google_maps_url'),
-  isRegistrationPaid: boolean('is_registration_paid').default(false).notNull(), 
-  
+ 
   status: storeStatusEnum('status').default('active').notNull(),
   suspendReason: text('suspend_reason'),
   deleteReason: text('delete_reason'),
@@ -343,7 +361,12 @@ export const designersRelations = relations(designers, ({ one, many }) => ({
   payoutRequests: many(payoutRequests),
 }));
 
+export const templateCategoriesRelations = relations(templateCategories, ({ many }) => ({
+  templates: many(templates),
+}));
+
 export const templatesRelations = relations(templates, ({ one, many }) => ({
+  category: one(templateCategories, { fields: [templates.categoryId], references: [templateCategories.id] }),
   designer: one(designers, { fields: [templates.designerId], references: [designers.userId], relationName: 'createdTemplates' }),
   approver: one(users, { fields: [templates.approvedBy], references: [users.id] }),
   stores: many(stores),

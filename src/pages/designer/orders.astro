@@ -1,0 +1,112 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import DesignerOrdersTable from '@/components/designer/DesignerOrdersTable.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import { transactionService } from '@/services/finance/transaction.service';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login?redirect=/designer/orders');
+}
+
+let initialOrders: Awaited<ReturnType<typeof transactionService.getDesignerIncomingOrders>> = [];
+try {
+  initialOrders = await transactionService.getDesignerIncomingOrders(user.id);
+} catch {
+  initialOrders = [];
+}
+
+const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
+const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
+const totalFailedOrders = initialOrders.filter((o) => o.status === 'failed' || o.status === 'expired' || o.status === 'canceled');
+
+const totalNetEarned = totalPaidOrders.reduce(
+  (sum, o) => sum + (o.commission?.designerAmount ?? Math.round(o.amount * 0.7)),
+  0
+);
+
+const formattedNetIncome = `Rp ${new Intl.NumberFormat('id-ID').format(totalNetEarned)}`;
+---
+
+<DashboardLayout title="Pesanan Masuk" breadcrumb="Desainer / Pesanan Masuk">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching designer/wallet & designer/templates style) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Pesanan Template Masuk</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau seluruh aktivitas transaksi pembelian template toko online Anda oleh tenant UMKM secara real-time.
+        </p>
+      </div>
+
+      <!-- Quick Actions / Link -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <a
+          href="/designer/wallet"
+          class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <span class="material-symbols-outlined text-primary text-base">account_balance_wallet</span>
+          <span>Buka Dompet Keuangan</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
+      <StatCard
+        client:load
+        label="Total Pesanan"
+        value={initialOrders.length}
+        rawValue={initialOrders.length}
+        icon="receipt_long"
+        colorTheme="indigo"
+        badge="Semua Tagihan"
+        footerText="Akumulasi seluruh pesanan"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Hak Komisi Lunas"
+        value={formattedNetIncome}
+        rawValue={totalNetEarned}
+        icon="payments"
+        colorTheme="emerald"
+        badge="Lunas 70%"
+        footerText="Total pendapatan bersih"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Menunggu Pembayaran"
+        value={totalPendingOrders.length}
+        rawValue={totalPendingOrders.length}
+        icon="hourglass_top"
+        colorTheme="amber"
+        badge="Pending"
+        footerText="Belum diselesaikan tenant"
+        delayClass="delay-200"
+      />
+      <StatCard
+        client:load
+        label="Batal / Kedaluwarsa"
+        value={totalFailedOrders.length}
+        rawValue={totalFailedOrders.length}
+        icon="cancel"
+        colorTheme="rose"
+        badge="Expired"
+        footerText="Invoice tidak diselesaikan"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <!-- Interactive Table Card -->
+    <div class="animate-fade-in-up delay-300">
+      <DesignerOrdersTable client:load {initialOrders} />
+    </div>
+  </div>
+</DashboardLayout>

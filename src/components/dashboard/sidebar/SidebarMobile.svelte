@@ -1,12 +1,10 @@
 <script lang="ts">
   import type { AuthenticatedUser } from '@/lib/auth';
-  import type { NavItem } from './sidebar.helpers';
+  import type { NavGroup } from './sidebar.helpers';
   import { createEventDispatcher } from 'svelte';
 
   export let user: AuthenticatedUser;
-  export let generalItems: NavItem[] = [];
-  export let accountItems: NavItem[] = [];
-  export let flatItems: NavItem[] = [];
+  export let navGroups: NavGroup[] = [];
   export let drawerOpen = false;
   export let currentPath = '';
 
@@ -16,7 +14,6 @@
     signOut: void;
   }>();
 
-  $: isDesigner = user.role === 'designer';
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
 
   const isActive = (href: string): boolean => {
@@ -73,63 +70,35 @@
     </button>
   </div>
 
-  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="Menu utama mobile">
-    {#if isDesigner}
-      <p class="text-label-caps text-muted px-2 pb-2">General</p>
-      {#each generalItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
-          <span class="flex-1">{item.label}</span>
-          {#if active}
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-          {/if}
-        </a>
-      {/each}
-      <p class="text-label-caps text-muted px-2 pb-2 pt-4">Account</p>
-      {#each accountItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
-          <span class="flex-1">{item.label}</span>
-          {#if active}
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-          {/if}
-        </a>
-      {/each}
-    {:else}
-      {#each flatItems as item}
-        {@const active = isActive(item.href)}
-        <a
-          href={item.href}
-          on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold' : 'text-secondary hover:bg-nested hover:text-main'}"
-        >
-          <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
-          <span class="flex-1">{item.label}</span>
-          {#if active}
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-          {/if}
-        </a>
-      {/each}
-    {/if}
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-4" aria-label="Menu utama mobile">
+    {#each navGroups as group (group.title)}
+      <div>
+        <p class="text-2xs font-bold font-heading uppercase tracking-wider text-muted px-2 pb-1.5">
+          {group.title}
+        </p>
+        <div class="space-y-0.5">
+          {#each group.items as item (item.href)}
+            {@const active = isActive(item.href)}
+            <a
+              href={item.href}
+              on:click={() => dispatch('closeDrawer')}
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active
+                ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold'
+                : 'text-secondary hover:bg-nested hover:text-main'}"
+            >
+              <span class="material-symbols-outlined text-sm" class:icon-filled={active}>{item.icon}</span>
+              <span class="flex-1">{item.label}</span>
+              {#if active}
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+              {/if}
+            </a>
+          {/each}
+        </div>
+      </div>
+    {/each}
   </nav>
 
   <div class="border-t border-light p-3 space-y-1">
@@ -139,7 +108,7 @@
       </div>
       <div class="flex-1 min-w-0">
         <p class="text-sm font-semibold text-main truncate">{user.name ?? user.email}</p>
-        <span class="text-xs font-bold text-primary">{user.role}</span>
+        <span class="text-xs font-bold text-primary uppercase">{user.role}</span>
       </div>
     </div>
     <button

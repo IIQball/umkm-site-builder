@@ -3,6 +3,7 @@
   import { formatIDR } from '@/lib/utils/format';
   import { Building2, AlertTriangle, Info } from 'lucide-svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
+  import { Card, Badge, Button } from '@/components/ui';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
   import DesignerPayoutHistoryTable from './DesignerPayoutHistoryTable.svelte';
@@ -259,10 +260,7 @@
 
 <div class="mb-6">
   <!-- Bank Account + Withdraw Card -->
-  <div class="bg-card border border-[var(--color-border)] rounded-3xl p-6 md:p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
-    <!-- Top smooth accent light beam -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-full z-20 pointer-events-none"></div>
-
+  <Card variant="bordered" padding="lg" radius="3xl" topBeam="indigo-500" className="group">
     <div>
       <div class="flex items-start justify-between gap-3 mb-5">
         <div class="flex items-center gap-3">
@@ -275,14 +273,13 @@
           </div>
         </div>
         {#if bankAccount}
-          <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-3xs font-bold px-2.5 py-1 rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <Badge variant="emerald" dot pulse size="sm">
             Terhubung
-          </span>
+          </Badge>
         {:else}
-          <span class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-3xs font-bold px-2.5 py-1 rounded-full">
+          <Badge variant="amber" size="sm">
             Belum Diatur
-          </span>
+          </Badge>
         {/if}
       </div>
 
@@ -301,10 +298,10 @@
           <!-- Top Row: Bank Badge + Contactless Icon -->
           <div class="flex items-center justify-between relative z-10 mb-6">
             <div class="flex items-center gap-2">
-              <span class="px-3 py-1 bg-white/15 backdrop-blur-md rounded-lg text-xs font-black tracking-widest text-white border border-white/20 uppercase">
+              <span class="px-3 py-1 bg-white/15 backdrop-blur-md rounded-lg text-xs font-black tracking-widest text-white border border-white/20 uppercase font-heading">
                 {bankAccount.bankName}
               </span>
-              <span class="text-3xs text-white/60 font-semibold tracking-wider uppercase">DEBIT CARD</span>
+              <span class="text-3xs text-white/60 font-semibold tracking-wider uppercase font-heading">KARTU DEBIT</span>
             </div>
             <!-- Contactless Icon SVG -->
             <svg class="w-6 h-6 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -329,14 +326,14 @@
           <!-- Bottom Row: Cardholder Name + Status Badge -->
           <div class="flex items-end justify-between relative z-10 pt-2 border-t border-white/10">
             <div>
-              <span class="text-4xs text-white/60 uppercase tracking-widest font-bold block">Pemilik Rekening</span>
+              <span class="text-4xs text-white/60 uppercase tracking-widest font-bold block font-heading">Pemilik Rekening</span>
               <p class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-white truncate max-w-[200px]">
                 {bankAccount.holderName}
               </p>
             </div>
             <div class="text-right">
-              <span class="text-4xs text-emerald-400 font-bold uppercase tracking-wider block">Valid Thru</span>
-              <span class="text-xs font-mono text-white/80">Active</span>
+              <span class="text-4xs text-emerald-400 font-bold uppercase tracking-wider block font-heading">Masa Berlaku</span>
+              <span class="text-xs font-mono text-white/80">Aktif</span>
             </div>
           </div>
         </div>
@@ -353,7 +350,7 @@
         </div>
       {/if}
 
-      <!-- Settlement info alert (moved here from withdraw card) -->
+      <!-- Settlement info alert -->
       {#if availableBalance === 0 && balance > 0}
         <div class="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex gap-2.5 items-start">
           <div class="w-5 h-5 text-info flex-shrink-0 flex items-center justify-center mt-0.5">
@@ -372,20 +369,20 @@
         {bankAccount ? 'Nomor rekening terenkripsi & aman · 1-2 hari kerja' : 'Mendukung semua bank di Indonesia'}
       </p>
       <div class="flex items-center gap-2 flex-shrink-0">
-        <button
-          type="button"
-          on:click={openBankModal}
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={isLoading}
-          class="btn btn-sm text-xs font-bold text-main bg-nested hover:bg-nested/80 border border-[var(--color-border)] rounded-2xl py-2.5 px-4 transition-all disabled:opacity-50 cursor-pointer shadow-2xs flex items-center gap-1.5"
+          on:click={openBankModal}
         >
           <span class="material-symbols-outlined text-sm">{bankAccount ? 'edit' : 'add_link'}</span>
           <span>{bankAccount ? 'Ganti Rekening' : 'Hubungkan Rekening'}</span>
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           disabled={!bankAccount || availableBalance < minPayoutLimit || isLoading}
           on:click={() => showWithdrawModal = true}
-          class="btn btn-sm text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:from-nested disabled:to-nested disabled:text-muted disabled:border disabled:border-[var(--color-border)] rounded-2xl py-2.5 px-4 transition-all cursor-pointer shadow-md hover:shadow-emerald-500/20 flex items-center gap-1.5"
         >
           <span class="material-symbols-outlined text-sm">payments</span>
           <span>
@@ -395,10 +392,10 @@
               Tarik Dana
             {/if}
           </span>
-        </button>
+        </Button>
       </div>
     </div>
-  </div>
+  </Card>
 </div>
 
 <!-- Modals -->

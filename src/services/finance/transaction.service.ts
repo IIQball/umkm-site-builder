@@ -4,15 +4,13 @@
  */
 
 import { db } from '@/lib/db/client';
-import { transactions, users, templates, userTemplates, commissions, stores } from '@/db/schema';
+import { transactions, users, templates, userTemplates, commissions } from '@/db/schema';
 import { xenditClient } from '@/lib/finance/xendit';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { AppError, formatCurrency } from '@/lib/utils';
 import type { TransactionInitiateInput, TransactionRecord, TransactionType, PaymentStatus } from '@/types';
-
-export const STORE_REGISTRATION_FEE_IDR = 100000;
 
 // In-memory cache for invoice URLs
 const invoiceUrlCache = new Map<string, string>();
@@ -26,10 +24,6 @@ export class TransactionService {
     const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     if (!user.length) throw new AppError('User not found', 404);
 
-    if (input.type === 'store_registration' && input.amount !== STORE_REGISTRATION_FEE_IDR) {
-      throw new AppError(`Invalid amount. Expected ${STORE_REGISTRATION_FEE_IDR}, got ${input.amount}`, 400);
-    }
-
     const existingTx = await db.select().from(transactions).where(eq(transactions.userId, userId));
     if (existingTx.some((tx: { status: string }) => tx.status === 'pending')) {
       throw new AppError('Payment already in progress', 400);
@@ -42,7 +36,7 @@ export class TransactionService {
       invoiceNum,
       amount: input.amount,
       payerEmail: user[0].email,
-      description: `Payment for ${input.type === 'store_registration' ? 'Store Registration' : 'Template Purchase'}`,
+      description: 'Payment for Template Purchase',
       expiryDate,
       successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
       failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
@@ -234,9 +228,6 @@ export class TransactionService {
           referenceId: transaction.id,
         });
       }
-    } else if (transaction.type === 'store_registration') {
-      const condition = transaction.storeId ? eq(stores.id, transaction.storeId) : eq(stores.userId, transaction.userId);
-      await db.update(stores).set({ isRegistrationPaid: true, status: 'active', updatedAt: new Date() }).where(condition);
     }
   }
 
@@ -276,6 +267,45 @@ export class TransactionService {
       paymentChannel: tx.paymentChannel || undefined,
       createdAt: tx.createdAt,
     };
+  }
+
+  async getTenantOrders(userId: string) {
+    return db.query.transactions.findMany({
+      where: and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'template_purchase')
+      ),
+      with: {
+        template: true,
+      },
+      orderBy: [desc(transactions.createdAt)],
+    });
+  }
+
+  async getDesignerIncomingOrders(designerId: string) {
+    const designerTemplates = await db.query.templates.findMany({
+      where: eq(templates.designerId, designerId),
+      columns: { id: true },
+    });
+
+    if (!designerTemplates.length) return [];
+
+    const templateIds = designerTemplates.map((t: { id: string }) => t.id);
+
+    return db.query.transactions.findMany({
+      where: and(
+        inArray(transactions.templateId, templateIds),
+        eq(transactions.type, 'template_purchase')
+      ),
+      with: {
+        template: true,
+        user: {
+          columns: { id: true, name: true, email: true, image: true },
+        },
+        commission: true,
+      },
+      orderBy: [desc(transactions.createdAt)],
+    });
   }
 
   formatCurrency(amount: number): string {

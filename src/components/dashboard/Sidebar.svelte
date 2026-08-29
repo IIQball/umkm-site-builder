@@ -2,7 +2,7 @@
   import { signOut } from '@/lib/auth-client';
   import type { AuthenticatedUser } from '@/lib/auth';
   import { onMount } from 'svelte';
-  import { getNavItems } from './sidebar/sidebar.helpers';
+  import { getNavGroups } from './sidebar/sidebar.helpers';
   import SidebarDesktop from './sidebar/SidebarDesktop.svelte';
   import SidebarMobile from './sidebar/SidebarMobile.svelte';
 
@@ -10,11 +10,7 @@
   export let currentPath = '';
 
   const user: AuthenticatedUser = JSON.parse(userJson);
-  const navItems = getNavItems(user.role);
-  
-  const generalItems = navItems.filter((i) => i.group === 'GENERAL');
-  const accountItems = navItems.filter((i) => i.group === 'ACCOUNT');
-  const flatItems    = navItems.filter((i) => !i.group);
+  const navGroups = getNavGroups(user.role);
 
   let collapsed = false;
   let drawerOpen = false;
@@ -42,9 +38,7 @@
 
 <SidebarDesktop
   {user}
-  {generalItems}
-  {accountItems}
-  {flatItems}
+  {navGroups}
   {collapsed}
   {currentPath}
   on:toggleCollapse={toggleCollapse}
@@ -53,9 +47,7 @@
 
 <SidebarMobile
   {user}
-  {generalItems}
-  {accountItems}
-  {flatItems}
+  {navGroups}
   {drawerOpen}
   {currentPath}
   on:openDrawer={openDrawer}

@@ -6,15 +6,17 @@ vi.mock('../../../../src/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
 }));
 
-vi.mock('../../../../src/lib/db/client', () => ({
-  db: {
-    select: vi.fn(),
-    update: vi.fn(),
-  },
+vi.mock('../../../../src/services/store-template.service', () => ({
+  validateTemplateOwnership: vi.fn(),
+  applyTemplateToStore: vi.fn(),
 }));
 
 import { getAuthenticatedUser } from '../../../../src/lib/auth';
-import { db } from '../../../../src/lib/db/client';
+import {
+  validateTemplateOwnership,
+  applyTemplateToStore,
+} from '../../../../src/services/store-template.service';
+import { AppError } from '../../../../src/lib/utils/api-handler';
 
 function makeContext(storeId: string, body: unknown): APIContext {
   const request = new Request('http://localhost/api/stores/' + storeId + '/apply-template', {
@@ -59,13 +61,9 @@ describe('Apply Template API', () => {
 
   it('returns 404 if store not found', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
-      }),
-    };
-    (db.select as Mock).mockReturnValueOnce(storeSelectChain);
+    (validateTemplateOwnership as Mock).mockRejectedValue(
+      new AppError('Toko tidak ditemukan', 404, undefined, 'STORE_NOT_FOUND')
+    );
 
     const ctx = makeContext('store-nonexistent', { templateId: 'tpl-1' });
     const res = (await POST(ctx)) as Response;
@@ -76,13 +74,9 @@ describe('Apply Template API', () => {
 
   it('returns 403 if store belongs to different user', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'store-1', userId: 'u2', templateId: 'tpl-old' }]),
-      }),
-    };
-    (db.select as Mock).mockReturnValueOnce(storeSelectChain);
+    (validateTemplateOwnership as Mock).mockRejectedValue(
+      new AppError('Anda tidak memiliki akses ke toko ini', 403, undefined, 'STORE_FORBIDDEN')
+    );
 
     const ctx = makeContext('store-1', { templateId: 'tpl-1' });
     const res = (await POST(ctx)) as Response;
@@ -93,20 +87,9 @@ describe('Apply Template API', () => {
 
   it('returns 404 if template not found or not approved', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'store-1', userId: 'u1', templateId: 'tpl-old' }]),
-      }),
-    };
-    const templateSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
-      }),
-    };
-    (db.select as Mock)
-      .mockReturnValueOnce(storeSelectChain)
-      .mockReturnValueOnce(templateSelectChain);
+    (validateTemplateOwnership as Mock).mockRejectedValue(
+      new AppError('Template tidak ditemukan atau belum disetujui', 404, undefined, 'TEMPLATE_NOT_FOUND')
+    );
 
     const ctx = makeContext('store-1', { templateId: 'tpl-draft' });
     const res = (await POST(ctx)) as Response;
@@ -117,26 +100,11 @@ describe('Apply Template API', () => {
 
   it('returns 403 if paid template not owned', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'store-1', userId: 'u1', templateId: 'tpl-old' }]),
-      }),
-    };
-    const templateSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'tpl-paid', name: 'Premium', price: 50000, config: {}, status: 'approved' }]),
-      }),
-    };
-    const ownedSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
-      }),
-    };
-    (db.select as Mock)
-      .mockReturnValueOnce(storeSelectChain)
-      .mockReturnValueOnce(templateSelectChain)
-      .mockReturnValueOnce(ownedSelectChain);
+    (validateTemplateOwnership as Mock).mockResolvedValue({
+      store: { id: 'store-1', userId: 'u1', templateId: 'tpl-old' },
+      template: { id: 'tpl-paid', name: 'Premium', price: 50000, config: {}, status: 'approved' },
+      owned: false,
+    });
 
     const ctx = makeContext('store-1', { templateId: 'tpl-paid' });
     const res = (await POST(ctx)) as Response;
@@ -147,32 +115,12 @@ describe('Apply Template API', () => {
 
   it('successfully applies a free template', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'store-1', userId: 'u1', templateId: 'tpl-old' }]),
-      }),
-    };
-    const templateSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'tpl-free', name: 'Basic', price: 0, config: { theme: {}, sections: [] }, status: 'approved' }]),
-      }),
-    };
-    const ownedSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
-      }),
-    };
-    const updateChain = {
-      set: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      }),
-    };
-    (db.select as Mock)
-      .mockReturnValueOnce(storeSelectChain)
-      .mockReturnValueOnce(templateSelectChain)
-      .mockReturnValueOnce(ownedSelectChain);
-    (db.update as Mock).mockReturnValueOnce(updateChain);
+    (validateTemplateOwnership as Mock).mockResolvedValue({
+      store: { id: 'store-1', userId: 'u1', templateId: 'tpl-old' },
+      template: { id: 'tpl-free', name: 'Basic', price: 0, config: { theme: {}, sections: [] }, status: 'approved' },
+      owned: true,
+    });
+    (applyTemplateToStore as Mock).mockResolvedValue(undefined);
 
     const ctx = makeContext('store-1', { templateId: 'tpl-free' });
     const res = (await POST(ctx)) as Response;
@@ -185,32 +133,12 @@ describe('Apply Template API', () => {
 
   it('successfully applies a paid template if owned', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
-
-    const storeSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'store-1', userId: 'u1', templateId: 'tpl-old' }]),
-      }),
-    };
-    const templateSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'tpl-paid', name: 'Premium', price: 50000, config: { theme: {}, sections: [] }, status: 'approved' }]),
-      }),
-    };
-    const ownedSelectChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ id: 'ut-1', userId: 'u1', templateId: 'tpl-paid' }]),
-      }),
-    };
-    const updateChain = {
-      set: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      }),
-    };
-    (db.select as Mock)
-      .mockReturnValueOnce(storeSelectChain)
-      .mockReturnValueOnce(templateSelectChain)
-      .mockReturnValueOnce(ownedSelectChain);
-    (db.update as Mock).mockReturnValueOnce(updateChain);
+    (validateTemplateOwnership as Mock).mockResolvedValue({
+      store: { id: 'store-1', userId: 'u1', templateId: 'tpl-old' },
+      template: { id: 'tpl-paid', name: 'Premium', price: 50000, config: { theme: {}, sections: [] }, status: 'approved' },
+      owned: true,
+    });
+    (applyTemplateToStore as Mock).mockResolvedValue(undefined);
 
     const ctx = makeContext('store-1', { templateId: 'tpl-paid' });
     const res = (await POST(ctx)) as Response;

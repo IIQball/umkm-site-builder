@@ -1,10 +1,8 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db/client';
-import { stores, templates, userTemplates } from '@/db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { validate } from '@/lib/utils/validation';
+import { validateTemplateOwnership, applyTemplateToStore } from '@/services/store-template.service';
 import { migrateTemplateConfig } from '@/lib/templates';
 import { z } from 'zod';
 
@@ -31,62 +29,24 @@ export const POST: APIRoute = async ({ params, request }) => {
     const body = await request.json();
     const { templateId } = validate(ApplyTemplateSchema, body);
 
-    const [store] = await db
-      .select()
-      .from(stores)
-      .where(and(eq(stores.id, storeId), isNull(stores.deletedAt)));
+    const result = await validateTemplateOwnership(storeId, templateId, user.id);
 
-    if (!store) {
-      return jsonError('Toko tidak ditemukan', 404);
-    }
-
-    if (store.userId !== user.id) {
-      return jsonError('Anda tidak memiliki akses ke toko ini', 403);
-    }
-
-    const [template] = await db
-      .select()
-      .from(templates)
-      .where(
-        and(
-          eq(templates.id, templateId),
-          eq(templates.status, 'approved'),
-          isNull(templates.deletedAt)
-        )
+    if (!result.owned) {
+      return jsonError(
+        'Anda belum memiliki template ini. Silakan beli terlebih dahulu.',
+        403
       );
-
-    if (!template) {
-      return jsonError('Template tidak ditemukan atau belum disetujui', 404);
     }
 
-    const [owned] = await db
-      .select()
-      .from(userTemplates)
-      .where(
-        and(
-          eq(userTemplates.userId, user.id),
-          eq(userTemplates.templateId, templateId)
-        )
-      );
-
-    if (template.price > 0 && !owned) {
-      return jsonError('Anda belum memiliki template ini. Silakan beli terlebih dahulu.', 403);
-    }
-
-    await db
-      .update(stores)
-      .set({
-        templateId,
-        customization: migrateTemplateConfig(template.config),
-        updatedAt: new Date(),
-      })
-      .where(eq(stores.id, storeId));
+    // Terapkan template ke store menggunakan service layer dengan config yang termigrasi
+    const migratedConfig = migrateTemplateConfig(result.template.config);
+    await applyTemplateToStore(storeId, templateId, migratedConfig);
 
     return jsonSuccess(
       {
         storeId,
         templateId,
-        templateName: template.name,
+        templateName: result.template.name,
       },
       'Template berhasil diterapkan ke toko'
     );

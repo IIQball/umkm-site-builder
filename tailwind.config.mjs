@@ -5,7 +5,25 @@ export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-poppins, 'Poppins')", 'sans-serif'],
+        heading: ["var(--font-poppins, 'Poppins')", 'sans-serif'],
+        mono: ['var(--font-geist-mono, monospace)'],
+      },
+      fontSize: {
+        '3xs': ['0.5625rem', { lineHeight: '0.75rem' }],
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        'xs-dense': ['0.6875rem', { lineHeight: '0.875rem' }],
+      },
+      letterSpacing: {
+        caps: '0.2em',
+      },
+      colors: {
+        'muted-foreground': 'var(--color-text-muted, #64748b)',
+        foreground: 'var(--color-text-main, #0f172a)',
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {

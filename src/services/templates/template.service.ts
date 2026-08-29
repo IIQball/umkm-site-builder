@@ -6,8 +6,10 @@ import {
   TemplateConfigSchema,
   DEFAULT_TEMPLATE_SECTIONS,
   DEFAULT_TEMPLATE_THEME,
+  CURRENT_SCHEMA_VERSION,
   type TemplateConfig,
 } from '@/schemas';
+import { migrateTemplateConfig } from '@/lib/templates';
 import type { PublicTemplateItem } from '@/types';
 
 export type { PublicTemplateItem };
@@ -69,7 +71,10 @@ export async function getTemplateById(templateId: string, userId: string, userRo
     throw new AppError('Access denied: You do not have permission', 403, undefined, 'FORBIDDEN');
   }
 
-  return template;
+  return {
+    ...template,
+    config: migrateTemplateConfig(template.config),
+  };
 }
 
 export async function createTemplateDraft(
@@ -94,6 +99,7 @@ export async function createTemplateDraft(
       designerId,
       status: 'draft',
       config: {
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         theme: DEFAULT_TEMPLATE_THEME,
         sections: DEFAULT_TEMPLATE_SECTIONS,
       },
@@ -138,7 +144,7 @@ export async function updateTemplateDraft(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.thumbnailUrl !== undefined) updateData.thumbnailUrl = data.thumbnailUrl;
   if (data.price !== undefined) updateData.price = data.price;
-  if (data.config !== undefined) updateData.config = data.config;
+  if (data.config !== undefined) updateData.config = migrateTemplateConfig(data.config);
 
   const [updated] = await db
     .update(templates)
@@ -179,7 +185,7 @@ export async function submitTemplateForReview(
     throw new AppError('Template must be in draft status to submit', 400);
   }
 
-  const configToValidate = patchData ? patchData.config : template.config;
+  const configToValidate = migrateTemplateConfig(patchData ? patchData.config : template.config);
   validate(TemplateConfigSchema, configToValidate);
 
   const updatePayload: Partial<typeof templates.$inferInsert> = {
@@ -192,7 +198,7 @@ export async function submitTemplateForReview(
     updatePayload.description = patchData.description;
     updatePayload.thumbnailUrl = patchData.thumbnailUrl;
     updatePayload.price = patchData.price;
-    updatePayload.config = patchData.config;
+    updatePayload.config = configToValidate;
   }
 
   const [updated] = await db

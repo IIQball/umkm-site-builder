@@ -69,9 +69,9 @@
   };
 </script>
 
-<div class="min-h-screen bg-base-200/50 flex flex-col font-sans text-base-content transition-colors">
+<div class="min-h-screen bg-canvas flex flex-col font-sans text-main transition-colors">
   <!-- Top Admin Status & Navigation Banner -->
-  <header class="sticky top-0 z-50 border-b shadow-sm bg-base-100 border-base-200">
+  <header class="sticky top-0 z-50 border-b shadow-sm bg-card border-light">
     <!-- Status Specific Color Alert Bar (hanya untuk desainer pemilik template) -->
     {#if isOwner}
       {#if template.status === 'pending'}
@@ -131,26 +131,26 @@
       <div class="flex items-center gap-3 min-w-0">
         <a
           href="/"
-          class="inline-flex items-center justify-center p-2 rounded-xl bg-base-200 hover:bg-base-300 text-base-content/80 hover:text-base-content transition-colors cursor-pointer"
+          class="inline-flex items-center justify-center p-2 rounded-xl bg-nested hover:bg-nested/80 text-secondary hover:text-main transition-colors cursor-pointer"
           title="Kembali ke Beranda"
         >
           <ArrowLeft size={16} />
         </a>
         <div class="min-w-0">
-          <h1 class="text-xs sm:text-sm font-bold text-base-content truncate">{template.name || 'Untitled Template'}</h1>
-          <p class="text-xs text-base-content/60 truncate">{template.description || 'Preview read-only tampilan website'}</p>
+          <h1 class="text-xs sm:text-sm font-bold text-main truncate">{template.name || 'Untitled Template'}</h1>
+          <p class="text-xs text-muted truncate">{template.description || 'Preview read-only tampilan website'}</p>
         </div>
       </div>
 
       <!-- Center: Viewport Switcher -->
-      <div class="flex items-center bg-base-200/80 p-1 rounded-lg border border-base-300">
+      <div class="flex items-center bg-nested p-1 rounded-lg border border-light">
         <button
           type="button"
           on:click={() => (viewMode = 'desktop')}
           class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'desktop'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
+              ? 'bg-card text-main font-semibold shadow-sm'
+              : 'text-secondary hover:text-main'
           }`}
           title="Tampilan Desktop (100%)"
         >
@@ -163,8 +163,8 @@
           on:click={() => (viewMode = 'tablet')}
           class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'tablet'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
+              ? 'bg-card text-main font-semibold shadow-sm'
+              : 'text-secondary hover:text-main'
           }`}
           title="Tampilan Tablet (768px)"
         >
@@ -177,8 +177,8 @@
           on:click={() => (viewMode = 'mobile')}
           class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
             viewMode === 'mobile'
-              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
-              : 'text-base-content/60 hover:text-base-content'
+              ? 'bg-card text-main font-semibold shadow-sm'
+              : 'text-secondary hover:text-main'
           }`}
           title="Tampilan Mobile (375px)"
         >
@@ -192,13 +192,13 @@
         <button
           type="button"
           on:click={toggleTheme}
-          class="p-1.5 rounded-lg bg-base-200 hover:bg-base-300 text-base-content/80 hover:text-base-content transition-colors cursor-pointer"
+          class="p-1.5 rounded-lg bg-nested hover:bg-nested/80 text-secondary hover:text-main transition-colors cursor-pointer"
           title="Ganti Tema (Terang / Gelap)"
         >
           {#if isDark}
-            <Sun size={14} class="text-amber-400" />
+            <Sun size={14} class="text-warning" />
           {:else}
-            <Moon size={14} class="text-slate-600" />
+            <Moon size={14} class="text-secondary" />
           {/if}
         </button>
       </div>
@@ -208,7 +208,7 @@
   <!-- Read-Only Canvas Area -->
   <main
     bind:clientWidth={containerWidth}
-    class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center items-start bg-base-200/60 min-w-0"
+    class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center items-start bg-canvas min-w-0"
   >
     <div
       class="canvas-scale-container relative flex-shrink-0 transition-all duration-300 ease-out"

@@ -173,7 +173,10 @@ export const TemplateThemeSchema = z.object({
   layout: ThemeLayoutSchema,
 }).passthrough().optional();
 
+export const CURRENT_SCHEMA_VERSION = 1;
+
 export const TemplateConfigSchema = z.object({
+  schemaVersion: z.number().int().positive().optional().default(CURRENT_SCHEMA_VERSION),
   theme: TemplateThemeSchema,
   sections: z.array(TemplateSectionSchema),
 });
@@ -405,6 +408,25 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
   },
   {
     id: 'section-7',
+    type: 'google_maps',
+    layoutPreset: 'fullwidth_map',
+    props: {
+      markerTitle: 'Lokasi Toko Kami',
+      address: 'Jl. Merdeka Barat No. 12, Gambir, Jakarta Pusat',
+      zoom: 15,
+      mapHeight: '400px',
+      mapQuery: 'Monas Jakarta',
+      addressTitle: 'Lokasi Toko Kami',
+      addressDetail: 'Jl. Merdeka Barat No. 12, Gambir, Jakarta Pusat',
+    },
+    styles: {
+      bgColorToken: 'surface',
+      textColorToken: 'text_primary',
+      padding: '0px',
+    },
+  },
+  {
+    id: 'section-8',
     type: 'footer',
     layoutPreset: 'multi_column',
     props: {
@@ -420,6 +442,12 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     },
   },
 ];
+
+export const DEFAULT_TEMPLATE_CONFIG: TemplateConfig = {
+  schemaVersion: CURRENT_SCHEMA_VERSION,
+  theme: DEFAULT_TEMPLATE_THEME,
+  sections: DEFAULT_TEMPLATE_SECTIONS,
+};
 
 export const SubmitReviewSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),

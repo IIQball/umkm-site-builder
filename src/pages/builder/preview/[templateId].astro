@@ -6,7 +6,7 @@ import { templates, stores } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import type { EditorTemplate } from '@/components/builder/stores/editorStore';
-import type { TemplateConfig } from '@/schemas';
+import { migrateTemplateConfig } from '@/lib/templates';
 
 export const prerender = false;
 
@@ -35,7 +35,7 @@ const previewTemplate: EditorTemplate = {
   price: templateRecord.price,
   status: templateRecord.status,
   rejectionReason: templateRecord.rejectionReason,
-  config: templateRecord.config as TemplateConfig,
+  config: migrateTemplateConfig(templateRecord.config),
 };
 
 let tenantStoreId: string | null = null;

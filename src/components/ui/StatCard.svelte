@@ -13,7 +13,7 @@
 <div class="bg-card border border-light rounded-2xl p-5 relative overflow-hidden shadow-sm transition-all hover:shadow-md {borderAccent}">
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0 flex-1">
-      <p class="text-[11px] font-extrabold uppercase tracking-wider text-muted truncate">{label}</p>
+      <p class="text-label-caps text-muted truncate">{label}</p>
       <div class="flex items-baseline gap-1.5 mt-2">
         <p class="text-2xl font-black text-main font-mono tracking-tight leading-none whitespace-nowrap">
           {value}
@@ -52,7 +52,7 @@
   {/if}
 
   {#if description}
-    <p class="text-[11px] text-muted mt-3 leading-relaxed border-t border-light pt-2.5">
+    <p class="text-3xs text-muted mt-3 leading-relaxed border-t border-light pt-2.5">
       {description}
     </p>
   {/if}

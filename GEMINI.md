@@ -111,6 +111,9 @@ umkm-site-builder/
 │   │   │   ├── layer/
 │   │   │   │   ├── AddNodeDropdown.svelte      # Tombol nambah block section baru
 │   │   │   │   └── layerPanel.helpers.ts       # Helper manipulasi susunan layer
+│   │   │   ├── registry/
+│   │   │   │   ├── index.ts                    # Registri sentral modularisasi modul section builder
+│   │   │   │   └── registry.types.ts           # Definisi tipe registry map section
 │   │   │   ├── sections/
 │   │   │   │   ├── catalog/
 │   │   │   │   │   ├── ProductCatalogCard.svelte # Komponen visual kartu katalog produk
@@ -230,6 +233,9 @@ umkm-site-builder/
 │   │   │   └── .gitkeep                        # Penahan folder git
 │   │   ├── stores/
 │   │   │   └── schemas.ts                      # Skema validasi state svelte store
+│   │   ├── templates/
+│   │   │   ├── index.ts                        # Barrel export modul migrasi skema template
+│   │   │   └── migration.ts                    # Logika pipeline migrasi skema template
 │   │   ├── utils/
 │   │   │   ├── api-handler.ts                  # Pembungkus standar API route handler
 │   │   │   ├── designMath.ts                   # Utilitas rumus radius & Golden Ratio
@@ -443,7 +449,10 @@ umkm-site-builder/
 │   │   ├── webhooks/
 │   │   │   └── xendit.test.ts                  # Uji penanganan webhook e-invoice Xendit
 │   │   ├── check-subdomain.test.ts             # Uji validasi subdomain input Zod
-│   │   └── media-sign.test.ts                  # Uji Cloudinary signed upload generator
+│   │   ├── media-sign.test.ts                  # Uji Cloudinary signed upload generator
+│   │   └── admin-media-cleanup.test.ts         # Uji API pembersihan aset orphan Cloudinary
+│   ├── builder/
+│   │   └── section-registry.test.ts            # Uji modularitas section registry map
 │   ├── finance/
 │   │   ├── commission-and-masking.test.ts      # Uji engine komisi & masking nominal rupiah
 │   │   ├── payout-disbursement.test.ts         # Uji webhook disbursement & saldo payout
@@ -453,6 +462,7 @@ umkm-site-builder/
 │   │   │   └── service.test.ts                 # Uji modul internal transaction service
 │   │   ├── auth-google-whitelist.test.ts       # Uji redirect & whitelist email BetterAuth
 │   │   ├── auth-helpers.test.ts                # Uji helper otentikasi role user
+│   │   ├── templates-migration.test.ts         # Uji pipeline migrasi skema template config
 │   │   ├── toast.test.ts                       # Uji state writable toast alert notifications
 │   │   └── xendit.test.ts                      # Uji API call tagihan & disbursement Xendit
 │   ├── schemas/

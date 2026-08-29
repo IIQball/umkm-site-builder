@@ -1,14 +1,7 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { SectionStyles } from '@/types';
-  import HeaderAnnouncement from './HeaderAnnouncement.svelte';
-  import Hero from './Hero.svelte';
-  import Features from './Features.svelte';
-  import ProductCatalog from './ProductCatalog.svelte';
-  import Testimonials from './Testimonials.svelte';
-  import FAQ from './FAQ.svelte';
-  import GoogleMaps from './GoogleMaps.svelte';
-  import Footer from './Footer.svelte';
+  import { getSectionDefinition } from '../registry';
 
   export let section: TemplateSection;
   export let isActive: boolean = false;
@@ -73,6 +66,12 @@
   $: containerStyle = containerWidthMode === 'full'
     ? ''
     : 'max-width: var(--theme-max-width, 1200px);';
+
+  $: sectionDef = getSectionDefinition(section?.type);
+  $: isFullBleed = sectionDef?.isFullBleed ?? (section?.type === 'header_announcement' || section?.type === 'hero');
+  $: sectionProps = section?.type === 'product_catalog'
+    ? { ...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined) }
+    : (section?.props || {});
 </script>
 
 <section
@@ -80,26 +79,30 @@
   style={inlineStyle}
   class="relative box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
 >
-  {#if section.type === 'header_announcement'}
-    <HeaderAnnouncement props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-  {:else if section.type === 'hero'}
-    <Hero props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-  {:else}
-    <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); {containerStyle}">
-      {#if section.type === 'features'}
-        <Features props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'product_catalog'}
-        <ProductCatalog props={{...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined)}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'testimonials'}
-        <Testimonials props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'faq'}
-        <FAQ props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'google_maps'}
-        <GoogleMaps props={section.props || {}} styles={section.styles || {}} sectionId={section.id} {isActive} layoutPreset={section.layoutPreset} />
-      {:else if section.type === 'footer'}
-        <Footer props={section.props || {}} styles={section.styles || {}} layoutPreset={section.layoutPreset} />
-      {/if}
-    </div>
+  {#if sectionDef}
+    {#if isFullBleed}
+      <svelte:component
+        this={sectionDef.renderComponent}
+        props={sectionProps}
+        styles={section.styles || {}}
+        sectionId={section.id}
+        {isActive}
+        layoutPreset={section.layoutPreset}
+        {storeId}
+      />
+    {:else}
+      <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); {containerStyle}">
+        <svelte:component
+          this={sectionDef.renderComponent}
+          props={sectionProps}
+          styles={section.styles || {}}
+          sectionId={section.id}
+          {isActive}
+          layoutPreset={section.layoutPreset}
+          {storeId}
+        />
+      </div>
+    {/if}
   {/if}
 </section>
 

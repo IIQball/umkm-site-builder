@@ -11,23 +11,41 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Implemented analytics tracking for tenant storefronts. Created `POST /api/analytics/track` endpoint (public, no auth) to record store views and WhatsApp clicks. Built TrafficWidget dashboard showing total views, total clicks, and conversion rate. All 263 tests pass, type-check and lint are green.
+Synchronized global typography system across `src/styles/global.css`, `tailwind.config.mjs`, and strictly whitelisted target modules (Templates/Builder, Transaksi/Finance, Platform Settings/Admin) with 0 modifications to blacklisted files. All 278 unit tests passing across 40 test files, 0 typecheck errors, 0 lint warnings.
 
 ## Last session did
 
-- **Analytics Tracking Feature:**
-  - `src/services/analytics.service.ts` (NEW): Service with `trackEvent(storeId, eventType)`. Accepts 'wa_click' or 'store_view' events. Atomically increments `stores.totalWaClicks` or `stores.totalViews`. Throws structured `AppError` with codes `STORE_NOT_FOUND`, `INVALID_EVENT_TYPE`.
-  - `src/pages/api/analytics/track.ts` (NEW): POST endpoint accepting `storeId` and `eventType`. Public access (no auth required) to allow tracking from storefronts. Validates input via Zod schema.
-  - `src/components/dashboard/TrafficWidget.svelte` (NEW): Displays two stat cards (Total Views with Users icon, WhatsApp Clicks with MessageCircle icon). Shows conversion rate (clicks/views %) with progress bar. Includes manual refresh button with loading state.
-  - `src/pages/dashboard/analytics.astro` (NEW): Tenant-only analytics page. Fetches user's store and passes `storeId` to TrafficWidget. Auth guard redirects to onboarding if no store exists.
-  - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added 'Analitik' nav link (trending_up icon) to tenant sidebar.
-  - `tests/services/analytics.service.test.ts` (NEW): 4 unit tests for service layer (store not found, invalid event type, store_view increment, wa_click increment).
-  - `tests/api/analytics/track.test.ts` (NEW): 6 unit tests for endpoint (validation, success cases, error handling).
-  - Total test count: 263 (all passing). Type check: 0 errors, 0 warnings. Lint: 0 errors, 0 warnings.
-  - `src/pages/dashboard/templates.astro`: Created the Astro page wrapper to mount `TemplateGallery.svelte`, enforcing tenant role access and fetching the current `store.templateId`.
-  - `src/components/dashboard/sidebar/sidebar.helpers.ts`: Added "Pilih Template" navigation item under the tenant sidebar section.
-  - `tests/api/stores/[storeId]/apply-template.test.ts`: Added 9 new unit tests covering all authorization paths, ownership checks, missing data validation, and successful application of both free and paid templates.
-  - Total test count: 237 (232 passed, 5 previously existing unrelated failures). Build and Type Check pass successfully.
+- **Global Typography System Synchronization:**
+  - `src/styles/global.css` & `tailwind.config.mjs`: Registered standard typography utilities (`text-heading-xl`, `text-heading-lg`, `text-heading-md`, `text-tagline`, `text-body-lg`, `text-body-base`, `text-label-caps`, `text-3xs`, `text-2xs`, `text-xs-dense`, `tracking-caps`).
+  - Refactored whitelisted modules strictly:
+    * **Admin / Settings / Whitelist**: `CommissionSettingsPanel.svelte`, `TemplateReviewPanel.svelte`, `UserManagementPanel.svelte`, `AdminWhitelistPanel.svelte`.
+    * **Designer / Finance**: `designer/templates.astro`, `designer/wallet.astro`, `DesignerBankModal.svelte`, `DesignerWithdrawModal.svelte`.
+    * **Checkout**: `CheckoutSummaryCard.svelte`.
+    * **Marketplace & Builder**: `templates/index.astro`, `PropertyInspector.svelte`.
+  - Zero modifications to blacklisted directories (`src/components/tenant/*`, `src/components/storefront/*`, `src/components/onboarding/*`, `src/middleware.ts`, `src/db/schema.ts`).
+  - Full validation: `bun run type-check` (0 errors), `bun run lint` (0 errors), `bun test` (278/278 pass).
+
+- **Google Maps Section Default Integration:**
+  - `src/schemas/templates/template.schema.ts`: Added `google_maps` section into `DEFAULT_TEMPLATE_SECTIONS` (id: `section-7`) placed immediately between `faq` (id: `section-6`) and `footer` (id: `section-8`).
+  - `src/components/builder/content/GoogleMapsContent.svelte` (NEW): Created content inspector component allowing real-time modification of `markerTitle`, `address`, `zoom`, and `mapHeight`.
+  - `src/components/builder/registry/index.ts`: Linked `GoogleMapsContent` as `inspectorComponent` and mapped `defaultConfig` to `defaultSectionConfigs['google_maps']`.
+  - `tests/schemas/template.test.ts`: Updated schema unit tests to assert 8 default sections including `google_maps`.
+
+- **Section Registry Map Architecture (`src/components/builder/registry/`):**
+  - `src/components/builder/registry/registry.types.ts` & `index.ts` (NEW): Created centralized `sectionRegistry` map exporting `SectionDefinition` for all 8 section types (`header_announcement`, `hero`, `features`, `product_catalog`, `testimonials`, `faq`, `google_maps`, `footer`) along with `getSectionDefinition`, `getAllSectionDefinitions`, and `registerSection`.
+  - `src/components/builder/sections/SectionRenderer.svelte`: Replaced static if-else section rendering with dynamic `<svelte:component this={sectionDef.renderComponent} ... />` based on `isFullBleed` flag.
+  - `src/components/builder/ContentTab.svelte` & `StylesTab.svelte`: Replaced hardcoded conditionals with dynamic inspector components (`sectionDef.inspectorComponent`, `sectionDef.stylesComponent`).
+  - `src/components/builder/layer/layerPanel.helpers.ts`: Derived `sectionTypeLabels`, `sectionTypeIcons`, and `sectionTypes` dynamically from `getAllSectionDefinitions()`.
+  - `tests/builder/section-registry.test.ts` (NEW): 5 unit tests verifying registry map, retrieval, full-bleed flags, and dynamic custom section registration.
+
+- **Template Schema Versioning & Migration Layer:**
+  - `src/schemas/templates/template.schema.ts`: Added `CURRENT_SCHEMA_VERSION = 1`, `schemaVersion` field to `TemplateConfigSchema`, and exported `DEFAULT_TEMPLATE_CONFIG`.
+  - `src/lib/templates/migration.ts` & `index.ts`: Implemented schema migration pipeline (`migrateTemplateConfig`, `isLegacyConfig`, `normalizeTheme`, `normalizeSection`) to deeply normalize and upgrade legacy template configs without runtime exceptions.
+  - `src/components/builder/stores/editorStore.types.ts`: Replaced local `ensureValidConfig` with centralized `migrateTemplateConfig` from `@/lib/templates`.
+  - `src/services/templates/template.service.ts`: Ensured `getTemplateById`, `createTemplateDraft`, and updates apply `migrateTemplateConfig`.
+  - `src/pages/api/stores/[storeId]/apply-template.ts`: Migrated template config before persisting to `stores.customization`.
+  - `src/pages/builder/preview/[templateId].astro`: Applied `migrateTemplateConfig` to template records on preview.
+  - `tests/lib/templates-migration.test.ts`: 16 unit tests covering legacy migration, normalization of themes and sections, schema validation, and idempotency.
 
 - **Header & Canvas Viewport Realignment (3 Breakpoints Audit):**
   - `src/components/builder/Canvas.svelte`: Refactored `<main>` to `flex-1 w-full h-full overflow-auto flex items-start justify-center p-6 bg-slate-100 dark:bg-slate-950` with centered `#canvas-frame` (`max-w-[1200px]` desktop, `768px` tablet, `375px` mobile) avoiding sidebar collision. Added `--active-safe-zone` CSS variable matching active viewport mode (`32px` desktop, `24px` tablet, `16px` mobile).

@@ -276,15 +276,15 @@
       {:else if bankAccount}
         <div class="bg-nested border border-light rounded-xl p-4 space-y-2 mt-2">
           <div class="flex justify-between items-center">
-            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Bank</span>
+            <span class="text-label-caps text-muted">Bank</span>
             <span class="text-xs font-bold text-main">{bankAccount.bankName}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nomor Rekening</span>
+            <span class="text-label-caps text-muted">Nomor Rekening</span>
             <span class="text-xs font-semibold text-main font-mono">{bankAccount.accountNumber}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs font-extrabold uppercase tracking-widest text-muted">Nama Pemilik</span>
+            <span class="text-label-caps text-muted">Nama Pemilik</span>
             <span class="text-xs font-semibold text-main">{bankAccount.holderName}</span>
           </div>
         </div>

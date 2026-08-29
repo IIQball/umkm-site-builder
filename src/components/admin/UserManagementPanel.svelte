@@ -131,8 +131,8 @@
 <div class="space-y-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Manajemen Pengguna</h1>
-      <p class="text-sm text-secondary mt-1">Kelola dan tinjau status akun pengguna di platform</p>
+      <h1 class="text-heading-md text-main">Manajemen Pengguna</h1>
+      <p class="text-body-base text-secondary mt-0.5">Kelola dan tinjau status akun pengguna di platform</p>
     </div>
   </div>
 

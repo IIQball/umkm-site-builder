@@ -124,9 +124,9 @@
         <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
           <ShieldCheck size={24} strokeWidth={2.5} />
         </div>
-        <h1 class="text-2xl font-black text-main tracking-tight leading-none pt-3">Manajemen Admin</h1>
+        <h1 class="text-heading-md text-main">Manajemen Admin</h1>
       </div>
-      <p class="text-sm text-secondary max-w-xl leading-relaxed">
+      <p class="text-body-base text-secondary mt-0.5 max-w-xl leading-relaxed">
         Buat akun Administrator baru secara langsung. Admin yang terdaftar dapat mengelola operasional platform sesuai otoritas yang diberikan.
       </p>
     </div>

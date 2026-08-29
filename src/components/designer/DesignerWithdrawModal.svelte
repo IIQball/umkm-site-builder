@@ -55,7 +55,7 @@
       {:else}
         <div class="space-y-4">
           <div class="flex justify-between items-center pb-2 border-b border-light">
-            <h3 class="text-sm font-bold text-main m-0">Tarik Dana</h3>
+            <h3 class="text-base font-bold text-foreground m-0">Tarik Dana</h3>
             <button type="button" on:click={onClose} class="text-muted hover:text-main flex items-center cursor-pointer p-1">
               <X size={16} />
             </button>
@@ -63,17 +63,17 @@
 
           <div class="grid grid-cols-2 gap-3 bg-nested border border-light rounded-xl p-3 text-center">
             <div class="space-y-0.5">
-              <span class="text-[10px] font-bold text-muted uppercase tracking-wider">Saldo Aktif</span>
+              <span class="text-label-caps text-muted-foreground block">Saldo Aktif</span>
               <p class="text-xs font-black text-main font-mono">{formatIDR(balance)}</p>
             </div>
             <div class="space-y-0.5 border-l border-light">
-              <span class="text-[10px] font-bold text-success uppercase tracking-wider">Siap Tarik</span>
+              <span class="text-label-caps text-success block">Siap Tarik</span>
               <p class="text-xs font-black text-success font-mono">{formatIDR(availableBalance)}</p>
             </div>
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-[10px] font-extrabold uppercase tracking-widest text-muted" for="input-amount">Nominal Penarikan</label>
+            <label class="block text-label-caps text-muted-foreground mb-1.5" for="input-amount">Nominal Penarikan</label>
             <div class="relative">
               <span class="absolute left-3.5 top-3 text-xs font-bold text-muted">Rp</span>
               <input

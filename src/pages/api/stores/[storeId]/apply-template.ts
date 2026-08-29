@@ -5,6 +5,7 @@ import { eq, and, isNull } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { validate } from '@/lib/utils/validation';
+import { migrateTemplateConfig } from '@/lib/templates';
 import { z } from 'zod';
 
 const ApplyTemplateSchema = z.object({
@@ -76,7 +77,7 @@ export const POST: APIRoute = async ({ params, request }) => {
       .update(stores)
       .set({
         templateId,
-        customization: template.config,
+        customization: migrateTemplateConfig(template.config),
         updatedAt: new Date(),
       })
       .where(eq(stores.id, storeId));

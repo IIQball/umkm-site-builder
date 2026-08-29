@@ -64,19 +64,19 @@
   $: badge = getStatusBadge(status);
 </script>
 
-<header class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between flex-shrink-0 select-none text-slate-900 dark:text-slate-100 transition-colors z-30">
+<header class="h-14 bg-card border-b border-light px-4 flex items-center justify-between flex-shrink-0 select-none text-main transition-colors z-30">
   <!-- Left info & Editable Title -->
   <div class="flex items-center gap-2.5 min-w-0">
     <a
       href="/designer/templates"
-      class="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+      class="text-xs font-semibold text-secondary hover:text-main transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-nested hover:bg-nested/80 border border-light"
       title="Kembali ke Template"
     >
       <ArrowLeft size={13} />
       <span class="hidden sm:inline">Kembali</span>
     </a>
 
-    <div class="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+    <div class="h-4 w-px bg-nested border-r border-light" />
 
     {#if isEditingName}
       <input
@@ -84,13 +84,13 @@
         bind:value={nameInputValue}
         on:blur={handleNameSave}
         on:keydown={(e) => e.key === 'Enter' && handleNameSave()}
-        class="text-xs font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 border border-blue-500 rounded px-2 py-1 focus:outline-none max-w-xs"
+        class="text-xs font-semibold text-main bg-nested border border-primary rounded px-2 py-1 focus:outline-none max-w-xs"
         use:focus
       />
     {:else}
       <button
         on:click={() => (isEditingName = true)}
-        class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 px-2 py-0.5 rounded transition-colors text-left max-w-[140px] sm:max-w-[220px]"
+        class="text-xs sm:text-sm font-semibold text-main truncate hover:text-primary hover:bg-nested px-2 py-0.5 rounded transition-colors text-left max-w-[140px] sm:max-w-[220px]"
         title="Klik untuk mengubah nama template"
       >
         {templateName}
@@ -105,12 +105,12 @@
   <!-- Center: Viewport Switcher & Grid & Undo/Redo -->
   <div class="flex items-center gap-2">
     <!-- Undo / Redo -->
-    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
       <button
         type="button"
         on:click={() => editorStore.undo()}
         disabled={!$canUndo}
-        class="p-1 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+        class="p-1 rounded text-secondary hover:text-main hover:bg-card disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
         title="Undo (Ctrl+Z)"
       >
         <Undo2 size={14} />
@@ -119,7 +119,7 @@
         type="button"
         on:click={() => editorStore.redo()}
         disabled={!$canRedo}
-        class="p-1 rounded text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
+        class="p-1 rounded text-secondary hover:text-main hover:bg-card disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
         title="Redo (Ctrl+Y)"
       >
         <Redo2 size={14} />
@@ -127,14 +127,14 @@
     </div>
 
     <!-- View Mode Switcher -->
-    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
       <button
         type="button"
         on:click={() => onViewModeChange('desktop')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'desktop'
-            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-card text-main font-semibold shadow-sm'
+            : 'text-secondary hover:text-main'
         }`}
         title="Desktop View (1200px)"
       >
@@ -146,8 +146,8 @@
         on:click={() => onViewModeChange('tablet')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'tablet'
-            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-card text-main font-semibold shadow-sm'
+            : 'text-secondary hover:text-main'
         }`}
         title="Tablet View (768px Flat Frame)"
       >
@@ -159,8 +159,8 @@
         on:click={() => onViewModeChange('mobile')}
         class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           viewMode === 'mobile'
-            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-card text-main font-semibold shadow-sm'
+            : 'text-secondary hover:text-main'
         }`}
         title="Mobile View (375px Flat Frame)"
       >
@@ -170,14 +170,14 @@
     </div>
 
     <!-- Figma-Style Layout Grid Guides Toggle -->
-    <div class="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
       <button
         type="button"
         on:click={() => canvasStore.toggleColumnGrid()}
         class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $canvasStore.showColumnGrid
-            ? 'bg-blue-600 text-white font-semibold shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-primary text-white font-semibold shadow-sm'
+            : 'text-secondary hover:text-main'
         }`}
         title="Toggle Column Grid Guides (Ctrl+G / Shift+G)"
       >
@@ -189,8 +189,8 @@
         on:click={() => canvasStore.togglePixelGrid()}
         class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
           $canvasStore.showPixelGrid
-            ? 'bg-blue-600 text-white font-semibold shadow-sm'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-primary text-white font-semibold shadow-sm'
+            : 'text-secondary hover:text-main'
         }`}
         title="Toggle 8px Pixel Grid"
       >
@@ -207,29 +207,29 @@
       on:click={() => canvasStore.toggleEditorTheme()}
       class={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
         $canvasStore.editorTheme === 'dark'
-          ? 'bg-slate-800 text-amber-400 border-slate-700 hover:bg-slate-700'
-          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
+          ? 'bg-nested text-warning border-light hover:bg-nested/80'
+          : 'bg-nested text-secondary hover:text-main border-light'
       }`}
       title={`Editor Theme: ${$canvasStore.editorTheme === 'dark' ? 'Dark' : 'Light'}`}
       aria-label="Toggle Editor Theme"
     >
       {#if $canvasStore.editorTheme === 'dark'}
-        <Moon size={13} class="text-amber-400" />
+        <Moon size={13} class="text-warning" />
         <span class="text-xs font-semibold">Dark</span>
       {:else}
-        <Sun size={13} class="text-amber-500" />
+        <Sun size={13} class="text-warning" />
         <span class="text-xs font-semibold">Light</span>
       {/if}
     </button>
 
     <!-- Save Status Message -->
     {#if saveSuccess}
-      <div class="hidden sm:flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+      <div class="hidden sm:flex items-center gap-1 text-xs text-success font-medium">
         <CheckCircle2 size={13} />
         <span>Tersimpan</span>
       </div>
     {:else if isDirty}
-      <span class="hidden sm:inline text-xs text-amber-600 dark:text-amber-400 font-medium">Belum disimpan</span>
+      <span class="hidden sm:inline text-xs text-warning font-medium">Belum disimpan</span>
     {/if}
 
     <!-- Save Button -->
@@ -237,7 +237,7 @@
       type="button"
       on:click={onSave}
       disabled={saving}
-      class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-900 dark:text-slate-100 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+      class="flex items-center gap-1.5 px-3 py-1.5 bg-nested hover:bg-nested/80 disabled:opacity-50 text-main rounded-lg text-xs font-semibold border border-light transition-colors cursor-pointer"
       title="Simpan Perubahan (Ctrl+S)"
     >
       {#if saving}

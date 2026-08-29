@@ -52,8 +52,8 @@
         on:focus|preventDefault={() => {}}
       />
       <span class="hidden sm:flex items-center gap-0.5 flex-shrink-0">
-        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">⌘</kbd>
-        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">F</kbd>
+        <kbd class="text-3xs font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">⌘</kbd>
+        <kbd class="text-3xs font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">F</kbd>
       </span>
     </label>
   </div>
@@ -109,7 +109,7 @@
           <span class="text-xs font-semibold text-main max-w-[100px] truncate leading-tight">
             {user.name ?? user.email}
           </span>
-          <span class="badge-custom text-[10px] font-bold border rounded-full px-1.5 py-0.5 leading-none mt-0.5 {role.cls}">
+          <span class="badge-custom text-3xs font-bold border rounded-full px-1.5 py-0.5 leading-none mt-0.5 {role.cls}">
             {role.label}
           </span>
         </div>
@@ -151,8 +151,8 @@
           <div class="border-t border-light mt-1 pt-1">
             <a
               href="/auth/login"
-              class="flex items-center gap-2.5 px-3 py-2 text-sm text-rose-500
-                     hover:bg-rose-50/10 transition-colors"
+              class="flex items-center gap-2.5 px-3 py-2 text-sm text-error
+                     hover:bg-error/10 transition-colors"
               role="menuitem"
             >
               <span class="material-symbols-outlined text-sm">logout</span>

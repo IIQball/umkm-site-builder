@@ -65,23 +65,23 @@
           <Check size={24} />
         </div>
       {/if}
-      <h1 class="text-2xl font-extrabold tracking-tight text-base-content">{checkoutTitle}</h1>
-      <p class="text-xs text-base-content/70 max-w-sm mx-auto leading-relaxed">
+      <h1 class="text-heading-md font-extrabold tracking-tight text-main">{checkoutTitle}</h1>
+      <p class="text-body-base text-secondary mt-0.5 max-w-sm mx-auto leading-relaxed">
         {checkoutDescription}
       </p>
     </div>
 
     <!-- Inner Nested Invoice Card -->
-    <div class="bg-base-200/60 rounded-xl border border-base-content/10 p-5 space-y-5">
+    <div class="bg-nested rounded-xl border border-light p-5 space-y-5">
       <!-- Reference Box -->
-      <div class="flex items-center justify-between bg-base-100 p-3 rounded-lg border border-base-content/10 shadow-sm">
+      <div class="flex items-center justify-between bg-card p-3 rounded-lg border border-light shadow-sm">
         <div>
-          <p class="text-xs font-medium text-base-content/60 mb-0.5">No. Referensi Tagihan</p>
-          <p class="text-xs font-mono font-bold text-base-content tracking-wide">{pageData.invoiceId}</p>
+          <p class="text-xs font-medium text-muted mb-0.5">No. Referensi Tagihan</p>
+          <p class="text-xs font-mono font-bold text-main tracking-wide">{pageData.invoiceId}</p>
         </div>
         <button 
           type="button" 
-          class="btn btn-ghost btn-xs btn-square text-base-content/60 hover:text-base-content cursor-pointer" 
+          class="btn btn-ghost btn-xs btn-square text-muted hover:text-main cursor-pointer" 
           title="Salin Nomor Referensi"
           on:click={copyInvoice}
         >
@@ -91,19 +91,19 @@
 
       <!-- Line Items -->
       <div class="space-y-3 pt-1">
-        <div class="flex justify-between items-start border-b border-base-content/10 pb-3">
+        <div class="flex justify-between items-start border-b border-light pb-3">
           <div class="max-w-[70%]">
-            <p class="text-xs font-semibold text-base-content">{lineItemTitle}</p>
-            <p class="text-xs text-base-content/60">{lineItemSubtitle}</p>
+            <p class="text-xs font-semibold text-main">{lineItemTitle}</p>
+            <p class="text-xs text-muted">{lineItemSubtitle}</p>
           </div>
-          <p class="text-xs font-semibold text-base-content">{pageData.amountFormatted}</p>
+          <p class="text-xs font-semibold text-main">{pageData.amountFormatted}</p>
         </div>
       </div>
 
       <!-- Total Amount -->
       <div class="pt-1 flex flex-col items-center justify-center space-y-1 text-center">
-        <p class="text-xs font-bold text-base-content/60 uppercase tracking-widest">Total Pembayaran</p>
-        <p class="text-3xl font-black text-base-content tracking-tight font-mono">{pageData.amountFormatted}</p>
+        <p class="text-label-caps text-muted">Total Pembayaran</p>
+        <p class="text-3xl font-black text-main tracking-tight font-mono">{pageData.amountFormatted}</p>
         
         {#if pageData.status === 'pending'}
           <p class="text-xs text-warning mt-2 inline-flex items-center gap-1.5 bg-warning/10 px-2.5 py-1 rounded-md font-medium border border-warning/20">

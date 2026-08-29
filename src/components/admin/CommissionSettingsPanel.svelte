@@ -72,8 +72,8 @@
 <div class="w-full space-y-6">
   <!-- Page Header -->
   <div>
-    <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Pengaturan Komisi Platform</h1>
-    <p class="text-sm text-secondary mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
+    <h1 class="text-heading-md text-main">Pengaturan Komisi Platform</h1>
+    <p class="text-body-base text-secondary mt-0.5">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
   </div>
 
   <!-- Stat Cards Grid -->
@@ -120,14 +120,14 @@
         <span class="material-symbols-outlined text-xl">percent</span>
       </div>
       <div>
-        <h2 class="font-bold text-sm text-main">Potongan Fee Platform</h2>
-        <p class="text-xs text-muted mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
+        <h2 class="font-bold text-base text-foreground">Potongan Fee Platform</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
       </div>
     </div>
 
     <form on:submit|preventDefault={handleSave} class="space-y-6">
       <div class="form-control w-full">
-        <label for="platformFeePercentage" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
+        <label for="platformFeePercentage" class="block text-label-caps text-muted-foreground mb-2">
           Persentase Fee Platform
         </label>
         <div class="relative flex items-center">
@@ -151,7 +151,7 @@
 
       <!-- Settlement Delay Days Input -->
       <div class="form-control w-full">
-        <label for="settlementDelayDays" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
+        <label for="settlementDelayDays" class="block text-label-caps text-muted-foreground mb-2">
           Durasi Penahanan Settlement (Hari)
         </label>
         <div class="relative flex items-center">

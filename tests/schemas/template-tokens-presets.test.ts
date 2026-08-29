@@ -15,8 +15,8 @@ import {
   GoogleMapsPresetSchema,
   FooterPresetSchema,
   TemplateSectionSchema,
-  DEFAULT_TEMPLATE_SECTIONS,
   DEFAULT_TEMPLATE_THEME,
+  DEFAULT_TEMPLATE_CONFIG,
 } from '@/schemas';
 import {
   calculateNestedRadius,
@@ -165,10 +165,7 @@ describe('Split Store: canvasStore (Ephemeral) & documentStore (Persistent)', ()
       id: 'tpl-test',
       name: 'Test Template',
       price: 50000,
-      config: {
-        theme: DEFAULT_TEMPLATE_THEME,
-        sections: DEFAULT_TEMPLATE_SECTIONS,
-      },
+      config: DEFAULT_TEMPLATE_CONFIG,
     });
   });
 

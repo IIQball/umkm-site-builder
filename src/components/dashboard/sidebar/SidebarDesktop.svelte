@@ -67,7 +67,7 @@
     {#if isDesigner}
       <!-- GENERAL group -->
       {#if !collapsed}
-        <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2.5 pb-1.5">General</p>
+        <p class="text-label-caps text-muted px-2.5 pb-1.5">General</p>
       {/if}
       {#each generalItems as item}
         {@const active = isActive(item.href)}
@@ -93,7 +93,7 @@
 
       <!-- ACCOUNT group -->
       {#if !collapsed}
-        <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2.5 pb-1.5 pt-4">Account</p>
+        <p class="text-label-caps text-muted px-2.5 pb-1.5 pt-4">Account</p>
       {:else}
         <div class="border-t border-light my-2"></div>
       {/if}
@@ -154,7 +154,7 @@
       type="button"
       on:click={() => dispatch('signOut')}
       title={collapsed ? 'Keluar' : undefined}
-      class="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl text-sm font-medium text-muted hover:text-rose-500 hover:bg-rose-50/10 transition-colors cursor-pointer"
+      class="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl text-sm font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
     >
       <span class="material-symbols-outlined text-sm flex-shrink-0">logout</span>
       {#if !collapsed}

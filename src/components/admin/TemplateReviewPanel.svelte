@@ -96,8 +96,8 @@
 <div class="space-y-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Kurasi & Review Template</h1>
-      <p class="text-sm text-secondary mt-1">Tinjau dan berikan persetujuan untuk template desainer</p>
+      <h1 class="text-heading-md text-main">Kurasi & Review Template</h1>
+      <p class="text-body-base text-secondary mt-0.5">Tinjau dan berikan persetujuan untuk template desainer</p>
     </div>
   </div>
 

@@ -33,11 +33,11 @@
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs">
         <thead>
-          <tr class="border-b border-light text-muted uppercase tracking-wider text-xs">
-            <th class="py-2.5 font-extrabold">Tanggal</th>
-            <th class="py-2.5 font-extrabold">Nominal</th>
-            <th class="py-2.5 font-extrabold">Status</th>
-            <th class="py-2.5 font-extrabold">Keterangan</th>
+          <tr class="border-b border-light text-muted text-label-caps">
+            <th class="py-2.5">Tanggal</th>
+            <th class="py-2.5">Nominal</th>
+            <th class="py-2.5">Status</th>
+            <th class="py-2.5">Keterangan</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-light">

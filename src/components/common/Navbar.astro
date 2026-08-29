@@ -9,23 +9,23 @@ const user = Astro.locals.user;
 const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 ---
 
-<nav class="navbar bg-base-100/90 backdrop-blur-md border-b border-base-200 sticky top-0 z-40 shadow-sm transition-colors">
+<nav class="navbar bg-card/90 backdrop-blur-md border-b border-light sticky top-0 z-40 shadow-sm transition-colors text-main">
   <div class="flex-1 px-2">
-    <a href="/" class="btn btn-ghost text-base sm:text-lg font-bold gap-2 px-2 hover:bg-base-200/60 rounded-xl">
-      <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
+    <a href="/" class="btn btn-ghost text-base sm:text-lg font-bold gap-2 px-2 hover:bg-nested rounded-xl">
+      <div class="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center font-black text-sm shadow-sm">
         U
       </div>
-      <span class="tracking-tight text-base-content">UMKM Builder</span>
+      <span class="tracking-tight text-main">UMKM Builder</span>
     </a>
   </div>
 
   <div class="flex-none gap-2 px-2">
     <!-- Desktop Nav Links -->
     <div class="hidden md:flex items-center gap-1.5">
-      <a href="/" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-base-content/80 hover:text-base-content">
+      <a href="/" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-secondary hover:text-main hover:bg-nested">
         Beranda
       </a>
-      <a href="/umkm" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-base-content/80 hover:text-base-content">
+      <a href="/umkm" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-secondary hover:text-main hover:bg-nested">
         Direktori UMKM
       </a>
     </div>
@@ -34,20 +34,20 @@ const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
     <div class="hidden md:flex items-center gap-1.5">
       {user ? (
         <>
-          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold gap-1.5 shadow-sm shadow-blue-600/20">
+          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold gap-1.5 shadow-sm text-white">
             <span class="material-symbols-outlined text-[16px]">dashboard</span>
             <span>Ke Dashboard</span>
           </a>
-          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm" title={user.name ?? user.email}>
+          <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-sm" title={user.name ?? user.email}>
             {userInitial}
           </div>
         </>
       ) : (
         <>
-          <a href="/auth/login" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium">
+          <a href="/auth/login" class="btn btn-ghost btn-sm rounded-lg text-xs font-medium text-secondary hover:text-main hover:bg-nested">
             Masuk
           </a>
-          <a href="/auth/login?mode=register" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm shadow-blue-600/20">
+          <a href="/auth/login?mode=register" class="btn btn-primary btn-sm rounded-xl text-xs font-semibold shadow-sm text-white">
             Daftar
           </a>
         </>
@@ -59,24 +59,24 @@ const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 
     <!-- Mobile Dropdown -->
     <div class="dropdown dropdown-end md:hidden">
-      <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="Menu">
+      <button tabindex="0" class="btn btn-ghost btn-circle btn-sm text-secondary hover:text-main" aria-label="Menu">
         <span class="material-symbols-outlined text-[20px]">menu</span>
       </button>
-      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-xl w-52 border border-base-200 space-y-1 mt-2 text-xs">
-        <li><a href="/" class="rounded-lg">Beranda</a></li>
-        <li><a href="/umkm" class="rounded-lg">Direktori UMKM</a></li>
-        <li class="divider my-0.5"></li>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-card rounded-xl w-52 border border-light space-y-1 mt-2 text-xs text-main">
+        <li><a href="/" class="rounded-lg hover:bg-nested">Beranda</a></li>
+        <li><a href="/umkm" class="rounded-lg hover:bg-nested">Direktori UMKM</a></li>
+        <li class="divider my-0.5 border-light"></li>
         {user ? (
           <li>
-            <a href="/dashboard" class="font-semibold text-primary rounded-lg flex items-center gap-1.5">
+            <a href="/dashboard" class="font-semibold text-primary rounded-lg flex items-center gap-1.5 hover:bg-nested">
               <span class="material-symbols-outlined text-[16px]">dashboard</span>
               <span>Ke Dashboard</span>
             </a>
           </li>
         ) : (
           <>
-            <li><a href="/auth/login" class="rounded-lg">Masuk</a></li>
-            <li><a href="/auth/login?mode=register" class="rounded-lg font-semibold text-primary">Daftar</a></li>
+            <li><a href="/auth/login" class="rounded-lg hover:bg-nested">Masuk</a></li>
+            <li><a href="/auth/login?mode=register" class="rounded-lg font-semibold text-primary hover:bg-nested">Daftar</a></li>
           </>
         )}
       </ul>

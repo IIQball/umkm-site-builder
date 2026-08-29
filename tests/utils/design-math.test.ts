@@ -10,7 +10,7 @@ import {
   editorStore,
   canUndo,
 } from '@/components/builder/stores/editorStore';
-import { DEFAULT_TEMPLATE_SECTIONS, DEFAULT_TEMPLATE_THEME } from '@/schemas';
+import { DEFAULT_TEMPLATE_CONFIG, DEFAULT_TEMPLATE_THEME } from '@/schemas';
 
 describe('Design Math Helper Functions', () => {
   it('calculateNestedRadius should obey R_inner = max(0, R_outer - Padding)', () => {
@@ -48,10 +48,7 @@ describe('Theme History Merge Window (400ms Debounce Merge)', () => {
       id: 'tpl-test',
       name: 'Test Template',
       price: 50000,
-      config: {
-        theme: DEFAULT_TEMPLATE_THEME,
-        sections: DEFAULT_TEMPLATE_SECTIONS,
-      },
+      config: DEFAULT_TEMPLATE_CONFIG,
     });
   });
 

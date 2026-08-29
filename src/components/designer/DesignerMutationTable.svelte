@@ -58,12 +58,12 @@
       <table class="w-full min-w-[640px]">
         <thead>
           <tr class="bg-nested/60 border-b border-light">
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Tanggal</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Tipe</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Keterangan</th>
-            <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Reference ID</th>
-            <th class="text-right text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-3">Nominal</th>
-            <th class="text-right text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-3">Saldo Akhir</th>
+            <th class="text-left text-label-caps text-muted px-6 py-3">Tanggal</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Tipe</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Keterangan</th>
+            <th class="text-left text-label-caps text-muted px-4 py-3">Reference ID</th>
+            <th class="text-right text-label-caps text-muted px-4 py-3">Nominal</th>
+            <th class="text-right text-label-caps text-muted px-6 py-3">Saldo Akhir</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-light/50">

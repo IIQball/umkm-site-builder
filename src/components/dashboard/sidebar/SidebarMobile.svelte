@@ -72,7 +72,7 @@
 
   <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5" aria-label="Menu utama mobile">
     {#if isDesigner}
-      <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2 pb-2">General</p>
+      <p class="text-label-caps text-muted px-2 pb-2">General</p>
       {#each generalItems as item}
         {@const active = isActive(item.href)}
         <a
@@ -85,7 +85,7 @@
           {#if active}<span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>{/if}
         </a>
       {/each}
-      <p class="text-xs font-extrabold uppercase tracking-widest text-muted px-2 pb-2 pt-4">Account</p>
+      <p class="text-label-caps text-muted px-2 pb-2 pt-4">Account</p>
       {#each accountItems as item}
         {@const active = isActive(item.href)}
         <a
@@ -103,7 +103,7 @@
         <a
           href={item.href}
           on:click={() => dispatch('closeDrawer')}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary' : 'text-secondary hover:bg-nested hover:text-main'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active ? 'bg-primary/10 text-primary font-semibold' : 'text-secondary hover:bg-nested hover:text-main'}"
         >
           <span class="material-symbols-outlined text-sm">{item.icon}</span>
           <span class="flex-1">{item.label}</span>
@@ -126,7 +126,7 @@
     <button
       type="button"
       on:click={() => dispatch('signOut')}
-      class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-rose-500 hover:bg-rose-50/10 transition-colors cursor-pointer"
+      class="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
     >
       <span class="material-symbols-outlined text-sm">logout</span>
       <span>Keluar</span>

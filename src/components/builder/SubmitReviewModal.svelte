@@ -104,18 +104,18 @@
     aria-modal="true"
     aria-labelledby="submit-review-title"
   >
-    <div class="modal-box max-w-lg w-full p-0 overflow-hidden bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-800 shadow-2xl rounded-2xl flex flex-col max-h-[85vh]">
+    <div class="modal-box max-w-lg w-full p-0 overflow-hidden bg-card border border-light shadow-2xl rounded-2xl flex flex-col max-h-[85vh]">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-base-200 dark:border-slate-800/80 bg-base-200/40 dark:bg-slate-800/40 shrink-0">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-light bg-nested/40 shrink-0">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
             <ShieldCheck size={20} />
           </div>
           <div>
-            <h3 id="submit-review-title" class="font-bold text-sm sm:text-base text-base-content leading-tight">
+            <h3 id="submit-review-title" class="font-bold text-sm sm:text-base text-main leading-tight">
               Ajukan Template untuk Kurasi
             </h3>
-            <p class="text-xs text-base-content/60 truncate max-w-[280px] sm:max-w-xs mt-0.5" title={templateId ? `${templateName} (${templateId})` : templateName}>
+            <p class="text-xs text-muted truncate max-w-[280px] sm:max-w-xs mt-0.5" title={templateId ? `${templateName} (${templateId})` : templateName}>
               {templateName}
             </p>
           </div>
@@ -124,7 +124,7 @@
           type="button"
           on:click={handleClose}
           disabled={isSubmitting}
-          class="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content hover:bg-base-200 dark:hover:bg-slate-800 cursor-pointer disabled:opacity-30"
+          class="btn btn-ghost btn-xs btn-circle text-muted hover:text-main hover:bg-nested cursor-pointer disabled:opacity-30"
           title="Tutup dialog"
         >
           <X size={16} />
@@ -142,42 +142,42 @@
         {/if}
 
         <!-- Notice & Curation Process Card -->
-        <div class="bg-base-200/50 dark:bg-slate-800/50 rounded-xl p-3.5 border border-base-300/70 dark:border-slate-800 space-y-2.5">
-          <div class="flex items-center gap-2 text-xs font-semibold text-base-content">
-            <Info size={14} class="text-blue-500 shrink-0" />
+        <div class="bg-nested/50 rounded-xl p-3.5 border border-light space-y-2.5">
+          <div class="flex items-center gap-2 text-xs font-semibold text-main">
+            <Info size={14} class="text-primary shrink-0" />
             <span>Alur Proses Kurasi & Peninjauan</span>
           </div>
 
-          <ul class="text-xs text-base-content/75 space-y-1.5 pl-1.5">
+          <ul class="text-xs text-secondary space-y-1.5 pl-1.5">
             <li class="flex items-start gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
               <span>Status template akan beralih menjadi <strong>"Menunggu Review"</strong>.</span>
             </li>
             <li class="flex items-start gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
               <span>Tim Admin akan meninjau kelayakan desain, tata letak responsif, dan konten template.</span>
             </li>
             <li class="flex items-start gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+              <span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 shrink-0" />
               <span class="flex items-center gap-1">
                 <span>Selama peninjauan, template akan dikunci untuk pengeditan.</span>
-                <Lock size={11} class="text-amber-500 inline shrink-0" />
+                <Lock size={11} class="text-warning inline shrink-0" />
               </span>
             </li>
           </ul>
         </div>
 
         <!-- Dynamic Platform Commission Breakdown Card -->
-        <div class="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-slate-800/80 dark:to-slate-800/40 rounded-xl p-4 border border-blue-100 dark:border-slate-700/60 shadow-xs">
+        <div class="bg-nested/30 rounded-xl p-4 border border-light shadow-xs">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
-              <Coins size={16} class="text-blue-600 dark:text-blue-400" />
-              <h4 class="text-xs font-bold text-base-content uppercase tracking-wider">
+              <Coins size={16} class="text-primary" />
+              <h4 class="text-xs font-bold text-main uppercase tracking-wider">
                 Skema Komisi Penjualan
               </h4>
             </div>
             {#if isLoadingFee}
-              <span class="loading loading-spinner loading-xs text-blue-500"></span>
+              <span class="loading loading-spinner loading-xs text-primary"></span>
             {:else}
               <span class="badge badge-sm badge-info font-medium text-xs">
                 Dinamis Aktif
@@ -187,13 +187,13 @@
 
           <!-- Split Percentages Grid -->
           <div class="grid grid-cols-2 gap-2 text-center mb-3">
-            <div class="bg-base-100/90 dark:bg-slate-900/80 p-2.5 rounded-lg border border-base-200 dark:border-slate-800">
-              <p class="text-xs text-base-content/60 font-medium">Potongan Fee Platform</p>
-              <p class="text-base font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
+            <div class="bg-card p-2.5 rounded-lg border border-light">
+              <p class="text-xs text-muted font-medium">Potongan Fee Platform</p>
+              <p class="text-base font-extrabold text-warning mt-0.5">
                 {platformFeePercentage}%
               </p>
             </div>
-            <div class="bg-base-100/90 dark:bg-slate-900/80 p-2.5 rounded-lg border border-emerald-500/20 dark:border-emerald-500/30">
+            <div class="bg-card p-2.5 rounded-lg border border-success/30">
               <p class="text-xs text-success font-semibold">Hak Bersih Desainer</p>
               <p class="text-base font-extrabold text-success mt-0.5">
                 {designerPercentage}%
@@ -202,20 +202,20 @@
           </div>
 
           <!-- Financial Calculation Simulation -->
-          <div class="bg-base-100/80 dark:bg-slate-900/60 rounded-lg p-3 border border-base-200/80 dark:border-slate-800 text-xs space-y-1.5">
-            <div class="flex justify-between items-center text-xs text-base-content/70">
+          <div class="bg-card rounded-lg p-3 border border-light text-xs space-y-1.5">
+            <div class="flex justify-between items-center text-xs text-secondary">
               <span>Harga Jual Template:</span>
-              <span class="font-bold text-base-content">
+              <span class="font-bold text-main">
                 {templatePrice > 0 ? formatRupiah(templatePrice) : 'Gratis (Rp 0)'}
               </span>
             </div>
 
             {#if templatePrice > 0}
-              <div class="flex justify-between items-center text-xs text-base-content/60">
+              <div class="flex justify-between items-center text-xs text-muted">
                 <span>Fee Platform ({platformFeePercentage}%):</span>
-                <span class="text-amber-600 dark:text-amber-400">-{formatRupiah(platformFeeAmount)}</span>
+                <span class="text-warning">-{formatRupiah(platformFeeAmount)}</span>
               </div>
-              <div class="border-t border-base-200 dark:border-slate-800 pt-1.5 flex justify-between items-center font-bold text-xs">
+              <div class="border-t border-light pt-1.5 flex justify-between items-center font-bold text-xs">
                 <span class="text-success flex items-center gap-1">
                   <CheckCircle2 size={13} />
                   Estimasi Pendapatan Desainer:
@@ -225,7 +225,7 @@
                 </span>
               </div>
             {:else}
-              <p class="text-xs text-base-content/60 italic pt-1">
+              <p class="text-xs text-muted italic pt-1">
                 *Template gratis tidak dikenakan potongan biaya platform.
               </p>
             {/if}
@@ -234,12 +234,12 @@
       </div>
 
       <!-- Modal Footer Actions -->
-      <div class="px-6 py-4 bg-base-200/40 dark:bg-slate-800/40 border-t border-base-200 dark:border-slate-800 flex items-center justify-end gap-2.5 shrink-0">
+      <div class="px-6 py-4 bg-nested/40 border-t border-light flex items-center justify-end gap-2.5 shrink-0">
         <button
           type="button"
           on:click={handleClose}
           disabled={isSubmitting}
-          class="btn btn-ghost btn-sm text-xs font-semibold px-4 rounded-xl border border-base-300 dark:border-slate-700 hover:bg-base-200 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50"
+          class="btn btn-ghost btn-sm text-xs font-semibold px-4 rounded-xl border border-light hover:bg-nested transition-colors cursor-pointer disabled:opacity-50"
         >
           Batal
         </button>

@@ -22,7 +22,7 @@
   
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm whitespace-nowrap">
-      <thead class="bg-nested/60 border-b border-light text-[10px] uppercase text-muted font-extrabold tracking-widest">
+      <thead class="bg-nested/60 border-b border-light text-label-caps text-muted">
         <tr>
           <th class="px-6 py-4">Profil Admin</th>
           <th class="px-6 py-4">Status Akses</th>
@@ -64,13 +64,13 @@
               </td>
               <td class="px-6 py-4">
                 {#if admin.status === 'active'}
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-[11px] font-bold border border-success/20">
+                  <span class="badge-custom badge-custom-emerald text-3xs">
                     <CheckCircle size={12} strokeWidth={3} /> Aktif
-                  </div>
+                  </span>
                 {:else}
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold border border-error/20">
+                  <span class="badge-custom badge-custom-rose text-3xs">
                     <Ban size={12} strokeWidth={3} /> Diblokir
-                  </div>
+                  </span>
                 {/if}
               </td>
               <td class="px-6 py-4 hidden md:table-cell text-secondary text-xs font-medium">

@@ -29,6 +29,8 @@
   let loading = false;
   let loadingCategories = false;
   let error: string | null = null;
+  let platformFeePercentage = 30;
+  let designerPercentage = 70;
 
   $: selectedCategoryObj = categories.find((c) => c.id === selectedCategoryId) || categories[0];
   $: selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : 'Umum';
@@ -51,13 +53,24 @@
     if (!selectedCategoryId && categories.length > 0) {
       selectedCategoryId = categories[0].id;
     }
+
+    try {
+      const commRes = await fetch('/api/public/commission');
+      const commJson = await commRes.json();
+      if (commJson.ok && commJson.data) {
+        platformFeePercentage = commJson.data.platformFeePercentage;
+        designerPercentage = commJson.data.designerPercentage;
+      }
+    } catch (err) {
+      console.error('Gagal mengambil informasi split komisi:', err);
+    }
   });
 
   $: if (!selectedCategoryId && categories.length > 0) {
     selectedCategoryId = categories[0].id;
   }
 
-  $: designerShare = Math.round(numericPriceState * 0.7);
+  $: designerShare = Math.round(numericPriceState * (designerPercentage / 100));
   $: platformShare = numericPriceState - designerShare;
 
   $: pricePreview =
@@ -357,7 +370,7 @@
                 class="bg-card p-2 rounded-xl border border-emerald-500/20"
               >
                 <span class="text-[10px] text-muted block font-sans"
-                  >Hak Desainer (70%)</span
+                  >Hak Desainer ({designerPercentage}%)</span
                 >
                 <span class="font-extrabold text-success text-xs"
                   >Rp {new Intl.NumberFormat('id-ID').format(
@@ -367,7 +380,7 @@
               </div>
               <div class="bg-card p-2 rounded-xl border border-light">
                 <span class="text-[10px] text-muted block font-sans"
-                  >Fee Platform (30%)</span
+                  >Fee Platform ({platformFeePercentage}%)</span
                 >
                 <span class="font-bold text-secondary text-xs"
                   >Rp {new Intl.NumberFormat('id-ID').format(

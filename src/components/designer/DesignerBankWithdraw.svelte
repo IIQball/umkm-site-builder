@@ -317,7 +317,7 @@
             <Button
               variant="secondary"
               size="xs"
-              className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 rounded-full font-bold"
+              class="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 rounded-full font-bold"
               title="Ganti Rekening Bank"
               on:click={openBankModal}
             >

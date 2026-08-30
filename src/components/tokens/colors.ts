@@ -5,11 +5,11 @@
 
 export const colors = {
   primary: {
-    DEFAULT: '#5551ff',
-    dark: '#4338ca',
-    light: '#6366f1',
-    rgb: '85, 81, 255',
-    hsl: '241, 100%, 66%',
+    DEFAULT: '#2563eb',
+    dark: '#1d4ed8',
+    light: '#3b82f6',
+    rgb: '37, 99, 235',
+    hsl: '221, 83%, 53%',
   },
   secondary: {
     DEFAULT: '#334155',
@@ -68,6 +68,13 @@ export const colors = {
       bg: 'rgba(244, 63, 94, 0.1)',
       border: 'rgba(244, 63, 94, 0.2)',
     },
+    orange: {
+      DEFAULT: '#ff5b35',
+      dark: '#ea4a24',
+      light: '#ff7b5c',
+      bg: 'rgba(255, 91, 53, 0.1)',
+      border: 'rgba(255, 91, 53, 0.2)',
+    },
     amber: {
       DEFAULT: '#f59e0b',
       dark: '#d97706',
@@ -102,7 +109,7 @@ export const colors = {
   },
 } as const;
 
-export type ColorTheme = 'indigo' | 'emerald' | 'amber' | 'violet' | 'sky' | 'rose';
+export type ColorTheme = 'indigo' | 'emerald' | 'amber' | 'violet' | 'sky' | 'rose' | 'orange';
 export type BadgeVariant =
   | 'primary'
   | 'secondary'
@@ -116,4 +123,6 @@ export type BadgeVariant =
   | 'sky'
   | 'indigo'
   | 'amber'
-  | 'rose';
+  | 'rose'
+  | 'orange';
+

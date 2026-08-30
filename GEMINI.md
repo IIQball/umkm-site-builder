@@ -197,7 +197,6 @@ umkm-site-builder/
 │   │   │   ├── marketplace.types.ts            # Tipe data catalog template marketplace
 │   │   │   └── TemplateCardAction.svelte       # Kartu katalog template dengan tombol beli & demo
 │   │   ├── shared/
-│   │   │   ├── .gitkeep                        # Penahan folder git
 │   │   │   └── ImageUpload.svelte              # Pengunggah gambar terintegrasi Cloudinary API
 │   │   ├── storefront/
 │   │   │   ├── DynamicSection.svelte           # Komponen rendering section dinamis storefront
@@ -225,6 +224,7 @@ umkm-site-builder/
 │   │       ├── Card.svelte                     # Komponen pembungkus kartu visual
 │   │       ├── Input.svelte                    # Komponen kolom isian teks input
 │   │       ├── Modal.svelte                    # Komponen popup modal dialog
+│   │       ├── Pagination.svelte               # Komponen paginasi kontrol halaman data
 │   │       ├── Select.svelte                   # Komponen dropdown select pilihan
 │   │       ├── StatCard.svelte                 # Komponen card ringkasan statistik modular
 │   │       ├── Table.svelte                    # Komponen tabel tabular modular
@@ -344,6 +344,8 @@ umkm-site-builder/
 │   │   │   │   └── commission.ts               # GET persentase split komisi untuk publik
 │   │   │   ├── template-categories/
 │   │   │   │   └── index.ts                    # GET list kategori aktif untuk publik
+│   │   │   ├── templates/
+│   │   │   │   └── index.ts                    # GET katalog template publik & owned template tenant
 │   │   │   ├── storefront/
 │   │   │   │   └── catalog.ts                  # GET daftar katalog produk untuk storefront
 │   │   │   ├── stores/
@@ -355,6 +357,8 @@ umkm-site-builder/
 │   │   │   │       ├── apply-template.ts       # POST menerapkan template ke toko tenant
 │   │   │   │       └── products.ts             # GET daftar produk toko publik & filter kategori
 │   │   │   ├── tenant/
+│   │   │   │   ├── templates/
+│   │   │   │   │   └── index.ts                # GET daftar template yang dimiliki tenant
 │   │   │   │   └── transactions/
 │   │   │   │       └── template-purchase.ts    # POST pembelian template oleh tenant
 │   │   │   └── webhooks/

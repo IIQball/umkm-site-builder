@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Plus, Folder, Trash2, Edit2, Check, RefreshCw } from 'lucide-svelte';
-  import { Card, Input, Textarea, Button, Modal } from '@/components/ui';
-  import { toast } from '@/lib/toast';
+  import { Plus, Trash2, Edit2, RefreshCw } from 'lucide-svelte';
+  import { Card, Badge, Table, Textarea, Button, Modal, Pagination } from '@/components/ui';
+  import { formatDate } from '@/lib/utils';
+  import { addToast } from '@/lib/toast';
 
   export let initialCategories: Array<{
     id: string;
@@ -17,6 +18,8 @@
   let searchQuery = '';
   let loading = false;
   let isSaving = false;
+  let currentPage = 1;
+  const pageSize = 10;
 
   // Modal State
   let showFormModal = false;
@@ -55,6 +58,13 @@
     );
   });
 
+  $: {
+    searchQuery;
+    currentPage = 1;
+  }
+
+  $: paginatedCategories = filteredCategories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const generateSlug = (val: string) => {
     return val
       .toLowerCase()
@@ -81,7 +91,10 @@
         categories = json.data;
       }
     } catch {
-      toast.error('Gagal mengambil data kategori');
+      addToast({
+        type: 'error',
+        message: 'Gagal mengambil data kategori',
+      });
     } finally {
       loading = false;
     }
@@ -145,7 +158,10 @@
         throw new Error(json.error?.message || 'Gagal menyimpan kategori');
       }
 
-      toast.success(isEditing ? 'Kategori berhasil diperbarui' : 'Kategori baru berhasil ditambahkan');
+      addToast({
+        type: 'success',
+        message: isEditing ? 'Kategori berhasil diperbarui' : 'Kategori baru berhasil ditambahkan',
+      });
       showFormModal = false;
       await fetchCategories();
     } catch (err) {
@@ -174,12 +190,18 @@
         throw new Error(json.error?.message || 'Gagal menghapus kategori');
       }
 
-      toast.success(`Kategori "${deletingCategory.name}" berhasil dihapus`);
+      addToast({
+        type: 'success',
+        message: `Kategori "${deletingCategory.name}" berhasil dihapus`,
+      });
       showDeleteModal = false;
       deletingCategory = null;
       await fetchCategories();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Gagal menghapus kategori');
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal menghapus kategori',
+      });
     } finally {
       isDeleting = false;
     }
@@ -190,21 +212,31 @@
       fetchCategories();
     }
   });
+
+  const tableHeaders = [
+    { label: 'Kategori Bisnis' },
+    { label: 'Slug URL', width: 'w-48' },
+    { label: 'Ikon UI', align: 'center' as const, width: 'w-28' },
+    { label: 'Tanggal Dibuat', width: 'w-40' },
+    { label: 'Aksi', align: 'right' as const, width: 'w-36' },
+  ];
 </script>
 
-<Card variant="bordered" padding="none" radius="xl" topBeam="indigo-500">
-  <!-- Table Header & Controls (matching DesignerMutationTable style) -->
-  <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-base">category</span>
-        </div>
-        <h3 class="text-heading-md text-main font-bold">Master Kategori Template</h3>
+<Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
+  <!-- Table Header & Controls -->
+  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">category</span>
       </div>
-      <p class="text-body-sm text-secondary mt-0.5 ml-10.5">
-        Daftar ceruk bisnis, slug URL, ikon antarmuka, dan opsi modifikasi data
-      </p>
+      <div>
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Master Kategori Template
+        </h3>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Daftar ceruk bisnis, slug URL, ikon antarmuka, dan opsi modifikasi data
+        </p>
+      </div>
     </div>
 
     <!-- Actions & Search Box -->
@@ -216,193 +248,298 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari kategori / slug..."
-          class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="icon"
           on:click={fetchCategories}
           disabled={loading}
-          class="p-2 rounded-xl bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main shadow-2xs transition-all cursor-pointer"
           title="Refresh Data"
-          aria-label="Refresh Data"
         >
           <RefreshCw size={14} class={loading ? 'animate-spin' : ''} />
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           on:click={openCreateModal}
-          class="inline-flex items-center gap-2 bg-gradient-to-r from-primary via-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:shadow-primary/25 border border-primary/30 transition-all cursor-pointer flex-shrink-0"
         >
-          <Plus size={16} class="stroke-[2.5]" />
-          <span>Tambah Kategori Baru</span>
-        </button>
+          <Plus size={15} class="stroke-[2.5]" />
+          <span>Tambah Kategori</span>
+        </Button>
       </div>
     </div>
   </div>
 
   <!-- Categories Table Content -->
-  <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="border-b border-light bg-nested/50 text-2xs uppercase tracking-wider text-muted font-heading font-bold">
-          <th class="px-6 py-4">Kategori & Ikon</th>
-          <th class="px-6 py-4">Slug URL</th>
-          <th class="px-6 py-4">Deskripsi</th>
-          <th class="px-6 py-4 text-right">Aksi</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-[var(--color-border-light)] text-sm">
-        {#if filteredCategories.length === 0}
-          <tr>
-            <td colspan="4" class="px-6 py-16 text-center text-muted">
-              <div class="w-12 h-12 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-                <Folder size={24} />
+  {#if filteredCategories.length === 0}
+    <div class="py-16 px-8 flex flex-col items-center text-center">
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
+        <span class="material-symbols-outlined text-2xl">category</span>
+      </div>
+      <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Kategori Ditemukan</h4>
+      <p class="text-xs text-secondary max-w-sm mx-auto font-sans leading-relaxed">
+        {searchQuery ? 'Tidak ada kategori yang cocok dengan pencarian Anda.' : 'Belum ada kategori template terdaftar. Tambahkan kategori baru sekarang.'}
+      </p>
+      {#if !searchQuery}
+        <div class="mt-4">
+          <Button
+            variant="primary"
+            size="sm"
+            className="rounded-2xl font-bold"
+            on:click={openCreateModal}
+          >
+            <Plus size={14} />
+            <span>Tambah Kategori Pertama</span>
+          </Button>
+        </div>
+      {/if}
+    </div>
+  {:else}
+    <Table headers={tableHeaders} minWidth="min-w-[700px]">
+      {#each paginatedCategories as cat (cat.id)}
+        <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Name + Description -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 shadow-2xs">
+                <span class="material-symbols-outlined text-base">{cat.icon || 'folder'}</span>
               </div>
-              <p class="font-bold text-main text-sm font-heading">Tidak Ada Kategori Ditemukan</p>
-              <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans">
-                Gunakan tombol "Tambah Kategori" untuk membuat kategori ceruk bisnis baru.
-              </p>
-            </td>
-          </tr>
-        {:else}
-          {#each filteredCategories as cat (cat.id)}
-            <tr class="hover:bg-nested/30 transition-colors group">
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-card border border-light text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
-                    <span class="material-symbols-outlined text-lg">{cat.icon || 'folder'}</span>
-                  </div>
-                  <div>
-                    <span class="font-bold text-xs text-main block">{cat.name}</span>
-                    <span class="text-3xs font-mono text-muted block">ID: #{cat.id.slice(-6)}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 font-mono text-xs text-secondary">
-                <span class="bg-nested/80 px-2 py-0.5 rounded-md border border-light">{cat.slug}</span>
-              </td>
-              <td class="px-6 py-4 text-xs text-secondary max-w-xs truncate font-sans">
-                {cat.description || '-'}
-              </td>
-              <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                  <button
-                    type="button"
-                    on:click={() => openEditModal(cat)}
-                    class="p-1.5 rounded-lg text-secondary hover:text-main hover:bg-nested border border-transparent hover:border-light transition-all cursor-pointer"
-                    title="Edit Kategori"
-                  >
-                    <Edit2 size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    on:click={() => openDeleteConfirm(cat)}
-                    class="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
-                    title="Hapus Kategori"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          {/each}
-        {/if}
-      </tbody>
-    </table>
-  </div>
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-main block font-sans">
+                  {cat.name}
+                </span>
+                {#if cat.description}
+                  <span class="text-3xs text-secondary block truncate font-sans max-w-xs mt-0.5">
+                    {cat.description}
+                  </span>
+                {/if}
+              </div>
+            </div>
+          </td>
+
+          <!-- Slug URL -->
+          <td class="px-4 py-4">
+            <span class="font-mono text-2xs font-bold text-secondary bg-nested/80 px-2 py-1 rounded-lg border border-light">
+              {cat.slug}
+            </span>
+          </td>
+
+          <!-- Icon Badge -->
+          <td class="px-4 py-4 text-center">
+            <Badge variant="primary" size="sm">
+              {cat.icon || 'folder'}
+            </Badge>
+          </td>
+
+          <!-- Created Date -->
+          <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
+            {cat.createdAt ? formatDate(cat.createdAt) : '—'}
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1.5">
+              <Button
+                variant="secondary"
+                size="icon"
+                on:click={() => openEditModal(cat)}
+                title="Edit Kategori"
+              >
+                <Edit2 size={13} />
+              </Button>
+
+              <Button
+                variant="destructive"
+                size="icon"
+                className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+                on:click={() => openDeleteConfirm(cat)}
+                title="Hapus Kategori"
+              >
+                <Trash2 size={13} />
+              </Button>
+            </div>
+          </td>
+        </tr>
+      {/each}
+    </Table>
+
+    <!-- DaisyUI Pagination Footer -->
+    <Pagination
+      bind:currentPage
+      totalItems={filteredCategories.length}
+      {pageSize}
+    />
+  {/if}
 </Card>
 
-<!-- Modal Create / Edit Category -->
-<Modal bind:open={showFormModal} title={isEditing ? 'Edit Kategori Template' : 'Tambah Kategori Template Baru'}>
-  <form on:submit={handleSave} class="space-y-4" novalidate>
+<!-- Create / Edit Modal -->
+<Modal
+  open={showFormModal}
+  size="md"
+  on:close={() => (showFormModal = false)}
+>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/15 border border-primary/25 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">{isEditing ? 'edit' : 'add_circle'}</span>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          {isEditing ? 'Edit Kategori Template' : 'Tambah Kategori Template Baru'}
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          {isEditing ? 'Perbarui informasi ceruk bisnis' : 'Daftarkan klasifikasi template untuk desainer'}
+        </p>
+      </div>
+    </div>
+  </svelte:fragment>
+
+  <form on:submit={handleSave} class="space-y-4 pt-1">
     {#if formError}
-      <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2">
-        <span class="material-symbols-outlined text-base flex-shrink-0">error</span>
-        <p class="font-sans">{formError}</p>
+      <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-sans">
+        {formError}
       </div>
     {/if}
 
-    <Input
-      id="cat-name"
-      label="Nama Kategori"
-      required
-      placeholder="Contoh: Kuliner & Makanan"
-      value={formName}
-      on:input={handleNameInput}
-      disabled={isSaving}
-    />
-
-    <Input
-      id="cat-slug"
-      label="Slug URL (Unik)"
-      required
-      placeholder="contoh: kuliner-makanan"
-      bind:value={formSlug}
-      disabled={isSaving}
-      className="font-mono text-xs"
-      helper="Hanya huruf kecil, angka, dan strip (-)"
-    />
-
-    <!-- Icon Selector -->
     <div class="space-y-1.5">
-      <span class="text-label-caps text-muted font-bold block">Pilih Ikon Material</span>
-      <div class="grid grid-cols-3 gap-2">
+      <label for="cat_name" class="text-xs font-bold text-main block font-heading">
+        Nama Kategori <span class="text-rose-500">*</span>
+      </label>
+      <input
+        id="cat_name"
+        type="text"
+        value={formName}
+        on:input={handleNameInput}
+        placeholder="Contoh: Kuliner & Minuman"
+        required
+        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all font-sans"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="cat_slug" class="text-xs font-bold text-main block font-heading">
+        Slug URL <span class="text-rose-500">*</span>
+      </label>
+      <input
+        id="cat_slug"
+        type="text"
+        bind:value={formSlug}
+        placeholder="kuliner-dan-minuman"
+        required
+        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted font-mono focus:outline-none focus:border-primary/50 focus:bg-card transition-all"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="cat_icon" class="text-xs font-bold text-main block font-heading">
+        Ikon Representatif (Google Material Symbols)
+      </label>
+      <div class="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1 bg-nested/50 rounded-2xl border border-light">
         {#each iconOptions as opt}
           <button
             type="button"
             on:click={() => (formIcon = opt.value)}
-            class="flex items-center gap-2 p-2 rounded-xl border text-xs transition-all cursor-pointer {formIcon === opt.value ? 'bg-primary/15 border-primary text-primary font-bold shadow-2xs' : 'bg-nested/60 border-light text-secondary hover:text-main'}"
+            class="flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition-all text-left {formIcon === opt.value
+              ? 'bg-primary text-white border-primary shadow-2xs font-bold'
+              : 'bg-card hover:bg-nested border-light text-main'}"
           >
-            <span class="material-symbols-outlined text-base">{opt.value}</span>
-            <span class="truncate">{opt.label.split(' ')[0]}</span>
+            <span class="material-symbols-outlined text-sm flex-shrink-0">{opt.value}</span>
+            <span class="truncate">{opt.value}</span>
           </button>
         {/each}
       </div>
     </div>
 
-    <Textarea
-      id="cat-desc"
-      label="Deskripsi Kategori (Opsional)"
-      placeholder="Jelaskan jenis template yang masuk dalam kategori ini..."
-      bind:value={formDescription}
-      rows={3}
-      disabled={isSaving}
-    />
+    <div class="space-y-1.5">
+      <label for="cat_desc" class="text-xs font-bold text-main block font-heading">
+        Deskripsi Singkat (Opsional)
+      </label>
+      <Textarea
+        id="cat_desc"
+        bind:value={formDescription}
+        placeholder="Template yang cocok untuk restoran, cafe, kedai kopi, dan catering..."
+        rows={2}
+        className="text-xs font-sans"
+      />
+    </div>
 
-    <div class="pt-3 flex items-center justify-end gap-2 border-t border-light">
-      <Button variant="secondary" size="sm" on:click={() => (showFormModal = false)} disabled={isSaving}>
+    <div class="flex items-center justify-end gap-2 pt-3 border-t border-light">
+      <Button
+        variant="secondary"
+        size="sm"
+        className="rounded-xl font-bold"
+        on:click={() => (showFormModal = false)}
+        disabled={isSaving}
+      >
         Batal
       </Button>
-      <Button type="submit" variant="primary" size="sm" loading={isSaving} disabled={isSaving}>
-        <Check size={14} class="mr-1" />
-        <span>{isEditing ? 'Simpan Perubahan' : 'Buat Kategori'}</span>
+      <Button
+        type="submit"
+        variant="primary"
+        size="sm"
+        className="rounded-xl font-bold"
+        disabled={isSaving}
+      >
+        {isSaving ? 'Menyimpan...' : isEditing ? 'Simpan Perubahan' : 'Tambah Kategori'}
       </Button>
     </div>
   </form>
 </Modal>
 
-<!-- Modal Konfirmasi Hapus -->
-<Modal bind:open={showDeleteModal} title="Konfirmasi Penghapusan Kategori">
-  <div class="space-y-4">
-    <p class="text-sm text-secondary leading-relaxed">
-      Apakah Anda yakin ingin menghapus kategori <strong class="text-main">"{deletingCategory?.name}"</strong>?
-    </p>
-    <p class="text-xs text-muted bg-nested p-3 rounded-xl border border-light">
-      Template yang sebelumnya menggunakan kategori ini tidak akan terhapus, namun status kategorinya akan menjadi tidak terkategori (null).
-    </p>
-    <div class="flex items-center justify-end gap-2 pt-2 border-t border-light">
-      <Button variant="secondary" size="sm" on:click={() => (showDeleteModal = false)} disabled={isDeleting}>
-        Batal
-      </Button>
-      <Button variant="destructive" size="sm" on:click={handleDelete} loading={isDeleting} disabled={isDeleting}>
-        <Trash2 size={14} class="mr-1" />
-        <span>Hapus Kategori</span>
-      </Button>
+<!-- Delete Confirm Modal -->
+<Modal
+  open={showDeleteModal}
+  size="sm"
+  on:close={() => (showDeleteModal = false)}
+>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <Trash2 size={18} />
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          Hapus Kategori Template
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          Tindakan ini tidak dapat dibatalkan
+        </p>
+      </div>
     </div>
-  </div>
+  </svelte:fragment>
+
+  {#if deletingCategory}
+    <div class="space-y-4 pt-1">
+      <p class="text-xs text-secondary leading-relaxed font-sans">
+        Apakah Anda yakin ingin menghapus kategori <strong class="text-main">{deletingCategory.name}</strong>?
+      </p>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="rounded-xl font-bold"
+          on:click={() => (showDeleteModal = false)}
+          disabled={isDeleting}
+        >
+          Batal
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="rounded-xl font-bold"
+          on:click={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? 'Menghapus...' : 'Konfirmasi Hapus'}
+        </Button>
+      </div>
+    </div>
+  {/if}
 </Modal>

@@ -29,6 +29,18 @@ const totalTemplatesSold = soldInfo?.count || 0;
 
 const settingsList = await db.select().from(platformSettings).limit(1);
 const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
+
+const currentHour = new Date().getHours();
+let greeting = 'Selamat Datang';
+if (currentHour >= 4 && currentHour < 11) {
+  greeting = 'Selamat Pagi';
+} else if (currentHour >= 11 && currentHour < 15) {
+  greeting = 'Selamat Siang';
+} else if (currentHour >= 15 && currentHour < 18.5) {
+  greeting = 'Selamat Sore';
+} else {
+  greeting = 'Selamat Malam';
+}
 ---
 
 <DashboardLayout title="Dompet & Keuangan" breadcrumb="Dompet">
@@ -37,8 +49,7 @@ const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlement
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
         <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
-          <span>Hello, {user.name ? user.name.split(' ')[0] : 'Designer'}!</span>
-          <span class="text-2xl animate-bounce">👋</span> <!--sengaja pake emoji, masih nyari icon yang pas-->
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Designer'}!</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
           Berikut adalah rangkuman transaksi, riwayat komisi penjualan, dan status saldo dompet keuangan Anda.

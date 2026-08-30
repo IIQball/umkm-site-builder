@@ -6,8 +6,9 @@
     CheckCircle2,
     RotateCcw,
   } from 'lucide-svelte';
+  import { Pagination } from '@/components/ui';
   import { formatCurrency } from '@/lib/utils';
-  import { toast } from '@/lib/toast';
+  import { addToast } from '@/lib/toast';
   import type { PublicTemplate, CategoryItem } from './marketplace.types';
 
   export let initialTemplates: PublicTemplate[] = [];
@@ -25,6 +26,8 @@
   let selectedSort: 'newest' | 'price_asc' | 'price_desc' | 'name_asc' = 'newest';
 
   let purchasingId: string | null = null;
+  let currentPage = 1;
+  const pageSize = 9;
 
   // Filter & Sort Logic
   $: filteredTemplates = templates
@@ -47,7 +50,7 @@
         if (tpl.price <= 100000) return false;
       }
 
-      // 3. Search Query (name, description, designer name, category name)
+      // 3. Search Query
       const q = searchQuery.toLowerCase().trim();
       if (q) {
         const matchName = tpl.name.toLowerCase().includes(q);
@@ -75,11 +78,22 @@
       return 0;
     });
 
+  $: {
+    searchQuery;
+    selectedCategorySlug;
+    selectedPriceFilter;
+    selectedSort;
+    currentPage = 1;
+  }
+
+  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const resetFilters = () => {
     searchQuery = '';
     selectedCategorySlug = 'all';
     selectedPriceFilter = 'all';
     selectedSort = 'newest';
+    currentPage = 1;
   };
 
   const handlePurchase = async (template: PublicTemplate) => {
@@ -104,7 +118,10 @@
       }
 
       if (result.isFree) {
-        toast.success(result.message || 'Template gratis berhasil ditambahkan ke toko Anda!');
+        addToast({
+          type: 'success',
+          message: result.message || 'Template gratis berhasil ditambahkan ke toko Anda!',
+        });
         ownedTemplateIds = [...ownedTemplateIds, template.id];
       } else if (result.data?.externalId) {
         window.location.href = `/checkout/${result.data.externalId}`;
@@ -112,7 +129,10 @@
         throw new Error('Respons tidak valid dari server');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan');
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Terjadi kesalahan transaksi',
+      });
     } finally {
       purchasingId = null;
     }
@@ -133,13 +153,13 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari tema toko, kuliner, fashion, nama desainer..."
-          class="w-full bg-nested/70 border border-light rounded-2xl pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all shadow-2xs font-sans"
+          class="w-full bg-nested/70 border border-light rounded-full pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all shadow-2xs font-sans"
         />
         {#if searchQuery}
           <button
             type="button"
             on:click={() => (searchQuery = '')}
-            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs bg-nested px-2 py-1 rounded-lg cursor-pointer"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs bg-nested px-2.5 py-1 rounded-full cursor-pointer"
           >
             Hapus
           </button>
@@ -186,7 +206,7 @@
           <button
             type="button"
             on:click={resetFilters}
-            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer active:scale-95"
             title="Reset Semua Filter"
           >
             <RotateCcw size={13} />
@@ -201,8 +221,8 @@
       <button
         type="button"
         on:click={() => (selectedCategorySlug = 'all')}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
-          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-sm'
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
+          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
           : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
       >
         <span class="material-symbols-outlined text-sm">grid_view</span>
@@ -217,8 +237,8 @@
         <button
           type="button"
           on:click={() => (selectedCategorySlug = cat.slug)}
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
-            ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-sm'
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
+            ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
             : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
         >
           <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>
@@ -241,13 +261,13 @@
       </span>
       {#if selectedCategorySlug !== 'all'}
         <span class="text-muted">•</span>
-        <span class="bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-lg border border-primary/20">
+        <span class="bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full border border-primary/20">
           Kategori: {categories.find((c) => c.slug === selectedCategorySlug)?.name || selectedCategorySlug}
         </span>
       {/if}
       {#if selectedPriceFilter !== 'all'}
         <span class="text-muted">•</span>
-        <span class="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 rounded-lg border border-amber-500/20">
+        <span class="bg-orange/10 text-orange font-bold px-2.5 py-0.5 rounded-full border border-orange/20">
           {selectedPriceFilter === 'free' ? 'Gratis' : selectedPriceFilter === 'under50' ? '< Rp 50.000' : selectedPriceFilter === '50to100' ? 'Rp 50rb - 100rb' : 'Berbayar'}
         </span>
       {/if}
@@ -269,7 +289,7 @@
         <button
           type="button"
           on:click={resetFilters}
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary text-white text-xs font-bold shadow-md hover:shadow-primary/25 transition-all cursor-pointer"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary hover:bg-primary-dark text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           <RotateCcw size={14} />
           <span>Reset Semua Filter</span>
@@ -278,17 +298,17 @@
     </div>
   {:else}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-      {#each filteredTemplates as tpl (tpl.id)}
+      {#each paginatedTemplates as tpl (tpl.id)}
         {@const isOwned = ownedTemplateIds.includes(tpl.id)}
         {@const isPurchasing = purchasingId === tpl.id}
-        <div class="bg-card border border-light hover:border-primary/40 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 flex flex-col group relative">
+        <div class="bg-card border border-light hover:border-slate-300 dark:hover:border-slate-700 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group relative">
           <!-- Thumbnail Frame -->
           <div class="relative h-52 w-full bg-nested flex items-center justify-center overflow-hidden border-b border-light">
             {#if tpl.thumbnailUrl}
               <img
                 src={tpl.thumbnailUrl}
                 alt={tpl.name}
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
               />
             {:else}
               <div class="flex flex-col items-center justify-center text-muted gap-2 p-6 text-center">
@@ -303,23 +323,23 @@
             <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
               <!-- Category Pill -->
               {#if tpl.categoryName}
-                <span class="inline-flex items-center gap-1.5 bg-card/90 dark:bg-card/90 backdrop-blur-md text-main border border-light px-3 py-1 rounded-full text-3xs font-bold shadow-xs">
+                <span class="inline-flex items-center gap-1.5 bg-card/90 dark:bg-slate-900/90 backdrop-blur-md text-main border border-light px-3 py-1 rounded-full text-3xs font-bold shadow-xs">
                   <span class="material-symbols-outlined text-xs text-primary">{tpl.categoryIcon || 'category'}</span>
                   <span>{tpl.categoryName}</span>
                 </span>
               {:else}
-                <span class="inline-flex items-center gap-1 bg-card/90 backdrop-blur-md text-secondary border border-light px-3 py-1 rounded-full text-3xs font-bold shadow-xs">
+                <span class="inline-flex items-center gap-1 bg-card/90 dark:bg-slate-900/90 backdrop-blur-md text-secondary border border-light px-3 py-1 rounded-full text-3xs font-bold shadow-xs">
                   Umum
                 </span>
               {/if}
 
               <!-- Price Badge -->
               {#if tpl.price === 0}
-                <span class="inline-flex items-center gap-1 bg-emerald-500 text-white px-3 py-1 rounded-full text-3xs font-black shadow-xs tracking-wider uppercase">
+                <span class="inline-flex items-center gap-1 bg-emerald-500 text-white px-3 py-1 rounded-full text-3xs font-bold shadow-xs tracking-wider uppercase">
                   Gratis
                 </span>
               {:else}
-                <span class="inline-flex items-center gap-1 bg-card/95 dark:bg-slate-900/95 backdrop-blur-md text-primary font-mono font-extrabold px-3 py-1 rounded-full text-xs shadow-xs border border-primary/20">
+                <span class="inline-flex items-center gap-1 bg-card/95 dark:bg-slate-900/95 backdrop-blur-md text-main font-mono font-black px-3 py-1 rounded-full text-xs shadow-xs border border-light">
                   {formatCurrency(tpl.price)}
                 </span>
               {/if}
@@ -331,37 +351,37 @@
             <div>
               <!-- Title & Price Details -->
               <div class="flex items-start justify-between gap-2 mb-1.5">
-                <h3 class="text-heading-md font-bold text-main line-clamp-1 group-hover:text-primary transition-colors">
+                <h3 class="text-heading-md font-bold text-main line-clamp-1 group-hover:text-primary transition-colors font-heading">
                   {tpl.name}
                 </h3>
               </div>
 
               <!-- Description -->
-              <p class="text-body-sm text-secondary line-clamp-2 leading-relaxed">
+              <p class="text-body-sm text-secondary line-clamp-2 leading-relaxed font-sans">
                 {tpl.description || 'Template toko online responsif dengan tata letak optimal untuk konversi penjualan produk UMKM.'}
               </p>
             </div>
 
             <div class="space-y-4 pt-2 border-t border-light/60">
-              <!-- Designer Profile Info (Without ID) -->
+              <!-- Designer Profile Info -->
               <div class="flex items-center justify-between text-xs text-secondary">
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold text-2xs flex items-center justify-center flex-shrink-0 border border-primary/20">
                     {tpl.designerName ? tpl.designerName.charAt(0).toUpperCase() : 'D'}
                   </div>
-                  <span class="truncate font-medium text-main">
+                  <span class="truncate font-bold text-main font-sans">
                     {tpl.designerName || 'Kreator Desainer'}
                   </span>
                 </div>
               </div>
 
-              <!-- Action Buttons (Only Tenant / Guest can purchase; other roles preview only) -->
+              <!-- Action Buttons -->
               {#if isTenantOrGuest}
                 <div class="grid grid-cols-2 gap-2.5 pt-1">
                   <!-- Preview Button -->
                   <a
                     href={`/builder/preview/${tpl.id}`}
-                    class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-nested hover:bg-card border border-light text-main hover:border-primary/40 font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-nested hover:bg-card border border-light text-main hover:border-slate-300 dark:hover:border-slate-600 font-bold text-xs shadow-2xs transition-all active:scale-95 cursor-pointer"
                   >
                     <Eye size={14} />
                     <span>Pratinjau</span>
@@ -371,7 +391,7 @@
                   {#if isOwned}
                     <a
                       href="/dashboard/templates"
-                      class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs shadow-2xs transition-all cursor-pointer"
+                      class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs shadow-2xs transition-all active:scale-95 cursor-pointer"
                     >
                       <CheckCircle2 size={14} />
                       <span>Milik Anda</span>
@@ -381,14 +401,14 @@
                       type="button"
                       on:click={() => handlePurchase(tpl)}
                       disabled={isPurchasing}
-                      class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-primary via-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white font-bold text-xs shadow-md hover:shadow-lg hover:shadow-primary/25 border border-primary/20 transition-all cursor-pointer disabled:opacity-60"
+                      class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-60"
                     >
                       {#if isPurchasing}
                         <span class="material-symbols-outlined text-sm animate-spin">refresh</span>
                         <span>Memproses...</span>
                       {:else}
                         <ShoppingCart size={14} class="stroke-[2.5]" />
-                        <span>{tpl.price === 0 ? 'Gunakan Gratis' : 'Beli Template'}</span>
+                        <span>{tpl.price === 0 ? 'Gunakan Gratis' : 'Beli'}</span>
                       {/if}
                     </button>
                   {/if}
@@ -397,7 +417,7 @@
                 <div class="pt-1">
                   <a
                     href={`/builder/preview/${tpl.id}`}
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-nested hover:bg-card border border-light text-main hover:border-primary/40 font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-nested hover:bg-card border border-light text-main hover:border-slate-300 dark:hover:border-slate-600 font-bold text-xs shadow-2xs transition-all active:scale-95 cursor-pointer"
                   >
                     <Eye size={14} />
                     <span>Pratinjau Langsung</span>
@@ -408,6 +428,15 @@
           </div>
         </div>
       {/each}
+    </div>
+
+    <!-- Pagination -->
+    <div class="pt-4">
+      <Pagination
+        bind:currentPage
+        totalItems={filteredTemplates.length}
+        {pageSize}
+      />
     </div>
   {/if}
 </div>

@@ -107,6 +107,63 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
   ];
 };
 
+export type RoleConfig = {
+  label: string;
+  badgeLabel: string;
+  icon: string;
+  subtext: string;
+  badgeBg: string;
+  badgeText: string;
+};
+
+export const ROLE_CONFIGS: Record<string, RoleConfig> = {
+  superadmin: {
+    label: "Super Admin",
+    badgeLabel: "SUPERADMIN",
+    icon: "shield_person",
+    subtext: "Akses Penuh Sistem",
+    badgeBg: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/50",
+    badgeText: "text-rose-700 dark:text-rose-300",
+  },
+  admin: {
+    label: "Admin Platform",
+    badgeLabel: "ADMIN",
+    icon: "admin_panel_settings",
+    subtext: "Operator Platform",
+    badgeBg: "bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900/50",
+    badgeText: "text-amber-800 dark:text-amber-300",
+  },
+  designer: {
+    label: "Desainer Template",
+    badgeLabel: "DESIGNER",
+    icon: "palette",
+    subtext: "Kreator Terverifikasi",
+    badgeBg: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900/50",
+    badgeText: "text-indigo-700 dark:text-indigo-300",
+  },
+  tenant: {
+    label: "Merchant",
+    badgeLabel: "MERCHANT",
+    icon: "storefront",
+    subtext: "Toko Online Aktif",
+    badgeBg: "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+    badgeText: "text-slate-700 dark:text-slate-300",
+  },
+};
+
+export const getRoleConfig = (role: string): RoleConfig => {
+  return (
+    ROLE_CONFIGS[role] ?? {
+      label: role,
+      badgeLabel: role.toUpperCase(),
+      icon: "person",
+      subtext: "Pengguna Terdaftar",
+      badgeBg: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+      badgeText: "text-slate-700 dark:text-slate-300",
+    }
+  );
+};
+
 export const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
   return getNavGroups(role).flatMap((g) => g.items);
 };

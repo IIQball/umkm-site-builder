@@ -15,8 +15,8 @@
     value: formatIDR(balance),
     rawValue: balance,
     badge: pendingSettlement > 0 ? 'Ada Dana Hold' : 'Siap Ditarik',
-    isHero: true,
     icon: 'account_balance_wallet',
+    cardTheme: 'dark' as const,
     footerText: 'Saldo aktif akun desainer',
     delayClass: 'delay-100',
   };
@@ -25,9 +25,9 @@
     label: 'Saldo Siap Tarik',
     value: formatIDR(availableBalance),
     rawValue: availableBalance,
-    badge: availableBalance > 0 ? 'Siap Ditarik' : 'Saldo Nihil',
-    colorTheme: 'emerald' as const,
+    badge: availableBalance > 0 ? 'Siap Cair' : 'Saldo Nihil',
     icon: 'check_circle',
+    cardTheme: 'orange' as const,
     footerText: 'Dapat dicairkan ke bank',
     delayClass: 'delay-150',
   };
@@ -37,8 +37,8 @@
     value: formatIDR(pendingSettlement),
     rawValue: pendingSettlement,
     badge: pendingSettlement > 0 ? `Hold ${settlementDelayDays || 0} Hari` : 'Nihil',
-    colorTheme: 'amber' as const,
     icon: 'hourglass_top',
+    cardTheme: 'default' as const,
     footerText: `Masa hold ${settlementDelayDays || 0} hari`,
     delayClass: 'delay-200',
   };
@@ -48,9 +48,9 @@
     value: formatIDR(totalNetIncome),
     rawValue: totalNetIncome,
     badge: 'Sepanjang Waktu',
-    colorTheme: 'violet' as const,
     icon: 'payments',
-    footerText: 'Akumulasi seluruh waktu',
+    cardTheme: 'blue' as const,
+    footerText: 'Akumulasi seluruh komisi',
     delayClass: 'delay-250',
   };
 
@@ -59,9 +59,9 @@
     value: `${totalTemplatesSold}`,
     rawValue: totalTemplatesSold,
     badge: 'Unit Terjual',
-    colorTheme: 'sky' as const,
     icon: 'sell',
     valueSuffix: 'Template',
+    cardTheme: 'default' as const,
     footerText: 'Total transaksi sukses',
     delayClass: 'delay-300',
   };

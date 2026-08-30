@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ShoppingCart, CheckCircle, Loader } from 'lucide-svelte';
+  import { addToast } from '@/lib/toast';
 
   export let templateId: string;
   export let price: number; // in IDR
@@ -37,11 +38,14 @@
 
       if (result.isFree) {
         successMessage = result.message || 'Template gratis ditambahkan!';
+        addToast({
+          type: 'success',
+          message: 'Template berhasil ditambahkan ke akun Anda!',
+        });
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       } else if (result.data?.externalId) {
-        // Redirect to checkout page which handles the Xendit iframe/details
         window.location.href = `/checkout/${result.data.externalId}`;
       } else {
         throw new Error('Respons tidak valid dari server');
@@ -55,13 +59,13 @@
 
 <div class="w-full flex flex-col gap-1">
   {#if errorMessage}
-    <div class="alert alert-error text-white text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
+    <div class="bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 mb-1 animate-fade-in font-sans">
       <span>{errorMessage}</span>
     </div>
   {/if}
 
   {#if successMessage}
-    <div class="alert alert-success text-white text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 mb-1 animate-fade-in">
+    <div class="bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 mb-1 animate-fade-in font-sans">
       <CheckCircle size={14} />
       <span>{successMessage}</span>
     </div>
@@ -70,7 +74,7 @@
   {#if isOwned}
     <button
       type="button"
-      class="btn btn-success btn-sm text-white rounded-xl text-xs font-semibold shadow-sm w-full gap-1.5"
+      class="bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-2xl py-2 px-3 text-xs font-bold shadow-2xs w-full flex items-center justify-center gap-1.5 cursor-default"
       disabled
     >
       <CheckCircle size={15} />
@@ -80,7 +84,7 @@
     <button
       type="button"
       on:click={handlePurchase}
-      class="btn btn-primary btn-sm rounded-xl text-xs font-bold shadow-sm w-full gap-1.5 text-white active:scale-[0.98] transition-transform cursor-pointer"
+      class="bg-primary hover:bg-primary-dark text-white rounded-2xl py-2.5 px-4 text-xs font-bold shadow-xs w-full flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
       disabled={loading}
     >
       {#if loading}

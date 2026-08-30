@@ -1,6 +1,8 @@
 <script lang="ts">
   import { formatCurrency } from '@/lib/utils/format';
-  import { Card, Badge, Table, Modal, Button } from '@/components/ui';
+  import { Card, Badge, Table, Modal, Button, Pagination } from '@/components/ui';
+  import DesignerTemplateCard from './DesignerTemplateCard.svelte';
+  import { addToast } from '@/lib/toast';
 
   export let templates: Array<{
     id: string;
@@ -19,11 +21,17 @@
   let viewMode: 'table' | 'grid' = 'table';
   let selectedRejection: { name: string; reason: string } | null = null;
   let copiedId: string | null = null;
+  let currentPage = 1;
+  const pageSize = 10;
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       copiedId = text;
+      addToast({
+        type: 'success',
+        message: `ID Template #${text.slice(0, 8)} disalin!`,
+      });
       setTimeout(() => { copiedId = null; }, 1800);
     } catch {
       // clipboard unavailable
@@ -54,12 +62,20 @@
     return matchesFilter && matchesSearch;
   });
 
+  $: {
+    searchQuery;
+    activeFilter;
+    currentPage = 1;
+  }
+
+  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
         return { label: 'Disetujui', variant: 'emerald' as const, dot: true, pulse: false };
       case 'pending':
-        return { label: 'Menunggu Review', variant: 'amber' as const, dot: true, pulse: true };
+        return { label: 'Menunggu Review', variant: 'orange' as const, dot: true, pulse: true };
       case 'rejected':
         return { label: 'Perlu Revisi', variant: 'rose' as const, dot: true, pulse: false };
       default:
@@ -69,25 +85,29 @@
 
   const tableHeaders = [
     { label: 'Template Desain', align: 'left' as const },
-    { label: 'Harga', align: 'left' as const },
-    { label: 'Penjualan', align: 'left' as const },
-    { label: 'Status Kurasi', align: 'left' as const },
-    { label: 'Tanggal Dibuat', align: 'left' as const },
-    { label: 'Aksi', align: 'right' as const },
+    { label: 'Harga Jual', align: 'left' as const, width: 'w-32' },
+    { label: 'Penjualan', align: 'left' as const, width: 'w-28' },
+    { label: 'Status Kurasi', align: 'left' as const, width: 'w-36' },
+    { label: 'Tanggal Dibuat', align: 'left' as const, width: 'w-36' },
+    { label: 'Aksi', align: 'right' as const, width: 'w-44' },
   ];
 </script>
 
-<Card variant="bordered" padding="none" radius="xl" topBeam="indigo-500">
+<Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
   <!-- Table Header & Controls -->
-  <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-base">dashboard_customize</span>
-        </div>
-        <h3 class="text-heading-md text-main font-bold">Katalog Desain Saya</h3>
+  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">dashboard_customize</span>
       </div>
-      <p class="text-body-sm text-secondary mt-0.5 ml-10.5">Daftar seluruh draft, pengajuan review, dan template aktif yang Anda rancang</p>
+      <div>
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Katalog Desain Saya
+        </h3>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Daftar seluruh draft, pengajuan review, dan template aktif yang Anda rancang
+        </p>
+      </div>
     </div>
 
     <!-- Filter Tabs & Search Box -->
@@ -99,68 +119,63 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari nama template..."
-          class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Segmented Status Filter -->
-      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-xl p-1 overflow-x-auto">
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
         <button
           type="button"
           on:click={() => activeFilter = 'all'}
-          class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 {activeFilter === 'all' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'all' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span>Semua</span>
-          <span class="text-3xs px-1.5 py-0.5 rounded-md font-extrabold {activeFilter === 'all' ? 'bg-primary/10 text-primary' : 'bg-nested text-muted'}">{counts.all}</span>
+          Semua ({counts.all})
         </button>
 
         <button
           type="button"
           on:click={() => activeFilter = 'approved'}
-          class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 {activeFilter === 'approved' ? 'bg-emerald-500 text-white shadow-2xs' : 'text-muted hover:text-success'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'approved' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          <span>Disetujui</span>
-          <span class="text-3xs px-1.5 py-0.5 rounded-md font-extrabold {activeFilter === 'approved' ? 'bg-white/20 text-white' : 'bg-nested text-muted'}">{counts.approved}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          Disetujui
         </button>
 
         <button
           type="button"
           on:click={() => activeFilter = 'pending'}
-          class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 {activeFilter === 'pending' ? 'bg-amber-500 text-white shadow-2xs' : 'text-muted hover:text-warning'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'pending' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          <span>Review</span>
-          <span class="text-3xs px-1.5 py-0.5 rounded-md font-extrabold {activeFilter === 'pending' ? 'bg-white/20 text-white' : 'bg-nested text-muted'}">{counts.pending}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          Review
         </button>
 
         <button
           type="button"
           on:click={() => activeFilter = 'draft'}
-          class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 {activeFilter === 'draft' ? 'bg-slate-700 text-white shadow-2xs' : 'text-muted hover:text-main'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'draft' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          <span>Draft</span>
-          <span class="text-3xs px-1.5 py-0.5 rounded-md font-extrabold {activeFilter === 'draft' ? 'bg-white/20 text-white' : 'bg-nested text-muted'}">{counts.draft}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+          Draft
         </button>
 
         <button
           type="button"
           on:click={() => activeFilter = 'rejected'}
-          class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 {activeFilter === 'rejected' ? 'bg-rose-500 text-white shadow-2xs' : 'text-muted hover:text-error'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'rejected' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          <span>Ditolak</span>
-          <span class="text-3xs px-1.5 py-0.5 rounded-md font-extrabold {activeFilter === 'rejected' ? 'bg-white/20 text-white' : 'bg-nested text-muted'}">{counts.rejected}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+          Ditolak
         </button>
       </div>
 
       <!-- View Switcher (Table / Grid) -->
-      <div class="hidden sm:flex items-center gap-0.5 bg-nested/80 border border-light rounded-xl p-1">
+      <div class="hidden sm:flex items-center gap-0.5 bg-nested/80 border border-light rounded-full p-1">
         <button
           type="button"
           on:click={() => viewMode = 'table'}
-          class="p-1.5 rounded-lg text-xs transition-all cursor-pointer {viewMode === 'table' ? 'bg-card text-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          class="p-1.5 rounded-full text-xs transition-all cursor-pointer {viewMode === 'table' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
           title="Tampilan Tabel"
         >
           <span class="material-symbols-outlined text-base">table_rows</span>
@@ -168,7 +183,7 @@
         <button
           type="button"
           on:click={() => viewMode = 'grid'}
-          class="p-1.5 rounded-lg text-xs transition-all cursor-pointer {viewMode === 'grid' ? 'bg-card text-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          class="p-1.5 rounded-full text-xs transition-all cursor-pointer {viewMode === 'grid' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
           title="Tampilan Kartu"
         >
           <span class="material-symbols-outlined text-base">grid_view</span>
@@ -179,17 +194,17 @@
 
   {#if filteredTemplates.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
-      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4 text-muted">
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4 text-muted shadow-2xs">
         <span class="material-symbols-outlined text-3xl">dashboard_customize</span>
       </div>
-      <h4 class="text-heading-md font-bold text-main mb-1.5">Tidak Ada Template Ditemukan</h4>
-      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4">
+      <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Tidak Ada Template Ditemukan</h4>
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
         {searchQuery ? 'Tidak ada template yang cocok dengan kata kunci pencarian Anda.' : 'Mulai buat tema toko online UMKM pertama Anda dengan visual builder.'}
       </p>
       {#if !searchQuery}
         <a
           href="/builder/new"
-          class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-2xl px-5 py-2.5 shadow-sm transition-all"
+          class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-2xl px-5 py-2.5 shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           <span class="material-symbols-outlined text-sm">add</span>
           Buat Template Sekarang
@@ -198,19 +213,18 @@
     </div>
   {:else if viewMode === 'table'}
     <Table headers={tableHeaders} minWidth="min-w-[820px]">
-      {#each filteredTemplates as tpl}
+      {#each paginatedTemplates as tpl}
         {@const badge = getStatusBadge(tpl.status)}
         <tr class="hover:bg-nested/40 transition-colors group">
           <!-- Template Info + Thumbnail -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-3.5">
-              <!-- Thumbnail container with fallback -->
-              <div class="w-14 h-11 rounded-xl bg-nested border border-light overflow-hidden flex-shrink-0 relative group-hover:border-primary/40 transition-colors shadow-2xs">
+              <div class="w-14 h-9 rounded-xl bg-nested border border-light overflow-hidden flex-shrink-0 relative shadow-2xs">
                 {#if tpl.thumbnailUrl}
                   <img src={tpl.thumbnailUrl} alt={tpl.name} class="w-full h-full object-cover" />
                 {:else}
-                  <div class="w-full h-full bg-gradient-to-br from-primary/10 via-nested to-nested flex items-center justify-center text-primary/60">
-                    <span class="material-symbols-outlined text-lg">storefront</span>
+                  <div class="w-full h-full bg-nested flex items-center justify-center text-muted">
+                    <span class="material-symbols-outlined text-base">palette</span>
                   </div>
                 {/if}
               </div>
@@ -220,7 +234,7 @@
                 <div class="flex items-center gap-2">
                   <a
                     href={`/builder/${tpl.id}`}
-                    class="font-bold text-xs text-main hover:text-primary transition-colors truncate block leading-tight"
+                    class="font-bold text-xs text-main hover:text-primary transition-colors truncate block leading-tight font-sans"
                     title="Buka di Editor"
                   >
                     {tpl.name}
@@ -228,7 +242,7 @@
                   <button
                     type="button"
                     on:click={() => copyToClipboard(tpl.id)}
-                    class="text-3xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded border border-light"
+                    class="text-3xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95"
                     title="Salin ID Template"
                   >
                     <span>#{tpl.id.slice(0, 6)}</span>
@@ -238,7 +252,7 @@
                   </button>
                 </div>
                 <span class="text-2xs text-muted truncate block mt-0.5 font-sans">
-                  {tpl.description || 'Tema website toko online modular UMKM'}
+                  {tpl.description || 'Tanpa deskripsi template'}
                 </span>
               </div>
             </div>
@@ -246,164 +260,135 @@
 
           <!-- Price -->
           <td class="px-4 py-4 whitespace-nowrap">
-            {#if tpl.price === 0}
-              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-2xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                Gratis
-              </span>
-            {:else}
-              <span class="font-mono text-xs font-extrabold text-main">
-                {formatCurrency(tpl.price)}
-              </span>
-            {/if}
+            <span class="font-mono text-xs font-bold text-main bg-nested/80 px-2.5 py-1 rounded-xl border border-light">
+              {tpl.price === 0 ? 'Gratis' : formatCurrency(tpl.price)}
+            </span>
           </td>
 
-          <!-- Total Sold -->
+          <!-- Sales -->
           <td class="px-4 py-4 whitespace-nowrap">
-            <div class="inline-flex items-center gap-1.5 font-mono text-2xs font-semibold text-secondary bg-nested/80 border border-light px-2.5 py-1 rounded-lg">
-              <span class="material-symbols-outlined text-xs text-primary">shopping_bag</span>
-              <span>{tpl.totalSold} Terjual</span>
-            </div>
+            <span class="font-mono text-xs font-bold text-secondary">
+              {tpl.totalSold}× Terjual
+            </span>
           </td>
 
           <!-- Status Badge -->
           <td class="px-4 py-4 whitespace-nowrap">
-            <div class="flex items-center gap-2">
-              <Badge variant={badge.variant} dot={badge.dot} pulse={badge.pulse} size="sm">
-                {badge.label}
-              </Badge>
-              {#if tpl.status === 'rejected' && tpl.rejectionReason}
-                <button
-                  type="button"
-                  on:click={() => selectedRejection = { name: tpl.name, reason: tpl.rejectionReason || '' }}
-                  class="w-6 h-6 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 flex items-center justify-center transition-colors cursor-pointer"
-                  title="Lihat Alasan Penolakan"
-                >
-                  <span class="material-symbols-outlined text-xs">info</span>
-                </button>
-              {/if}
-            </div>
+            <Badge variant={badge.variant} dot={badge.dot} pulse={badge.pulse} size="sm">
+              {badge.label}
+            </Badge>
           </td>
 
-          <!-- Created Date -->
-          <td class="px-4 py-4 text-2xs text-secondary font-medium whitespace-nowrap font-mono">
+          <!-- Date -->
+          <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
             {formatDate(tpl.createdAt)}
           </td>
 
           <!-- Actions -->
           <td class="px-6 py-4 text-right whitespace-nowrap">
-            <div class="flex items-center justify-end gap-1.5">
-              <a
-                href={`/builder/${tpl.id}`}
-                class="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer"
-                title="Buka Visual Editor"
-              >
-                <span class="material-symbols-outlined text-sm">edit</span>
-                <span>Edit</span>
-              </a>
+            <div class="flex items-center justify-end gap-2">
+              {#if tpl.status === 'draft'}
+                <Button
+                  href={`/builder/${tpl.id}`}
+                  variant="dark"
+                  size="sm"
+                  className="rounded-xl font-bold"
+                >
+                  <span class="material-symbols-outlined text-xs">edit</span>
+                  <span>Edit</span>
+                </Button>
+              {/if}
 
-              <a
-                href={`/builder/preview/${tpl.id}`}
-                target="_blank"
-                rel="noreferrer"
-                class="w-8 h-8 rounded-xl bg-nested hover:bg-nested/80 border border-light text-secondary hover:text-main flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
-                title="Pratinjau Live"
-              >
-                <span class="material-symbols-outlined text-sm">visibility</span>
-              </a>
+              {#if tpl.status === 'rejected'}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl font-bold"
+                  on:click={() => selectedRejection = { name: tpl.name, reason: tpl.rejectionReason || 'Tidak ada alasan terperinci.' }}
+                >
+                  <span class="material-symbols-outlined text-xs text-rose-500">info</span>
+                  <span>Alasan</span>
+                </Button>
+                <Button
+                  href={`/builder/${tpl.id}`}
+                  variant="primary"
+                  size="sm"
+                  className="rounded-xl font-bold"
+                >
+                  Edit Ulang
+                </Button>
+              {/if}
+
+              {#if tpl.status === 'approved' || tpl.status === 'pending'}
+                <Button
+                  href={`/builder/preview/${tpl.id}`}
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl font-bold"
+                >
+                  <span class="material-symbols-outlined text-xs">visibility</span>
+                  <span>Pratinjau</span>
+                </Button>
+              {/if}
             </div>
           </td>
         </tr>
       {/each}
     </Table>
   {:else}
-    <!-- Grid View Mode -->
-    <div class="p-6 md:p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {#each filteredTemplates as tpl}
-        {@const badge = getStatusBadge(tpl.status)}
-        <div class="bg-card border border-light rounded-3xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all group flex flex-col justify-between">
-          <!-- Thumbnail header -->
-          <div class="aspect-[16/10] bg-nested relative overflow-hidden">
-            {#if tpl.thumbnailUrl}
-              <img src={tpl.thumbnailUrl} alt={tpl.name} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            {:else}
-              <div class="w-full h-full bg-gradient-to-br from-primary/15 via-nested to-nested flex items-center justify-center text-primary/60">
-                <span class="material-symbols-outlined text-3xl">storefront</span>
-              </div>
-            {/if}
-            <!-- Status Badge overlay -->
-            <div class="absolute top-3 right-3">
-              <Badge variant={badge.variant} dot={badge.dot} pulse={badge.pulse} size="sm">
-                {badge.label}
-              </Badge>
-            </div>
-          </div>
-
-          <!-- Card Body -->
-          <div class="p-5 flex-1 flex flex-col justify-between">
-            <div>
-              <h4 class="font-bold text-sm text-main group-hover:text-primary transition-colors truncate mb-1">
-                {tpl.name}
-              </h4>
-              <p class="text-2xs text-secondary line-clamp-2 leading-relaxed mb-4">
-                {tpl.description || 'Tema website toko online UMKM modular dan responsif.'}
-              </p>
-            </div>
-
-            <!-- Footer info + Action buttons -->
-            <div class="pt-3 border-t border-light flex items-center justify-between gap-2">
-              <div>
-                <span class="text-4xs text-muted uppercase tracking-wider font-bold block font-heading">Harga</span>
-                <span class="font-mono text-xs font-extrabold text-main">
-                  {tpl.price === 0 ? 'Gratis' : formatCurrency(tpl.price)}
-                </span>
-              </div>
-
-              <div class="flex items-center gap-1.5">
-                <a
-                  href={`/builder/preview/${tpl.id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  class="w-8 h-8 rounded-xl bg-nested hover:bg-nested/80 border border-light text-secondary hover:text-main flex items-center justify-center transition-colors"
-                  title="Preview"
-                >
-                  <span class="material-symbols-outlined text-sm">visibility</span>
-                </a>
-                <a
-                  href={`/builder/${tpl.id}`}
-                  class="inline-flex items-center gap-1 text-xs font-bold text-white bg-primary hover:bg-primary/90 px-3.5 py-1.5 rounded-xl transition-all shadow-2xs"
-                >
-                  <span class="material-symbols-outlined text-sm">edit</span>
-                  <span>Edit</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- Grid Mode -->
+    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {#each paginatedTemplates as tpl (tpl.id)}
+        <DesignerTemplateCard template={tpl} />
       {/each}
     </div>
+  {/if}
+
+  {#if filteredTemplates.length > 0}
+    <Pagination
+      bind:currentPage
+      totalItems={filteredTemplates.length}
+      {pageSize}
+    />
   {/if}
 </Card>
 
 <!-- Rejection Reason Modal -->
-{#if selectedRejection}
-  <Modal
-    open={true}
-    title="Catatan Kurasi Admin"
-    description={`Template: ${selectedRejection.name}`}
-    on:close={() => selectedRejection = null}
-  >
-    <div class="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-2xl p-5 text-xs font-medium leading-relaxed font-mono">
-      <div class="flex items-start gap-2.5 mb-2">
-        <span class="material-symbols-outlined text-base flex-shrink-0 text-rose-500">error</span>
-        <strong class="text-rose-700 dark:text-rose-300">Alasan Penolakan / Catatan Perbaikan:</strong>
+<Modal
+  open={!!selectedRejection}
+  size="sm"
+  on:close={() => selectedRejection = null}
+>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">feedback</span>
       </div>
-      <p class="mt-1 whitespace-pre-wrap">{selectedRejection.reason}</p>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          Catatan Kurasi Admin
+        </h3>
+        <p class="text-2xs text-muted mt-0.5 truncate max-w-[200px]">
+          {selectedRejection?.name}
+        </p>
+      </div>
+    </div>
+  </svelte:fragment>
+
+  <div class="space-y-4 pt-1">
+    <div class="p-4 rounded-2xl bg-nested border border-light text-xs text-main leading-relaxed font-sans whitespace-pre-wrap">
+      {selectedRejection?.reason}
     </div>
 
-    <svelte:fragment slot="footer">
-      <Button variant="secondary" on:click={() => selectedRejection = null}>
+    <div class="flex justify-end gap-2 pt-2">
+      <Button
+        variant="secondary"
+        size="sm"
+        className="rounded-xl font-bold"
+        on:click={() => selectedRejection = null}
+      >
         Tutup
       </Button>
-    </svelte:fragment>
-  </Modal>
-{/if}
+    </div>
+  </div>
+</Modal>

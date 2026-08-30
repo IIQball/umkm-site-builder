@@ -12,16 +12,24 @@ html[data-theme="light"],
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   
-  --color-primary: #5551ff;
-  --color-primary-dark: #4338ca;
-  --color-primary-light: #6366f1;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #3b82f6;
+  --color-primary-rgb: 37 99 235;
   
   --color-success: #10b981;
+  --color-success-rgb: 16 185 129;
   --color-error: #ef4444;
+  --color-error-rgb: 239 68 68;
   --color-warning: #f59e0b;
+  --color-warning-rgb: 245 158 11;
   --color-info: #3b82f6;
+  --color-orange: #ff5b35;
+  --color-orange-dark: #ea4a24;
+  --color-orange-light: #ff7b5c;
+  --color-orange-rgb: 255 91 53;
   
-  --color-bg-base: #f4f6fa;
+  --color-bg-base: #f8fafc;
   --color-card-base: #ffffff;
   --color-nested-base: #f1f5f9;
   
@@ -49,14 +57,22 @@ html[data-theme="dark"],
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-primary-light: #818cf8;
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-primary-rgb: 59 130 246;
   
   --color-success: #10b981;
+  --color-success-rgb: 16 185 129;
   --color-error: #ef4444;
+  --color-error-rgb: 239 68 68;
   --color-warning: #f59e0b;
+  --color-warning-rgb: 245 158 11;
   --color-info: #3b82f6;
+  --color-orange: #ff6b47;
+  --color-orange-dark: #ff5b35;
+  --color-orange-light: #ff8b6e;
+  --color-orange-rgb: 255 107 71;
   
   --color-bg-base: #0b0f19;
   --color-card-base: #111827;
@@ -287,17 +303,6 @@ html[data-theme="dark"],
   to {
     transform: scaleY(1);
     opacity: 1;
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
   }
 }
 

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let variant: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' = 'primary';
-  export let size: 'sm' | 'md' | 'lg' | 'icon' = 'md';
+  export let variant: 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'dark' | 'orange' | 'outline' | 'ghost' = 'primary';
+  export let size: 'xs' | 'sm' | 'md' | 'lg' | 'icon' = 'md';
   export let type: 'button' | 'submit' | 'reset' = 'button';
   export let disabled: boolean = false;
   export let loading: boolean = false;
@@ -21,22 +21,29 @@
 
   const variantStyles = {
     primary:
-      'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] active:scale-[0.98] border border-transparent shadow-xs hover:shadow-md',
+      'bg-primary text-white hover:bg-primary-dark active:scale-[0.98] border border-transparent shadow-xs',
+    dark:
+      'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-[0.98] border border-slate-800 shadow-xs',
+    orange:
+      'bg-orange text-white hover:bg-orange-dark active:scale-[0.98] border border-transparent shadow-xs',
     secondary:
-      'bg-nested text-main hover:bg-nested/80 border border-light active:scale-[0.98] shadow-2xs',
+      'bg-transparent text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
+    tertiary:
+      'bg-transparent text-slate-700 dark:text-slate-300 hover:text-main underline underline-offset-4 border-transparent p-0 h-auto min-h-0 active:opacity-80 shadow-none',
     outline:
-      'bg-transparent text-main border border-light hover:border-primary hover:text-primary active:scale-[0.98]',
+      'bg-transparent text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
     ghost:
       'bg-transparent text-secondary hover:text-main hover:bg-nested active:scale-[0.98] border border-transparent',
     destructive:
-      'bg-[var(--color-error)] text-white hover:bg-[var(--color-error)]/90 active:scale-[0.98] border border-transparent shadow-xs',
+      'bg-rose-600 text-white hover:bg-rose-700 active:scale-[0.98] border border-transparent shadow-xs',
   };
 
   const sizeStyles = {
-    sm: 'text-xs px-3 py-1.5 rounded-xl gap-1.5 h-8 min-h-[32px]',
-    md: 'text-sm px-4 py-2.5 rounded-xl gap-2 h-10 min-h-[40px]',
+    xs: 'text-2xs px-2.5 py-1 rounded-xl gap-1 h-7 min-h-[28px]',
+    sm: 'text-xs px-3.5 py-1.5 rounded-xl gap-1.5 h-8 min-h-[32px]',
+    md: 'text-sm px-4 py-2.5 rounded-2xl gap-2 h-10 min-h-[40px]',
     lg: 'text-base px-5 py-3 rounded-2xl gap-2.5 h-12 min-h-[48px]',
-    icon: 'p-2 rounded-xl h-9 w-9 min-h-[36px] min-w-[36px] justify-center items-center',
+    icon: 'p-1.5 rounded-xl h-8 w-8 min-h-[32px] min-w-[32px] justify-center items-center',
   };
 
   $: isDisabled = disabled || loading;
@@ -45,7 +52,7 @@
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1',
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100',
     variantStyles[variant] || variantStyles.primary,
-    sizeStyles[size] || sizeStyles.md,
+    variant === 'tertiary' ? 'text-xs sm:text-sm font-medium gap-1' : (sizeStyles[size] || sizeStyles.md),
     fullWidth ? 'w-full flex' : '',
     className,
   ]
@@ -96,7 +103,7 @@
   >
     {#if loading}
       <svg
-        class="animate-spin -ml-1 mr-2 h-4 w-4 text-current flex-shrink-0"
+        class="animate-spin -ml-1 mr-2 h-4 w-4 text-current"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"

@@ -9,14 +9,15 @@ import {
   Badge,
   Modal,
   Table,
+  Pagination,
 } from '@/components/ui';
 
 describe('Centralized Design System Tokens (SSOT)', () => {
   describe('Color Tokens', () => {
     it('defines primary, secondary, and semantic color palettes', () => {
-      expect(tokens.colors.primary.DEFAULT).toBe('#5551ff');
-      expect(tokens.colors.primary.dark).toBe('#4338ca');
-      expect(tokens.colors.primary.light).toBe('#6366f1');
+      expect(tokens.colors.primary.DEFAULT).toBe('#2563eb');
+      expect(tokens.colors.primary.dark).toBe('#1d4ed8');
+      expect(tokens.colors.primary.light).toBe('#3b82f6');
 
       expect(tokens.colors.secondary.DEFAULT).toBe('#334155');
 
@@ -25,6 +26,7 @@ describe('Centralized Design System Tokens (SSOT)', () => {
       expect(tokens.colors.semantic.warning.DEFAULT).toBe('#f59e0b');
       expect(tokens.colors.semantic.info.DEFAULT).toBe('#3b82f6');
       expect(tokens.colors.semantic.violet.DEFAULT).toBe('#8b5cf6');
+      expect(tokens.colors.semantic.orange.DEFAULT).toBe('#ff5b35');
     });
 
     it('defines neutrals for both light and dark themes', () => {
@@ -102,7 +104,7 @@ describe('Centralized Design System Tokens (SSOT)', () => {
 });
 
 describe('Atomic UI Components Exports & Definition', () => {
-  it('exports all 8 atomic UI components from src/components/ui', () => {
+  it('exports atomic UI components including Pagination from src/components/ui', () => {
     expect(Button).toBeDefined();
     expect(Input).toBeDefined();
     expect(Textarea).toBeDefined();
@@ -111,5 +113,6 @@ describe('Atomic UI Components Exports & Definition', () => {
     expect(Badge).toBeDefined();
     expect(Modal).toBeDefined();
     expect(Table).toBeDefined();
+    expect(Pagination).toBeDefined();
   });
 });

@@ -47,6 +47,7 @@ const createToastStore = () => {
     subscribe,
     remove,
     clear,
+    add,
     success: (message: string, title?: string, duration?: number) => add('success', message, title, duration),
     error: (message: string, title?: string, duration?: number) => add('error', message, title, duration),
     warning: (message: string, title?: string, duration?: number) => add('warning', message, title, duration),
@@ -55,3 +56,15 @@ const createToastStore = () => {
 };
 
 export const toast = createToastStore();
+
+export const addToast = ({
+  type,
+  message,
+  title,
+  duration,
+}: {
+  type: ToastType;
+  message: string;
+  title?: string;
+  duration?: number;
+}): string => toast.add(type, message, title, duration);

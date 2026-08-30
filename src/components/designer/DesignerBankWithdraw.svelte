@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { formatIDR } from '@/lib/utils/format';
-  import { Building2, AlertTriangle, Info } from 'lucide-svelte';
+  import { Building2 } from 'lucide-svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
-  import { Card, Badge, Button } from '@/components/ui';
+  import { Button } from '@/components/ui';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
   import DesignerPayoutHistoryTable from './DesignerPayoutHistoryTable.svelte';
@@ -253,149 +253,186 @@
   const closeWithdrawModal = () => {
     showWithdrawModal = false;
     withdrawSuccess = false;
-    withdrawAmount = '';
+      withdrawAmount = '';
     withdrawError = '';
   };
 </script>
 
 <div class="mb-6">
-  <!-- Bank Account + Withdraw Card -->
-  <Card variant="bordered" padding="lg" radius="3xl" topBeam="indigo-500" className="group">
-    <div>
-      <div class="flex items-start justify-between gap-3 mb-5">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-xs">
-            <Building2 size={20} />
-          </div>
-          <div>
-            <h3 class="text-heading-md text-main font-bold leading-tight">Rekening Bank Tujuan</h3>
-            <p class="text-2xs text-muted mt-0.5">Penampung transfer payout komisi penjualan</p>
-          </div>
-        </div>
-        {#if bankAccount}
-          <Badge variant="emerald" dot pulse size="sm">
-            Terhubung
-          </Badge>
-        {:else}
-          <Badge variant="amber" size="sm">
-            Belum Diatur
-          </Badge>
-        {/if}
+  <!-- Unified Single Master Bank & Withdrawal Card -->
+  {#if isLoading && !bankAccount}
+    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-8 text-center animate-pulse space-y-4 shadow-xl">
+      <div class="h-8 bg-slate-900 rounded-xl w-1/4 mx-auto"></div>
+      <div class="h-6 bg-slate-900 rounded-lg w-1/2 mx-auto"></div>
+      <div class="h-12 bg-slate-900 rounded-2xl w-1/3 mx-auto mt-4"></div>
+    </div>
+  {:else if bankAccount}
+    <!-- Authentic Black & Orange Bank Card Motif with Integrated Payout Action -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-orange/30 p-6 sm:p-8 text-white shadow-2xl shadow-black/30 group hover:border-orange/50 transition-all duration-300">
+      <!-- Ambient Orange & Blue Glow Arcs -->
+      <div class="absolute -right-16 -top-16 w-60 h-60 rounded-full bg-orange/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-52 h-52 rounded-full bg-orange/10 blur-2xl pointer-events-none"></div>
+
+      <!-- Subtle Bank Card Circuit & Radial Dot Motif -->
+      <div class="absolute inset-0 bg-[radial-gradient(theme(colors.orange.DEFAULT)_1px,transparent_1px)] [background-size:18px_18px] opacity-10 pointer-events-none"></div>
+      <div class="absolute right-4 bottom-24 w-44 h-44 opacity-15 pointer-events-none">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2" class="text-white w-full h-full">
+          <circle cx="50" cy="50" r="40" stroke-dasharray="3 3" />
+          <circle cx="50" cy="50" r="28" />
+          <circle cx="50" cy="50" r="16" stroke-dasharray="2 2" />
+          <path d="M10 50 Q 50 10 90 50 Q 50 90 10 50" />
+        </svg>
       </div>
 
-      {#if isLoading && !bankAccount}
-        <div class="bg-nested border border-dashed border-light rounded-2xl p-8 text-center my-3 animate-pulse space-y-3">
-          <div class="h-5 bg-nested rounded-lg w-1/3 mx-auto"></div>
-          <div class="h-4 bg-nested rounded-lg w-1/2 mx-auto"></div>
-        </div>
-      {:else if bankAccount}
-        <!-- Realistic Luxurious ATM / Debit Card Mockup -->
-        <div class="bg-gradient-to-tr from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-5 md:p-6 my-2 relative overflow-hidden shadow-lg border border-white/10 group-hover:shadow-indigo-500/20 transition-all duration-300">
-          <!-- Card Decorative Shapes & Hologram shine -->
-          <div class="absolute -right-12 -top-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
-          <div class="absolute -left-10 -bottom-10 w-36 h-36 bg-blue-500/15 rounded-full blur-2xl pointer-events-none"></div>
-
-          <!-- Top Row: Bank Badge + Contactless Icon -->
-          <div class="flex items-center justify-between relative z-10 mb-6">
-            <div class="flex items-center gap-2">
-              <span class="px-3 py-1 bg-white/15 backdrop-blur-md rounded-lg text-xs font-black tracking-widest text-white border border-white/20 uppercase font-heading">
-                {bankAccount.bankName}
-              </span>
-              <span class="text-3xs text-white/60 font-semibold tracking-wider uppercase font-heading">KARTU DEBIT</span>
+      <!-- Card Content Layer -->
+      <div class="relative z-10">
+        <!-- Top Row: EMV Chip + NFC + Bank Badge + Ganti Rekening -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div class="flex items-center gap-3">
+            <!-- Realistic Metallic Gold EMV Chip -->
+            <div class="w-11 h-8 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-0.5 border border-amber-300/60 shadow-sm relative overflow-hidden flex items-center justify-center flex-shrink-0">
+              <div class="w-full h-full border border-amber-900/30 rounded-[3px] grid grid-cols-2 gap-0.5 opacity-70">
+                <div class="border-r border-b border-amber-900/40"></div>
+                <div class="border-b border-amber-900/40"></div>
+                <div class="border-r border-amber-900/40"></div>
+                <div></div>
+              </div>
             </div>
-            <!-- Contactless Icon SVG -->
-            <svg class="w-6 h-6 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8.5 16.5a5 5 0 0 1 0-9"></path>
-              <path d="M12 19a8.5 8.5 0 0 0 0-14"></path>
-              <path d="M15.5 21.5a12 12 0 0 0 0-19"></path>
+
+            <!-- Contactless NFC Wave Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/60">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1.5-2.5" />
+              <path d="M5.5 17.5A6.5 6.5 0 0 0 12 11c0-3.59-1.5-5.5-4-6.5" />
+              <path d="M2.5 20.5A10.5 10.5 0 0 0 13 10c0-5.8-2.5-9-6.5-10.5" />
             </svg>
           </div>
 
-          <!-- Middle Row: Golden EMV Chip + Masked Account Number -->
-          <div class="flex items-center gap-4 relative z-10 mb-5">
-            <!-- EMV Chip graphic -->
-            <div class="w-10 h-8 rounded-md bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 border border-amber-200/80 p-1 flex flex-col justify-between shadow-inner flex-shrink-0">
-              <div class="w-full h-0.5 bg-amber-700/50"></div>
-              <div class="w-full h-0.5 bg-amber-700/50"></div>
+          <!-- Bank Name & Action Button -->
+          <div class="flex items-center gap-2.5">
+            <div class="inline-flex items-center gap-1.5 bg-orange/20 border border-orange/35 text-white px-3.5 py-1.5 rounded-full text-xs font-black font-mono uppercase tracking-wider backdrop-blur-md">
+              <span class="w-2 h-2 rounded-full bg-orange animate-pulse"></span>
+              <span>{bankAccount.bankName}</span>
             </div>
-            <p class="font-mono text-base md:text-lg font-bold tracking-widest text-white/95 truncate">
-              •••• •••• •••• {bankAccount.accountNumber.length > 4 ? bankAccount.accountNumber.slice(-4) : bankAccount.accountNumber}
+
+            <Button
+              variant="secondary"
+              size="xs"
+              className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 rounded-full font-bold"
+              title="Ganti Rekening Bank"
+              on:click={openBankModal}
+            >
+              <span class="material-symbols-outlined text-xs">edit</span>
+              <span>Ganti Rekening</span>
+            </Button>
+          </div>
+        </div>
+
+        <!-- Middle Row: Spaced Card Number & Card Holder -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end mb-8">
+          <div>
+            <span class="text-[10px] text-white/50 font-bold uppercase tracking-widest font-heading block mb-1">
+              Nomor Rekening Terdaftar
+            </span>
+            <p class="font-mono text-xl sm:text-2xl font-black tracking-widest text-white drop-shadow-sm">
+              •••• &nbsp;•••• &nbsp;•••• &nbsp;<span class="text-orange-light font-black">{bankAccount.accountNumber.length > 4 ? bankAccount.accountNumber.slice(-4) : bankAccount.accountNumber}</span>
             </p>
           </div>
 
-          <!-- Bottom Row: Cardholder Name + Status Badge -->
-          <div class="flex items-end justify-between relative z-10 pt-2 border-t border-white/10">
-            <div>
-              <span class="text-4xs text-white/60 uppercase tracking-widest font-bold block font-heading">Pemilik Rekening</span>
-              <p class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-white truncate max-w-[200px]">
+          <div class="flex items-end justify-between sm:justify-end gap-4">
+            <div class="space-y-0.5 min-w-0 sm:text-right">
+              <span class="text-[10px] text-white/50 uppercase tracking-widest font-bold font-heading block">
+                Pemilik Rekening
+              </span>
+              <p class="text-xs sm:text-sm font-bold text-white uppercase truncate font-mono tracking-wide">
                 {bankAccount.holderName}
               </p>
             </div>
-            <div class="text-right">
-              <span class="text-4xs text-emerald-400 font-bold uppercase tracking-wider block font-heading">Masa Berlaku</span>
-              <span class="text-xs font-mono text-white/80">Aktif</span>
+
+            <!-- Dual Overlapping Mastercard-style Circles -->
+            <div class="flex items-center -space-x-2.5 opacity-90 flex-shrink-0">
+              <div class="w-7 h-7 rounded-full bg-orange shadow-xs"></div>
+              <div class="w-7 h-7 rounded-full bg-amber-400/90 backdrop-blur-xs shadow-xs"></div>
             </div>
           </div>
         </div>
-      {:else}
-        <!-- Empty Bank Card Slot -->
-        <div class="bg-amber-500/5 border-2 border-dashed border-amber-500/30 rounded-2xl p-6 text-center my-3 text-warning flex flex-col items-center justify-center">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-3">
-            <AlertTriangle size={24} />
-          </div>
-          <p class="text-sm font-bold text-main">Belum Ada Rekening Terdaftar</p>
-          <p class="text-xs text-secondary mt-1 max-w-xs leading-relaxed">
-            Hubungkan rekening bank Anda untuk menerima pembayaran komisi hasil penjualan template secara otomatis.
-          </p>
-        </div>
-      {/if}
 
-      <!-- Settlement info alert -->
-      {#if availableBalance === 0 && balance > 0}
-        <div class="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex gap-2.5 items-start">
-          <div class="w-5 h-5 text-info flex-shrink-0 flex items-center justify-center mt-0.5">
-            <Info size={16} />
+        <!-- Integrated Lower Tray: Saldo Siap Tarik + Payout Action -->
+        <div class="pt-5 border-t border-white/15 flex flex-col md:flex-row md:items-center justify-between gap-5 bg-black/40 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-5 sm:p-7 rounded-b-3xl backdrop-blur-md">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-white/80 font-heading">
+                Saldo Siap Dicairkan
+              </span>
+              <span class="text-3xs font-mono text-white/60 bg-white/10 border border-white/10 px-2 py-0.5 rounded-full">
+                Min: {formatIDR(minPayoutLimit)}
+              </span>
+            </div>
+
+            <p class="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight leading-none">
+              {formatIDR(availableBalance)}
+            </p>
+
+            <p class="text-2xs text-white/60 font-sans mt-1">
+              {#if availableBalance >= minPayoutLimit}
+                Saldo memenuhi batas penarikan dan siap ditransfer
+              {:else if availableBalance > 0}
+                Belum mencapai batas minimum penarikan ({formatIDR(minPayoutLimit)})
+              {:else}
+                Tidak ada saldo siap tarik saat ini
+              {/if}
+            </p>
+
+            {#if availableBalance === 0 && balance > 0}
+              <p class="text-2xs text-amber-300/90 font-medium">
+                * Saldo <strong>{formatIDR(balance)}</strong> dalam masa hold ({settlementDelayDays} hari) dan akan aktif otomatis.
+              </p>
+            {/if}
           </div>
-          <p class="text-2xs text-info leading-normal mb-0">
-            Total saldo Anda sebesar <strong>{formatIDR(balance)}</strong> sedang dalam masa settlement delay ({settlementDelayDays} hari). Saldo akan otomatis berpindah ke <strong>Saldo Siap Tarik</strong> setelah masa verifikasi selesai.
-          </p>
+
+          <div class="flex-shrink-0">
+            <Button
+              variant="orange"
+              size="md"
+              className="w-full sm:w-auto shadow-lg shadow-orange-500/25 px-6 font-bold"
+              disabled={!bankAccount || availableBalance < minPayoutLimit || isLoading}
+              on:click={() => showWithdrawModal = true}
+            >
+              <span class="material-symbols-outlined text-lg">payments</span>
+              <span>
+                {#if availableBalance >= minPayoutLimit}
+                  Tarik {formatIDR(availableBalance)}
+                {:else}
+                  Tarik Dana ke Bank
+                {/if}
+              </span>
+            </Button>
+          </div>
         </div>
-      {/if}
+      </div>
     </div>
-
-    <!-- Footer: Edit bank + Tarik Dana buttons -->
-    <div class="mt-4 pt-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <p class="text-2xs text-muted">
-        {bankAccount ? 'Nomor rekening terenkripsi & aman · 1-2 hari kerja' : 'Mendukung semua bank di Indonesia'}
+  {:else}
+    <!-- Empty Bank Card Slot with Dark Blueprint style -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-2 border-dashed border-orange/35 p-8 text-center text-white shadow-xl flex flex-col items-center justify-center">
+      <div class="w-14 h-14 rounded-2xl bg-orange/15 border border-orange/30 text-orange flex items-center justify-center mb-3 shadow-xs">
+        <Building2 size={26} />
+      </div>
+      <h3 class="text-lg font-bold text-white font-heading">Hubungkan Rekening Bank Tujuan</h3>
+      <p class="text-xs text-slate-300 mt-1 max-w-md leading-relaxed font-sans">
+        Daftarkan nomor rekening bank di Indonesia untuk menerima pencairan komisi penjualan template secara instan.
       </p>
-      <div class="flex items-center gap-2 flex-shrink-0">
+      <div class="mt-5">
         <Button
-          variant="secondary"
-          size="sm"
-          disabled={isLoading}
+          variant="orange"
+          size="md"
+          className="shadow-lg shadow-orange-500/25 px-6 font-bold"
           on:click={openBankModal}
         >
-          <span class="material-symbols-outlined text-sm">{bankAccount ? 'edit' : 'add_link'}</span>
-          <span>{bankAccount ? 'Ganti Rekening' : 'Hubungkan Rekening'}</span>
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          disabled={!bankAccount || availableBalance < minPayoutLimit || isLoading}
-          on:click={() => showWithdrawModal = true}
-        >
-          <span class="material-symbols-outlined text-sm">payments</span>
-          <span>
-            {#if availableBalance >= minPayoutLimit}
-              Tarik {formatIDR(availableBalance)}
-            {:else}
-              Tarik Dana
-            {/if}
-          </span>
+          <span class="material-symbols-outlined text-lg">add_link</span>
+          <span>Hubungkan Rekening Sekarang</span>
         </Button>
       </div>
     </div>
-  </Card>
+  {/if}
 </div>
 
 <!-- Modals -->

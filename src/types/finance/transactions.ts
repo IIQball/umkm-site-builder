@@ -101,4 +101,8 @@ export interface CheckoutPageData {
   status: PaymentStatus;
   expiresAt: string;
   paymentMethod?: string;
+  createdAt?: string | Date;
+  templateThumbnailUrl?: string | null;
+  designerName?: string | null;
+  templateDescription?: string | null;
 }

@@ -2,23 +2,25 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateCategoryManager from '@/components/admin/TemplateCategoryManager.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { getTemplateCategories } from '@/services/template-categories';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { templateCategories } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user) {
-  return Astro.redirect('/auth/login');
+if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  return Astro.redirect('/auth/login?redirect=/admin/template-categories');
 }
 
-if (!isAuthorizedAdmin(user)) {
-  return Astro.redirect('/dashboard');
-}
-
-let initialCategories: Awaited<ReturnType<typeof getTemplateCategories>> = [];
+let initialCategories: (typeof templateCategories.$inferSelect)[] = [];
 try {
-  initialCategories = await getTemplateCategories();
+  initialCategories = await db
+    .select()
+    .from(templateCategories)
+    .orderBy(desc(templateCategories.createdAt));
 } catch {
   initialCategories = [];
 }
@@ -39,13 +41,16 @@ try {
 
       <!-- Quick Action / Link -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <a
+        <Button
+          client:load
           href="/admin/templates"
-          class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+          variant="secondary"
+          size="md"
+          class="font-bold"
         >
           <span class="material-symbols-outlined text-primary text-base">palette</span>
           <span>Buka Kurasi Template</span>
-        </a>
+        </Button>
       </div>
     </div>
 
@@ -57,7 +62,7 @@ try {
         value={initialCategories.length}
         rawValue={initialCategories.length}
         icon="category"
-        colorTheme="indigo"
+        cardTheme="dark"
         badge="Master Data"
         footerText="Semua ceruk bisnis terdaftar"
         delayClass="delay-100"
@@ -68,7 +73,7 @@ try {
         value={initialCategories.length}
         rawValue={initialCategories.length}
         icon="check_circle"
-        colorTheme="emerald"
+        cardTheme="default"
         badge="Aktif"
         footerText="Tersedia di form builder desainer"
         delayClass="delay-150"
@@ -79,7 +84,7 @@ try {
         value="100%"
         rawValue={100}
         icon="verified"
-        colorTheme="violet"
+        cardTheme="blue"
         badge="Tervalidasi"
         footerText="Sesuai taxonomi toko UMKM"
         delayClass="delay-200"

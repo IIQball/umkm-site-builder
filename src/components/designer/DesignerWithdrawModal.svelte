@@ -16,56 +16,98 @@
   export let onWithdraw: () => void = () => {};
   export let onClose: () => void = () => {};
 
-  function handleInput(e: Event) {
-    const target = e.currentTarget as HTMLInputElement;
-    const rawVal = target.value;
+  function handleInputChange(e: CustomEvent<Event> | Event) {
+    const detail = (e as CustomEvent).detail;
+    const target = (detail?.target || e.target) as HTMLInputElement | null;
+    const rawVal = target ? target.value : withdrawAmount;
+    
     if (!rawVal) {
       withdrawAmount = '';
       return;
     }
-    const cleanNum = parsePriceInput(rawVal);
-    withdrawAmount = formatPriceInput(cleanNum);
+    
+    const cleanDigits = String(rawVal).replace(/\D/g, '');
+    if (!cleanDigits) {
+      withdrawAmount = '';
+      return;
+    }
+    
+    const num = Number(cleanDigits);
+    withdrawAmount = formatPriceInput(num);
+  }
+
+  function setPresetAmount(ratio: number) {
+    const amount = Math.floor(availableBalance * ratio);
+    withdrawAmount = formatPriceInput(amount);
   }
 
   $: parsedAmount = parsePriceInput(withdrawAmount);
-  $: isConfirmDisabled = isWithdrawing || parsedAmount <= 0 || parsedAmount < minPayoutLimit || parsedAmount > availableBalance;
+  $: isAmountTooLow = parsedAmount > 0 && parsedAmount < minPayoutLimit;
+  $: isAmountTooHigh = parsedAmount > availableBalance;
+  $: validationMessage = isAmountTooLow
+    ? `Nominal minimal penarikan adalah ${formatIDR(minPayoutLimit)}`
+    : isAmountTooHigh
+    ? `Nominal melebihi saldo siap dicairkan (${formatIDR(availableBalance)})`
+    : withdrawError;
+  $: isConfirmDisabled = isWithdrawing || !withdrawAmount || parsedAmount <= 0 || parsedAmount < minPayoutLimit || parsedAmount > availableBalance;
 </script>
 
 <Modal
   bind:open={showModal}
-  title={withdrawSuccess ? '' : 'Tarik Dana'}
   size="sm"
   on:close={onClose}
 >
+  <svelte:fragment slot="header">
+    {#if !withdrawSuccess}
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-orange/15 border border-orange/25 text-orange flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">payments</span>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+            Tarik Dana Saldo
+          </h3>
+          <p class="text-2xs text-muted mt-0.5">
+            Transfer instan ke {bankAccount?.bankName ?? 'rekening terdaftar'}
+          </p>
+        </div>
+      </div>
+    {/if}
+  </svelte:fragment>
+
   {#if withdrawSuccess}
     <div class="text-center py-4 space-y-4">
-      <div class="w-12 h-12 rounded-full bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto shadow-2xs">
-        <CheckCircle2 size={24} />
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto shadow-2xs">
+        <CheckCircle2 size={28} />
       </div>
       <div class="space-y-1">
-        <h4 class="text-sm font-bold text-main font-heading">Permintaan Penarikan Dikirim</h4>
-        <p class="text-xs text-secondary px-2 leading-relaxed">
-          Dana sedang diproses dan akan masuk ke rekening {bankAccount?.bankName} ({bankAccount?.accountNumber}) Anda dalam 1-2 hari kerja.
+        <h4 class="text-base font-extrabold text-main font-heading">Permintaan Penarikan Terkirim</h4>
+        <p class="text-xs text-secondary px-2 leading-relaxed font-sans">
+          Dana penarikan sedang diproses otomatis dan akan segera masuk ke rekening <strong class="text-main">{bankAccount?.bankName} ({bankAccount?.accountNumber})</strong> Anda.
         </p>
       </div>
-      <Button
-        variant="primary"
-        fullWidth
-        on:click={onClose}
-      >
-        Selesai
-      </Button>
+      <div class="pt-2">
+        <Button
+          variant="orange"
+          size="md"
+          className="w-full justify-center font-bold"
+          on:click={onClose}
+        >
+          Selesai
+        </Button>
+      </div>
     </div>
   {:else}
     <div class="space-y-4">
-      <div class="grid grid-cols-2 gap-3 bg-nested border border-light rounded-2xl p-3 text-center">
+      <!-- Balance Status Bar -->
+      <div class="grid grid-cols-2 gap-3 bg-slate-900 text-white rounded-2xl p-3.5 text-center shadow-sm">
         <div class="space-y-0.5">
-          <span class="text-label-caps text-muted block">Saldo Aktif</span>
-          <p class="text-xs font-black text-main font-mono">{formatIDR(balance)}</p>
+          <span class="text-[10px] text-white/60 font-bold uppercase tracking-wider font-heading block">Total Saldo</span>
+          <p class="text-xs sm:text-sm font-black text-white font-mono">{formatIDR(balance)}</p>
         </div>
-        <div class="space-y-0.5 border-l border-light">
-          <span class="text-label-caps text-success block">Siap Tarik</span>
-          <p class="text-xs font-black text-success font-mono">{formatIDR(availableBalance)}</p>
+        <div class="space-y-0.5 border-l border-white/15">
+          <span class="text-[10px] text-orange-light font-bold uppercase tracking-wider font-heading block">Siap Dicairkan</span>
+          <p class="text-xs sm:text-sm font-black text-orange-light font-mono">{formatIDR(availableBalance)}</p>
         </div>
       </div>
 
@@ -73,30 +115,33 @@
         <Input
           label="Nominal Penarikan"
           placeholder="0"
-          value={withdrawAmount}
-          on:input={handleInput}
+          bind:value={withdrawAmount}
+          on:input={handleInputChange}
           disabled={isWithdrawing}
-          error={withdrawError}
-          className="font-mono font-bold"
+          error={validationMessage}
+          className="font-mono font-bold text-base"
         >
           <span slot="prefix" class="text-xs font-bold text-muted select-none">Rp</span>
         </Input>
         
-        <div class="flex gap-2 pt-1">
-          <button
-            type="button"
-            on:click={() => withdrawAmount = formatPriceInput(Math.floor(availableBalance * 0.5))}
-            class="text-xs font-bold bg-nested border border-light text-secondary px-3 py-1.5 rounded-xl hover:bg-nested/80 cursor-pointer transition-colors active:scale-[0.98] font-heading"
-          >
-            50%
-          </button>
-          <button
-            type="button"
-            on:click={() => withdrawAmount = formatPriceInput(availableBalance)}
-            class="text-xs font-bold bg-nested border border-light text-secondary px-3 py-1.5 rounded-xl hover:bg-nested/80 cursor-pointer transition-colors active:scale-[0.98] font-heading"
-          >
-            100%
-          </button>
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <div class="flex gap-2">
+            <button
+              type="button"
+              on:click={() => setPresetAmount(0.5)}
+              class="text-xs font-bold bg-nested border border-light text-main hover:bg-slate-900 hover:text-white dark:hover:bg-primary px-3.5 py-1.5 rounded-xl cursor-pointer transition-all active:scale-[0.98] font-heading shadow-2xs"
+            >
+              50%
+            </button>
+            <button
+              type="button"
+              on:click={() => setPresetAmount(1.0)}
+              class="text-xs font-bold bg-nested border border-light text-main hover:bg-orange hover:text-white dark:hover:bg-orange px-3.5 py-1.5 rounded-xl cursor-pointer transition-all active:scale-[0.98] font-heading shadow-2xs"
+            >
+              100% (Semua)
+            </button>
+          </div>
+          <span class="text-3xs text-muted font-mono font-bold">Min: {formatIDR(minPayoutLimit)}</span>
         </div>
       </div>
     </div>
@@ -113,13 +158,14 @@
         Batal
       </Button>
       <Button
-        variant="primary"
+        variant="orange"
         size="sm"
         disabled={isConfirmDisabled}
         loading={isWithdrawing}
         on:click={onWithdraw}
       >
-        Konfirmasi
+        <span class="material-symbols-outlined text-sm">payments</span>
+        <span>Konfirmasi Penarikan</span>
       </Button>
     {/if}
   </svelte:fragment>

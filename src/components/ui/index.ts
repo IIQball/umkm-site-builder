@@ -10,6 +10,7 @@ export { default as Card } from './Card.svelte';
 export { default as Badge } from './Badge.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as Table } from './Table.svelte';
+export { default as Pagination } from './Pagination.svelte';
 export { default as StatCard } from './StatCard.svelte';
 export { default as ToastContainer } from './ToastContainer.svelte';
 export { default as WhatsAppIcon } from './WhatsAppIcon.svelte';

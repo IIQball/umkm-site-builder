@@ -3,7 +3,7 @@
   import StatCard from '../ui/StatCard.svelte';
   import { Card, Input, Button } from '@/components/ui';
   import { formatCurrency } from '@/lib/utils';
-  import { toast } from '@/lib/toast';
+  import { addToast } from '@/lib/toast';
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;
@@ -31,11 +31,17 @@
 
   const handleSave = async () => {
     if (platformFeePercentage < 0 || platformFeePercentage > 100) {
-      toast.error('Persentase fee harus antara 0% hingga 100%');
+      addToast({
+        type: 'error',
+        message: 'Persentase fee harus antara 0% hingga 100%',
+      });
       return;
     }
     if (settlementDelayDays < 0) {
-      toast.error('Durasi penahanan settlement tidak boleh negatif');
+      addToast({
+        type: 'error',
+        message: 'Durasi penahanan settlement tidak boleh negatif',
+      });
       return;
     }
 
@@ -53,12 +59,21 @@
       const result = await res.json();
 
       if (res.ok && (result.success || result.ok)) {
-        toast.success('Pengaturan komisi & settlement platform berhasil disimpan!');
+        addToast({
+          type: 'success',
+          message: 'Pengaturan komisi & settlement platform berhasil disimpan!',
+        });
       } else {
-        toast.error(result.error?.message || 'Gagal menyimpan pengaturan komisi');
+        addToast({
+          type: 'error',
+          message: result.error?.message || 'Gagal menyimpan pengaturan komisi',
+        });
       }
     } catch {
-      toast.error('Terjadi kesalahan koneksi saat menyimpan');
+      addToast({
+        type: 'error',
+        message: 'Terjadi kesalahan koneksi saat menyimpan',
+      });
     } finally {
       isLoading = false;
     }
@@ -84,13 +99,15 @@
 
     <!-- Quick Action / Link -->
     <div class="flex items-center gap-2 flex-shrink-0">
-      <a
+      <Button
         href="/admin/users"
-        class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+        variant="secondary"
+        size="md"
+        className="font-bold"
       >
         <span class="material-symbols-outlined text-primary text-base">group</span>
         <span>Manajemen Pengguna</span>
-      </a>
+      </Button>
     </div>
   </div>
 
@@ -101,7 +118,7 @@
       value="{platformFeePercentage}%"
       rawValue={platformFeePercentage}
       icon="percent"
-      colorTheme="indigo"
+      cardTheme="dark"
       badge="Kas SaaS"
       footerText="Potongan otomatis per transaksi"
       delayClass="delay-100"
@@ -111,7 +128,7 @@
       value="{designerShare}%"
       rawValue={designerShare}
       icon="brush"
-      colorTheme="emerald"
+      cardTheme="default"
       badge="Hak Desainer"
       footerText="Masuk langsung ke dompet kreator"
       delayClass="delay-150"
@@ -121,7 +138,7 @@
       value="{settlementDelayDays} Hari"
       rawValue={settlementDelayDays}
       icon="hourglass_top"
-      colorTheme="amber"
+      cardTheme="orange"
       badge="Proteksi Fraud"
       footerText="Jeda saldo sebelum dapat ditarik"
       delayClass="delay-200"
@@ -130,16 +147,20 @@
 
   <!-- Settings Configuration Card -->
   <div class="animate-fade-in-up delay-300">
-    <Card variant="bordered" padding="none" radius="xl" topBeam="indigo-500">
+    <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
       <!-- Header inside Card -->
-      <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-base">tune</span>
+      <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+            <span class="material-symbols-outlined text-lg">tune</span>
           </div>
           <div>
-            <h3 class="text-heading-md text-main font-bold">Parameter Finansial & Bagi Hasil</h3>
-            <p class="text-body-sm text-secondary mt-0.5">Konfigurasi nilai persentase potongan transaksi dan kebijakan penahanan dana</p>
+            <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+              Parameter Finansial & Bagi Hasil
+            </h3>
+            <p class="text-body-sm text-secondary mt-0.5 font-sans">
+              Konfigurasi nilai persentase potongan transaksi dan kebijakan penahanan dana
+            </p>
           </div>
         </div>
       </div>
@@ -148,7 +169,7 @@
       <div class="p-6 md:p-8">
         <form on:submit|preventDefault={handleSave} class="space-y-8 w-full">
           <!-- Split Ratio Visual Gauge -->
-          <div class="p-6 rounded-2xl bg-nested/70 border border-light space-y-4">
+          <div class="p-6 rounded-3xl bg-nested/70 border border-light space-y-4 shadow-2xs">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold font-heading uppercase tracking-wider text-muted">
                 Rasio Pembagian Komisi
@@ -157,21 +178,21 @@
                 <button
                   type="button"
                   on:click={() => (platformFeePercentage = 20)}
-                  class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {platformFeePercentage === 20 ? 'bg-indigo-500 text-white border-indigo-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 20 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
                 >
                   20% / 80%
                 </button>
                 <button
                   type="button"
                   on:click={() => (platformFeePercentage = 30)}
-                  class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {platformFeePercentage === 30 ? 'bg-indigo-500 text-white border-indigo-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 30 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
                 >
                   30% / 70% (Standar)
                 </button>
                 <button
                   type="button"
                   on:click={() => (platformFeePercentage = 40)}
-                  class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {platformFeePercentage === 40 ? 'bg-indigo-500 text-white border-indigo-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 40 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
                 >
                   40% / 60%
                 </button>
@@ -179,24 +200,24 @@
             </div>
 
             <!-- Progress Bar Barcode -->
-            <div class="h-3.5 w-full bg-light rounded-full overflow-hidden flex shadow-inner">
+            <div class="h-3.5 w-full bg-nested border border-light rounded-full overflow-hidden flex shadow-inner">
               <div
-                class="bg-gradient-to-r from-indigo-600 to-indigo-500 h-full transition-all duration-300 relative group"
+                class="bg-primary h-full transition-all duration-300 relative group"
                 style="width: {platformFeePercentage}%"
               ></div>
               <div
-                class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-full transition-all duration-300 relative group"
+                class="bg-emerald-500 h-full transition-all duration-300 relative group"
                 style="width: {designerShare}%"
               ></div>
             </div>
 
             <div class="flex items-center justify-between text-xs font-bold font-heading pt-1">
-              <span class="text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span class="text-primary flex items-center gap-1.5 font-sans">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
                 Fee Platform: {platformFeePercentage}%
               </span>
-              <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-sans">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Hak Desainer: {designerShare}%
               </span>
             </div>
@@ -204,10 +225,10 @@
             <!-- Simulation Calculation Box -->
             <div class="pt-3 text-xs text-secondary flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-light/60 font-sans">
               <span>Simulasi penjualan template <strong>{formatCurrency(samplePrice)}</strong>:</span>
-              <div class="flex items-center gap-3 font-mono">
-                <span class="text-indigo-600 dark:text-indigo-400">Platform: {formatCurrency(samplePlatformFee)}</span>
+              <div class="flex items-center gap-3 font-mono font-bold">
+                <span class="text-primary">Platform: {formatCurrency(samplePlatformFee)}</span>
                 <span class="text-muted">•</span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-bold">Desainer: {formatCurrency(sampleDesignerShare)}</span>
+                <span class="text-emerald-600 dark:text-emerald-400">Desainer: {formatCurrency(sampleDesignerShare)}</span>
               </div>
             </div>
           </div>
@@ -215,9 +236,9 @@
           <!-- Input Fields Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Platform Fee -->
-            <div class="p-5 rounded-2xl bg-card border border-light space-y-3">
+            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
               <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <span class="material-symbols-outlined text-sm">percent</span>
                 </div>
                 <span class="text-xs font-bold text-main font-heading">Potongan Fee Platform</span>
@@ -246,15 +267,15 @@
                 step="1"
                 bind:value={platformFeePercentage}
                 disabled={isLoading}
-                class="w-full accent-indigo-600 cursor-pointer h-2 bg-nested rounded-lg"
+                class="w-full accent-primary cursor-pointer h-2 bg-nested rounded-lg"
               />
             </div>
 
             <!-- Settlement Delay -->
-            <div class="p-5 rounded-2xl bg-card border border-light space-y-3">
+            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <div class="w-7 h-7 rounded-lg bg-orange/15 text-orange flex items-center justify-center">
                     <span class="material-symbols-outlined text-sm">hourglass_top</span>
                   </div>
                   <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
@@ -264,21 +285,21 @@
                   <button
                     type="button"
                     on:click={() => (settlementDelayDays = 3)}
-                    class="px-2 py-0.5 rounded text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 3 ? 'bg-amber-500 text-white border-amber-500' : 'bg-nested text-muted border-light'}"
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 3 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
                   >
                     3H
                   </button>
                   <button
                     type="button"
                     on:click={() => (settlementDelayDays = 7)}
-                    class="px-2 py-0.5 rounded text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 7 ? 'bg-amber-500 text-white border-amber-500' : 'bg-nested text-muted border-light'}"
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 7 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
                   >
                     7H
                   </button>
                   <button
                     type="button"
                     on:click={() => (settlementDelayDays = 14)}
-                    class="px-2 py-0.5 rounded text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 14 ? 'bg-amber-500 text-white border-amber-500' : 'bg-nested text-muted border-light'}"
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 14 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
                   >
                     14H
                   </button>
@@ -309,7 +330,7 @@
               size="md"
               loading={isLoading}
               disabled={isLoading}
-              className="min-w-[180px] shadow-md"
+              className="min-w-[180px] shadow-xs active:scale-95 font-bold rounded-2xl"
             >
               <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">save</span>
               <span>Simpan Parameter</span>

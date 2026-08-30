@@ -1,14 +1,14 @@
 <script lang="ts">
   import {
     Palette,
-    User,
     Clock,
     CheckCircle2,
     XCircle,
     ShoppingBag,
   } from 'lucide-svelte';
-  import { Card, Badge } from '@/components/ui';
+  import { Card, Badge, Table, Pagination } from '@/components/ui';
   import { formatCurrency, formatDate } from '@/lib/utils';
+  import { addToast } from '@/lib/toast';
 
   export let initialOrders: Array<{
     id: string;
@@ -45,6 +45,9 @@
   let orders = [...initialOrders];
   let searchQuery = '';
   let selectedStatus: 'all' | 'paid' | 'pending' | 'failed' = 'all';
+  let currentPage = 1;
+  const pageSize = 10;
+  let copiedId: string | null = null;
 
   $: filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -68,6 +71,14 @@
     return matchesStatus && matchesSearch;
   });
 
+  $: {
+    searchQuery;
+    selectedStatus;
+    currentPage = 1;
+  }
+
+  $: paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
@@ -75,7 +86,7 @@
       case 'completed':
         return { variant: 'emerald' as const, label: 'Lunas', icon: CheckCircle2 };
       case 'pending':
-        return { variant: 'amber' as const, label: 'Menunggu', icon: Clock };
+        return { variant: 'orange' as const, label: 'Menunggu', icon: Clock };
       case 'expired':
         return { variant: 'slate' as const, label: 'Kedaluwarsa', icon: Clock };
       case 'failed':
@@ -84,21 +95,51 @@
         return { variant: 'slate' as const, label: status, icon: Clock };
     }
   };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      copiedId = text;
+      addToast({
+        type: 'success',
+        message: `ID Tagihan ${text} disalin!`,
+      });
+      setTimeout(() => {
+        if (copiedId === text) copiedId = null;
+      }, 2500);
+    } catch {
+      addToast({
+        type: 'error',
+        message: 'Gagal menyalin',
+      });
+    }
+  };
+
+  const tableHeaders = [
+    { label: 'Invoice & Waktu', width: 'w-44' },
+    { label: 'Template Terpesan' },
+    { label: 'Pembeli (Tenant)', width: 'w-48' },
+    { label: 'Harga Jual', align: 'right' as const, width: 'w-32' },
+    { label: 'Komisi Desainer', align: 'right' as const, width: 'w-36' },
+    { label: 'Status', align: 'center' as const, width: 'w-32' },
+  ];
 </script>
 
-<Card variant="bordered" padding="none" radius="xl" topBeam="indigo-500">
-  <!-- Table Header & Controls (matching DesignerMutationTable style) -->
-  <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-base">shopping_bag</span>
-        </div>
-        <h3 class="text-heading-md text-main font-bold">Daftar Transaksi Pesanan Masuk</h3>
+<Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
+  <!-- Table Header & Controls -->
+  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <ShoppingBag size={18} />
       </div>
-      <p class="text-body-sm text-secondary mt-0.5 ml-10.5">
-        Rincian pembeli tenant, nominal kotor, dan hak komisi bersih per transaksi
-      </p>
+      <div>
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Daftar Transaksi Pesanan Masuk
+        </h3>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Rincian pembeli tenant, nominal kotor, dan hak komisi bersih per transaksi
+        </p>
+      </div>
     </div>
 
     <!-- Filter Tabs & Search Box -->
@@ -110,17 +151,17 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari invoice / pembeli..."
-          class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Segmented Status Filter -->
-      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-xl p-1">
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
         <button
           type="button"
           on:click={() => (selectedStatus = 'all')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer {selectedStatus === 'all'
-            ? 'bg-card text-main shadow-2xs'
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {selectedStatus === 'all'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           Semua ({orders.length})
@@ -128,164 +169,150 @@
         <button
           type="button"
           on:click={() => (selectedStatus = 'paid')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {selectedStatus === 'paid'
-            ? 'bg-emerald-500 text-white shadow-2xs'
-            : 'text-muted hover:text-success'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'paid'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Lunas ({orders.filter((o) => o.status === 'paid' || o.status === 'success' || o.status === 'completed').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          Lunas
         </button>
         <button
           type="button"
           on:click={() => (selectedStatus = 'pending')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {selectedStatus === 'pending'
-            ? 'bg-amber-500 text-white shadow-2xs'
-            : 'text-muted hover:text-amber-500'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'pending'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Menunggu ({orders.filter((o) => o.status === 'pending').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          Menunggu
         </button>
         <button
           type="button"
           on:click={() => (selectedStatus = 'failed')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {selectedStatus === 'failed'
-            ? 'bg-rose-500 text-white shadow-2xs'
-            : 'text-muted hover:text-rose-500'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'failed'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Batal ({orders.filter((o) => o.status === 'failed' || o.status === 'expired').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+          Batal
         </button>
       </div>
     </div>
   </div>
 
   <!-- Table Content -->
-  <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="border-b border-light bg-nested/50 text-2xs uppercase tracking-wider text-muted font-heading font-bold">
-          <th class="px-6 py-4">Invoice & Waktu</th>
-          <th class="px-6 py-4">Template Terpesan</th>
-          <th class="px-6 py-4">Pembeli (Tenant)</th>
-          <th class="px-6 py-4 text-right">Harga Jual</th>
-          <th class="px-6 py-4 text-right">Komisi Desainer</th>
-          <th class="px-6 py-4 text-center">Status</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-[var(--color-border-light)] text-sm">
-        {#if filteredOrders.length === 0}
-          <tr>
-            <td colspan="6" class="px-6 py-16 text-center text-muted">
-              <div class="w-12 h-12 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-                <ShoppingBag size={24} />
+  {#if filteredOrders.length === 0}
+    <div class="py-16 px-8 flex flex-col items-center text-center">
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
+        <ShoppingBag size={24} />
+      </div>
+      <h4 class="font-bold text-main text-base font-heading mb-1">Belum Ada Pesanan Masuk</h4>
+      <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans leading-relaxed">
+        {searchQuery || selectedStatus !== 'all'
+          ? 'Tidak ada transaksi masuk yang cocok dengan kriteria pencarian.'
+          : 'Belum ada transaksi pembelian template oleh tenant saat ini.'}
+      </p>
+    </div>
+  {:else}
+    <Table headers={tableHeaders} minWidth="min-w-[840px]">
+      {#each paginatedOrders as order (order.id)}
+        {@const statusMeta = getStatusBadge(order.status)}
+        {@const designerShare = order.commission?.designerAmount ?? Math.round(order.amount * 0.7)}
+        {@const displayId = order.externalId || order.id}
+        <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Invoice ID & Created At -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2.5">
+              <button
+                type="button"
+                on:click={() => copyToClipboard(displayId)}
+                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+                title="Salin ID Tagihan"
+              >
+                <span class="truncate max-w-[110px]">{displayId}</span>
+                <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-emerald-500' : 'text-muted'}">
+                  {copiedId === displayId ? 'check' : 'content_copy'}
+                </span>
+              </button>
+            </div>
+            <span class="text-3xs text-secondary mt-1 block font-mono">
+              {formatDate(order.createdAt)}
+            </span>
+          </td>
+
+          <!-- Template Details -->
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              {#if order.template?.thumbnailUrl}
+                <img
+                  src={order.template.thumbnailUrl}
+                  alt={order.template.name}
+                  class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
+                />
+              {:else}
+                <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
+                  <Palette size={16} />
+                </div>
+              {/if}
+              <div class="min-w-0 max-w-xs">
+                <span class="font-bold text-xs text-main block truncate font-sans">
+                  {order.template?.name || 'Template Desain Toko'}
+                </span>
+                <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
+                  ID: #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
+                </span>
               </div>
-              <p class="font-bold text-main text-sm font-heading">Belum Ada Pesanan Masuk</p>
-              <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans">
-                {searchQuery || selectedStatus !== 'all'
-                  ? 'Tidak ada transaksi masuk yang cocok dengan kriteria pencarian.'
-                  : 'Belum ada transaksi pembelian template oleh tenant saat ini.'}
-              </p>
-            </td>
-          </tr>
-        {:else}
-          {#each filteredOrders as order (order.id)}
-            {@const statusMeta = getStatusBadge(order.status)}
-            {@const designerShare = order.commission?.designerAmount ?? Math.round(order.amount * 0.7)}
-            <tr class="hover:bg-nested/30 transition-colors group">
-              <!-- Invoice ID & Created At -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-card border border-light text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
-                    <span class="material-symbols-outlined text-base">receipt</span>
-                  </div>
-                  <div>
-                    <span class="font-bold font-mono text-xs text-main block">
-                      {order.externalId || order.id}
-                    </span>
-                    <span class="text-3xs text-secondary mt-0.5 block font-sans">
-                      {formatDate(order.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              </td>
+            </div>
+          </td>
 
-              <!-- Template Details -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  {#if order.template?.thumbnailUrl}
-                    <img
-                      src={order.template.thumbnailUrl}
-                      alt={order.template.name}
-                      class="w-10 h-8 rounded-lg object-cover border border-light flex-shrink-0"
-                    />
-                  {:else}
-                    <div class="w-10 h-8 rounded-lg bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0">
-                      <Palette size={15} />
-                    </div>
-                  {/if}
-                  <div class="min-w-0 max-w-xs">
-                    <span class="font-bold text-xs text-main block truncate">
-                      {order.template?.name || 'Template Desain'}
-                    </span>
-                    <span class="text-3xs font-mono text-muted block">
-                      ID: #{order.templateId?.slice(-6) || '-'}
-                    </span>
-                  </div>
-                </div>
-              </td>
-
-              <!-- Tenant Details -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2.5">
-                  {#if order.user?.image}
-                    <img
-                      src={order.user.image}
-                      alt={order.user.name || 'Tenant'}
-                      class="w-7 h-7 rounded-full object-cover border border-light flex-shrink-0"
-                    />
-                  {:else}
-                    <div class="w-7 h-7 rounded-full bg-nested border border-light flex items-center justify-center text-secondary flex-shrink-0">
-                      <User size={13} />
-                    </div>
-                  {/if}
-                  <div class="min-w-0 max-w-xs">
-                    <span class="font-bold text-xs text-main block truncate">
-                      {order.user?.name || 'Tenant UMKM'}
-                    </span>
-                    <span class="text-3xs text-secondary block truncate font-mono">
-                      {order.user?.email || '-'}
-                    </span>
-                  </div>
-                </div>
-              </td>
-
-              <!-- Gross Amount -->
-              <td class="px-6 py-4 text-right font-mono text-xs text-secondary">
-                {formatCurrency(order.amount)}
-              </td>
-
-              <!-- Net Designer Share -->
-              <td class="px-6 py-4 text-right">
-                <span class="font-mono font-bold text-xs text-success block">
-                  {formatCurrency(designerShare)}
+          <!-- Buyer (Tenant) -->
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                {order.user?.name ? order.user.name.charAt(0).toUpperCase() : order.user?.email.charAt(0).toUpperCase()}
+              </div>
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-main block truncate font-sans">
+                  {order.user?.name || 'Tenant UMKM'}
                 </span>
-                <span class="text-[10px] text-muted font-normal block font-sans mt-0.5 tracking-tight">
-                  (Hak 70%)
+                <span class="text-3xs text-secondary block truncate font-mono mt-0.5">
+                  {order.user?.email}
                 </span>
-              </td>
+              </div>
+            </div>
+          </td>
 
-              <!-- Status Badge -->
-              <td class="px-6 py-4 text-center">
-                <div class="inline-flex items-center justify-center">
-                  <Badge variant={statusMeta.variant} size="sm" dot>
-                    {statusMeta.label}
-                  </Badge>
-                </div>
-              </td>
-            </tr>
-          {/each}
-        {/if}
-      </tbody>
-    </table>
-  </div>
+          <!-- Gross Sale Price -->
+          <td class="px-4 py-4 text-right whitespace-nowrap">
+            <span class="font-mono text-xs font-bold text-secondary">
+              {formatCurrency(order.amount)}
+            </span>
+          </td>
+
+          <!-- Net Designer Commission -->
+          <td class="px-4 py-4 text-right whitespace-nowrap">
+            <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+              +{formatCurrency(designerShare)}
+            </span>
+          </td>
+
+          <!-- Status Badge -->
+          <td class="px-6 py-4 text-center whitespace-nowrap">
+            <div class="inline-flex items-center justify-center">
+              <Badge variant={statusMeta.variant} size="sm" dot>
+                {statusMeta.label}
+              </Badge>
+            </div>
+          </td>
+        </tr>
+      {/each}
+    </Table>
+
+    <!-- DaisyUI Pagination Footer -->
+    <Pagination
+      bind:currentPage
+      totalItems={filteredOrders.length}
+      {pageSize}
+    />
+  {/if}
 </Card>

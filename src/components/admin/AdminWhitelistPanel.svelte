@@ -9,6 +9,7 @@
   import AdminDetailModal from './whitelist/AdminDetailModal.svelte';
   import AdminConfirmModal from './whitelist/AdminConfirmModal.svelte';
   import StatCard from '../ui/StatCard.svelte';
+  import { Button } from '@/components/ui';
 
   let admins: AdminEntry[] = [];
   
@@ -131,9 +132,15 @@
       </p>
     </div>
     
-    <button type="button" on:click={() => isAddModalOpen = true} class="btn btn-primary rounded-xl font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all w-full md:w-auto shrink-0 px-6 h-11">
-      <Plus size={18} strokeWidth={2.5} class="mr-1" /> Tambah Admin
-    </button>
+    <Button
+      variant="primary"
+      size="md"
+      on:click={() => isAddModalOpen = true}
+      className="font-bold shrink-0 px-6"
+    >
+      <Plus size={18} strokeWidth={2.5} class="mr-1" />
+      <span>Tambah Admin</span>
+    </Button>
   </div>
   
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">

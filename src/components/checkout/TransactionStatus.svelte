@@ -52,28 +52,28 @@
 
 <div class="w-full">
   {#if status === 'pending'}
-    <div class="flex items-center justify-center gap-2 text-base-content/60 text-xs py-1 animate-pulse">
-      <span class="material-symbols-outlined text-base animate-spin">sync</span>
-      <span>Mengecek status pembayaran otomatis...</span>
+    <div class="flex items-center justify-center gap-2 text-secondary text-xs py-1.5 animate-pulse">
+      <span class="material-symbols-outlined text-base animate-spin text-primary">sync</span>
+      <span class="font-medium">Mengecek status pembayaran otomatis...</span>
     </div>
   {/if}
 
   {#if error}
-    <div class="alert alert-warning text-xs py-2 px-3 mt-2 rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+    <div class="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs py-2 px-3 mt-2 rounded-xl flex items-center justify-center gap-2">
       <span class="material-symbols-outlined text-base">warning</span>
       <span>{error}</span>
     </div>
   {/if}
 
   {#if status === 'success'}
-    <div class="flex items-center justify-center gap-1.5 text-success text-xs font-semibold py-1">
+    <div class="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold py-1.5">
       <span class="material-symbols-outlined text-base">verified</span>
       <span>Pembayaran Berhasil Diverifikasi</span>
     </div>
   {/if}
 
   {#if status === 'failed' || status === 'expired' || status === 'canceled' || status === 'refunded'}
-    <div class="flex items-center justify-center gap-1.5 text-error text-xs font-semibold py-1">
+    <div class="flex items-center justify-center gap-1.5 text-error text-xs font-semibold py-1.5">
       <span class="material-symbols-outlined text-base">cancel</span>
       <span>Pembayaran {status === 'expired' ? 'Kedaluwarsa' : status === 'canceled' ? 'Dibatalkan' : status === 'refunded' ? 'Dikembalikan' : 'Gagal'}. Silakan coba lagi.</span>
     </div>

@@ -2,6 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateReviewPanel from '@/components/admin/TemplateReviewPanel.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { getTemplatesForAdmin } from '@/services';
 
@@ -48,13 +49,16 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
 
       <!-- Quick Action / Link -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <a
+        <Button
+          client:load
           href="/admin/template-categories"
-          class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+          variant="secondary"
+          size="md"
+          class="font-bold"
         >
           <span class="material-symbols-outlined text-primary text-base">category</span>
           <span>Kelola Kategori Template</span>
-        </a>
+        </Button>
       </div>
     </div>
 
@@ -66,7 +70,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
         value={counts.all}
         rawValue={counts.all}
         icon="palette"
-        colorTheme="indigo"
+        cardTheme="dark"
         badge="Koleksi"
         footerText="Seluruh template terdaftar"
         delayClass="delay-100"
@@ -77,7 +81,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
         value={counts.pending}
         rawValue={counts.pending}
         icon="hourglass_top"
-        colorTheme="amber"
+        cardTheme="orange"
         badge="Antrean"
         footerText="Memerlukan tindakan admin"
         delayClass="delay-150"
@@ -88,7 +92,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
         value={counts.approved}
         rawValue={counts.approved}
         icon="check_circle"
-        colorTheme="emerald"
+        cardTheme="default"
         badge="Aktif"
         footerText="Tersedia di marketplace publik"
         delayClass="delay-200"
@@ -99,7 +103,7 @@ const initialTemplatesJson = JSON.stringify(initialTemplates);
         value={counts.rejected}
         rawValue={counts.rejected}
         icon="cancel"
-        colorTheme="rose"
+        cardTheme="blue"
         badge="Revisi"
         footerText="Perlu perbaikan oleh desainer"
         delayClass="delay-250"

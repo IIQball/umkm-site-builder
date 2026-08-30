@@ -5,9 +5,6 @@
   export let padding: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
   export let radius: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full' = '2xl';
   export let hoverable: boolean = false;
-  export let topBeam: boolean | string = false;
-  export let beam: boolean = false;
-  export let beamColor: string = 'indigo-500';
   export let id: string = '';
   export let role: string | undefined = undefined;
   let className: string = '';
@@ -21,10 +18,10 @@
 
   const variantStyles = {
     bordered: 'bg-card border border-light shadow-xs',
-    elevated: 'bg-card border border-light shadow-md hover:shadow-lg',
+    elevated: 'bg-card border border-light shadow-sm hover:shadow-md',
     flat: 'bg-card border-none shadow-none',
     nested: 'bg-nested border border-light shadow-none',
-    gradient: 'bg-gradient-to-br from-indigo-500/8 via-card to-card border border-indigo-500/20 shadow-xs',
+    gradient: 'bg-card border border-light shadow-xs',
   };
 
   const paddingStyles = {
@@ -47,15 +44,12 @@
     full: 'rounded-full',
   };
 
-  $: hasBeam = topBeam || beam;
-  $: activeBeamColor = typeof topBeam === 'string' ? topBeam : (beamColor.includes('-') ? beamColor : `${beamColor}-500`);
-
   $: cardClasses = [
-    'relative overflow-hidden transition-all duration-200 text-main',
+    'relative overflow-hidden transition-all duration-150 text-main',
     variantStyles[variant] || variantStyles.bordered,
     paddingStyles[padding] || paddingStyles.md,
     radiusStyles[radius] || radiusStyles['2xl'],
-    hoverable ? 'hover:-translate-y-0.5 hover:shadow-md cursor-pointer' : '',
+    hoverable ? 'hover:-translate-y-0.5 hover:shadow-sm cursor-pointer' : '',
     className,
   ]
     .filter(Boolean)
@@ -71,11 +65,7 @@
   on:mouseleave={(e) => dispatch('mouseleave', e)}
   {...$$restProps}
 >
-  {#if hasBeam}
-    <div
-      class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-{activeBeamColor} to-transparent rounded-full z-20 pointer-events-none"
-    ></div>
-  {/if}
   <slot />
 </div>
+
 

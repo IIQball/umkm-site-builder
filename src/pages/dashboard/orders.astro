@@ -2,6 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services/finance/transaction.service';
 
@@ -43,13 +44,16 @@ const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpe
 
       <!-- Quick Action Pill -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <a
+        <Button
+          client:load
           href="/dashboard/templates"
-          class="bg-card border border-light rounded-2xl px-4 py-2.5 text-xs font-bold text-main shadow-xs hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+          variant="secondary"
+          size="md"
+          class="font-bold"
         >
           <span class="material-symbols-outlined text-primary text-base">palette</span>
           <span>Galeri Template Toko</span>
-        </a>
+        </Button>
       </div>
     </div>
 
@@ -61,7 +65,7 @@ const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpe
         value={initialOrders.length}
         rawValue={initialOrders.length}
         icon="receipt_long"
-        colorTheme="indigo"
+        cardTheme="dark"
         badge="Semua Transaksi"
         footerText="Riwayat seluruh invoice"
         delayClass="delay-100"
@@ -72,7 +76,7 @@ const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpe
         value={totalPaidOrders.length}
         rawValue={totalPaidOrders.length}
         icon="check_circle"
-        colorTheme="emerald"
+        cardTheme="default"
         badge="Siap Pakai"
         footerText="Dapat langsung diterapkan"
         delayClass="delay-150"
@@ -83,9 +87,9 @@ const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpe
         value={totalPendingOrders.length}
         rawValue={totalPendingOrders.length}
         icon="hourglass_top"
-        colorTheme="amber"
+        cardTheme="orange"
         badge="Pending"
-        footerText="Selesaikan tagihan via Xendit"
+        footerText="Selesaikan tagihan pembayaran"
         delayClass="delay-200"
       />
       <StatCard
@@ -94,7 +98,7 @@ const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpe
         value={formattedTotalSpent}
         rawValue={totalSpent}
         icon="payments"
-        colorTheme="violet"
+        cardTheme="blue"
         badge="Akumulasi"
         footerText="Total pembelian template lunas"
         delayClass="delay-250"

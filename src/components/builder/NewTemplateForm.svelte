@@ -131,9 +131,8 @@
   <Card
     variant="bordered"
     padding="none"
-    radius="3xl"
-    topBeam="indigo-500"
-    className="overflow-hidden shadow-xl relative"
+    radius="2xl"
+    className="relative overflow-hidden"
   >
     <!-- Header Banner -->
     <div
@@ -141,16 +140,16 @@
     >
       <div class="flex items-center gap-3.5">
         <div
-          class="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs"
+          class="w-8 h-8 rounded-lg bg-nested border border-light text-muted flex items-center justify-center flex-shrink-0"
         >
-          <Sparkles size={20} />
+          <Sparkles size={16} />
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-heading-md text-main font-bold">
               Studio Inisialisasi Template
             </h1>
-            <Badge variant="indigo" size="sm" dot pulse>Draf Baru</Badge>
+            <Badge variant="secondary" size="sm">Draf Baru</Badge>
           </div>
           <p class="text-body-sm text-secondary mt-0.5">
             Konfigurasi metadata awal template sebelum masuk ke No-Code Visual

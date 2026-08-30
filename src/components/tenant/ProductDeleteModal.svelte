@@ -1,25 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { Modal, Button } from '@/components/ui';
 
   export let showModal = false;
   export let deletingId: string | null = null;
 
   const dispatch = createEventDispatcher();
-  
-  let dialogElement: HTMLDialogElement;
   let deleteLoading = false;
-
-  $: if (dialogElement) {
-    if (showModal) {
-      if (!dialogElement.open) dialogElement.showModal();
-    } else {
-      if (dialogElement.open) dialogElement.close();
-    }
-  }
 
   const closeModal = () => {
     showModal = false;
-  }
+  };
 
   const confirmDelete = async () => {
     if (!deletingId) return;
@@ -39,24 +30,48 @@
       deleteLoading = false;
       deletingId = null;
     }
-  }
+  };
 </script>
 
-<dialog class="modal backdrop-blur-sm" bind:this={dialogElement} on:close={closeModal}>
-  <div class="modal-box rounded-2xl p-6 md:p-8">
-    <h3 class="font-bold text-xl text-base-content tracking-tight mb-2">Hapus Produk</h3>
-    <p class="py-4 text-base-content/70">Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.</p>
-    <div class="modal-action mt-6">
-      <button class="btn btn-ghost rounded-xl" on:click={closeModal}>Batal</button>
-      <button class="btn bg-error hover:bg-error/90 text-white border-none shadow-sm rounded-xl px-6" on:click={confirmDelete} disabled={deleteLoading}>
-        {#if deleteLoading}
-          <span class="loading loading-spinner"></span>
-        {/if}
-        Hapus
-      </button>
+<Modal open={showModal} size="sm" on:close={closeModal}>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">delete</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-main text-base font-heading">
+          Hapus Produk
+        </h3>
+        <p class="text-xs text-secondary mt-0.5 font-sans">
+          Konfirmasi penghapusan data katalog produk
+        </p>
+      </div>
     </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+  </svelte:fragment>
+
+  <p class="text-sm text-secondary leading-relaxed font-sans">
+    Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.
+  </p>
+
+  <svelte:fragment slot="footer">
+    <Button
+      variant="secondary"
+      size="sm"
+      disabled={deleteLoading}
+      on:click={closeModal}
+    >
+      Batal
+    </Button>
+    <Button
+      variant="destructive"
+      size="sm"
+      loading={deleteLoading}
+      disabled={deleteLoading}
+      on:click={confirmDelete}
+      className="font-bold px-6"
+    >
+      Hapus
+    </Button>
+  </svelte:fragment>
+</Modal>

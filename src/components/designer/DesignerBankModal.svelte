@@ -24,36 +24,62 @@
 
 <Modal
   bind:open={showModal}
-  title={bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}
   size="sm"
   on:close={onClose}
 >
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">account_balance</span>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          {bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          Pastikan nama pemilik sesuai dengan buku rekening Anda
+        </p>
+      </div>
+    </div>
+  </svelte:fragment>
+
   <div class="space-y-4">
-    <Select
-      label="Nama Bank"
-      options={popularBanks}
-      bind:value={inputBankName}
-      disabled={isLoading}
-      size="sm"
-    />
+    <!-- Form Fields -->
+    <div class="space-y-3.5 pt-1">
+      <Select
+        label="Nama Bank Tujuan"
+        options={popularBanks}
+        bind:value={inputBankName}
+        disabled={isLoading}
+        size="sm"
+      />
 
-    <Input
-      label="Nomor Rekening"
-      placeholder="Contoh: 7128391829"
-      bind:value={inputAccountNumber}
-      disabled={isLoading}
-      size="sm"
-      className="font-mono"
-    />
+      <Input
+        label="Nomor Rekening"
+        placeholder="Contoh: 7128391829"
+        bind:value={inputAccountNumber}
+        disabled={isLoading}
+        size="sm"
+        className="font-mono font-bold"
+      />
 
-    <Input
-      label="Nama Pemilik Rekening"
-      placeholder="Nama lengkap sesuai tabungan"
-      bind:value={inputHolderName}
-      disabled={isLoading}
-      size="sm"
-      error={apiError}
-    />
+      <Input
+        label="Nama Pemilik Rekening"
+        placeholder="Nama lengkap sesuai tabungan"
+        bind:value={inputHolderName}
+        disabled={isLoading}
+        size="sm"
+        error={apiError}
+      />
+    </div>
+
+    <!-- Security Trust Note -->
+    <div class="p-3 bg-nested/80 border border-light rounded-2xl flex items-center gap-2.5">
+      <span class="material-symbols-outlined text-xs text-muted flex-shrink-0">lock</span>
+      <span class="text-3xs text-secondary font-medium leading-relaxed">
+        Data rekening terenkripsi secara aman dan hanya digunakan untuk penyaluran komisi template.
+      </span>
+    </div>
   </div>
 
   <svelte:fragment slot="footer">
@@ -66,13 +92,14 @@
       Batal
     </Button>
     <Button
-      variant="primary"
+      variant="orange"
       size="sm"
       disabled={isLoading}
       loading={isLoading}
       on:click={onSave}
     >
-      Simpan Rekening
+      <span class="material-symbols-outlined text-sm">check</span>
+      <span>Simpan Rekening</span>
     </Button>
   </svelte:fragment>
 </Modal>

@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
+  import { Button } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -74,12 +75,22 @@
   </td>
   <td class="px-4 py-3 text-right">
     <div class="flex justify-end gap-2">
-      <button class="btn btn-sm btn-ghost bg-base-200 hover:bg-base-300 text-base-content/80 font-medium rounded-xl" on:click={() => dispatch('edit', product)}>
+      <Button
+        variant="secondary"
+        size="xs"
+        className="font-medium"
+        on:click={() => dispatch('edit', product)}
+      >
         Edit
-      </button>
-      <button class="btn btn-sm btn-ghost hover:bg-error/10 hover:text-error text-error/80 font-medium rounded-xl" on:click={() => dispatch('delete', product.id)}>
+      </Button>
+      <Button
+        variant="destructive"
+        size="xs"
+        className="font-medium"
+        on:click={() => dispatch('delete', product.id)}
+      >
         Hapus
-      </button>
+      </Button>
     </div>
   </td>
 </tr>

@@ -6,6 +6,7 @@ import { templates, commissions } from '@/db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import DesignerTemplateTable from '@/components/designer/DesignerTemplateTable.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
 
 export const prerender = false;
 
@@ -57,13 +58,16 @@ const counts = {
           Kelola, buat, dan pantau status kurasi publikasi template toko online UMKM Anda.
         </p>
       </div>
-      <a
+      <Button
+        client:load
         href="/builder/new"
-        class="inline-flex items-center gap-2 bg-gradient-to-r from-primary via-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white text-xs md:text-sm font-bold rounded-2xl px-6 py-3.5 shadow-md hover:shadow-lg hover:shadow-primary/20 transition-all flex-shrink-0 cursor-pointer"
+        variant="primary"
+        size="md"
+        class="font-bold flex-shrink-0"
       >
         <span class="material-symbols-outlined text-base">add_circle</span>
         <span>Buat Desain Baru</span>
-      </a>
+      </Button>
     </div>
 
     <!-- Statcards Grid (animated on client load) -->
@@ -74,7 +78,7 @@ const counts = {
         value={counts.all} 
         rawValue={counts.all}
         icon="layers" 
-        colorTheme="indigo"
+        cardTheme="dark"
         badge="Koleksi"
         footerText="Total template dibuat"
         delayClass="delay-100"
@@ -85,7 +89,7 @@ const counts = {
         value={counts.approved} 
         rawValue={counts.approved}
         icon="check_circle" 
-        colorTheme="emerald"
+        cardTheme="default"
         badge="Aktif"
         footerText="Tersedia di katalog publik"
         delayClass="delay-150"
@@ -96,7 +100,7 @@ const counts = {
         value={counts.pending} 
         rawValue={counts.pending}
         icon="hourglass_top" 
-        colorTheme="amber"
+        cardTheme="orange"
         badge="Kurasi Admin"
         footerText="Sedang diperiksa tim kurator"
         delayClass="delay-200"
@@ -107,7 +111,7 @@ const counts = {
         value={counts.draft + counts.rejected} 
         rawValue={counts.draft + counts.rejected}
         icon="edit_note" 
-        colorTheme="violet"
+        cardTheme="blue"
         badge="Dalam Proses"
         footerText="Belum dipublikasikan"
         delayClass="delay-250"

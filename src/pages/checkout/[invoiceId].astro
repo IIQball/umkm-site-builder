@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import CheckoutSummaryCard from '@/components/checkout/CheckoutSummaryCard.svelte';
+import Button from '@/components/ui/Button.svelte';
 import { transactionService } from '@/services';
 import { formatCurrency } from '@/lib/utils/format';
 import type { CheckoutPageData } from '@/types';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { templates } from '@/db/schema';
+import { templates, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const { invoiceId } = Astro.params;
@@ -25,6 +26,9 @@ let accessDenied = false;
 let pageData: CheckoutPageData | null = null;
 let error: string | null = null;
 let templateName = '';
+let templateThumbnailUrl = '';
+let designerName = '';
+let templateDescription = '';
 
 try {
   const transaction = await transactionService.getTransactionDetails(invoiceId);
@@ -43,12 +47,24 @@ try {
         });
         if (tpl) {
           templateName = tpl.name;
+          templateThumbnailUrl = tpl.thumbnailUrl || '';
+          templateDescription = tpl.description || '';
+
+          if (tpl.designerId) {
+            const designerUser = await db.query.users.findFirst({
+              where: eq(users.id, tpl.designerId),
+              columns: { name: true },
+            });
+            if (designerUser?.name) {
+              designerName = designerUser.name;
+            }
+          }
         }
       }
 
       let paymentUrl = '';
       if (transaction.status === 'pending') {
-        paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || '';
+        paymentUrl = (await transactionService.getInvoiceUrl(transaction.externalId)) || '';
       }
 
       pageData = {
@@ -59,6 +75,10 @@ try {
         status: transaction.status,
         expiresAt: '',
         paymentMethod: transaction.paymentChannel || undefined,
+        createdAt: transaction.createdAt,
+        templateThumbnailUrl,
+        designerName,
+        templateDescription,
       };
     }
   }
@@ -76,38 +96,50 @@ const lineItemSubtitle = 'Desain Template Website UMKM Siap Pakai';
 ---
 
 <BaseLayout title={checkoutMetaTitle} description={checkoutDescription}>
-  <div class="min-h-screen bg-canvas flex flex-col justify-center items-center py-10 px-4 text-main antialiased">
-    <div class="w-full max-w-lg">
+  <div class="min-h-screen bg-canvas relative flex flex-col justify-center items-center py-12 px-4 sm:px-6 text-main antialiased overflow-hidden">
+    <!-- Ambient Background Lighting -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    <div class="absolute top-1/3 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+    <div class="w-full max-w-4xl relative z-10">
 
       <!-- 403 Access Denied -->
       {accessDenied && (
-        <div class="p-8 rounded-2xl bg-card border border-light shadow-lg text-center space-y-3">
-          <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center mx-auto">
+        <div class="p-8 rounded-3xl bg-card border border-light shadow-lg text-center space-y-4 animate-fade-in-up">
+          <div class="w-14 h-14 rounded-2xl bg-error/10 text-error flex items-center justify-center mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h2 class="text-heading-md font-bold text-main">Akses Ditolak</h2>
-          <p class="text-body-sm text-secondary">Anda tidak memiliki akses ke halaman pembayaran ini.</p>
-          <a href="/dashboard" class="btn btn-primary btn-sm rounded-xl">Ke Dashboard</a>
+          <div>
+            <h2 class="text-heading-md font-bold text-main font-heading">Akses Ditolak</h2>
+            <p class="text-body-sm text-secondary mt-1">Anda tidak memiliki hak akses untuk melihat rincian pembayaran ini.</p>
+          </div>
+          <div class="pt-2">
+            <Button client:load href="/dashboard" variant="primary" size="md">
+              <span class="material-symbols-outlined text-base">dashboard</span>
+              <span>Ke Dashboard</span>
+            </Button>
+          </div>
         </div>
       )}
 
       <!-- Error Alert -->
       {!accessDenied && error && (
-        <div class="alert alert-error shadow-lg text-white text-xs rounded-xl flex items-start gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-          <div>
-            <h3 class="font-bold">Terjadi Kesalahan</h3>
-            <p>{error}</p>
+        <div class="bg-error/10 border border-error/20 text-error rounded-2xl p-4 flex items-start gap-3 mb-6 animate-fade-in-up">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+          <div class="text-xs">
+            <h3 class="font-bold text-main font-heading">Gagal Memuat Pembayaran</h3>
+            <p class="text-secondary mt-0.5">{error}</p>
           </div>
         </div>
       )}
 
       <!-- Loading State Skeleton -->
       {!pageData && !error && (
-        <div class="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl bg-card border border-light">
-          <div class="flex flex-col items-center justify-center py-20">
-            <span class="loading loading-spinner loading-lg text-primary"></span>
-            <p class="text-xs text-muted mt-4 font-medium">Memuat data tagihan...</p>
+        <div class="w-full max-w-lg rounded-3xl overflow-hidden shadow-xl bg-card border border-light p-12 text-center">
+          <div class="flex flex-col items-center justify-center space-y-4">
+            <div class="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-secondary font-medium">Memuat data rincian tagihan...</p>
           </div>
         </div>
       )}

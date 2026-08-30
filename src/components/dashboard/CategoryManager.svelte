@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { Button } from '@/components/ui';
   
   interface Category {
     id: string;
@@ -116,13 +117,15 @@
     <div class="px-4 py-2">
       <p class="text-sm text-base-content/60 font-medium">Total <span class="text-base-content font-bold">{categories.length}</span> kategori</p>
     </div>
-    <button 
-      class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none rounded-lg btn-sm h-10 px-4 active:scale-[0.98] transition-transform" 
+    <Button 
+      variant="dark"
+      size="sm"
+      className="rounded-xl font-bold"
       on:click={openAddModal}
     >
       <span class="material-symbols-outlined text-[18px]">add</span>
-      Tambah Kategori
-    </button>
+      <span>Tambah Kategori</span>
+    </Button>
   </div>
 
   <!-- Notifications -->
@@ -143,9 +146,8 @@
   <!-- Content -->
   <div class="bg-base-100 rounded-2xl border border-base-200 overflow-hidden shadow-sm min-h-[400px] flex flex-col">
     {#if isLoading}
-      <div class="flex-1 flex flex-col items-center justify-center p-12 text-base-content/40">
-        <span class="loading loading-spinner loading-md mb-4"></span>
-        <p class="text-sm font-medium">Memuat data kategori...</p>
+      <div class="flex-1 flex items-center justify-center p-12">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
       </div>
     {:else if categories.length === 0}
       <div class="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-sm mx-auto">
@@ -154,9 +156,9 @@
         </div>
         <h3 class="text-lg font-semibold text-base-content tracking-tight mb-1">Belum ada kategori</h3>
         <p class="text-sm text-base-content/60 mb-6">Kelompokkan produk Anda dengan menambahkan kategori pertama.</p>
-        <button class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none shadow-sm" on:click={openAddModal}>
+        <Button variant="dark" size="sm" className="rounded-xl font-bold" on:click={openAddModal}>
           Buat Kategori
-        </button>
+        </Button>
       </div>
     {:else}
       <div class="overflow-x-auto">
@@ -183,20 +185,23 @@
                 </td>
                 <td class="px-6 py-4 align-top text-right">
                   <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
-                    <button 
-                      class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    <Button 
+                      variant="secondary"
+                      size="icon"
                       on:click={() => openEditModal(category)}
                       title="Edit"
                     >
                       <span class="material-symbols-outlined text-[18px]">edit</span>
-                    </button>
-                    <button 
-                      class="btn btn-ghost btn-sm btn-square text-base-content/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      size="icon"
+                      className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
                       on:click={() => deleteCategory(category.id)}
                       title="Hapus"
                     >
                       <span class="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -224,13 +229,15 @@
           <h3 class="font-bold text-lg tracking-tight text-base-content">
             {editingCategory ? 'Edit Kategori' : 'Kategori Baru'}
           </h3>
-          <button 
-            class="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-base-content" 
-            on:click={() => isModalOpen = false}
+          <Button 
+            variant="secondary"
+            size="icon"
+            on:click={() => (isModalOpen = false)}
             disabled={isSaving}
+            title="Tutup"
           >
             <span class="material-symbols-outlined text-[20px]">close</span>
-          </button>
+          </Button>
         </div>
 
         <div class="p-6">
@@ -273,25 +280,24 @@
         </div>
 
         <div class="px-6 py-4 bg-base-50/50 border-t border-base-200 flex justify-end gap-3">
-          <button 
-            class="btn btn-ghost text-base-content/70 hover:bg-base-200" 
-            on:click={() => isModalOpen = false}
+          <Button 
+            variant="secondary"
+            size="sm"
+            on:click={() => (isModalOpen = false)}
             disabled={isSaving}
           >
             Batal
-          </button>
-          <button 
-            class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none shadow-sm active:scale-[0.98] transition-transform" 
+          </Button>
+          <Button 
+            variant="dark"
+            size="sm"
             on:click={handleSubmit}
             disabled={isSaving || !formName.trim()}
+            loading={isSaving}
+            className="font-bold"
           >
-            {#if isSaving}
-              <span class="loading loading-spinner loading-sm"></span>
-              Menyimpan...
-            {:else}
-              Simpan
-            {/if}
-          </button>
+            Simpan
+          </Button>
         </div>
       </div>
     </div>

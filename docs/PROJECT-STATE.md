@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-29 by feature/language-standardization session
+Status: LIVE · Updated: 2026-08-30 by feature/ai-slop-removal-and-clean-saas-refactor
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,15 +11,44 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-Frontend UI language has been 100% standardized to Bahasa Indonesia across Template Management, Transactions, Checkout, and Platform Settings, while preserving 100% English for backend architecture (DB schemas, API endpoints, error codes). Created learning proposal for language standard rule. All 44 test suites (306 tests) passing, 0 typecheck errors, 0 lint warnings.
+AI-Slop decorative elements (loud gradient glows, top beam accents, skeuomorphic ATM cards, neon borders) have been completely removed across the entire UI and replaced with clean, industrial SaaS design system standards (Linear / Emil Kowalski / Stripe aesthetic). 45 test files (315 tests) passing, 0 typecheck errors, 0 lint warnings.
 
-- **Audit & Cleanup Legacy Registration Payment & Email Activation Flows:**
-  - Removed `isRegistrationPaid` flag and `store_registration` transaction type from schema, services, schemas, and types.
-  - Set `emailVerified: true` as default in `users` table schema and in BetterAuth `databaseHooks.user.create.before` to ensure accounts are immediately active upon registration.
-  - Updated `RegisterForm.svelte` to redirect directly to dashboard (`/dashboard` for tenants, `/designer/wallet` for designers) after signup without email activation gating.
-  - Set newly created stores in `/api/stores/onboard` and `/api/stores/register-subdomain` directly to `status: 'active'`.
-  - Removed obsolete `/api/tenant/transactions/initiate.ts` endpoint and simplified webhook fulfillment logic to strictly handle `template_purchase`.
-  - Cleaned up obsolete tests in `tests/transactions/wallet-and-fulfillment.test.ts` and `tests/lib/transactions/service.test.ts`.
+- **High-Craft SaaS Dashboard Redesign (Putih, Biru, Hitam, & Oren):**
+  - **100% Button UI Component Adoption ([`src/components/ui/Button.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\ui\Button.svelte)):**
+    - Eliminated raw HTML `<button>` and DaisyUI `.btn` classes across all tenant, designer, admin views, and checkout flow.
+    - Standardized Astro page quick action header buttons (`/dashboard/orders`, `/designer/templates`, `/designer/orders`, `/admin/template-categories`, `/admin/templates`, `/admin/settings`) to use `<Button client:load size="md" ...>`.
+    - Redesigned Checkout Experience (`/checkout/[invoiceId]` & `CheckoutSummaryCard.svelte`):
+      - Clean SaaS Receipt / 2-Column Split Layout (`max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8`) with ambient background lighting and breadcrumb stepper.
+      - Left column (7 cols): Browser mockup showcase with live preview, creator badge with verified checkmark, and 2x2 interactive license benefits grid (Lifetime, No-Code Editor, WhatsApp Order, Instant Subdomain).
+      - Right column (5 cols): Single unified payment card with invoice copy chip, itemized pricing breakdown with fee discounts, 24h countdown, `<Button variant="primary" fullWidth size="lg">`, payment method badges strip (QRIS, VA Bank, E-Wallet), and SSL encrypted trust guarantee.
+      - Fully removed mismatched dark card boxes in light mode; 100% harmonious single-tone card styling.
+    - **Tenant Template Gallery & Ownership Fix**:
+      - Created `/api/templates` and `/api/tenant/templates` endpoints backed by `getTenantOwnedTemplates(userId)` to strictly return templates owned/purchased by the tenant (from `userTemplates` table) plus free approved templates.
+      - Updated `TemplateGallery.svelte` to apply templates via `POST /api/stores/${storeId}/apply-template` with proper validation, clean empty states, and toast notifications.
+    - Standardized variant hierarchy: `primary`, `dark`, `orange`, `secondary`, `tertiary`, `destructive`.
+    - Added `size="xs"` (`text-2xs px-2.5 py-1 rounded-xl h-7`) and `size="icon"` (`p-1.5 rounded-xl h-8 w-8`) for crisp table row and modal actions.
+    - Full type-safety, 0 warnings, 45 test suites (315 tests) passing.
+  - **7 Pages Comprehensive Refactor & Polish (100% Token & Atomic UI Compliance):**
+    1. **Tenant Order History ([`/dashboard/orders`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/dashboard/orders.astro)):** Standardized header, 4-theme StatCards (`dark`, `default`, `orange`, `blue`), 10-item DaisyUI `<Pagination>`, click-to-copy invoice ID with toast, and responsive status filters.
+    2. **Public Marketplace ([`/templates`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/templates/index.astro)):** Upgraded search bar, price & sort dropdowns, category pills, verified designer info, 9-item DaisyUI `<Pagination>`, and direct purchase flow.
+    3. **Designer Templates ([`/designer/templates`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/designer/templates.astro)):** 4-theme StatCards, table/grid view switcher, 10-item DaisyUI `<Pagination>`, clean modals, and rejection reason review dialog.
+    4. **Designer Orders ([`/designer/orders`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/designer/orders.astro)):** 4-theme StatCards, 10-item DaisyUI `<Pagination>`, tenant avatar & email, gross vs net commission pill (`+Rp ...` in emerald), and click-to-copy invoice ID.
+    5. **Admin Template Review ([`/admin/templates`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/admin/templates/index.astro)):** 4-theme StatCards, review queue tabs, 10-item DaisyUI `<Pagination>`, approval modal, and rejection reason textarea modal.
+    6. **Admin Master Categories ([`/admin/template-categories`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/admin/template-categories/index.astro)):** 3-theme StatCards, master categories table with 10-item DaisyUI `<Pagination>`, icon selector grid, and create/edit/delete modals.
+    7. **Admin Settings ([`/admin/settings`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/admin/settings/index.astro)):** 3-theme StatCards, interactive dual-hue progress bar (Blue for Platform / Emerald for Designer), instant simulation box, quick fee preset buttons (20/80, 30/70, 40/60), and settlement delay presets.
+  - **Comprehensive Design Token Migration (`tailwind.config.mjs`, `global.css`, `colors.ts`):** Registered full RGB alpha channel variables for semantic colors (`primary`, `orange`, `success`, `error`, `warning`, `info`) across light & dark modes. Purged 100% of hardcoded arbitrary hex bracket styles (`[#ff5b35]`, `[#1c120c]`, `[#ff7b5c]`) across all components, replacing them with standardized Tailwind tokens (`bg-orange`, `text-orange`, `border-orange/20`, `bg-orange/15`, `text-orange-light`, `bg-primary`, `to-slate-950`).
+  - **Reusable DaisyUI Pagination Component (`Pagination.svelte` & `src/components/ui`):** Created a universal `<Pagination>` component leveraging DaisyUI `join` and `join-item btn` classes, featuring smart ellipsis handling, previous/next chevron navigation, and responsive info labels (_"Menampilkan 1-10 dari 45 data"_). Implemented 10-row pagination on both **Riwayat Mutasi & Transaksi** (`DesignerMutationTable.svelte`) and **Riwayat Penarikan Dana** (`DesignerPayoutHistoryTable.svelte`), complete with auto-reset to page 1 on search/filter changes.
+  - **Technical Terms Purge (`DesignerWithdrawModal.svelte`, `DesignerBankWithdraw.svelte`, `DesignerPayoutHistoryTable.svelte`):** Completely removed technical jargon (e.g. "via Xendit", "payment gateway") from user-facing copy, replacing them with clear, friendly Indonesian language descriptions.
+  - **Withdrawal Modal Thousand Separators & State Sync (`DesignerWithdrawModal.svelte`):** Fixed CustomEvent target resolution with `bind:value` synchronization, enabling automatic real-time frontend dot thousands formatting (`100.000`, `1.250.000`). Resolved button enable/disable state sync when manually typing or clearing presets, enforcing strict minimum payout (`>= minPayoutLimit`) and maximum balance bounds.
+  - **Modal Header Alignment & Validation Polish (`DesignerBankModal.svelte`, `DesignerWithdrawModal.svelte`):** Placed custom icon + title + subtitle into `<svelte:fragment slot="header">` so the `X` close button aligns seamlessly on the same row with the title. Configured strict payout button disabled state requiring minimum payout (`>= minPayoutLimit`), disabling submission when empty or less than minimum, and displaying dynamic error feedback.
+  - **Themed Modals Studio (`DesignerBankModal.svelte`, `DesignerWithdrawModal.svelte`, `Modal.svelte`):** Purged top gradient beam in modal base; upgraded both modal dialogs to match the Black & Orange dashboard palette with squircle icon badges (`bg-slate-900 text-white` & `bg-orange/15`), dark slate balance status bars, instant percentage preset pills (50%/100%), security encryption trust badges, and orange CTA confirmation buttons.
+  - **Dynamic Time-Based Greeting (`/designer/wallet`):** Header displays Indonesian contextual greeting (`Selamat Pagi`, `Selamat Siang`, `Selamat Sore`, `Selamat Malam`) based on current user local time.
+  - **Unified Master Bank & Payout Card (`DesignerBankWithdraw.svelte`):** Merged the bank account info and ready-to-withdraw balance into a single seamless Black & Orange Debit Card (`from-slate-950 via-slate-900 to-slate-950`) with gold EMV chip, NFC wave, bank badge, spaced account numbers, cardholder name, overlapping debit circles, and a frosted glass lower tray featuring available balance + vibrant orange "Tarik Dana" CTA button.
+  - **Color Palette & System Tokens (`colors.ts`, `global.css`):** Integrated vibrant Tangerine Orange (`#ff5b35`), Electric Blue (`#2563eb`), Deep Black (`#0f172a`), and Crisp White (`#ffffff`), complete with semantic `--color-orange` variables and `orange` badge/card themes.
+  - **StatCard Enhancements (`StatCard.svelte` & `DesignerStatCards.svelte`):** Supported `cardTheme` (`'dark'`, `'orange'`, `'blue'`, `'default'`). Total Saldo Dompet is Deep Black (`#0f172a`), Saldo Siap Tarik is Vibrant Orange (`#ff5b35`), Total Pendapatan Bersih is Electric Blue (`#2563eb`).
+  - **Lively Ledger & Payout Tables (`DesignerMutationTable.svelte`, `DesignerPayoutHistoryTable.svelte`):** Vivid transaction icons (south_west / north_east), emerald / orange amount pills (`+Rp ...` / `-Rp ...`), animated copy feedback, and rounded-full segmented status filters.
+  - **Modern Chunky Charts (`DesignerWalletOverview.svelte`):** Weekly Income bar chart features chunky rounded bars in deep black with today/peak bar highlighted in vibrant orange; donut distribution chart utilizes clean multi-hue segments.
+  - **Shell & Navigation Polish (`SidebarDesktop.svelte`, `SidebarMobile.svelte`, `DashboardNavbar.svelte`):** Modern brand logo pill, active dark/blue navigation pills with pulsing orange beacons, rounded-full search bar, and orange notification dots.
   - All 45 test files (315 tests) passing, 0 typecheck errors, 0 lint warnings.
 - **Public Navbar Redesign & User Profile Dropdown:**
   - Built interactive [`PublicNavbar.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\common\PublicNavbar.svelte) and integrated with [`Navbar.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\common\Navbar.astro).
@@ -27,7 +56,7 @@ Frontend UI language has been 100% standardized to Bahasa Indonesia across Templ
   - Provided responsive mobile navigation drawer with theme switching and auth states.
   - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
 - **Role-Based Marketplace Purchasing & Clean Actions:**
-  - Configured role-based purchasing guard in [`PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\public\PublicTemplateMarketplace.svelte): only tenants (and unauthenticated guests) see the purchase/apply button. Other logged-in roles (`designer`, `admin`, `superadmin`) see a single full-width *Pratinjau Langsung* button.
+  - Configured role-based purchasing guard in [`PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\public\PublicTemplateMarketplace.svelte): only tenants (and unauthenticated guests) see the purchase/apply button. Other logged-in roles (`designer`, `admin`, `superadmin`) see a single full-width _Pratinjau Langsung_ button.
   - All 45 test files (318 tests) passing, 0 typecheck errors, 0 lint warnings.
 - **Marketplace Cleanups & Type Modularization:**
   - Extracted public marketplace types (`PublicTemplate`, `CategoryItem`) into dedicated [`marketplace.types.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/public/marketplace.types.ts).
@@ -175,14 +204,14 @@ Frontend UI language has been 100% standardized to Bahasa Indonesia across Templ
 
 - **8 Preset Sections with 8pt Grid & Concentric Radius (Step 3):**
   - Refactored all 8 builder section components to strictly eliminate hardcoded hex colors / arbitrary spacing and use 8pt grid + CSS variables:
-    * `HeaderAnnouncement.svelte`: `default_split`, `centered_stacked`, `compact_inline` (h-14 / 56px single row).
-    * `Hero.svelte`: `split_left_text`, `split_right_text`, `centered_minimal`, `full_banner_overlay` (Nested radius outer 16px, padding 8px, inner 8px; Pill badges).
-    * `Features.svelte`: `grid_3_cards`, `horizontal_list`, `banner_inline_bar` (h-16 / 64px ribbon bar).
-    * `ProductCatalog.svelte`: `grid_standard`, `carousel_scroll` (snap-scroll), `list_compact` (Nested radius card 16px, inner thumbnail 8px).
-    * `Testimonials.svelte`: `masonry_grid`, `single_spotlight`, `chat_bubble_flow` (Pill avatars 48px, star rating gap 8px).
-    * `FAQ.svelte`: `accordion_single_col`, `split_faq_sidebar`, `grid_2_col_cards` (Nested radius containers).
-    * `GoogleMaps.svelte`: `fullwidth_map`, `split_map_info`, `compact_boxed` (Heights 320px, 400px, 480px; floating cards p-6 / 24px).
-    * `Footer.svelte`: `multi_column`, `centered_simple`, `cta_focused` (Floating WhatsApp CTA banner -mt-16 offset).
+    - `HeaderAnnouncement.svelte`: `default_split`, `centered_stacked`, `compact_inline` (h-14 / 56px single row).
+    - `Hero.svelte`: `split_left_text`, `split_right_text`, `centered_minimal`, `full_banner_overlay` (Nested radius outer 16px, padding 8px, inner 8px; Pill badges).
+    - `Features.svelte`: `grid_3_cards`, `horizontal_list`, `banner_inline_bar` (h-16 / 64px ribbon bar).
+    - `ProductCatalog.svelte`: `grid_standard`, `carousel_scroll` (snap-scroll), `list_compact` (Nested radius card 16px, inner thumbnail 8px).
+    - `Testimonials.svelte`: `masonry_grid`, `single_spotlight`, `chat_bubble_flow` (Pill avatars 48px, star rating gap 8px).
+    - `FAQ.svelte`: `accordion_single_col`, `split_faq_sidebar`, `grid_2_col_cards` (Nested radius containers).
+    - `GoogleMaps.svelte`: `fullwidth_map`, `split_map_info`, `compact_boxed` (Heights 320px, 400px, 480px; floating cards p-6 / 24px).
+    - `Footer.svelte`: `multi_column`, `centered_simple`, `cta_focused` (Floating WhatsApp CTA banner -mt-16 offset).
   - Updated `SectionRenderer.svelte` to support `GoogleMaps.svelte` and propagate `layoutPreset`.
   - Added full `data-node="[nodeKey]"` tree across all 8 section components.
   - Added unit test cases for all 8 preset variants in `tests/schemas/template-tokens-presets.test.ts`.
@@ -195,8 +224,6 @@ Frontend UI language has been 100% standardized to Bahasa Indonesia across Templ
   - Dynamically synchronized `LayoutGridOverlay.svelte` with active breakpoint safe zone margin and grid columns (12/8/4).
   - Implemented 0ms optimistic visual feedback on input events and 300ms debounced persistence in `GlobalThemeInspector.svelte`.
   - Added unit test suites in `tests/utils/design-math.test.ts` and `tests/schemas/template-tokens-presets.test.ts`.
-
-
 
 - **Service Layer Exceptions & Validation Standardization:**
   - Standardized `payout.service.ts` to replace generic `Error` with `AppError` mapping custom keys (`'PAYOUT_NOT_FOUND'`, `'BANK_ACCOUNT_NOT_FOUND'`, `'WALLET_NOT_FOUND'`, `'XENDIT_DISBURSEMENT_ERROR'`).

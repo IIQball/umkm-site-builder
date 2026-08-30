@@ -2,6 +2,7 @@
   import { Trash2, Ban, CheckCircle2 } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
   import type { ConfirmModalState } from './whitelist.types';
+  import { Button } from '@/components/ui';
 
   export let modalState: ConfirmModalState | null = null;
   export let isActionLoading = false;
@@ -50,30 +51,38 @@
       </p>
 
       <div class="flex gap-3">
-        <button on:click={close} class="btn btn-outline border-light flex-1 rounded-xl hover:bg-light h-11 min-h-0">
+        <Button
+          variant="secondary"
+          size="md"
+          className="flex-1 font-bold"
+          disabled={isActionLoading}
+          on:click={close}
+        >
           Batal
-        </button>
+        </Button>
         
         {#if modalState.type === 'remove'}
-          <button on:click={confirm} disabled={isActionLoading} class="btn btn-error flex-1 rounded-xl h-11 min-h-0 font-bold">
-            {#if isActionLoading}
-              <span class="loading loading-spinner loading-sm"></span>
-            {:else}
-              Hapus
-            {/if}
-          </button>
-        {:else}
-          <button 
-            on:click={confirm} 
+          <Button
+            variant="destructive"
+            size="md"
+            className="flex-1 font-bold"
             disabled={isActionLoading}
-            class="btn flex-1 rounded-xl h-11 min-h-0 font-bold {modalState.currentStatus === 'active' ? 'btn-warning' : 'btn-success text-white'}"
+            loading={isActionLoading}
+            on:click={confirm}
           >
-            {#if isActionLoading}
-              <span class="loading loading-spinner loading-sm"></span>
-            {:else}
-              {modalState.currentStatus === 'active' ? 'Blokir' : 'Aktifkan'}
-            {/if}
-          </button>
+            Hapus
+          </Button>
+        {:else}
+          <Button
+            variant={modalState.currentStatus === 'active' ? 'orange' : 'primary'}
+            size="md"
+            className="flex-1 font-bold {modalState.currentStatus !== 'active' ? '!bg-emerald-600 hover:!bg-emerald-700' : ''}"
+            disabled={isActionLoading}
+            loading={isActionLoading}
+            on:click={confirm}
+          >
+            {modalState.currentStatus === 'active' ? 'Blokir' : 'Aktifkan'}
+          </Button>
         {/if}
       </div>
     </div>

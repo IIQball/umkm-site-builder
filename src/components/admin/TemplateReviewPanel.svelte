@@ -17,7 +17,6 @@
 <script lang="ts">
   import {
     Palette,
-    User,
     Check,
     X,
     Eye,
@@ -25,9 +24,9 @@
     Clock,
     XCircle,
   } from 'lucide-svelte';
-  import { Card, Badge, Modal, Button, Textarea } from '@/components/ui';
+  import { Card, Badge, Table, Modal, Button, Textarea, Pagination } from '@/components/ui';
   import { formatCurrency, formatDate } from '@/lib/utils';
-  import { toast } from '@/lib/toast';
+  import { addToast } from '@/lib/toast';
 
   export let initialTemplatesJson: string = '[]';
   let templates: AdminTemplateItem[] = JSON.parse(initialTemplatesJson);
@@ -39,6 +38,8 @@
   let rejectModalOpen = false;
   let rejectionReason = '';
   let actionLoading = false;
+  let currentPage = 1;
+  const pageSize = 10;
 
   const fetchTemplates = async () => {
     isLoading = true;
@@ -50,7 +51,10 @@
         templates = result.data;
       }
     } catch {
-      toast.error('Gagal memuat daftar template');
+      addToast({
+        type: 'error',
+        message: 'Gagal memuat daftar template',
+      });
     } finally {
       isLoading = false;
     }
@@ -58,6 +62,7 @@
 
   const handleTabChange = (tab: typeof activeTab) => {
     activeTab = tab;
+    currentPage = 1;
     fetchTemplates();
   };
 
@@ -82,7 +87,10 @@
   const submitReview = async (action: 'approve' | 'reject') => {
     if (!selectedTemplate) return;
     if (action === 'reject' && rejectionReason.trim().length < 5) {
-      toast.error('Alasan penolakan minimal 5 karakter');
+      addToast({
+        type: 'error',
+        message: 'Alasan penolakan minimal 5 karakter',
+      });
       return;
     }
     actionLoading = true;
@@ -97,14 +105,23 @@
       });
       const result = await res.json();
       if (res.ok && (result.success || result.ok)) {
-        toast.success(action === 'approve' ? 'Template berhasil disetujui!' : 'Template telah ditolak');
+        addToast({
+          type: 'success',
+          message: action === 'approve' ? 'Template berhasil disetujui!' : 'Template telah ditolak',
+        });
         closeModal();
         await fetchTemplates();
       } else {
-        toast.error(result.error?.message || 'Gagal memperbarui status template');
+        addToast({
+          type: 'error',
+          message: result.error?.message || 'Gagal memperbarui status template',
+        });
       }
     } catch {
-      toast.error('Terjadi kesalahan koneksi');
+      addToast({
+        type: 'error',
+        message: 'Terjadi kesalahan koneksi',
+      });
     } finally {
       actionLoading = false;
     }
@@ -123,33 +140,51 @@
     return matchesTab && matchesSearch;
   });
 
+  $: {
+    searchQuery;
+    currentPage = 1;
+  }
+
+  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
         return { variant: 'emerald' as const, label: 'Disetujui', icon: CheckCircle2 };
       case 'pending':
-        return { variant: 'amber' as const, label: 'Perlu Ditinjau', icon: Clock };
+        return { variant: 'orange' as const, label: 'Perlu Ditinjau', icon: Clock };
       case 'rejected':
         return { variant: 'rose' as const, label: 'Ditolak', icon: XCircle };
       default:
         return { variant: 'slate' as const, label: status, icon: Clock };
     }
   };
+
+  const tableHeaders = [
+    { label: 'Template & Preview' },
+    { label: 'Desainer', width: 'w-48' },
+    { label: 'Harga Jual', align: 'right' as const, width: 'w-32' },
+    { label: 'Tanggal Diajukan', width: 'w-36' },
+    { label: 'Status', align: 'center' as const, width: 'w-36' },
+    { label: 'Aksi Review', align: 'right' as const, width: 'w-48' },
+  ];
 </script>
 
-<Card variant="bordered" padding="none" radius="xl" topBeam="indigo-500">
-  <!-- Table Header & Controls (matching DesignerMutationTable style) -->
-  <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-base">palette</span>
-        </div>
-        <h3 class="text-heading-md text-main font-bold">Daftar Kurasi & Review Template</h3>
+<Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
+  <!-- Table Header & Controls -->
+  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <Palette size={18} />
       </div>
-      <p class="text-body-sm text-secondary mt-0.5 ml-10.5">
-        Tinjau preview desain, verifikasi harga, dan putuskan persetujuan publikasi
-      </p>
+      <div>
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Daftar Kurasi & Review Template
+        </h3>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Tinjau preview desain, verifikasi harga, dan putuskan persetujuan publikasi
+        </p>
+      </div>
     </div>
 
     <!-- Filter Tabs & Search Box -->
@@ -161,47 +196,47 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari template / desainer..."
-          class="bg-nested/80 border border-light rounded-xl pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Segmented Status Filter -->
-      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-xl p-1">
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
         <button
           type="button"
           on:click={() => handleTabChange('pending')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {activeTab === 'pending'
-            ? 'bg-amber-500 text-white shadow-2xs'
-            : 'text-muted hover:text-amber-500'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'pending'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Menunggu ({templates.filter((t) => t.status === 'pending').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          Menunggu
         </button>
         <button
           type="button"
           on:click={() => handleTabChange('approved')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {activeTab === 'approved'
-            ? 'bg-emerald-500 text-white shadow-2xs'
-            : 'text-muted hover:text-success'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'approved'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Disetujui ({templates.filter((t) => t.status === 'approved').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          Disetujui
         </button>
         <button
           type="button"
           on:click={() => handleTabChange('rejected')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 {activeTab === 'rejected'
-            ? 'bg-rose-500 text-white shadow-2xs'
-            : 'text-muted hover:text-rose-500'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'rejected'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          Ditolak ({templates.filter((t) => t.status === 'rejected').length})
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+          Ditolak
         </button>
         <button
           type="button"
           on:click={() => handleTabChange('all')}
-          class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer {activeTab === 'all'
-            ? 'bg-card text-main shadow-2xs'
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeTab === 'all'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           Semua ({templates.length})
@@ -211,193 +246,250 @@
   </div>
 
   <!-- Table Content -->
-  <div class="overflow-x-auto">
-    {#if isLoading}
-      <div class="flex justify-center items-center py-16 text-muted">
-        <span class="material-symbols-outlined text-2xl animate-spin text-primary">refresh</span>
-        <span class="ml-2 text-xs font-bold">Memuat data template...</span>
+  {#if isLoading}
+    <div class="flex justify-center items-center py-16 text-muted">
+      <span class="material-symbols-outlined text-2xl animate-spin text-primary">refresh</span>
+      <span class="ml-2 text-xs font-bold font-sans">Memuat data template...</span>
+    </div>
+  {:else if filteredTemplates.length === 0}
+    <div class="py-16 px-8 text-center text-muted">
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
+        <Palette size={24} />
       </div>
-    {:else if filteredTemplates.length === 0}
-      <div class="py-16 px-8 text-center text-muted">
-        <div class="w-12 h-12 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-          <Palette size={24} />
-        </div>
-        <p class="font-bold text-main text-sm font-heading">Tidak Ada Pengajuan Template</p>
-        <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans">
-          Belum ada template dalam kategori status ini atau sesuai dengan pencarian Anda.
-        </p>
-      </div>
-    {:else}
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-light bg-nested/50 text-2xs uppercase tracking-wider text-muted font-heading font-bold">
-            <th class="px-6 py-4">Template & Preview</th>
-            <th class="px-6 py-4">Desainer</th>
-            <th class="px-6 py-4 text-right">Harga Jual</th>
-            <th class="px-6 py-4">Tanggal Diajukan</th>
-            <th class="px-6 py-4 text-center">Status</th>
-            <th class="px-6 py-4 text-right">Aksi Review</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-[var(--color-border-light)] text-sm">
-          {#each filteredTemplates as item (item.id)}
-            {@const statusMeta = getStatusBadge(item.status)}
-            <tr class="hover:bg-nested/30 transition-colors group">
-              <!-- Template Info -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  {#if item.thumbnailUrl}
-                    <img
-                      src={item.thumbnailUrl}
-                      alt={item.name}
-                      class="w-11 h-9 rounded-lg object-cover border border-light flex-shrink-0"
-                    />
-                  {:else}
-                    <div class="w-11 h-9 rounded-lg bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0">
-                      <Palette size={16} />
-                    </div>
-                  {/if}
-                  <div class="min-w-0 max-w-xs">
-                    <span class="font-bold text-xs text-main block truncate">
-                      {item.name}
-                    </span>
-                    <span class="text-3xs text-secondary line-clamp-1 block">
-                      {item.description || 'Tidak ada deskripsi'}
-                    </span>
+      <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Pengajuan Template</h4>
+      <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans leading-relaxed">
+        Belum ada template dalam kategori status ini atau sesuai dengan pencarian Anda.
+      </p>
+    </div>
+  {:else}
+    <Table headers={tableHeaders} minWidth="min-w-[860px]">
+      {#each paginatedTemplates as tpl (tpl.id)}
+        {@const statusMeta = getStatusBadge(tpl.status)}
+        <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Template Info + Thumbnail -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-14 h-10 rounded-xl bg-nested border border-light overflow-hidden flex-shrink-0 relative shadow-2xs">
+                {#if tpl.thumbnailUrl}
+                  <img src={tpl.thumbnailUrl} alt={tpl.name} class="w-full h-full object-cover" />
+                {:else}
+                  <div class="w-full h-full bg-nested flex items-center justify-center text-muted">
+                    <Palette size={16} />
                   </div>
-                </div>
-              </td>
+                {/if}
+              </div>
+              <div class="min-w-0 max-w-xs">
+                <span class="font-bold text-xs text-main block truncate font-sans">
+                  {tpl.name}
+                </span>
+                <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
+                  ID: #{tpl.id.slice(0, 8)}
+                </span>
+              </div>
+            </div>
+          </td>
 
-              <!-- Designer Info -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-nested border border-light flex items-center justify-center text-secondary flex-shrink-0">
-                    <User size={13} />
-                  </div>
-                  <div class="min-w-0 max-w-xs">
-                    <span class="font-bold text-xs text-main block truncate">
-                      {item.designerName || 'Desainer'}
-                    </span>
-                    <span class="text-3xs text-muted block truncate font-mono">
-                      {item.designerEmail || '-'}
-                    </span>
-                  </div>
-                </div>
-              </td>
+          <!-- Designer Info -->
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                {tpl.designerName ? tpl.designerName.charAt(0).toUpperCase() : 'D'}
+              </div>
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-main block truncate font-sans">
+                  {tpl.designerName || 'Desainer Kreator'}
+                </span>
+                <span class="text-3xs text-secondary block truncate font-mono mt-0.5">
+                  {tpl.designerEmail || '—'}
+                </span>
+              </div>
+            </div>
+          </td>
 
-              <!-- Price -->
-              <td class="px-6 py-4 text-right font-mono font-bold text-xs text-main">
-                {item.price === 0 ? 'Gratis' : formatCurrency(item.price)}
-              </td>
+          <!-- Price -->
+          <td class="px-4 py-4 text-right whitespace-nowrap">
+            <span class="font-mono text-xs font-bold text-main bg-nested/80 px-2.5 py-1 rounded-xl border border-light">
+              {tpl.price === 0 ? 'Gratis' : formatCurrency(tpl.price)}
+            </span>
+          </td>
 
-              <!-- Created Date -->
-              <td class="px-6 py-4 text-xs text-secondary font-sans">
-                {formatDate(item.createdAt)}
-              </td>
+          <!-- Created Date -->
+          <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
+            {formatDate(tpl.createdAt)}
+          </td>
 
-              <!-- Status Badge -->
-              <td class="px-6 py-4 text-center">
-                <div class="inline-flex items-center justify-center">
-                  <Badge variant={statusMeta.variant} size="sm" dot>
-                    {statusMeta.label}
-                  </Badge>
-                </div>
-              </td>
+          <!-- Status Badge -->
+          <td class="px-4 py-4 text-center whitespace-nowrap">
+            <div class="inline-flex items-center justify-center">
+              <Badge variant={statusMeta.variant} size="sm" dot>
+                {statusMeta.label}
+              </Badge>
+            </div>
+          </td>
 
-              <!-- Actions -->
-              <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                  <a
-                    href={`/builder/preview/${item.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    class="p-1.5 rounded-lg text-secondary hover:text-main hover:bg-nested border border-transparent hover:border-light transition-all cursor-pointer inline-flex items-center gap-1 text-xs"
-                    title="Buka Pratinjau Live"
-                  >
-                    <Eye size={14} />
-                    <span class="hidden sm:inline">Preview</span>
-                  </a>
+          <!-- Actions -->
+          <td class="px-6 py-4 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1.5">
+              <!-- Live Preview Button -->
+              <Button
+                href={`/builder/preview/${tpl.id}`}
+                target="_blank"
+                variant="secondary"
+                size="xs"
+                className="font-bold"
+                title="Buka Pratinjau Live"
+              >
+                <Eye size={13} />
+                <span>Lihat</span>
+              </Button>
 
-                  {#if item.status === 'pending'}
-                    <button
-                      type="button"
-                      on:click={() => openApproveModal(item)}
-                      class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
-                      title="Setujui Template"
-                    >
-                      <Check size={13} />
-                      <span>Setujui</span>
-                    </button>
-                    <button
-                      type="button"
-                      on:click={() => openRejectModal(item)}
-                      class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
-                      title="Tolak Template"
-                    >
-                      <X size={13} />
-                      <span>Tolak</span>
-                    </button>
-                  {/if}
-                </div>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    {/if}
-  </div>
+              {#if tpl.status === 'pending'}
+                <!-- Quick Approve -->
+                <Button
+                  variant="primary"
+                  size="xs"
+                  className="font-bold !bg-emerald-600 hover:!bg-emerald-700 text-white"
+                  title="Setujui Template"
+                  on:click={() => openApproveModal(tpl)}
+                >
+                  <Check size={13} strokeWidth={3} />
+                  <span>Setujui</span>
+                </Button>
+
+                <!-- Quick Reject -->
+                <Button
+                  variant="destructive"
+                  size="xs"
+                  className="font-bold"
+                  title="Tolak Template"
+                  on:click={() => openRejectModal(tpl)}
+                >
+                  <X size={13} strokeWidth={3} />
+                  <span>Tolak</span>
+                </Button>
+              {/if}
+            </div>
+          </td>
+        </tr>
+      {/each}
+    </Table>
+
+    <!-- DaisyUI Pagination Footer -->
+    <Pagination
+      bind:currentPage
+      totalItems={filteredTemplates.length}
+      {pageSize}
+    />
+  {/if}
 </Card>
 
-<!-- Modal Setujui Template -->
-<Modal bind:open={approveModalOpen} title="Konfirmasi Persetujuan Template">
-  <div class="space-y-4">
-    <p class="text-sm text-secondary leading-relaxed">
-      Apakah Anda yakin ingin menyetujui template <strong class="text-main">"{selectedTemplate?.name}"</strong> untuk dipublikasikan ke marketplace UMKM?
-    </p>
-    <p class="text-xs text-muted bg-nested p-3 rounded-xl border border-light">
-      Template ini akan segera dapat dilihat dan dibeli oleh seluruh tenant di katalog publik.
-    </p>
-    <div class="flex items-center justify-end gap-2 pt-2 border-t border-light">
-      <Button variant="secondary" size="sm" on:click={closeModal} disabled={actionLoading}>
-        Batal
-      </Button>
-      <Button variant="primary" size="sm" on:click={() => submitReview('approve')} loading={actionLoading} disabled={actionLoading}>
-        <Check size={14} class="mr-1" />
-        <span>Setujui & Publikasikan</span>
-      </Button>
+<!-- Approve Modal -->
+<Modal
+  open={approveModalOpen}
+  size="sm"
+  on:close={closeModal}
+>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <CheckCircle2 size={20} />
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          Setujui Template Desain
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          Publikasikan template ke marketplace UMKM
+        </p>
+      </div>
     </div>
-  </div>
+  </svelte:fragment>
+
+  {#if selectedTemplate}
+    <div class="space-y-4 pt-1">
+      <p class="text-xs text-secondary leading-relaxed font-sans">
+        Apakah Anda yakin ingin menyetujui template <strong class="text-main">{selectedTemplate.name}</strong> karya <strong class="text-main">{selectedTemplate.designerName || selectedTemplate.designerEmail}</strong>? Template ini akan langsung dapat dibeli dan digunakan oleh semua tenant UMKM.
+      </p>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="rounded-xl font-bold"
+          on:click={closeModal}
+          disabled={actionLoading}
+        >
+          Batal
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700"
+          on:click={() => submitReview('approve')}
+          disabled={actionLoading}
+        >
+          {actionLoading ? 'Menyetujui...' : 'Konfirmasi Setujui'}
+        </Button>
+      </div>
+    </div>
+  {/if}
 </Modal>
 
-<!-- Modal Tolak Template -->
-<Modal bind:open={rejectModalOpen} title="Tolak Pengajuan Template">
-  <form on:submit|preventDefault={() => submitReview('reject')} class="space-y-4">
-    <p class="text-sm text-secondary">
-      Berikan catatan alasan penolakan atau revisi untuk template <strong class="text-main">"{selectedTemplate?.name}"</strong>:
-    </p>
-    <Textarea
-      id="reject-reason"
-      label="Alasan Penolakan / Catatan Kurator (Wajib)"
-      placeholder="Jelaskan kekurangan desain, bug visual, atau hal yang perlu diperbaiki oleh desainer..."
-      bind:value={rejectionReason}
-      rows={4}
-      required
-      disabled={actionLoading}
-    />
-    <div class="flex items-center justify-end gap-2 pt-2 border-t border-light">
-      <Button variant="secondary" size="sm" on:click={closeModal} disabled={actionLoading}>
-        Batal
-      </Button>
-      <Button
-        type="submit"
-        variant="destructive"
-        size="sm"
-        loading={actionLoading}
-        disabled={actionLoading || rejectionReason.trim().length < 5}
-      >
-        <X size={14} class="mr-1" />
-        <span>Tolak Template</span>
-      </Button>
+<!-- Reject Modal -->
+<Modal
+  open={rejectModalOpen}
+  size="md"
+  on:close={closeModal}
+>
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <XCircle size={20} />
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          Tolak / Minta Revisi Template
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          Kirimkan catatan kurasi kepada desainer
+        </p>
+      </div>
     </div>
-  </form>
+  </svelte:fragment>
+
+  {#if selectedTemplate}
+    <div class="space-y-4 pt-1">
+      <p class="text-xs text-secondary leading-relaxed font-sans">
+        Tuliskan alasan penolakan atau perbaikan yang perlu dilakukan oleh desainer <strong class="text-main">{selectedTemplate.name}</strong>:
+      </p>
+
+      <Textarea
+        bind:value={rejectionReason}
+        placeholder="Contoh: Tata letak pada section hero kurang kontras pada mobile breakpoint..."
+        rows={4}
+        className="text-xs font-sans"
+      />
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="rounded-xl font-bold"
+          on:click={closeModal}
+          disabled={actionLoading}
+        >
+          Batal
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="rounded-xl font-bold"
+          on:click={() => submitReview('reject')}
+          disabled={actionLoading || rejectionReason.trim().length < 5}
+        >
+          {actionLoading ? 'Memproses...' : 'Kirim Penolakan'}
+        </Button>
+      </div>
+    </div>
+  {/if}
 </Modal>

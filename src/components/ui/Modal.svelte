@@ -78,9 +78,6 @@
       aria-labelledby={title ? 'modal-title' : undefined}
       aria-describedby={description ? 'modal-desc' : undefined}
     >
-      <!-- Top luminous accent beam -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent rounded-full z-20 pointer-events-none"></div>
-
       <!-- Modal Header -->
       {#if title || $$slots.header || showCloseButton}
         <div class="px-6 sm:px-7 py-5 border-b border-light flex items-center justify-between gap-4">

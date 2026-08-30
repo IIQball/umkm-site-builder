@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { Card, Badge } from '@/components/ui';
+  import { colors } from '@/components/tokens';
   import DesignerStatCards from './DesignerStatCards.svelte';
   import DesignerMutationTable from './DesignerMutationTable.svelte';
   import DesignerBankWithdraw from './DesignerBankWithdraw.svelte';
@@ -121,29 +122,26 @@
     />
   </div>
 
-  <!-- Row 3: Analytics 2-col (matching reference image Revenue Bar Chart + Donut Ring Chart) -->
+  <!-- Row 3: Analytics 2-col -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up delay-300">
-    <!-- Left: Weekly Activity Bar Chart (matching image Revenue Chart) -->
-    <Card variant="bordered" padding="lg" radius="3xl" beam beamColor="indigo" className="hover:shadow-md transition-all flex flex-col justify-between group">
+    <!-- Left: Weekly Activity Bar Chart -->
+    <Card variant="bordered" padding="lg" radius="2xl" className="flex flex-col justify-between group shadow-xs hover:shadow-md transition-all">
       <div class="flex items-start justify-between mb-6">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-xs">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
             <span class="material-symbols-outlined text-lg">bar_chart</span>
           </div>
           <div>
             <div class="flex items-baseline gap-2">
               <h3 class="text-heading-md font-bold text-main leading-tight">Aktivitas Pendapatan</h3>
-              <Badge variant="indigo" size="sm">7 Hari Terakhir</Badge>
+              <Badge variant="orange" size="sm">7 Hari Terakhir</Badge>
             </div>
-            <p class="text-body-sm text-secondary mt-0.5">Riwayat komisi CREDIT yang masuk ke dompet</p>
+            <p class="text-body-sm text-secondary mt-0.5">Riwayat komisi kredit yang masuk ke dompet</p>
           </div>
-        </div>
-        <div class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-main flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45">
-          <span class="material-symbols-outlined text-base">north_east</span>
         </div>
       </div>
 
-      <!-- Bar chart visual with subtle dotted guidelines -->
+      <!-- Bar chart visual with modern chunky bars -->
       <div class="pt-4 pb-2 relative">
         <!-- Guidelines -->
         <div class="absolute inset-x-2 top-8 border-b border-dashed border-light/60 pointer-events-none"></div>
@@ -151,23 +149,23 @@
 
         <div class="flex items-end justify-between gap-3 h-44 px-2 relative z-10">
           {#each weeklyData as day, idx}
-            {@const heightPercent = day.amount > 0 ? Math.max(14, Math.round((day.amount / maxWeekly) * 100)) : 8}
+            {@const heightPercent = day.amount > 0 ? Math.max(16, Math.round((day.amount / maxWeekly) * 100)) : 10}
             <div class="flex flex-col items-center gap-2 flex-1 group/bar relative">
-              <!-- Bar container -->
-              <div class="w-full max-w-[38px] bg-nested/70 rounded-t-2xl flex items-end justify-center h-36 overflow-hidden p-0.5 shadow-inner">
+              <!-- Bar container with chunky rounded bars -->
+              <div class="w-full max-w-[42px] bg-nested/80 rounded-2xl flex items-end justify-center h-36 overflow-hidden p-1">
                 <div
-                  class="w-full rounded-t-2xl transition-all duration-700 cursor-pointer animate-bar-grow {day.isToday ? 'bg-gradient-to-t from-[#4338CA] to-[#5551FF] shadow-sm shadow-indigo-500/30' : 'bg-gradient-to-t from-primary/30 to-primary/60 hover:from-[#5551FF]/80 hover:to-[#5551FF]'}"
-                  style="height: {heightPercent}%; animation-delay: {idx * 80}ms;"
+                  class="w-full rounded-xl transition-all duration-500 cursor-pointer animate-bar-grow {day.isToday ? 'bg-orange shadow-sm shadow-orange-500/20' : 'bg-slate-900 dark:bg-slate-700 hover:bg-primary dark:hover:bg-primary/80'}"
+                  style="height: {heightPercent}%; animation-delay: {idx * 60}ms;"
                 ></div>
               </div>
 
               <!-- Tooltip popup on hover -->
-              <div class="absolute -top-9 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-nested border border-main text-main text-3xs font-mono font-bold px-2.5 py-1 rounded-lg pointer-events-none whitespace-nowrap z-20 shadow-lg scale-95 group-hover/bar:scale-100 duration-200">
+              <div class="absolute -top-10 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-slate-900 text-white text-3xs font-mono font-bold px-3 py-1.5 rounded-xl pointer-events-none whitespace-nowrap z-20 shadow-md scale-95 group-hover/bar:scale-100 duration-150 border border-slate-800">
                 {day.amount > 0 ? `Rp ${day.amount.toLocaleString('id-ID')}` : 'Rp 0'}
               </div>
 
               <!-- Day Label -->
-              <span class="text-xs font-semibold {day.isToday ? 'text-primary font-extrabold' : 'text-muted'}">
+              <span class="text-2xs font-semibold {day.isToday ? 'text-orange font-black' : 'text-muted'}">
                 {day.label}
               </span>
             </div>
@@ -176,23 +174,20 @@
       </div>
     </Card>
 
-    <!-- Right: Sales by Template Donut Ring Chart (matching image Sales by Category Donut) -->
-    <Card variant="bordered" padding="lg" radius="3xl" beam beamColor="sky" className="hover:shadow-md transition-all flex flex-col justify-between group">
+    <!-- Right: Sales by Template Donut Ring Chart -->
+    <Card variant="bordered" padding="lg" radius="2xl" className="flex flex-col justify-between group shadow-xs hover:shadow-md transition-all">
       <div class="flex items-start justify-between mb-6">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 flex-shrink-0 shadow-xs">
+          <div class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
             <span class="material-symbols-outlined text-lg">donut_large</span>
           </div>
           <div>
             <div class="flex items-baseline gap-2">
               <h3 class="text-heading-md font-bold text-main leading-tight">Distribusi Penjualan</h3>
-              <Badge variant="sky" size="sm">Performa Template</Badge>
+              <Badge variant="indigo" size="sm">Performa Template</Badge>
             </div>
             <p class="text-body-sm text-secondary mt-0.5">Proporsi komisi berdasarkan template terlaris</p>
           </div>
-        </div>
-        <div class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-main flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-45">
-          <span class="material-symbols-outlined text-base">north_east</span>
         </div>
       </div>
 
@@ -215,48 +210,48 @@
                 r="15.91549430918954"
                 fill="transparent"
                 stroke="currentColor"
-                stroke-width="4"
+                stroke-width="4.5"
                 class="text-nested"
               />
               <!-- Donut Slices -->
               {#each distribution as item, idx}
                 {@const prevPct = distribution.slice(0, idx).reduce((s, it) => s + it.pct, 0)}
-                {@const sliceColor = ['#6366F1', '#0EA5E9', '#F59E0B', '#10B981'][idx % 4]}
+                {@const sliceColor = [colors.primary.DEFAULT, colors.semantic.orange.DEFAULT, colors.secondary.DEFAULT, colors.semantic.success.DEFAULT][idx % 4]}
                 <circle
                   cx="21"
                   cy="21"
                   r="15.91549430918954"
                   fill="transparent"
                   stroke={sliceColor}
-                  stroke-width="4.2"
+                  stroke-width="4.5"
                   stroke-dasharray="{item.pct} {100 - item.pct}"
                   stroke-dashoffset="-{prevPct}"
-                  class="transition-all duration-700 hover:stroke-[5.2] cursor-pointer"
+                  class="transition-all duration-500 hover:stroke-[5.5] cursor-pointer"
                 />
               {/each}
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span class="text-3xs font-bold text-muted uppercase tracking-wider font-heading">Top 3</span>
-              <span class="text-sm font-extrabold text-main font-mono">100%</span>
+              <span class="text-3xs font-semibold text-muted uppercase tracking-wider font-heading">Top 3</span>
+              <span class="text-base font-black text-main font-mono">100%</span>
             </div>
           </div>
 
           <!-- Legend List with Mini Progress Bars -->
           <div class="flex-1 space-y-3 w-full">
             {#each distribution as item, idx}
-              {@const dotColor = ['bg-[#5551FF]', 'bg-[#06B6D4]', 'bg-[#F59E0B]', 'bg-[#10B981]'][idx % 4]}
-              {@const barColor = ['bg-[#5551FF]', 'bg-[#06B6D4]', 'bg-[#F59E0B]', 'bg-[#10B981]'][idx % 4]}
-              <div class="p-2 rounded-2xl hover:bg-nested/60 transition-colors border border-transparent hover:border-light">
+              {@const dotColor = ['bg-primary', 'bg-orange', 'bg-slate-900 dark:bg-slate-100', 'bg-emerald-500'][idx % 4]}
+              {@const barColor = ['bg-primary', 'bg-orange', 'bg-slate-900 dark:bg-slate-100', 'bg-emerald-500'][idx % 4]}
+              <div class="p-2.5 rounded-2xl hover:bg-nested/60 transition-colors border border-transparent hover:border-light">
                 <div class="flex items-center justify-between gap-2 mb-1.5">
                   <div class="flex items-center gap-2 min-w-0">
-                    <span class="w-2.5 h-2.5 rounded-full {dotColor} flex-shrink-0 shadow-2xs"></span>
-                    <span class="text-xs font-semibold text-main truncate font-sans">{item.name}</span>
+                    <span class="w-2.5 h-2.5 rounded-full {dotColor} flex-shrink-0"></span>
+                    <span class="text-xs font-bold text-main truncate font-sans">{item.name}</span>
                   </div>
-                  <span class="text-xs font-bold text-secondary font-mono bg-nested px-2.5 py-0.5 rounded-lg flex-shrink-0 border border-light/80">{item.pct}%</span>
+                  <span class="text-xs font-black text-secondary font-mono bg-nested px-2 py-0.5 rounded-lg flex-shrink-0 border border-light">{item.pct}%</span>
                 </div>
                 <!-- Mini Progress Bar -->
-                <div class="w-full h-1.5 bg-nested rounded-full overflow-hidden">
-                  <div class="h-full rounded-full {barColor} transition-all duration-700" style="width: {item.pct}%"></div>
+                <div class="w-full h-2 bg-nested rounded-full overflow-hidden">
+                  <div class="h-full rounded-full {barColor} transition-all duration-500" style="width: {item.pct}%"></div>
                 </div>
               </div>
             {/each}

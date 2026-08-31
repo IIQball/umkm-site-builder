@@ -1,120 +1,208 @@
 <script lang="ts">
-  import type { AuthenticatedUser } from '@/lib/auth';
+  import { onMount } from "svelte";
+  import type { AuthenticatedUser } from "@/lib/auth";
+  import { getRoleConfig } from "./sidebar/sidebar.helpers";
 
   export let userJson: string;
   export let breadcrumb: string | undefined = undefined;
 
   const user: AuthenticatedUser = JSON.parse(userJson);
   const userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
-
-  const roleMeta: Record<string, { label: string; cls: string }> = {
-    superadmin: { label: 'Super Admin', cls: 'badge-custom-rose' },
-    admin:      { label: 'Admin',       cls: 'badge-custom-amber' },
-    designer:   { label: 'Designer',   cls: 'badge-custom-indigo' },
-    tenant:     { label: 'Tenant',     cls: 'badge-custom-emerald' },
-  };
-  const role = roleMeta[user.role] ?? { label: user.role, cls: 'badge-custom-slate' };
-  const homePath = user.role === 'designer' ? '/designer/wallet' : '/dashboard';
+  const roleCfg = getRoleConfig(user.role);
+  const homePath = user.role === "designer" ? "/designer/wallet" : "/dashboard";
 
   let dropdownOpen = false;
-  const toggleDropdown = () => { dropdownOpen = !dropdownOpen; };
-  const closeDropdown = () => { dropdownOpen = false; };
+  let isDark = false;
+
+  const toggleDropdown = () => {
+    dropdownOpen = !dropdownOpen;
+  };
+  const closeDropdown = () => {
+    dropdownOpen = false;
+  };
+
+  onMount(() => {
+    isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  });
 
   const toggleTheme = () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
-    localStorage.setItem('theme', next);
+    const next = isDark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+    localStorage.setItem("theme", next);
+    isDark = next === "dark";
+  };
+
+  const getTodayFormatted = () => {
+    return new Intl.DateTimeFormat("id-ID", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }).format(new Date());
   };
 </script>
 
 <svelte:window on:click={closeDropdown} />
 
 <header
-  class="sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6
-         bg-card/80 backdrop-blur-md border-b border-light/80 flex-shrink-0"
+  class="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-8
+         bg-canvas/90 backdrop-blur-md border-b border-light flex-shrink-0"
 >
-  <!-- Left: search bar capsule -->
-  <div class="flex items-center gap-3 flex-1 min-w-0 max-w-xs">
+  <!-- Left: search bar capsule + date pill badge -->
+  <div class="flex items-center gap-3 flex-1 min-w-0 max-w-md">
     <label
-      class="flex items-center gap-2 w-full bg-nested border border-light rounded-xl
-             px-3 py-1.5 cursor-text hover:border-main hover:bg-card transition-colors group"
+      class="flex items-center gap-2.5 w-full bg-card border border-light rounded-full
+             px-4 py-2 cursor-text hover:border-main/40 hover:bg-card transition-all shadow-xs group"
       for="navbar-search"
     >
-      <span class="material-symbols-outlined text-sm text-muted flex-shrink-0">search</span>
+      <span
+        class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors flex-shrink-0"
+        >search</span
+      >
       <input
         id="navbar-search"
         type="text"
-        placeholder="Cari..."
+        placeholder="Cari fitur, template, mutasi..."
         class="bg-transparent border-none outline-none text-xs text-main
                placeholder:text-muted w-full min-w-0"
         readonly
         on:focus|preventDefault={() => {}}
       />
       <span class="hidden sm:flex items-center gap-0.5 flex-shrink-0">
-        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">⌘</kbd>
-        <kbd class="text-[10px] font-medium text-muted bg-nested border border-light rounded px-1.5 py-0.5 leading-none">F</kbd>
+        <kbd
+          class="text-3xs font-semibold text-muted bg-nested border border-light rounded-md px-1.5 py-0.5 leading-none"
+          >⌘</kbd
+        >
+        <kbd
+          class="text-3xs font-semibold text-muted bg-nested border border-light rounded-md px-1.5 py-0.5 leading-none"
+          >K</kbd
+        >
       </span>
     </label>
+
+    <!-- Date pill badge -->
+    <div
+      class="hidden lg:inline-flex items-center gap-2 bg-card border border-light px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shadow-xs hover:border-primary/30 transition-colors"
+    >
+      <span class="material-symbols-outlined text-sm text-primary flex-shrink-0"
+        >calendar_today</span
+      >
+      <span class="text-secondary"
+        >Hari ini, <strong class="text-main font-semibold"
+          >{getTodayFormatted()}</strong
+        ></span
+      >
+    </div>
   </div>
 
   <!-- Right: breadcrumb (mobile), actions, profile chip -->
-  <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+  <div class="flex items-center gap-2.5 flex-shrink-0 ml-3">
     <!-- Breadcrumb (mobile only) -->
     {#if breadcrumb}
-      <span class="sm:hidden text-xs font-semibold text-main truncate max-w-[120px]">
+      <span
+        class="sm:hidden text-xs font-semibold text-main truncate max-w-[120px]"
+      >
         {breadcrumb}
       </span>
     {/if}
 
-    <!-- Notification icon -->
+    <!-- Settings gear icon button -->
+    <a
+      href="/auth/settings"
+      class="w-9 h-9 rounded-full bg-card border border-light flex items-center justify-center text-muted
+             hover:text-main hover:bg-nested transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+      aria-label="Pengaturan"
+      title="Pengaturan"
+    >
+      <span class="material-symbols-outlined text-lg">settings</span>
+    </a>
+
+    <!-- Notification icon button with pulsing orange dot -->
     <button
       type="button"
-      class="w-8 h-8 rounded-xl flex items-center justify-center text-muted
-             hover:text-main hover:bg-nested transition-colors relative cursor-pointer"
+      class="w-9 h-9 rounded-full bg-card border border-light flex items-center justify-center text-muted
+             hover:text-main hover:bg-nested transition-all relative shadow-xs cursor-pointer active:scale-[0.98]"
       aria-label="Notifikasi"
       title="Notifikasi"
     >
-      <span class="material-symbols-outlined text-sm">notifications</span>
+      <span class="material-symbols-outlined text-lg">notifications</span>
+      <span class="absolute top-2 right-2 flex h-2 w-2">
+        <span
+          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-75"
+        ></span>
+        <span
+          class="relative inline-flex rounded-full h-2 w-2 bg-orange ring-2 ring-card"
+        ></span>
+      </span>
     </button>
 
-    <!-- Theme toggle -->
+    <!-- Theme toggle icon button -->
     <button
       type="button"
       on:click={toggleTheme}
-      class="w-8 h-8 rounded-xl flex items-center justify-center
-             text-muted hover:text-main hover:bg-nested transition-colors cursor-pointer"
+      class="w-9 h-9 rounded-full bg-card border border-light flex items-center justify-center
+             text-muted hover:text-main hover:bg-nested transition-all shadow-xs cursor-pointer group active:scale-[0.98]"
       aria-label="Toggle tema gelap/terang"
       title="Toggle tema"
     >
-      <span class="material-symbols-outlined text-sm">contrast</span>
+      {#if isDark}
+        <span
+          class="material-symbols-outlined text-lg transition-transform duration-300 group-hover:rotate-90"
+          >light_mode</span
+        >
+      {:else}
+        <span
+          class="material-symbols-outlined text-lg transition-transform duration-300 group-hover:-rotate-45"
+          >dark_mode</span
+        >
+      {/if}
     </button>
 
-    <!-- Profile chip -->
-    <div class="relative">
+    <!-- Profile Chip & Dropdown -->
+    <div class="relative ml-1">
       <button
         type="button"
         on:click|stopPropagation={toggleDropdown}
-        class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl
-               hover:bg-nested border border-transparent hover:border-light transition-all group cursor-pointer"
+        class="flex items-center gap-2 pl-1 pr-2 md:pr-3 py-1 bg-card hover:bg-nested border border-light hover:border-main/20 rounded-full transition-all duration-200 shadow-2xs group cursor-pointer active:scale-[0.98]"
         aria-label="Menu akun"
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
-        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center
-                    font-bold text-xs shadow-sm flex-shrink-0">
-          {userInitial}
+        <!-- Solid Avatar with Clean Status Dot -->
+        <div class="relative flex-shrink-0">
+          <div
+            class="w-7 h-7 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-xs shadow-xs"
+          >
+            {userInitial}
+          </div>
+          <span
+            class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-card"
+            title="Online"
+          ></span>
         </div>
-        <div class="hidden md:flex flex-col items-start min-w-0">
-          <span class="text-xs font-semibold text-main max-w-[100px] truncate leading-tight">
-            {user.name ?? user.email}
+
+        <!-- User Name & Role (Tablet & Desktop) -->
+        <div class="hidden sm:flex flex-col text-left min-w-0 max-w-[120px]">
+          <span
+            class="text-xs font-semibold text-main truncate leading-tight group-hover:text-primary transition-colors"
+          >
+            {user.name ?? user.email.split("@")[0]}
           </span>
-          <span class="badge-custom text-[10px] font-bold border rounded-full px-1.5 py-0.5 leading-none mt-0.5 {role.cls}">
-            {role.label}
+          <span
+            class="text-[9px] font-medium uppercase tracking-wider {roleCfg.badgeText} leading-none truncate mt-0.5 flex items-center gap-0.5"
+          >
+            <span class="material-symbols-outlined text-[9px] leading-none"
+              >{roleCfg.icon}</span
+            >
+            <span>{roleCfg.badgeLabel}</span>
           </span>
         </div>
-        <span class="material-symbols-outlined text-sm text-muted hidden md:block
-                     transition-transform {dropdownOpen ? 'rotate-180' : ''}">
+
+        <!-- Chevron Icon -->
+        <span
+          class="material-symbols-outlined text-sm text-muted group-hover:text-main transition-transform duration-200 flex-shrink-0"
+          class:rotate-180={dropdownOpen}
+        >
           expand_more
         </span>
       </button>
@@ -122,40 +210,76 @@
       <!-- Dropdown menu -->
       {#if dropdownOpen}
         <div
-          class="absolute right-0 top-full mt-2 w-52 bg-card border border-light
-                 rounded-2xl shadow-lg shadow-black/8 py-1.5 z-50"
+          class="absolute right-0 top-full mt-2 w-64 bg-card border border-light
+                 rounded-2xl shadow-xl shadow-black/10 py-2 z-50 animate-fade-in"
           role="menu"
         >
-          <div class="px-3 py-2.5 border-b border-light mb-1">
-            <p class="text-xs font-semibold text-main truncate">{user.name ?? user.email}</p>
-            <p class="text-xs text-muted truncate mt-0.5">{user.email}</p>
+          <!-- User Info Banner in Dropdown -->
+          <div class="px-4 py-3 border-b border-light mb-1.5">
+            <div class="flex items-center gap-2.5 mb-2">
+              <div
+                class="w-9 h-9 rounded-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0"
+              >
+                {userInitial}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-main truncate leading-tight">
+                  {user.name ?? user.email}
+                </p>
+                <p class="text-2xs text-muted truncate mt-0.5 leading-tight">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+
+            <!-- Role Badge with Icon & Status Indicator -->
+            <div class="flex items-center justify-between pt-1">
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md border {roleCfg.badgeBg} leading-none"
+              >
+                <span class="material-symbols-outlined text-[11px] leading-none"
+                  >{roleCfg.icon}</span
+                >
+                <span>{roleCfg.badgeLabel}</span>
+              </span>
+
+              <span
+                class="inline-flex items-center gap-1.5 text-2xs text-muted font-medium"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Aktif</span>
+              </span>
+            </div>
           </div>
+
           <a
             href={homePath}
-            class="flex items-center gap-2.5 px-3 py-2 text-sm text-secondary
+            class="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-secondary
                    hover:bg-nested hover:text-main transition-colors"
             role="menuitem"
           >
-            <span class="material-symbols-outlined text-sm">dashboard</span>
+            <span class="material-symbols-outlined text-base">dashboard</span>
             Dashboard
           </a>
           <a
             href="/auth/settings"
-            class="flex items-center gap-2.5 px-3 py-2 text-sm text-secondary
+            class="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-secondary
                    hover:bg-nested hover:text-main transition-colors"
             role="menuitem"
           >
-            <span class="material-symbols-outlined text-sm">manage_accounts</span>
+            <span class="material-symbols-outlined text-base"
+              >manage_accounts</span
+            >
             Pengaturan Akun
           </a>
-          <div class="border-t border-light mt-1 pt-1">
+          <div class="border-t border-light mt-1.5 pt-1">
             <a
               href="/auth/login"
-              class="flex items-center gap-2.5 px-3 py-2 text-sm text-rose-500
-                     hover:bg-rose-50/10 transition-colors"
+              class="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-error
+                     hover:bg-error/10 transition-colors"
               role="menuitem"
             >
-              <span class="material-symbols-outlined text-sm">logout</span>
+              <span class="material-symbols-outlined text-base">logout</span>
               Keluar
             </a>
           </div>

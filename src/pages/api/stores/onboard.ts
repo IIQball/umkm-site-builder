@@ -101,7 +101,7 @@ export const POST: APIRoute = async ({ request }) => {
       templateId: 'system-default-template', // From db seed logic
       waNumber,
       googleMapsUrl: googleMapsUrl || null,
-      status: 'pending', // Awaiting payment setup? Or active right away if MVP? Let's use active since it's just onboarding, or pending based on docs? Wait, docs say "status (pending|active|inactive|suspended)".
+      status: 'active',
     });
 
     return new Response(

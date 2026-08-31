@@ -1,0 +1,99 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import TemplateCategoryManager from '@/components/admin/TemplateCategoryManager.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { templateCategories } from '@/db/schema';
+import { desc } from 'drizzle-orm';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  return Astro.redirect('/auth/login?redirect=/admin/template-categories');
+}
+
+let initialCategories: (typeof templateCategories.$inferSelect)[] = [];
+try {
+  initialCategories = await db
+    .select()
+    .from(templateCategories)
+    .orderBy(desc(templateCategories.createdAt));
+} catch {
+  initialCategories = [];
+}
+---
+
+<DashboardLayout title="Kategori Template" breadcrumb="Admin / Kategori Template">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching designer/wallet & designer/templates style) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Kelola Kategori Template</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Atur master kategori ceruk bisnis UMKM yang tersedia untuk template desainer dan filter katalog marketplace.
+        </p>
+      </div>
+
+      <!-- Quick Action / Link -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          client:load
+          href="/admin/templates"
+          variant="secondary"
+          size="md"
+          class="font-bold"
+        >
+          <span class="material-symbols-outlined text-primary text-base">palette</span>
+          <span>Buka Kurasi Template</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <StatCard
+        client:load
+        label="Total Kategori"
+        value={initialCategories.length}
+        rawValue={initialCategories.length}
+        icon="category"
+        cardTheme="dark"
+        badge="Master Data"
+        footerText="Semua ceruk bisnis terdaftar"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Kategori Aktif"
+        value={initialCategories.length}
+        rawValue={initialCategories.length}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Aktif"
+        footerText="Tersedia di form builder desainer"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Standar Marketplace"
+        value="100%"
+        rawValue={100}
+        icon="verified"
+        cardTheme="blue"
+        badge="Tervalidasi"
+        footerText="Sesuai taxonomi toko UMKM"
+        delayClass="delay-200"
+      />
+    </div>
+
+    <!-- Interactive Table Panel -->
+    <div class="animate-fade-in-up delay-300">
+      <TemplateCategoryManager client:load {initialCategories} />
+    </div>
+  </div>
+</DashboardLayout>

@@ -73,7 +73,7 @@
           <button
             type="button"
             on:click={() => editorStore.selectNode(section.id, null)}
-            class={`font-semibold hover:text-base-content transition-colors uppercase tracking-wider cursor-pointer truncate ${
+            class={`text-label-caps hover:text-base-content transition-colors uppercase tracking-caps cursor-pointer truncate ${
               !$activeNodeId ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-base-content/60 hover:underline'
             }`}
           >
@@ -82,12 +82,12 @@
 
           {#if $activeNodeId}
             <ChevronRight size={13} class="text-base-content/40 flex-shrink-0" />
-            <span class="text-blue-600 dark:text-blue-400 font-semibold truncate">
+            <span class="text-blue-600 dark:text-blue-400 font-semibold truncate text-xs">
               {getNodeLabel($activeNodeId)}
             </span>
           {/if}
         </div>
-        <p class="text-[10px] text-base-content/40 font-mono">{section.id}</p>
+        <p class="text-3xs text-base-content/40 font-mono">{section.id}</p>
       </div>
 
       <!-- Close Inspector Button -->

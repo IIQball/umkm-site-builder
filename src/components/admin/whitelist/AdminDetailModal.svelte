@@ -2,6 +2,7 @@
   import { ShieldCheck, CheckCircle, Ban, X } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
   import type { AdminEntry } from './whitelist.types';
+  import { Button } from '@/components/ui';
 
   export let admin: AdminEntry | null = null;
 
@@ -20,9 +21,9 @@
           <ShieldCheck size={18} class="text-primary" />
           Detail Profil Admin
         </h3>
-        <button on:click={close} class="btn btn-ghost btn-sm btn-square hover:bg-nested/80 rounded-xl">
+        <Button variant="secondary" size="icon" on:click={close} title="Tutup">
           <X size={18} class="text-secondary" />
-        </button>
+        </Button>
       </div>
 
       <!-- Content -->
@@ -62,9 +63,9 @@
 
       <!-- Footer Actions -->
       <div class="px-6 py-4 border-t border-light bg-nested/20 flex justify-end">
-        <button on:click={close} class="btn btn-outline border-light hover:bg-light hover:text-main rounded-xl px-6 h-10 min-h-0 text-sm">
+        <Button variant="secondary" size="sm" on:click={close} className="px-6">
           Tutup
-        </button>
+        </Button>
       </div>
     </div>
   </div>

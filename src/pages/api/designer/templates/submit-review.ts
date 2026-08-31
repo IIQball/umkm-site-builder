@@ -8,7 +8,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan untuk mengajukan review', 401);
+      throw new AppError('Designer access required to submit review', 401);
     }
 
     const body = await context.request.json().catch(() => ({}));

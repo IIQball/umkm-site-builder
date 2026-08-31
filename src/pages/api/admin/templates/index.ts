@@ -7,7 +7,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedAdmin(user)) {
-      throw new AppError('Akses khusus admin', 403);
+      throw new AppError('Admin access required', 403);
     }
 
     const url = new URL(context.request.url);
@@ -15,7 +15,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const records = await getTemplatesForAdmin(statusFilter);
 
-    return jsonSuccess(records, 'Daftar template berhasil diambil');
+    return jsonSuccess(records, 'Templates fetched successfully');
   });
 };
-

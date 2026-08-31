@@ -34,13 +34,17 @@ One pack. Never a second. No emojis as substitutes.
 | form-control | form-control, label, label-text, input, input-bordered | checkout/InvoiceDetails.svelte |
 | loading | loading-spinner | checkout page, PaymentStatus.svelte |
 | link | link, link-hover | checkout page |
+| progress | progress-primary, progress-success | shared/ImageUpload.svelte, dashboard/TrafficWidget.svelte |
+| stat | implicit via card + flex layout | dashboard/TrafficWidget.svelte (two stat cards) |
 | progress | progress-primary | shared/ImageUpload.svelte |
+| modal | modal, modal-open, modal-box, modal-action | dashboard/ConfirmTemplateModal.svelte |
 
 ## 3.1 Composite components (project-specific)
 
 | Component | File | Built from | Props |
 |---|---|---|---|
 | ImageUpload | src/components/shared/ImageUpload.svelte | card, btn, alert, progress, lucide icons | folder, maxFiles, maxSizeMB, existingUrls, onUpload |
+| TrafficWidget | src/components/dashboard/TrafficWidget.svelte | card, btn, alert, progress, lucide icons (TrendingUp, Users, MessageCircle, Loader2) | storeId |
 
 ## 4. Established patterns
 

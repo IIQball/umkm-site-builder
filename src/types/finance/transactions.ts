@@ -3,12 +3,12 @@
  * Aligned with transactions table schema
  */
 
-export type TransactionType = 'store_registration' | 'template_purchase';
+export type TransactionType = 'template_purchase';
 export type PaymentStatus = 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded';
 
 export interface TransactionInitiateInput {
   amount: number;
-  type: 'store_registration' | 'template_purchase';
+  type: 'template_purchase';
   storeId?: string;
   templateId?: string;
 }
@@ -101,4 +101,8 @@ export interface CheckoutPageData {
   status: PaymentStatus;
   expiresAt: string;
   paymentMethod?: string;
+  createdAt?: string | Date;
+  templateThumbnailUrl?: string | null;
+  designerName?: string | null;
+  templateDescription?: string | null;
 }

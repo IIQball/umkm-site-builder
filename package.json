@@ -18,7 +18,8 @@
     "format": "prettier --write src",
     "test": "vitest",
     "test:unit": "vitest run --reporter=verbose",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "postinstall": "node scripts/fix-better-auth.js"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.1",

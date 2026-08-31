@@ -1,14 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import StatCard from '../ui/StatCard.svelte';
+  import { Card, Input, Button } from '@/components/ui';
+  import { formatCurrency } from '@/lib/utils';
+  import { addToast } from '@/lib/toast';
 
   export let initialFeePercentage: number = 30;
+  export let initialSettlementDelayDays: number = 7;
 
   let platformFeePercentage: number = initialFeePercentage;
-  let settlementDelayDays: number = 7;
+  let settlementDelayDays: number = initialSettlementDelayDays;
   let isLoading = false;
-
-  let feedback: { message: string; type: 'success' | 'error' } | null = null;
 
   onMount(async () => {
     try {
@@ -29,16 +31,21 @@
 
   const handleSave = async () => {
     if (platformFeePercentage < 0 || platformFeePercentage > 100) {
-      feedback = { message: 'Persentase fee harus antara 0% hingga 100%', type: 'error' };
+      addToast({
+        type: 'error',
+        message: 'Persentase fee harus antara 0% hingga 100%',
+      });
       return;
     }
     if (settlementDelayDays < 0) {
-      feedback = { message: 'Durasi penahanan settlement tidak boleh negatif', type: 'error' };
+      addToast({
+        type: 'error',
+        message: 'Durasi penahanan settlement tidak boleh negatif',
+      });
       return;
     }
 
     isLoading = true;
-    feedback = null;
 
     try {
       const res = await fetch('/api/admin/settings/commission', {
@@ -52,141 +59,285 @@
       const result = await res.json();
 
       if (res.ok && (result.success || result.ok)) {
-        feedback = { message: 'Pengaturan komisi platform berhasil disimpan!', type: 'success' };
+        addToast({
+          type: 'success',
+          message: 'Pengaturan komisi & settlement platform berhasil disimpan!',
+        });
       } else {
-        feedback = {
-          message: result.error?.message || 'Gagal menyimpan pengaturan komisi',
+        addToast({
           type: 'error',
-        };
+          message: result.error?.message || 'Gagal menyimpan pengaturan komisi',
+        });
       }
     } catch {
-      feedback = { message: 'Terjadi kesalahan koneksi saat menyimpan', type: 'error' };
+      addToast({
+        type: 'error',
+        message: 'Terjadi kesalahan koneksi saat menyimpan',
+      });
     } finally {
       isLoading = false;
     }
   };
 
   $: designerShare = Math.max(0, 100 - Number(platformFeePercentage || 0));
+  $: samplePrice = 100000;
+  $: samplePlatformFee = Math.round((samplePrice * Number(platformFeePercentage || 0)) / 100);
+  $: sampleDesignerShare = samplePrice - samplePlatformFee;
 </script>
 
-<div class="w-full space-y-6">
-  <!-- Page Header -->
-  <div>
-    <h1 class="text-xl font-black text-main tracking-tight animate-fade-in">Pengaturan Komisi Platform</h1>
-    <p class="text-sm text-secondary mt-1">Konfigurasi pembagian komisi otomatis antara platform dan desainer template</p>
+<div class="w-full space-y-8 md:space-y-10">
+  <!-- Page Header (matching designer/wallet & designer/templates style) -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+        <span>Pengaturan Platform & Komisi</span>
+      </h1>
+      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+        Kelola parameter pembagian hasil penjualan template otomatis antara kas platform dan dompet desainer.
+      </p>
+    </div>
+
+    <!-- Quick Action / Link -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <Button
+        href="/admin/users"
+        variant="secondary"
+        size="md"
+        className="font-bold"
+      >
+        <span class="material-symbols-outlined text-primary text-base">group</span>
+        <span>Manajemen Pengguna</span>
+      </Button>
+    </div>
   </div>
 
-  <!-- Stat Cards Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <!-- Stat Cards Grid (animated on client load) -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
     <StatCard
       label="Fee Platform"
       value="{platformFeePercentage}%"
+      rawValue={platformFeePercentage}
       icon="percent"
-      iconCls="icon-wrapper-indigo"
-      borderAccent="border-accent-primary"
+      cardTheme="dark"
+      badge="Kas SaaS"
+      footerText="Potongan otomatis per transaksi"
+      delayClass="delay-100"
     />
     <StatCard
       label="Bagian Desainer"
       value="{designerShare}%"
+      rawValue={designerShare}
       icon="brush"
-      iconCls="icon-wrapper-emerald"
-      borderAccent="border-accent-success"
+      cardTheme="default"
+      badge="Hak Desainer"
+      footerText="Masuk langsung ke dompet kreator"
+      delayClass="delay-150"
     />
     <StatCard
-      label="Penahanan Dana"
+      label="Penahanan Settlement"
       value="{settlementDelayDays} Hari"
+      rawValue={settlementDelayDays}
       icon="hourglass_top"
-      iconCls="icon-wrapper-amber"
-      borderAccent="border-accent-warning"
+      cardTheme="orange"
+      badge="Proteksi Fraud"
+      footerText="Jeda saldo sebelum dapat ditarik"
+      delayClass="delay-200"
     />
   </div>
 
-  <!-- Alert Feedback -->
-  {#if feedback}
-    <div 
-      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3.5 border transition-all animate-fade-in shadow-sm {feedback.type === 'success' ? 'alert-success' : 'alert-error'}"
-    >
-      <span class="material-symbols-outlined text-[18px] flex-shrink-0">
-        {feedback.type === 'success' ? 'check_circle' : 'error'}
-      </span>
-      <span class="font-medium">{feedback.message}</span>
-    </div>
-  {/if}
-
-  <!-- Form Card -->
-  <div class="bg-card rounded-2xl border border-light p-6 shadow-sm space-y-6">
-    <div class="flex items-center gap-3 pb-4 border-b border-light">
-      <div class="w-10 h-10 rounded-xl icon-wrapper-indigo flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-xl">percent</span>
-      </div>
-      <div>
-        <h2 class="font-bold text-sm text-main">Potongan Fee Platform</h2>
-        <p class="text-xs text-muted mt-0.5">Diaplikasikan untuk seluruh transaksi penjualan template berbayar</p>
-      </div>
-    </div>
-
-    <form on:submit|preventDefault={handleSave} class="space-y-6">
-      <div class="form-control w-full">
-        <label for="platformFeePercentage" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
-          Persentase Fee Platform
-        </label>
-        <div class="relative flex items-center">
-          <input
-            id="platformFeePercentage"
-            type="number"
-            min="0"
-            max="100"
-            step="1"
-            bind:value={platformFeePercentage}
-            disabled={isLoading}
-            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-sm font-semibold focus:outline-none transition-colors"
-            placeholder="30"
-          />
-          <span class="absolute right-4 font-bold text-sm text-muted select-none">%</span>
+  <!-- Settings Configuration Card -->
+  <div class="animate-fade-in-up delay-300">
+    <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
+      <!-- Header inside Card -->
+      <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+            <span class="material-symbols-outlined text-lg">tune</span>
+          </div>
+          <div>
+            <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+              Parameter Finansial & Bagi Hasil
+            </h3>
+            <p class="text-body-sm text-secondary mt-0.5 font-sans">
+              Konfigurasi nilai persentase potongan transaksi dan kebijakan penahanan dana
+            </p>
+          </div>
         </div>
-        <p class="text-xs text-muted leading-relaxed mt-2">
-          Persentase potongan fee yang diambil platform dari setiap penjualan template berbayar. Sisa persentase (<strong class="text-primary font-bold">{designerShare}%</strong>) otomatis masuk ke dompet desainer.
-        </p>
       </div>
 
-      <!-- Settlement Delay Days Input -->
-      <div class="form-control w-full">
-        <label for="settlementDelayDays" class="block text-xs font-extrabold uppercase tracking-widest text-muted mb-2">
-          Durasi Penahanan Settlement (Hari)
-        </label>
-        <div class="relative flex items-center">
-          <input
-            id="settlementDelayDays"
-            type="number"
-            min="0"
-            step="1"
-            bind:value={settlementDelayDays}
-            disabled={isLoading}
-            class="w-full px-4 py-2.5 bg-nested/40 text-main border border-light focus:border-primary rounded-xl text-sm font-semibold focus:outline-none transition-colors"
-            placeholder="7"
-          />
-          <span class="absolute right-4 font-bold text-xs text-muted select-none">Hari</span>
-        </div>
-        <p class="text-xs text-muted leading-relaxed mt-2">
-          Jumlah hari dana penjualan ditahan sebelum ditambahkan ke saldo aktif yang dapat ditarik oleh desainer.
-        </p>
-      </div>
+      <!-- Form Content -->
+      <div class="p-6 md:p-8">
+        <form on:submit|preventDefault={handleSave} class="space-y-8 w-full">
+          <!-- Split Ratio Visual Gauge -->
+          <div class="p-6 rounded-3xl bg-nested/70 border border-light space-y-4 shadow-2xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold font-heading uppercase tracking-wider text-muted">
+                Rasio Pembagian Komisi
+              </span>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  on:click={() => (platformFeePercentage = 20)}
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 20 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                >
+                  20% / 80%
+                </button>
+                <button
+                  type="button"
+                  on:click={() => (platformFeePercentage = 30)}
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 30 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                >
+                  30% / 70% (Standar)
+                </button>
+                <button
+                  type="button"
+                  on:click={() => (platformFeePercentage = 40)}
+                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 40 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
+                >
+                  40% / 60%
+                </button>
+              </div>
+            </div>
 
-      <div class="pt-2">
-        <button
-          type="submit"
-          class="btn btn-primary text-sm font-bold rounded-xl px-5 py-2.5 transition-all min-w-[160px]"
-          disabled={isLoading}
-        >
-          {#if isLoading}
-            <span class="loading loading-spinner loading-xs flex-shrink-0"></span>
-            <span>Menyimpan...</span>
-          {:else}
-            <span class="material-symbols-outlined text-[18px] flex-shrink-0 icon-filled">save</span>
-            <span>Simpan Pengaturan</span>
-          {/if}
-        </button>
+            <!-- Progress Bar Barcode -->
+            <div class="h-3.5 w-full bg-nested border border-light rounded-full overflow-hidden flex shadow-inner">
+              <div
+                class="bg-primary h-full transition-all duration-300 relative group"
+                style="width: {platformFeePercentage}%"
+              ></div>
+              <div
+                class="bg-emerald-500 h-full transition-all duration-300 relative group"
+                style="width: {designerShare}%"
+              ></div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs font-bold font-heading pt-1">
+              <span class="text-primary flex items-center gap-1.5 font-sans">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                Fee Platform: {platformFeePercentage}%
+              </span>
+              <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-sans">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Hak Desainer: {designerShare}%
+              </span>
+            </div>
+
+            <!-- Simulation Calculation Box -->
+            <div class="pt-3 text-xs text-secondary flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-light/60 font-sans">
+              <span>Simulasi penjualan template <strong>{formatCurrency(samplePrice)}</strong>:</span>
+              <div class="flex items-center gap-3 font-mono font-bold">
+                <span class="text-primary">Platform: {formatCurrency(samplePlatformFee)}</span>
+                <span class="text-muted">•</span>
+                <span class="text-emerald-600 dark:text-emerald-400">Desainer: {formatCurrency(sampleDesignerShare)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Fields Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Platform Fee -->
+            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-sm">percent</span>
+                </div>
+                <span class="text-xs font-bold text-main font-heading">Potongan Fee Platform</span>
+              </div>
+
+              <Input
+                id="platformFeePercentage"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="30"
+                bind:value={platformFeePercentage}
+                disabled={isLoading}
+                className="font-bold text-sm"
+                helper="Persentase potongan kas SaaS dari setiap penjualan."
+              >
+                <span slot="suffix" class="font-bold text-sm text-muted select-none">%</span>
+              </Input>
+
+              <!-- Slider control -->
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                bind:value={platformFeePercentage}
+                disabled={isLoading}
+                class="w-full accent-primary cursor-pointer h-2 bg-nested rounded-lg"
+              />
+            </div>
+
+            <!-- Settlement Delay -->
+            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-orange/15 text-orange flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm">hourglass_top</span>
+                  </div>
+                  <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
+                </div>
+                <!-- Presets -->
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    on:click={() => (settlementDelayDays = 3)}
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 3 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
+                  >
+                    3H
+                  </button>
+                  <button
+                    type="button"
+                    on:click={() => (settlementDelayDays = 7)}
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 7 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
+                  >
+                    7H
+                  </button>
+                  <button
+                    type="button"
+                    on:click={() => (settlementDelayDays = 14)}
+                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 14 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
+                  >
+                    14H
+                  </button>
+                </div>
+              </div>
+
+              <Input
+                id="settlementDelayDays"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="7"
+                bind:value={settlementDelayDays}
+                disabled={isLoading}
+                className="font-bold text-sm"
+                helper="Durasi penahanan saldo sebelum dapat di-withdraw."
+              >
+                <span slot="suffix" class="font-bold text-xs text-muted select-none">Hari</span>
+              </Input>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="pt-4 border-t border-light flex items-center justify-end gap-3">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              loading={isLoading}
+              disabled={isLoading}
+              className="min-w-[180px] shadow-xs active:scale-95 font-bold rounded-2xl"
+            >
+              <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">save</span>
+              <span>Simpan Parameter</span>
+            </Button>
+          </div>
+        </form>
       </div>
-    </form>
+    </Card>
   </div>
 </div>

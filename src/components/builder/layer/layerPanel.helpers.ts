@@ -17,38 +17,27 @@ import {
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, FeatureItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
 
-export const sectionTypeLabels: Record<TemplateSection['type'], string> = {
-  header_announcement: 'Header & Announcement',
-  hero: 'Hero Banner',
-  features: 'Fitur & Keunggulan',
-  product_catalog: 'Katalog Produk',
-  testimonials: 'Testimoni Pelanggan',
-  faq: 'FAQ (Tanya Jawab)',
-  google_maps: 'Google Maps & Lokasi',
-  footer: 'Footer & Kontak',
-};
+import { getAllSectionDefinitions } from '../registry';
 
-export const sectionTypeIcons: Record<TemplateSection['type'], ComponentType> = {
-  header_announcement: Megaphone,
-  hero: Sparkles,
-  features: CheckCircle,
-  product_catalog: ShoppingBag,
-  testimonials: MessageSquare,
-  faq: HelpCircle,
-  google_maps: MapPin,
-  footer: PanelBottom,
-};
+export const sectionTypeLabels: Record<TemplateSection['type'], string> = getAllSectionDefinitions().reduce(
+  (acc, def) => {
+    acc[def.type as TemplateSection['type']] = def.label;
+    return acc;
+  },
+  {} as Record<TemplateSection['type'], string>
+);
 
-export const sectionTypes: TemplateSection['type'][] = [
-  'header_announcement',
-  'hero',
-  'features',
-  'product_catalog',
-  'testimonials',
-  'faq',
-  'google_maps',
-  'footer',
-];
+export const sectionTypeIcons: Record<TemplateSection['type'], ComponentType> = getAllSectionDefinitions().reduce(
+  (acc, def) => {
+    acc[def.type as TemplateSection['type']] = def.icon;
+    return acc;
+  },
+  {} as Record<TemplateSection['type'], ComponentType>
+);
+
+export const sectionTypes: TemplateSection['type'][] = getAllSectionDefinitions().map(
+  (def) => def.type as TemplateSection['type']
+);
 
 export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
   switch (section.type) {

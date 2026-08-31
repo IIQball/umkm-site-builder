@@ -2,6 +2,7 @@
   import { Plus, Eye, EyeOff, UserPlus, X } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
+  import { Button } from '@/components/ui';
 
   export let isOpen = false;
 
@@ -66,9 +67,15 @@
           <UserPlus size={18} class="text-primary" />
           <span class="pt-1">Pendaftaran Admin Baru</span>
         </h3>
-        <button type="button" on:click={close} disabled={isSubmitting} class="btn btn-ghost btn-sm btn-square hover:bg-nested/80 rounded-xl">
+        <Button
+          variant="secondary"
+          size="icon"
+          on:click={close}
+          disabled={isSubmitting}
+          title="Tutup"
+        >
           <X size={18} class="text-secondary" />
-        </button>
+        </Button>
       </div>
 
       <!-- Form -->
@@ -105,7 +112,7 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div class="form-control w-full">
-              <label for="newPassword" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Kata Sandi</label>
+              <label for="newPassword" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Kata Sandi Baru</label>
               <div class="relative">
                 {#if showPassword}
                   <input
@@ -180,20 +187,25 @@
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 border-t border-light bg-nested/20 flex justify-end gap-3">
-          <button type="button" on:click={close} disabled={isSubmitting} class="btn btn-outline border-light hover:bg-light hover:text-main rounded-xl px-6 h-11 min-h-0 text-sm">
-            Batal
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting || !newName || !newEmail || !newPassword || !confirmPassword}
-            class="btn btn-primary h-11 text-sm font-bold rounded-xl px-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+          <Button
+            variant="secondary"
+            size="sm"
+            on:click={close}
+            disabled={isSubmitting}
           >
-            {#if isSubmitting}
-              <span class="loading loading-spinner loading-sm"></span> Menyimpan...
-            {:else}
-              <Plus size={18} strokeWidth={2.5} class="mr-1" /> Daftarkan
-            {/if}
-          </button>
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            disabled={isSubmitting || !newName || !newEmail || !newPassword || !confirmPassword}
+            loading={isSubmitting}
+            className="font-bold px-6"
+          >
+            <Plus size={18} strokeWidth={2.5} class="mr-1" />
+            <span>Daftarkan</span>
+          </Button>
         </div>
       </form>
     </div>

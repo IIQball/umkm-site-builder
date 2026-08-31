@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Store, Phone, MapPin, Loader2, CheckCircle, AlertCircle } from 'lucide-svelte';
+  import { Store, Phone, MapPin, CheckCircle, AlertCircle } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
 
   export let initialStoreName = '';
   export let initialWaNumber = '';
@@ -196,19 +197,16 @@
 
     <!-- Submit Button -->
     <div class="flex justify-end pt-4">
-      <button
-        type="button"
-        class="btn btn-primary"
+      <Button
+        variant="primary"
+        size="md"
         disabled={submitStatus === 'submitting'}
+        loading={submitStatus === 'submitting'}
         on:click={handleSubmit}
+        className="font-bold min-w-[180px]"
       >
-        {#if submitStatus === 'submitting'}
-          <Loader2 size={18} class="animate-spin" />
-          Menyimpan...
-        {:else}
-          Simpan Perubahan
-        {/if}
-      </button>
+        Simpan Perubahan
+      </Button>
     </div>
   </div>
 </div>

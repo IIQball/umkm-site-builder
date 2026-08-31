@@ -2,6 +2,7 @@
   import { ShieldCheck, CheckCircle, Ban, Info, CheckCircle2, Trash2 } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
   import type { AdminEntry } from './whitelist.types';
+  import { Badge, Button } from '@/components/ui';
 
   export let admins: AdminEntry[] = [];
   export let isFetching = true;
@@ -22,7 +23,7 @@
   
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm whitespace-nowrap">
-      <thead class="bg-nested/60 border-b border-light text-[10px] uppercase text-muted font-extrabold tracking-widest">
+      <thead class="bg-nested/60 border-b border-light text-label-caps text-muted">
         <tr>
           <th class="px-6 py-4">Profil Admin</th>
           <th class="px-6 py-4">Status Akses</th>
@@ -30,7 +31,7 @@
           <th class="px-6 py-4 text-right">Aksi</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-light/60">
+      <tbody class="divide-y divide-[var(--color-border-light)]">
         {#if isFetching}
           <tr>
             <td colspan="4" class="px-6 py-12 text-center text-muted">
@@ -64,52 +65,58 @@
               </td>
               <td class="px-6 py-4">
                 {#if admin.status === 'active'}
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-[11px] font-bold border border-success/20">
-                    <CheckCircle size={12} strokeWidth={3} /> Aktif
-                  </div>
+                  <Badge variant="emerald" size="sm">
+                    <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
+                    Aktif
+                  </Badge>
                 {:else}
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold border border-error/20">
-                    <Ban size={12} strokeWidth={3} /> Diblokir
-                  </div>
+                  <Badge variant="rose" size="sm">
+                    <Ban size={12} strokeWidth={3} class="mr-1 inline" />
+                    Diblokir
+                  </Badge>
                 {/if}
               </td>
               <td class="px-6 py-4 hidden md:table-cell text-secondary text-xs font-medium">
                 {new Date(admin.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
               </td>
               <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
+                <div class="flex items-center justify-end gap-1.5">
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     on:click={() => dispatch('view', admin)}
                     title="Lihat Detail Admin"
-                    class="btn btn-sm btn-square border border-light bg-card text-secondary hover:text-primary hover:bg-primary/10 hover:border-primary/30 transition-all"
                   >
-                    <Info size={16} />
-                  </button>
+                    <Info size={14} />
+                  </Button>
 
-                  <button
-                    type="button"
+                  <Button
+                    variant={admin.status === 'active' ? 'orange' : 'primary'}
+                    size="xs"
                     disabled={isActionLoading}
+                    className="font-bold {admin.status !== 'active' ? '!bg-emerald-600 hover:!bg-emerald-700' : ''}"
                     on:click={() => dispatch('toggleStatus', admin)}
                     title={admin.status === 'active' ? 'Blokir Admin' : 'Aktifkan Admin'}
-                    class="btn btn-sm px-3 border border-light bg-card text-xs font-semibold {admin.status === 'active' ? 'hover:bg-warning/10 hover:text-warning hover:border-warning/30' : 'hover:bg-success/10 hover:text-success hover:border-success/30'} transition-all"
                   >
                     {#if admin.status === 'active'}
-                      <Ban size={14} class="mr-1" /> Blokir
+                      <Ban size={12} class="mr-1" />
+                      <span>Blokir</span>
                     {:else}
-                      <CheckCircle2 size={14} class="mr-1" /> Aktifkan
+                      <CheckCircle2 size={12} class="mr-1" />
+                      <span>Aktifkan</span>
                     {/if}
-                  </button>
+                  </Button>
                   
-                  <button
-                    type="button"
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
                     disabled={isActionLoading}
                     on:click={() => dispatch('remove', admin)}
                     title="Hapus Permanen"
-                    class="btn btn-sm btn-square border border-light bg-card text-muted hover:text-error hover:bg-error/10 hover:border-error/30 transition-all"
                   >
-                    <Trash2 size={16} />
-                  </button>
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
               </td>
             </tr>

@@ -79,7 +79,11 @@
         return;
       }
 
-      window.location.href = "/auth/login";
+      if (role === 'designer') {
+        window.location.href = '/designer/wallet';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } catch (err: unknown) {
       generalError = err instanceof Error ? err.message : "Terjadi kesalahan sistem";
     } finally {

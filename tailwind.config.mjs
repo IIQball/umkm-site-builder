@@ -5,7 +5,48 @@ export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-family, 'Poppins')", 'sans-serif'],
+        heading: ["var(--font-heading, 'League Spartan')", 'sans-serif'],
+        mono: ['var(--font-geist-mono, monospace)'],
+      },
+      fontSize: {
+        '3xs': ['0.5625rem', { lineHeight: '0.75rem' }],
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        'xs-dense': ['0.6875rem', { lineHeight: '0.875rem' }],
+      },
+      letterSpacing: {
+        caps: '0.2em',
+      },
+      colors: {
+        'muted-foreground': 'var(--color-text-muted, #64748b)',
+        foreground: 'var(--color-text-main, #0f172a)',
+        // Theme semantic tokens — usable as bg-*, text-*, border-*, divide-*
+        canvas: 'var(--color-bg-base)',
+        card: 'var(--color-card-base)',
+        nested: 'var(--color-nested-base)',
+        main: 'var(--color-text-main)',
+        secondary: 'var(--color-text-secondary)',
+        muted: 'var(--color-text-muted)',
+        light: 'var(--color-border-light)',
+        border: 'var(--color-border)',
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary-rgb, 37 99 235) / <alpha-value>)',
+          dark: 'var(--color-primary-dark)',
+          light: 'var(--color-primary-light)',
+        },
+        orange: {
+          DEFAULT: 'rgb(var(--color-orange-rgb, 255 91 53) / <alpha-value>)',
+          dark: 'var(--color-orange-dark)',
+          light: 'var(--color-orange-light)',
+        },
+        success: 'rgb(var(--color-success-rgb, 16 185 129) / <alpha-value>)',
+        error: 'rgb(var(--color-error-rgb, 239 68 68) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning-rgb, 245 158 11) / <alpha-value>)',
+        info: 'rgb(var(--color-primary-rgb, 37 99 235) / <alpha-value>)',
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {

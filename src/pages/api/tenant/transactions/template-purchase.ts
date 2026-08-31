@@ -8,10 +8,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user) {
-      throw new AppError('Harap masuk terlebih dahulu', 401);
+      throw new AppError('Authentication required', 401);
     }
     if (user.status !== 'active') {
-      throw new AppError('Akun Anda ditangguhkan', 403);
+      throw new AppError('Account is suspended', 403);
     }
 
     const body = await context.request.json().catch(() => ({}));

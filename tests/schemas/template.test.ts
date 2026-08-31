@@ -19,7 +19,7 @@ describe('Template Schemas', () => {
     const parsed = TemplateConfigSchema.safeParse(config);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect(parsed.data.sections).toHaveLength(7);
+      expect(parsed.data.sections).toHaveLength(8);
       expect(parsed.data.sections.map((s) => s.type)).toEqual([
         'header_announcement',
         'hero',
@@ -27,6 +27,7 @@ describe('Template Schemas', () => {
         'product_catalog',
         'testimonials',
         'faq',
+        'google_maps',
         'footer',
       ]);
     }
@@ -43,7 +44,7 @@ describe('Template Schemas', () => {
     expect(parsed.success).toBe(true);
   });
 
-  it('should validate draft submit schema with 7 sections', () => {
+  it('should validate draft submit schema with 8 sections', () => {
     const submitPayload = {
       name: 'Template Warung Kopi',
       price: 99000,

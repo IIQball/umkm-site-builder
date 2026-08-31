@@ -4,6 +4,10 @@
   import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
 
+  // Prevent SSR bundler warning while keeping client transitions
+  const _transitions = { fade, fly };
+  void _transitions;
+
   onMount(() => {
     if (typeof window === 'undefined') return;
 
@@ -74,39 +78,39 @@
       <div
         in:fly={{ y: -20, duration: 250 }}
         out:fade={{ duration: 200 }}
-        class={`alert shadow-2xl flex items-center gap-3 pointer-events-auto border-0 py-3 px-4 rounded-xl ${
+        class={`alert shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
           item.type === 'success'
-            ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+            ? 'bg-emerald-600 text-white border-emerald-500/30 shadow-emerald-600/20'
             : item.type === 'error'
-            ? 'bg-rose-600 text-white shadow-rose-600/30'
+            ? 'bg-rose-600 text-white border-rose-500/30 shadow-rose-600/20'
             : item.type === 'warning'
-            ? 'bg-amber-500 text-white shadow-amber-500/30'
-            : 'bg-blue-600 text-white shadow-blue-600/30'
+            ? 'bg-orange text-white border-orange-light/30 shadow-orange/20'
+            : 'bg-primary text-white border-primary-light/30 shadow-primary/20'
         }`}
         role="alert"
       >
         <div class="shrink-0 flex items-center justify-center">
           {#if item.type === 'success'}
-            <CheckCircle2 size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
+            <CheckCircle2 size={20} class="stroke-current" strokeWidth={2.5} />
           {:else if item.type === 'error'}
-            <AlertCircle size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
+            <AlertCircle size={20} class="stroke-current" strokeWidth={2.5} />
           {:else if item.type === 'warning'}
-            <AlertTriangle size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
+            <AlertTriangle size={20} class="stroke-current" strokeWidth={2.5} />
           {:else}
-            <Info size={22} class="stroke-current drop-shadow-sm" strokeWidth={2.5} />
+            <Info size={20} class="stroke-current" strokeWidth={2.5} />
           {/if}
         </div>
 
-        <div class="flex-1 min-w-0 flex flex-col justify-center translate-y-[6px]">
+        <div class="flex-1 min-w-0 flex flex-col justify-center">
           {#if item.title}
-            <h4 class="font-extrabold text-sm leading-tight mb-1 text-white drop-shadow-sm">{item.title}</h4>
+            <h4 class="font-extrabold text-sm leading-tight mb-0.5 text-white font-heading">{item.title}</h4>
           {/if}
-          <p class="text-[13px] font-medium text-white drop-shadow-sm leading-normal break-words">{item.message}</p>
+          <p class="text-xs font-medium text-white/95 leading-normal break-words font-sans">{item.message}</p>
         </div>
 
         <button
           type="button"
-          class="btn btn-ghost btn-xs btn-circle hover:bg-black/10 text-current shrink-0"
+          class="w-6 h-6 rounded-lg flex items-center justify-center hover:bg-white/20 text-white shrink-0 cursor-pointer active:scale-95 transition-all"
           on:click={() => toast.remove(item.id)}
           aria-label="Tutup notifikasi"
         >

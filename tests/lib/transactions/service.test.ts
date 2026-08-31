@@ -19,6 +19,14 @@ vi.mock('@/lib/db/client', () => {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
+    query: {
+      transactions: {
+        findMany: vi.fn(),
+      },
+      templates: {
+        findMany: vi.fn(),
+      },
+    },
   };
   return { db: mockDb, getDb: () => mockDb };
 });
@@ -28,6 +36,14 @@ describe('TransactionService', () => {
     select: Mock;
     insert: Mock;
     update: Mock;
+    query: {
+      transactions: {
+        findMany: Mock;
+      },
+      templates: {
+        findMany: Mock;
+      },
+    };
   };
   let consoleErrorSpy: MockInstance;
   let consoleWarnSpy: MockInstance;
@@ -40,6 +56,8 @@ describe('TransactionService', () => {
     mockDb.select.mockReset();
     mockDb.insert.mockReset();
     mockDb.update.mockReset();
+    mockDb.query.transactions.findMany.mockReset();
+    mockDb.query.templates.findMany.mockReset();
 
     // Suppress console output during tests
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -92,30 +110,12 @@ describe('TransactionService', () => {
   });
 
   describe('initiateTransaction', () => {
-    it('should validate amount matches STORE_REGISTRATION_FEE_IDR', async () => {
+    it('should create template_purchase transaction successfully', async () => {
       const input: TransactionInitiateInput = {
         amount: 50000,
-        type: 'store_registration',
+        type: 'template_purchase',
+        templateId: 'tpl_123',
         storeId: 'store_123',
-      };
-
-      mockDb.select.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
-          }),
-        }),
-      });
-
-      await expect(
-        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
-      ).rejects.toThrow(/Invalid amount/);
-    });
-
-    it('should allow store_registration without storeId (per US-02)', async () => {
-      const input: TransactionInitiateInput = {
-        amount: 100000,
-        type: 'store_registration',
       };
 
       mockDb.select.mockReturnValueOnce({
@@ -141,12 +141,14 @@ describe('TransactionService', () => {
       const result = await transactionService.initiateTransaction('user_123', input, 'http://localhost:3000');
       expect(result).toBeDefined();
       expect(result.invoiceId).toBe('INV-user_123-123456');
+      expect(result.paymentUrl).toBe('https://xendit.co/invoices/xyz');
     });
 
-    it('should require templateId for template_purchase (per US-09)', async () => {
+    it('should reject if payment already in progress', async () => {
       const input: TransactionInitiateInput = {
         amount: 50000,
         type: 'template_purchase',
+        templateId: 'tpl_123',
       };
 
       mockDb.select.mockReturnValueOnce({
@@ -157,29 +159,15 @@ describe('TransactionService', () => {
         }),
       });
 
-      await expect(
-        transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
-      ).rejects.toThrow();
-    });
-
-    it('should require storeId for template_purchase (per US-09)', async () => {
-      const input: TransactionInitiateInput = {
-        amount: 50000,
-        type: 'template_purchase',
-        templateId: 'template_123',
-      };
-
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
-          }),
+          where: vi.fn().mockResolvedValue([{ id: 'txn_prev', status: 'pending' }]),
         }),
       });
 
       await expect(
         transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
-      ).rejects.toThrow();
+      ).rejects.toThrow(/Payment already in progress/);
     });
   });
 
@@ -339,6 +327,73 @@ describe('TransactionService', () => {
     it('should return null for non-existent transaction', async () => {
       const result = await transactionService.getTransactionDetails('nonexistent');
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getTenantOrders', () => {
+    it('should query tenant template purchase transactions with template relation', async () => {
+      const mockOrders = [
+        {
+          id: 'txn_1',
+          userId: 'user_123',
+          type: 'template_purchase',
+          amount: 50000,
+          status: 'paid',
+          template: { id: 'tmpl_1', name: 'Warung Kopi Theme' },
+          createdAt: new Date(),
+        },
+      ];
+
+      mockDb.query.transactions.findMany.mockResolvedValueOnce(mockOrders);
+
+      const orders = await transactionService.getTenantOrders('user_123');
+      expect(orders).toHaveLength(1);
+      expect(orders[0].id).toBe('txn_1');
+      expect(orders[0].template?.name).toBe('Warung Kopi Theme');
+      expect(mockDb.query.transactions.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('getDesignerIncomingOrders', () => {
+    it('should return empty array if designer has no templates', async () => {
+      mockDb.query.templates.findMany.mockResolvedValueOnce([]);
+
+      const orders = await transactionService.getDesignerIncomingOrders('designer_999');
+      expect(orders).toEqual([]);
+      expect(mockDb.query.templates.findMany).toHaveBeenCalled();
+      expect(mockDb.query.transactions.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should query transactions for templates owned by the designer', async () => {
+      mockDb.query.templates.findMany.mockResolvedValueOnce([
+        { id: 'tmpl_1' },
+        { id: 'tmpl_2' },
+      ]);
+
+      const mockIncomingOrders = [
+        {
+          id: 'txn_100',
+          userId: 'tenant_1',
+          type: 'template_purchase',
+          amount: 100000,
+          status: 'paid',
+          templateId: 'tmpl_1',
+          template: { id: 'tmpl_1', name: 'Resto Theme', price: 100000 },
+          user: { id: 'tenant_1', name: 'Budi Tenant', email: 'budi@tenant.id' },
+          commission: { id: 'comm_1', totalAmount: 100000, designerAmount: 70000, platformFee: 30000, transactionId: 'txn_100', designerId: 'designer_1', templateId: 'tmpl_1', createdAt: new Date() },
+          createdAt: new Date(),
+        },
+      ];
+
+      mockDb.query.transactions.findMany.mockResolvedValueOnce(mockIncomingOrders);
+
+      const orders = await transactionService.getDesignerIncomingOrders('designer_1');
+      expect(orders).toHaveLength(1);
+      expect(orders[0].id).toBe('txn_100');
+      expect(orders[0].template?.name).toBe('Resto Theme');
+      expect(orders[0].user?.email).toBe('budi@tenant.id');
+      expect(orders[0].commission?.designerAmount).toBe(70000);
+      expect(mockDb.query.transactions.findMany).toHaveBeenCalled();
     });
   });
 });

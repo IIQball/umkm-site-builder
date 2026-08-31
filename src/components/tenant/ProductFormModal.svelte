@@ -4,6 +4,7 @@
   import type { products as productsSchema } from "../../db/schema";
   import type { VariantGroup, VariantOption } from "../../schemas/product-variant.schema";
   import ImageUpload from "../shared/ImageUpload.svelte";
+  import { Button } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -527,20 +528,25 @@
       </label>
     </div>
 
-    <div class="modal-action mt-8">
-      <button class="btn btn-ghost rounded-xl" on:click={closeModal}
-        >Batal</button
+    <div class="modal-action mt-8 flex items-center justify-end gap-3">
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={formLoading}
+        on:click={closeModal}
       >
-      <button
-        class="btn rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm"
+        Batal
+      </Button>
+      <Button
+        variant="primary"
+        size="sm"
         on:click={handleSaveProduct}
         disabled={formLoading}
+        loading={formLoading}
+        className="font-bold"
       >
-        {#if formLoading}
-          <span class="loading loading-spinner"></span>
-        {/if}
         Simpan
-      </button>
+      </Button>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">

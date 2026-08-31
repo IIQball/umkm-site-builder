@@ -9,6 +9,7 @@
   import AdminDetailModal from './whitelist/AdminDetailModal.svelte';
   import AdminConfirmModal from './whitelist/AdminConfirmModal.svelte';
   import StatCard from '../ui/StatCard.svelte';
+  import { Button } from '@/components/ui';
 
   let admins: AdminEntry[] = [];
   
@@ -124,16 +125,22 @@
         <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
           <ShieldCheck size={24} strokeWidth={2.5} />
         </div>
-        <h1 class="text-2xl font-black text-main tracking-tight leading-none pt-3">Manajemen Admin</h1>
+        <h1 class="text-heading-md text-main">Manajemen Admin</h1>
       </div>
-      <p class="text-sm text-secondary max-w-xl leading-relaxed">
+      <p class="text-body-base text-secondary mt-0.5 max-w-xl leading-relaxed">
         Buat akun Administrator baru secara langsung. Admin yang terdaftar dapat mengelola operasional platform sesuai otoritas yang diberikan.
       </p>
     </div>
     
-    <button type="button" on:click={() => isAddModalOpen = true} class="btn btn-primary rounded-xl font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all w-full md:w-auto shrink-0 px-6 h-11">
-      <Plus size={18} strokeWidth={2.5} class="mr-1" /> Tambah Admin
-    </button>
+    <Button
+      variant="primary"
+      size="md"
+      on:click={() => isAddModalOpen = true}
+      className="font-bold shrink-0 px-6"
+    >
+      <Plus size={18} strokeWidth={2.5} class="mr-1" />
+      <span>Tambah Admin</span>
+    </Button>
   </div>
   
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">

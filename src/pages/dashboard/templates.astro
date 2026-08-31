@@ -1,0 +1,60 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import TemplateGallery from '@/components/dashboard/TemplateGallery.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { stores } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin') {
+  return Astro.redirect('/dashboard');
+}
+
+const [store] = await db.select().from(stores).where(eq(stores.userId, user.id));
+if (!store) {
+  return Astro.redirect('/onboarding');
+}
+---
+
+<DashboardLayout title="Koleksi Template Toko" breadcrumb="Dashboard / Galeri Template">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching standard dashboard header layout) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5 font-heading">
+          <span>Koleksi Template Desain Toko</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pilih dan terapkan template website yang telah Anda miliki ke toko online UMKM Anda seketika.
+        </p>
+      </div>
+
+      <!-- Quick Action Button -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          client:load
+          href="/templates"
+          variant="secondary"
+          size="md"
+          class="font-bold"
+        >
+          <span class="material-symbols-outlined text-primary text-base">storefront</span>
+          <span>Jelajahi Marketplace</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Template Gallery Component -->
+    <TemplateGallery
+      client:load
+      storeId={store.id}
+      currentTemplateId={store.templateId}
+    />
+  </div>
+</DashboardLayout>

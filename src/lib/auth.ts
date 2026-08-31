@@ -103,7 +103,10 @@ export const auth = betterAuth({
           }
 
           return {
-            data: user,
+            data: {
+              ...user,
+              emailVerified: true,
+            },
           };
         },
         after: async (user) => {

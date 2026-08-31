@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { toast } from "@/lib/toast";
 
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
@@ -60,22 +61,25 @@
 
   const toggleStatus = async (product: Product, newStatus: boolean) => {
     try {
-      const res = await fetch(`/api/products/${product.id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/products/${product.id}/stock`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isAvailable: newStatus }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.ok) {
         product.isAvailable = newStatus;
         products = [...products];
+        toast.success(data.message || "Status stok berhasil diubah");
       } else {
         product.isAvailable = !newStatus;
         products = [...products];
-        alert("Gagal mengubah status");
+        toast.error(data.error?.message || "Gagal mengubah status");
       }
     } catch (e) {
       product.isAvailable = !newStatus;
       products = [...products];
+      toast.error("Terjadi kesalahan jaringan");
     }
   }
 

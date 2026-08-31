@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button } from '@/components/ui';
+  import { Button, Card, Table, Modal, Input } from '@/components/ui';
   
   interface Category {
     id: string;
     name: string;
-    description: string | null;
+    slug: string;
+    storeId: string;
+    storeName?: string;
   }
+
+  export let storeId: string = '';
+  export let storeName: string = 'Toko Anda';
 
   let categories: Category[] = [];
   let isLoading = true;
@@ -18,18 +23,34 @@
   let isModalOpen = false;
   let editingCategory: Category | null = null;
   let formName = '';
-  let formDescription = '';
+  let formSlug = '';
+
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
+
+  $: formSlug = formName ? slugify(formName) : '';
 
   const fetchCategories = async () => {
+    if (!storeId) {
+      isLoading = false;
+      return;
+    }
     isLoading = true;
     error = null;
     try {
-      const res = await fetch('/api/categories');
-      const data = (await res.json()) as { ok?: boolean; data?: Category[]; error?: { message?: string } };
-      if (data.ok && data.data) {
-        categories = data.data;
+      const res = await fetch(`/api/categories?storeId=${storeId}`);
+      const data = await res.json();
+      if (res.ok) {
+        categories = data;
       } else {
-        error = data.error?.message || 'Gagal memuat kategori';
+        error = data.error || 'Gagal memuat kategori';
       }
     } catch {
       error = 'Gagal memuat kategori';
@@ -40,12 +61,18 @@
 
   onMount(() => {
     fetchCategories();
+
+    const handleOpenAdd = () => openAddModal();
+    window.addEventListener('open-add-category', handleOpenAdd);
+
+    return () => {
+      window.removeEventListener('open-add-category', handleOpenAdd);
+    };
   });
 
   const openAddModal = () => {
     editingCategory = null;
     formName = '';
-    formDescription = '';
     error = null;
     isModalOpen = true;
   };
@@ -53,35 +80,36 @@
   const openEditModal = (category: Category) => {
     editingCategory = category;
     formName = category.name;
-    formDescription = category.description || '';
     error = null;
     isModalOpen = true;
   };
 
   const handleSubmit = async () => {
-    if (!formName.trim()) return;
+    if (!formName.trim() || !storeId) return;
     
     isSaving = true;
     error = null;
     success = null;
     try {
-      const url = editingCategory ? `/api/categories/${editingCategory.id}` : '/api/categories';
       const method = editingCategory ? 'PATCH' : 'POST';
-      
-      const res = await fetch(url, {
+      const bodyPayload = editingCategory 
+        ? { id: editingCategory.id, name: formName, slug: formSlug } 
+        : { storeId, name: formName, slug: formSlug };
+        
+      const res = await fetch('/api/categories', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formName, description: formDescription }),
+        body: JSON.stringify(bodyPayload),
       });
       
-      const data = (await res.json()) as { ok?: boolean; error?: { message?: string } };
-      if (data.ok) {
+      const data = await res.json();
+      if (res.ok) {
         await fetchCategories();
         isModalOpen = false;
         success = editingCategory ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.';
         setTimeout(() => success = null, 3000);
       } else {
-        error = data.error?.message || 'Gagal menyimpan kategori';
+        error = data.error || 'Gagal menyimpan kategori';
       }
     } catch {
       error = 'Gagal menyimpan kategori';
@@ -90,216 +118,196 @@
     }
   };
 
-  const deleteCategory = async (id: string) => {
-    if (!confirm('Hapus kategori ini secara permanen?')) return;
-    
+  // Delete Modal
+  let deleteId: string | null = null;
+  let isDeleteModalOpen = false;
+  let isDeleting = false;
+
+  const confirmDelete = (id: string) => {
+    deleteId = id;
+    error = null;
+    isDeleteModalOpen = true;
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    isDeleting = true;
     error = null;
     success = null;
     try {
-      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
-      const data = (await res.json()) as { ok?: boolean; error?: { message?: string } };
-      if (data.ok) {
-        categories = categories.filter(c => c.id !== id);
+      const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        categories = categories.filter(c => c.id !== deleteId);
         success = 'Kategori berhasil dihapus.';
         setTimeout(() => success = null, 3000);
+        isDeleteModalOpen = false;
       } else {
-        error = data.error?.message || 'Gagal menghapus kategori';
+        error = data.error || 'Gagal menghapus kategori';
       }
     } catch {
       error = 'Gagal menghapus kategori';
+    } finally {
+      isDeleting = false;
     }
   };
 </script>
 
-<div class="space-y-6">
+<div class="space-y-6 animate-fade-in-up">
   <!-- Header Actions -->
-  <div class="flex items-center justify-between bg-base-100 p-1 rounded-xl shadow-sm border border-base-200">
-    <div class="px-4 py-2">
-      <p class="text-sm text-base-content/60 font-medium">Total <span class="text-base-content font-bold">{categories.length}</span> kategori</p>
+  <Card variant="flat" padding="sm" className="flex items-center justify-between">
+    <div class="px-2">
+      <p class="text-body-sm text-secondary font-medium">Total <span class="text-main font-bold">{categories.length}</span> kategori</p>
     </div>
-    <Button 
-      variant="dark"
-      size="sm"
-      className="rounded-xl font-bold"
-      on:click={openAddModal}
-    >
-      <span class="material-symbols-outlined text-[18px]">add</span>
-      <span>Tambah Kategori</span>
-    </Button>
-  </div>
+  </Card>
 
   <!-- Notifications -->
-  {#if error && !isModalOpen}
-    <div class="p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-xl border border-red-100 dark:border-red-800/50 flex gap-3">
-      <span class="material-symbols-outlined mt-0.5 text-[20px]">error</span>
-      <p class="text-sm">{error}</p>
+  {#if error && !isModalOpen && !isDeleteModalOpen}
+    <div class="p-4 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20 flex gap-3 items-center animate-fade-in-up">
+      <span class="material-symbols-outlined text-lg">error</span>
+      <p class="text-sm font-medium">{error}</p>
     </div>
   {/if}
 
-  {#if success && !isModalOpen}
-    <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 rounded-xl border border-emerald-100 dark:border-emerald-800/50 flex gap-3">
-      <span class="material-symbols-outlined mt-0.5 text-[20px]">check_circle</span>
-      <p class="text-sm">{success}</p>
+  {#if success && !isModalOpen && !isDeleteModalOpen}
+    <div class="p-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20 flex gap-3 items-center animate-fade-in-up">
+      <span class="material-symbols-outlined text-lg">check_circle</span>
+      <p class="text-sm font-medium">{success}</p>
     </div>
   {/if}
 
   <!-- Content -->
-  <div class="bg-base-100 rounded-2xl border border-base-200 overflow-hidden shadow-sm min-h-[400px] flex flex-col">
+  <Card padding="none" className="min-h-[400px] flex flex-col">
     {#if isLoading}
       <div class="flex-1 flex items-center justify-center p-12">
         <span class="loading loading-spinner loading-lg text-primary"></span>
       </div>
     {:else if categories.length === 0}
-      <div class="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-sm mx-auto">
-        <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-4 text-base-content/30">
-          <span class="material-symbols-outlined text-[32px]">category</span>
+      <div class="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-sm mx-auto animate-fade-in">
+        <div class="w-16 h-16 rounded-full bg-nested flex items-center justify-center mb-4 text-muted border border-light">
+          <span class="material-symbols-outlined text-3xl">category</span>
         </div>
-        <h3 class="text-lg font-semibold text-base-content tracking-tight mb-1">Belum ada kategori</h3>
-        <p class="text-sm text-base-content/60 mb-6">Kelompokkan produk Anda dengan menambahkan kategori pertama.</p>
-        <Button variant="dark" size="sm" className="rounded-xl font-bold" on:click={openAddModal}>
+        <h3 class="text-heading-md font-bold text-main tracking-tight mb-1">Belum ada kategori</h3>
+        <p class="text-body-sm text-secondary mb-6">Kelompokkan produk Anda dengan menambahkan kategori pertama.</p>
+        <Button variant="dark" size="sm" className="font-bold" on:click={openAddModal}>
           Buat Kategori
         </Button>
       </div>
     {:else}
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-base-50/50 border-b border-base-200">
-              <th class="px-6 py-4 text-xs font-semibold text-base-content/50 uppercase tracking-wider w-1/3">Nama Kategori</th>
-              <th class="px-6 py-4 text-xs font-semibold text-base-content/50 uppercase tracking-wider hidden sm:table-cell">Deskripsi</th>
-              <th class="px-6 py-4 text-xs font-semibold text-base-content/50 uppercase tracking-wider text-right w-24">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-base-200">
-            {#each categories as category}
-              <tr class="group hover:bg-base-50/50 transition-colors">
-                <td class="px-6 py-4 align-top">
-                  <p class="font-medium text-base-content">{category.name}</p>
-                </td>
-                <td class="px-6 py-4 align-top hidden sm:table-cell">
-                  {#if category.description}
-                    <p class="text-sm text-base-content/70 line-clamp-2">{category.description}</p>
-                  {:else}
-                    <p class="text-sm text-base-content/30 italic">Tidak ada deskripsi</p>
-                  {/if}
-                </td>
-                <td class="px-6 py-4 align-top text-right">
-                  <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
-                    <Button 
-                      variant="secondary"
-                      size="icon"
-                      on:click={() => openEditModal(category)}
-                      title="Edit"
-                    >
-                      <span class="material-symbols-outlined text-[18px]">edit</span>
-                    </Button>
-                    <Button 
-                      variant="destructive"
-                      size="icon"
-                      className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
-                      on:click={() => deleteCategory(category.id)}
-                      title="Hapus"
-                    >
-                      <span class="material-symbols-outlined text-[18px]">delete</span>
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <Table 
+        headers={[
+          { label: 'Nama Kategori Produk' },
+          { label: 'Toko' },
+          { label: 'Aksi', align: 'right', width: '120px' }
+        ]}
+      >
+        {#each categories as category}
+          <tr class="group">
+            <td class="px-6 py-4 align-top">
+              <p class="font-bold text-main">{category.name}</p>
+            </td>
+            <td class="px-6 py-4 align-top hidden sm:table-cell">
+              <p class="text-sm font-medium text-secondary">{storeName || 'Unknown Store'}</p>
+            </td>
+            <td class="px-6 py-4 align-top text-right">
+              <div class="flex items-center justify-end gap-1">
+                <Button 
+                  variant="secondary"
+                  size="icon"
+                  on:click={() => openEditModal(category)}
+                  title="Edit"
+                >
+                  <span class="material-symbols-outlined text-base">edit</span>
+                </Button>
+                <Button 
+                  variant="destructive"
+                  size="icon"
+                  className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+                  on:click={() => confirmDelete(category.id)}
+                  title="Hapus"
+                >
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </Button>
+              </div>
+            </td>
+          </tr>
+        {/each}
+      </Table>
     {/if}
-  </div>
+  </Card>
 
-  <!-- Modal Form -->
-  {#if isModalOpen}
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <!-- Backdrop -->
-      <button 
-        type="button"
-        class="absolute inset-0 bg-black/40 backdrop-blur-sm border-0 cursor-default transition-opacity"
-        aria-label="Tutup"
-        on:click={() => { if(!isSaving) isModalOpen = false; }}
-      ></button>
-      
-      <!-- Dialog -->
-      <div class="relative bg-base-100 w-full max-w-md rounded-2xl shadow-2xl border border-base-200 overflow-hidden transform transition-all">
-        <div class="px-6 py-5 border-b border-base-200 flex items-center justify-between bg-base-50/50">
-          <h3 class="font-bold text-lg tracking-tight text-base-content">
-            {editingCategory ? 'Edit Kategori' : 'Kategori Baru'}
-          </h3>
-          <Button 
-            variant="secondary"
-            size="icon"
-            on:click={() => (isModalOpen = false)}
-            disabled={isSaving}
-            title="Tutup"
-          >
-            <span class="material-symbols-outlined text-[20px]">close</span>
-          </Button>
+  <!-- Delete Confirm Modal -->
+  <Modal bind:open={isDeleteModalOpen} title="Konfirmasi Hapus">
+    <div class="space-y-4">
+      <p class="text-secondary text-sm">Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.</p>
+      {#if error}
+        <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
+          <span class="material-symbols-outlined text-base">error</span>
+          <p class="font-medium">{error}</p>
         </div>
-
-        <div class="p-6">
-          {#if error}
-            <div class="mb-5 p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-lg border border-red-100 dark:border-red-800/50 flex gap-2 text-sm">
-              <span class="material-symbols-outlined text-[18px]">error</span>
-              <p>{error}</p>
-            </div>
-          {/if}
-
-          <div class="space-y-5">
-            <div class="form-control">
-              <label class="label mb-1" for="category-name">
-                <span class="label-text font-medium text-base-content">Nama Kategori</span>
-              </label>
-              <input 
-                id="category-name"
-                type="text" 
-                placeholder="Mis: Minuman Dingin" 
-                class="input input-bordered w-full bg-base-100 focus:input-primary transition-colors"
-                bind:value={formName}
-                disabled={isSaving}
-              />
-            </div>
-
-            <div class="form-control">
-              <label class="label mb-1" for="category-desc">
-                <span class="label-text font-medium text-base-content">Deskripsi</span>
-                <span class="label-text-alt text-base-content/50">Opsional</span>
-              </label>
-              <textarea 
-                id="category-desc"
-                class="textarea textarea-bordered h-24 bg-base-100 focus:textarea-primary transition-colors resize-none" 
-                placeholder="Deskripsi singkat..."
-                bind:value={formDescription}
-                disabled={isSaving}
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="px-6 py-4 bg-base-50/50 border-t border-base-200 flex justify-end gap-3">
-          <Button 
-            variant="secondary"
-            size="sm"
-            on:click={() => (isModalOpen = false)}
-            disabled={isSaving}
-          >
-            Batal
-          </Button>
-          <Button 
-            variant="dark"
-            size="sm"
-            on:click={handleSubmit}
-            disabled={isSaving || !formName.trim()}
-            loading={isSaving}
-            className="font-bold"
-          >
-            Simpan
-          </Button>
-        </div>
-      </div>
+      {/if}
     </div>
-  {/if}
+    <svelte:fragment slot="footer">
+      <Button 
+        variant="secondary"
+        size="sm"
+        on:click={() => (isDeleteModalOpen = false)}
+        disabled={isDeleting}
+      >
+        Batal
+      </Button>
+      <Button 
+        variant="destructive"
+        size="sm"
+        on:click={handleDelete}
+        disabled={isDeleting}
+        loading={isDeleting}
+        className="font-bold"
+      >
+        Hapus Kategori
+      </Button>
+    </svelte:fragment>
+  </Modal>
+
+  <!-- Add/Edit Modal -->
+  <Modal bind:open={isModalOpen} title={editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}>
+    <div class="space-y-5">
+      <p class="text-sm text-secondary">Tambahkan kategori barang yang tersedia di toko Anda</p>
+      {#if error}
+        <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
+          <span class="material-symbols-outlined text-base">error</span>
+          <p class="font-medium">{error}</p>
+        </div>
+      {/if}
+
+      <Input 
+        label="Nama Kategori"
+        placeholder="Contoh: Makanan, Minuman" 
+        bind:value={formName}
+        disabled={isSaving}
+        required
+      />
+    </div>
+
+    <svelte:fragment slot="footer">
+      <Button 
+        variant="secondary"
+        size="sm"
+        on:click={() => (isModalOpen = false)}
+        disabled={isSaving}
+      >
+        Batal
+      </Button>
+      <Button 
+        variant="dark"
+        size="sm"
+        on:click={handleSubmit}
+        disabled={isSaving || !formName.trim()}
+        loading={isSaving}
+        className="font-bold"
+      >
+        Simpan Kategori
+      </Button>
+    </svelte:fragment>
+  </Modal>
 </div>

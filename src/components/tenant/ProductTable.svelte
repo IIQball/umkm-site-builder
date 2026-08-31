@@ -7,6 +7,8 @@
   import ProductFormModal from "./ProductFormModal.svelte";
   import ProductDeleteModal from "./ProductDeleteModal.svelte";
   import ProductTableRow from "./ProductTableRow.svelte";
+  
+  import { StatCard, Card, Table, Input } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -137,157 +139,149 @@
   $: inactiveProducts = totalProducts - activeProducts;
 </script>
 
-<div>
+<div class="space-y-8">
   <!-- Stat Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Produk</p>
-      <p class="text-3xl font-extrabold text-base-content">{totalProducts}</p>
-      <p class="text-xs text-base-content/40">Seluruh produk terdaftar</p>
-    </div>
-
-    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Produk Aktif</p>
-      <p class="text-3xl font-extrabold text-success">{activeProducts}</p>
-      <p class="text-xs text-base-content/40">Siap untuk dijual</p>
-    </div>
-
-    <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-      <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Produk Tidak Aktif</p>
-      <p class="text-3xl font-extrabold text-base-content">{inactiveProducts}</p>
-      <p class="text-xs text-base-content/40">Stok nonaktif</p>
-    </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+    {#key totalProducts}
+      <StatCard 
+        label="Total Produk" 
+        value={totalProducts} 
+        description="Seluruh produk terdaftar"
+        icon="inventory_2"
+        cardTheme="default"
+        delayClass="delay-100"
+      />
+    {/key}
+    {#key activeProducts}
+      <StatCard 
+        label="Produk Aktif" 
+        value={activeProducts} 
+        description="Siap untuk dijual"
+        icon="check_circle"
+        cardTheme="default"
+        delayClass="delay-200"
+      />
+    {/key}
+    {#key inactiveProducts}
+      <StatCard 
+        label="Tidak Aktif" 
+        value={inactiveProducts} 
+        description="Stok nonaktif"
+        icon="block"
+        cardTheme="default"
+        delayClass="delay-300"
+      />
+    {/key}
   </div>
 
   <!-- Kontainer Tabel Utama -->
-  <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden p-6 mb-8">
+  <Card padding="lg" className="animate-fade-in-up delay-400">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <h2 class="text-2xl font-bold tracking-tight text-base-content">
+      <h2 class="text-heading-md font-bold tracking-tight text-main">
         Daftar Produk
       </h2>
-      <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
+      <div class="flex items-center gap-3">
         <div class="dropdown dropdown-end {isDropdownOpen ? 'dropdown-open' : ''}">
-          <div class="relative w-full min-w-[160px] max-w-[200px]">
-            <input 
+          <div class="relative w-full min-w-[200px]">
+            <Input 
               id="categorySearchInput"
-              type="text"
               placeholder="Ketik kategori..."
               bind:value={searchCategoryName}
               on:focus={() => isDropdownOpen = true}
               on:blur={() => setTimeout(() => isDropdownOpen = false, 200)}
-              class="input input-bordered input-sm bg-base-100 w-full pr-8"
-            />
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div 
-              class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer"
-              on:mousedown|preventDefault={() => {
-                if (isDropdownOpen) {
-                  isDropdownOpen = false;
-                  document.getElementById('categorySearchInput')?.blur();
-                } else {
-                  isDropdownOpen = true;
-                  document.getElementById('categorySearchInput')?.focus();
-                }
-              }}
+              size="sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              <svelte:fragment slot="prefix">
+                <span class="material-symbols-outlined text-lg">filter_list</span>
+              </svelte:fragment>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div 
+                slot="suffix"
+                class="flex items-center cursor-pointer px-1"
+                on:mousedown|preventDefault={() => {
+                  if (isDropdownOpen) {
+                    isDropdownOpen = false;
+                    document.getElementById('categorySearchInput')?.blur();
+                  } else {
+                    isDropdownOpen = true;
+                    document.getElementById('categorySearchInput')?.focus();
+                  }
+                }}
+              >
+                <span class="material-symbols-outlined text-base">expand_more</span>
+              </div>
+            </Input>
           </div>
-          <ul class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-xl w-52 mt-1 max-h-60 overflow-y-auto border border-base-200">
+          <ul class="dropdown-content z-20 menu p-2 shadow-md bg-card rounded-xl w-full mt-2 max-h-60 overflow-y-auto border border-light">
             <li>
-              <button type="button" class="font-medium cursor-pointer text-base-content w-full text-left" on:click={() => selectCategory("Semua Kategori")}>
+              <button type="button" class="font-medium cursor-pointer text-main w-full text-left hover:bg-nested/80" on:click={() => selectCategory("Semua Kategori")}>
                 Semua Kategori
               </button>
             </li>
             {#each displayedCategories as category}
               <li>
-                <button type="button" class="cursor-pointer text-base-content w-full text-left" on:click={() => selectCategory(category.name)}>
+                <button type="button" class="cursor-pointer text-main w-full text-left hover:bg-nested/80" on:click={() => selectCategory(category.name)}>
                   {category.name}
                 </button>
               </li>
             {/each}
             {#if displayedCategories.length === 0}
-              <li class="px-4 py-2 text-xs text-base-content/50 text-center">Kategori tidak ditemukan</li>
+              <li class="px-4 py-2 text-xs text-muted text-center">Kategori tidak ditemukan</li>
             {/if}
           </ul>
         </div>
       </div>
     </div>
 
-  {#if error}
-    <div class="alert alert-error mb-4 shadow-sm rounded-xl">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-        /></svg
-      >
-      <span>{error}</span>
-    </div>
-  {/if}
+    {#if error}
+      <div class="mb-4 p-4 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20 flex gap-3 items-center animate-fade-in">
+        <span class="material-symbols-outlined text-lg">error</span>
+        <span class="text-sm font-medium">{error}</span>
+      </div>
+    {/if}
 
-  {#if loading}
-    <div class="flex justify-center my-12">
-      <span class="loading loading-spinner loading-md text-primary"></span>
-    </div>
-  {:else if products.length === 0}
-    <div
-      class="text-center py-12 border border-dashed border-blue-300 dark:border-blue-800 rounded-2xl"
-    >
-      <p class="text-base-content/60">
-        Belum ada produk. Silakan tambahkan produk pertama Anda.
-      </p>
-    </div>
-  {:else}
-    <div class="overflow-x-auto">
-      <table class="table w-full text-sm">
-        <thead
-          class="bg-base-200/50 text-base-content/60 border-b border-base-200"
-        >
+    {#if loading}
+      <div class="flex justify-center my-12">
+        <span class="loading loading-spinner loading-md text-primary"></span>
+      </div>
+    {:else if products.length === 0}
+      <div class="text-center py-16 rounded-2xl border border-dashed border-light">
+        <span class="material-symbols-outlined text-4xl text-muted mb-3">inventory_2</span>
+        <h3 class="text-lg font-bold text-main mb-1">Belum ada produk</h3>
+        <p class="text-body-sm text-secondary">Silakan tambahkan produk pertama Anda.</p>
+      </div>
+    {:else}
+      <Table 
+        headers={[
+          { label: 'Produk' },
+          { label: 'Kategori' },
+          { label: 'Deskripsi' },
+          { label: 'Harga' },
+          { label: 'Status' },
+          { label: 'Aksi', align: 'right' }
+        ]}
+      >
+        {#if filteredProducts.length === 0}
           <tr>
-            <th class="font-medium px-4 py-3">Produk</th>
-            <th class="font-medium px-4 py-3">Kategori</th>
-            <th class="font-medium px-4 py-3">Deskripsi</th>
-            <th class="font-medium px-4 py-3">Harga</th>
-            <th class="font-medium px-4 py-3">Status</th>
-            <th class="font-medium px-4 py-3 text-right">Aksi</th>
+            <td colspan="6" class="text-center py-8 text-secondary">
+              Tidak ada produk di kategori ini.
+            </td>
           </tr>
-        </thead>
-        <tbody class="divide-y divide-base-200">
-          {#if filteredProducts.length === 0}
-            <tr>
-              <td colspan="6" class="text-center py-8 text-base-content/50">
-                Tidak ada produk di kategori ini.
-              </td>
-            </tr>
-          {:else}
-            {#each filteredProducts as product}
-              <ProductTableRow
-                {product}
-                {categories}
-                on:edit={handleEdit}
-                on:delete={handleDelete}
-                on:toggle={handleToggleEvent}
-              />
-            {/each}
-          {/if}
-        </tbody>
-      </table>
-    </div>
-  {/if}
-  </div>
+        {:else}
+          {#each filteredProducts as product}
+            <ProductTableRow
+              {product}
+              {categories}
+              on:edit={handleEdit}
+              on:delete={handleDelete}
+              on:toggle={handleToggleEvent}
+            />
+          {/each}
+        {/if}
+      </Table>
+    {/if}
+  </Card>
 
   <ProductFormModal
     bind:showModal={showFormModal}

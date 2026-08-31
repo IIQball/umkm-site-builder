@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { auth } from "@/lib/auth";
+import { extractSubdomain } from "@/lib/routing/subdomain";
 
 // Domain utama aplikasi, sesuaikan dengan environment
 const MAIN_DOMAIN = import.meta.env.PUBLIC_MAIN_DOMAIN || 'localhost:4321';
@@ -9,20 +10,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const host = context.request.headers.get('host') || context.request.headers.get('x-forwarded-host') || '';
   const url = new URL(context.request.url);
   
-  // Pisahkan subdomain dari host
-  let subdomain: string | null = null;
-  
-  // Logika sederhana: jika host bukan main domain dan bukan IP address, asumsikan itu subdomain
-  // Ini mengasumsikan format seperti "storename.domain.com"
-  if (host && host !== MAIN_DOMAIN && !host.startsWith('127.0.0.1') && !host.startsWith('localhost')) {
-    const hostParts = host.split('.');
-    const mainDomainParts = MAIN_DOMAIN.split('.');
-    
-    // Jika jumlah bagian host lebih banyak dari main domain, kita punya subdomain
-    if (hostParts.length > mainDomainParts.length) {
-      subdomain = hostParts[0];
-    }
-  }
+  const subdomain = extractSubdomain(host, MAIN_DOMAIN);
 
   // Simpan subdomain di locals agar bisa diakses di route handlers
   context.locals.subdomain = subdomain;

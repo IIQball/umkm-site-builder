@@ -49,7 +49,7 @@
     confirmModal = { isOpen: true, type: 'toggle', id: admin.id, adminName: admin.name, currentStatus: admin.status };
   };
 
-  const executeToggleStatus = async () => {
+  const executeToggleStatus = async (reason?: string) => {
     if (!confirmModal || confirmModal.type !== 'toggle') return;
     const { id, currentStatus } = confirmModal;
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
@@ -62,7 +62,10 @@
       const res = await fetch(`/api/admin/whitelist?id=${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ 
+          status: newStatus,
+          suspendReason: newStatus === 'suspended' ? reason : undefined
+        })
       });
       const result = await res.json();
 
@@ -109,11 +112,11 @@
     }
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = (event: CustomEvent<{ reason?: string }>) => {
     if (confirmModal?.type === 'remove') {
       executeRemove();
     } else if (confirmModal?.type === 'toggle') {
-      executeToggleStatus();
+      executeToggleStatus(event.detail?.reason);
     }
   };
 </script>

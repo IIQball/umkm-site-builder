@@ -3,6 +3,7 @@ import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db, users, sessions, accounts, verifications, designers, wallets } from "@/db";
 import { eq } from "drizzle-orm";
+import { sendEmail } from "@/lib/utils/email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -16,10 +17,26 @@ export const auth = betterAuth({
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4321",
+  trustedOrigins: ["http://localhost:4321", "http://localhost:4322", "http://127.0.0.1:4321", "http://127.0.0.1:4322"],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'Reset Password Akun UMKM Site Builder',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            <h2 style="color: #0f172a;">Halo ${user.name},</h2>
+            <p>Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.</p>
+            <p>Klik tombol di bawah ini untuk membuat kata sandi baru:</p>
+            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Atur Ulang Kata Sandi</a>
+            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika Anda tidak meminta reset password, abaikan saja email ini.</p>
+          </div>
+        `
+      });
+    },
   },
   socialProviders: {
     google: {

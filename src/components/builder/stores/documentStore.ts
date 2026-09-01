@@ -1,9 +1,7 @@
 import { writable, get } from 'svelte/store';
 import {
-  type TemplateConfig,
   type TemplateSection,
   type TemplateTheme,
-  DEFAULT_TEMPLATE_THEME,
 } from '@/schemas';
 import {
   type EditorTemplate,
@@ -14,20 +12,18 @@ import {
 } from './editorStore.types';
 import { applyDeleteNode, applyAddNode, applySave, applySubmitReview } from './editorStore.mutations';
 import { canvasStore } from './canvasStore';
+import {
+  getDefaultLayoutPreset,
+  createHistoryManager,
+  applyThemeUpdates,
+  applyReorderSectionSlot,
+  applyReorderArrayItem,
+  applyNodeStyleToken,
+  applySectionSpacing,
+  applyNodeSpacing,
+} from './documentStore.actions';
 
-const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
-  switch (type) {
-    case 'header_announcement': return 'default_split';
-    case 'hero': return 'split_left_text';
-    case 'features': return 'grid_3_cards';
-    case 'product_catalog': return 'grid_standard';
-    case 'testimonials': return 'masonry_grid';
-    case 'faq': return 'accordion_single_col';
-    case 'google_maps': return 'fullwidth_map';
-    case 'footer': return 'multi_column';
-    default: return 'default';
-  }
-};
+export * from './documentStore.actions';
 
 /**
  * documentStore (Persistent Template Data)
@@ -35,29 +31,7 @@ const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
  */
 export function createDocumentStore() {
   const { subscribe, set, update } = writable<DocumentState>(initialDocumentState);
-  let lastHistoryTime = 0;
-
-  const pushHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
-    if (!state.template) return state;
-    const now = Date.now();
-    const shouldMerge = now - lastHistoryTime < 350 && state.history.past.length > 0;
-    lastHistoryTime = now;
-
-    const past = shouldMerge
-      ? state.history.past
-      : [...state.history.past, clone(state.template.config)].slice(-20);
-
-    return {
-      ...state,
-      template: { ...state.template, config: newConfig },
-      history: { past, future: [] },
-      isDirty: true,
-    };
-  };
-
-  const pushThemeHistory = (state: DocumentState, newConfig: TemplateConfig): DocumentState => {
-    return pushHistory(state, newConfig);
-  };
+  const { pushHistory } = createHistoryManager();
 
   return {
     subscribe,
@@ -91,22 +65,7 @@ export function createDocumentStore() {
     },
 
     reorderSectionSlot(sectionId: string, fromIndex: number, toIndex: number) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          const currentProps = { ...(s.props || {}) };
-          const order = Array.isArray(currentProps.elementOrder)
-            ? [...currentProps.elementOrder]
-            : ['badge', 'title', 'subtitle', 'image', 'cta'];
-          if (fromIndex < 0 || fromIndex >= order.length || toIndex < 0 || toIndex >= order.length) return s;
-          const [moved] = order.splice(fromIndex, 1);
-          order.splice(toIndex, 0, moved);
-          currentProps.elementOrder = order;
-          return { ...s, props: currentProps };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+      update((state) => applyReorderSectionSlot(state, sectionId, fromIndex, toIndex, pushHistory));
     },
 
     updateSectionProps(sectionId: string, props: Record<string, unknown>) {
@@ -129,118 +88,44 @@ export function createDocumentStore() {
       });
     },
 
-    updateNodeStyleToken(sectionId: string, nodeId: string, property: string, tokenKey: string) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          const currentProps = s.props || {};
-          const currentStyles = (currentProps.nodeStyles as Record<string, Record<string, unknown>>) || {};
-          const updatedForNode = { ...(currentStyles[nodeId] || {}), [property]: tokenKey };
-          return {
-            ...s,
-            props: { ...currentProps, nodeStyles: { ...currentStyles, [nodeId]: updatedForNode } },
-          };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+    updateNodeStyleToken(sectionId: string, nodeId: string, tokenKey: string, value: string) {
+      update((state) => applyNodeStyleToken(state, sectionId, nodeId, tokenKey, value, pushHistory));
     },
 
-    updateNodeStyles(sectionId: string, nodeId: string, styles: Record<string, unknown>) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          const currentProps = s.props || {};
-          const currentStyles = (currentProps.nodeStyles as Record<string, Record<string, unknown>>) || {};
-          const updatedForNode = { ...(currentStyles[nodeId] || {}), ...styles };
-          return {
-            ...s,
-            props: { ...currentProps, nodeStyles: { ...currentStyles, [nodeId]: updatedForNode } },
-          };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+    updateSectionSpacing(sectionId: string, spacing: { paddingY?: number; paddingX?: number; gap?: number }) {
+      update((state) => applySectionSpacing(state, sectionId, spacing, pushHistory));
     },
 
-    updateDesignSystemTheme(section: string, updates: Record<string, unknown>) {
-      update((state) => {
-        if (!state.template) return state;
-        const currentTheme = (state.template.config.theme || {}) as Record<string, unknown>;
-        const existingSection = (currentTheme[section] || {}) as Record<string, unknown>;
-        const updatedTheme = {
-          ...DEFAULT_TEMPLATE_THEME,
-          ...currentTheme,
-          [section]: { ...existingSection, ...updates },
-        } as TemplateTheme;
-        return pushThemeHistory(state, { ...state.template.config, theme: updatedTheme });
-      });
+    updateNodeSpacing(sectionId: string, nodeId: string, spacing: { marginTop?: number; marginBottom?: number; padding?: number }) {
+      update((state) => applyNodeSpacing(state, sectionId, nodeId, spacing, pushHistory));
     },
 
-    updateSectionSpacing(sectionId: string, spacingConfig: { paddingY: number; paddingX: number; gap: number }) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          return {
-            ...s,
-            styles: {
-              ...(s.styles || {}),
-              padding: `${spacingConfig.paddingY}px ${spacingConfig.paddingX}px`,
-              paddingTop: `${spacingConfig.paddingY}px`,
-              paddingBottom: `${spacingConfig.paddingY}px`,
-              gap: `${spacingConfig.gap}px`,
-            },
-          };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
-    },
-
-    updateNodeSpacing(sectionId: string, nodeId: string, spacingConfig: { marginTop?: number; marginBottom?: number; padding?: number }) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          const currentProps = s.props || {};
-          const currentStyles = (currentProps.nodeStyles as Record<string, Record<string, unknown>>) || {};
-          const existingNodeStyle = currentStyles[nodeId] || {};
-          const spacingUpdates: Record<string, unknown> = {};
-          if (spacingConfig.marginTop !== undefined) spacingUpdates.marginTop = `${spacingConfig.marginTop}px`;
-          if (spacingConfig.marginBottom !== undefined) spacingUpdates.marginBottom = `${spacingConfig.marginBottom}px`;
-          if (spacingConfig.padding !== undefined) spacingUpdates.padding = `${spacingConfig.padding}px`;
-          const updatedForNode = { ...existingNodeStyle, ...spacingUpdates };
-          return {
-            ...s,
-            props: { ...currentProps, nodeStyles: { ...currentStyles, [nodeId]: updatedForNode } },
-          };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+    updateTheme(themeUpdates: Partial<TemplateTheme>) {
+      update((state) => applyThemeUpdates(state, themeUpdates, pushHistory));
     },
 
     updateGlobalTheme(themeUpdates: Partial<TemplateTheme>) {
-      update((state) => {
-        if (!state.template) return state;
-        const currentTheme = (state.template.config.theme || {}) as Partial<TemplateTheme>;
-        const updates = themeUpdates || {};
-        const newTheme: TemplateTheme = {
-          ...DEFAULT_TEMPLATE_THEME,
-          ...currentTheme,
-          ...updates,
-          colors: { ...(currentTheme.colors || {}), ...(updates.colors || {}) },
-          typography: { ...(currentTheme.typography || {}), ...(updates.typography || {}) },
-          buttons: {
-            ...(currentTheme.buttons || {}),
-            ...(updates.buttons || {}),
-            primary: { ...(currentTheme.buttons?.primary || {}), ...(updates.buttons?.primary || {}) },
-            secondary: { ...(currentTheme.buttons?.secondary || {}), ...(updates.buttons?.secondary || {}) },
-            outline: { ...(currentTheme.buttons?.outline || {}), ...(updates.buttons?.outline || {}) },
-          },
-          layout: { ...(currentTheme.layout || {}), ...(updates.layout || {}) },
-        };
-        return pushThemeHistory(state, { ...state.template.config, theme: newTheme });
-      });
+      update((state) => applyThemeUpdates(state, themeUpdates, pushHistory));
+    },
+
+    updateDesignSystemTheme(key: 'colors' | 'typography' | 'buttons' | 'layout', updates: Record<string, unknown>) {
+      update((state) => applyThemeUpdates(state, { [key]: updates } as Partial<TemplateTheme>, pushHistory));
+    },
+
+    updateThemeColors(colorUpdates: Record<string, string>) {
+      update((state) => applyThemeUpdates(state, { colors: colorUpdates }, pushHistory));
+    },
+
+    updateThemeTypography(typoUpdates: Record<string, unknown>) {
+      update((state) => applyThemeUpdates(state, { typography: typoUpdates }, pushHistory));
+    },
+
+    updateThemeButtons(buttonUpdates: Record<string, unknown>) {
+      update((state) => applyThemeUpdates(state, { buttons: buttonUpdates }, pushHistory));
+    },
+
+    updateThemeLayout(layoutUpdates: Record<string, unknown>) {
+      update((state) => applyThemeUpdates(state, { layout: layoutUpdates }, pushHistory));
     },
 
     updateTemplateName(name: string) {
@@ -325,18 +210,7 @@ export function createDocumentStore() {
     },
 
     reorderArrayItem(sectionId: string, arrayKey: string, fromIndex: number, toIndex: number) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) => {
-          if (s.id !== sectionId) return s;
-          const array = [...((s.props?.[arrayKey] as unknown[]) || [])];
-          if (fromIndex < 0 || fromIndex >= array.length || toIndex < 0 || toIndex >= array.length) return s;
-          const [movedItem] = array.splice(fromIndex, 1);
-          array.splice(toIndex, 0, movedItem);
-          return { ...s, props: { ...s.props, [arrayKey]: array } };
-        });
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+      update((state) => applyReorderArrayItem(state, sectionId, arrayKey, fromIndex, toIndex, pushHistory));
     },
 
     undo() {

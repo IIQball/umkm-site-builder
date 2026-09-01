@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { MessageCircle, MapPin } from 'lucide-svelte';
+  import { MessageCircle, MapPin, Clock } from 'lucide-svelte';
   import { canvasStore } from '../stores/editorStore';
   import type { FooterProps, SectionStyles } from '@/types';
+  import FooterNewsletter from './footer/FooterNewsletter.svelte';
+  import FooterSocialShowcase from './footer/FooterSocialShowcase.svelte';
 
   export let props: FooterProps = {};
   export let styles: SectionStyles = {};
@@ -9,145 +11,154 @@
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'multi_column';
   $: isMobileView = $canvasStore?.viewMode === 'mobile';
-  $: whatsappNumber = props?.whatsappNumber || '';
-  $: address = props?.address || '';
+  $: whatsappNumber = props?.whatsappNumber || '6281234567890';
+  $: address = props?.address || 'Jl. Raya Sudirman No. 123, Jakarta Pusat';
   $: copyrightText = props?.copyrightText || '© 2026 Toko Kami. Semua hak dilindungi.';
   $: tagline = props?.tagline || 'Pusat belanja produk UMKM terpercaya berkualitas tinggi.';
   $: logoText = props?.logoText || 'TOKO KAMI';
+  $: storeHours = (props?.storeHours as string) || 'Buka Setiap Hari: 08.00 - 21.00 WIB';
 </script>
 
 <footer
   data-node="footer_container"
-  class="w-full box-border pt-12 pb-6 select-none"
+  class="w-full box-border select-none {activePreset === 'boxed_card_footer' ? 'p-4 sm:p-6' : 'pt-12 pb-6'}"
 >
-  {#if activePreset === 'cta_focused'}
-    <!-- Preset 3: CTA Focused (Floating Banner Card on Top) -->
-    <div class="relative w-full flex flex-col gap-8">
-      <!-- Floating WA CTA Banner: Concentric nested radius -->
-      {#if whatsappNumber}
-        <div class="-mt-16 p-6 sm:p-8 rounded-2xl bg-[var(--theme-primary,#2563eb)] text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-          <div class="flex flex-col gap-1">
-            <h3 class="text-xl sm:text-2xl font-black">Punya Pertanyaan atau Ingin Pesan Custom?</h3>
-            <p class="text-xs sm:text-sm text-blue-100">Hubungi langsung via WhatsApp untuk respon instan dan penawaran terbaik.</p>
-          </div>
-          <a
-            href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
-            target="_blank"
-            rel="noreferrer"
-            style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px);"
-            class="px-6 bg-white text-[var(--theme-primary,#2563eb)] font-bold text-sm shadow-md hover:bg-slate-50 transition-all flex items-center gap-2 flex-shrink-0"
-          >
-            <MessageCircle size={18} />
-            <span>Chat Sekarang</span>
-          </a>
+  {#if activePreset === 'boxed_card_footer'}
+    <!-- Preset 10: Boxed Card Container Footer -->
+    <div class="max-w-6xl mx-auto p-8 rounded-3xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-xl flex flex-col gap-8 text-left">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-6 flex flex-col gap-2">
+          <h3 class="text-xl font-black text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
+          <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-sm">{tagline}</p>
         </div>
-      {/if}
-
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
-        <div data-node="footer_info" class="md:col-span-6 flex flex-col gap-2">
-          <h3 class="text-lg font-black tracking-wider text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
-          <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-sm leading-relaxed">{tagline}</p>
-        </div>
-        <div data-node="footer_links" class="md:col-span-6 flex flex-col items-start md:items-end justify-center">
-          {#if address}
-            <div class="flex items-center gap-2 text-xs text-[var(--theme-text-muted,#64748b)]">
-              <MapPin size={14} class="text-[var(--theme-primary,#2563eb)] flex-shrink-0" />
-              <span>{address}</span>
-            </div>
+        <div class="md:col-span-6 flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4">
+          {#if whatsappNumber}
+            <a
+              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noreferrer"
+              style="height: var(--theme-btn-height, 40px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              class="inline-flex items-center justify-center px-6 text-xs font-bold shadow-md hover:brightness-105 active:scale-95 transition-all"
+            >
+              <MessageCircle size={14} class="mr-1.5" />
+              <span>Chat WhatsApp</span>
+            </a>
           {/if}
         </div>
       </div>
-
-      <div data-node="footer_copyright" class="pt-6 border-t border-base-200 dark:border-slate-800 text-center text-xs text-[var(--theme-text-muted,#64748b)]">
+      <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--theme-text-muted,#64748b)]">
         <p>{copyrightText}</p>
+        <p class="flex items-center gap-1"><MapPin size={12} class="text-[var(--theme-primary,#2563eb)]" /> {address}</p>
       </div>
     </div>
 
-  {:else if activePreset === 'centered_simple'}
-    <!-- Preset 2: Centered Simple (Logo, Socials, Copyright) -->
-    <div class="flex flex-col items-center text-center gap-6">
-      <div data-node="footer_info" class="flex flex-col items-center gap-2">
-        <h3 class="text-xl font-black tracking-wider text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
-        <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-md">{tagline}</p>
+  {:else if activePreset === 'minimal_single_row'}
+    <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-base-200 dark:border-slate-800 text-xs">
+      <span class="font-black tracking-wider text-[var(--theme-text-primary,#0f172a)]">{logoText}</span>
+      <div class="flex items-center gap-6 text-[var(--theme-text-muted,#64748b)]">
+        <a href="#products" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">Katalog</a>
+        <a href="#about" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">Tentang</a>
+        <a href="#faq" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">FAQ</a>
       </div>
+      <p class="text-[var(--theme-text-muted,#64748b)]">{copyrightText}</p>
+    </div>
 
-      <div data-node="footer_links" class="flex items-center gap-4">
+  {:else if activePreset === 'giant_wordmark'}
+    <div class="w-full flex flex-col items-center text-center gap-8 py-8 overflow-hidden">
+      <div class="flex flex-col items-center gap-2 max-w-xl">
+        <p class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)]">{tagline}</p>
         {#if whatsappNumber}
           <a
             href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
             target="_blank"
             rel="noreferrer"
-            aria-label="WhatsApp"
-            class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 hover:scale-105 transition-transform"
+            class="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1 mt-1"
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={14} />
+            <span>Hubungi kami via WhatsApp: +{whatsappNumber}</span>
           </a>
         {/if}
       </div>
 
-      <div data-node="footer_copyright" class="pt-6 border-t border-base-200 dark:border-slate-800 w-full text-center text-xs text-[var(--theme-text-muted,#64748b)]">
+      <div class="w-full select-none pointer-events-none py-4">
+        <span class="text-4xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-slate-200 dark:text-slate-800/60 uppercase block truncate">
+          {logoText}
+        </span>
+      </div>
+
+      <div class="w-full pt-4 border-t border-base-200 dark:border-slate-800 text-center text-xs text-[var(--theme-text-muted,#64748b)]">
         <p>{copyrightText}</p>
       </div>
     </div>
 
+  {:else if activePreset === 'newsletter_centric'}
+    <FooterNewsletter {logoText} {tagline} {copyrightText} />
+
+  {:else if activePreset === 'social_showcase_footer'}
+    <FooterSocialShowcase {logoText} {tagline} {copyrightText} />
+
+  {:else if activePreset === 'centered_brand_column'}
+    <div class="w-full flex flex-col items-center text-center gap-4 py-8">
+      <span class="font-black text-xl tracking-tight text-[var(--theme-text-primary,#0f172a)]">{logoText}</span>
+      <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-md">{tagline}</p>
+      <div class="flex items-center gap-6 text-xs text-[var(--theme-text-muted,#64748b)] pt-2">
+        <a href="#products" class="hover:text-[var(--theme-primary,#2563eb)]">Katalog</a>
+        <a href="#about" class="hover:text-[var(--theme-primary,#2563eb)]">Tentang</a>
+        <a href="#faq" class="hover:text-[var(--theme-primary,#2563eb)]">FAQ</a>
+      </div>
+      <p class="text-[11px] text-[var(--theme-text-muted,#64748b)] pt-6 border-t border-base-200 dark:border-slate-800 w-full">
+        {copyrightText}
+      </p>
+    </div>
+
   {:else}
-    <!-- Preset 1 (Default): Multi Column (3-4 Columns, gap-8 = 32px) -->
-    <div class="w-full">
-      <div class={`grid ${isMobileView ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'} gap-8 mb-8 text-left`}>
-        <!-- Kolom 1: Profil Toko -->
-        <div data-node="footer_info" class="min-w-0 flex flex-col gap-2">
-          <h3 class="text-base font-black tracking-wider text-[var(--theme-text-primary,#0f172a)]">
-            {logoText}
-          </h3>
-          <p class="text-xs text-[var(--theme-text-muted,#64748b)] leading-relaxed">
-            {tagline}
-          </p>
-        </div>
-
-        <!-- Kolom 2: Kontak Cepat -->
-        <div data-node="footer_links" class="min-w-0">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)] mb-3">
-            Kontak Layanan
-          </h4>
-          <div class="flex flex-col gap-2 text-xs text-[var(--theme-text-muted,#64748b)]">
-            {#if whatsappNumber}
-              <a
-                href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                class="inline-flex items-center gap-2 text-emerald-600 hover:underline"
-              >
-                <MessageCircle size={14} class="flex-shrink-0" />
-                <span>+{whatsappNumber}</span>
-              </a>
-            {/if}
-            {#if address}
-              <div class="flex items-start gap-2">
-                <MapPin size={14} class="mt-0.5 text-[var(--theme-primary,#2563eb)] flex-shrink-0" />
-                <p class="leading-relaxed break-words">{address}</p>
-              </div>
-            {/if}
-          </div>
-        </div>
-
-        <!-- Kolom 3: Informasi Menu -->
-        <div data-node="footer_links" class="min-w-0">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)] mb-3">
-            Informasi
-          </h4>
-          <ul class="space-y-2 text-xs text-[var(--theme-text-muted,#64748b)]">
-            <li><span class="hover:underline cursor-pointer">Tentang Toko</span></li>
-            <li><span class="hover:underline cursor-pointer">Kebijakan Privasi</span></li>
-            <li><span class="hover:underline cursor-pointer">Syarat & Ketentuan</span></li>
-          </ul>
-        </div>
+    <!-- Preset 1 (Default): Multi-Column Footer -->
+    <div class="w-full grid {isMobileView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-12'} gap-8 text-left">
+      <div class="md:col-span-4 flex flex-col gap-3">
+        <h3 class="font-black text-lg text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
+        <p class="text-xs text-[var(--theme-text-muted,#64748b)] leading-relaxed">{tagline}</p>
       </div>
 
-      <!-- Copyright Bar -->
-      <div data-node="footer_copyright" class="pt-6 border-t border-base-200 dark:border-slate-800 text-center text-xs text-[var(--theme-text-muted,#64748b)]">
-        <p>{copyrightText}</p>
+      <div class="md:col-span-3 flex flex-col gap-2.5">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)]">Tautan Cepat</h4>
+        <a href="#products" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Katalog Produk</a>
+        <a href="#about" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Tentang Kami</a>
+        <a href="#faq" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Tanya Jawab (FAQ)</a>
+      </div>
+
+      <div class="md:col-span-5 flex flex-col gap-3">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)]">Kontak & Lokasi</h4>
+        <p class="text-xs text-[var(--theme-text-muted,#64748b)] flex items-start gap-2">
+          <MapPin size={15} class="text-[var(--theme-primary,#2563eb)] mt-0.5 flex-shrink-0" />
+          <span>{address}</span>
+        </p>
+        <p class="text-xs text-[var(--theme-text-muted,#64748b)] flex items-center gap-2">
+          <Clock size={15} class="text-[var(--theme-primary,#2563eb)] flex-shrink-0" />
+          <span>{storeHours}</span>
+        </p>
+        {#if whatsappNumber}
+          <div class="pt-1">
+            <a
+              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noreferrer"
+              style="height: var(--theme-btn-height, 36px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              class="inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 transition-all"
+            >
+              <MessageCircle size={14} class="mr-1.5" />
+              <span>Hubungi CS WhatsApp</span>
+            </a>
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-base-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--theme-text-muted,#64748b)]">
+      <p>{copyrightText}</p>
+      <div class="flex items-center gap-4">
+        <a href="#terms" class="hover:underline">Syarat & Ketentuan</a>
+        <a href="#privacy" class="hover:underline">Kebijakan Privasi</a>
       </div>
     </div>
   {/if}
 </footer>
-

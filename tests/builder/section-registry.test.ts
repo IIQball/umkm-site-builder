@@ -26,6 +26,7 @@ describe('Section Registry Map Architecture', () => {
       expect(sectionRegistry[type].label).toBeTruthy();
       expect(sectionRegistry[type].renderComponent).toBeDefined();
       expect(sectionRegistry[type].icon).toBeDefined();
+      expect(sectionRegistry[type].layoutPresets.length).toBeGreaterThanOrEqual(10);
     }
   });
 

@@ -2,21 +2,13 @@
   import {
     Save,
     Send,
-    Monitor,
-    Tablet,
-    Smartphone,
     CheckCircle2,
     Loader2,
-    Undo2,
-    Redo2,
-    Sun,
-    Moon,
     ArrowLeft,
-    Grid,
-    Grid2X2,
   } from 'lucide-svelte';
-  import { editorStore, canvasStore, canUndo, canRedo } from './stores/editorStore';
+  import { editorStore } from './stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
+  import TopBarViewportControls from './topbar/TopBarViewportControls.svelte';
   import { Badge } from '@/components/ui';
 
   export let templateId: string = '';
@@ -98,185 +90,62 @@
       </button>
     {/if}
 
-    <div class="hidden md:inline-flex">
-      <Badge variant={badge.variant} size="sm" dot pulse={status === 'pending'}>
-        {badge.label}
-      </Badge>
-    </div>
+    <Badge variant={badge.variant} size="sm" className="hidden sm:inline-flex capitalize">
+      {badge.label}
+    </Badge>
   </div>
 
-  <!-- Center: Viewport Switcher & Grid & Undo/Redo -->
+  <!-- Center: Viewport Controls & Grid Guides -->
+  <TopBarViewportControls
+    {viewMode}
+    {onViewModeChange}
+  />
+
+  <!-- Right actions -->
   <div class="flex items-center gap-2">
-    <!-- Undo / Redo -->
-    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
-      <button
-        type="button"
-        on:click={() => editorStore.undo()}
-        disabled={!$canUndo}
-        class="p-1 rounded text-secondary hover:text-main hover:bg-card disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
-        title="Undo (Ctrl+Z)"
-      >
-        <Undo2 size={14} />
-      </button>
-      <button
-        type="button"
-        on:click={() => editorStore.redo()}
-        disabled={!$canRedo}
-        class="p-1 rounded text-secondary hover:text-main hover:bg-card disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer disabled:cursor-not-allowed"
-        title="Redo (Ctrl+Y)"
-      >
-        <Redo2 size={14} />
-      </button>
-    </div>
-
-    <!-- View Mode Switcher -->
-    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
-      <button
-        type="button"
-        on:click={() => onViewModeChange('desktop')}
-        class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          viewMode === 'desktop'
-            ? 'bg-card text-main font-semibold shadow-sm'
-            : 'text-secondary hover:text-main'
-        }`}
-        title="Tampilan Desktop (1200px)"
-      >
-        <Monitor size={14} />
-        <span class="hidden sm:inline">Desktop</span>
-      </button>
-      <button
-        type="button"
-        on:click={() => onViewModeChange('tablet')}
-        class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          viewMode === 'tablet'
-            ? 'bg-card text-main font-semibold shadow-sm'
-            : 'text-secondary hover:text-main'
-        }`}
-        title="Tampilan Tablet (768px)"
-      >
-        <Tablet size={14} />
-        <span class="hidden sm:inline">Tablet</span>
-      </button>
-      <button
-        type="button"
-        on:click={() => onViewModeChange('mobile')}
-        class={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          viewMode === 'mobile'
-            ? 'bg-card text-main font-semibold shadow-sm'
-            : 'text-secondary hover:text-main'
-        }`}
-        title="Tampilan Ponsel (375px)"
-      >
-        <Smartphone size={14} />
-        <span class="hidden sm:inline">Ponsel</span>
-      </button>
-    </div>
-
-    <!-- Figma-Style Layout Grid Guides Toggle -->
-    <div class="flex items-center gap-0.5 bg-nested p-1 rounded-lg border border-light">
-      <button
-        type="button"
-        on:click={() => canvasStore.toggleColumnGrid()}
-        class={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          $canvasStore.showColumnGrid
-            ? 'bg-primary text-white font-semibold shadow-sm'
-            : 'text-secondary hover:text-main'
-        }`}
-        title="Panduan Kolom Grid (Ctrl+G / Shift+G)"
-      >
-        <Grid size={13} />
-        <span class="hidden md:inline text-xs">Grid</span>
-      </button>
-      <button
-        type="button"
-        on:click={() => canvasStore.togglePixelGrid()}
-        class={`p-1 rounded text-xs font-medium transition-all cursor-pointer ${
-          $canvasStore.showPixelGrid
-            ? 'bg-primary text-white font-semibold shadow-sm'
-            : 'text-secondary hover:text-main'
-        }`}
-        title="Panduan Pixel Grid 8px"
-      >
-        <Grid2X2 size={13} />
-      </button>
-    </div>
-  </div>
-
-  <!-- Right Actions: Editor Theme Toggle, Save Draft, Submit & Right Sidebar Toggle -->
-  <div class="flex items-center gap-2">
-    <!-- Editor Chrome Theme Toggle (Light / Dark) -->
+    <!-- Save Status / Button -->
     <button
-      type="button"
-      on:click={() => canvasStore.toggleEditorTheme()}
-      class={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
-        $canvasStore.editorTheme === 'dark'
-          ? 'bg-nested text-warning border-light hover:bg-nested/80'
-          : 'bg-nested text-secondary hover:text-main border-light'
-      }`}
-      title={`Tema Editor: ${$canvasStore.editorTheme === 'dark' ? 'Gelap' : 'Terang'}`}
-      aria-label="Ganti Tema Editor"
-    >
-      {#if $canvasStore.editorTheme === 'dark'}
-        <Moon size={13} class="text-warning" />
-        <span class="text-xs font-semibold">Gelap</span>
-      {:else}
-        <Sun size={13} class="text-warning" />
-        <span class="text-xs font-semibold">Terang</span>
-      {/if}
-    </button>
-
-    <!-- Save Status Message -->
-    {#if saveSuccess}
-      <div class="hidden sm:flex items-center gap-1 text-xs text-success font-medium">
-        <CheckCircle2 size={13} />
-        <span>Tersimpan</span>
-      </div>
-    {:else if isDirty}
-      <span class="hidden sm:inline text-xs text-warning font-medium">Belum disimpan</span>
-    {/if}
-
-    <!-- Save Button -->
-    <button
-      type="button"
       on:click={onSave}
       disabled={saving}
-      class="flex items-center gap-1.5 px-3 py-1.5 bg-nested hover:bg-nested/80 disabled:opacity-50 text-main rounded-lg text-xs font-semibold border border-light transition-colors cursor-pointer"
-      title="Simpan Perubahan (Ctrl+S)"
+      class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all {saveSuccess ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : isDirty ? 'bg-primary text-white border-transparent hover:bg-primary/90 shadow-xs' : 'bg-nested text-secondary hover:text-main border-light'}"
+      title={isDirty ? 'Ada perubahan belum disimpan (Ctrl+S)' : 'Semua perubahan tersimpan'}
     >
       {#if saving}
         <Loader2 size={13} class="animate-spin" />
-        <span>Menyimpan...</span>
+        <span class="hidden sm:inline">Menyimpan...</span>
+      {:else if saveSuccess}
+        <CheckCircle2 size={13} />
+        <span class="hidden sm:inline">Tersimpan</span>
       {:else}
         <Save size={13} />
-        <span>Simpan</span>
+        <span class="hidden sm:inline">{isDirty ? 'Simpan' : 'Tersimpan'}</span>
       {/if}
     </button>
 
-    <!-- Submit Review Button -->
-    <button
-      type="button"
-      on:click={() => (isSubmitModalOpen = true)}
-      disabled={saving || status === 'pending'}
-      class="btn btn-sm btn-primary text-xs font-semibold text-white transition-all flex items-center gap-1.5 cursor-pointer"
-    >
-      <Send size={13} />
-      <span class="hidden sm:inline">{status === 'pending' ? 'Menunggu Review' : 'Ajukan Review'}</span>
-    </button>
+    <!-- Ajukan Kurasi (Review) Button -->
+    {#if status === 'draft' || status === 'rejected'}
+      <button
+        on:click={() => (isSubmitModalOpen = true)}
+        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-lg hover:opacity-90 transition-all shadow-xs"
+        title="Ajukan template ke admin untuk ditinjau"
+      >
+        <Send size={13} />
+        <span class="hidden sm:inline">Ajukan Review</span>
+      </button>
+    {/if}
   </div>
 </header>
 
 <SubmitReviewModal
-  bind:isOpen={isSubmitModalOpen}
+  isOpen={isSubmitModalOpen}
   {templateId}
   {templateName}
   {templatePrice}
   initialPlatformFeePercentage={platformFeePercentage}
   onClose={() => (isSubmitModalOpen = false)}
   onConfirm={async () => {
-    if (onSubmit) {
-      await onSubmit();
-    } else {
-      await editorStore.submitReview();
-    }
+    const res = await onSubmit();
+    isSubmitModalOpen = false;
+    return res;
   }}
 />

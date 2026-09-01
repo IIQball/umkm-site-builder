@@ -202,12 +202,12 @@
         ]}
       >
         {#each categories as category}
-          <tr class="group">
+          <tr class="group hover:bg-nested/40 transition-colors">
             <td class="px-6 py-4 align-top">
-              <p class="font-bold text-main">{category.name}</p>
+              <p class="text-xs font-bold text-main font-sans">{category.name}</p>
             </td>
             <td class="px-6 py-4 align-top hidden sm:table-cell">
-              <p class="text-sm font-medium text-secondary">{storeName || 'Unknown Store'}</p>
+              <p class="text-xs font-medium text-secondary font-sans">{storeName || 'Unknown Store'}</p>
             </td>
             <td class="px-6 py-4 align-top text-right">
               <div class="flex items-center justify-end gap-1">

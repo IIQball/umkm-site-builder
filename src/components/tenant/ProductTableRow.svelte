@@ -24,7 +24,7 @@
   }
 </script>
 
-<tr class="group">
+<tr class="group hover:bg-nested/40 transition-colors">
   <td class="px-6 py-4 align-top">
     <div class="flex items-center gap-4">
       <div class="w-14 h-14 rounded-2xl bg-nested flex items-center justify-center overflow-hidden border border-light shadow-sm flex-shrink-0">
@@ -35,16 +35,16 @@
         {/if}
       </div>
       <div class="min-w-0">
-        <div class="font-bold text-main truncate">{product.name}</div>
+        <div class="text-xs font-bold text-main font-sans truncate">{product.name}</div>
         {#if Array.isArray(product.variants) && product.variants.length > 0}
           {@const groups = product.variants}
           {@const hasGroups = groups.length > 0 && typeof groups[0] === 'object' && groups[0] !== null && 'groupName' in groups[0]}
           {#if hasGroups}
-            <div class="text-xs text-secondary mt-1 truncate">
+            <div class="text-2xs text-secondary font-sans mt-0.5 truncate">
               {groups.length} grup: {groups.map(g => g.groupName).join(', ')}
             </div>
           {:else}
-            <div class="text-xs text-secondary mt-1">{product.variants.length} varian</div>
+            <div class="text-2xs text-secondary font-sans mt-0.5">{product.variants.length} varian</div>
           {/if}
         {/if}
       </div>
@@ -54,12 +54,12 @@
     <Badge variant="secondary" size="sm">{categoryName}</Badge>
   </td>
   <td class="px-6 py-4 align-top">
-    <div class="max-w-[200px] text-sm text-secondary line-clamp-2 leading-relaxed" title={product.description || ""}>
+    <div class="max-w-[200px] text-xs text-secondary font-sans line-clamp-2 leading-relaxed" title={product.description || ""}>
       {product.description || "-"}
     </div>
   </td>
   <td class="px-6 py-4 align-top whitespace-nowrap">
-    <span class="font-bold font-mono text-main">
+    <span class="text-xs font-bold font-mono text-main">
       Rp {product.basePrice.toLocaleString("id-ID")}
     </span>
   </td>

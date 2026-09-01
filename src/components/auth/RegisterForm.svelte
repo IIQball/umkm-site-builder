@@ -75,7 +75,7 @@
       });
 
       if (errResponse) {
-        generalError = errResponse.message || "Gagal membuat akun.";
+        generalError = errResponse.message || "Gagal membuat akun";
         return;
       }
 
@@ -157,7 +157,7 @@
         {errors.email}
       </span>
     {/if}
-  </div>
+  </div> 
 
   <div class="form-control w-full">
     <label class="label pt-0 pb-0.5" for="password">

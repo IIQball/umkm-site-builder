@@ -70,6 +70,6 @@ export async function handleApiRoute(fn: () => Promise<Response> | Response): Pr
     const stack = error instanceof Error ? error.stack : '';
     errorLog('API_HANDLER', message, stack);
 
-    return jsonError('Internal server error', 500);
+    return jsonError(message, 500);
   }
 }

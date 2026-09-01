@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { CheckCircle, XCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
+import { CheckCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
+import { subdomainField } from '@lib/validators/subdomain';
+import { Button, Input } from '@/components/ui';
+import { slide } from 'svelte/transition';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -13,8 +16,6 @@
   let subdomainMessage = '';
   let debounceTimer: ReturnType<typeof setTimeout>;
 
-  const SUBDOMAIN_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-  const MIN_LENGTH = 3;
   const MAX_LENGTH = 63;
   const DEBOUNCE_MS = 300;
 
@@ -60,10 +61,10 @@
   }
 
   function validateSubdomainLocally(input: string): string | null {
-    if (input.length < MIN_LENGTH) return `Minimal ${MIN_LENGTH} karakter`;
-    if (input.length > MAX_LENGTH) return `Maksimal ${MAX_LENGTH} karakter`;
-    if (!SUBDOMAIN_PATTERN.test(input)) return 'Hanya huruf kecil, angka, dan tanda hubung';
-    if (input.startsWith('-') || input.endsWith('-')) return 'Tidak boleh diawali/diakhiri tanda hubung';
+    const result = subdomainField.safeParse(input);
+    if (!result.success) {
+      return result.error.errors[0].message;
+    }
     return null;
   }
 
@@ -215,78 +216,54 @@
           </p>
         </div>
 
-        <div class="form-control w-full">
-          <label class="label" for="subdomain-input">
-            <span class="label-text font-medium">Subdomain Toko</span>
-          </label>
+        <div class="w-full relative">
+          <Input
+            id="subdomain-input"
+            label="Subdomain Toko"
+            bind:value={subdomain}
+            on:input={onSubdomainInput}
+            placeholder="nama-toko"
+            error={(subdomainStatus === 'taken' || subdomainStatus === 'invalid' || subdomainStatus === 'error') ? subdomainMessage : ''}
+            maxlength={MAX_LENGTH}
+            autocomplete="off"
+            spellcheck="false"
+            fullWidth
+          >
+            <span slot="suffix" class="font-medium text-base-content/50 pr-2">.umkm.site</span>
+          </Input>
 
-          <div class="join w-full">
-            <input
-              id="subdomain-input"
-              type="text"
-              class="input input-bordered join-item w-full"
-              class:input-success={subdomainStatus === 'available'}
-              class:input-error={subdomainStatus === 'taken' || subdomainStatus === 'invalid' || subdomainStatus === 'error'}
-              placeholder="nama-toko"
-              maxlength={MAX_LENGTH}
-              autocomplete="off"
-              spellcheck="false"
-              value={subdomain}
-              on:input={onSubdomainInput}
-            />
-            <span class="join-item flex items-center bg-nested px-3 text-sm font-medium text-muted">
-              .umkm.site
-            </span>
-          </div>
-
-          <label class="label" for="subdomain-input">
+          <div class="h-6 mt-1 flex items-center overflow-hidden ml-1">
             {#if subdomainStatus === 'checking'}
-              <span class="label-text-alt flex items-center gap-1 text-info">
+              <span class="text-xs flex items-center gap-1 text-info" transition:slide={{ axis: 'y', duration: 300 }}>
                 <Loader2 size={14} class="animate-spin" />
                 Memeriksa ketersediaan...
               </span>
             {:else if subdomainStatus === 'available'}
-              <span class="label-text-alt flex items-center gap-1 text-success">
+              <span class="text-xs flex items-center gap-1 text-success" transition:slide={{ axis: 'y', duration: 300 }}>
                 <CheckCircle size={14} />
                 {subdomainMessage}
               </span>
-            {:else if subdomainStatus === 'taken'}
-              <span class="label-text-alt flex items-center gap-1 text-error">
-                <XCircle size={14} />
-                {subdomainMessage}
-              </span>
-            {:else if subdomainStatus === 'invalid'}
-              <span class="label-text-alt flex items-center gap-1 text-warning">
-                <AlertCircle size={14} />
-                {subdomainMessage}
-              </span>
-            {:else if subdomainStatus === 'error'}
-              <span class="label-text-alt flex items-center gap-1 text-error">
-                <AlertCircle size={14} />
-                {subdomainMessage}
-              </span>
             {:else if subdomainStatus === 'typing'}
-              <span class="label-text-alt text-base-content/40">
+              <span class="text-xs text-base-content/40" transition:slide={{ axis: 'y', duration: 300 }}>
                 Mengetik...
               </span>
-            {:else}
-              <span class="label-text-alt text-base-content/40">
+            {:else if subdomainStatus === 'idle'}
+              <span class="text-xs text-muted" transition:slide={{ axis: 'y', duration: 300 }}>
                 Contoh: kopi-budi, toko-sari
               </span>
             {/if}
-          </label>
+          </div>
         </div>
 
         <div class="mt-4 flex justify-end gap-3">
-          <button
-            type="button"
-            class="btn btn-primary"
+          <Button
+            variant="primary"
             disabled={!isStep1Valid}
             on:click={nextStep}
           >
             Lanjutkan
             <ArrowRight size={18} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -301,74 +278,43 @@
         </div>
 
         <div class="space-y-4">
-          <div class="form-control w-full">
-            <label class="label" for="store-name">
-              <span class="label-text font-medium">Nama Toko</span>
-              <span class="label-text-alt text-error">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Store size={18} class="text-base-content/40" />
-              </div>
-              <input
-                id="store-name"
-                type="text"
-                bind:value={storeName}
-                placeholder="Contoh: Kopi Budi Nusantara"
-                class="input input-bordered w-full pl-10"
-                class:input-error={!!formErrors.storeName}
-              />
-            </div>
-            {#if formErrors.storeName}
-              <span class="label-text-alt text-error mt-1">{formErrors.storeName}</span>
-            {/if}
-          </div>
+          <Input
+            id="store-name"
+            label="Nama Toko"
+            required
+            bind:value={storeName}
+            placeholder="Contoh: Kopi Budi Nusantara"
+            error={formErrors.storeName ?? ''}
+            fullWidth
+          >
+            <Store slot="prefix" size={18} class="text-base-content/40" />
+          </Input>
 
-          <div class="form-control w-full">
-            <label class="label" for="wa-number">
-              <span class="label-text font-medium">Nomor WhatsApp</span>
-              <span class="label-text-alt text-error">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Phone size={18} class="text-base-content/40" />
-              </div>
-              <input
-                id="wa-number"
-                type="tel"
-                bind:value={waNumber}
-                placeholder="Contoh: 6281234567890"
-                class="input input-bordered w-full pl-10"
-                class:input-error={!!formErrors.waNumber}
-              />
-            </div>
-            <span class="label-text-alt text-base-content/50 mt-1">Gunakan format 628... (tanpa + atau 0 di depan)</span>
-            {#if formErrors.waNumber}
-              <span class="label-text-alt text-error mt-1">{formErrors.waNumber}</span>
-            {/if}
-          </div>
+          <Input
+            id="wa-number"
+            type="tel"
+            label="Nomor WhatsApp"
+            required
+            bind:value={waNumber}
+            placeholder="Contoh: 6281234567890"
+            helper="Gunakan format 628... (tanpa + atau 0 di depan)"
+            error={formErrors.waNumber ?? ''}
+            fullWidth
+          >
+            <Phone slot="prefix" size={18} class="text-base-content/40" />
+          </Input>
 
-          <div class="form-control w-full">
-            <label class="label" for="maps-url">
-              <span class="label-text font-medium">Google Maps URL <span class="text-base-content/40 font-normal">(Opsional)</span></span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MapPin size={18} class="text-base-content/40" />
-              </div>
-              <input
-                id="maps-url"
-                type="url"
-                bind:value={googleMapsUrl}
-                placeholder="https://maps.google.com/..."
-                class="input input-bordered w-full pl-10"
-                class:input-error={!!formErrors.googleMapsUrl}
-              />
-            </div>
-            {#if formErrors.googleMapsUrl}
-              <span class="label-text-alt text-error mt-1">{formErrors.googleMapsUrl}</span>
-            {/if}
-          </div>
+          <Input
+            id="maps-url"
+            type="url"
+            label="Google Maps URL (Opsional)"
+            bind:value={googleMapsUrl}
+            placeholder="https://maps.google.com/..."
+            error={formErrors.googleMapsUrl ?? ''}
+            fullWidth
+          >
+            <MapPin slot="prefix" size={18} class="text-base-content/40" />
+          </Input>
         </div>
 
         {#if submitError}
@@ -379,19 +325,17 @@
         {/if}
 
         <div class="mt-4 flex justify-between gap-3">
-          <button
-            type="button"
-            class="btn btn-ghost"
+          <Button
+            variant="ghost"
             disabled={submitStatus === 'submitting'}
             on:click={prevStep}
           >
             <ArrowLeft size={18} />
             Kembali
-          </button>
+          </Button>
           
-          <button
-            type="button"
-            class="btn btn-primary"
+          <Button
+            variant="primary"
             disabled={submitStatus === 'submitting'}
             on:click={nextStep}
           >
@@ -402,7 +346,7 @@
               Selesai
               <CheckCircle size={18} />
             {/if}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -427,9 +371,9 @@
           Anda akan diarahkan ke Dashboard dalam beberapa detik...
         </p>
 
-        <a href="/dashboard" class="btn btn-primary w-full">
+        <Button variant="primary" fullWidth href="/dashboard">
           Ke Dashboard Sekarang
-        </a>
+        </Button>
       </div>
     {/if}
     

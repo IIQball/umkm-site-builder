@@ -30,14 +30,12 @@ const categories = hasStore
 <DashboardLayout title="Manajemen Produk" breadcrumb="Produk">
   <div class="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-base-content">Manajemen Produk</h1>
-      <p class="text-sm text-base-content/60 mt-1">Kelola daftar produk, varian, dan harga untuk toko Anda.</p>
+      <h1 class="text-heading-lg font-bold tracking-tight text-main">Manajemen Produk</h1>
+      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">Kelola daftar produk, varian, dan harga untuk toko Anda.</p>
     </div>
     {hasStore ? (
-      <button id="add-product-btn" class="btn bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white border-none shadow-sm rounded-xl px-5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-        </svg>
+      <button id="add-product-btn" class="bg-primary text-white hover:bg-primary/90 font-bold shadow-sm rounded-xl px-5 py-2.5 flex items-center transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-lg mr-1.5">add</span>
         Tambah Produk
       </button>
     ) : null}
@@ -62,7 +60,7 @@ const categories = hasStore
         <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">store_off</span>
         <h3 class="text-lg font-bold text-base-content mb-2">Toko Belum Diatur</h3>
         <p class="text-base-content/60 mb-6">Anda belum memiliki toko yang aktif. Silakan buat atau atur toko Anda terlebih dahulu.</p>
-        <a href="/dashboard/store" class="btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] border-none">Atur Toko Sekarang</a>
+        <a href="/dashboard/store" class="bg-primary text-white hover:bg-primary/90 font-bold px-6 py-3 rounded-xl inline-block transition-all shadow-sm">Atur Toko Sekarang</a>
       </div>
     )}
   </div>

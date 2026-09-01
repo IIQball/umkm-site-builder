@@ -40,17 +40,17 @@
         <span class="material-symbols-outlined text-lg">delete</span>
       </div>
       <div>
-        <h3 class="font-bold text-main text-base font-heading">
+        <h3 class="font-bold text-main text-heading-md font-heading leading-tight">
           Hapus Produk
         </h3>
-        <p class="text-xs text-secondary mt-0.5 font-sans">
+        <p class="text-body-sm text-secondary mt-1 font-sans">
           Konfirmasi penghapusan data katalog produk
         </p>
       </div>
     </div>
   </svelte:fragment>
 
-  <p class="text-sm text-secondary leading-relaxed font-sans">
+  <p class="text-body-base text-secondary leading-relaxed font-sans pt-1">
     Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.
   </p>
 

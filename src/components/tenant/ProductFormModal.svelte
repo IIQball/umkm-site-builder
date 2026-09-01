@@ -4,7 +4,7 @@
   import type { products as productsSchema } from "../../db/schema";
   import type { VariantGroup, VariantOption } from "../../schemas/product-variant.schema";
   import ImageUpload from "../shared/ImageUpload.svelte";
-  import { Button } from "@/components/ui";
+  import { Button, Input, Select, Textarea } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -27,6 +27,14 @@
   let description = "";
   let isAvailable = true;
   let sortOrder = 0;
+
+  function handleSortOrderInput(e: CustomEvent | Event) {
+    const customEvent = e as CustomEvent;
+    const target = (customEvent.detail?.target || e.target) as HTMLInputElement;
+    if (target) {
+      sortOrder = parseInt(target.value.replace(/\D/g, "")) || 0;
+    }
+  }
   let imageUrls: string[] = [];
   let variantGroups: VariantGroup[] = [];
 
@@ -137,8 +145,10 @@
     return cleaned ? parseInt(cleaned, 10) : 0;
   }
 
-  const handlePriceInput = (event: Event) => {
-    const target = event.target as HTMLInputElement;
+  const handlePriceInput = (event: Event | CustomEvent) => {
+    const customEvent = event as CustomEvent;
+    const target = (customEvent.detail?.target || event.target) as HTMLInputElement;
+    if (!target) return;
     const rawValue = target.value.replace(/\D/g, "");
     basePrice = rawValue ? parseInt(rawValue, 10) : 0;
     const formatted = basePrice ? basePrice.toLocaleString("id-ID") : "";
@@ -258,8 +268,8 @@
   bind:this={dialogElement}
   on:close={closeModal}
 >
-  <div class="modal-box rounded-2xl p-6 md:p-8 max-w-2xl">
-    <h3 class="font-bold text-xl mb-6 text-base-content tracking-tight">
+  <div class="modal-box rounded-2xl p-6 md:p-8 max-w-2xl bg-card border border-light shadow-xl">
+    <h3 class="font-bold text-heading-md text-main tracking-tight font-heading mb-6">
       {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
     </h3>
 
@@ -281,90 +291,45 @@
       </div>
     {/if}
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-name"
-        ><span class="label-text font-medium text-base-content/80"
-          >Nama Produk</span
-        ></label
-      >
-      <input
-        id="product-name"
-        type="text"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        class:input-error={fieldErrors.name}
+    <div class="mb-3">
+      <Input
+        label="Nama Produk"
         bind:value={name}
+        error={fieldErrors.name}
       />
-      {#if fieldErrors.name}
-        <span class="text-error text-xs mt-1">{fieldErrors.name}</span>
-      {/if}
     </div>
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-category"
-        ><span class="label-text font-medium text-base-content/80"
-          >Kategori</span
-        ></label
-      >
-      <select
-        id="product-category"
-        class="select select-bordered w-full rounded-xl bg-base-100"
-        class:select-error={fieldErrors.categoryId}
+    <div class="mb-3">
+      <Select
+        label="Kategori"
         bind:value={categoryId}
-      >
-        {#if categories.length === 0}
-          <option value="" disabled>Belum ada kategori</option>
-        {/if}
-        {#each categories as cat}
-          <option value={cat.id}>{cat.name}</option>
-        {/each}
-      </select>
-      {#if fieldErrors.categoryId}
-        <span class="text-error text-xs mt-1">{fieldErrors.categoryId}</span>
-      {/if}
+        error={fieldErrors.categoryId}
+        options={categories.length === 0 ? [{value: "", label: "Belum ada kategori", disabled: true}] : categories.map(cat => ({ value: cat.id, label: cat.name }))}
+      />
     </div>
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-price"
-        ><span class="label-text font-medium text-base-content/80"
-          >Harga Dasar</span
-        ></label
-      >
-      <input
-        id="product-price"
+    <div class="mb-3">
+      <Input
+        label="Harga Dasar"
         type="text"
-        inputmode="numeric"
-        class="input input-bordered w-full rounded-xl bg-base-100"
-        class:input-error={fieldErrors.basePrice}
+        placeholder="0"
         value={basePrice ? basePrice.toLocaleString("id-ID") : ""}
         on:input={handlePriceInput}
-        placeholder="0"
+        error={fieldErrors.basePrice}
       />
-      {#if fieldErrors.basePrice}
-        <span class="text-error text-xs mt-1">{fieldErrors.basePrice}</span>
-      {/if}
     </div>
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-desc"
-        ><span class="label-text font-medium text-base-content/80"
-          >Deskripsi</span
-        ></label
-      >
-      <textarea
-        id="product-desc"
-        class="textarea textarea-bordered w-full rounded-xl bg-base-100"
+    <div class="mb-3">
+      <Textarea
+        label="Deskripsi"
         bind:value={description}
-      ></textarea>
+      />
     </div>
 
-    <div class="form-control w-full mb-4 mt-2">
-      <div class="label">
-        <span class="label-text font-medium text-base-content/80"
-          >Gambar Produk</span
-        >
-      </div>
+    <div class="w-full mb-5 mt-4">
+      <div class="block text-label-caps text-muted mb-1.5">Gambar Produk</div>
       <div
-        class="border rounded-2xl p-2 bg-base-100"
+        class="border rounded-2xl p-2 bg-nested"
         class:border-error={fieldErrors.imageUrls}
       >
         <ImageUpload
@@ -385,10 +350,10 @@
     <!-- Variant Groups Editor -->
     <div class="mb-4">
       <div class="flex items-center justify-between mb-3">
-        <span class="label-text font-medium text-base-content/80">
+        <span class="block text-label-caps text-muted mb-0">
           Varian Produk
           {#if variantGroups.length > 0}
-            <span class="badge badge-sm bg-base-200 border-none ml-1">{variantGroups.length}/5 grup</span>
+            <span class="badge badge-sm bg-nested border-none ml-1 text-main font-sans">{variantGroups.length}/5 grup</span>
           {/if}
         </span>
         {#if variantGroups.length < 5}
@@ -411,11 +376,11 @@
       {/if}
 
       {#each variantGroups as group, gi}
-        <div class="border border-base-200 rounded-xl p-4 mb-3 bg-base-100/50">
+        <div class="border border-light rounded-xl p-4 mb-3 bg-nested/50">
           <div class="flex items-center gap-2 mb-3">
             <input
               type="text"
-              class="input input-bordered input-sm flex-1 rounded-lg bg-base-100"
+              class="input input-bordered input-sm flex-1 rounded-xl bg-nested text-main font-sans text-xs focus:border-blue-500 focus:outline-none"
               class:input-error={fieldErrors[`variantGroup_${gi}`]}
               bind:value={group.groupName}
               placeholder="Nama grup (contoh: Ukuran, Warna)"
@@ -441,7 +406,7 @@
               <div class="flex items-center gap-2">
                 <input
                   type="text"
-                  class="input input-bordered input-xs flex-1 rounded-lg bg-base-100"
+                  class="input input-bordered input-xs flex-1 rounded-lg bg-nested text-main font-sans focus:border-blue-500 focus:outline-none h-8 px-3"
                   class:input-error={fieldErrors[`variantOption_${gi}_${oi}`]}
                   bind:value={option.name}
                   placeholder="Nama opsi (contoh: S, M, L)"
@@ -449,7 +414,7 @@
                 <div class="relative">
                   <input
                     type="text"
-                    class="input input-bordered input-xs w-28 rounded-lg bg-base-100 text-right"
+                    class="input input-bordered input-xs w-28 rounded-lg bg-nested text-main font-sans focus:border-blue-500 focus:outline-none h-8 px-3 text-right"
                     value={formatPriceAdjustment(option.priceAdjustment)}
                     on:input={(e) => {
                       option.priceAdjustment = parsePriceAdjustment(e.currentTarget.value);
@@ -498,31 +463,23 @@
       {/each}
     </div>
 
-    <div class="form-control w-full mb-2">
-      <label class="label" for="product-sort"
-        ><span class="label-text font-medium text-base-content/80"
-          >Urutan Tampil</span
-        ></label
-      >
-      <input
-        id="product-sort"
+    <div class="mb-3">
+      <Input
+        label="Urutan Tampil"
         type="text"
         inputmode="numeric"
-        class="input input-bordered w-full rounded-xl bg-base-100"
         value={sortOrder}
-        on:input={(e) =>
-          (sortOrder = parseInt(e.currentTarget.value.replace(/\D/g, "")) || 0)}
+        on:input={handleSortOrderInput}
       />
     </div>
 
     <div class="form-control mb-4">
-      <label class="label cursor-pointer" for="product-avail">
-        <span class="label-text font-medium text-base-content/80">Tersedia</span
-        >
+      <label class="label cursor-pointer justify-start gap-4">
+        <span class="block text-label-caps text-muted mb-0">Tersedia</span>
         <input
           id="product-avail"
           type="checkbox"
-          class="toggle toggle-primary"
+          class="toggle toggle-success toggle-sm"
           bind:checked={isAvailable}
         />
       </label>
@@ -538,7 +495,7 @@
         Batal
       </Button>
       <Button
-        variant="primary"
+        variant="dark"
         size="sm"
         on:click={handleSaveProduct}
         disabled={formLoading}

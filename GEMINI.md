@@ -6,8 +6,19 @@ Berikut adalah struktur folder lengkap beserta seluruh berkas yang ada di dalam 
 ```
 umkm-site-builder/
 ├── .agents/                                    # Konfigurasi & workflow agen AI pintar
-│   └── rules/
-│       └── language-standards.md               # Standar aturan penulisan bahasa UI frontend
+│   ├── rules/
+│   │   └── language-standards.md               # Standar aturan penulisan bahasa UI frontend
+│   └── skills/                                 # Kumpulan skill agen AI cerdas
+│       ├── animate/                            # Skill orkestrasi animasi & transisi UI
+│       ├── apple-design/                       # Skill desain interaksi & gestur Apple-grade
+│       ├── caveman/                            # Skill komunikasi terkompresi efisien token
+│       ├── clean-code/                         # Skill penulisan kode bersih standar Robert C. Martin
+│       ├── design-taste-frontend/              # Skill anti-slop visual landing page & frontend
+│       ├── emil-design-eng/                    # Skill mikro-interaksi & UI polish Emil Kowalski
+│       ├── find-animation-opportunities/       # Skill deteksi peluang animasi UI
+│       ├── improve-animations/                 # Skill audit & perbaikan kualitas animasi
+│       └── ponytail/                           # Skill implementasi minimalis & solusi pragmatis
+│
 ├── docs/                                       # Dokumentasi teknis & ERD data model
 │   ├── memory/
 │   │   ├── codebase-map.md                     # Ringkasan modul krusial arsitektur SaaS
@@ -76,6 +87,7 @@ umkm-site-builder/
 │   │   │   │   ├── FaqContent.svelte           # Form inspector konten FAQ section
 │   │   │   │   ├── FeaturesContent.svelte      # Form inspector konten features section
 │   │   │   │   ├── FooterContent.svelte        # Form inspector konten footer section
+│   │   │   │   ├── GoogleMapsContent.svelte    # Form inspector konten Google Maps section
 │   │   │   │   ├── HeaderContent.svelte        # Form inspector konten header section
 │   │   │   │   ├── HeroContent.svelte          # Form inspector konten hero section
 │   │   │   │   ├── ProductCatalogContent.svelte# Form inspector data produk katalog
@@ -259,6 +271,8 @@ umkm-site-builder/
 │   │   │   └── xendit.ts                       # Integrasi SDK e-invoice & payout Xendit
 │   │   ├── routes/
 │   │   │   └── .gitkeep                        # Penahan folder git
+│   │   ├── routing/
+│   │   │   └── subdomain.ts                    # Utilitas parsing & ekstraksi subdomain multitenancy
 │   │   ├── stores/
 │   │   │   └── schemas.ts                      # Skema validasi state svelte store
 │   │   ├── templates/
@@ -271,6 +285,8 @@ umkm-site-builder/
 │   │   │   ├── index.ts                        # Ekspor modul utilitas
 │   │   │   ├── logger.ts                       # Logger console terstandar
 │   │   │   └── validation.ts                   # Utilitas validator skema Zod
+│   │   ├── validators/
+│   │   │   └── subdomain.ts                    # Skema Zod & blacklist validasi reserved subdomain
 │   │   ├── auth-client.ts                      # Klien inisialisasi auth BetterAuth (frontend)
 │   │   ├── auth.ts                             # Konfigurasi server BetterAuth & database adapter
 │   │   ├── cloudinary.ts                       # Pembantu upload gambar aman ke Cloudinary
@@ -331,10 +347,11 @@ umkm-site-builder/
 │   │   │   │   ├── delete.ts                   # DELETE hapus file media gambar Cloudinary
 │   │   │   │   └── sign.ts                     # POST generate Cloudinary upload signature
 │   │   │   ├── products/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── stock.ts                # PATCH perbarui stok produk tenant instan
+│   │   │   │   │   └── variants.ts             # GET & POST/PUT/DELETE varian produk
 │   │   │   │   ├── [id].ts                     # PUT & DELETE edit/hapus produk toko tenant
-│   │   │   │   ├── index.ts                    # GET & POST manajemen produk toko tenant
-│   │   │   │   └── [id]/
-│   │   │   │       └── variants.ts             # GET & POST/PUT/DELETE varian produk
+│   │   │   │   └── index.ts                    # GET & POST manajemen produk toko tenant
 │   │   │   ├── public/
 │   │   │   │   ├── templates/
 │   │   │   │   │   └── index.ts                # GET katalog template publik siap pakai
@@ -342,20 +359,20 @@ umkm-site-builder/
 │   │   │   │   │   └── status/
 │   │   │   │   │       └── [invoiceId].ts      # GET status invoice transaksi pembayaran
 │   │   │   │   └── commission.ts               # GET persentase split komisi untuk publik
-│   │   │   ├── template-categories/
-│   │   │   │   └── index.ts                    # GET list kategori aktif untuk publik
-│   │   │   ├── templates/
-│   │   │   │   └── index.ts                    # GET katalog template publik & owned template tenant
 │   │   │   ├── storefront/
 │   │   │   │   └── catalog.ts                  # GET daftar katalog produk untuk storefront
 │   │   │   ├── stores/
-│   │   │   │   ├── check-subdomain.ts          # GET verifikasi status subdomain baru
-│   │   │   │   ├── onboard.ts                  # POST aktivasi awal nama subdomain toko
-│   │   │   │   ├── register-subdomain.ts       # POST daftarkan rute dns subdomain ke serverless
+│   │   │   │   ├── check-subdomain.ts          # GET verifikasi ketersediaan subdomain toko
+│   │   │   │   ├── onboard.ts                  # POST inisialisasi onboarding toko tenant
+│   │   │   │   ├── register-subdomain.ts       # POST registrasi subdomain toko tenant
 │   │   │   │   ├── settings.ts                 # GET & POST data visual setting toko tenant
 │   │   │   │   └── [storeId]/
 │   │   │   │       ├── apply-template.ts       # POST menerapkan template ke toko tenant
 │   │   │   │       └── products.ts             # GET daftar produk toko publik & filter kategori
+│   │   │   ├── template-categories/
+│   │   │   │   └── index.ts                    # GET list kategori aktif untuk publik
+│   │   │   ├── templates/
+│   │   │   │   └── index.ts                    # GET katalog template publik & owned template tenant
 │   │   │   ├── tenant/
 │   │   │   │   ├── templates/
 │   │   │   │   │   └── index.ts                # GET daftar template yang dimiliki tenant
@@ -483,6 +500,7 @@ umkm-site-builder/
 │   │   │   └── payout.test.ts                  # Uji API pencairan komisi desainer
 │   │   ├── products/
 │   │   │   ├── index.test.ts                   # Uji API CRUD produk toko tenant
+│   │   │   ├── stock.test.ts                   # Uji API pembaruan stok produk instan
 │   │   │   └── variants.test.ts                # Uji API CRUD varian produk
 │   │   ├── public/
 │   │   │   ├── templates/
@@ -496,9 +514,9 @@ umkm-site-builder/
 │   │   │       └── products.test.ts            # Uji API katalog produk spesifik toko
 │   │   ├── webhooks/
 │   │   │   └── xendit.test.ts                  # Uji penanganan webhook e-invoice Xendit
+│   │   ├── admin-media-cleanup.test.ts         # Uji API pembersihan aset orphan Cloudinary
 │   │   ├── check-subdomain.test.ts             # Uji validasi subdomain input Zod
 │   │   ├── media-sign.test.ts                  # Uji Cloudinary signed upload generator
-│   │   ├── admin-media-cleanup.test.ts         # Uji API pembersihan aset orphan Cloudinary
 │   │   └── template-categories.test.ts         # Uji API & skema master kategori template
 │   ├── builder/
 │   │   └── section-registry.test.ts            # Uji modularitas section registry map
@@ -514,6 +532,8 @@ umkm-site-builder/
 │   │   ├── templates-migration.test.ts         # Uji pipeline migrasi skema template config
 │   │   ├── toast.test.ts                       # Uji state writable toast alert notifications
 │   │   └── xendit.test.ts                      # Uji API call tagihan & disbursement Xendit
+│   ├── routing/
+│   │   └── subdomain.test.ts                   # Uji utilitas parsing subdomain & reserved blacklist
 │   ├── schemas/
 │   │   ├── auth.test.ts                        # Uji validasi kredensial pengguna Zod
 │   │   ├── media.test.ts                       # Uji validasi Zod payload media
@@ -523,14 +543,14 @@ umkm-site-builder/
 │   │   └── template.test.ts                    # Uji validasi Zod visual data template
 │   ├── services/
 │   │   ├── analytics.service.test.ts           # Uji logic service analytics
-│   │   ├── store-template.service.test.ts      # Uji logic service storefront rendering
-│   │   └── media-cleanup.test.ts               # Uji garbage collection orphan image Cloudinary
-│   ├── ui/
-│   │   └── design-system.test.ts               # Uji validasi token Design System
+│   │   ├── media-cleanup.test.ts               # Uji garbage collection orphan image Cloudinary
+│   │   └── store-template.service.test.ts      # Uji logic service storefront rendering
 │   ├── transactions/
 │   │   ├── e2e-template-marketplace-flow.test.ts # Uji e2e alur template (review -> beli -> lunas)
 │   │   ├── template-purchase-flow.test.ts      # Uji transaksi pembayaran template desainer
 │   │   └── wallet-and-fulfillment.test.ts      # Uji trigger pemenuhan invoice & kredit wallet
+│   ├── ui/
+│   │   └── design-system.test.ts               # Uji validasi token Design System
 │   └── utils/
 │       ├── api-handler.test.ts                 # Uji wrapper standar error handler HTTP API
 │       ├── design-math.test.ts                 # Uji rumus concentric radius, pill, & debounce
@@ -547,31 +567,115 @@ umkm-site-builder/
 
 ## 🛠️ Dokumentasi Visual Template Builder
 
-Berikut adalah detail spesifikasi arsitektur teknis dari no-code visual template builder yang dapat digunakan untuk menganalisis, memperbaiki, atau menambahkan fungsionalitas visual:
+Berikut adalah detail spesifikasi arsitektur teknis dari no-code visual template builder yang digunakan untuk merancang, mengedit, dan merender website toko UMKM responsif secara dinamis.
 
-### 1. Daftar Template Layout & Section yang Tersedia (`src/components/builder/sections/`)
+---
 
-* **A. Header Sections (`sections/header/`)**
-  * `AnnouncementBar.svelte`: Bilah pesan teks pengumuman berjalan/statis di bagian paling atas halaman.
-  * `HeaderLogo.svelte`: Area visual untuk memuat dan merender logo toko (mendukung URL gambar atau teks inisial).
-  * `HeaderNav.svelte`: Menu tautan navigasi responsif (Desktop satu baris horizontal, Mobile otomatis runtuh).
+### 1. Spesifikasi Modular Section & Layout Presets
 
-* **B. Hero Sections (`sections/hero/`)**
-  * `HeroCenteredMinimal.svelte`: Banner sambutan dengan teks headline dan subheadline terpusat di tengah dengan CTA minimalis.
-  * `HeroFullBanner.svelte`: Layout hero dengan latar belakang gambar penuh (full-bleed) dilapisi overlay gelap untuk keterbacaan teks kontras tinggi.
-  * `HeroSplitLayout.svelte`: Komposisi asimetris 50/50 (Teks di satu sisi, aset gambar/media di sisi lain).
+Seluruh section terdaftar di **Section Registry Central** (`src/components/builder/registry/index.ts`). Terdapat total **8 Tipe Section** dengan **24 Varian Layout Preset** (masing-masing section memiliki 3 hingga 4 preset layout terisolasi).
 
-* **C. Content & Utility Sections (`sections/`)**
-  * `FAQ.svelte`: Daftar pertanyaan yang sering diajukan menggunakan mekanisme akordeon buka-tutup interaktif.
-  * `Features.svelte`: Susunan grid modular untuk menampilkan keunggulan layanan, fitur, atau poin penting produk.
-  * `GoogleMaps.svelte`: Integrasi rendering iframe lokasi maps fisik toko UMKM.
-  * `Testimonials.svelte`: Grid/kartu berisi ulasan ulasan positif atau kutipan kepuasan pembeli/tamu.
-  * `Footer.svelte`: Bagian kaki halaman yang memuat hak cipta, alamat fisik toko, dan tautan sosial media.
+Di bawah ini adalah penjelasan detail per section, jumlah layout, serta perilaku dan representasi visual layout tersebut di ketiga ukuran device (**Desktop: 1200px**, **Tablet: 768px**, dan **Mobile: 375px**):
 
-* **D. Katalog Produk (`sections/catalog/`)**
-  * `ProductCatalog.svelte`: Komponen utama untuk memuat, memfilter berdasarkan kategori, dan menampilkan grid produk toko.
-  * `ProductCatalogCard.svelte`: Komponen visual kartu satuan produk (harga, gambar, status stok, tombol interaktif).
-  * `ProductCatalogQuickView.svelte`: Modal popup interaktif untuk melihat rincian detail produk secara instan tanpa berpindah rute halaman.
+---
+
+#### A. Header & Announcement (`header_announcement`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/HeaderAnnouncement.svelte`  
+Komponen pendukung: `AnnouncementBar.svelte`, `HeaderLogo.svelte`, `HeaderNav.svelte`.  
+Karakteristik: `isFullBleed = true` (melebar 100% viewport).
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`default_split`** *(Default)* | **2 Baris Terpisah**: Baris 1 memuat Announcement Bar di atas (fullwidth, `py-2`). Baris 2 Navbar setinggi `64px`: Logo di kiri, menu navigasi (`HeaderNav`) di kanan, dan tombol CTA Chat WhatsApp di ujung kanan. | Announcement Bar tetap di atas; Navbar mempertahankan Logo di kiri dan menu navigasi di kanan dengan padding safe zone `24px`. | Announcement Bar tetap aktif di atas; Navbar menyederhanakan tata letak (tombol CTA WhatsApp disembunyikan `hidden sm:flex` agar logo dan menu nav pas dalam 1 baris tanpa wrapping berlebih). |
+| **`centered_stacked`** | **2 Baris Terpusat**: Announcement Bar di atas. Navbar bertumpuk vertikal di tengah (`flex-col items-center justify-center gap-4 py-4`): Logo toko berada di baris atas tengah, menu nav links horizontal rapi di baris bawah tengah dengan `gap-6`. | Logo tetap di baris tengah atas, deretan nav links horizontal di tengah bawah dengan safe-margin `24px`. | Logo terpusat di tengah atas, deretan nav links otomatis membungkus (*flex-wrap*) di tengah bawah dengan ukuran padding `16px`. |
+| **`compact_inline`** | **1 Baris Ramping Tunggal (`h-14` / 56px)**: Announcement Bar ditiadakan. Logo di sisi kiri, menu navigasi sejajar horizontal di tengah (`flex-1 hidden md:flex`), dan tombol CTA WhatsApp (`MessageCircle` + teks) berada di sisi kanan. | Logo di kiri, menu nav di tengah, tombol CTA di kanan dalam 1 baris ramping 56px. | Menu nav links disembunyikan (`hidden md:flex`), menyisakan Logo di sisi kiri dan tombol CTA Chat WhatsApp ringkas di sisi kanan (`justify-between`), hemat ruang vertikal. |
+
+---
+
+#### B. Hero Banner (`hero`) — 4 Layout Presets
+Komponen utama: `src/components/builder/sections/Hero.svelte`  
+Komponen pendukung: `HeroSplitLayout.svelte`, `HeroCenteredMinimal.svelte`, `HeroFullBanner.svelte`, `HeroElementToolbar.svelte`.  
+Karakteristik: `isFullBleed = true` (background melebar 100%, konten di dalam batas safe-zone).
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`split_left_text`** *(Default)* | **Grid 2 Kolom 50/50 (`md:grid-cols-12`)**: Kolom kiri (span-6) memuat Promo Badge pill, Headline judul H1 (`text-5xl`), Subtitle deskripsi, dan tombol CTA Belanja. Kolom kanan (span-6) memuat Card container gambar showcase produk (rasio `4:3`) berbingkai `rounded-2xl` dengan soft shadow. | Grid 2 kolom 50/50 proporsional. Font judul berskala `text-4xl`, gambar 4:3 proporsional di sisi kanan. | **1 Kolom Bertumpuk Vertikal (`grid-cols-1`)**: Teks judul (`text-3xl`), badge, dan tombol CTA tampil di bagian atas, diikuti gambar showcase produk di bawahnya. |
+| **`split_right_text`** | **Grid 2 Kolom Asimetris Terbalik**: Kolom kiri (span-6) memuat gambar showcase produk (rasio `4:3`). Kolom kanan (span-6) memuat Promo Badge, Headline judul H1, Subtitle, dan tombol CTA. | Gambar di sisi kiri, teks headline & CTA di sisi kanan dalam susunan 2 kolom 50/50. | **1 Kolom Bertumpuk Vertikal**: Gambar showcase berada di urutan atas, diikuti headline teks dan tombol CTA di bawahnya. |
+| **`centered_minimal`** | **Komposisi Simetris Tengah (Max-Width 3xl-4xl)**: Badge pill di tengah atas, Title H1 (`text-5xl`) terpusat, Subtitle di tengah (max-w-2xl), tombol CTA di tengah, diakhiri Card showcase gambar lanskap (rasio `16:9`) berbingkai tebal `rounded-2xl` shadow besar di bagian bawah. | Seluruh teks dan tombol CTA tetap terpusat di tengah layar. Gambar lanskap 16:9 menyesuaikan lebar tablet. | Teks judul mengecil proporsional (`text-3xl`), tombol CTA penuh/lebar nyaman disentuh, gambar lanskap 16:9 membentang 100% lebar safe-zone mobile. |
+| **`full_banner_overlay`** | **Latar Belakang Gambar Penuh (Full-Bleed Cover)**: Gambar latar menutupi seluruh bidang hero dilapisi gelap (*dark overlay* `bg-black/40`). Teks putih kontras tinggi (`drop-shadow-md`) terpusat di tengah (max-w-3xl) dengan tombol CTA kontras tinggi. | Gambar latar full-bleed dengan teks putih terpusat dan mudah dibaca di tablet. | Gambar latar tetap memenuhi tinggi hero section, teks judul rapat dan jelas dengan padding safe-zone `16px`. |
+
+---
+
+#### C. Fitur & Keunggulan (`features`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/Features.svelte`.  
+Karakteristik: `isFullBleed = false`, mendukung drag-and-drop kartu langsung di canvas editor.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`grid_3_cards`** *(Default)* | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-6`)**: Menampilkan 3 kartu fitur dengan padding `p-6`, concentric radius `rounded-2xl`, icon container 48px ber-radius `rounded-lg`, judul tebal, dan deskripsi benefit. | Grid 3 kolom atau membungkus 2 kolom seimbang dengan ukuran kartu yang fleksibel. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu-kartu fitur tersusun vertikal dari atas ke bawah untuk kenyamanan scrolling jari. |
+| **`horizontal_list`** | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-4, `sticky top-8`) berisi Heading judul & Subtitle section. Kolom kanan (span-8) berisi deretan baris kartu horizontal (`p-6 flex items-start gap-4`) dengan icon di kiri dan deskripsi di kanan. | Kolom kiri memuat heading, kolom kanan memuat daftar kartu memanjang ke bawah. | **1 Kolom Bertumpuk**: Heading judul berada di bagian paling atas, diikuti tumpukan kartu horizontal ke bawah. |
+| **`banner_inline_bar`** | **Pita/Ribbon Horizontal Ramping (`rounded-2xl bg-surface`)**: Seluruh item keunggulan tersusun mendatar dalam 1 baris kontainer ramping dengan icon 40px, judul tebal, dan deskripsi singkat. | Item fitur berjejer horizontal rapi dengan jarak antar elemen proporsional. | Item fitur membungkus rapat (*wrap*); deskripsi panjang disembunyikan (`hidden sm:block`) menyisakan icon dan judul ringkas agar hemat layar. |
+
+---
+
+#### D. Katalog Produk (`product_catalog`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/ProductCatalog.svelte`  
+Komponen pendukung: `ProductCatalogCard.svelte`, `ProductCatalogQuickView.svelte`, `productCatalog.helpers.ts`.  
+Karakteristik: `isFullBleed = false`, mendukung tab kategori dinamis, live search, pagination "Muat Lebih Banyak", dan Quick View modal popup.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`grid_standard`** *(Default)* | **Grid Produk Modular (Default 3 Kolom `lg:grid-cols-3`, dapat disetel 2–5 kolom)**: Kartu produk lengkap dengan foto (aspek rasio *square*, *portrait*, atau *widescreen*), badge diskon, nama produk, harga IDR, tombol Beli WhatsApp, dan tombol Quick View popup. | **Grid 2 atau 3 Kolom (`sm:grid-cols-2` / `sm:grid-cols-3`)** sesuai konfigurasi slider tablet inspector. | **Grid 1 atau 2 Kolom (`grid-cols-1` / `grid-cols-2`)** sesuai konfigurasi slider mobile, tata letak harga dan tombol WhatsApp responsif. |
+| **`carousel_scroll`** | **Slider Horizontal Geser Bebas (`overflow-x-auto snap-x no-scrollbar`)**: Produk tersusun horizontal memanjang ke samping, pengguna dapat melakukan klik-drag atau scroll horizontal untuk menjelajahi katalog. | Menampilkan 2–3 kartu sebagian di layar dengan snap scrolling mulus. | Swipe geser produk ke samping secara alami dengan touch gestur ponsel, hemat ruang vertikal halaman. |
+| **`list_compact`** | **Daftar Baris Horizontal (`flex flex-col gap-4`)**: Setiap produk ditampilkan dalam format horizontal card memanjang (foto produk di sisi kiri, informasi judul, harga, dan tombol pesan di sisi kanan). | Format baris horizontal dengan gambar proporsional di kiri dan detail di kanan. | Format baris kompak yang otomatis menyesuaikan proporsi tombol dan teks agar tidak terjadi overflow horizontal. |
+
+---
+
+#### E. Testimoni Pelanggan (`testimonials`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/Testimonials.svelte`.  
+Karakteristik: `isFullBleed = false`, mendukung drag-and-drop urutan testimoni langsung di canvas editor.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`masonry_grid`** *(Default)* | **Grid 3 Kolom Tabular (`md:grid-cols-3`, `gap-6`)**: Kartu ulasan berbingkai `rounded-2xl` memuat bintang rating (1–5 bintang warna amber), kutipan ulasan (clamp 4 baris), avatar pembeli, nama, dan status "Pembeli Terverifikasi". | Grid 2–3 kolom proporsional menyesuaikan lebar kontainer tablet 768px. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu testimoni menumpuk vertikal dengan teks ulasan yang mudah dibaca. |
+| **`single_spotlight`** | **Kartu Ulasan Tunggal Terpusat (Max-W-2xl)**: Menampilkan 1 ulasan terpilih secara elegan dengan bintang rating besar di atas, kutipan font besar *italic* di tengah, identitas pembeli di bawah, dan dot pagination bulat interaktif untuk berpindah ulasan. | Kartu ulasan terpusat di tengah dengan dot navigasi interaktif di bawahnya. | Kartu ulasan mengisi penuh safe-zone mobile dengan teks yang proporsional dan mudah dibaca di smartphone. |
+| **`chat_bubble_flow`** | **WhatsApp Chat Bubble Flow (Max-W-2xl)**: Format gelembung pesan chat berlatar surface dengan sudut kiri runcing (`rounded-tl-sm`), avatar WhatsApp hijau (`bg-emerald-100`), label "via WhatsApp", rating bintang, dan isi pesan ulasan pelanggan. | Gelembung pesan chat tersusun vertikal memanjang di tengah layar. | Tampilan menyerupai pesan WhatsApp asli di smartphone, memberikan kesan autentik dan dekat bagi calon pembeli lokal. |
+
+---
+
+#### F. FAQ / Tanya Jawab (`faq`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/FAQ.svelte`.  
+Karakteristik: `isFullBleed = false`, mendukung animasi ekspansi akordeon buka-tutup halus.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`accordion_single_col`** *(Default)* | **Akordeon Terpusat 1 Kolom (Max-W-3xl)**: Daftar pertanyaan yang dapat diklik untuk membuka/menutup jawaban secara bergantian. Dilengkapi ikon ChevronDown yang berotasi 180° dengan transisi halus. | Akordeon terpusat rapi selebar kontainer tablet (768px). | Akordeon memenuhi lebar layar safe-zone mobile (375px), teks pertanyaan dan jawaban membungkus rapi (*break-words*). |
+| **`split_faq_sidebar`** | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-5) memuat Judul FAQ, deskripsi, dan Kartu Bantuan CS ("Butuh Bantuan Lebih?" + tombol kontak WA); Kolom kanan (span-7) memuat tumpukan akordeon tanya jawab interaktif. | 2 kolom proporsional (span-5 dan span-7) dengan kartu bantuan di sisi kiri. | **1 Kolom Bertumpuk**: Judul dan kartu bantuan kontak berada di atas, diikuti daftar akordeon tanya jawab di bawahnya. |
+| **`grid_2_col_cards`** | **Grid 2 Kolom Kartu Terbuka (`md:grid-cols-2`, `gap-6`)**: Seluruh pertanyaan dan jawaban langsung terbuka permanen (*open static card*) dalam bentuk kartu-kartu terpisah tanpa memerlukan interaksi klik buka-tutup. | Grid 2 kolom kartu terbuka seimbang. | **Grid 1 Kolom Vertikal**: Seluruh pertanyaan dan jawaban tampil terbuka berurutan ke bawah. |
+
+---
+
+#### G. Google Maps & Lokasi (`google_maps`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/GoogleMaps.svelte`.  
+Karakteristik: `isFullBleed = false`, rendering iframe Google Maps live tanpa API key berbayar.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`fullwidth_map`** *(Default)* | **Iframe Peta Penuh dengan Floating Card**: Iframe maps membentang penuh (tinggi default `400px`) dengan kartu informasi melayang semi-transparan (*glassmorphism* `bg-white/95 backdrop-blur-md`) di sudut kiri bawah memuat judul, alamat, dan tombol "Petunjuk Arah". | Peta membentang penuh dengan floating card proporsional di sisi kiri bawah. | Floating card meluas memenuhi bagian bawah peta (`bottom-6 left-6 right-6`), menyajikan tombol petunjuk arah yang mudah dijangkau jempol. |
+| **`split_map_info`** | **Layout 2 Kolom Sejajar (`grid-cols-12 items-stretch`)**: Kolom kiri (span-5) berupa Kartu Info lengkap (Alamat, Jam Operasional Toko, Kontak Layanan, Tombol Buka Arah); Kolom kanan (span-7) berupa frame peta interaktif setinggi `360px+`. | 2 kolom seimbang dengan tinggi frame peta dan kartu informasi yang sama. | **1 Kolom Bertumpuk**: Kartu jam operasional dan alamat berada di atas, diikuti iframe peta Google Maps di bawahnya. |
+| **`compact_boxed`** | **Kotak Kartu Lokasi Kompak (Max-W-Xl)**: Kontainer kartu terpusat memuat judul & alamat di atas, jendela pratinjau peta mini setinggi `192px` (`h-48`) di tengah, dan tombol CTA "Buka di Google Maps" di bawah. | Kotak kartu terpusat simetris di tengah layar tablet. | Kotak kartu mengisi lebar mobile safe-zone (375px) secara padat dan efisien. |
+
+---
+
+#### H. Footer & Kontak (`footer`) — 3 Layout Presets
+Komponen utama: `src/components/builder/sections/Footer.svelte`.  
+Karakteristik: `isFullBleed = false`, memuat profil toko, link WhatsApp, alamat, dan hak cipta.
+
+| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :--- | :--- | :--- |
+| **`multi_column`** *(Default)* | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-8`)**: Kolom 1 (Profil Toko: Logo & Tagline), Kolom 2 (Kontak Layanan: link nomor WhatsApp & alamat toko), Kolom 3 (Informasi: menu privasi & syarat ketentuan). Diakhiri baris Copyright di bagian bawah. | Grid 3 kolom atau membungkus 2 kolom seimbang. | **1 Kolom Bertumpuk Vertikal**: Kolom Profil Toko, Kontak Layanan, dan Informasi tersusun ke bawah, diakhiri baris Copyright. |
+| **`centered_simple`** | **Layout Minimalis Terpusat**: Logo toko dan tagline terpusat di tengah, tombol kontak WhatsApp bulat ber-hover effect di tengah, dan teks hak cipta di bagian bawah. | Simetris terpusat di tengah layar. | Simetris terpusat di tengah layar mobile dengan tombol WhatsApp yang nyaman ditekan. |
+| **`cta_focused`** | **Banner Floating WhatsApp di Atas Footer**: Banner WhatsApp melayang menonjol di atas footer (`-mt-16 bg-primary text-white shadow-xl` dengan judul ajakan dan tombol "Chat Sekarang"), diikuti info toko dan alamat di bawahnya. | Banner WhatsApp melayang menyesuaikan lebar kontainer tablet. | Banner WhatsApp membungkus vertikal (judul ajakan di atas, tombol chat di bawah), diikuti profil toko dan copyright. |
 
 ---
 
@@ -613,50 +717,117 @@ Sistem peninjauan viewport (Desktop, Tablet, Mobile) dirancang menggunakan **Tru
 
 ---
 
-### 5. State Management & Operations (`editorStore.ts`)
+### 5. State Management & Operations (Arsitektur Dual-Store)
 
-Siklus data visual editor builder dikelola secara terpusat oleh `editorStore` (Svelte Writable Store) dengan arsitektur data sebagai berikut:
-* **Struktur State (`EditorState`)**:
-  * `template`: Objek data template utuh yang sedang diedit (berisi metadata, list `sections`, dan objek `theme`).
-  * `selectedSectionId`: ID unik section yang saat ini dipilih oleh pengguna di canvas atau layer panel.
-  * `history`: Stack riwayat perubahan untuk mendukung fitur undo/redo.
-  * `viewMode`: Mode peninjauan aktif (`desktop` | `tablet` | `mobile`).
-* **Operasi Mutasi State (`editorStore.mutations.ts`)**:
-  * `addSection(type, index)`: Menyisipkan section baru ke posisi tertentu.
-  * `updateSectionContent(id, content)`: Memperbarui data teks/gambar konten di dalam node section.
-  * `updateSectionStyles(id, styles)`: Memperbarui parameter styling (margin, padding, border radius, alignment).
-  * `deleteSection(id)`: Menghapus section dari silsilah visual.
-  * `reorderSections(fromIndex, toIndex)`: Mengubah posisi urutan section (dipicu oleh interaksi drag-and-drop pada Layer Panel).
-  * `undo()` / `redo()`: Berpindah antar snapshot history state.
+Siklus data visual editor builder dikelola secara modular menggunakan pemisahan tanggung jawab (*separation of concerns*) antara data persisten template dan state visual antarmuka:
+
+* **A. `documentStore` (State Data Template Persisten)**:
+  * **Struktur State (`DocumentState`)**:
+    * `template`: Objek data template lengkap (`EditorTemplate`) yang memuat `id`, `name`, `description`, `price`, `status`, dan `config` (berisi daftar `sections` dan objek `theme`).
+    * `history`: Stack riwayat perubahan (`past: TemplateConfig[]`, `future: TemplateConfig[]`) dengan batas kapasitas 20 snapshot dan auto-merging debounced (350ms).
+    * `isDirty`: Flag penanda jika terdapat perubahan lokal yang belum tersimpan ke database.
+    * `isSaving` & `saveSuccess`: Status eksekusi penyimpanan ke API server `/api/builder/save`.
+    * `error`: Pesan kesalahan jika terjadi kegagalan request network atau validasi skema.
+  * **Operasi Mutasi Section**:
+    * `addSection(type)`: Menyisipkan section baru ke urutan terbawah dan menginisialisasi default layout preset.
+    * `deleteSection(id)`: Menghapus section dari canvas dan otomatis memilih section terdekat berikutnya.
+    * `reorderSection(id, direction)`: Mengubah posisi urutan section ke atas (`up`) atau ke bawah (`down`).
+    * `updateSection(section)`: Memperbarui objek data section utuh.
+    * `updateSectionProps(id, props)`: Memperbarui konten dinamis props section.
+    * `updateSectionStyles(id, styles)`: Memperbarui style spesifik section.
+    * `updateSectionLayoutPreset(id, preset)`: Mengubah varian layout preset section seketika.
+    * `updateSectionSpacing(id, spacingConfig)`: Memperbarui konfigurasi padding vertikal/horizontal dan gap.
+  * **Operasi Mutasi Sub-Node**:
+    * `addNode(sectionId, nodeType)`: Menambahkan elemen baru (misal: tombol nav baru, item benefit baru, kartu produk baru).
+    * `deleteNode(sectionId, nodeId)`: Menghapus elemen spesifik di dalam section.
+    * `updateNodeStyles(sectionId, nodeId, styles)`: Memperbarui CSS style lokal milik sub-node tertentu.
+    * `updateNodeStyleToken(sectionId, nodeId, prop, tokenKey)`: Memetakan token warna/font ke node.
+    * `updateNodeSpacing(sectionId, nodeId, spacingConfig)`: Memperbarui margin dan padding sub-node.
+    * `reorderSectionSlot(sectionId, fromIdx, toIdx)`: Mengubah urutan susunan slot elemen hero (`elementOrder`).
+    * `reorderArrayItem(sectionId, arrayKey, fromIdx, toIdx)`: Mengubah urutan array item (fitur, produk, testimoni, FAQ).
+  * **Operasi Mutasi Tema & Persistensi**:
+    * `updateGlobalTheme(themeUpdates)`: Memperbarui parameter tema global (warna, tipografi, tombol, layout).
+    * `updateDesignSystemTheme(section, updates)`: Memperbarui token design system per kategori.
+    * `updateTemplateName(name)`: Mengubah judul template draft.
+    * `undo()` / `redo()`: Berpindah maju-mundur melintasi snapshot konfigurasi template.
+    * `save()`: Mengirim payload konfigurasi template ke server (`POST /api/builder/save`).
+    * `submitReview()`: Mengajukan draft template desainer untuk verifikasi admin (`POST /api/designer/templates/submit-review`).
+
+* **B. `canvasStore` (State Antarmuka Visual / Ephemeral)**:
+  * **Struktur State (`CanvasState`)**:
+    * `selectedSectionId`: ID section yang sedang aktif/dipilih (`string | null`).
+    * `selectedNodeId`: ID sub-node spesifik yang sedang aktif/dipilih (`string | null`).
+    * `hoveredNodeId`: ID node yang sedang diarahkan oleh kursor mouse.
+    * `viewMode`: Mode simulasi viewport aktif (`desktop` | `tablet` | `mobile`).
+    * `zoom`: Skala zoom kanvas manual (rentang: 50% hingga 150%).
+    * `showColumnGrid`: Visibilitas overlay 12/8/4 kolom grid Figma.
+    * `showPixelGrid`: Visibilitas overlay grid titik-titik (dot pattern) 8px.
+    * `activeMargin` / `canvasMargin`: Token margin safe-zone aktif (`16px` | `24px` | `32px` | `48px`).
+    * `previewTheme`: Tema warna canvas pratinjau (`light` | `dark`).
+    * `editorTheme`: Tema warna antarmuka editor builder (`light` | `dark`).
+    * `leftSidebarOpen` & `rightSidebarOpen`: Status drawer layer panel dan property inspector.
+  * **Karakteristik**: Seluruh mutasi pada `canvasStore` **tidak memicu pencatatan history undo/redo** dan **tidak mengubah status `isDirty`**.
+
+* **C. Derived Stores**:
+  * `activeSection`: Menghasilkan objek `TemplateSection` yang sedang aktif berdasarkan `selectedSectionId`.
+  * `activeNodeId`: Menyediakan ID sub-node yang sedang dipilih.
+  * `canUndo`: Boolean derived dari `$documentStore.history.past.length > 0`.
+  * `canRedo`: Boolean derived dari `$documentStore.history.future.length > 0`.
 
 ---
 
-### 6. Inspector & Image Upload Integration
+### 6. Property Inspector & Image Upload Integration
 
-Panel kanan editor (`PropertyInspector.svelte`) menyajikan antarmuka pengaturan spesifik berdasarkan node yang sedang aktif:
-* **Tabs Navigasi**:
-  * **Content Tab (`ContentTab.svelte`)**: Mengatur input teks, headline, tautan tombol, dan pilihan gambar/media.
-  * **Styles Tab (`StylesTab.svelte`)**: Mengatur visual theme global seperti tipografi font header/body, warna primer/sekunder, dan radius global.
-  * **NodeStyles Tab (`NodeStylesTab.svelte`)**: Mengatur layout visual tingkat section (alignment, container width, background, margin/padding).
-* **Integrasi Cloudinary Uploader (`ImageUpload.svelte`)**:
-  * Mendukung unggah gambar drag-and-drop dengan feedback indikator progress bar.
-  * Mengambil signed signature secara dinamis dari API endpoint `/api/media/sign` untuk unggah gambar secara langsung dan aman dari client-side ke Cloudinary.
-  * Mendukung penghapusan aset gambar lama dari Cloudinary via API `/api/media/delete` saat gambar diganti atau dihapus.
+Panel kanan editor (`PropertyInspector.svelte`) menyajikan antarmuka pengaturan properti kontekstual 3-level yang dinamis:
+
+* **Level 1 — Global Design System Inspector (`GlobalThemeInspector.svelte`)**:
+  * *Pemicu*: Tampil saat **tidak ada section yang dipilih** di canvas/layer panel.
+  * *Sub-Tabs Navigasi*:
+    * **Warna (`ThemeColorsTab.svelte`)**: Kustomisasi warna `primary`, `secondary`, `background`, `surface`, `textPrimary`, dan `textMuted` yang secara reaktif langsung disuntikkan ke CSS Variables canvas (`--theme-primary`, `--theme-bg`, dll.).
+    * **Font (`ThemeTypographyTab.svelte`)**: Pemilihan keluarga font Google Fonts (`headingFont`, `bodyFont`) serta konfigurasi skala tipografi berbasis rasio emas (*Golden Ratio*) untuk tag `h1`, `h2`, `h3`, `body`, dan `caption`.
+    * **Tombol (`ThemeButtonsTab.svelte`)**: Kustomisasi tinggi tombol (`height`), radius sudut konsentris (`borderRadius`), serta skema warna untuk varian tombol **Primary**, **Secondary**, dan **Outline**.
+    * **Layout (`ThemeLayoutTab.svelte`)**: Pengaturan batas lebar kontainer maksimal (`maxWidth`) dan safe-margin horizontal responsif (`horizontalMarginDesktop`, `horizontalMarginTablet`, `horizontalMarginMobile`).
+
+* **Level 2 — Section-Level Inspector**:
+  * *Pemicu*: Tampil saat sebuah **parent section dipilih** (`$activeNodeId === null`).
+  * *Tabs Navigasi*:
+    * **Content Tab (`ContentTab.svelte`)**: Merender form pengisian data konten sesuai tipe section (`HeaderContent`, `HeroContent`, `FeaturesContent`, `ProductCatalogContent`, `TestimonialsContent`, `FaqContent`, `GoogleMapsContent`, `FooterContent`).
+    * **Styles Tab (`StylesTab.svelte`)**: Merender panel styling khusus section (`HeaderStylesTab`, `CatalogStylesTab`) serta `GeneralStylesTab` yang mencakup:
+      * `SectionLayoutPanel.svelte`: Penyesuaian layout flex/grid, perataan teks, dan lebar kontainer.
+      * `SectionAppearancePanel.svelte`: Penyesuaian warna latar belakang (*background token*), radius sudut section, dan margin/padding numerik.
+
+* **Level 3 — Sub-Node Contextual Inspector**:
+  * *Pemicu*: Tampil saat **elemen sub-node spesifik dipilih** (misal: klik pada teks judul hero, gambar banner, tombol CTA, atau logo header).
+  * *Tabs Navigasi*:
+    * **Styles Node (`NodeStylesTab.svelte` / Header Panels)**: Mengatur parameter styling mikro spesifik elemen tersebut (font size, weight, alignment, warna, padding lokal). Untuk header, tersedia panel khusus: `HeaderAnnouncementPanel`, `HeaderLogoPanel`, dan `HeaderNavPanel`.
+    * **Konten Node (`NodeContentForm.svelte`)**: Mengatur isian teks, URL tautan, upload gambar, atau label tombol untuk node tersebut secara langsung.
+
+* **Integrasi Cloudinary Uploader (`ImageUpload.svelte` & `src/lib/cloudinary.ts`)**:
+  * **Signed Upload Security**: Mengambil signature aman dari backend API `/api/media/sign` sebelum file dikirim langsung dari browser pengguna ke CDN Cloudinary tanpa membebani server backend.
+  * **Drag-and-Drop & Progress Feedback**: Area dropzone interaktif dengan indikator visual animasi persentase unggahan.
+  * **Automatic Media Cleanup**: Menghapus file gambar usang dari storage Cloudinary melalui endpoint API `/api/media/delete` setiap kali gambar diganti atau dihapus oleh desainer untuk mencegah akumulasi berkas tidak terpakai (*orphan assets*).
 
 ---
 
-### 7. Rekomendasi Perbaikan & Pengembangan Builder
+### 7. Status Implementasi & Roadmap Pengembangan Builder
 
-Berikut adalah analisis rekomendasi perbaikan teknis yang dapat diterapkan pada UMKM Site Builder Builder di masa mendatang:
-* **Viewport Scaling Transform**:
-  * *Masalah*: Di layar beresolusi rendah (seperti laptop 1366x768), sisa ruang workspace tengah setelah dikurangi sidebar kiri (260px) dan kanan (320px) hanya menyisakan sekitar 786px. Mode tablet (768px) atau desktop (1200px) akan terhimpit.
-  * *Solusi*: Terapkan CSS `transform: scale(...)` dinamis pada `#canvas-frame` berdasarkan lebar workspace tersisa agar seluruh kanvas terlihat utuh (fit-to-screen) tanpa memotong detail tata letak asli.
-* **Shadow Drop Indicator pada Reordering Layer**:
-  * *Masalah*: Saat ini reordering section pada `LayerPanel.svelte` bekerja secara instan tanpa indikator drop zone visual yang halus.
-  * *Solusi*: Tambahkan baris bayangan (shadow bar / drop-indicator) yang memandu pengguna di mana posisi section akan diletakkan sebelum pointer dilepas.
-* **Presets Design System Themes**:
-  * *Masalah*: Desainer pemula sering kesulitan mengombinasikan warna/font yang harmonis.
-  * *Solusi*: Sediakan opsi palet tema siap pakai (presets) di `GlobalThemeInspector` seperti *"Classic Clean"*, *"Emerald Organic"*, atau *"Cyber Tech"* agar pengguna dapat langsung mengganti tema warna & font terkurasi dengan sekali klik.
-* **Image Cropper & Aspect Ratio Lock**:
-  * *Masalah*: Gambar yang diunggah pengguna sering merusak proporsi tata letak visual (layout box) karena rasio tinggi-lebar file asli yang tidak seragam.
-  * *Solusi*: Integrasikan pustaka cropping gambar berbasis client-side di `ImageUpload.svelte` agar desainer dapat memotong gambar sesuai aspek rasio target (misal: 1:1 untuk katalog, 16:9 untuk banner hero) sebelum dikirim ke server Cloudinary.
+Berikut adalah rekapitulasi status fitur yang telah aktif serta rekomendasi pengembangan lanjutan untuk UMKM Site Builder:
+
+* **A. Fitur Inti yang Telah Berhasil Diimplementasikan (Active & Implemented)**:
+  1. **True Viewport Simulation & Auto-Scaling Canvas**: Fitur penskalaan otomatis kanvas (`transform: scale(scaleRatio)`) di `Canvas.svelte` yang menjaga layout Desktop (1200px), Tablet (768px), dan Mobile (375px) tetap render pixel-perfect tanpa distorsi breakpoint di semua resolusi monitor laptop.
+  2. **Interactive Spacing Drag-Handles**: Handle geser absolut untuk Margin Top, Margin Bottom, dan Side Padding dengan status transient 60fps dan single-step history commit.
+  3. **Figma-Style Layout Grid Guides**: Panduan 12-kolom Desktop, 8-kolom Tablet, 4-kolom Mobile, serta 8px Dot Pixel Grid overlay di `LayoutGridOverlay.svelte`.
+  4. **Modular Section Registry (24 Layout Presets)**: Arsitektur 8 section modular terisolasi dengan 24 varian layout presets di `src/components/builder/registry/index.ts`.
+  5. **Dual-Store State Architecture**: Pemisahan `documentStore` (data persisten) dan `canvasStore` (state UI) dengan dukungan undo/redo 20 langkah riwayat.
+  6. **Hierarchical Tree & Node Navigation**: Struktur pohon section dan child-nodes pada `LayerPanel.svelte` dengan fitur reorder urutan hero slot dan array items.
+  7. **Instant Quick View Modal & Dynamic Multitenant Catalog**: Integrasi katalog produk dinamis tenant dengan filter kategori dan modal pop-up pratinjau cepat di `ProductCatalogQuickView.svelte`.
+
+* **B. Rekomendasi Pengembangan Lanjutan (Future Roadmap Enhancements)**:
+  1. **Client-Side Image Cropper & Aspect Ratio Guard**:
+     * *Tujuan*: Mengintegrasikan pustaka cropping gambar client-side (seperti `cropperjs`) pada `ImageUpload.svelte` agar desainer dapat memotong gambar sesuai aspek rasio target (1:1 untuk produk, 16:9 untuk banner hero) sebelum proses unggah ke Cloudinary.
+  2. **Visual Drop-Indicator Bar pada Layer Panel**:
+     * *Tujuan*: Menambahkan garis panduan visual bayangan (*drop-indicator line*) saat melakukan drag-and-drop layer pada `LayerPanel.svelte` sebelum pointer dilepas.
+  3. **Pre-built Theme Palette Presets**:
+     * *Tujuan*: Menyediakan bundle tema siap pakai 1-klik (seperti *"Classic Clean"*, *"Emerald Organic"*, *"Cyber Tech"*, *"Sunset Warm"*) di `GlobalThemeInspector` untuk mempercepat proses perancangan bagi desainer pemula.
+  4. **Keyboard Shortcuts Suite**:
+     * *Tujuan*: Menambahkan pintasan keyboard terpadu untuk efisiensi workflow desainer: `Ctrl+Z` (Undo), `Ctrl+Y` (Redo), `Ctrl+S` (Save), `Ctrl+G` (Toggle Grid), `Ctrl+\` (Toggle Layer Panel), `Ctrl+/` (Toggle Inspector), dan `Delete` (Hapus Section/Node).

@@ -1,8 +1,8 @@
 <script lang="ts">
-import { CheckCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
-import { subdomainField } from '@lib/validators/subdomain';
-import { Button, Input } from '@/components/ui';
-import { slide } from 'svelte/transition';
+  import { subdomainField } from '@lib/validators/subdomain';
+  import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
+  import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
+  import OnboardingStepSuccess from './wizard/OnboardingStepSuccess.svelte';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -16,7 +16,6 @@ import { slide } from 'svelte/transition';
   let subdomainMessage = '';
   let debounceTimer: ReturnType<typeof setTimeout>;
 
-  const MAX_LENGTH = 63;
   const DEBOUNCE_MS = 300;
 
   // Step 2: Store Info
@@ -205,177 +204,31 @@ import { slide } from 'svelte/transition';
 
   <!-- Step Content -->
   <div class="bg-card rounded-3xl shadow-xl p-8 border border-border">
-    
     {#if currentStep === 1}
-      <!-- STEP 1: SUBDOMAIN -->
-      <div class="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div class="text-center mb-4">
-          <h2 class="text-2xl font-bold mb-2">Pilih Alamat Toko</h2>
-          <p class="text-base-content/70 text-sm">
-            Tentukan subdomain unik untuk toko online Anda. Ini akan menjadi URL toko Anda.
-          </p>
-        </div>
-
-        <div class="w-full relative">
-          <Input
-            id="subdomain-input"
-            label="Subdomain Toko"
-            bind:value={subdomain}
-            on:input={onSubdomainInput}
-            placeholder="nama-toko"
-            error={(subdomainStatus === 'taken' || subdomainStatus === 'invalid' || subdomainStatus === 'error') ? subdomainMessage : ''}
-            maxlength={MAX_LENGTH}
-            autocomplete="off"
-            spellcheck="false"
-            fullWidth
-          >
-            <span slot="suffix" class="font-medium text-base-content/50 pr-2">.umkm.site</span>
-          </Input>
-
-          <div class="h-6 mt-1 flex items-center overflow-hidden ml-1">
-            {#if subdomainStatus === 'checking'}
-              <span class="text-xs flex items-center gap-1 text-info" transition:slide={{ axis: 'y', duration: 300 }}>
-                <Loader2 size={14} class="animate-spin" />
-                Memeriksa ketersediaan...
-              </span>
-            {:else if subdomainStatus === 'available'}
-              <span class="text-xs flex items-center gap-1 text-success" transition:slide={{ axis: 'y', duration: 300 }}>
-                <CheckCircle size={14} />
-                {subdomainMessage}
-              </span>
-            {:else if subdomainStatus === 'typing'}
-              <span class="text-xs text-base-content/40" transition:slide={{ axis: 'y', duration: 300 }}>
-                Mengetik...
-              </span>
-            {:else if subdomainStatus === 'idle'}
-              <span class="text-xs text-muted" transition:slide={{ axis: 'y', duration: 300 }}>
-                Contoh: kopi-budi, toko-sari
-              </span>
-            {/if}
-          </div>
-        </div>
-
-        <div class="mt-4 flex justify-end gap-3">
-          <Button
-            variant="primary"
-            disabled={!isStep1Valid}
-            on:click={nextStep}
-          >
-            Lanjutkan
-            <ArrowRight size={18} />
-          </Button>
-        </div>
-      </div>
-
+      <OnboardingStepSubdomain
+        bind:subdomain
+        {subdomainStatus}
+        {subdomainMessage}
+        {isStep1Valid}
+        onInput={onSubdomainInput}
+        onNext={nextStep}
+      />
     {:else if currentStep === 2}
-      <!-- STEP 2: STORE INFO -->
-      <div class="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-500">
-        <div class="text-center mb-4">
-          <h2 class="text-2xl font-bold mb-2">Profil Toko</h2>
-          <p class="text-base-content/70 text-sm">
-            Lengkapi informasi toko Anda untuk memudahkan pelanggan berbelanja.
-          </p>
-        </div>
-
-        <div class="space-y-4">
-          <Input
-            id="store-name"
-            label="Nama Toko"
-            required
-            bind:value={storeName}
-            placeholder="Contoh: Kopi Budi Nusantara"
-            error={formErrors.storeName ?? ''}
-            fullWidth
-          >
-            <Store slot="prefix" size={18} class="text-base-content/40" />
-          </Input>
-
-          <Input
-            id="wa-number"
-            type="tel"
-            label="Nomor WhatsApp"
-            required
-            bind:value={waNumber}
-            placeholder="Contoh: 6281234567890"
-            helper="Gunakan format 628... (tanpa + atau 0 di depan)"
-            error={formErrors.waNumber ?? ''}
-            fullWidth
-          >
-            <Phone slot="prefix" size={18} class="text-base-content/40" />
-          </Input>
-
-          <Input
-            id="maps-url"
-            type="url"
-            label="Google Maps URL (Opsional)"
-            bind:value={googleMapsUrl}
-            placeholder="https://maps.google.com/..."
-            error={formErrors.googleMapsUrl ?? ''}
-            fullWidth
-          >
-            <MapPin slot="prefix" size={18} class="text-base-content/40" />
-          </Input>
-        </div>
-
-        {#if submitError}
-          <div class="alert alert-error text-sm mt-2">
-            <AlertCircle size={16} />
-            <span>{submitError}</span>
-          </div>
-        {/if}
-
-        <div class="mt-4 flex justify-between gap-3">
-          <Button
-            variant="ghost"
-            disabled={submitStatus === 'submitting'}
-            on:click={prevStep}
-          >
-            <ArrowLeft size={18} />
-            Kembali
-          </Button>
-          
-          <Button
-            variant="primary"
-            disabled={submitStatus === 'submitting'}
-            on:click={nextStep}
-          >
-            {#if submitStatus === 'submitting'}
-              <Loader2 size={18} class="animate-spin" />
-              Menyimpan...
-            {:else}
-              Selesai
-              <CheckCircle size={18} />
-            {/if}
-          </Button>
-        </div>
-      </div>
-
+      <OnboardingStepStoreInfo
+        bind:storeName
+        bind:waNumber
+        bind:googleMapsUrl
+        {formErrors}
+        {submitStatus}
+        {submitError}
+        onPrev={prevStep}
+        onNext={nextStep}
+      />
     {:else if currentStep === 3}
-      <!-- STEP 3: SUCCESS -->
-      <div class="flex flex-col items-center text-center gap-4 py-8 animate-in zoom-in-95 duration-500">
-        <div class="w-16 h-16 rounded-full bg-success/20 text-success flex items-center justify-center mb-2">
-          <CheckCircle size={32} />
-        </div>
-        
-        <h2 class="text-2xl font-bold">Profil Toko Berhasil Dibuat!</h2>
-        
-        <div class="bg-nested p-4 rounded-xl w-full text-left mb-4 border border-border-light">
-          <p class="text-sm text-muted mb-1">Subdomain:</p>
-          <p class="font-mono font-medium mb-3 text-main">{subdomain}.umkm.site</p>
-          
-          <p class="text-sm text-muted mb-1">Nama Toko:</p>
-          <p class="font-medium text-main">{storeName}</p>
-        </div>
-        
-        <p class="text-base-content/70 mb-4">
-          Anda akan diarahkan ke Dashboard dalam beberapa detik...
-        </p>
-
-        <Button variant="primary" fullWidth href="/dashboard">
-          Ke Dashboard Sekarang
-        </Button>
-      </div>
+      <OnboardingStepSuccess
+        {subdomain}
+        {storeName}
+      />
     {/if}
-    
   </div>
 </div>

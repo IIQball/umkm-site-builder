@@ -1,7 +1,11 @@
 <script lang="ts">
   import { editorStore, canvasStore } from '../stores/editorStore';
   import type { FeaturesProps, SectionStyles } from '@/types';
-  import { ShieldCheck, Truck, Award, Star } from 'lucide-svelte';
+  import { ShieldCheck, Truck, Award, Star, Zap, Layers } from 'lucide-svelte';
+  import FeaturesBentoGrid from './features/FeaturesBentoGrid.svelte';
+  import FeaturesInteractiveTabs from './features/FeaturesInteractiveTabs.svelte';
+  import FeaturesVerticalAccordion from './features/FeaturesVerticalAccordion.svelte';
+  import FeaturesComparison from './features/FeaturesComparison.svelte';
 
   export let props: FeaturesProps = {};
   export let styles: SectionStyles = {};
@@ -16,17 +20,17 @@
         {
           icon: 'shield',
           title: 'Toko Terpercaya',
-          description: 'Dipercaya oleh ribuan pelanggan di seluruh Indonesia.',
+          description: 'Dipercaya oleh ribuan pelanggan di seluruh Indonesia dengan rekam jejak kepuasan tinggi.',
         },
         {
           icon: 'truck',
           title: 'Pengiriman Cepat',
-          description: 'Gratis ongkos kirim dan pengiriman kilat terjamin.',
+          description: 'Gratis ongkos kirim dan proses packing kilat dengan proteksi ekstra aman.',
         },
         {
           icon: 'award',
           title: 'Produk Berkualitas',
-          description: 'Garansi produk original dan jaminan uang kembali.',
+          description: 'Garansi produk original 100% dan jaminan uang kembali bila ada cacat pabrik.',
         },
       ];
 
@@ -71,27 +75,22 @@
     if (iconName === 'shield') return ShieldCheck;
     if (iconName === 'truck') return Truck;
     if (iconName === 'award') return Award;
+    if (iconName === 'zap') return Zap;
+    if (iconName === 'layers') return Layers;
     return Star;
   };
 </script>
 
-<div
-  data-node="features_container"
-  class="w-full box-border"
->
+<div data-node="features_container" class="w-full box-border">
   {#if activePreset === 'banner_inline_bar'}
-    <!-- Preset 3: Banner Inline Bar (Ribbon h-16 / 64px horizontal strip) -->
+    <!-- Preset 3: Banner Inline Bar -->
     <div class="w-full py-4 px-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-around gap-6">
       {#each features as feature, index (feature.title + index)}
-        <div
-          data-node="feature_card"
-          class="flex items-center gap-3 min-w-0"
-        >
-          <!-- Nested radius: container 16px, inner icon pill/8px -->
+        <div data-node="feature_card" class="flex items-center gap-3 min-w-0">
           <div data-node="feature_icon" class="w-10 h-10 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center flex-shrink-0 border border-blue-100">
             <svelte:component this={renderIcon(feature.icon)} size={18} />
           </div>
-          <div class="min-w-0">
+          <div class="min-w-0 text-left">
             <h4 data-node="feature_title" class="text-xs sm:text-sm font-bold text-[var(--theme-text-primary,#0f172a)] truncate">
               {feature.title}
             </h4>
@@ -104,9 +103,8 @@
     </div>
 
   {:else if activePreset === 'horizontal_list'}
-    <!-- Preset 2: Horizontal List (2-Col: Left Heading, Right 16px-gap rows) -->
+    <!-- Preset 2: Horizontal List -->
     <div class="py-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-      <!-- Left Heading -->
       <div class="md:col-span-4 md:sticky md:top-8 flex flex-col gap-2 text-left">
         <h2 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight">
           {props?.title || 'Keunggulan Produk Kami'}
@@ -116,17 +114,10 @@
         </p>
       </div>
 
-      <!-- Right Feature Rows -->
       <div class="md:col-span-8 flex flex-col gap-4">
         {#each features as feature, index (feature.title + index)}
           <div
             data-node="feature_card"
-            role="listitem"
-            draggable={isActive}
-            on:dragstart={(e) => onDragStart(e, index)}
-            on:dragover={(e) => onDragOver(e, index)}
-            on:dragleave={() => (dropTargetIdx = null)}
-            on:drop={(e) => onDrop(e, index)}
             class="p-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex items-start gap-4 transition-all hover:border-blue-300"
           >
             <div data-node="feature_icon" class="w-12 h-12 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center flex-shrink-0 border border-blue-100">
@@ -145,8 +136,95 @@
       </div>
     </div>
 
+  {:else if activePreset === 'bento_grid_asymmetric'}
+    <FeaturesBentoGrid {features} title={props?.title || ''} subtitle={props?.subtitle || ''} {renderIcon} />
+
+  {:else if activePreset === 'alternating_zigzag_rows'}
+    <!-- Preset 5: Alternating Zigzag Rows -->
+    <div class="py-12 flex flex-col gap-12 text-left">
+      {#each features as feature, index}
+        {@const isReverse = index % 2 === 1}
+        <div class={`grid grid-cols-1 md:grid-cols-12 gap-8 items-center ${isReverse ? 'md:flex-row-reverse' : ''}`}>
+          <div class={`md:col-span-6 flex flex-col gap-3 ${isReverse ? 'md:order-2' : 'md:order-1'}`}>
+            <span class="text-xs font-bold uppercase tracking-wider text-[var(--theme-primary,#2563eb)]">Keunggulan #{index + 1}</span>
+            <h3 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight">
+              {feature.title}
+            </h3>
+            <p class="text-sm text-[var(--theme-text-muted,#64748b)] leading-relaxed">
+              {feature.description}
+            </p>
+          </div>
+          <div class={`md:col-span-6 p-8 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-md flex items-center justify-center min-h-[160px] ${isReverse ? 'md:order-1' : 'md:order-2'}`}>
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center border border-blue-100 shadow-sm">
+              <svelte:component this={renderIcon(feature.icon)} size={32} />
+            </div>
+          </div>
+        </div>
+      {/each}
+    </div>
+
+  {:else if activePreset === 'interactive_tabs'}
+    <FeaturesInteractiveTabs {features} title={props?.title || ''} {renderIcon} />
+
+  {:else if activePreset === 'vertical_accordion_showcase'}
+    <FeaturesVerticalAccordion {features} title={props?.title || ''} subtitle={props?.subtitle || ''} {renderIcon} />
+
+  {:else if activePreset === 'sticky_scroll_highlight'}
+    <!-- Preset 8: Sticky Scroll Highlight -->
+    <div class="py-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-start text-left">
+      <div class="md:col-span-5 md:sticky md:top-12 p-8 rounded-2xl bg-slate-900 text-white shadow-xl flex flex-col gap-4">
+        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Komitmen Pelanggan</span>
+        <h3 class="text-2xl sm:text-3xl font-black text-white leading-tight">Pengalaman Belanja Terbaik</h3>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Kami memastikan setiap langkah transaksi berjalan aman, cepat, dan terpercaya untuk seluruh pelanggan setia.
+        </p>
+      </div>
+
+      <div class="md:col-span-7 flex flex-col gap-4">
+        {#each features as feature, idx}
+          <div class="p-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+            <div class="w-8 h-8 rounded-full bg-blue-100 text-[var(--theme-primary,#2563eb)] font-bold text-xs flex items-center justify-center flex-shrink-0">
+              {idx + 1}
+            </div>
+            <div>
+              <h4 class="font-bold text-base text-[var(--theme-text-primary,#0f172a)] mb-1">{feature.title}</h4>
+              <p class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)] leading-relaxed">{feature.description}</p>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+
+  {:else if activePreset === 'dense_icon_matrix'}
+    <!-- Preset 9: Dense Icon Matrix -->
+    <div class="py-12 flex flex-col gap-8 text-center">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight mb-2">
+          {props?.title || 'Kelebihan Lengkap Layanan Kami'}
+        </h2>
+        <p class="text-sm text-[var(--theme-text-muted,#64748b)]">{props?.subtitle || 'Seluruh fitur dirancang untuk kemudahan Anda'}</p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-left">
+        {#each [...features, ...features].slice(0, 6) as feature}
+          <div class="p-4 rounded-xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center flex-shrink-0">
+              <svelte:component this={renderIcon(feature.icon)} size={16} />
+            </div>
+            <div class="min-w-0">
+              <h5 class="font-bold text-xs text-[var(--theme-text-primary,#0f172a)] truncate">{feature.title}</h5>
+              <p class="text-[11px] text-[var(--theme-text-muted,#64748b)] line-clamp-2 mt-0.5">{feature.description}</p>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+
+  {:else if activePreset === 'before_after_comparison'}
+    <FeaturesComparison />
+
   {:else}
-    <!-- Preset 1 (Default): Grid 3 Cards (py-12 = 48px, gap-6 = 24px, card p-6 = 24px) -->
+    <!-- Preset 1 (Default): Grid 3 Cards -->
     <div class="py-12">
       {#if props?.title}
         <div class="mb-8 text-center">
@@ -178,7 +256,6 @@
             }`}
           >
             <div>
-              <!-- Nested radius: Card radius 16px (rounded-2xl) with p-6 (24px) -> Icon radius 8px (rounded-lg) -->
               <div data-node="feature_icon" class="w-12 h-12 rounded-lg bg-blue-50 text-[var(--theme-primary,#2563eb)] flex items-center justify-center mb-4 border border-blue-100">
                 <svelte:component this={renderIcon(feature.icon)} size={22} />
               </div>

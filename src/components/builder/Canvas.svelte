@@ -2,10 +2,10 @@
   import { onDestroy } from 'svelte';
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
+  import CanvasSpacingHandles from './canvas/CanvasSpacingHandles.svelte';
   import type { TemplateSection, TemplateTheme } from '@/schemas';
   import { editorStore, canvasStore } from './stores/editorStore';
-  import { calculateGoldenRatioTypography } from '@/lib/utils/designMath';
-  import { MoveVertical, MoveHorizontal } from 'lucide-svelte';
+  import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
 
   export let sections: TemplateSection[] = [];
   export let selectedSectionId: string | null = null;
@@ -42,7 +42,7 @@
   let canvasHeight = 0;
 
   $: targetWidth = viewMode === 'desktop' ? 1200 : viewMode === 'tablet' ? 768 : 375;
-  $: paddingHorizontal = 48; // 24px left + 24px right padding
+  $: paddingHorizontal = 48;
   $: availableWidth = Math.max(0, containerWidth - paddingHorizontal);
   $: autoScale = (availableWidth > 0 && availableWidth < targetWidth)
     ? (availableWidth / targetWidth)
@@ -52,331 +52,201 @@
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
   $: isDarkPreview = $canvasStore.previewTheme === 'dark';
-  $: colors = theme.colors || {};
-  $: typography = theme.typography || {};
-  $: buttons = (theme.buttons || {}) as Record<string, any>;
-  $: layout = theme.layout || {};
-
-  $: baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16;
-  $: goldenRatio = calculateGoldenRatioTypography(baseFontSize);
-
-  $: canvasCssVars = [
-    /* 1. Warna */
-    `--theme-primary: ${colors.primary || '#3b82f6'}`,
-    `--theme-secondary: ${colors.secondary || '#64748b'}`,
-    `--theme-bg: ${isDarkPreview ? '#090d16' : (colors.background || '#ffffff')}`,
-    `--theme-surface: ${isDarkPreview ? '#111827' : (colors.surface || '#f8fafc')}`,
-    `--theme-text-primary: ${isDarkPreview ? '#f8fafc' : (colors.textPrimary || '#0f172a')}`,
-    `--theme-text-muted: ${isDarkPreview ? '#94a3b8' : (colors.textMuted || '#64748b')}`,
-
-    /* 2. Tipografi Golden Ratio */
-    `--theme-font-heading: ${typography.headingFont || 'Inter, sans-serif'}`,
-    `--theme-font-body: ${typography.bodyFont || 'Inter, sans-serif'}`,
-    `--theme-text-h1: ${typography.h1?.fontSize || `${goldenRatio.h1}px`}`,
-    `--theme-text-h2: ${typography.h2?.fontSize || `${goldenRatio.h2}px`}`,
-    `--theme-text-h3: ${typography.h3?.fontSize || `${goldenRatio.h3}px`}`,
-    `--theme-text-body: ${typography.body?.fontSize || `${goldenRatio.body}px`}`,
-    `--theme-text-caption: ${typography.caption?.fontSize || `${goldenRatio.caption}px`}`,
-
-    /* 3. Tombol & Radius */
-    `--theme-btn-height: ${buttons.height || 40}px`,
-    `--theme-btn-radius: ${buttons.borderRadius || '8px'}`,
-    `--theme-btn-primary-bg: ${buttons.primary?.backgroundColor || colors.primary || '#3b82f6'}`,
-    `--theme-btn-primary-text: ${buttons.primary?.textColor || '#ffffff'}`,
-    `--theme-btn-secondary-bg: ${buttons.secondary?.backgroundColor || '#f1f5f9'}`,
-    `--theme-btn-secondary-text: ${buttons.secondary?.textColor || '#0f172a'}`,
-    `--theme-btn-outline-border: ${buttons.outline?.borderColor || colors.primary || '#3b82f6'}`,
-    `--theme-btn-outline-text: ${buttons.outline?.textColor || colors.primary || '#3b82f6'}`,
-
-    /* 4. Grid & Spacing */
-    `--theme-grid-gutter: 24px`,
-    `--theme-max-width: ${layout.maxWidth || '1200px'}`,
-    `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
-    `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
-    `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
-    `--active-safe-zone: ${viewMode === 'mobile' ? (layout.horizontalMarginMobile || '16px') : viewMode === 'tablet' ? (layout.horizontalMarginTablet || '24px') : (layout.horizontalMarginDesktop || '32px')}`,
-
-    /* 5. Effects */
-    `--theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)`,
-    `--theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1)`,
-    `--theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1)`,
-  ].join('; ');
+  $: canvasCssVars = buildCanvasCssVars(theme, isDarkPreview, viewMode);
 
   const parsePx = (val: unknown, defaultVal: number = 0): number => {
     if (typeof val !== 'string' && typeof val !== 'number') return defaultVal;
     return parseInt(String(val), 10) || defaultVal;
   };
 
-  const handleSelect = (id: string, e: MouseEvent) => {
-    e.stopPropagation();
-    if (isDraggingSpacing) return;
-    onSelectSection(id);
-  };
-
-  const handleCanvasBackgroundClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement | null;
-    if (target?.classList?.contains('canvas-backdrop')) {
-      canvasStore.deselectAll();
-    }
-  };
-
-  const commitStyles = (sectionId: string, styles: Record<string, string>) => {
-    if (!styles || Object.keys(styles).length === 0) return;
-    editorStore.updateSectionStyles(sectionId, styles);
-  };
-
-  const startTopMarginDrag = (e: PointerEvent, section: TemplateSection) => {
-    e.stopPropagation();
+  const handleStartDrag = (
+    e: MouseEvent,
+    section: TemplateSection,
+    type: 'padding-top' | 'padding-bottom' | 'padding-horizontal' | 'margin-top' | 'margin-bottom'
+  ) => {
     e.preventDefault();
-    if (activeCleanup) activeCleanup();
+    e.stopPropagation();
 
     isDraggingSpacing = true;
     dragStartY = e.clientY;
-    startValue = parsePx(section.styles?.marginTop, 0);
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
-      const newMarginTop = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
-      currentDragTooltip = `Margin Top: ${newMarginTop}px`;
-      transientStyles = {
-        ...transientStyles,
-        [section.id]: {
-          ...(transientStyles[section.id] || {}),
-          marginTop: `${newMarginTop}px`,
-        },
-      };
-    };
-
-    const onPointerUp = () => {
-      const finalStyles = transientStyles[section.id];
-      transientStyles = {};
-      if (activeCleanup) activeCleanup();
-      if (finalStyles) {
-        commitStyles(section.id, finalStyles);
-      }
-    };
-
-    activeCleanup = () => {
-      isDraggingSpacing = false;
-      currentDragTooltip = '';
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      activeCleanup = null;
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  };
-
-  const startBottomMarginDrag = (e: PointerEvent, section: TemplateSection) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (activeCleanup) activeCleanup();
-
-    isDraggingSpacing = true;
-    dragStartY = e.clientY;
-    startValue = parsePx(section.styles?.marginBottom, 0);
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaY = (moveEvent.clientY - dragStartY) / (scaleRatio || 1);
-      const newMarginBottom = Math.max(0, Math.min(160, startValue + Math.round(deltaY)));
-      currentDragTooltip = `Margin Bottom: ${newMarginBottom}px`;
-      transientStyles = {
-        ...transientStyles,
-        [section.id]: {
-          ...(transientStyles[section.id] || {}),
-          marginBottom: `${newMarginBottom}px`,
-        },
-      };
-    };
-
-    const onPointerUp = () => {
-      const finalStyles = transientStyles[section.id];
-      transientStyles = {};
-      if (activeCleanup) activeCleanup();
-      if (finalStyles) {
-        commitStyles(section.id, finalStyles);
-      }
-    };
-
-    activeCleanup = () => {
-      isDraggingSpacing = false;
-      currentDragTooltip = '';
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      activeCleanup = null;
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  };
-
-  const startSidePaddingDrag = (e: PointerEvent, section: TemplateSection) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (activeCleanup) activeCleanup();
-
-    isDraggingSpacing = true;
     dragStartX = e.clientX;
-    const paddingStr = section.styles?.padding || '48px 24px';
-    const parts = paddingStr.trim().split(/\s+/).map((p) => parseInt(p, 10) || 0);
-    const padY = parts[0] || 48;
-    const startPadX = parts.length > 1 ? parts[1] : padY;
 
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = Math.abs(moveEvent.clientX - dragStartX) / (scaleRatio || 1);
-      const newPadX = Math.max(8, Math.min(120, startPadX + Math.round(deltaX / 2)));
-      currentDragTooltip = `Padding: ${padY}px ${newPadX}px`;
+    const styles = section.styles || {};
+    if (type === 'padding-top') {
+      startValue = parsePx(styles.paddingTop ?? (styles.padding ? styles.padding.split(' ')[0] : '0px'), 0);
+    } else if (type === 'padding-bottom') {
+      startValue = parsePx(styles.paddingBottom ?? (styles.padding ? styles.padding.split(' ')[0] : '0px'), 0);
+    } else if (type === 'padding-horizontal') {
+      startValue = parsePx(styles.paddingLeft ?? (styles.padding ? (styles.padding.split(' ')[1] || styles.padding.split(' ')[0]) : '0px'), 0);
+    } else if (type === 'margin-top') {
+      startValue = parsePx(styles.marginTop ?? '0px', 0);
+    } else if (type === 'margin-bottom') {
+      startValue = parsePx(styles.marginBottom ?? '0px', 0);
+    }
+
+    currentDragTooltip = `${type}: ${startValue}px`;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      let delta = 0;
+      if (type === 'padding-top' || type === 'margin-top') {
+        delta = moveEvent.clientY - dragStartY;
+      } else if (type === 'padding-bottom' || type === 'margin-bottom') {
+        delta = moveEvent.clientY - dragStartY;
+      } else if (type === 'padding-horizontal') {
+        delta = Math.abs(moveEvent.clientX - dragStartX) * (moveEvent.clientX < dragStartX ? 1 : 1);
+      }
+
+      let rawNewVal = startValue + (type === 'padding-top' || type === 'margin-top' ? delta : delta);
+      if (type === 'padding-top' && delta < 0) rawNewVal = startValue - Math.abs(delta);
+
+      let snappedVal = Math.max(0, Math.round(rawNewVal / 8) * 8);
+      if (type.startsWith('padding') && snappedVal > 160) snappedVal = 160;
+      if (type.startsWith('margin') && snappedVal > 120) snappedVal = 120;
+
+      currentDragTooltip = `${type.replace('-', ' ').toUpperCase()}: ${snappedVal}px`;
+
+      const updates: Record<string, string> = {};
+      if (type === 'padding-top') {
+        updates.paddingTop = `${snappedVal}px`;
+      } else if (type === 'padding-bottom') {
+        updates.paddingBottom = `${snappedVal}px`;
+      } else if (type === 'padding-horizontal') {
+        updates.paddingLeft = `${snappedVal}px`;
+        updates.paddingRight = `${snappedVal}px`;
+      } else if (type === 'margin-top') {
+        updates.marginTop = `${snappedVal}px`;
+      } else if (type === 'margin-bottom') {
+        updates.marginBottom = `${snappedVal}px`;
+      }
+
       transientStyles = {
         ...transientStyles,
         [section.id]: {
           ...(transientStyles[section.id] || {}),
-          padding: `${padY}px ${newPadX}px`,
+          ...updates,
         },
       };
     };
 
-    const onPointerUp = () => {
-      const finalStyles = transientStyles[section.id];
-      transientStyles = {};
-      if (activeCleanup) activeCleanup();
-      if (finalStyles) {
-        commitStyles(section.id, finalStyles);
+    const handleMouseUp = () => {
+      isDraggingSpacing = false;
+      currentDragTooltip = '';
+      if (activeCleanup) {
+        activeCleanup();
+        activeCleanup = null;
+      }
+
+      const finalOverrides = transientStyles[section.id];
+      if (finalOverrides) {
+        editorStore.updateSectionStyles(section.id, finalOverrides);
+        transientStyles = { ...transientStyles };
+        delete transientStyles[section.id];
       }
     };
 
-    activeCleanup = () => {
-      isDraggingSpacing = false;
-      currentDragTooltip = '';
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      activeCleanup = null;
-    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
 
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
+    activeCleanup = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
   };
 </script>
 
-<svelte:window on:keydown={(e) => e.key === 'Escape' && canvasStore.deselectAll()} />
-
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-<main
+<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
+<div
   bind:clientWidth={containerWidth}
-  tabindex="-1"
-  on:click={handleCanvasBackgroundClick}
-  class="canvas-backdrop flex-1 w-full h-full overflow-auto flex items-start justify-center min-w-0 p-6 bg-slate-100 dark:bg-slate-950 select-none transition-colors"
-  aria-label="Editor Canvas"
+  class="flex-1 bg-nested relative flex items-start justify-center p-3 sm:p-6 overflow-x-hidden overflow-y-auto min-h-0 select-none transition-colors"
+  on:click={() => editorStore.selectSection(null)}
+  role="region"
+  aria-label="Canvas Area"
 >
-  <!-- Scaler Wrapper that preserves accurate flow bounds and vertical scrollbar height -->
-  <div
-    class="canvas-scale-container relative flex-shrink-0 transition-all duration-300 ease-out"
-    style="width: {targetWidth * scaleRatio}px; height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : 'auto'}; min-height: {canvasHeight > 0 ? `${canvasHeight * scaleRatio}px` : '100%'};"
-  >
-    <!-- Frame Container with fixed viewport width, scaled via CSS transform -->
+  <!-- Background Pixel Grid Guide -->
+  {#if $canvasStore.showPixelGrid}
     <div
-      id="canvas-frame"
-      bind:clientHeight={canvasHeight}
-      data-theme={$canvasStore.previewTheme}
-      style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
-      class={`transition-transform duration-300 ease-out flex flex-col box-border overflow-x-hidden ${
-        isDarkPreview ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
-      } ${
-        viewMode === 'desktop'
-          ? 'min-h-screen shadow-xl border border-slate-300 dark:border-slate-700'
-          : viewMode === 'tablet'
-          ? 'min-h-screen shadow-2xl border border-slate-300 dark:border-slate-700'
-          : 'min-h-screen shadow-2xl border border-slate-300 dark:border-slate-700'
-      }`}
-    >
-      <!-- Figma-Style Layout Grid Guides (Overlay) -->
-      <LayoutGridOverlay
-        {viewMode}
-        showColumnGrid={$canvasStore.showColumnGrid}
-        showPixelGrid={$canvasStore.showPixelGrid}
-      />
+      class="absolute inset-0 pointer-events-none opacity-30 z-0 bg-[radial-gradient(var(--theme-primary,#2563eb)_1px,transparent_1px)] [background-size:16px_16px]"
+      aria-hidden="true"
+    />
+  {/if}
 
-      {#if renderedSections.length === 0}
-        <div class="p-16 text-center text-slate-400">
-          <p class="text-sm">Tidak ada section untuk ditampilkan.</p>
+  <!-- Drag Spacing Value Tooltip Overlay -->
+  {#if isDraggingSpacing && currentDragTooltip}
+    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white font-mono font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl border border-white/20 animate-pulse pointer-events-none flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-orange"></span>
+      <span>{currentDragTooltip}</span>
+    </div>
+  {/if}
+
+  <!-- Canvas Scaled Wrapper -->
+  <div
+    class="relative transition-all duration-300 origin-top flex flex-col items-center flex-shrink-0"
+    style="
+      width: {targetWidth}px;
+      transform: scale({scaleRatio});
+      margin-bottom: {canvasHeight > 0 && scaleRatio < 1 ? `${Math.round(canvasHeight * (scaleRatio - 1))}px` : '0px'};
+    "
+  >
+    <!-- Viewport Header Indicator -->
+    <div class="w-full flex items-center justify-between px-3 py-1.5 mb-2 bg-card border border-light rounded-t-xl text-3xs font-mono text-secondary shadow-xs">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="font-bold text-main uppercase font-heading">{viewMode}</span>
+        <span>•</span>
+        <span>{targetWidth}px</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span>Zoom: {Math.round(scaleRatio * 100)}%</span>
+        <span>•</span>
+        <span>{sections.length} Section</span>
+      </div>
+    </div>
+
+    <!-- Active Template Canvas Paper Container -->
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
+    <div
+      bind:clientHeight={canvasHeight}
+      class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible"
+      style="{canvasCssVars};"
+      on:click|stopPropagation
+      role="region"
+      aria-label="Editable Page Canvas"
+    >
+      <!-- Figma Layout Columns Overlay -->
+      <LayoutGridOverlay {viewMode} />
+
+      {#if sections.length === 0}
+        <div class="py-24 px-8 text-center flex flex-col items-center justify-center">
+          <div class="w-16 h-16 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mb-4 shadow-2xs">
+            <span class="material-symbols-outlined text-3xl">add_box</span>
+          </div>
+          <h3 class="text-base font-bold text-main font-heading mb-1">Canvas Masih Kosong</h3>
+          <p class="text-xs text-secondary max-w-sm font-sans mb-4 leading-relaxed">
+            Belum ada section yang ditambahkan ke tema ini. Gunakan panel layer di samping kiri untuk mulai mendesain.
+          </p>
         </div>
       {:else}
-        <div class="flex flex-col w-full min-w-0 transition-all">
-          {#each renderedSections as section (section.id)}
-            <div
-              role="button"
-              tabindex="0"
-              on:click={(e) => handleSelect(section.id, e)}
-              on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectSection(section.id)}
-              class={`relative w-full text-left transition-all cursor-pointer ${
-                selectedSectionId === section.id
-                  ? 'ring-2 ring-blue-500 ring-inset z-20'
-                  : 'hover:ring-1 hover:ring-blue-400/50 hover:ring-inset'
-              }`}
-            >
-              <!-- Active Section Overlays & Spacing Drag Handles -->
-              {#if selectedSectionId === section.id}
-                <!-- Selection Badge -->
-                <div class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow z-30 pointer-events-none uppercase tracking-wider">
-                  {section.type.replace('_', ' ')}
-                </div>
+        {#each renderedSections as section (section.id)}
+          {@const isSelected = selectedSectionId === section.id}
+          <div
+            class="relative group/section transition-all duration-150 {isSelected ? 'ring-2 ring-primary ring-inset z-20 shadow-md' : 'hover:ring-1 hover:ring-primary/40 hover:ring-inset'}"
+            on:click|stopPropagation={() => onSelectSection(section.id)}
+            role="button"
+            tabindex="0"
+            on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectSection(section.id)}
+          >
+            <!-- Spacing Interactive Drag Handles on Selected Section -->
+            <CanvasSpacingHandles
+              {section}
+              {isSelected}
+              onStartDrag={handleStartDrag}
+            />
 
-                <!-- Drag Info Tooltip -->
-                {#if isDraggingSpacing && currentDragTooltip}
-                  <div class="absolute top-2 right-2 bg-slate-900 text-blue-400 border border-blue-500/40 text-[10px] font-mono font-bold px-2.5 py-1 rounded shadow-lg z-40 pointer-events-none">
-                    {currentDragTooltip}
-                  </div>
-                {/if}
-
-                <!-- Top Spacing Handle (Margin Top) -->
-                <div
-                  role="slider"
-                  tabindex="0"
-                  aria-valuenow={startValue}
-                  aria-label="Drag to adjust margin top"
-                  on:pointerdown={(e) => startTopMarginDrag(e, section)}
-                  class="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
-                  title="Tarik untuk mengatur jarak atas (Margin Top)"
-                >
-                  <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
-                  <span class="text-[9px] tracking-tight">Jarak Atas</span>
-                </div>
-
-                <!-- Bottom Spacing Handle (Margin Bottom) -->
-                <div
-                  role="slider"
-                  tabindex="0"
-                  aria-valuenow={startValue}
-                  aria-label="Drag to adjust margin bottom"
-                  on:pointerdown={(e) => startBottomMarginDrag(e, section)}
-                  class="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 px-3 h-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold rounded-full shadow-lg cursor-ns-resize z-30 transition-all group"
-                  title="Tarik untuk mengatur jarak bawah (Margin Bottom)"
-                >
-                  <MoveVertical size={11} class="opacity-90 group-hover:scale-110 transition-transform" />
-                  <span class="text-[9px] tracking-tight">Jarak Bawah</span>
-                </div>
-
-                <!-- Right Side Padding Handle -->
-                <div
-                  role="slider"
-                  tabindex="0"
-                  aria-valuenow={startValue}
-                  aria-label="Drag to adjust horizontal padding"
-                  on:pointerdown={(e) => startSidePaddingDrag(e, section)}
-                  class="absolute top-1/2 -right-3 -translate-y-1/2 w-5 h-16 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg cursor-ew-resize z-30 flex items-center justify-center transition-all group"
-                  title="Tarik untuk mengatur padding horizontal"
-                >
-                  <MoveHorizontal size={12} class="opacity-90 group-hover:scale-110 transition-transform" />
-                </div>
-              {/if}
-
-              <SectionRenderer {section} isActive={selectedSectionId === section.id} />
-            </div>
-          {/each}
-        </div>
+            <!-- Section Content Body -->
+            <SectionRenderer {section} isActive={isSelected} />
+          </div>
+        {/each}
       {/if}
     </div>
   </div>
-</main>
-
-
+</div>

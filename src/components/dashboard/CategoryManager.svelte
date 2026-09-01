@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button, Card, Table, Modal, Input } from '@/components/ui';
+  import { Button, Card, Table } from '@/components/ui';
+  import TenantCategoryFormModal from './category/TenantCategoryFormModal.svelte';
+  import TenantCategoryDeleteModal from './category/TenantCategoryDeleteModal.svelte';
   
   interface Category {
     id: string;
@@ -236,78 +238,20 @@
     {/if}
   </Card>
 
-  <!-- Delete Confirm Modal -->
-  <Modal bind:open={isDeleteModalOpen} title="Konfirmasi Hapus">
-    <div class="space-y-4">
-      <p class="text-secondary text-sm">Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.</p>
-      {#if error}
-        <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
-          <span class="material-symbols-outlined text-base">error</span>
-          <p class="font-medium">{error}</p>
-        </div>
-      {/if}
-    </div>
-    <svelte:fragment slot="footer">
-      <Button 
-        variant="secondary"
-        size="sm"
-        on:click={() => (isDeleteModalOpen = false)}
-        disabled={isDeleting}
-      >
-        Batal
-      </Button>
-      <Button 
-        variant="destructive"
-        size="sm"
-        on:click={handleDelete}
-        disabled={isDeleting}
-        loading={isDeleting}
-        className="font-bold"
-      >
-        Hapus Kategori
-      </Button>
-    </svelte:fragment>
-  </Modal>
+  <!-- Modals -->
+  <TenantCategoryDeleteModal
+    bind:open={isDeleteModalOpen}
+    {isDeleting}
+    {error}
+    onDelete={handleDelete}
+  />
 
-  <!-- Add/Edit Modal -->
-  <Modal bind:open={isModalOpen} title={editingCategory ? 'Edit Kategori' : 'Tambah Kategori'}>
-    <div class="space-y-5">
-      <p class="text-sm text-secondary">Tambahkan kategori barang yang tersedia di toko Anda</p>
-      {#if error}
-        <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
-          <span class="material-symbols-outlined text-base">error</span>
-          <p class="font-medium">{error}</p>
-        </div>
-      {/if}
-
-      <Input 
-        label="Nama Kategori"
-        placeholder="Contoh: Makanan, Minuman" 
-        bind:value={formName}
-        disabled={isSaving}
-        required
-      />
-    </div>
-
-    <svelte:fragment slot="footer">
-      <Button 
-        variant="secondary"
-        size="sm"
-        on:click={() => (isModalOpen = false)}
-        disabled={isSaving}
-      >
-        Batal
-      </Button>
-      <Button 
-        variant="dark"
-        size="sm"
-        on:click={handleSubmit}
-        disabled={isSaving || !formName.trim()}
-        loading={isSaving}
-        className="font-bold"
-      >
-        Simpan Kategori
-      </Button>
-    </svelte:fragment>
-  </Modal>
+  <TenantCategoryFormModal
+    bind:open={isModalOpen}
+    isEditing={!!editingCategory}
+    bind:formName
+    {isSaving}
+    {error}
+    onSave={handleSubmit}
+  />
 </div>

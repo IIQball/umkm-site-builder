@@ -12,6 +12,7 @@ import {
   updateTemplateDraft,
   submitTemplateForReview,
   deleteTemplateDraft,
+  deleteBatchTemplateDrafts,
 } from '@/services/templates';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
@@ -111,13 +112,21 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
 
     const url = new URL(context.request.url);
     const templateId = url.searchParams.get('templateId');
+    const body = await context.request.json().catch(() => ({}));
 
-    if (!templateId) {
+    // Handle batch deletion if templateIds array is provided
+    if (Array.isArray(body?.templateIds) && body.templateIds.length > 0) {
+      const result = await deleteBatchTemplateDrafts(body.templateIds, user.id, user.role);
+      return jsonSuccess(result, `${result.deletedCount} template draft berhasil dihapus permanen`);
+    }
+
+    const targetId = templateId || body?.templateId;
+    if (!targetId) {
       throw new AppError('templateId is required', 400);
     }
 
-    await deleteTemplateDraft(templateId, user.id, user.role);
+    await deleteTemplateDraft(targetId, user.id, user.role);
 
-    return jsonSuccess(null, 'Template draft deleted');
+    return jsonSuccess(null, 'Template draft berhasil dihapus permanen');
   });
 };

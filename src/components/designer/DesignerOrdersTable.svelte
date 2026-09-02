@@ -1,13 +1,12 @@
 <script lang="ts">
   import {
-    Palette,
     Clock,
     CheckCircle2,
     XCircle,
     ShoppingBag,
   } from 'lucide-svelte';
-  import { Card, Badge, Table, Pagination } from '@/components/ui';
-  import { formatCurrency, formatDate } from '@/lib/utils';
+  import { Card, Table, Pagination } from '@/components/ui';
+  import DesignerOrderRow from './orders/DesignerOrderRow.svelte';
   import { addToast } from '@/lib/toast';
 
   export let initialOrders: Array<{
@@ -102,26 +101,23 @@
       copiedId = text;
       addToast({
         type: 'success',
-        message: `ID Tagihan ${text} disalin!`,
+        message: `ID Transaksi #${text.slice(0, 8)} disalin!`,
       });
       setTimeout(() => {
-        if (copiedId === text) copiedId = null;
-      }, 2500);
+        copiedId = null;
+      }, 1800);
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Gagal menyalin',
-      });
+      // clipboard unavailable
     }
   };
 
   const tableHeaders = [
-    { label: 'Invoice & Waktu', width: 'w-44' },
-    { label: 'Template Terpesan' },
-    { label: 'Pembeli (Tenant)', width: 'w-48' },
-    { label: 'Harga Jual', align: 'right' as const, width: 'w-32' },
-    { label: 'Komisi Desainer', align: 'right' as const, width: 'w-36' },
-    { label: 'Status', align: 'center' as const, width: 'w-32' },
+    { label: 'ID Invoice & Tanggal' },
+    { label: 'Template Dibeli', width: 'w-64' },
+    { label: 'Pembeli (Tenant)', width: 'w-52' },
+    { label: 'Harga Jual', align: 'right' as const, width: 'w-36' },
+    { label: 'Komisi Desainer', align: 'right' as const, width: 'w-44' },
+    { label: 'Status Tagihan', align: 'center' as const, width: 'w-36' },
   ];
 </script>
 
@@ -130,21 +126,20 @@
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <ShoppingBag size={18} />
+        <span class="material-symbols-outlined text-lg">receipt_long</span>
       </div>
       <div>
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
-          Daftar Transaksi Pesanan Masuk
+          Pesanan Template Masuk
         </h3>
         <p class="text-body-sm text-secondary mt-0.5 font-sans">
-          Rincian pembeli tenant, nominal kotor, dan hak komisi bersih per transaksi
+          Daftar seluruh transaksi pembelian tema oleh tenant UMKM dan rincian bagi hasil
         </p>
       </div>
     </div>
 
-    <!-- Filter Tabs & Search Box -->
+    <!-- Actions & Filter Pills -->
     <div class="flex flex-wrap items-center gap-2.5">
-      <!-- Search Input Capsule -->
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
         <input
@@ -219,92 +214,14 @@
         {@const statusMeta = getStatusBadge(order.status)}
         {@const designerShare = order.commission?.designerAmount ?? Math.round(order.amount * 0.7)}
         {@const displayId = order.externalId || order.id}
-        <tr class="hover:bg-nested/40 transition-colors group">
-          <!-- Invoice ID & Created At -->
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2.5">
-              <button
-                type="button"
-                on:click={() => copyToClipboard(displayId)}
-                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-                title="Salin ID Tagihan"
-              >
-                <span class="truncate max-w-[110px]">{displayId}</span>
-                <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-emerald-500' : 'text-muted'}">
-                  {copiedId === displayId ? 'check' : 'content_copy'}
-                </span>
-              </button>
-            </div>
-            <span class="text-3xs text-secondary mt-1 block font-mono">
-              {formatDate(order.createdAt)}
-            </span>
-          </td>
-
-          <!-- Template Details -->
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-3">
-              {#if order.template?.thumbnailUrl}
-                <img
-                  src={order.template.thumbnailUrl}
-                  alt={order.template.name}
-                  class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
-                />
-              {:else}
-                <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
-                  <Palette size={16} />
-                </div>
-              {/if}
-              <div class="min-w-0 max-w-xs">
-                <span class="font-bold text-xs text-main block truncate font-sans">
-                  {order.template?.name || 'Template Desain Toko'}
-                </span>
-                <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
-                  ID: #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
-                </span>
-              </div>
-            </div>
-          </td>
-
-          <!-- Buyer (Tenant) -->
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
-                {order.user?.name ? order.user.name.charAt(0).toUpperCase() : order.user?.email.charAt(0).toUpperCase()}
-              </div>
-              <div class="min-w-0">
-                <span class="font-bold text-xs text-main block truncate font-sans">
-                  {order.user?.name || 'Tenant UMKM'}
-                </span>
-                <span class="text-3xs text-secondary block truncate font-mono mt-0.5">
-                  {order.user?.email}
-                </span>
-              </div>
-            </div>
-          </td>
-
-          <!-- Gross Sale Price -->
-          <td class="px-4 py-4 text-right whitespace-nowrap">
-            <span class="font-mono text-xs font-bold text-secondary">
-              {formatCurrency(order.amount)}
-            </span>
-          </td>
-
-          <!-- Net Designer Commission -->
-          <td class="px-4 py-4 text-right whitespace-nowrap">
-            <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
-              +{formatCurrency(designerShare)}
-            </span>
-          </td>
-
-          <!-- Status Badge -->
-          <td class="px-6 py-4 text-center whitespace-nowrap">
-            <div class="inline-flex items-center justify-center">
-              <Badge variant={statusMeta.variant} size="sm" dot>
-                {statusMeta.label}
-              </Badge>
-            </div>
-          </td>
-        </tr>
+        <DesignerOrderRow
+          {order}
+          {statusMeta}
+          {designerShare}
+          {displayId}
+          {copiedId}
+          onCopyId={copyToClipboard}
+        />
       {/each}
     </Table>
 

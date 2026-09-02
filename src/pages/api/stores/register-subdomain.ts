@@ -16,12 +16,6 @@ import {
 import { ZodError } from 'zod';
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
-const SUBDOMAIN_BLACKLIST = new Set([
-  'www', 'api', 'admin', 'app', 'mail', 'smtp', 'ftp', 'ssh',
-  'login', 'register', 'dashboard', 'panel', 'support', 'help',
-  'blog', 'docs', 'status', 'cdn', 'static', 'assets', 'media',
-  'store', 'shop', 'test', 'staging', 'dev', 'demo',
-]);
 
 async function hasExistingStore(userId: string): Promise<boolean> {
   const [existing] = await db
@@ -67,13 +61,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const { subdomain } = RegisterSubdomainInput.parse(body);
-
-    if (SUBDOMAIN_BLACKLIST.has(subdomain)) {
-      return new Response(
-        JSON.stringify(validationError('Subdomain tidak tersedia')),
-        { status: 400, headers: JSON_HEADERS },
-      );
-    }
 
     if (await hasExistingStore(user.id)) {
       return new Response(

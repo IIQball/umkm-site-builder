@@ -9,13 +9,6 @@ import { ZodError } from 'zod';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
-const SUBDOMAIN_BLACKLIST = new Set([
-  'www', 'api', 'admin', 'app', 'mail', 'smtp', 'ftp', 'ssh',
-  'login', 'register', 'dashboard', 'panel', 'support', 'help',
-  'blog', 'docs', 'status', 'cdn', 'static', 'assets', 'media',
-  'store', 'shop', 'test', 'staging', 'dev', 'demo',
-]);
-
 export const POST: APIRoute = async ({ request }) => {
   const user = await getAuthenticatedUser(request);
   if (!user) {
@@ -28,13 +21,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const { subdomain } = CheckSubdomainInput.parse(body);
-
-    if (SUBDOMAIN_BLACKLIST.has(subdomain)) {
-      return new Response(
-        JSON.stringify(okResponse({ available: false, subdomain })),
-        { status: 200, headers: JSON_HEADERS },
-      );
-    }
 
     const [existing] = await db
       .select({ id: stores.id })

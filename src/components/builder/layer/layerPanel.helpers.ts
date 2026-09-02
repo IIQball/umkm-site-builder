@@ -13,6 +13,7 @@ import {
   Image,
   MousePointerClick,
   ListFilter,
+  Clock,
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, FeatureItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
@@ -43,10 +44,22 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
   switch (section.type) {
     case 'header_announcement': {
       const list: LayerNodeItem[] = [];
-      if (section.props?.showAnnouncement !== false && section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
+      const preset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'default_split';
+      const noAnnouncementPresets = ['compact_inline', 'transparent_glass_header', 'floating_pill_island', 'top_contact_bar', 'delivery_order_cta', 'store_badge_highlight', 'promo_countdown_banner'];
+
+      if (preset === 'top_contact_bar') {
+        list.push({ id: 'contact_bar', name: 'Top Contact Bar', icon: Clock });
+      } else if (preset === 'delivery_order_cta') {
+        list.push({ id: 'delivery_bar', name: 'Delivery Status Bar', icon: Clock });
+      } else if (preset === 'promo_countdown_banner') {
+        list.push({ id: 'countdown_bar', name: 'Flash Sale Countdown', icon: Clock });
+      } else if (!noAnnouncementPresets.includes(preset) && section.props?.showAnnouncement !== false && section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
         list.push({ id: 'announcement', name: 'Announcement Bar', icon: Megaphone });
       }
       list.push({ id: 'logo', name: 'Logo Brand', icon: Image });
+      if (preset === 'store_badge_highlight') {
+        list.push({ id: 'store_badges', name: 'Legal Badges (BPOM/Halal)', icon: CheckCircle });
+      }
       list.push({ id: 'nav_links', name: 'Navigation Menu', icon: ListFilter });
       return list;
     }

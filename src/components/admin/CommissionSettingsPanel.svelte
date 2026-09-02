@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import StatCard from '../ui/StatCard.svelte';
   import { Card, Input, Button } from '@/components/ui';
-  import { formatCurrency } from '@/lib/utils';
   import { addToast } from '@/lib/toast';
+  import CommissionSimulationCard from './commission/CommissionSimulationCard.svelte';
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;
@@ -25,7 +25,7 @@
         }
       }
     } catch {
-      // Keep initial/default values
+      // Keep default values
     }
   });
 
@@ -86,7 +86,7 @@
 </script>
 
 <div class="w-full space-y-8 md:space-y-10">
-  <!-- Page Header (matching designer/wallet & designer/templates style) -->
+  <!-- Page Header -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
     <div>
       <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
@@ -97,7 +97,6 @@
       </p>
     </div>
 
-    <!-- Quick Action / Link -->
     <div class="flex items-center gap-2 flex-shrink-0">
       <Button
         href="/admin/users"
@@ -111,7 +110,7 @@
     </div>
   </div>
 
-  <!-- Stat Cards Grid (animated on client load) -->
+  <!-- Stat Cards Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
     <StatCard
       label="Fee Platform"
@@ -148,7 +147,6 @@
   <!-- Settings Configuration Card -->
   <div class="animate-fade-in-up delay-300">
     <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
-      <!-- Header inside Card -->
       <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
@@ -165,77 +163,20 @@
         </div>
       </div>
 
-      <!-- Form Content -->
       <div class="p-6 md:p-8">
         <form on:submit|preventDefault={handleSave} class="space-y-8 w-full">
-          <!-- Split Ratio Visual Gauge -->
-          <div class="p-6 rounded-3xl bg-nested/70 border border-light space-y-4 shadow-2xs">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold font-heading uppercase tracking-wider text-muted">
-                Rasio Pembagian Komisi
-              </span>
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  on:click={() => (platformFeePercentage = 20)}
-                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 20 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
-                >
-                  20% / 80%
-                </button>
-                <button
-                  type="button"
-                  on:click={() => (platformFeePercentage = 30)}
-                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 30 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
-                >
-                  30% / 70% (Standar)
-                </button>
-                <button
-                  type="button"
-                  on:click={() => (platformFeePercentage = 40)}
-                  class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 40 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
-                >
-                  40% / 60%
-                </button>
-              </div>
-            </div>
-
-            <!-- Progress Bar Barcode -->
-            <div class="h-3.5 w-full bg-nested border border-light rounded-full overflow-hidden flex shadow-inner">
-              <div
-                class="bg-primary h-full transition-all duration-300 relative group"
-                style="width: {platformFeePercentage}%"
-              ></div>
-              <div
-                class="bg-emerald-500 h-full transition-all duration-300 relative group"
-                style="width: {designerShare}%"
-              ></div>
-            </div>
-
-            <div class="flex items-center justify-between text-xs font-bold font-heading pt-1">
-              <span class="text-primary flex items-center gap-1.5 font-sans">
-                <span class="w-2 h-2 rounded-full bg-primary"></span>
-                Fee Platform: {platformFeePercentage}%
-              </span>
-              <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-sans">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                Hak Desainer: {designerShare}%
-              </span>
-            </div>
-
-            <!-- Simulation Calculation Box -->
-            <div class="pt-3 text-xs text-secondary flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-light/60 font-sans">
-              <span>Simulasi penjualan template <strong>{formatCurrency(samplePrice)}</strong>:</span>
-              <div class="flex items-center gap-3 font-mono font-bold">
-                <span class="text-primary">Platform: {formatCurrency(samplePlatformFee)}</span>
-                <span class="text-muted">•</span>
-                <span class="text-emerald-600 dark:text-emerald-400">Desainer: {formatCurrency(sampleDesignerShare)}</span>
-              </div>
-            </div>
-          </div>
+          <CommissionSimulationCard
+            {platformFeePercentage}
+            {designerShare}
+            {samplePrice}
+            {samplePlatformFee}
+            {sampleDesignerShare}
+            onSelectRatio={(val) => (platformFeePercentage = val)}
+          />
 
           <!-- Input Fields Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Platform Fee -->
+            <!-- Platform Fee Input -->
             <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -259,7 +200,6 @@
                 <span slot="suffix" class="font-bold text-sm text-muted select-none">%</span>
               </Input>
 
-              <!-- Slider control -->
               <input
                 type="range"
                 min="0"
@@ -271,7 +211,7 @@
               />
             </div>
 
-            <!-- Settlement Delay -->
+            <!-- Settlement Delay Input -->
             <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -280,7 +220,6 @@
                   </div>
                   <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
                 </div>
-                <!-- Presets -->
                 <div class="flex items-center gap-1">
                   <button
                     type="button"
@@ -322,7 +261,6 @@
             </div>
           </div>
 
-          <!-- Save Button -->
           <div class="pt-4 border-t border-light flex items-center justify-end gap-3">
             <Button
               type="submit"

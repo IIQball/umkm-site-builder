@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
-  import { Button } from "@/components/ui";
+  import { Button, Badge } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -24,72 +24,76 @@
   }
 </script>
 
-<tr class="hover:bg-base-50/50 transition-colors group">
-  <td class="px-4 py-3">
-    <div class="flex items-center gap-3">
-      <div class="avatar">
-        <div class="mask mask-squircle w-12 h-12 bg-base-200 flex items-center justify-center overflow-hidden border border-base-200 shadow-sm">
-          {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && (product.imageUrls[0].url || typeof product.imageUrls[0] === "string")}
-            <img src={product.imageUrls[0].url || product.imageUrls[0]} alt={product.name} class="object-cover w-full h-full" />
-          {:else}
-            <span class="text-[10px] opacity-40 font-medium uppercase">Img</span>
-          {/if}
-        </div>
+<tr class="group hover:bg-nested/40 transition-colors">
+  <td class="px-6 py-4 align-top">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-nested flex items-center justify-center overflow-hidden border border-light shadow-sm flex-shrink-0">
+        {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && (product.imageUrls[0].url || typeof product.imageUrls[0] === "string")}
+          <img src={product.imageUrls[0].url || product.imageUrls[0]} alt={product.name} class="object-cover w-full h-full" />
+        {:else}
+          <span class="text-3xs text-muted font-bold uppercase tracking-wider">Img</span>
+        {/if}
       </div>
-      <div>
-        <div class="font-semibold text-base-content">{product.name}</div>
+      <div class="min-w-0">
+        <div class="text-xs font-bold text-main font-sans truncate">{product.name}</div>
         {#if Array.isArray(product.variants) && product.variants.length > 0}
           {@const groups = product.variants}
           {@const hasGroups = groups.length > 0 && typeof groups[0] === 'object' && groups[0] !== null && 'groupName' in groups[0]}
           {#if hasGroups}
-            <div class="text-xs text-base-content/50 font-medium mt-0.5">
+            <div class="text-2xs text-secondary font-sans mt-0.5 truncate">
               {groups.length} grup: {groups.map(g => g.groupName).join(', ')}
             </div>
           {:else}
-            <div class="text-xs text-base-content/50 font-medium mt-0.5">{product.variants.length} varian</div>
+            <div class="text-2xs text-secondary font-sans mt-0.5">{product.variants.length} varian</div>
           {/if}
         {/if}
       </div>
     </div>
   </td>
-  <td class="px-4 py-3 whitespace-nowrap">
-    <span class="badge font-medium border-none shadow-sm bg-base-200 text-base-content/70">
-      {categoryName}
-    </span>
+  <td class="px-6 py-4 align-top whitespace-nowrap">
+    <Badge variant="secondary" size="sm">{categoryName}</Badge>
   </td>
-  <td class="px-4 py-3">
-    <div class="max-w-xs text-xs text-base-content/70 line-clamp-2 leading-relaxed" title={product.description || ""}>
+  <td class="px-6 py-4 align-top">
+    <div class="max-w-[200px] text-xs text-secondary font-sans line-clamp-2 leading-relaxed" title={product.description || ""}>
       {product.description || "-"}
     </div>
   </td>
-  <td class="px-4 py-3 whitespace-nowrap font-medium text-base-content/90">
-    Rp {product.basePrice.toLocaleString("id-ID")}
+  <td class="px-6 py-4 align-top whitespace-nowrap">
+    <span class="text-xs font-bold font-mono text-main">
+      Rp {product.basePrice.toLocaleString("id-ID")}
+    </span>
   </td>
-  <td class="px-4 py-3">
-    <div class="flex items-center gap-2.5">
-      <span class="badge font-medium border-none shadow-sm {product.isAvailable ? 'bg-success/10 text-success' : 'bg-base-200 text-base-content/60'}">
+  <td class="px-6 py-4 align-top">
+    <div class="flex items-center gap-3">
+      <Badge variant={product.isAvailable ? "success" : "secondary"} size="sm">
         {product.isAvailable ? "Tersedia" : "Kosong"}
-      </span>
-      <input type="checkbox" class="toggle toggle-sm toggle-success" checked={product.isAvailable} on:change={handleToggle} />
+      </Badge>
+      <input 
+        type="checkbox" 
+        class="toggle toggle-sm toggle-success" 
+        checked={product.isAvailable} 
+        on:change={handleToggle} 
+      />
     </div>
   </td>
-  <td class="px-4 py-3 text-right">
-    <div class="flex justify-end gap-2">
+  <td class="px-6 py-4 align-top text-right">
+    <div class="flex items-center justify-end gap-1">
       <Button
         variant="secondary"
-        size="xs"
-        className="font-medium"
+        size="icon"
         on:click={() => dispatch('edit', product)}
+        title="Edit"
       >
-        Edit
+        <span class="material-symbols-outlined text-base">edit</span>
       </Button>
       <Button
         variant="destructive"
-        size="xs"
-        className="font-medium"
+        size="icon"
+        className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
         on:click={() => dispatch('delete', product.id)}
+        title="Hapus"
       >
-        Hapus
+        <span class="material-symbols-outlined text-base">delete</span>
       </Button>
     </div>
   </td>

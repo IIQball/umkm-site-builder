@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Package } from 'lucide-svelte';
-  import WhatsAppIcon from '../../../ui/WhatsAppIcon.svelte';
+  import { Package, ShoppingCart } from 'lucide-svelte';
   import type { ProductItem } from '@/types';
 
   export let product: ProductItem;
@@ -15,11 +14,7 @@
   export let nameSizeClass: string = 'text-sm font-semibold';
   export let nameWeightClass: string = 'font-semibold';
   export let isInlinePrice: boolean = false;
-  export let ctaBtnColor: string = '#2563eb';
-  export let ctaBtnTextColor: string = '#ffffff';
   export let ctaBtnRadiusClass: string = 'rounded-xl';
-  export let ctaWidthClass: string = 'w-full';
-  export let showWhatsAppIcon: boolean = true;
   export let isActive: boolean = false;
   export let draggedIdx: number | null = null;
   export let dropTargetIdx: number | null = null;
@@ -27,10 +22,52 @@
   export let onDragOver: (e: DragEvent, idx: number) => void = () => {};
   export let onDrop: (e: DragEvent, idx: number) => void = () => {};
   export let onDragLeave: () => void = () => {};
-  export let onOpenQuickView: (prod: ProductItem) => void = () => {};
+  export let onAddToCart: (prod: ProductItem, selections: Record<string, string>) => void = () => {};
+  export let onBuyNow: (prod: ProductItem, selections: Record<string, string>) => void = () => {};
+
+  let selections: Record<string, string> = {};
+
+  $: if (product) {
+    if (product.variants && Array.isArray(product.variants) && Object.keys(selections).length === 0) {
+      product.variants.forEach((g: any) => {
+        const firstAvail = g.options?.find((o: any) => o.isAvailable);
+        if (firstAvail) {
+          selections[g.groupName] = firstAvail.name;
+        } else if (g.options?.[0]) {
+          selections[g.groupName] = g.options[0].name;
+        }
+      });
+    }
+  }
+
+  const handleVariantChange = (groupName: string, value: string) => {
+    selections[groupName] = value;
+    selections = { ...selections };
+  };
+
+  $: computedPrice = (() => {
+    let base = typeof product.price === 'number'
+      ? product.price
+      : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, '')) || 0;
+    if (product?.variants && Array.isArray(product.variants)) {
+      for (const group of product.variants) {
+        if (!group) continue;
+        const selectedOptionName = selections[group.groupName];
+        if (selectedOptionName && group.options && Array.isArray(group.options)) {
+          const opt = group.options.find((o: any) => o?.name === selectedOptionName);
+          if (opt && typeof opt.priceAdjustment === 'number') {
+            base += opt.priceAdjustment;
+          }
+        }
+      }
+    }
+    return base;
+  })();
+
 </script>
 
 <div
+  data-node="product_card"
   role="group"
   aria-label={product.name || 'Kartu Produk'}
   draggable={isActive}
@@ -78,53 +115,94 @@
     <div>
       <h3
         data-node="product_title"
-        class={`mb-1.5 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}
+        class={`mb-1 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}
       >
         {product.name || 'Nama Produk'}
       </h3>
+      
+      {#if product.description}
+        <p class="text-xs text-slate-500 line-clamp-2 mb-3">
+          {product.description}
+        </p>
+      {/if}
     </div>
 
+    <!-- VARIANTS CHIPS -->
+    {#if product?.variants && Array.isArray(product.variants) && product.variants.length > 0}
+      <div class="mt-2 mb-4 flex flex-col gap-3">
+        {#each product.variants as group}
+          {#if group && group.options && Array.isArray(group.options)}
+            <div class="flex flex-col gap-1.5">
+              <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{group.groupName || 'Varian'}:</span>
+              <div class="flex flex-wrap gap-2">
+                {#each group.options as opt}
+                  {#if opt}
+                    <button
+                      type="button"
+                      disabled={!opt.isAvailable}
+                      on:click={() => handleVariantChange(group.groupName, opt.name)}
+                      class={`px-3 py-1 text-[10px] font-semibold rounded-full border transition-all ${
+                        selections[group.groupName] === opt.name
+                          ? 'bg-[var(--theme-primary,#4f00ff)] border-[var(--theme-primary,#4f00ff)] text-white shadow-sm'
+                          : 'border-slate-300 text-slate-500 hover:border-slate-400'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {opt.name} {opt.priceAdjustment ? `(+Rp ${opt.priceAdjustment.toLocaleString('id-ID')})` : ''}
+                    </button>
+                  {/if}
+                {/each}
+              </div>
+            </div>
+          {/if}
+        {/each}
+      </div>
+    {:else}
+      <div class="mb-4"></div>
+    {/if}
+
     {#if isInlinePrice}
-      <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+      <div class="mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
         <div data-node="product_price" class="min-w-0">
           <span class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight">Harga</span>
-          <p class="text-sm sm:text-base font-extrabold text-[var(--theme-primary,#2563eb)] font-mono truncate">
-            Rp {typeof product.price === 'number'
-              ? product.price.toLocaleString('id-ID')
-              : product.price || '0'}
+          <p class="text-sm sm:text-base font-extrabold font-mono text-[var(--theme-primary,#4f00ff)] truncate tracking-tight">
+            Rp {computedPrice.toLocaleString('id-ID')}
           </p>
         </div>
-        <div data-node="product_cta">
+        <div data-node="product_cta" class="flex gap-2">
           <button
             type="button"
-            on:click={() => {
-              if (!isActive) onOpenQuickView(product);
-            }}
-            style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
-            class={`px-3.5 py-2 text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${ctaBtnRadiusClass}`}
+            on:click={() => { if (!isActive) onAddToCart(product, selections); }}
+            class={`px-3 py-2 text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white ${ctaBtnRadiusClass}`}
           >
-            {#if showWhatsAppIcon}<WhatsAppIcon size={14} />{/if}
-            <span>Beli Sekarang</span>
+            <ShoppingCart size={14} />
+          </button>
+          <button
+            type="button"
+            on:click={() => { if (!isActive) onBuyNow(product, selections); }}
+            class={`px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary,#4f00ff)] text-white ${ctaBtnRadiusClass}`}
+          >
+            <span>Beli</span>
           </button>
         </div>
       </div>
     {:else}
-      <div class="mt-2">
-        <p data-node="product_price" class="text-base sm:text-lg font-extrabold text-[var(--theme-primary,#2563eb)] mb-3 font-mono">
-          Rp {typeof product.price === 'number'
-            ? product.price.toLocaleString('id-ID')
-            : product.price || '0'}
+      <div class="mt-auto flex flex-col items-center">
+        <p data-node="product_price" class="text-xl sm:text-2xl font-black font-mono mb-4 tracking-tight text-[var(--theme-primary,#4f00ff)] text-center">
+          Rp {computedPrice.toLocaleString('id-ID')}
         </p>
-        <div data-node="product_cta">
+        <div data-node="product_cta" class="w-full flex gap-2">
           <button
             type="button"
-            on:click={() => {
-              if (!isActive) onOpenQuickView(product);
-            }}
-            style={`background-color: ${ctaBtnColor}; color: ${ctaBtnTextColor};`}
-            class={`${ctaWidthClass} text-xs font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${ctaBtnRadiusClass}`}
+            on:click={() => { if (!isActive) onAddToCart(product, selections); }}
+            class={`px-4 py-2.5 text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white ${ctaBtnRadiusClass}`}
           >
-            {#if showWhatsAppIcon}<WhatsAppIcon size={14} />{/if}
+            <ShoppingCart size={16} />
+          </button>
+          <button
+            type="button"
+            on:click={() => { if (!isActive) onBuyNow(product, selections); }}
+            class={`flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary,#4f00ff)] text-white ${ctaBtnRadiusClass}`}
+          >
             <span>Beli Sekarang</span>
           </button>
         </div>

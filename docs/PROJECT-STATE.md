@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-08-30 by feature/ai-slop-removal-and-clean-saas-refactor
+Status: LIVE · Updated: 2026-09-01 by feature/h7-dina-password-reset
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -12,6 +12,12 @@ Keep it short and current. This is a checkpoint, not a changelog.
 ## Where the work stands
 
 AI-Slop decorative elements (loud gradient glows, top beam accents, skeuomorphic ATM cards, neon borders) have been completely removed across the entire UI and replaced with clean, industrial SaaS design system standards (Linear / Emil Kowalski / Stripe aesthetic). 45 test files (315 tests) passing, 0 typecheck errors, 0 lint warnings.
+
+- **Password Reset Flow Integration:**
+  - Implemented the full forgot/reset password flow using BetterAuth verification tokens and Resend API via HTTP fetch (bypassing Cloudflare Node compatibility issues).
+  - Built dedicated `src/pages/api/auth/reset-password.ts` custom endpoint for validating and applying the password reset.
+  - Created `src/pages/auth/forgot-password.astro` and `src/pages/auth/reset-password.astro` frontend pages fully utilizing the design system (`Input`, `Button` components) to match the `/designer/wallet` aesthetic.
+  - Type-check, lint, and build verified.
 
 - **High-Craft SaaS Dashboard Redesign (Putih, Biru, Hitam, & Oren):**
   - **100% Button UI Component Adoption ([`src/components/ui/Button.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK\umkm-site-builder\src\components\ui\Button.svelte)):**

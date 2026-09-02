@@ -102,39 +102,83 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
     expect(typo?.caption?.fontSize).toBe('10px'); // 16 / 1.618
   });
 
-  it('should validate layout presets per section type', () => {
-    expect(HeaderAnnouncementPresetSchema.safeParse('default_split').success).toBe(true);
-    expect(HeaderAnnouncementPresetSchema.safeParse('centered_stacked').success).toBe(true);
-    expect(HeaderAnnouncementPresetSchema.safeParse('compact_inline').success).toBe(true);
+  it('should validate layout presets per section type (all 82 presets)', () => {
+    const headerPresets = [
+      'default_split', 'centered_stacked', 'compact_inline', 'floating_pill_island',
+      'split_nav_centered_logo', 'command_search_bar', 'transparent_glass_header',
+      'mega_menu_dropdown', 'top_contact_bar', 'delivery_order_cta',
+      'store_badge_highlight', 'promo_countdown_banner'
+    ];
+    for (const p of headerPresets) {
+      expect(HeaderAnnouncementPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(HeroPresetSchema.safeParse('split_left_text').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('split_right_text').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('centered_minimal').success).toBe(true);
-    expect(HeroPresetSchema.safeParse('full_banner_overlay').success).toBe(true);
+    const heroPresets = [
+      'split_left_text', 'split_right_text', 'centered_minimal', 'full_banner_overlay',
+      'video_background_loop', 'gradient_mesh_glow', 'interactive_terminal_code',
+      'floating_cards_showcase', 'oversized_bold_typography', 'inline_email_capture',
+      'social_proof_community', 'dual_product_showcase',
+      'badge_ticker_split', 'pill_category_selector', 'bento_masonry_hero',
+      'split_stat_counter', 'sticky_whatsapp_pill_float', 'sticker_badge_playful',
+      'editorial_luxury_serif', 'side_card_booking', 'dual_contrast_split', 'brand_story_founder'
+    ];
+    for (const p of heroPresets) {
+      expect(HeroPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(FeaturesPresetSchema.safeParse('grid_3_cards').success).toBe(true);
-    expect(FeaturesPresetSchema.safeParse('horizontal_list').success).toBe(true);
-    expect(FeaturesPresetSchema.safeParse('banner_inline_bar').success).toBe(true);
+    const featuresPresets = [
+      'grid_3_cards', 'horizontal_list', 'banner_inline_bar', 'bento_grid_asymmetric',
+      'alternating_zigzag_rows', 'interactive_tabs', 'vertical_accordion_showcase',
+      'sticky_scroll_highlight', 'dense_icon_matrix', 'before_after_comparison'
+    ];
+    for (const p of featuresPresets) {
+      expect(FeaturesPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(ProductCatalogPresetSchema.safeParse('grid_standard').success).toBe(true);
-    expect(ProductCatalogPresetSchema.safeParse('carousel_scroll').success).toBe(true);
-    expect(ProductCatalogPresetSchema.safeParse('list_compact').success).toBe(true);
+    const catalogPresets = [
+      'grid_standard', 'carousel_scroll', 'list_compact', 'masonry_catalog',
+      'bento_product_spotlight', 'split_category_sidebar', 'compact_mini_cards',
+      'price_table_view', 'lookbook_gallery', 'flash_sale_countdown'
+    ];
+    for (const p of catalogPresets) {
+      expect(ProductCatalogPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(TestimonialsPresetSchema.safeParse('masonry_grid').success).toBe(true);
-    expect(TestimonialsPresetSchema.safeParse('single_spotlight').success).toBe(true);
-    expect(TestimonialsPresetSchema.safeParse('chat_bubble_flow').success).toBe(true);
+    const testimonialsPresets = [
+      'masonry_grid', 'single_spotlight', 'chat_bubble_flow', 'infinite_marquee_scroll',
+      'video_review_cards', 'social_post_cards', 'side_by_side_3_cards',
+      'logo_client_cloud', 'split_rating_stats', 'carousel_slider'
+    ];
+    for (const p of testimonialsPresets) {
+      expect(TestimonialsPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(FAQPresetSchema.safeParse('accordion_single_col').success).toBe(true);
-    expect(FAQPresetSchema.safeParse('split_faq_sidebar').success).toBe(true);
-    expect(FAQPresetSchema.safeParse('grid_2_col_cards').success).toBe(true);
+    const faqPresets = [
+      'accordion_single_col', 'split_faq_sidebar', 'grid_2_col_cards', 'accordion_two_col',
+      'chat_style_faq', 'search_filtered_faq', 'categorized_tabs_faq',
+      'compact_numbered_list', 'floating_help_center', 'horizontal_faq_cards'
+    ];
+    for (const p of faqPresets) {
+      expect(FAQPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(GoogleMapsPresetSchema.safeParse('fullwidth_map').success).toBe(true);
-    expect(GoogleMapsPresetSchema.safeParse('split_map_info').success).toBe(true);
-    expect(GoogleMapsPresetSchema.safeParse('compact_boxed').success).toBe(true);
+    const mapsPresets = [
+      'fullwidth_map', 'split_map_info', 'compact_boxed', 'floating_address_card',
+      'two_column_directions', 'store_hours_highlight', 'interactive_route_finder',
+      'minimal_framed_map', 'multi_branch_tabs', 'card_overlay_bottom'
+    ];
+    for (const p of mapsPresets) {
+      expect(GoogleMapsPresetSchema.safeParse(p).success).toBe(true);
+    }
 
-    expect(FooterPresetSchema.safeParse('multi_column').success).toBe(true);
-    expect(FooterPresetSchema.safeParse('centered_simple').success).toBe(true);
-    expect(FooterPresetSchema.safeParse('cta_focused').success).toBe(true);
+    const footerPresets = [
+      'multi_column', 'centered_simple', 'cta_focused', 'minimal_single_row',
+      'giant_wordmark', 'newsletter_centric', 'live_status_badge',
+      'split_map_footer', 'social_links_grid', 'boxed_card_footer'
+    ];
+    for (const p of footerPresets) {
+      expect(FooterPresetSchema.safeParse(p).success).toBe(true);
+    }
   });
 
   it('should validate sections with layoutPreset and token-based styles', () => {

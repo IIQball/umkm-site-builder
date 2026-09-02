@@ -40,3 +40,16 @@ Astro's TypeScript checker cannot resolve lucide-svelte (Svelte 4 class-based) c
 ```
 
 **lucide-svelte IS fine in `.svelte` components** — only avoid in `.astro` template sections.
+
+## Builder Canvas Viewport Responsiveness
+
+**DO NOT rely solely on window-based CSS media queries (`md:hidden`, `hidden md:flex`, `sm:inline`) in Template Builder section components (`src/components/builder/sections/`).**
+
+When building or refactoring components rendered inside the no-code builder canvas:
+- Always subscribe to `$canvasStore.viewMode` (`'desktop' | 'tablet' | 'mobile'`) from `src/components/builder/stores/editorStore.ts`.
+- Derive reactive conditionals:
+  - `$: isDesktop = $canvasStore?.viewMode === 'desktop';`
+  - `$: isMobile = $canvasStore?.viewMode === 'mobile';`
+  - `$: isSmallScreen = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';`
+- Use Svelte logic blocks (`{#if isDesktop}`, `{#if isSmallScreen}`) for layout shifts, burger buttons, and nav link visibility instead of `@media (min-width: 768px)` window classes.
+

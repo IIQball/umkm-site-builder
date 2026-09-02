@@ -1,408 +1,241 @@
 <script lang="ts">
-  import { editorStore, canvasStore } from "../stores/editorStore";
-  import type {
-    ProductCatalogProps,
-    SectionStyles,
-    ProductItem,
-  } from "@/types";
-  import { ShoppingBag } from "lucide-svelte";
-  import {
-    DEFAULT_DEMO_PRODUCTS,
-    getBadgeColorClass,
-    getCardPresetClass,
-  } from "./productCatalog.helpers";
-  import { onMount } from "svelte";
-  import ProductCatalogCard from "./catalog/ProductCatalogCard.svelte";
-  import ProductCatalogQuickView from "./catalog/ProductCatalogQuickView.svelte";
+  import type { ProductCatalogProps, SectionStyles, ProductItem } from "@/types";
+  import { ShoppingCart } from "lucide-svelte";
+  import { DEFAULT_DEMO_PRODUCTS, getBadgeColorClass, getCardPresetClass } from "./productCatalog.helpers";
+  import CatalogCheckoutModal from "./catalog/CatalogCheckoutModal.svelte";
+  import CatalogPriceTable from "./catalog/CatalogPriceTable.svelte";
+  import CatalogBentoSpotlight from "./catalog/CatalogBentoSpotlight.svelte";
+  import CatalogSidebarFilter from "./catalog/CatalogSidebarFilter.svelte";
+  import CatalogGridStandard from "./catalog/CatalogGridStandard.svelte";
+  import CatalogListCompact from "./catalog/CatalogListCompact.svelte";
+  import CatalogCarouselMasonry from "./catalog/CatalogCarouselMasonry.svelte";
+  import { fly } from "svelte/transition";
 
   export let props: ProductCatalogProps & { storeId?: string } = {};
   export let styles: SectionStyles = {};
-  export let sectionId: string = "";
-  export let isActive: boolean = false;
   export let layoutPreset: string = "grid_standard";
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || "grid_standard";
 
-  $: activeStoreId =
-    props.storeId ||
-    (typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("storeId")
-      : null);
   let dynamicProducts: ProductItem[] = [];
   let categories: { id: string; name: string; slug: string }[] = [];
   let activeCategoryId: string = "all";
   let storeWaNumber: string = "";
-  let currentPage = 1;
-  let totalPages = 1;
-  let isLoading = false;
+  let currentView: "catalog" | "checkout" = "catalog";
+  let cart: any[] = [];
+  let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
 
-  let quickViewProduct: ProductItem | null = null;
+  $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  $: detailedCart = cart.map((item) => ({ ...item, subtotal: item.price * item.qty }));
+  $: cartTotal = detailedCart.reduce((sum, item) => sum + item.subtotal, 0);
 
-  const openQuickView = (product: ProductItem) => {
-    quickViewProduct = product;
-  };
-
-  const closeQuickView = () => {
-    quickViewProduct = null;
-  };
-
-  $: rawProducts = Array.isArray(props?.products) ? props.products : [];
-  $: products = activeStoreId
-    ? dynamicProducts
-    : ((rawProducts.length > 0
-        ? rawProducts
-        : DEFAULT_DEMO_PRODUCTS) as ProductItem[]);
-  $: isMobileView = $canvasStore?.viewMode === "mobile";
-  $: isTabletView = $canvasStore?.viewMode === "tablet";
-  $: hasCustomColor = !!styles?.color;
-
-  $: colDesktop = Number(props?.columnsDesktop ?? styles?.columnsDesktop ?? 3);
-  $: colTablet = Number(props?.columnsTablet ?? styles?.columnsTablet ?? 2);
-  $: colMobile = Number(props?.columnsMobile ?? styles?.columnsMobile ?? 1);
-
-  $: gridColClass = (() => {
-    if (isMobileView) return colMobile === 2 ? "grid-cols-2" : "grid-cols-1";
-    if (isTabletView) return colTablet === 3 ? "grid-cols-3" : "grid-cols-2";
-    const m = colMobile === 2 ? "grid-cols-2" : "grid-cols-1";
-    const t = colTablet === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
-    const d =
-      colDesktop === 2
-        ? "lg:grid-cols-2"
-        : colDesktop === 4
-          ? "lg:grid-cols-4"
-          : colDesktop === 5
-            ? "lg:grid-cols-5"
-            : "lg:grid-cols-3";
-    return `${m} ${t} ${d}`;
-  })();
-
-  $: gridGapVal = props?.gridGap ?? styles?.gridGap ?? "normal";
-  $: gridGapClass =
-    isMobileView || gridGapVal === "compact" || gridGapVal === "12px"
-      ? "gap-3"
-      : gridGapVal === "relaxed" || gridGapVal === "32px"
-        ? "gap-6 sm:gap-8"
-        : "gap-4 sm:gap-5";
-
-  $: cardPreset = String(
-    props?.cardPreset ?? styles?.cardPreset ?? "elevated_shadow",
-  );
-  $: isHorizontalLayout =
-    cardPreset === "horizontal" && (!isMobileView || colMobile === 1);
-  $: cardRadiusVal = String(
-    props?.cardRadius ?? styles?.cardRadius ?? "smooth",
-  );
-  $: cardRadiusClass =
-    cardRadiusVal === "sharp" || cardRadiusVal === "0px"
-      ? "rounded-none"
-      : cardRadiusVal === "rounded" || cardRadiusVal === "8px"
-        ? "rounded-lg"
-        : cardRadiusVal === "extra_rounded" || cardRadiusVal === "24px"
-          ? "rounded-3xl"
-          : "rounded-2xl";
-
-  $: aspectVal = String(
-    props?.imageAspectRatio ?? styles?.imageAspectRatio ?? "square",
-  );
-  $: imageAspectClass = isHorizontalLayout
-    ? "h-full w-full object-cover"
-    : aspectVal === "portrait" || aspectVal === "3/4"
-      ? "aspect-[3/4] w-full object-cover"
-      : aspectVal === "widescreen" || aspectVal === "16/9"
-        ? "aspect-[16/9] w-full object-cover"
-        : aspectVal === "auto"
-          ? "h-48 w-full object-cover"
-          : "aspect-square w-full object-cover";
-
-  $: badgePos = String(
-    props?.badgePosition ?? styles?.badgePosition ?? "top_left",
-  );
-  $: badgePosClass =
-    badgePos === "top_right" ? "top-3 right-3" : "top-3 left-3";
-  $: badgeColorVal = String(props?.badgeColor ?? styles?.badgeColor ?? "rose");
-  $: badgeColorClass = getBadgeColorClass(badgeColorVal);
-
-  $: nameSizeVal = String(
-    props?.productNameSize ?? styles?.productNameSize ?? "base",
-  );
-  $: nameSizeClass =
-    nameSizeVal === "sm"
-      ? "text-xs sm:text-sm"
-      : nameSizeVal === "lg"
-        ? "text-base sm:text-lg"
-        : "text-sm sm:text-base";
-  $: nameWeightVal = String(
-    props?.productNameWeight ?? styles?.productNameWeight ?? "bold",
-  );
-  $: nameWeightClass =
-    nameWeightVal === "normal"
-      ? "font-normal"
-      : nameWeightVal === "medium"
-        ? "font-medium"
-        : nameWeightVal === "semibold"
-          ? "font-semibold"
-          : nameWeightVal === "extrabold"
-            ? "font-extrabold"
-            : "font-bold";
-
-  $: isInlinePrice =
-    (props?.pricePlacement ?? styles?.pricePlacement ?? "stacked") === "inline";
-  $: ctaWidthClass =
-    (props?.ctaButtonWidth ?? styles?.ctaButtonWidth) === "compact"
-      ? "w-auto px-4 py-2 self-start"
-      : "w-full py-2.5";
-  $: ctaBtnRadiusVal = String(
-    props?.ctaButtonRadius ?? styles?.ctaButtonRadius ?? "smooth",
-  );
-  $: ctaBtnRadiusClass =
-    ctaBtnRadiusVal === "sharp"
-      ? "rounded-none"
-      : ctaBtnRadiusVal === "rounded"
-        ? "rounded-lg"
-        : ctaBtnRadiusVal === "pill"
-          ? "rounded-full"
-          : "rounded-xl";
-  $: ctaBtnColor = String(
-    props?.ctaButtonColor ?? styles?.ctaButtonColor ?? "var(--theme-primary, #2563eb)",
-  );
-  $: ctaBtnTextColor = String(
-    props?.ctaButtonTextColor ?? styles?.ctaButtonTextColor ?? "#ffffff",
-  );
-  $: showWhatsAppIcon =
-    (props?.showWhatsAppIcon ?? styles?.showWhatsAppIcon) !== false;
-  $: cardPresetClass = getCardPresetClass(cardPreset);
-
-  let draggedIdx: number | null = null;
-  let dropTargetIdx: number | null = null;
-
-  const onDragStart = (e: DragEvent, index: number) => {
-    if (!isActive) return;
-    draggedIdx = index;
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", String(index));
+  const handleAddToCart = (product: ProductItem, selections: Record<string, string>) => {
+    const variantId = JSON.stringify(selections);
+    const existing = cart.find((c) => c.product.id === product.id && c.variantId === variantId);
+    if (existing) {
+      existing.qty++;
+      cart = [...cart];
+    } else {
+      let base = typeof product.price === "number" ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, "")) || 0;
+      if (product.variants && Array.isArray(product.variants)) {
+        for (const group of product.variants) {
+          const selectedOptionName = selections[group.groupName];
+          if (selectedOptionName && group.options) {
+            const opt = group.options.find((o: any) => o.name === selectedOptionName);
+            if (opt && typeof opt.priceAdjustment === "number") base += opt.priceAdjustment;
+          }
+        }
+      }
+      cart = [...cart, { product, variantId, selections, qty: 1, price: base, subtotal: base }];
     }
   };
-  const onDragOver = (e: DragEvent, index: number) => {
-    if (draggedIdx === null || draggedIdx === index) return;
-    e.preventDefault();
-    dropTargetIdx = index;
+
+  const handleBuyNow = (product: ProductItem, selections: Record<string, string>) => {
+    handleAddToCart(product, selections);
+    currentView = "checkout";
   };
-  const onDrop = (e: DragEvent, targetIdx: number) => {
-    e.preventDefault();
-    if (draggedIdx === null || draggedIdx === targetIdx) {
-      draggedIdx = null;
-      dropTargetIdx = null;
+
+  const updateCartQty = (idx: number, delta: number) => {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart = cart.filter((_, i) => i !== idx);
+    else cart = [...cart];
+  };
+
+  const removeFromCart = (idx: number) => {
+    cart = cart.filter((_, i) => i !== idx);
+  };
+
+  const handleCheckout = () => {
+    if (!form.name || !form.phone || !form.address) {
+      alert("Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.");
       return;
     }
-    const list = [...products];
-    const [moved] = list.splice(draggedIdx, 1);
-    list.splice(targetIdx, 0, moved);
-    editorStore.updateSectionProps(sectionId, { products: list });
-    draggedIdx = null;
-    dropTargetIdx = null;
+    const itemsSummary = detailedCart
+      .map((item) => `• ${item.product.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(item.selections).join(", ") || "Standar"}`)
+      .join("\n");
+    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info rekening. Terima kasih!`;
+    const rawTargetPhone = (storeWaNumber || (props.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') : '') || '6281234567890') as string;
+    let targetPhone = rawTargetPhone.replace(/[^0-9]/g, "");
+    if (targetPhone.startsWith("0")) targetPhone = "62" + targetPhone.slice(1);
+    if (!targetPhone.startsWith("62")) targetPhone = "62" + targetPhone;
+    window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
-  const fetchCategories = async (storeId: string) => {
-    try {
-      const res = await fetch(`/api/categories?storeId=${storeId}`);
-      if (res.ok) {
-        categories = await res.json();
-      }
-    } catch (e) {
-      console.error("Failed to fetch categories:", e);
-    }
-  };
-
-  const fetchProducts = async (
-    storeId: string,
-    page: number,
-    categoryId: string,
-    append = false,
-  ) => {
-    if (isLoading) return;
-    isLoading = true;
-    try {
-      const url = new URL(
-        `/api/stores/${storeId}/products`,
-        window.location.origin,
-      );
-      url.searchParams.set("page", page.toString());
-      url.searchParams.set("limit", "12");
-      if (categoryId && categoryId !== "all") {
-        url.searchParams.set("categoryId", categoryId);
-      }
-
-      const res = await fetch(url.toString());
-      if (res.ok) {
-        const { data, pagination, store } = await res.json();
-        if (store?.waNumber) storeWaNumber = store.waNumber;
-        if (append) {
-          dynamicProducts = [...dynamicProducts, ...data];
-        } else {
-          dynamicProducts = data;
-        }
-        currentPage = pagination.page;
-        totalPages = pagination.totalPages;
-      }
-    } catch (e) {
-      console.error("Failed to fetch products:", e);
-    } finally {
-      isLoading = false;
-    }
-  };
-
-  onMount(() => {
-    if (activeStoreId) {
-      fetchCategories(activeStoreId);
-      fetchProducts(activeStoreId, 1, "all");
-    }
-  });
-
-  const handleCategorySelect = (categoryId: string) => {
-    if (!activeStoreId || activeCategoryId === categoryId) return;
-    activeCategoryId = categoryId;
-    currentPage = 1;
-    fetchProducts(activeStoreId, 1, categoryId, false);
-  };
-
-  const handleLoadMore = () => {
-    if (!activeStoreId || currentPage >= totalPages) return;
-    fetchProducts(activeStoreId, currentPage + 1, activeCategoryId, true);
-  };
+  $: products = ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+  $: cardPresetClass = getCardPresetClass(styles?.cardPreset || '');
+  $: isHorizontalLayout = styles?.cardPreset === "horizontal" || activePreset === "list_compact";
+  $: cardRadiusClass = styles?.cardRadius === "sharp" ? "rounded-none" : styles?.cardRadius === "smooth" ? "rounded-2xl" : styles?.cardRadius === "extra_rounded" ? "rounded-3xl" : "rounded-xl";
+  $: imageAspectClass = styles?.imageAspectRatio === "square" ? "aspect-square" : styles?.imageAspectRatio === "portrait" ? "aspect-[3/4]" : styles?.imageAspectRatio === "widescreen" ? "aspect-video" : isHorizontalLayout ? "aspect-square sm:aspect-[4/3]" : "aspect-square";
+  $: badgePosClass = styles?.badgePosition === "top_right" ? "top-3 right-3" : "top-3 left-3";
+  $: badgeColorClass = getBadgeColorClass(styles?.badgeColor || '');
+  $: nameSizeClass = styles?.productNameSize === "sm" ? "text-xs" : styles?.productNameSize === "lg" ? "text-base" : "text-sm";
+  $: nameWeightClass = styles?.productNameWeight === "normal" ? "font-normal" : styles?.productNameWeight === "semibold" ? "font-semibold" : styles?.productNameWeight === "extrabold" ? "font-black" : "font-bold";
+  $: ctaBtnRadiusClass = styles?.ctaButtonRadius === "sharp" ? "rounded-none" : styles?.ctaButtonRadius === "smooth" ? "rounded-xl" : styles?.ctaButtonRadius === "pill" ? "rounded-full" : "rounded-lg";
 </script>
 
-<div class="w-full">
-  <!-- Section Header -->
-  <div class="mb-8 text-center">
-    <h2
-      class={`text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 ${hasCustomColor ? "" : "text-slate-900 dark:text-white"}`}
-    >
-      {props?.title || "Katalog Produk Pilihan"}
-    </h2>
-    <p
-      class={`text-xs sm:text-sm max-w-xl mx-auto ${hasCustomColor ? "opacity-80" : "text-slate-600 dark:text-slate-400"}`}
-    >
-      {props?.subtitle ||
-        "Pilih produk terbaik kami dengan jaminan mutu dan kemudahan pemesanan"}
-    </p>
-  </div>
-
-  <!-- Category Tabs -->
-  {#if activeStoreId && categories.length > 0}
-    <div class="flex items-center justify-center mb-8">
-      <div
-        class="flex overflow-x-auto hide-scrollbar gap-2 px-2 py-1 max-w-full"
+<div data-node="product_catalog_container" class="w-full box-border py-12 relative">
+  <!-- Dynamic Category Filter Rail -->
+  {#if categories.length > 0}
+    <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+      <button
+        type="button"
+        on:click={() => (activeCategoryId = "all")}
+        class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {activeCategoryId === 'all'
+          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-xs'
+          : 'bg-nested/80 border border-light text-secondary hover:text-main'}"
       >
+        Semua Produk
+      </button>
+      {#each categories as cat}
         <button
           type="button"
-          on:click={() => handleCategorySelect("all")}
-          class={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
-            activeCategoryId === "all"
-              ? "bg-blue-600 text-white shadow-md"
-              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-          }`}
+          on:click={() => (activeCategoryId = cat.id)}
+          class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {activeCategoryId === cat.id
+            ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-xs'
+            : 'bg-nested/80 border border-light text-secondary hover:text-main'}"
         >
-          Semua
+          {cat.name}
         </button>
-        {#each categories as category}
-          <button
-            type="button"
-            on:click={() => handleCategorySelect(category.id)}
-            class={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
-              activeCategoryId === category.id
-                ? "bg-blue-600 text-white shadow-md"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-            }`}
-          >
-            {category.name}
-          </button>
-        {/each}
-      </div>
-    </div>
-  {/if}
-
-  <!-- Product Grid -->
-  {#if isLoading && currentPage === 1}
-    <div class="py-12 flex justify-center">
-      <div class="loading loading-spinner loading-lg text-blue-500"></div>
-    </div>
-  {:else if products.length === 0}
-    <div
-      class="p-8 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl text-center text-slate-400 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center gap-2"
-    >
-      <ShoppingBag size={28} class="text-slate-300 dark:text-slate-600" />
-      <p class="text-xs">
-        Belum ada produk di katalog.
-      </p>
-    </div>
-  {:else}
-    <div
-      data-node="product_grid"
-      class={activePreset === 'carousel_scroll'
-        ? "flex overflow-x-auto gap-4 pb-4 snap-x no-scrollbar w-full"
-        : activePreset === 'list_compact'
-          ? "flex flex-col gap-4 w-full"
-          : `grid ${gridColClass} ${gridGapClass}`}
-    >
-      {#each products as product, index (product.name + index)}
-        <div data-node="product_card" role="listitem" class="contents">
-          <ProductCatalogCard
-            {product}
-            {index}
-            {activePreset}
-            {isHorizontalLayout}
-            {cardRadiusClass}
-            {cardPresetClass}
-            {imageAspectClass}
-            {badgePosClass}
-            {badgeColorClass}
-            {nameSizeClass}
-            {nameWeightClass}
-            {isInlinePrice}
-            {ctaBtnColor}
-            {ctaBtnTextColor}
-            {ctaBtnRadiusClass}
-            {ctaWidthClass}
-            {showWhatsAppIcon}
-            {isActive}
-            {draggedIdx}
-            {dropTargetIdx}
-            {onDragStart}
-            {onDragOver}
-            {onDrop}
-            onDragLeave={() => (dropTargetIdx = null)}
-            onOpenQuickView={openQuickView}
-          />
-        </div>
       {/each}
     </div>
+  {/if}
 
-    <!-- Load More Pagination -->
-    {#if activeStoreId && currentPage < totalPages}
-      <div class="mt-10 flex justify-center">
-        <button
-          type="button"
-          on:click={handleLoadMore}
-          disabled={isLoading}
-          class="btn btn-outline border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 px-8 rounded-full font-semibold shadow-sm cursor-pointer"
-        >
-          {#if isLoading}
-            <span class="loading loading-spinner loading-sm"></span>
-            Memuat...
-          {:else}
-            Muat Lebih Banyak
-          {/if}
-        </button>
-      </div>
-    {/if}
+  {#if activePreset === "bento_spotlight"}
+    <CatalogBentoSpotlight
+      {products}
+      {cardPresetClass}
+      {cardRadiusClass}
+      {imageAspectClass}
+      {badgePosClass}
+      {badgeColorClass}
+      {nameSizeClass}
+      {nameWeightClass}
+      {ctaBtnRadiusClass}
+      {isHorizontalLayout}
+      onAddToCart={handleAddToCart}
+      onBuyNow={handleBuyNow}
+    />
+  {:else if activePreset === "price_table"}
+    <CatalogPriceTable {products} onBuyNow={handleBuyNow} />
+  {:else if activePreset === "sidebar_filter"}
+    <CatalogSidebarFilter
+      {products}
+      {categories}
+      {activeCategoryId}
+      {cardPresetClass}
+      {cardRadiusClass}
+      {imageAspectClass}
+      {badgePosClass}
+      {badgeColorClass}
+      {nameSizeClass}
+      {nameWeightClass}
+      {ctaBtnRadiusClass}
+      {isHorizontalLayout}
+      onCategorySelect={(id) => (activeCategoryId = id)}
+      onAddToCart={handleAddToCart}
+      onBuyNow={handleBuyNow}
+    />
+  {:else if activePreset === "list_compact"}
+    <CatalogListCompact
+      {products}
+      {activePreset}
+      {cardPresetClass}
+      {cardRadiusClass}
+      {imageAspectClass}
+      {badgePosClass}
+      {badgeColorClass}
+      {nameSizeClass}
+      {nameWeightClass}
+      {ctaBtnRadiusClass}
+      onAddToCart={handleAddToCart}
+      onBuyNow={handleBuyNow}
+    />
+  {:else if activePreset === "horizontal_carousel" || activePreset === "masonry_dynamic" || activePreset === "grid_3_wide"}
+    <CatalogCarouselMasonry
+      {activePreset}
+      {products}
+      {cardPresetClass}
+      {cardRadiusClass}
+      {imageAspectClass}
+      {badgePosClass}
+      {badgeColorClass}
+      {nameSizeClass}
+      {nameWeightClass}
+      {ctaBtnRadiusClass}
+      {isHorizontalLayout}
+      onAddToCart={handleAddToCart}
+      onBuyNow={handleBuyNow}
+    />
+  {:else}
+    <CatalogGridStandard
+      {products}
+      {activePreset}
+      {cardPresetClass}
+      {cardRadiusClass}
+      {imageAspectClass}
+      {badgePosClass}
+      {badgeColorClass}
+      {nameSizeClass}
+      {nameWeightClass}
+      {ctaBtnRadiusClass}
+      {isHorizontalLayout}
+      onAddToCart={handleAddToCart}
+      onBuyNow={handleBuyNow}
+    />
+  {/if}
+
+  <!-- Floating Sticky Cart Pill -->
+  {#if totalCartItems > 0 && currentView === "catalog"}
+    <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
+      <button
+        type="button"
+        on:click={() => (currentView = "checkout")}
+        class="bg-slate-900 text-white dark:bg-primary dark:text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
+      >
+        <div class="relative">
+          <ShoppingCart size={18} />
+          <span class="absolute -top-2 -right-2 bg-orange text-white text-3xs w-4 h-4 rounded-full flex items-center justify-center font-mono">
+            {totalCartItems}
+          </span>
+        </div>
+        <span>Keranjang</span>
+        <span class="font-mono bg-white/20 px-2 py-0.5 rounded-full text-xs">
+          Rp {cartTotal.toLocaleString("id-ID")}
+        </span>
+      </button>
+    </div>
+  {/if}
+
+  <!-- Integrated WhatsApp Checkout Dialog Modal -->
+  {#if currentView === "checkout"}
+    <CatalogCheckoutModal
+      {detailedCart}
+      {cartTotal}
+      bind:form
+      onBackToCatalog={() => (currentView = "catalog")}
+      onUpdateQty={updateCartQty}
+      onRemoveItem={removeFromCart}
+      onCheckout={handleCheckout}
+    />
   {/if}
 </div>
-
-<!-- Quick View Modal -->
-<ProductCatalogQuickView
-  {quickViewProduct}
-  {activeStoreId}
-  {storeWaNumber}
-  onClose={closeQuickView}
-/>

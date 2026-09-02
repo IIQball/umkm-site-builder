@@ -1,3 +1,5 @@
+export const DEFAULT_DEMO_WA_NUMBER = '6281234567890';
+
 export function formatWhatsAppNumber(phone: string): string {
   if (!phone) return '';
   let cleaned = phone.replace(/\D/g, '');
@@ -9,9 +11,19 @@ export function formatWhatsAppNumber(phone: string): string {
   return cleaned;
 }
 
+export function getEffectiveWhatsAppNumber(phone?: string | null): string {
+  const formatted = formatWhatsAppNumber(phone || '');
+  return formatted || DEFAULT_DEMO_WA_NUMBER;
+}
+
+export function generateWhatsAppLink(phone?: string | null, customText?: string): string {
+  const formattedPhone = getEffectiveWhatsAppNumber(phone);
+  const message = customText || 'Halo, saya tertarik dengan produk di toko Anda. Boleh minta informasi lebih lanjut?';
+  return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+}
+
 export function generateWhatsAppOrderUrl(phone: string, productName: string, productPrice?: number, variantInfo?: string): string {
-  const formattedPhone = formatWhatsAppNumber(phone);
-  if (!formattedPhone) return '';
+  const formattedPhone = getEffectiveWhatsAppNumber(phone);
 
   let message = `Halo, saya tertarik dengan produk ${productName}`;
   if (typeof productPrice === 'number') {

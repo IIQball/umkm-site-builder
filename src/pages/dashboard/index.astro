@@ -1,66 +1,61 @@
 ---
-/**
- * pages/dashboard/index.astro
- * Dashboard entry point — renders summary per user role.
- */
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser } from '@/lib/auth';
 
-// DashboardLayout already handles null session → redirect to /auth/login
-// but we also read user here for role-based rendering
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role === 'designer') return Astro.redirect('/designer/wallet');
 if (user.role === 'superadmin') return Astro.redirect('/admin/whitelist');
-
 ---
 
 <DashboardLayout title="Dashboard">
-  <div class="space-y-6">
-    <!-- Welcome Banner -->
-    <div class="p-5 rounded-2xl bg-blue-600 text-white flex items-center justify-between shadow-lg shadow-blue-600/20">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col gap-1 pb-2">
+      <h1 class="text-heading-lg text-main font-bold tracking-tight">Dashboard</h1>
+      <p class="text-body-base text-secondary max-w-2xl leading-relaxed">Ringkasan aktivitas dan statistik toko Anda.</p>
+    </div>
+
+    <div class="p-5 rounded-2xl bg-blue-600 text-white flex items-center justify-between shadow-lg shadow-blue-600/20 animate-fade-in-up delay-100">
       <div>
         <p class="text-blue-100 text-xs font-medium mb-0.5">Selamat datang kembali</p>
-        <h1 class="text-xl font-bold">{user.name ?? user.email}</h1>
+        <h2 class="text-xl font-bold">{user.name ?? user.email}</h2>
       </div>
       <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
         <span class="material-symbols-outlined text-[28px]">waving_hand</span>
       </div>
     </div>
 
-    {/* ── Tenant Dashboard ── */}
     {user.role === 'tenant' && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Status Toko</p>
-          <p class="text-2xl font-bold text-base-content">—</p>
-          <a href="/dashboard/store" class="text-xs text-blue-500 font-semibold hover:underline">Pengaturan toko →</a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-3 animate-fade-in-up delay-150">
+          <p class="text-2xs text-secondary font-bold uppercase tracking-wider">Status Toko</p>
+          <p class="text-2xl font-bold text-main">—</p>
+          <a href="/dashboard/store" class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">Pengaturan toko →</a>
         </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Produk</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/dashboard/products" class="text-xs text-blue-500 font-semibold hover:underline">Kelola produk →</a>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-3 animate-fade-in-up delay-200">
+          <p class="text-2xs text-secondary font-bold uppercase tracking-wider">Total Produk</p>
+          <p class="text-3xl font-bold text-main">—</p>
+          <a href="/dashboard/products" class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">Kelola produk →</a>
         </div>
       </div>
     )}
 
-    {/* ── Admin Dashboard ── */}
     {user.role === 'admin' && (
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Transaksi</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/transactions" class="text-xs text-blue-500 font-semibold hover:underline">Lihat semua →</a>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-3 animate-fade-in-up delay-150">
+          <p class="text-2xs text-secondary font-bold uppercase tracking-wider">Total Transaksi</p>
+          <p class="text-3xl font-bold text-main">—</p>
+          <a href="/admin/transactions" class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">Lihat semua →</a>
         </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total User</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/users" class="text-xs text-blue-500 font-semibold hover:underline">Manajemen user →</a>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-3 animate-fade-in-up delay-200">
+          <p class="text-2xs text-secondary font-bold uppercase tracking-wider">Total User</p>
+          <p class="text-3xl font-bold text-main">—</p>
+          <a href="/admin/users" class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">Manajemen user →</a>
         </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Template Pending Kurasi</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/templates" class="text-xs text-blue-500 font-semibold hover:underline">Kurasi →</a>
+        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-3 animate-fade-in-up delay-250">
+          <p class="text-2xs text-secondary font-bold uppercase tracking-wider">Template Pending</p>
+          <p class="text-3xl font-bold text-main">—</p>
+          <a href="/admin/templates" class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">Kurasi →</a>
         </div>
       </div>
     )}

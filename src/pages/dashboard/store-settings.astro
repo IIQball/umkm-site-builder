@@ -22,20 +22,22 @@ if (!store) {
 ---
 
 <DashboardLayout title="Pengaturan Toko">
-  <div class="p-6">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold">Pengaturan Toko</h1>
-      <p class="text-base-content/70 mt-2">
-        Kelola informasi profil toko dan kontak bisnis Anda.
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="pb-2">
+      <h1 class="text-heading-lg font-bold tracking-tight text-main">Pengaturan Toko</h1>
+      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+        Kelola informasi profil toko, kontak bisnis, dan preferensi tampilan Anda.
       </p>
     </div>
 
-    <StoreSettingsForm
-      client:load
-      subdomain={store.subdomain}
-      initialStoreName={store.name}
-      initialWaNumber={store.waNumber}
-      initialGoogleMapsUrl={store.googleMapsUrl || ''}
-    />
+    <div class="animate-fade-in-up delay-100">
+      <StoreSettingsForm
+        client:load
+        subdomain={store.subdomain}
+        initialStoreName={store.name}
+        initialWaNumber={store.waNumber}
+        initialGoogleMapsUrl={store.googleMapsUrl || ''}
+      />
+    </div>
   </div>
 </DashboardLayout>

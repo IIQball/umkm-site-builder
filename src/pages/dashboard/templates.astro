@@ -24,18 +24,14 @@ if (!store) {
 
 <DashboardLayout title="Koleksi Template Toko" breadcrumb="Dashboard / Galeri Template">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <!-- Page Header (matching standard dashboard header layout) -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5 font-heading">
-          <span>Koleksi Template Desain Toko</span>
-        </h1>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">Koleksi Template Desain</h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pilih dan terapkan template website yang telah Anda miliki ke toko online UMKM Anda seketika.
+          Pilih dan terapkan template website ke toko online UMKM Anda dengan mudah.
         </p>
       </div>
 
-      <!-- Quick Action Button -->
       <div class="flex items-center gap-2 flex-shrink-0">
         <Button
           client:load
@@ -50,11 +46,12 @@ if (!store) {
       </div>
     </div>
 
-    <!-- Template Gallery Component -->
-    <TemplateGallery
-      client:load
-      storeId={store.id}
-      currentTemplateId={store.templateId}
-    />
+    <div class="animate-fade-in-up delay-100">
+      <TemplateGallery
+        client:load
+        storeId={store.id}
+        currentTemplateId={store.templateId}
+      />
+    </div>
   </div>
 </DashboardLayout>

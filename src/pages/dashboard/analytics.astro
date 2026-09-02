@@ -34,17 +34,30 @@ const isOnboarded = customization?.isOnboarded === true;
 ---
 
 <DashboardLayout user={user}>
-  <div class="container mx-auto px-4 py-8">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">Analitik & Lalu Lintas Toko</h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau pengunjung toko online dan aktivitas pelanggan Anda secara real-time.
+        </p>
+      </div>
+    </div>
+
     {!isOnboarded && (
-      <IncompleteDataWarning client:load />
+      <div class="animate-fade-in-up">
+        <IncompleteDataWarning client:load />
+      </div>
     )}
     
-    <TrafficWidget 
-      client:load 
-      storeId={storeData.id} 
-      initialViews={storeData.totalViews}
-      initialClicks={storeData.totalWaClicks}
-      isOnboarded={isOnboarded}
-    />
+    <div class="animate-fade-in-up delay-100">
+      <TrafficWidget 
+        client:load 
+        storeId={storeData.id} 
+        initialViews={storeData.totalViews}
+        initialClicks={storeData.totalWaClicks}
+        isOnboarded={isOnboarded}
+      />
+    </div>
   </div>
 </DashboardLayout>

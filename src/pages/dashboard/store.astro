@@ -1,8 +1,4 @@
 ---
-/**
- * pages/dashboard/store.astro
- * Halaman Pengaturan Toko untuk Tenant
- */
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser } from '@/lib/auth';
 import StoreManager from '@/components/tenant/StoreManager.svelte';
@@ -13,12 +9,10 @@ const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role !== 'tenant') return Astro.redirect('/dashboard');
 
-// Ambil data toko jika ada
 const userStore = await db.query.stores.findFirst({
   where: eq(stores.userId, user.id),
 });
 
-// Jika belum ada toko atau belum onboarded, redirect ke onboarding
 const customization = userStore?.customization as Record<string, unknown> | undefined;
 const isOnboarded = customization?.isOnboarded === true;
 
@@ -26,7 +20,6 @@ if (!userStore || !isOnboarded) {
   return Astro.redirect('/onboarding');
 }
 
-// Jika kita belum memiliki toko, kita set null
 const initialStoreData = userStore ? {
   id: userStore.id,
   name: userStore.name,
@@ -34,16 +27,19 @@ const initialStoreData = userStore ? {
   waNumber: userStore.waNumber,
   googleMapsUrl: userStore.googleMapsUrl || '',
 } : null;
-
 ---
 
 <DashboardLayout title="Pengaturan Toko">
-  <div class="max-w-4xl mx-auto space-y-8">
-    <div class="space-y-1">
-      <h1 class="text-3xl font-bold tracking-tight text-base-content">Pengaturan Toko</h1>
-      <p class="text-base-content/60 text-sm">Kelola informasi dasar toko, tautan, dan preferensi tampilan Anda.</p>
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="pb-2">
+      <h1 class="text-heading-lg font-bold tracking-tight text-main">Pengaturan Toko</h1>
+      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+        Kelola informasi dasar toko, tautan, dan preferensi tampilan toko online Anda.
+      </p>
     </div>
 
-    <StoreManager client:load initialData={initialStoreData} />
+    <div class="animate-fade-in-up delay-100">
+      <StoreManager client:load initialData={initialStoreData} />
+    </div>
   </div>
 </DashboardLayout>

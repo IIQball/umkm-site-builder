@@ -2,52 +2,53 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import LoginForm from "@/components/auth/LoginForm.svelte";
 import RegisterForm from "@/components/auth/RegisterForm.svelte";
+import Button from "@/components/ui/Button.svelte";
 ---
 
 <BaseLayout title="Masuk - UMKM Site Builder" description="Masuk atau Buat Akun Anda" hideNavbar={true}>
   <!-- Layout mutlak tanpa scroll layar utama -->
-  <main class="h-[100dvh] w-full flex items-center justify-center p-4 bg-base-300 relative overflow-hidden" id="auth-wrapper">
+  <main class="min-h-screen w-full flex items-center justify-center p-4 bg-canvas relative overflow-hidden" id="auth-wrapper">
     
     <!-- Center Card -->
-    <div class="w-full max-w-5xl bg-base-100 shadow-2xl rounded-3xl overflow-hidden relative z-10 border border-base-200/50 h-[95dvh] sm:h-[90dvh]">
+    <div class="w-full max-w-5xl bg-card shadow-2xl rounded-3xl overflow-hidden relative z-10 border border-light h-[95dvh] sm:h-[90dvh] animate-fade-in-up">
       
       <!-- Area Panel Putih (Formulir Kiri/Kanan) -->
-      <div class="absolute top-0 left-0 w-full md:w-1/2 h-full bg-base-100 transition-transform duration-700 ease-in-out z-20" id="form-panel">
+      <div class="absolute top-0 left-0 w-full md:w-1/2 h-full bg-card transition-transform duration-700 ease-in-out z-20" id="form-panel">
         
         <!-- Formulir Login -->
-        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar" id="login-view">
-          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-4">
-            <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">U</div>
-            <span class="text-lg font-bold tracking-tight text-base-content">UMKM Builder</span>
+        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar bg-card" id="login-view">
+          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl">
+            <div class="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center font-heading font-bold text-sm shadow-sm">U</div>
+            <span class="text-heading-md text-main tracking-tight">UMKM Builder</span>
           </a>
           <div class="flex-grow flex flex-col justify-center mt-2">
             <div class="text-center mb-4">
-              <h1 class="text-2xl font-bold text-base-content">Masuk ke Akun</h1>
-              <p class="text-sm text-base-content/70 mt-1">Masuk untuk mengelola toko UMKM Anda</p>
+              <h1 class="text-heading-lg text-main">Masuk ke Akun</h1>
+              <p class="text-body-sm text-secondary mt-1">Masuk untuk mengelola toko UMKM Anda</p>
             </div>
             <LoginForm client:load />
             <!-- Mobile Toggle -->
-            <p class="md:hidden text-center text-sm text-base-content/70 mt-5 pt-3 border-t border-base-200">
-              Belum punya akun? <button type="button" class="link link-primary font-semibold ml-1 btn-to-register">Buat akun</button>
+            <p class="md:hidden text-center text-body-sm text-secondary mt-5 pt-3 border-t border-light">
+              Belum punya akun? <button type="button" class="text-primary font-semibold ml-1 hover:underline transition-all btn-to-register">Buat akun</button>
             </p>
           </div>
         </div>
 
         <!-- Formulir Register -->
-        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar" id="register-view">
-          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-2">
-            <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">U</div>
-            <span class="text-lg font-bold tracking-tight text-base-content">UMKM Builder</span>
+        <div class="absolute inset-0 p-6 md:p-8 flex flex-col transition-all duration-700 overflow-y-auto overflow-x-hidden custom-scrollbar bg-card" id="register-view">
+          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mb-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl">
+            <div class="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center font-heading font-bold text-sm shadow-sm">U</div>
+            <span class="text-heading-md text-main tracking-tight">UMKM Builder</span>
           </a>
           <div class="flex-grow flex flex-col justify-center">
             <div class="text-center mb-4">
-              <h1 class="text-2xl font-bold text-base-content">Buat Akun</h1>
-              <p class="text-sm text-base-content/70 mt-1">Mulai bangun toko UMKM Anda hari ini</p>
+              <h1 class="text-heading-lg text-main">Buat Akun</h1>
+              <p class="text-body-sm text-secondary mt-1">Mulai bangun toko UMKM Anda hari ini</p>
             </div>
             <RegisterForm client:load />
             <!-- Mobile Toggle -->
-            <p class="md:hidden text-center text-sm text-base-content/70 mt-5 pt-3 border-t border-base-200">
-              Sudah punya akun? <button type="button" class="link link-primary font-semibold ml-1 btn-to-login">Masuk</button>
+            <p class="md:hidden text-center text-body-sm text-secondary mt-5 pt-3 border-t border-light">
+              Sudah punya akun? <button type="button" class="text-primary font-semibold ml-1 hover:underline transition-all btn-to-login">Masuk</button>
             </p>
           </div>
         </div>
@@ -55,30 +56,34 @@ import RegisterForm from "@/components/auth/RegisterForm.svelte";
       </div>
 
       <!-- Area Panel Biru (Welcome Kanan/Kiri) -->
-      <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full bg-primary transition-transform duration-700 ease-in-out text-primary-content z-30" id="welcome-panel">
-        <!-- Dekorasi geometris statis -->
-        <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full"></div>
-        <div class="absolute bottom-10 left-6 w-20 h-20 bg-white/10 rounded-full"></div>
-        <div class="absolute top-1/2 left-0 w-6 h-6 bg-white/10 rounded-sm rotate-45"></div>
+      <div class="hidden md:block absolute top-0 right-0 w-1/2 h-full bg-primary transition-transform duration-700 ease-in-out text-white z-30" id="welcome-panel">
+        <!-- Dekorasi geometris (animasi) -->
+        <div class="absolute top-10 right-10 w-12 h-12 bg-white/10 rounded-full animate-float"></div>
+        <div class="absolute bottom-16 left-10 w-24 h-24 bg-white/10 rounded-full animate-float-slow"></div>
+        
+        <!-- Animasi Utama di Tengah (Center Focus) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-white/5 rounded-[40px] animate-float-spin pointer-events-none" style="z-index: 1;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] border border-white/10 rounded-full animate-float-slow pointer-events-none" style="z-index: 1;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-tr from-white/10 to-transparent rounded-full animate-float pointer-events-none blur-3xl" style="z-index: 1;"></div>
 
         <!-- Welcome untuk Login (tampil saat mode Login, di kanan) -->
         <div class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center transition-all duration-700" id="welcome-login">
-          <h2 class="text-3xl font-bold mb-3 relative z-10">Baru di Sini?</h2>
-          <p class="text-primary-content/90 text-sm leading-relaxed relative z-10 max-w-sm mb-6">
+          <h2 class="text-heading-xl font-bold mb-3 relative z-10 text-white">Baru di Sini?</h2>
+          <p class="text-white/90 text-body-base leading-relaxed relative z-10 max-w-sm mb-6">
             Daftarkan diri Anda sekarang untuk mulai membangun toko online impian tanpa koding.
           </p>
-          <button type="button" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary hover:border-white rounded-full px-12 relative z-10 btn-to-register">
+          <button type="button" class="inline-flex items-center justify-center font-heading font-semibold transition-all duration-150 cursor-pointer select-none text-sm px-8 py-3 rounded-2xl gap-2 h-11 border border-white/60 text-white hover:bg-white hover:text-primary hover:border-white active:scale-[0.98] shadow-xs relative z-10 btn-to-register">
             Buat Akun
           </button>
         </div>
 
         <!-- Welcome untuk Register (tampil saat mode Register, di kiri) -->
         <div class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center transition-all duration-700" id="welcome-register">
-          <h2 class="text-3xl font-bold mb-3 relative z-10">Selamat Datang!</h2>
-          <p class="text-primary-content/90 text-sm leading-relaxed relative z-10 max-w-sm mb-6">
+          <h2 class="text-heading-xl font-bold mb-3 relative z-10 text-white">Selamat Datang!</h2>
+          <p class="text-white/90 text-body-base leading-relaxed relative z-10 max-w-sm mb-6">
             Sudah memiliki akun? Silakan masuk untuk melanjutkan mengelola toko Anda.
           </p>
-          <button type="button" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary hover:border-white rounded-full px-12 relative z-10 btn-to-login">
+          <button type="button" class="inline-flex items-center justify-center font-heading font-semibold transition-all duration-150 cursor-pointer select-none text-sm px-8 py-3 rounded-2xl gap-2 h-11 border border-white/60 text-white hover:bg-white hover:text-primary hover:border-white active:scale-[0.98] shadow-xs relative z-10 btn-to-login">
             Masuk
           </button>
         </div>
@@ -156,7 +161,9 @@ import RegisterForm from "@/components/auth/RegisterForm.svelte";
     pointer-events: auto;
     transform: scale(1);
   }
+</style>
 
+<style is:global>
   /* Sembunyikan scrollbar bawaan form sepenuhnya (tetap bisa discroll dengan mouse wheel/touch) */
   .custom-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
@@ -167,5 +174,36 @@ import RegisterForm from "@/components/auth/RegisterForm.svelte";
     width: 0px;
     background: transparent;
   }
-</style>
 
+  /* Animasi Geometris Dekoratif */
+  @keyframes float-spin-custom {
+    0% { transform: translate(0, 0) rotate(45deg); border-radius: 4px; }
+    33% { transform: translate(30px, -30px) rotate(135deg); border-radius: 50%; }
+    66% { transform: translate(-20px, 30px) rotate(225deg); border-radius: 4px; }
+    100% { transform: translate(0, 0) rotate(405deg); border-radius: 4px; }
+  }
+
+  @keyframes float-custom {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-30px, 40px) scale(1.1); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+  
+  @keyframes float-slow-custom {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  .animate-float-spin {
+    animation: float-spin-custom 8s ease-in-out infinite;
+  }
+  
+  .animate-float {
+    animation: float-custom 6s ease-in-out infinite;
+  }
+  
+  .animate-float-slow {
+    animation: float-slow-custom 10s ease-in-out infinite;
+  }
+</style>

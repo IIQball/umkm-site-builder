@@ -1,6 +1,7 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { AlertCircle } from "lucide-svelte";
+  import Button from "@/components/ui/Button.svelte";
 
   let loading = false;
   let error = "";
@@ -28,20 +29,22 @@
 </script>
 
 {#if error}
-  <div class="alert alert-error shadow-sm rounded-xl p-3 mb-4 flex items-start gap-2.5 text-xs text-error-content">
+  <div class="p-3 rounded-xl bg-error/10 text-error text-xs font-medium border border-error/20 flex items-start gap-2 mb-4 animate-fade-in-up">
     <AlertCircle size={16} class="shrink-0 mt-0.5" />
     <span>{error}</span>
   </div>
 {/if}
 
-<button 
-  type="button" 
-  class="btn btn-outline w-full rounded-full h-10 btn-sm text-sm font-medium gap-3 border-base-content/20 hover:bg-base-200/60 hover:text-base-content hover:border-base-content/30 transition-all shadow-sm" 
+<Button 
+  variant="outline" 
+  size="md" 
+  fullWidth 
+  class="rounded-full shadow-sm"
   on:click={handleGoogleSignIn}
+  {loading}
   disabled={loading}
 >
   {#if loading}
-    <span class="loading loading-spinner loading-sm"></span>
     <span>Menghubungkan...</span>
   {:else}
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" class="shrink-0">
@@ -52,4 +55,4 @@
     </svg>
     <span>Lanjutkan dengan Google</span>
   {/if}
-</button>
+</Button>

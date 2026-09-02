@@ -1,14 +1,18 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { RegisterSchema } from "@/schemas/auth.schema";
-  import { Eye, EyeOff } from "lucide-svelte";
-  import GoogleAuthButton from "./GoogleAuthButton.svelte";
+  import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft } from "lucide-svelte";
+  import Input from "@/components/ui/Input.svelte";
+  import Button from "@/components/ui/Button.svelte";
+  import { fade, fly } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
 
+  let step = 1;
   let name = "";
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let role: "tenant" | "designer" = "tenant";
+  let role: "tenant" | "designer" | "" = "";
   let generalError = "";
   let errors: Record<string, string> = {};
   let loading = false;
@@ -32,11 +36,26 @@
     }
   };
 
+  const nextStep = () => {
+    if (role === "") {
+      generalError = "Silakan pilih peran akun Anda terlebih dahulu.";
+      return;
+    }
+    generalError = "";
+    step = 2;
+  };
+
+  const prevStep = () => {
+    generalError = "";
+    errors = {};
+    step = 1;
+  };
+
   const validateForm = () => {
     const result = RegisterSchema.safeParse({
       name,
       email,
-      role,
+      role: role as "tenant" | "designer",
       password,
       confirmPassword,
     });
@@ -71,7 +90,7 @@
         email,
         password,
         name,
-        role,
+        role: role as "tenant" | "designer",
       });
 
       if (errResponse) {
@@ -92,185 +111,193 @@
   };
 </script>
 
-<form novalidate on:submit={handleSubmit} class="space-y-2 w-full">
+<div class="w-full relative">
   {#if generalError}
-    <div class="p-2 rounded-lg bg-error/10 text-error text-sm font-medium border border-error/20 text-center w-full">
+    <div class="p-3 rounded-xl bg-error/10 text-error text-xs font-medium border border-error/20 text-center w-full animate-fade-in-up mb-4">
       {generalError}
     </div>
   {/if}
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="name">
-      <span class="label-text font-medium text-base-content/80 text-sm">Nama Lengkap</span>
-    </label>
-    <input
-      type="text"
-      id="name"
-      bind:value={name}
-      on:input={() => handleInput("name")}
-      placeholder="Nama lengkap Anda"
-      class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.name ? 'input-error' : ''}"
-      autocomplete="name"
-    />
-    {#if errors.name}
-      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
-        {errors.name}
-      </span>
-    {/if}
-  </div>
-
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="role">
-      <span class="label-text font-medium text-base-content/80 text-sm">Peran Akun</span>
-    </label>
-    <select
-      id="role"
-      bind:value={role}
-      on:change={() => handleInput("role")}
-      class="select select-sm h-10 select-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.role ? 'select-error' : ''}"
+  {#if step === 1}
+    <div 
+      class="w-full space-y-4"
+      in:fly={{ x: -20, duration: 400, delay: 400, easing: cubicOut }}
+      out:fade={{ duration: 300 }}
     >
-      <option value="tenant">Pemilik Toko (Tenant)</option>
-      <option value="designer">Desainer Template (Designer)</option>
-    </select>
-    {#if errors.role}
-      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
-        {errors.role}
-      </span>
-    {/if}
-  </div>
+      <div class="grid grid-cols-1 gap-3 w-full">
+        <!-- Tenant Card -->
+        <button 
+          type="button"
+          class="relative p-4 rounded-xl border text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 group {role === 'tenant' ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-sm' : 'border-light bg-card hover:border-muted hover:shadow-xs'}"
+          on:click={() => { role = 'tenant'; generalError = ""; }}
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+              <Store size={18} strokeWidth={2.5} />
+            </div>
+            <div class="pr-6">
+              <h3 class="font-medium text-main text-sm">Pemilik Toko (Tenant)</h3>
+              <p class="text-xs text-secondary mt-0.5 leading-relaxed">Bangun website UMKM impian tanpa koding.</p>
+            </div>
+          </div>
+          {#if role === 'tenant'}
+            <div class="absolute top-1/2 -translate-y-1/2 right-4 text-primary animate-fade-in-up">
+              <CheckCircle2 size={18} strokeWidth={2.5} />
+            </div>
+          {/if}
+        </button>
+        
+        <!-- Designer Card -->
+        <button 
+          type="button"
+          class="relative p-4 rounded-xl border text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 group {role === 'designer' ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-sm' : 'border-light bg-card hover:border-muted hover:shadow-xs'}"
+          on:click={() => { role = 'designer'; generalError = ""; }}
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+              <PenTool size={18} strokeWidth={2.5} />
+            </div>
+            <div class="pr-6">
+              <h3 class="font-medium text-main text-sm">Desainer Template</h3>
+              <p class="text-xs text-secondary mt-0.5 leading-relaxed">Buat dan jual template desain eksklusif.</p>
+            </div>
+          </div>
+          {#if role === 'designer'}
+            <div class="absolute top-1/2 -translate-y-1/2 right-4 text-primary animate-fade-in-up">
+              <CheckCircle2 size={18} strokeWidth={2.5} />
+            </div>
+          {/if}
+        </button>
+      </div>
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="email">
-      <span class="label-text font-medium text-base-content/80 text-sm">Email</span>
-    </label>
-    <input
-      type="email"
-      id="email"
-      bind:value={email}
-      on:input={() => handleInput("email")}
-      placeholder="anda@contoh.com"
-      class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.email ? 'input-error' : ''}"
-      autocomplete="email"
-    />
-    {#if errors.email}
-      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
-        {errors.email}
-      </span>
-    {/if}
-  </div> 
+      <div class="pt-2">
+        <Button 
+          type="button" 
+          variant="primary" 
+          size="md" 
+          fullWidth 
+          disabled={role === ""}
+          on:click={nextStep}
+        >
+          Lanjutkan
+        </Button>
+      </div>
+      
+      <p class="text-xs text-center text-secondary pt-6 leading-relaxed">
+        Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="text-primary hover:underline font-medium">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="text-primary hover:underline font-medium">Kebijakan Privasi</a>.
+      </p>
+    </div>
+  {:else if step === 2}
+    <form 
+      novalidate 
+      on:submit={handleSubmit} 
+      class="space-y-4 w-full"
+      in:fly={{ x: 20, duration: 400, delay: 400, easing: cubicOut }}
+      out:fade={{ duration: 300 }}
+    >
+      <Input
+        type="text"
+        id="name"
+        bind:value={name}
+        label="Nama Lengkap"
+        error={errors.name}
+        on:input={() => handleInput("name")}
+        placeholder="Nama lengkap Anda"
+        autocomplete="name"
+        size="md"
+        fullWidth
+      />
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="password">
-      <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi</span>
-    </label>
-    <div class="relative">
-      {#if showPassword}
-        <input
-          type="text"
-          id="password"
-          bind:value={password}
-          on:input={() => handleInput("password")}
-          placeholder="Minimal 8 karakter"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-          autocomplete="new-password"
-        />
-      {:else}
-        <input
-          type="password"
-          id="password"
-          bind:value={password}
-          on:input={() => handleInput("password")}
-          placeholder="Minimal 8 karakter"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-          autocomplete="new-password"
-        />
-      {/if}
-      <button
-        type="button"
-        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
-        on:click={togglePasswordVisibility}
-        aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+      <Input
+        type="email"
+        id="email"
+        bind:value={email}
+        label="Email"
+        error={errors.email}
+        on:input={() => handleInput("email")}
+        placeholder="anda@contoh.com"
+        autocomplete="email"
+        size="md"
+        fullWidth
+      />
+
+      <Input
+        type={showPassword ? "text" : "password"}
+        id="password"
+        bind:value={password}
+        label="Kata Sandi"
+        error={errors.password}
+        on:input={() => handleInput("password")}
+        placeholder="Minimal 8 karakter"
+        autocomplete="new-password"
+        size="md"
+        fullWidth
       >
-        <span class="pointer-events-none flex">
+        <button
+          slot="suffix"
+          type="button"
+          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          on:click={togglePasswordVisibility}
+          aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+        >
           {#if showPassword}
             <EyeOff size={16} />
           {:else}
             <Eye size={16} />
           {/if}
-        </span>
-      </button>
-    </div>
-    {#if errors.password}
-      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
-        {errors.password}
-      </span>
-    {/if}
-  </div>
+        </button>
+      </Input>
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="confirmPassword">
-      <span class="label-text font-medium text-base-content/80 text-sm">Konfirmasi Sandi</span>
-    </label>
-    <div class="relative">
-      {#if showConfirmPassword}
-        <input
-          type="text"
-          id="confirmPassword"
-          bind:value={confirmPassword}
-          on:input={() => handleInput("confirmPassword")}
-          placeholder="Ketik ulang kata sandi"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
-          autocomplete="new-password"
-        />
-      {:else}
-        <input
-          type="password"
-          id="confirmPassword"
-          bind:value={confirmPassword}
-          on:input={() => handleInput("confirmPassword")}
-          placeholder="Ketik ulang kata sandi"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.confirmPassword ? 'input-error' : ''}"
-          autocomplete="new-password"
-        />
-      {/if}
-      <button
-        type="button"
-        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
-        on:click={toggleConfirmPasswordVisibility}
-        aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
+      <Input
+        type={showConfirmPassword ? "text" : "password"}
+        id="confirmPassword"
+        bind:value={confirmPassword}
+        label="Konfirmasi Sandi"
+        error={errors.confirmPassword}
+        on:input={() => handleInput("confirmPassword")}
+        placeholder="Ketik ulang kata sandi"
+        autocomplete="new-password"
+        size="md"
+        fullWidth
       >
-        <span class="pointer-events-none flex">
+        <button
+          slot="suffix"
+          type="button"
+          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          on:click={toggleConfirmPasswordVisibility}
+          aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
+        >
           {#if showConfirmPassword}
             <EyeOff size={16} />
           {:else}
             <Eye size={16} />
           {/if}
-        </span>
-      </button>
-    </div>
-    {#if errors.confirmPassword}
-      <span class="text-xs text-error mt-0.5 px-1 flex items-center gap-1 font-medium">
-        {errors.confirmPassword}
-      </span>
-    {/if}
-  </div>
+        </button>
+      </Input>
 
-  <div class="pt-2 w-full flex justify-center">
-    <button type="submit" class="btn btn-primary btn-sm h-10 rounded-full font-semibold w-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" disabled={loading}>
-      {#if loading}
-        <span class="loading loading-spinner loading-sm"></span>
-      {/if}
-      Buat Akun
-    </button>
-  </div>
-</form>
-
-<div class="divider text-[10px] text-base-content/40 uppercase font-medium my-3 w-full">Atau lanjutkan dengan</div>
-
-<div class="w-full">
-  <GoogleAuthButton />
+      <div class="pt-2 flex items-center gap-3 w-full">
+        <Button 
+          type="button" 
+          variant="outline" 
+          size="md" 
+          disabled={loading}
+          on:click={prevStep}
+          class="px-4 shrink-0"
+          aria-label="Kembali ke langkah sebelumnya"
+        >
+          <ArrowLeft size={18} />
+        </Button>
+        <Button 
+          type="submit" 
+          variant="primary" 
+          size="md" 
+          class="flex-1"
+          {loading} 
+          disabled={loading}
+        >
+          Buat Akun Sekarang
+        </Button>
+      </div>
+    </form>
+  {/if}
 </div>
-
-<p class="text-xs text-center text-base-content/60 pt-2 leading-relaxed">
-  Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="link link-primary font-medium">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="link link-primary font-medium">Kebijakan Privasi</a>.
-</p>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { CheckCircle, XCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
@@ -6,6 +7,7 @@
   type Step = 1 | 2 | 3;
 
   let currentStep: Step = 1;
+  const STORAGE_KEY = 'onboarding_state';
 
   // Step 1: Subdomain
   let subdomain = '';
@@ -27,6 +29,36 @@
   // Step 3: Result
   let submitStatus: SubmitStatus = 'idle';
   let submitError = '';
+
+  onMount(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        currentStep = state.currentStep || 1;
+        subdomain = state.subdomain || '';
+        storeName = state.storeName || '';
+        waNumber = state.waNumber || '';
+        googleMapsUrl = state.googleMapsUrl || '';
+        subdomainStatus = state.subdomainStatus || 'idle';
+        subdomainMessage = state.subdomainMessage || '';
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  });
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentStep,
+      subdomain,
+      storeName,
+      waNumber,
+      googleMapsUrl,
+      subdomainStatus,
+      subdomainMessage,
+    }));
+  }
 
   $: isStep1Valid = subdomainStatus === 'available';
   
@@ -131,6 +163,7 @@
   function nextStep() {
     if (currentStep === 1 && isStep1Valid) {
       currentStep = 2;
+      saveState();
     } else if (currentStep === 2) {
       if (validateStep2()) {
         submitOnboard();
@@ -141,6 +174,7 @@
   function prevStep() {
     if (currentStep > 1) {
       currentStep = (currentStep - 1) as Step;
+      saveState();
     }
   }
 
@@ -175,16 +209,17 @@
           currentStep = 1;
           subdomainStatus = 'taken';
           subdomainMessage = 'Subdomain sudah digunakan, silakan pilih yang lain';
+          saveState();
         }
         return;
       }
 
       submitStatus = 'success';
       currentStep = 3;
+      localStorage.removeItem(STORAGE_KEY);
       
-      // Auto-redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/dashboard/store-settings';
       }, 2000);
       
     } catch {
@@ -424,11 +459,11 @@
         </div>
         
         <p class="text-base-content/70 mb-4">
-          Anda akan diarahkan ke Dashboard dalam beberapa detik...
+          Anda akan diarahkan ke Pengaturan Toko dalam beberapa detik...
         </p>
 
-        <a href="/dashboard" class="btn btn-primary w-full">
-          Ke Dashboard Sekarang
+        <a href="/dashboard/store-settings" class="btn btn-primary w-full">
+          Ke Pengaturan Toko Sekarang
         </a>
       </div>
     {/if}

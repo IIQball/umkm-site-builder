@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StoreSettingsForm from '../../components/dashboard/StoreSettingsForm.svelte';
+import StatCard from '../../components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '../../lib/auth';
 import { db } from '../../db';
 import { stores } from '../../db/schema';
@@ -30,7 +31,40 @@ if (!store) {
       </p>
     </div>
 
-    <div class="animate-fade-in-up delay-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <StatCard 
+        client:load
+        label="Nama Toko" 
+        value={store.name || '—'} 
+        icon="storefront" 
+        cardTheme="dark"
+        badge="Bisnis"
+        footerText="Nama toko Anda"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="Subdomain Toko" 
+        value={store.subdomain || '—'} 
+        icon="link" 
+        cardTheme="default"
+        badge="URL"
+        footerText="Domain unik toko"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="Kontak WhatsApp" 
+        value={store.waNumber ? '✓' : '—'} 
+        icon="message" 
+        cardTheme="blue"
+        badge="Hubungi"
+        footerText="Nomor WhatsApp bisnis"
+        delayClass="delay-200"
+      />
+    </div>
+
+    <div class="animate-fade-in-up delay-300">
       <StoreSettingsForm
         client:load
         subdomain={store.subdomain}

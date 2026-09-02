@@ -1,9 +1,10 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { db, stores } from '@/db';
-import { eq } from 'drizzle-orm';
+import { db, stores, storeCategories } from '@/db';
+import { eq, isNull, and } from 'drizzle-orm';
 import CategoryManager from '@/components/dashboard/CategoryManager.svelte';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -13,6 +14,18 @@ if (user.role !== "tenant") return Astro.redirect("/dashboard");
 const userStore = await db.query.stores.findFirst({
   where: eq(stores.userId, user.id),
 });
+
+const categoryList = userStore
+  ? await db.select()
+      .from(storeCategories)
+      .where(and(
+        eq(storeCategories.storeId, userStore.id),
+        isNull(storeCategories.deletedAt)
+      ))
+  : [];
+
+const totalCategories = categoryList.length;
+const activeCategories = categoryList.filter(c => c.status === 'active').length;
 ---
 
 <DashboardLayout title="Kategori Produk" breadcrumb="Kategori">
@@ -47,7 +60,53 @@ const userStore = await db.query.stores.findFirst({
       });
     </script>
 
-    <div class="animate-fade-in-up delay-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Total Kategori" 
+        value={totalCategories} 
+        rawValue={totalCategories}
+        icon="layers" 
+        cardTheme="dark"
+        badge="Organisasi"
+        footerText="Total kategori dibuat"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="Kategori Aktif" 
+        value={activeCategories} 
+        rawValue={activeCategories}
+        icon="check_circle" 
+        cardTheme="default"
+        badge="Aktif"
+        footerText="Kategori yang aktif"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="Tidak Aktif" 
+        value={totalCategories - activeCategories} 
+        rawValue={totalCategories - activeCategories}
+        icon="visibility_off" 
+        cardTheme="orange"
+        badge="Tersembunyi"
+        footerText="Kategori tidak ditampilkan"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Status Organisir" 
+        value="—" 
+        icon="done_all" 
+        cardTheme="blue"
+        badge="Siap"
+        footerText="Kategori terorganisir"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <div class="animate-fade-in-up delay-300">
       <CategoryManager 
         client:load 
         storeId={userStore?.id || ''} 

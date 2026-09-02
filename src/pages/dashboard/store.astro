@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import StatCard from '@/components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import StoreManager from '@/components/tenant/StoreManager.svelte';
 import { db, stores } from '@/db';
@@ -38,7 +39,50 @@ const initialStoreData = userStore ? {
       </p>
     </div>
 
-    <div class="animate-fade-in-up delay-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Nama Toko" 
+        value={userStore?.name || '—'} 
+        icon="storefront" 
+        cardTheme="dark"
+        badge="Identitas"
+        footerText="Nama bisnis Anda"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="Subdomain" 
+        value={userStore?.subdomain || '—'} 
+        icon="link" 
+        cardTheme="default"
+        badge="Domain"
+        footerText="URL toko online"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="WhatsApp" 
+        value={userStore?.waNumber ? '✓' : '—'} 
+        icon="message" 
+        cardTheme="orange"
+        badge="Kontak"
+        footerText="Nomor bisnis WhatsApp"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Onboarding" 
+        value="✓" 
+        icon="check_circle" 
+        cardTheme="blue"
+        badge="Selesai"
+        footerText="Toko siap operasional"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <div class="animate-fade-in-up delay-300">
       <StoreManager client:load initialData={initialStoreData} />
     </div>
   </div>

@@ -2,6 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TrafficWidget from '@/components/dashboard/TrafficWidget.svelte';
 import IncompleteDataWarning from '@/components/dashboard/IncompleteDataWarning.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
@@ -31,6 +32,15 @@ const storeData = store || {
 
 const customization = storeData.customization as Record<string, unknown> | undefined;
 const isOnboarded = customization?.isOnboarded === true;
+
+const conversionRate = storeData.totalViews > 0 
+  ? ((storeData.totalWaClicks / storeData.totalViews) * 100).toFixed(1)
+  : '0.0';
+
+const engagementScore = Math.min(
+  Math.round((parseInt(conversionRate) / 100) * 100),
+  100
+);
 ---
 
 <DashboardLayout user={user}>
@@ -49,8 +59,56 @@ const isOnboarded = customization?.isOnboarded === true;
         <IncompleteDataWarning client:load />
       </div>
     )}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Total Views" 
+        value={storeData.totalViews} 
+        rawValue={storeData.totalViews}
+        icon="visibility" 
+        cardTheme="dark"
+        badge="Pengunjung"
+        footerText="Total kunjungan toko"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="WhatsApp Clicks" 
+        value={storeData.totalWaClicks} 
+        rawValue={storeData.totalWaClicks}
+        icon="message" 
+        cardTheme="default"
+        badge="Kontak"
+        footerText="Klik hubungi via WhatsApp"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="Conversion Rate" 
+        value={`${conversionRate}%`} 
+        rawValue={parseFloat(conversionRate)}
+        icon="trending_up" 
+        cardTheme="orange"
+        badge="Metrik"
+        footerText="Persentase konversi pengunjung"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Engagement Score" 
+        value={engagementScore} 
+        rawValue={engagementScore}
+        icon="poll" 
+        cardTheme="blue"
+        badge="Skor"
+        valueSuffix="/ 100"
+        footerText="Skor engagement toko"
+        delayClass="delay-250"
+      />
+    </div>
     
-    <div class="animate-fade-in-up delay-100">
+    <div class="animate-fade-in-up delay-300">
       <TrafficWidget 
         client:load 
         storeId={storeData.id} 

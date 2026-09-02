@@ -19,6 +19,9 @@ const [store] = await db.select().from(stores).where(eq(stores.userId, user.id))
 if (!store) {
   return Astro.redirect('/onboarding');
 }
+
+const customization = (store.customization as Record<string, unknown>) || {};
+const isOpen = customization.isOpen !== false;
 ---
 
 <DashboardLayout title="Pengaturan Toko">
@@ -36,6 +39,7 @@ if (!store) {
       initialStoreName={store.name}
       initialWaNumber={store.waNumber}
       initialGoogleMapsUrl={store.googleMapsUrl || ''}
+      initialIsOpen={isOpen}
     />
   </div>
 </DashboardLayout>

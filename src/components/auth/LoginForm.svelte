@@ -3,6 +3,8 @@
   import { LoginSchema } from "@/schemas/auth.schema";
   import { Eye, EyeOff } from "lucide-svelte";
   import GoogleAuthButton from "./GoogleAuthButton.svelte";
+  import Input from "@/components/ui/Input.svelte";
+  import Button from "@/components/ui/Button.svelte";
 
   let email = "";
   let password = "";
@@ -76,91 +78,70 @@
   };
 </script>
 
-<form novalidate on:submit={handleSubmit} class="space-y-2 w-full">
+<form novalidate on:submit={handleSubmit} class="space-y-4 w-full">
   {#if generalError}
-    <div class="p-2 rounded-lg bg-error/10 text-error text-sm font-medium border border-error/20 text-center w-full">
+    <div class="p-4 rounded-2xl bg-error/10 text-error text-body-sm font-medium border border-error/20 text-center w-full animate-fade-in-up">
       {generalError}
     </div>
   {/if}
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="email">
-      <span class="label-text font-medium text-base-content/80 text-sm">Email</span>
-    </label>
-    <input
-      type="email"
-      id="email"
-      bind:value={email}
-      on:input={() => handleInput("email")}
-      placeholder="anda@contoh.com"
-      class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors {errors.email ? 'input-error' : ''}"
-      autocomplete="email"
-    />
-    {#if errors.email}
-      <span class="text-xs text-error mt-0.5 px-1">{errors.email}</span>
-    {/if}
-  </div>
+  <Input
+    type="email"
+    id="email"
+    bind:value={email}
+    label="Email"
+    error={errors.email}
+    on:input={() => handleInput("email")}
+    placeholder="anda@contoh.com"
+    autocomplete="email"
+    size="md"
+    fullWidth
+  />
 
-  <div class="form-control w-full">
-    <label class="label pt-0 pb-0.5" for="password">
-      <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi</span>
-    </label>
-    <div class="relative">
-      {#if showPassword}
-        <input
-          type="text"
-          id="password"
-          bind:value={password}
-          on:input={() => handleInput("password")}
-          placeholder="Masukkan kata sandi"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-          autocomplete="current-password"
-        />
-      {:else}
-        <input
-          type="password"
-          id="password"
-          bind:value={password}
-          on:input={() => handleInput("password")}
-          placeholder="Masukkan kata sandi"
-          class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10 {errors.password ? 'input-error' : ''}"
-          autocomplete="current-password"
-        />
-      {/if}
+  <div class="space-y-1">
+    <Input
+      type={showPassword ? "text" : "password"}
+      id="password"
+      bind:value={password}
+      label="Kata Sandi"
+      error={errors.password}
+      on:input={() => handleInput("password")}
+      placeholder="Masukkan kata sandi"
+      autocomplete="current-password"
+      size="md"
+      fullWidth
+    >
       <button
+        slot="suffix"
         type="button"
-        class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+        class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
         on:click={togglePasswordVisibility}
         aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
       >
-        <span class="pointer-events-none flex">
-          {#if showPassword}
-            <EyeOff size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
-        </span>
+        {#if showPassword}
+          <EyeOff size={16} />
+        {:else}
+          <Eye size={16} />
+        {/if}
       </button>
-    </div>
-    {#if errors.password}
-      <span class="text-xs text-error mt-0.5 px-1">{errors.password}</span>
-    {/if}
-    <div class="flex justify-end mt-1 mb-1">
-      <a href="/auth/forgot-password" class="text-xs font-medium text-primary hover:underline transition-all">Lupa Password?</a>
+    </Input>
+    <div class="flex justify-end pt-1">
+      <a href="/auth/forgot-password" class="text-body-sm font-medium text-primary hover:underline transition-all">Lupa Password?</a>
     </div>
   </div>
 
-  <div class="pt-2 w-full flex justify-center">
-    <button type="submit" class="btn btn-primary btn-sm h-10 rounded-full font-semibold w-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" disabled={loading}>
-      {#if loading}
-        <span class="loading loading-spinner loading-sm"></span>
-      {/if}
+  <div class="pt-2 w-full">
+    <Button type="submit" variant="primary" size="lg" fullWidth {loading} disabled={loading}>
       Masuk
-    </button>
+    </Button>
   </div>
 </form>
 
-<div class="divider text-[10px] text-base-content/40 uppercase font-medium my-3 w-full">Atau lanjutkan dengan</div>
+<div class="flex items-center gap-4 my-6 w-full">
+  <div class="flex-1 h-px bg-border-light"></div>
+  <span class="text-label-caps text-muted">Atau lanjutkan dengan</span>
+  <div class="flex-1 h-px bg-border-light"></div>
+</div>
 
 <div class="w-full">
   <GoogleAuthButton />

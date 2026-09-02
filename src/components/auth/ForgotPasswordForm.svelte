@@ -61,13 +61,13 @@
 
 <form novalidate on:submit={handleSubmit} class="space-y-4 w-full">
   {#if error}
-    <div class="p-3 rounded-xl bg-error/10 text-error text-sm font-medium border border-error/20 text-center w-full">
+    <div class="p-4 rounded-2xl bg-error/10 text-error text-body-sm font-medium border border-error/20 text-center w-full animate-fade-in-up">
       {error}
     </div>
   {/if}
 
   {#if successMessage}
-    <div class="p-3 rounded-xl bg-success/10 text-success text-sm font-medium border border-success/20 text-center w-full">
+    <div class="p-4 rounded-2xl bg-success/10 text-success text-body-sm font-medium border border-success/20 text-center w-full animate-fade-in-up">
       {successMessage}
     </div>
   {/if}
@@ -79,10 +79,12 @@
     placeholder="anda@contoh.com"
     required
     disabled={loading}
+    size="md"
+    fullWidth
   />
 
-  <div class="pt-2">
-    <Button type="submit" variant="primary" fullWidth loading={loading}>
+  <div class="pt-2 w-full">
+    <Button type="submit" variant="primary" size="lg" fullWidth {loading} disabled={loading}>
       Kirim Link Reset Password
     </Button>
   </div>

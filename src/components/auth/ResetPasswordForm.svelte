@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { z } from "zod";
   import Button from "@/components/ui/Button.svelte";
+  import Input from "@/components/ui/Input.svelte";
   import { Eye, EyeOff } from "lucide-svelte";
   import { authClient } from "@/lib/auth-client";
 
@@ -88,110 +89,75 @@
   };
 </script>
 
-<form novalidate on:submit={handleSubmit} class="space-y-4 w-full">
+<form novalidate on:submit={handleSubmit} class="space-y-5 w-full">
   {#if error}
-    <div class="p-3 rounded-xl bg-error/10 text-error text-sm font-medium border border-error/20 text-center w-full">
+    <div class="p-4 rounded-2xl bg-error/10 text-error text-body-sm font-medium border border-error/20 text-center w-full animate-fade-in-up">
       {error}
     </div>
   {/if}
 
   {#if successMessage}
-    <div class="p-3 rounded-xl bg-success/10 text-success text-sm font-medium border border-success/20 text-center w-full space-y-3">
+    <div class="p-4 rounded-2xl bg-success/10 text-success text-body-sm font-medium border border-success/20 text-center w-full space-y-4 animate-fade-in-up">
       <p>{successMessage}</p>
-      <Button href="/auth/login" variant="primary" size="sm" fullWidth>
+      <Button href="/auth/login" variant="primary" size="md" fullWidth>
         Menuju Halaman Masuk
       </Button>
     </div>
   {:else}
-    <div class="form-control w-full">
-      <label class="label pt-0 pb-0.5" for="password">
-        <span class="label-text font-medium text-base-content/80 text-sm">Kata Sandi Baru</span>
-      </label>
-      <div class="relative">
-        {#if showPassword}
-          <input
-            type="text"
-            id="password"
-            bind:value={password}
-            placeholder="Minimal 8 karakter"
-            class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10"
-            disabled={loading || !isTokenValid}
-          />
-        {:else}
-          <input
-            type="password"
-            id="password"
-            bind:value={password}
-            placeholder="Minimal 8 karakter"
-            class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10"
-            disabled={loading || !isTokenValid}
-          />
-        {/if}
+    <div class="space-y-4">
+      <Input
+        label="Kata Sandi Baru"
+        id="password"
+        type={showPassword ? "text" : "password"}
+        bind:value={password}
+        placeholder="Minimal 8 karakter"
+        disabled={loading || !isTokenValid}
+        size="md"
+      >
         <button
+          slot="suffix"
           type="button"
-          class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
           on:click={togglePasswordVisibility}
           aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
-          <span class="pointer-events-none flex">
-            {#if showPassword}
-              <EyeOff size={16} />
-            {:else}
-              <Eye size={16} />
-            {/if}
-          </span>
+          {#if showPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
         </button>
-      </div>
-    </div>
+      </Input>
 
-    <div class="form-control w-full">
-      <label class="label pt-0 pb-0.5" for="confirmPassword">
-        <span class="label-text font-medium text-base-content/80 text-sm">Konfirmasi Kata Sandi</span>
-      </label>
-      <div class="relative">
-        {#if showConfirmPassword}
-          <input
-            type="text"
-            id="confirmPassword"
-            bind:value={confirmPassword}
-            placeholder="Ulangi kata sandi baru"
-            class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10"
-            disabled={loading || !isTokenValid}
-          />
-        {:else}
-          <input
-            type="password"
-            id="confirmPassword"
-            bind:value={confirmPassword}
-            placeholder="Ulangi kata sandi baru"
-            class="input input-sm h-10 input-bordered w-full bg-base-200/30 focus:bg-base-100 transition-colors pr-10"
-            disabled={loading || !isTokenValid}
-          />
-        {/if}
+      <Input
+        label="Konfirmasi Kata Sandi"
+        id="confirmPassword"
+        type={showConfirmPassword ? "text" : "password"}
+        bind:value={confirmPassword}
+        placeholder="Ulangi kata sandi baru"
+        disabled={loading || !isTokenValid}
+        size="md"
+      >
         <button
+          slot="suffix"
           type="button"
-          class="absolute inset-y-0 right-0 flex items-center px-4 z-20 cursor-pointer text-base-content/60 hover:text-base-content transition-colors"
+          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
           on:click={toggleConfirmPasswordVisibility}
           aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
-          <span class="pointer-events-none flex">
-            {#if showConfirmPassword}
-              <EyeOff size={16} />
-            {:else}
-              <Eye size={16} />
-            {/if}
-          </span>
+          {#if showConfirmPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
         </button>
-      </div>
+      </Input>
     </div>
 
-    <div class="pt-2 w-full flex justify-center">
-      <button type="submit" class="btn btn-primary btn-sm h-10 rounded-full font-semibold w-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" disabled={!isTokenValid || loading}>
-        {#if loading}
-          <span class="loading loading-spinner loading-sm"></span>
-        {/if}
+    <div class="pt-2 w-full">
+      <Button type="submit" variant="primary" size="lg" fullWidth disabled={!isTokenValid || loading} {loading}>
         Simpan Kata Sandi Baru
-      </button>
+      </Button>
     </div>
   {/if}
 </form>

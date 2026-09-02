@@ -39,10 +39,12 @@ export const auth = betterAuth({
     },
   },
   socialProviders: {
-    google: {
-      clientId: (process.env.GOOGLE_CLIENT_ID || import.meta.env.GOOGLE_CLIENT_ID) as string,
-      clientSecret: (process.env.GOOGLE_CLIENT_SECRET || import.meta.env.GOOGLE_CLIENT_SECRET) as string,
-    },
+    ...(process.env.GOOGLE_CLIENT_ID || import.meta.env?.GOOGLE_CLIENT_ID ? {
+      google: {
+        clientId: (process.env.GOOGLE_CLIENT_ID || import.meta.env?.GOOGLE_CLIENT_ID) as string,
+        clientSecret: (process.env.GOOGLE_CLIENT_SECRET || import.meta.env?.GOOGLE_CLIENT_SECRET) as string,
+      },
+    } : {}),
   },
   account: {
     accountLinking: {

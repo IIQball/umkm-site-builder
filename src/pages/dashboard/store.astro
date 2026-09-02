@@ -18,6 +18,14 @@ const userStore = await db.query.stores.findFirst({
   where: eq(stores.userId, user.id),
 });
 
+// Jika belum ada toko atau belum onboarded, redirect ke onboarding
+const customization = userStore?.customization as Record<string, unknown> | undefined;
+const isOnboarded = customization?.isOnboarded === true;
+
+if (!userStore || !isOnboarded) {
+  return Astro.redirect('/onboarding');
+}
+
 // Jika kita belum memiliki toko, kita set null
 const initialStoreData = userStore ? {
   id: userStore.id,

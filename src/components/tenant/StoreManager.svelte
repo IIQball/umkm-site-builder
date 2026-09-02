@@ -122,22 +122,25 @@
             />
           </div>
 
-          <div class="form-control">
-            <label class="label mb-1" for="subdomain">
-              <span class="label-text font-medium text-base-content">Subdomain</span>
-            </label>
-            <div class="relative flex items-center">
-              <input
-                type="text"
-                id="subdomain"
-                bind:value={subdomain}
-                placeholder="kopikenangan"
-                class="input input-bordered w-full bg-base-100 pr-[140px] focus:input-primary transition-colors"
-                required
-              />
-              <span class="absolute right-4 text-base-content/50 text-sm select-none pointer-events-none">.mudapedia.com</span>
-            </div>
-          </div>
+           <div class="form-control">
+             <label class="label mb-1" for="subdomain">
+               <span class="label-text font-medium text-base-content">Subdomain</span>
+             </label>
+             <div class="relative flex items-center">
+               <input
+                 type="text"
+                 id="subdomain"
+                 value={subdomain}
+                 placeholder="kopikenangan"
+                 class="input input-bordered w-full bg-base-200 pr-[140px] focus:input-primary transition-colors"
+                 disabled
+               />
+               <span class="absolute right-4 text-base-content/50 text-sm select-none pointer-events-none">.mudapedia.com</span>
+             </div>
+             <div class="label mt-1">
+               <span class="label-text-alt text-base-content/50">Tidak dapat diubah setelah pembuatan toko</span>
+             </div>
+           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -3,6 +3,7 @@
   import { CheckCircle, XCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
+  import { subdomainField } from '@/lib/validators/subdomain';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -218,7 +219,7 @@
       localStorage.removeItem(STORAGE_KEY);
       
       setTimeout(() => {
-        window.location.href = '/dashboard/store-settings';
+        window.location.href = '/dashboard/store';
       }, 2000);
       
     } catch {

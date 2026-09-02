@@ -1,12 +1,13 @@
 import type { APIRoute } from 'astro';
 import { handleApiRoute, jsonError } from '@/lib/utils/api-handler';
 import { db } from '@/db';
-import { stores } from '@/db/schema';
+import { stores, templates, templateCategories } from '@/db/schema';
 import { eq, ilike, or, and, desc, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const SearchQuerySchema = z.object({
   q: z.string().optional(),
+  category: z.string().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(12),
 });
@@ -21,7 +22,7 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
       return jsonError('Parameter pencarian tidak valid', 400, parsed.error.format(), 'VALIDATION_ERROR');
     }
   
-  const { q, page, limit } = parsed.data;
+  const { q, category, page, limit } = parsed.data;
   const offset = (page - 1) * limit;
 
   const conditions = [
@@ -39,11 +40,17 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
     );
   }
 
+  if (category) {
+    conditions.push(eq(templateCategories.slug, category));
+  }
+
   // Execute both count and data queries in parallel
   const [countResult, results] = await Promise.all([
     db
       .select({ count: sql<number>`cast(count(${stores.id}) as integer)` })
       .from(stores)
+      .leftJoin(templates, eq(stores.templateId, templates.id))
+      .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
       .where(and(...conditions)),
       
     db
@@ -56,6 +63,8 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
         customization: stores.customization,
       })
       .from(stores)
+      .leftJoin(templates, eq(stores.templateId, templates.id))
+      .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
       .where(and(...conditions))
       .orderBy(desc(stores.totalViews), desc(stores.createdAt))
       .limit(limit)

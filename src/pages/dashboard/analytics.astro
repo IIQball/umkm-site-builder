@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TrafficWidget from '@/components/dashboard/TrafficWidget.svelte';
+import IncompleteDataWarning from '@/components/dashboard/IncompleteDataWarning.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
@@ -21,18 +22,29 @@ const [store] = await db
   .from(stores)
   .where(eq(stores.userId, user.id));
 
-if (!store) {
-  return Astro.redirect('/onboarding');
-}
+const storeData = store || { 
+  id: '', 
+  totalViews: 0, 
+  totalWaClicks: 0,
+  customization: {}
+};
+
+const customization = storeData.customization as Record<string, unknown> | undefined;
+const isOnboarded = customization?.isOnboarded === true;
 ---
 
 <DashboardLayout user={user}>
   <div class="container mx-auto px-4 py-8">
+    {!isOnboarded && (
+      <IncompleteDataWarning client:load />
+    )}
+    
     <TrafficWidget 
       client:load 
-      storeId={store.id} 
-      initialViews={store.totalViews}
-      initialClicks={store.totalWaClicks}
+      storeId={storeData.id} 
+      initialViews={storeData.totalViews}
+      initialClicks={storeData.totalWaClicks}
+      isOnboarded={isOnboarded}
     />
   </div>
 </DashboardLayout>

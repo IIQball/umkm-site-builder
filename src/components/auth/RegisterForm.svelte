@@ -2,7 +2,6 @@
   import { authClient } from "@/lib/auth-client";
   import { RegisterSchema } from "@/schemas/auth.schema";
   import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft } from "lucide-svelte";
-  import GoogleAuthButton from "./GoogleAuthButton.svelte";
   import Input from "@/components/ui/Input.svelte";
   import Button from "@/components/ui/Button.svelte";
   import { fade, fly } from "svelte/transition";
@@ -184,17 +183,7 @@
         </Button>
       </div>
       
-      <div class="flex items-center gap-4 my-5 w-full">
-        <div class="flex-1 h-px bg-border-light"></div>
-        <span class="text-label-caps text-muted">Atau lanjutkan dengan</span>
-        <div class="flex-1 h-px bg-border-light"></div>
-      </div>
-
-      <div class="w-full">
-        <GoogleAuthButton />
-      </div>
-
-      <p class="text-xs text-center text-secondary pt-1 leading-relaxed">
+      <p class="text-xs text-center text-secondary pt-6 leading-relaxed">
         Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="text-primary hover:underline font-medium">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="text-primary hover:underline font-medium">Kebijakan Privasi</a>.
       </p>
     </div>

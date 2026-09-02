@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import Navbar from '@/components/common/Navbar.astro';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
+import RateLimitAlert from '@/components/ui/RateLimitAlert.svelte';
 
 interface Props {
   title?: string;
@@ -34,6 +35,7 @@ const {
   </head>
   <body class="overflow-x-hidden">
     <ToastContainer client:load />
+    <RateLimitAlert client:load />
     {!hideNavbar && <Navbar />}
     <slot />
   </body>

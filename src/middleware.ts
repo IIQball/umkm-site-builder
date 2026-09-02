@@ -1,15 +1,50 @@
 import { defineMiddleware } from "astro:middleware";
 import { auth } from "@/lib/auth";
 import { extractSubdomain } from "@/lib/routing/subdomain";
+import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 
 // Domain utama aplikasi, sesuaikan dengan environment
 const MAIN_DOMAIN = import.meta.env.PUBLIC_MAIN_DOMAIN || 'localhost:4321';
+
+// Inisialisasi Rate Limiter untuk API:
+// 1. Read (GET): Longgar untuk memuat data (30 request / menit)
+const apiReadLimiter = new InMemoryRateLimiter(30, 60 * 1000);
+// 2. Write (POST/PUT/DELETE): Ketat untuk mencegah spam klik (5 request / menit)
+const apiWriteLimiter = new InMemoryRateLimiter(5, 60 * 1000);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // --- SUBDOMAIN DETECTION LOGIC ---
   const host = context.request.headers.get('host') || context.request.headers.get('x-forwarded-host') || '';
   const url = new URL(context.request.url);
+  const { pathname } = context.url;
   
+  // --- RATE LIMITING LOGIC ---
+  if (pathname.startsWith('/api/')) {
+    // Gunakan clientAddress dari Astro atau fallback ke header x-forwarded-for
+    let clientIp = 'unknown';
+    try {
+      clientIp = context.clientAddress || context.request.headers.get('x-forwarded-for') || 'unknown';
+    } catch {
+      clientIp = context.request.headers.get('x-forwarded-for') || 'unknown';
+    }
+
+    // Gunakan limiter yang sesuai berdasarkan HTTP Method
+    const method = context.request.method;
+    const isAllowed = method === 'GET' 
+      ? apiReadLimiter.check(clientIp) 
+      : apiWriteLimiter.check(clientIp);
+    
+    if (!isAllowed) {
+      return new Response(JSON.stringify({ error: 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.' }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': '60'
+        }
+      });
+    }
+  }
+
   const subdomain = extractSubdomain(host, MAIN_DOMAIN);
 
   // Simpan subdomain di locals agar bisa diakses di route handlers
@@ -41,7 +76,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.session = null;
   }
 
-  const { pathname } = context.url;
   const user = context.locals.user;
   
   // Redirect designer from general entry point /dashboard to designer templates

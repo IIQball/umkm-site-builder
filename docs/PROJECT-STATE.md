@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-09-01 by feature/h7-dina-password-reset
+Status: LIVE · Updated: 2026-09-02 by feature/h8-dina-rate-limiter
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -12,6 +12,11 @@ Keep it short and current. This is a checkpoint, not a changelog.
 ## Where the work stands
 
 AI-Slop decorative elements (loud gradient glows, top beam accents, skeuomorphic ATM cards, neon borders) have been completely removed across the entire UI and replaced with clean, industrial SaaS design system standards (Linear / Emil Kowalski / Stripe aesthetic). 45 test files (315 tests) passing, 0 typecheck errors, 0 lint warnings.
+
+- **In-Memory Rate Limiter (Public APIs):**
+  - Implemented `InMemoryRateLimiter` utility to protect all `/api/` endpoints across the platform.
+  - Set strict, user-safe limits of **30 requests per minute** per IP address in Astro `src/middleware.ts` to block bot spam and brute-force attacks (`429 Too Many Requests`).
+  - Added global, headless `RateLimitAlert.svelte` component to intercept `window.fetch` and trigger standard UI toast alerts when hitting the limit, matching the dashboard aesthetics.
 
 - **Password Reset Flow Integration:**
   - Implemented the full forgot/reset password flow using BetterAuth verification tokens and Resend API via HTTP fetch (bypassing Cloudflare Node compatibility issues).

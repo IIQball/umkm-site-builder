@@ -177,20 +177,36 @@ umkm-site-builder/
 │   │   │   │   │   ├── FooterNewsletter.svelte # [39 baris] Preset footer langganan newsletter
 │   │   │   │   │   └── FooterSocialShowcase.svelte# [27 baris] Preset footer showcase media sosial
 │   │   │   │   ├── header/
-│   │   │   │   │   ├── AnnouncementBar.svelte  # [74 baris] Baris pengumuman di atas navigasi
-│   │   │   │   │   ├── HeaderCommandSearch.svelte# [43 baris] Preset header pencarian cepat command palette
-│   │   │   │   │   ├── HeaderLogo.svelte       # [85 baris] Elemen visual logo website toko
-│   │   │   │   │   ├── HeaderMegaMenu.svelte   # [75 baris] Preset header mega menu navigasi
-│   │   │   │   │   ├── HeaderNav.svelte        # [206 baris] Elemen menu navigasi toko
-│   │   │   │   │   └── HeaderPillIsland.svelte # [41 baris] Preset header floating pill island
+│   │   │   │   │   ├── AnnouncementBar.svelte  # [69 baris] Baris pengumuman di atas navigasi
+│   │   │   │   │   ├── HeaderCommandSearch.svelte# [120 baris] Preset header pencarian cepat command palette
+│   │   │   │   │   ├── HeaderDeliveryOrder.svelte# [79 baris] Preset header promo kirim instan & opsi kurir
+│   │   │   │   │   ├── HeaderLogo.svelte       # [80 baris] Elemen visual logo website toko
+│   │   │   │   │   ├── HeaderMegaMenu.svelte   # [112 baris] Preset header mega menu navigasi
+│   │   │   │   │   ├── HeaderMobileDrawer.svelte# [162 baris] Drawer menu navigasi seluler dengan true overlay
+│   │   │   │   │   ├── HeaderNav.svelte        # [190 baris] Elemen menu navigasi toko
+│   │   │   │   │   ├── HeaderPillIsland.svelte # [62 baris] Preset header floating pill island
+│   │   │   │   │   ├── HeaderPromoCountdown.svelte# [124 baris] Preset header promo banner countdown flash sale
+│   │   │   │   │   └── HeaderStoreBadge.svelte # [72 baris] Preset header sorotan legalitas BPOM & Halal toko
 │   │   │   │   ├── hero/
-│   │   │   │   │   ├── HeroCenteredMinimal.svelte# [77 baris] Template hero minimalis tengah
-│   │   │   │   │   ├── HeroElementToolbar.svelte# [102 baris] Floating toolbar elemen teks/gambar hero
-│   │   │   │   │   ├── HeroEmailCapture.svelte # [42 baris] Preset hero penangkap email prospek
-│   │   │   │   │   ├── HeroFloatingCards.svelte# [49 baris] Preset hero kartu mengambang 3D
-│   │   │   │   │   ├── HeroFullBanner.svelte   # [66 baris] Template hero latar belakang penuh
-│   │   │   │   │   ├── HeroSplitLayout.svelte  # [153 baris] Template hero 50/50 visual terpisah
-│   │   │   │   │   └── HeroTerminalCode.svelte # [56 baris] Preset hero gaya terminal developer
+│   │   │   │   │   ├── HeroBadgeTicker.svelte  # [85 baris] Preset hero badge ticker sertifikasi mutu & stempel
+│   │   │   │   │   ├── HeroBentoGrid.svelte    # [94 baris] Preset hero bento grid ubin visual & promo
+│   │   │   │   │   ├── HeroCenteredMinimal.svelte# [70 baris] Template hero minimalis tengah
+│   │   │   │   │   ├── HeroChatSimulation.svelte# [73 baris] Preset hero simulasi chat WhatsApp interaktif
+│   │   │   │   │   ├── HeroDualContrast.svelte # [78 baris] Preset hero duo-tone kontras kuota & pendaftaran
+│   │   │   │   │   ├── HeroDualProduct.svelte  # [89 baris] Preset hero showcase 2 kartu produk terlaris
+│   │   │   │   │   ├── HeroEditorialSerif.svelte# [68 baris] Preset hero editorial mewah tipografi serif
+│   │   │   │   │   ├── HeroElementToolbar.svelte# [94 baris] Floating toolbar elemen teks/gambar hero
+│   │   │   │   │   ├── HeroEmailCapture.svelte # [38 baris] Preset hero penangkap email prospek
+│   │   │   │   │   ├── HeroFloatingCards.svelte# [45 baris] Preset hero kartu mengambang 3D
+│   │   │   │   │   ├── HeroFounderStory.svelte # [76 baris] Preset hero kisah profil pendiri & artisan
+│   │   │   │   │   ├── HeroFullBanner.svelte   # [60 baris] Template hero latar belakang penuh
+│   │   │   │   │   ├── HeroPillCategory.svelte # [67 baris] Preset hero pemilih kategori produk pill filter
+│   │   │   │   │   ├── HeroSideBooking.svelte  # [97 baris] Preset hero form booking janji temu samping
+│   │   │   │   │   ├── HeroSocialProof.svelte  # [82 baris] Preset hero avatar wall komunitas & ulasan rating
+│   │   │   │   │   ├── HeroSplitLayout.svelte  # [145 baris] Template hero 50/50 visual terpisah
+│   │   │   │   │   ├── HeroStatCounter.svelte  # [85 baris] Preset hero split kolom dengan 3 baris metrik angka
+│   │   │   │   │   ├── HeroStickerPlayful.svelte# [73 baris] Preset hero gaya playful stiker miring dinamis
+│   │   │   │   │   └── HeroTerminalCode.svelte # [52 baris] Preset hero gaya terminal developer
 │   │   │   │   ├── maps/
 │   │   │   │   │   ├── MapsDirectionsGuide.svelte# [35 baris] Preset maps panduan rute & navigasi
 │   │   │   │   │   └── MapsMultiBranch.svelte  # [32 baris] Preset maps banyak cabang toko UMKM
@@ -203,8 +219,8 @@ umkm-site-builder/
 │   │   │   │   ├── Features.svelte             # [⚠️ mepet 300 baris - 275 baris] Komponen visual daftar keunggulan/layanan
 │   │   │   │   ├── Footer.svelte               # [165 baris] Footer publik website toko tenant
 │   │   │   │   ├── GoogleMaps.svelte           # [156 baris] Komponen visual embed lokasi Google Maps
-│   │   │   │   ├── HeaderAnnouncement.svelte   # [165 baris] Komponen visual announcement bar
-│   │   │   │   ├── Hero.svelte                 # [240 baris] Banner hero publik website toko tenant
+│   │   │   │   ├── HeaderAnnouncement.svelte   # [⚠️ mepet 300 baris - 299 baris] Komponen visual announcement bar
+│   │   │   │   ├── Hero.svelte                 # [⚠️ >300 baris - 471 baris] Banner hero publik website toko tenant
 │   │   │   │   ├── productCatalog.helpers.ts   # [55 baris] Helper load data produk toko
 │   │   │   │   ├── ProductCatalog.svelte       # [242 baris] Komponen visual daftar katalog produk
 │   │   │   │   ├── SectionRenderer.svelte      # [166 baris] Renderer block layout editor no-code
@@ -269,11 +285,12 @@ umkm-site-builder/
 │   │   │   ├── orders/
 │   │   │   │   └── DesignerOrderRow.svelte     # [100 baris] Baris tabel pesanan template desainer
 │   │   │   ├── templates/
+│   │   │   │   ├── DesignerDeleteDraftModal.svelte# [80 baris] Modal validasi hard delete draf template desainer
 │   │   │   │   ├── DesignerRejectionModal.svelte# [46 baris] Modal alasan penolakan template desainer
-│   │   │   │   └── DesignerTemplateRow.svelte  # [131 baris] Baris data tabel kelola template desainer
+│   │   │   │   └── DesignerTemplateRow.svelte  # [160 baris] Baris data tabel kelola template desainer
 │   │   │   ├── wallet/
 │   │   │   │   ├── DesignerWeeklyChart.svelte  # [105 baris] Grafik tren pendapatan mingguan desainer
-│   │   │   │   └── wallet.helpers.ts           # [44 baris] Helper kalkulasi saldo & mutasi dompet
+│   │   │   │   └── wallet.helpers.ts           # [78 baris] Helper kalkulasi saldo & mutasi dompet
 │   │   │   ├── DesignerBankCard.svelte         # [174 baris] Kartu info rekening bank terhubung desainer
 │   │   │   ├── DesignerBankModal.svelte        # [107 baris] Modal data rekening bank desainer
 │   │   │   ├── DesignerBankWithdraw.svelte     # [⚠️ mepet 300 baris - 294 baris] Form rekening bank & modal payout desainer
@@ -528,9 +545,9 @@ umkm-site-builder/
 │   │   ├── templates/
 │   │   │   ├── index.ts                        # [6 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── template-category.schema.ts     # [28 baris] Skema Zod validasi kategori template
-│   │   │   ├── template.defaults.ts            # [240 baris] Default konfigurasi sections & themes template
+│   │   │   ├── template.defaults.ts            # [241 baris] Default konfigurasi sections & themes template
 │   │   │   ├── template.presets.ts             # [126 baris] Skema Zod validasi preset layout section
-│   │   │   ├── template.schema.ts              # [148 baris] Skema Zod visual draf & metadata template
+│   │   │   ├── template.schema.ts              # [147 baris] Skema Zod visual draf & metadata template
 │   │   │   └── template.tokens.ts              # [46 baris] Skema Zod token warna & tipografi template
 │   │   ├── auth.schema.ts                      # [40 baris] Skema Zod validasi kredensial pengguna
 │   │   ├── index.ts                            # [13 baris] Registri sentral modularisasi modul section builder
@@ -596,6 +613,7 @@ umkm-site-builder/
 │   │   │   └── index.test.ts                   # [102 baris] Uji API CRUD kategori produk tenant
 │   │   ├── designer/
 │   │   │   ├── templates/
+│   │   │   │   ├── draft-delete.test.ts        # [103 baris] Uji API hard delete draf template desainer
 │   │   │   │   └── submit-review.test.ts       # [210 baris] Uji API pengajuan review template desainer
 │   │   │   ├── bank-account.test.ts            # [⚠️ mepet 300 baris - 250 baris] Uji API CRUD rekening desainer
 │   │   │   ├── payout-status.test.ts           # [90 baris] Uji API status penarikan dana desainer
@@ -677,109 +695,183 @@ Berikut adalah detail spesifikasi arsitektur teknis dari no-code visual template
 
 ### 1. Spesifikasi Modular Section & Layout Presets
 
-Seluruh section terdaftar di **Section Registry Central** (`src/components/builder/registry/index.ts`). Terdapat total **8 Tipe Section** dengan **24 Varian Layout Preset** (masing-masing section memiliki 3 hingga 4 preset layout terisolasi).
+Seluruh section terdaftar di **Section Registry Central** (`src/components/builder/registry/index.ts`). Terdapat total **8 Tipe Section** dengan **94 Varian Layout Preset** (Header memiliki 12 preset terisolasi, Hero memiliki 22 preset terisolasi, dan 6 section lainnya masing-masing memiliki 10 preset layout).
 
 Di bawah ini adalah penjelasan detail per section, jumlah layout, serta perilaku dan representasi visual layout tersebut di ketiga ukuran device (**Desktop: 1200px**, **Tablet: 768px**, dan **Mobile: 375px**):
 
 ---
 
-#### A. Header & Announcement (`header_announcement`) — 3 Layout Presets
+#### A. Header & Announcement (`header_announcement`) — 12 Layout Presets
 Komponen utama: `src/components/builder/sections/HeaderAnnouncement.svelte`  
-Komponen pendukung: `AnnouncementBar.svelte`, `HeaderLogo.svelte`, `HeaderNav.svelte`.  
+Komponen pendukung: `AnnouncementBar.svelte`, `HeaderLogo.svelte`, `HeaderNav.svelte`, `HeaderPillIsland.svelte`, `HeaderMegaMenu.svelte`, `HeaderCommandSearch.svelte`, `HeaderDeliveryOrder.svelte`, `HeaderStoreBadge.svelte`, `HeaderPromoCountdown.svelte`, `HeaderMobileDrawer.svelte`.  
 Karakteristik: `isFullBleed = true` (melebar 100% viewport).
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`default_split`** *(Default)* | **2 Baris Terpisah**: Baris 1 memuat Announcement Bar di atas (fullwidth, `py-2`). Baris 2 Navbar setinggi `64px`: Logo di kiri, menu navigasi (`HeaderNav`) di kanan, dan tombol CTA Chat WhatsApp di ujung kanan. | Announcement Bar tetap di atas; Navbar mempertahankan Logo di kiri dan menu navigasi di kanan dengan padding safe zone `24px`. | Announcement Bar tetap aktif di atas; Navbar menyederhanakan tata letak (tombol CTA WhatsApp disembunyikan `hidden sm:flex` agar logo dan menu nav pas dalam 1 baris tanpa wrapping berlebih). |
-| **`centered_stacked`** | **2 Baris Terpusat**: Announcement Bar di atas. Navbar bertumpuk vertikal di tengah (`flex-col items-center justify-center gap-4 py-4`): Logo toko berada di baris atas tengah, menu nav links horizontal rapi di baris bawah tengah dengan `gap-6`. | Logo tetap di baris tengah atas, deretan nav links horizontal di tengah bawah dengan safe-margin `24px`. | Logo terpusat di tengah atas, deretan nav links otomatis membungkus (*flex-wrap*) di tengah bawah dengan ukuran padding `16px`. |
-| **`compact_inline`** | **1 Baris Ramping Tunggal (`h-14` / 56px)**: Announcement Bar ditiadakan. Logo di sisi kiri, menu navigasi sejajar horizontal di tengah (`flex-1 hidden md:flex`), dan tombol CTA WhatsApp (`MessageCircle` + teks) berada di sisi kanan. | Logo di kiri, menu nav di tengah, tombol CTA di kanan dalam 1 baris ramping 56px. | Menu nav links disembunyikan (`hidden md:flex`), menyisakan Logo di sisi kiri dan tombol CTA Chat WhatsApp ringkas di sisi kanan (`justify-between`), hemat ruang vertikal. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`default_split`** *(Default)* | ✅ Responsif & Rapi | **2 Baris Terpisah**: Baris 1 memuat Announcement Bar di atas (fullwidth, `py-2`). Baris 2 Navbar setinggi `64px`: Logo di kiri, menu navigasi (`HeaderNav`) di kanan, dan tombol CTA Chat WhatsApp di ujung kanan. | Announcement Bar tetap di atas; Navbar mempertahankan Logo di kiri dan hamburger button di ujung kanan dengan padding safe zone `24px`. | Announcement Bar tetap aktif di atas; Navbar mempertahankan Logo di sisi kiri dan tombol hamburger di ujung kanan (`justify-between`), membuka drawer overlay penuh saat diklik. |
+| **`centered_stacked`** | ✅ Responsif & Rapi | **2 Baris Terpusat**: Announcement Bar di atas. Navbar bertumpuk vertikal di tengah (`flex-col items-center justify-center gap-4 py-4`): Logo toko berada di baris atas tengah, menu nav links horizontal rapi di baris bawah tengah dengan `gap-6`. | Runtuh otomatis ke 1 baris simetris: Logo di sisi kiri dan tombol hamburger di sisi paling kanan (`justify-between`). | 1 Baris ramping: Logo di sisi kiri dan tombol hamburger di pojok kanan aman (`justify-between`), menu navigasi lengkap berpindah ke drawer overlay. |
+| **`compact_inline`** | ✅ Responsif & Rapi | **1 Baris Ramping Tunggal (`h-14` / 56px)**: Announcement Bar ditiadakan. Logo di sisi kiri, menu navigasi sejajar horizontal di tengah (`flex-1 hidden md:flex`), dan tombol CTA WhatsApp (`MessageCircle` + teks) berada di sisi kanan. | Logo di kiri, menu nav horizontal atau hamburger di kanan dalam 1 baris ramping 56px. | Menu nav links disembunyikan (`hidden md:flex`), menyisakan Logo di sisi kiri dan hamburger di sisi paling kanan (`justify-between`), hemat ruang vertikal. |
+| **`floating_pill_island`** | ✅ Responsif & Rapi | Floating island berbentuk kapsul terpisah (`rounded-full shadow-lg bg-surface/90 backdrop-blur`) melayang di atas banner dengan margin top 16px dan batas margin safe-zone layout aktif. | Floating island menyesuaikan lebar kontainer tablet 768px dengan safe-zone padding `24px`, logo di kiri dan hamburger di kanan kapsul. | Kapsul melayang ramping 1 baris; logo di kiri kapsul dan tombol hamburger di kanan kapsul, membuka drawer overlay seluler. |
+| **`split_nav_centered_logo`** | ✅ Responsif & Rapi | Logo terpusat simetris di tengah baris header (`flex-shrink-0`), 2 menu navigasi terpisah di sisi kiri (`Produk`, `Tentang`) dan kanan (`Kontak`, tombol WA). | Logo tetap terpusat di tengah, nav links disesuaikan dengan padding safe-zone `24px`, hamburger di kanan. | Logo terpusat atau di kiri (ikon saja pada 375px), burger icon di pojok kanan aman, nav links berpindah ke drawer overlay. |
+| **`command_search_bar`** | ✅ Responsif & Rapi | Baris pencarian cepat ala Command Palette (`Ctrl+K`) terintegrasi di tengah header berdampingan dengan logo dan tombol aksi. | Input search menyusut proporsional (`w-48` s/d `w-64`), hamburger di kanan. | Input search berubah menjadi ikon kaca pembesar (`Search`) 44x44px yang ketika diklik membuka search bar inline penuh, berdampingan dengan hamburger menu. |
+| **`transparent_glass_header`** | ✅ Responsif & Rapi | Header latar transparan dengan efek *glassmorphism* (`backdrop-blur-md bg-white/75 dark:bg-slate-950/75 border-b border-slate-200/40`). | Efek blur glassmorphism halus melapisi konten di bawahnya di layar tablet 768px, hamburger di pojok kanan. | Header glassmorphism 1 baris kompak dengan safe-zone `24px`, logo di kiri dan burger di kanan. |
+| **`mega_menu_dropdown`** | ✅ Responsif & Rapi | Navigasi dengan dropdown Mega Menu multi-kolom rapi saat hover pada kategori katalog produk. | Dropdown mega menu beradaptasi dengan lebar kontainer tablet, hamburger di kanan. | Mega menu dilipat menjadi menu akordeon vertikal interaktif di dalam drawer overlay tanpa menyebabkan scroll di dalam header. |
+| **`top_contact_bar`** | ✅ Responsif & Rapi | Baris kontak teratas (`bg-slate-900 text-slate-200 text-xs py-1.5`) memuat jam operasional, alamat toko, & status toko dinamis di atas navbar utama. | Baris kontak terkompresi; alamat toko disembunyikan di tablet (`hidden sm:flex`), menyisakan jam buka & badge status "Toko Buka", burger di kanan navbar. | Baris kontak ringkas 1 baris memuat jam buka & status toko aktif, navbar utama memuat logo & burger menu di pojok kanan. |
+| **`delivery_order_cta`** | ✅ Responsif & Rapi | Baris atas promo kirim instan 30 menit & opsi GrabFood/GoFood (`bg-orange-50 text-orange-900`), navbar utama dengan CTA `Pesan Sekarang` berikon sepeda motor (`bg-orange-600`). | Baris atas terkompresi; status opsi kurir disembunyikan di layar kecil, navbar mempertahankan logo & hamburger button 44x44px di pojok kanan. | Baris atas memuat info estimasi kirim, navbar utama memuat logo & tombol hamburger 44x44px di pojok kanan. |
+| **`store_badge_highlight`** | ✅ Responsif & Rapi | Badges legalitas resmi toko (`✓ BPOM` bg-emerald-50, `✓ Halal MUI` bg-blue-50) berdampingan langsung di samping logo brand, CTA `Konsultasi Gratis`. | Badges legalitas tetap tampak di samping logo pada layar tablet (`hidden sm:flex`), navbar memuat hamburger button 44x44px di kanan. | Badges legalitas dilipat rapi di dalam drawer overlay seluler, navbar utama memuat logo & tombol hamburger 44x44px. |
+| **`promo_countdown_banner`** | ✅ Responsif & Rapi | Banner atas merah gradasi `FLASH SALE` dengan timer hitung mundur digital (`04 Jam 28 Mnt 15 Dtk`), navbar utama dengan CTA `Klaim Kupon` (`bg-rose-600`). | Timer hitung mundur menyesuaikan tampilan ringkas pada layar tablet 768px, hamburger button 44x44px di kanan. | Banner atas memuat teks Flash Sale & timer ringkas, navbar utama memuat logo & tombol hamburger 44x44px di pojok kanan. |
 
 ---
 
-#### B. Hero Banner (`hero`) — 4 Layout Presets
+#### B. Hero Banner (`hero`) — 22 Layout Presets
 Komponen utama: `src/components/builder/sections/Hero.svelte`  
-Komponen pendukung: `HeroSplitLayout.svelte`, `HeroCenteredMinimal.svelte`, `HeroFullBanner.svelte`, `HeroElementToolbar.svelte`.  
-Karakteristik: `isFullBleed = true` (background melebar 100%, konten di dalam batas safe-zone).
+Komponen pendukung: `HeroSplitLayout.svelte`, `HeroCenteredMinimal.svelte`, `HeroFullBanner.svelte`, `HeroElementToolbar.svelte`, `HeroEmailCapture.svelte`, `HeroFloatingCards.svelte`, `HeroTerminalCode.svelte`, `HeroSocialProof.svelte`, `HeroDualProduct.svelte`, `HeroBadgeTicker.svelte`, `HeroPillCategory.svelte`, `HeroBentoGrid.svelte`, `HeroStatCounter.svelte`, `HeroChatSimulation.svelte`, `HeroStickerPlayful.svelte`, `HeroEditorialSerif.svelte`, `HeroSideBooking.svelte`, `HeroDualContrast.svelte`, `HeroFounderStory.svelte`.  
+Karakteristik: `isFullBleed = true` (background melebar 100%, konten di dalam batas safe-zone), isolasi container query `@container herocard`.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`split_left_text`** *(Default)* | **Grid 2 Kolom 50/50 (`md:grid-cols-12`)**: Kolom kiri (span-6) memuat Promo Badge pill, Headline judul H1 (`text-5xl`), Subtitle deskripsi, dan tombol CTA Belanja. Kolom kanan (span-6) memuat Card container gambar showcase produk (rasio `4:3`) berbingkai `rounded-2xl` dengan soft shadow. | Grid 2 kolom 50/50 proporsional. Font judul berskala `text-4xl`, gambar 4:3 proporsional di sisi kanan. | **1 Kolom Bertumpuk Vertikal (`grid-cols-1`)**: Teks judul (`text-3xl`), badge, dan tombol CTA tampil di bagian atas, diikuti gambar showcase produk di bawahnya. |
-| **`split_right_text`** | **Grid 2 Kolom Asimetris Terbalik**: Kolom kiri (span-6) memuat gambar showcase produk (rasio `4:3`). Kolom kanan (span-6) memuat Promo Badge, Headline judul H1, Subtitle, dan tombol CTA. | Gambar di sisi kiri, teks headline & CTA di sisi kanan dalam susunan 2 kolom 50/50. | **1 Kolom Bertumpuk Vertikal**: Gambar showcase berada di urutan atas, diikuti headline teks dan tombol CTA di bawahnya. |
-| **`centered_minimal`** | **Komposisi Simetris Tengah (Max-Width 3xl-4xl)**: Badge pill di tengah atas, Title H1 (`text-5xl`) terpusat, Subtitle di tengah (max-w-2xl), tombol CTA di tengah, diakhiri Card showcase gambar lanskap (rasio `16:9`) berbingkai tebal `rounded-2xl` shadow besar di bagian bawah. | Seluruh teks dan tombol CTA tetap terpusat di tengah layar. Gambar lanskap 16:9 menyesuaikan lebar tablet. | Teks judul mengecil proporsional (`text-3xl`), tombol CTA penuh/lebar nyaman disentuh, gambar lanskap 16:9 membentang 100% lebar safe-zone mobile. |
-| **`full_banner_overlay`** | **Latar Belakang Gambar Penuh (Full-Bleed Cover)**: Gambar latar menutupi seluruh bidang hero dilapisi gelap (*dark overlay* `bg-black/40`). Teks putih kontras tinggi (`drop-shadow-md`) terpusat di tengah (max-w-3xl) dengan tombol CTA kontras tinggi. | Gambar latar full-bleed dengan teks putih terpusat dan mudah dibaca di tablet. | Gambar latar tetap memenuhi tinggi hero section, teks judul rapat dan jelas dengan padding safe-zone `16px`. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`split_left_text`** *(Default)* | ✅ Responsif & Rapi | **Grid 2 Kolom 50/50 (`md:grid-cols-12`)**: Kolom kiri (span-6) memuat Promo Badge pill, Headline judul H1 (`text-5xl`), Subtitle deskripsi, dan tombol CTA Belanja. Kolom kanan (span-6) memuat Card container gambar showcase produk (rasio `4:3`) berbingkai `rounded-2xl` dengan soft shadow. | Grid 2 kolom 50/50 proporsional. Font judul berskala `text-4xl`, gambar 4:3 proporsional di sisi kanan. | **1 Kolom Bertumpuk Vertikal (`grid-cols-1`)**: Teks judul (`text-3xl`), badge, dan tombol CTA tampil di bagian atas, diikuti gambar showcase produk di bawahnya. |
+| **`split_right_text`** | ✅ Responsif & Rapi | **Grid 2 Kolom Asimetris Terbalik**: Kolom kiri (span-6) memuat gambar showcase produk (rasio `4:3`). Kolom kanan (span-6) memuat Promo Badge, Headline judul H1, Subtitle, dan tombol CTA. | Gambar di sisi kiri, teks headline & CTA di sisi kanan dalam susunan 2 kolom 50/50. | **1 Kolom Bertumpuk Vertikal**: Gambar showcase berada di urutan atas, diikuti headline teks dan tombol CTA di bawahnya. |
+| **`centered_minimal`** | ✅ Responsif & Rapi | **Komposisi Simetris Tengah (Max-Width 3xl-4xl)**: Badge pill di tengah atas, Title H1 (`text-5xl`) terpusat, Subtitle di tengah (max-w-2xl), tombol CTA di tengah, diakhiri Card showcase gambar lanskap (rasio `16:9`) berbingkai tebal `rounded-2xl` shadow besar di bagian bawah. | Seluruh teks dan tombol CTA tetap terpusat di tengah layar. Gambar lanskap 16:9 menyesuaikan lebar tablet. | Teks judul mengecil proporsional (`text-3xl`), tombol CTA penuh/lebar nyaman disentuh, gambar lanskap 16:9 membentang 100% lebar safe-zone mobile. |
+| **`full_banner_overlay`** | ✅ Responsif & Rapi | **Latar Belakang Gambar Penuh (Full-Bleed Cover)**: Gambar latar menutupi seluruh bidang hero dilapisi gelap (*dark overlay* `bg-black/40`). Teks putih kontras tinggi (`drop-shadow-md`) terpusat di tengah (max-w-3xl) dengan tombol CTA kontras tinggi. | Gambar latar full-bleed dengan teks putih terpusat dan mudah dibaca di tablet. | Gambar latar tetap memenuhi tinggi hero section, teks judul rapat dan jelas dengan padding safe-zone `16px`. |
+| **`video_background_loop`** | ✅ Responsif & Rapi | Latar belakang video loop interaktif dengan lapisan overlay gelap (`bg-black/60`) dan teks judul kontras di tengah. | Video terpasang penuh menutupi area hero tablet 768px tanpa distorsi aspek rasio (`object-cover`). | Video beradaptasi penuh dengan fallback gambar poster jika perangkat hemat daya/kuota. |
+| **`gradient_mesh_glow`** | ✅ Responsif & Rapi | Tampilan hero modern dengan latar belakang gradien mesh berkilau dinamis (`blur-3xl`) serta kartu form CTA terpusat berbingkai `rounded-2xl backdrop-blur-md`. | Efek gradien glow menyebar halus di latar belakang tablet 768px. | Kartu CTA membentang 100% safe-zone mobile dengan tombol aksi lebar yang mudah ditekan. |
+| **`interactive_terminal_code`** | ✅ Responsif & Rapi | Tampilan hero gaya terminal developer/teknologi dengan blok baris perintah, tombol kontrol window, dan tombol salin cepat. | Tampilan terminal terpotong rapi dengan scroll horizontal otomatis jika teks perintah panjang. | Font terminal menyesuaikan skala seluler (`text-xs`), padding internal ramping `16px`. |
+| **`floating_cards_showcase`** | ✅ Responsif & Rapi | Headline di tengah diapit 3 kartu promo mengambang 3D dengan animasi hover melayang. | Kartu mengambang berpindah posisi di bawah headline judul. | Kartu-kartu mengambang bertumpuk vertikal rapi di bawah headline tanpa overlapping. |
+| **`oversized_bold_typography`** | ✅ Responsif & Rapi | Tipografi judul super besar (`text-8xl font-black tracking-tighter`) yang menonjol di tengah layar desktop. | Skala font judul menyesuaikan ukuran layar tablet (`text-6xl font-black`). | Font judul tebal berskala responsif mobile (`text-4xl`), tidak terjadi teks overflow horizontal. |
+| **`inline_email_capture`** | ✅ Responsif & Rapi | Form penangkap email/WhatsApp prospek 1 baris horizontal (`flex gap-2 max-w-lg`) terintegrasi langsung di bawah subtitle. | Form input kontak terpusat di tengah layar tablet. | Form input kontak membungkus vertikal (`flex-col`), tombol submit berukuran lebar penuh. |
+| **`social_proof_community`** | ✅ Responsif & Rapi | Headline kiri memuat avatar wall 4 pembeli terverifikasi, rating 5/5, dan 2 tombol CTA. Kanan kartu showcase produk 4:3 berbingkai `rounded-2xl`. | Grid 2 kolom seimbang 50/50 proporsional dengan safe-zone padding `24px`. | 1 Kolom bertumpuk: Teks, avatar stack pembeli, tombol WhatsApp lebar, diikuti foto produk. |
+| **`dual_product_showcase`** | ✅ Responsif & Rapi | Kolom kiri memuat headline penawaran & benefit. Kolom kanan memuat 2 kartu produk terlaris berdampingan dengan badge harga dan tombol beli instan. | 2 Kartu produk tersusun seimbang di bawah headline judul. | 1 Kolom bertumpuk: Headline di atas, diikuti 2 kartu produk tersusun berurutan ke bawah. |
+| **`badge_ticker_split`** | ✅ Responsif & Rapi | Hero split 2 kolom: Teks kiri memuat badge sertifikasi resmi (Halal MUI, BPOM, P-IRT). Kanan foto produk 4:3 dengan circular badge `100% ASLI` berotasi halus. | Grid 2 kolom proporsional, font judul berskala tablet, badge legalitas tersusun rapi di bawah tombol aksi. | 1 Kolom bertumpuk: Judul, tombol pesan, badge sertifikasi mutu, dan foto produk dengan stempel asli. |
+| **`pill_category_selector`** | ✅ Responsif & Rapi | Layout terpusat simetris: Headline di atas dilengkapi filter pill tag kategori produk cepat (Semua Menu, Keripik, Sambal, Kopi, Kue), diikuti banner lanskap 21:9 di bawahnya. | Pill filter tersusun rapi di tengah dengan banner 21:9 proporsional tablet. | Pill kategori dapat digeser horizontal, banner foto membentang 100% lebar safe-zone mobile. |
+| **`bento_masonry_hero`** | ✅ Responsif & Rapi | Bento grid modern 12-kolom: Ubin teks utama (span-7), ubin foto (span-5), ubin kupon diskon 25% (span-4), ubin kutipan ulasan bintang 5 (span-4), dan ubin info gratis ongkir (span-4). | Bento grid menyesuaikan menjadi 2 kolom rapi dan proporsional. | Seluruh ubin bento menumpuk vertikal 1 kolom teratur dan dinamis. |
+| **`split_stat_counter`** | ✅ Responsif & Rapi | Layout split 2 kolom: Teks kiri dilengkapi 3 baris metrik angka pencapaian (25.000+ Porsi, Rating 4.9/5, 100% Higienis) dengan border pemisah. Kanan foto produk 4:3. | 3 Counter angka tersusun horizontal sejajar di bawah tombol CTA. | Counter angka menyesuaikan tata letak kolom vertikal/horizontal rapat yang mudah dibaca. |
+| **`sticky_whatsapp_pill_float`** | ✅ Responsif & Rapi | Layout terpusat: Headline di atas, simulasi percakapan chat WhatsApp interaktif 2 arah di tengah, diakhiri tombol CTA Chat WhatsApp hijau emerald. | Simulasi bubble chat terpusat rapi dengan tombol aksi lebar di bawahnya. | Tampilan bubble chat menyerupai antarmuka WhatsApp ponsel asli dengan tombol CTA chat penuh. |
+| **`sticker_badge_playful`** | ✅ Responsif & Rapi | Tema ceria & dinamis: Latar amber hangat, stiker diskon miring dinamis `-rotate-3` dan `-rotate-6`, foto polaroid putih miring `rotate-2`. Sangat memikat untuk produk camilan/kuliner. | Efek rotasi stiker dan polaroid tetap proporsional di tablet 768px. | 1 Kolom bertumpuk: Teks dan badge stiker di atas, foto polaroid di bawah dengan margin aman. |
+| **`editorial_luxury_serif`** | ✅ Responsif & Rapi | Tipografi serif editorial berlatar krem hangat (`#faf8f5`), judul miring artistik, dan showcase lanskap 16:8 khusus produk kriya, fesyen, atau artisan premium. | Tipografi serif terpusat elegan dengan banner lanskap selebar tablet. | Font judul berskala nyaman (`text-2xl`), tombol aksi terpusat, foto membentang aman di layar seluler. |
+| **`side_card_booking`** | ✅ Responsif & Rapi | Layout split 2 kolom: Kolom kiri memuat headline & fasilitas. Kolom kanan memuat kartu form reservasi janji temu/meja (pilihan layanan & nomor WhatsApp) dengan tombol konfirmasi langsung. | 2 Kolom seimbang (informasi layanan di kiri, kartu form booking di kanan). | 1 Kolom bertumpuk vertikal: Informasi layanan di atas, form booking interaktif di bawahnya. |
+| **`dual_contrast_split`** | ✅ Responsif & Rapi | Kartu duo-tone split 50/50 kontras: Sisi kiri berlatar terang (badge, judul kelas/program, tombol daftar), sisi kanan berlatar gelap Slate 950 dengan info kuota batch terbatas dan ambient glow. | Split 50/50 mempertahankan proporsi kontras di layar tablet 768px. | Runtuh vertikal menjadi 2 blok berurutan (blok terang di atas, blok gelap kuota di bawah). |
+| **`brand_story_founder`** | ✅ Responsif & Rapi | Layout naratif 2 kolom: Kolom kiri memuat foto profil pendiri/artisan (rasio 4:5) dengan overlay nama & jabatan. Kolom kanan memuat judul kutipan filosofi toko, cerita asal-usul usaha, dan tombol coba menu. | Foto pendiri dan narasi cerita tersusun seimbang 2 kolom. | 1 Kolom bertumpuk: Foto profil pendiri tampil di urutan atas, diikuti narasi cerita dan tombol di bawahnya. |
 
 ---
 
-#### C. Fitur & Keunggulan (`features`) — 3 Layout Presets
+#### C. Fitur & Keunggulan (`features`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/Features.svelte`.  
+Komponen pendukung: `FeaturesBentoGrid.svelte`, `FeaturesComparison.svelte`, `FeaturesInteractiveTabs.svelte`, `FeaturesVerticalAccordion.svelte`.  
 Karakteristik: `isFullBleed = false`, mendukung drag-and-drop kartu langsung di canvas editor.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`grid_3_cards`** *(Default)* | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-6`)**: Menampilkan 3 kartu fitur dengan padding `p-6`, concentric radius `rounded-2xl`, icon container 48px ber-radius `rounded-lg`, judul tebal, dan deskripsi benefit. | Grid 3 kolom atau membungkus 2 kolom seimbang dengan ukuran kartu yang fleksibel. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu-kartu fitur tersusun vertikal dari atas ke bawah untuk kenyamanan scrolling jari. |
-| **`horizontal_list`** | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-4, `sticky top-8`) berisi Heading judul & Subtitle section. Kolom kanan (span-8) berisi deretan baris kartu horizontal (`p-6 flex items-start gap-4`) dengan icon di kiri dan deskripsi di kanan. | Kolom kiri memuat heading, kolom kanan memuat daftar kartu memanjang ke bawah. | **1 Kolom Bertumpuk**: Heading judul berada di bagian paling atas, diikuti tumpukan kartu horizontal ke bawah. |
-| **`banner_inline_bar`** | **Pita/Ribbon Horizontal Ramping (`rounded-2xl bg-surface`)**: Seluruh item keunggulan tersusun mendatar dalam 1 baris kontainer ramping dengan icon 40px, judul tebal, dan deskripsi singkat. | Item fitur berjejer horizontal rapi dengan jarak antar elemen proporsional. | Item fitur membungkus rapat (*wrap*); deskripsi panjang disembunyikan (`hidden sm:block`) menyisakan icon dan judul ringkas agar hemat layar. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`grid_3_cards`** *(Default)* | ✅ Responsif & Rapi | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-6`)**: Menampilkan 3 kartu fitur dengan padding `p-6`, concentric radius `rounded-2xl`, icon container 48px ber-radius `rounded-lg`, judul tebal, dan deskripsi benefit. | Grid 3 kolom atau membungkus 2 kolom seimbang dengan ukuran kartu yang fleksibel. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu-kartu fitur tersusun vertikal dari atas ke bawah untuk kenyamanan scrolling jari. |
+| **`horizontal_list`** | ✅ Responsif & Rapi | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-4, `sticky top-8`) berisi Heading judul & Subtitle section. Kolom kanan (span-8) berisi deretan baris kartu horizontal (`p-6 flex items-start gap-4`) dengan icon di kiri dan deskripsi di kanan. | Kolom kiri memuat heading, kolom kanan memuat daftar kartu memanjang ke bawah. | **1 Kolom Bertumpuk**: Heading judul berada di bagian paling atas, diikuti tumpukan kartu horizontal ke bawah. |
+| **`banner_inline_bar`** | ✅ Responsif & Rapi | **Pita/Ribbon Horizontal Ramping (`rounded-2xl bg-surface`)**: Seluruh item keunggulan tersusun mendatar dalam 1 baris kontainer ramping dengan icon 40px, judul tebal, dan deskripsi singkat. | Item fitur berjejer horizontal rapi dengan jarak antar elemen proporsional. | Item fitur membungkus rapat (*wrap*); deskripsi panjang disembunyikan (`hidden sm:block`) menyisakan icon dan judul ringkas agar hemat layar. |
+| **`bento_grid_asymmetric`** | ✅ Responsif & Rapi | Bento grid asimetris 3 kolom dengan kartu utama berukuran ganda (span 2 kolom) dan kartu sekunder (span 1 kolom). | Bento grid menyesuaikan menjadi 2 kolom seimbang dengan tata letak rapi di tablet 768px. | Seluruh kartu bento menumpuk vertikal 1 kolom (`grid-cols-1`) secara teratur. |
+| **`alternating_zigzag_rows`** | ✅ Responsif & Rapi | Baris fitur berselang-seling 2 kolom (posisi gambar di kiri-kanan secara bergantian di setiap baris). | Tata letak 2 kolom berselang-seling proporsional di layar tablet. | Zigzag berubah menjadi 1 kolom vertikal konsisten (gambar di atas, teks deskripsi di bawah). |
+| **`interactive_tabs`** | ✅ Responsif & Rapi | Tab baris horizontal di atas untuk berpindah antarkategori keunggulan produk/layanan dengan animasi fading. | Tab navigasi horizontal rapi di tengah layar tablet. | Tab baris dapat digeser horizontal (*scrollable snap*) dengan indikator tab aktif yang jelas. |
+| **`vertical_accordion_showcase`** | ✅ Responsif & Rapi | Akordeon vertikal 2 kolom: kolom kiri berupa list fitur yang membesar saat aktif, kolom kanan menampilkan gambar ilustrasi fitur. | Akordeon vertikal menyesuaikan proporsi 2 kolom tablet. | Akordeon berubah menjadi 1 kolom vertikal yang dapat dibuka-tutup langsung di seluler. |
+| **`sticky_scroll_highlight`** | ✅ Responsif & Rapi | Efek scroll sticky: heading di sisi kiri tetap terkunci (`sticky top-24`) saat daftar kartu fitur disukai di sisi kanan. | Heading sticky menyesuaikan tinggi offset tablet 768px. | Sticky ditiadakan di mobile, heading judul tampil paling atas diikuti tumpukan kartu fitur. |
+| **`dense_icon_matrix`** | ✅ Responsif & Rapi | Matriks padat 4 kolom memuat ikon 32px, judul tebal, dan teks singkat untuk menampilkan banyak benefit dalam ruang efisien. | Matriks menyesuaikan menjadi 3 kolom di tablet. | Matriks menyesuaikan menjadi 2 kolom padat dan rapi di layar 375px. |
+| **`before_after_comparison`** | ✅ Responsif & Rapi | Tabel komparasi 2 kartu berdampingan ("Sebelum" vs "Sesudah") dengan penyorot warna hijau pada kartu sesudah. | 2 Kartu komparasi sejajar dengan border pemisah yang tegas. | 2 Kartu komparasi menumpuk vertikal (Sebelum di atas, Sesudah di bawah) dengan badge penanda. |
 
 ---
 
-#### D. Katalog Produk (`product_catalog`) — 3 Layout Presets
+#### D. Katalog Produk (`product_catalog`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/ProductCatalog.svelte`  
-Komponen pendukung: `ProductCatalogCard.svelte`, `ProductCatalogQuickView.svelte`, `productCatalog.helpers.ts`.  
+Komponen pendukung: `ProductCatalogCard.svelte`, `ProductCatalogQuickView.svelte`, `CatalogGridStandard.svelte`, `CatalogCarouselMasonry.svelte`, `CatalogListCompact.svelte`, `CatalogBentoSpotlight.svelte`, `CatalogSidebarFilter.svelte`, `CatalogPriceTable.svelte`, `CatalogCheckoutModal.svelte`, `productCatalog.helpers.ts`.  
 Karakteristik: `isFullBleed = false`, mendukung tab kategori dinamis, live search, pagination "Muat Lebih Banyak", dan Quick View modal popup.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`grid_standard`** *(Default)* | **Grid Produk Modular (Default 3 Kolom `lg:grid-cols-3`, dapat disetel 2–5 kolom)**: Kartu produk lengkap dengan foto (aspek rasio *square*, *portrait*, atau *widescreen*), badge diskon, nama produk, harga IDR, tombol Beli WhatsApp, dan tombol Quick View popup. | **Grid 2 atau 3 Kolom (`sm:grid-cols-2` / `sm:grid-cols-3`)** sesuai konfigurasi slider tablet inspector. | **Grid 1 atau 2 Kolom (`grid-cols-1` / `grid-cols-2`)** sesuai konfigurasi slider mobile, tata letak harga dan tombol WhatsApp responsif. |
-| **`carousel_scroll`** | **Slider Horizontal Geser Bebas (`overflow-x-auto snap-x no-scrollbar`)**: Produk tersusun horizontal memanjang ke samping, pengguna dapat melakukan klik-drag atau scroll horizontal untuk menjelajahi katalog. | Menampilkan 2–3 kartu sebagian di layar dengan snap scrolling mulus. | Swipe geser produk ke samping secara alami dengan touch gestur ponsel, hemat ruang vertikal halaman. |
-| **`list_compact`** | **Daftar Baris Horizontal (`flex flex-col gap-4`)**: Setiap produk ditampilkan dalam format horizontal card memanjang (foto produk di sisi kiri, informasi judul, harga, dan tombol pesan di sisi kanan). | Format baris horizontal dengan gambar proporsional di kiri dan detail di kanan. | Format baris kompak yang otomatis menyesuaikan proporsi tombol dan teks agar tidak terjadi overflow horizontal. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`grid_standard`** *(Default)* | ✅ Responsif & Rapi | **Grid Produk Modular (Default 3 Kolom `lg:grid-cols-3`, dapat disetel 2–5 kolom)**: Kartu produk lengkap dengan foto (aspek rasio *square*, *portrait*, atau *widescreen*), badge diskon, nama produk, harga IDR, tombol Beli WhatsApp, dan tombol Quick View popup. | **Grid 2 atau 3 Kolom (`sm:grid-cols-2` / `sm:grid-cols-3`)** sesuai konfigurasi slider tablet inspector. | **Grid 1 atau 2 Kolom (`grid-cols-1` / `grid-cols-2`)** sesuai konfigurasi slider mobile, tata letak harga dan tombol WhatsApp responsif. |
+| **`carousel_scroll`** | ✅ Responsif & Rapi | **Slider Horizontal Geser Bebas (`overflow-x-auto snap-x no-scrollbar`)**: Produk tersusun horizontal memanjang ke samping, pengguna dapat melakukan klik-drag atau scroll horizontal untuk menjelajahi katalog. | Menampilkan 2–3 kartu sebagian di layar dengan snap scrolling mulus. | Swipe geser produk ke samping secara alami dengan touch gestur ponsel, hemat ruang vertikal halaman. |
+| **`list_compact`** | ✅ Responsif & Rapi | **Daftar Baris Horizontal (`flex flex-col gap-4`)**: Setiap produk ditampilkan dalam format horizontal card memanjang (foto produk di sisi kiri, informasi judul, harga, dan tombol pesan di sisi kanan). | Format baris horizontal dengan gambar proporsional di kiri dan detail di kanan. | Format baris kompak yang otomatis menyesuaikan proporsi tombol dan teks agar tidak terjadi overflow horizontal. |
+| **`masonry_catalog`** | ✅ Responsif & Rapi | Grid masonry 3 kolom dengan variasi tinggi gambar produk otomatis tanpa sisa ruang kosong vertikal. | Grid masonry 2 kolom seimbang di layar tablet. | Grid masonry 1-2 kolom menyesuaikan rasio foto produk seluler. |
+| **`bento_product_spotlight`** | ✅ Responsif & Rapi | Layout bento spotlight 3 kolom: 1 Produk Utama berukuran besar (span 2 kolom) diiringi 2 produk sekunder di sisi kanan. | Produk spotlight utama di atas, produk sekunder tersusun 2 kolom di bawah. | Seluruh produk tersusun vertikal 1 kolom dengan produk utama paling atas. |
+| **`split_category_sidebar`** | ✅ Responsif & Rapi | Layout 2 kolom: Sidebar filter kategori di kiri (`span-3 sticky top-24`) dan grid produk di kanan (`span-9`). | Sidebar filter melipat menjadi baris dropdown filter horizontal di atas grid produk. | Sidebar filter melipat penuh ke dalam tombol modal filter drawer. |
+| **`compact_mini_cards`** | ✅ Responsif & Rapi | Grid 4-5 kolom kartu produk mini berukuran hemat ruang khusus katalog besar/grosir. | Grid 3-4 kolom kartu mini di tablet. | Grid 2 kolom mini padat dengan tombol WA ringkas di seluler. |
+| **`price_table_view`** | ✅ Responsif & Rapi | Format tabel harga tabular lengkap dengan kolom nama produk, spesifikasi, harga IDR, dan tombol Beli. | Tabel harga dilengkapi fitur horizontal scroll halus jika kolom melebihi kontainer. | Tabel otomatis bertransformasi menjadi format daftar kartu ringkas di mobile. |
+| **`lookbook_gallery`** | ✅ Responsif & Rapi | Galeri visual gaya lookbook majalah 3 kolom dengan caption overlay harga saat gambar di-hover. | Galeri visual 2 kolom dengan caption harga selalu terlihat di tablet. | Galeri visual 1 kolom membentang 100% lebar safe-zone mobile. |
+| **`flash_sale_countdown`** | ✅ Responsif & Rapi | Katalog promo flash sale dengan banner timer hitung mundur melayang di atas grid produk promo. | Timer promo terpusat di atas grid produk 2 kolom. | Timer promo ringkas 1 baris dengan badge diskon merah menonjol. |
 
 ---
 
-#### E. Testimoni Pelanggan (`testimonials`) — 3 Layout Presets
+#### E. Testimoni Pelanggan (`testimonials`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/Testimonials.svelte`.  
+Komponen pendukung: `TestimonialsSpotlightCarousel.svelte`, `TestimonialsMarquee.svelte`, `TestimonialsSocialCards.svelte`, `TestimonialsVideoCards.svelte`.  
 Karakteristik: `isFullBleed = false`, mendukung drag-and-drop urutan testimoni langsung di canvas editor.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`masonry_grid`** *(Default)* | **Grid 3 Kolom Tabular (`md:grid-cols-3`, `gap-6`)**: Kartu ulasan berbingkai `rounded-2xl` memuat bintang rating (1–5 bintang warna amber), kutipan ulasan (clamp 4 baris), avatar pembeli, nama, dan status "Pembeli Terverifikasi". | Grid 2–3 kolom proporsional menyesuaikan lebar kontainer tablet 768px. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu testimoni menumpuk vertikal dengan teks ulasan yang mudah dibaca. |
-| **`single_spotlight`** | **Kartu Ulasan Tunggal Terpusat (Max-W-2xl)**: Menampilkan 1 ulasan terpilih secara elegan dengan bintang rating besar di atas, kutipan font besar *italic* di tengah, identitas pembeli di bawah, dan dot pagination bulat interaktif untuk berpindah ulasan. | Kartu ulasan terpusat di tengah dengan dot navigasi interaktif di bawahnya. | Kartu ulasan mengisi penuh safe-zone mobile dengan teks yang proporsional dan mudah dibaca di smartphone. |
-| **`chat_bubble_flow`** | **WhatsApp Chat Bubble Flow (Max-W-2xl)**: Format gelembung pesan chat berlatar surface dengan sudut kiri runcing (`rounded-tl-sm`), avatar WhatsApp hijau (`bg-emerald-100`), label "via WhatsApp", rating bintang, dan isi pesan ulasan pelanggan. | Gelembung pesan chat tersusun vertikal memanjang di tengah layar. | Tampilan menyerupai pesan WhatsApp asli di smartphone, memberikan kesan autentik dan dekat bagi calon pembeli lokal. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`masonry_grid`** *(Default)* | ✅ Responsif & Rapi | **Grid 3 Kolom Tabular (`md:grid-cols-3`, `gap-6`)**: Kartu ulasan berbingkai `rounded-2xl` memuat bintang rating (1–5 bintang warna amber), kutipan ulasan (clamp 4 baris), avatar pembeli, nama, dan status "Pembeli Terverifikasi". | Grid 2–3 kolom proporsional menyesuaikan lebar kontainer tablet 768px. | **Grid 1 Kolom Vertikal (`grid-cols-1`)**: Kartu testimoni menumpuk vertikal dengan teks ulasan yang mudah dibaca. |
+| **`single_spotlight`** | ✅ Responsif & Rapi | **Kartu Ulasan Tunggal Terpusat (Max-W-2xl)**: Menampilkan 1 ulasan terpilih secara elegan dengan bintang rating besar di atas, kutipan font besar *italic* di tengah, identitas pembeli di bawah, dan dot pagination bulat interaktif untuk berpindah ulasan. | Kartu ulasan terpusat di tengah dengan dot navigasi interaktif di bawahnya. | Kartu ulasan mengisi penuh safe-zone mobile dengan teks yang proporsional dan mudah dibaca di smartphone. |
+| **`chat_bubble_flow`** | ✅ Responsif & Rapi | **WhatsApp Chat Bubble Flow (Max-W-2xl)**: Format gelembung pesan chat berlatar surface dengan sudut kiri runcing (`rounded-tl-sm`), avatar WhatsApp hijau (`bg-emerald-100`), label "via WhatsApp", rating bintang, dan isi pesan ulasan pelanggan. | Gelembung pesan chat tersusun vertikal memanjang di tengah layar. | Tampilan menyerupai pesan WhatsApp asli di smartphone, memberikan kesan autentik dan dekat bagi calon pembeli lokal. |
+| **`infinite_marquee_scroll`** | ✅ Responsif & Rapi | Deretan kartu ulasan berjalan otomatis (*infinite marquee*) secara horizontal dari kanan ke kiri tanpa jeda. | Marquee running text bergerak mulus di layar tablet 768px. | Marquee running text berkecepatan proporsional yang dapat di-pause saat ditahan kursor/jari. |
+| **`video_review_cards`** | ✅ Responsif & Rapi | Grid 3 kolom kartu testimoni video ulasan pendek pelanggan (format vertikal 9:16) dengan tombol play overlay. | Video review cards tersusun 2 kolom di tablet. | Video review cards tersusun 1 kolom dengan preview thumbnail dan tombol play besar. |
+| **`social_post_cards`** | ✅ Responsif & Rapi | Grid 3 kolom ulasan gaya postingan media sosial (lengkap dengan username, badge verifikasi, foto produk, dan jumlah likes). | Posting sosial tersusun 2 kolom seimbang. | Posting sosial tersusun 1 kolom vertikal rapi. |
+| **`side_by_side_3_cards`** | ✅ Responsif & Rapi | 3 Kartu ulasan sejajar dengan efek penyorotan kartu tengah (scale 105% & shadow lebih tebal). | 3 Kartu menyesuaikan proporsi lebar tablet. | 1 Kartu aktif di tengah dengan indikator geser swipe. |
+| **`logo_client_cloud`** | ✅ Responsif & Rapi | Grid 5-6 kolom menampilkan logo mitra/klien toko UMKM dengan efek grayscale ke berwarna saat hover. | Grid logo 4 kolom seimbang di tablet. | Grid logo 3 kolom padat di mobile. |
+| **`split_rating_stats`** | ✅ Responsif & Rapi | Layout split 2 kolom: Ringkasan statistik rating (4.9/5 & baris distribusi bintang) di kiri, list ulasan di kanan. | Split 2 kolom seimbang (statistik rating di kiri, ulasan di kanan). | Statistik rating tampil paling atas, diikuti tumpukan kartu ulasan di bawahnya. |
+| **`carousel_slider`** | ✅ Responsif & Rapi | Slider testimoni dengan tombol navigasi panah di kiri/kanan dan indikator slide di bawah. | Carousel menampilkan 2 kartu ulasan per slide di tablet. | Carousel menampilkan 1 kartu ulasan per slide di mobile. |
 
 ---
 
-#### F. FAQ / Tanya Jawab (`faq`) — 3 Layout Presets
+#### F. FAQ / Tanya Jawab (`faq`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/FAQ.svelte`.  
+Komponen pendukung: `FaqSplitSidebar.svelte`, `FaqBoxedCardsGrid.svelte`, `FaqChatStyle.svelte`, `FaqSearchFiltered.svelte`, `FaqCategorizedTabs.svelte`.  
 Karakteristik: `isFullBleed = false`, mendukung animasi ekspansi akordeon buka-tutup halus.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`accordion_single_col`** *(Default)* | **Akordeon Terpusat 1 Kolom (Max-W-3xl)**: Daftar pertanyaan yang dapat diklik untuk membuka/menutup jawaban secara bergantian. Dilengkapi ikon ChevronDown yang berotasi 180° dengan transisi halus. | Akordeon terpusat rapi selebar kontainer tablet (768px). | Akordeon memenuhi lebar layar safe-zone mobile (375px), teks pertanyaan dan jawaban membungkus rapi (*break-words*). |
-| **`split_faq_sidebar`** | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-5) memuat Judul FAQ, deskripsi, dan Kartu Bantuan CS ("Butuh Bantuan Lebih?" + tombol kontak WA); Kolom kanan (span-7) memuat tumpukan akordeon tanya jawab interaktif. | 2 kolom proporsional (span-5 dan span-7) dengan kartu bantuan di sisi kiri. | **1 Kolom Bertumpuk**: Judul dan kartu bantuan kontak berada di atas, diikuti daftar akordeon tanya jawab di bawahnya. |
-| **`grid_2_col_cards`** | **Grid 2 Kolom Kartu Terbuka (`md:grid-cols-2`, `gap-6`)**: Seluruh pertanyaan dan jawaban langsung terbuka permanen (*open static card*) dalam bentuk kartu-kartu terpisah tanpa memerlukan interaksi klik buka-tutup. | Grid 2 kolom kartu terbuka seimbang. | **Grid 1 Kolom Vertikal**: Seluruh pertanyaan dan jawaban tampil terbuka berurutan ke bawah. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`accordion_single_col`** *(Default)* | ✅ Responsif & Rapi | **Akordeon Terpusat 1 Kolom (Max-W-3xl)**: Daftar pertanyaan yang dapat diklik untuk membuka/menutup jawaban secara bergantian. Dilengkapi ikon ChevronDown yang berotasi 180° dengan transisi halus. | Akordeon terpusat rapi selebar kontainer tablet (768px). | Akordeon memenuhi layar safe-zone mobile (375px), teks pertanyaan dan jawaban membungkus rapi (*break-words*). |
+| **`split_faq_sidebar`** | ✅ Responsif & Rapi | **Layout 2 Kolom Asimetris (`grid-cols-12`)**: Kolom kiri (span-5) memuat Judul FAQ, deskripsi, dan Kartu Bantuan CS ("Butuh Bantuan Lebih?" + tombol kontak WA); Kolom kanan (span-7) memuat tumpukan akordeon tanya jawab interaktif. | 2 kolom proporsional (span-5 dan span-7) dengan kartu bantuan di sisi kiri. | **1 Kolom Bertumpuk**: Judul dan kartu bantuan kontak berada di atas, diikuti daftar akordeon tanya jawab di bawahnya. |
+| **`grid_2_col_cards`** | ✅ Responsif & Rapi | **Grid 2 Kolom Kartu Terbuka (`md:grid-cols-2`, `gap-6`)**: Seluruh pertanyaan dan jawaban langsung terbuka permanen (*open static card*) dalam bentuk kartu-kartu terpisah tanpa memerlukan interaksi klik buka-tutup. | Grid 2 kolom kartu terbuka seimbang. | **Grid 1 Kolom Vertikal**: Seluruh pertanyaan dan jawaban tampil terbuka berurutan ke bawah. |
+| **`accordion_two_col`** | ✅ Responsif & Rapi | Akordeon 2 kolom berdampingan untuk menampung jumlah pertanyaan yang banyak secara simetris. | Akordeon 2 kolom seimbang di layar tablet. | Akordeon otomatis menyatu menjadi 1 kolom vertikal berurutan ke bawah. |
+| **`chat_style_faq`** | ✅ Responsif & Rapi | FAQ bergaya percakapan chat bot CS (pertanyaan sebagai gelembung kanan, jawaban sebagai gelembung kiri). | Gelembung percakapan FAQ terpusat di tengah layar. | Gelembung percakapan FAQ hemat ruang dengan padding rapat `12px`. |
+| **`search_filtered_faq`** | ✅ Responsif & Rapi | FAQ dilengkapi input bar pencarian di atas untuk menyaring pertanyaan secara langsung (real-time filter). | Input pencarian selebar kontainer tablet di atas akordeon. | Input pencarian sticky di atas list FAQ saat di-scroll. |
+| **`categorized_tabs_faq`** | ✅ Responsif & Rapi | FAQ dikelompokkan berdasarkan tab kategori (Pemesanan, Pembayaran, Pengiriman) di atas akordeon. | Tab kategori horizontal rapi di tablet 768px. | Tab kategori dapat digeser horizontal (*scrollable tabs*) di mobile. |
+| **`compact_numbered_list`** | ✅ Responsif & Rapi | Daftar FAQ berpenomoran urut (01, 02, 03) dengan gaya minimalis dan garis pemisah halus. | List bernomor 1 kolom selebar tablet. | List bernomor dengan nomor berukuran menonjol di atas teks pertanyaan. |
+| **`floating_help_center`** | ✅ Responsif & Rapi | Grid 3 kolom kartu FAQ bergaya Help Center dengan ikon kategori berwarna di setiap kartu. | Kartu help center tersusun 2 kolom. | Kartu help center tersusun 1 kolom vertikal. |
+| **`horizontal_faq_cards`** | ✅ Responsif & Rapi | Kartu FAQ horizontal yang dapat digeser ke samping dengan indikator halaman. | Cards slider 2 item per view di tablet. | Cards slider 1 item per view di seluler. |
 
 ---
 
-#### G. Google Maps & Lokasi (`google_maps`) — 3 Layout Presets
+#### G. Google Maps & Lokasi (`google_maps`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/GoogleMaps.svelte`.  
+Komponen pendukung: `MapsDirectionsGuide.svelte`, `MapsMultiBranch.svelte`.  
 Karakteristik: `isFullBleed = false`, rendering iframe Google Maps live tanpa API key berbayar.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`fullwidth_map`** *(Default)* | **Iframe Peta Penuh dengan Floating Card**: Iframe maps membentang penuh (tinggi default `400px`) dengan kartu informasi melayang semi-transparan (*glassmorphism* `bg-white/95 backdrop-blur-md`) di sudut kiri bawah memuat judul, alamat, dan tombol "Petunjuk Arah". | Peta membentang penuh dengan floating card proporsional di sisi kiri bawah. | Floating card meluas memenuhi bagian bawah peta (`bottom-6 left-6 right-6`), menyajikan tombol petunjuk arah yang mudah dijangkau jempol. |
-| **`split_map_info`** | **Layout 2 Kolom Sejajar (`grid-cols-12 items-stretch`)**: Kolom kiri (span-5) berupa Kartu Info lengkap (Alamat, Jam Operasional Toko, Kontak Layanan, Tombol Buka Arah); Kolom kanan (span-7) berupa frame peta interaktif setinggi `360px+`. | 2 kolom seimbang dengan tinggi frame peta dan kartu informasi yang sama. | **1 Kolom Bertumpuk**: Kartu jam operasional dan alamat berada di atas, diikuti iframe peta Google Maps di bawahnya. |
-| **`compact_boxed`** | **Kotak Kartu Lokasi Kompak (Max-W-Xl)**: Kontainer kartu terpusat memuat judul & alamat di atas, jendela pratinjau peta mini setinggi `192px` (`h-48`) di tengah, dan tombol CTA "Buka di Google Maps" di bawah. | Kotak kartu terpusat simetris di tengah layar tablet. | Kotak kartu mengisi lebar mobile safe-zone (375px) secara padat dan efisien. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`fullwidth_map`** *(Default)* | ✅ Responsif & Rapi | **Iframe Peta Penuh dengan Floating Card**: Iframe maps membentang penuh (tinggi default `400px`) dengan kartu informasi melayang semi-transparan (*glassmorphism* `bg-white/95 backdrop-blur-md`) di sudut kiri bawah memuat judul, alamat, dan tombol "Petunjuk Arah". | Peta membentang penuh dengan floating card proporsional di sisi kiri bawah. | Floating card meluas memenuhi bagian bawah peta (`bottom-6 left-6 right-6`), menyajikan tombol petunjuk arah yang mudah dijangkau jempol. |
+| **`split_map_info`** | ✅ Responsif & Rapi | **Layout 2 Kolom Sejajar (`grid-cols-12 items-stretch`)**: Kolom kiri (span-5) berupa Kartu Info lengkap (Alamat, Jam Operasional Toko, Kontak Layanan, Tombol Buka Arah); Kolom kanan (span-7) berupa frame peta interaktif setinggi `360px+`. | 2 kolom seimbang dengan tinggi frame peta dan kartu informasi yang sama. | **1 Kolom Bertumpuk**: Kartu jam operasional dan alamat berada di atas, diikuti iframe peta Google Maps di bawahnya. |
+| **`compact_boxed`** | ✅ Responsif & Rapi | **Kotak Kartu Lokasi Kompak (Max-W-Xl)**: Kontainer kartu terpusat memuat judul & alamat di atas, jendela pratinjau peta mini setinggi `192px` (`h-48`) di tengah, dan tombol CTA "Buka di Google Maps" di bawah. | Kotak kartu terpusat simetris di tengah layar tablet. | Kotak kartu mengisi lebar mobile safe-zone (375px) secara padat dan efisien. |
+| **`floating_address_card`** | ✅ Responsif & Rapi | Iframe peta latar belakang penuh dengan kartu alamat melayang semi-transparan di posisi kanan atas. | Floating card melayang di kanan atas dengan padding safe-zone `24px`. | Floating card berpindah ke bawah peta melingkupi lebar mobile 375px. |
+| **`two_column_directions`** | ✅ Responsif & Rapi | Layout 2 kolom: Panduan petunjuk rute transportasi (Patokan, Angkutan, Parkir) di kiri dan peta di kanan. | 2 Kolom instruksi rute & peta seimbang di tablet. | Instruksi rute di atas, diikuti iframe peta di bawahnya. |
+| **`store_hours_highlight`** | ✅ Responsif & Rapi | Peta dilengkapi penyorot jam buka toko live ("Buka Sekarang - Tutup Jam 21.00") & kontak WA di sisi samping. | Penyorot jam toko di atas iframe peta di tablet. | Badge jam toko terkompresi di atas iframe peta seluler. |
+| **`interactive_route_finder`** | ✅ Responsif & Rapi | Kartu lokasi dengan tombol navigasi rute besar yang langsung mengarahkan ke aplikasi Google Maps seluler. | Tombol navigasi rute menonjol di tengah layar tablet. | Tombol navigasi rute lebar penuh di seluler (`w-full py-3`). |
+| **`minimal_framed_map`** | ✅ Responsif & Rapi | Frame peta minimalis dengan border halus `rounded-2xl` tanpa kartu dekoratif tambahan. | Frame peta minimalis setinggi `320px` di tablet. | Frame peta membentang 100% lebar layar mobile (`h-64`). |
+| **`multi_branch_tabs`** | ✅ Responsif & Rapi | Peta lokasi banyak cabang toko UMKM yang dapat dipilih lokasi pintasnya via tab cabang (misal: Cabang Utama, Cabang Barat). | Tab cabang horizontal di atas iframe peta. | Tab cabang scrollable horizontal di atas iframe peta. |
+| **`card_overlay_bottom`** | ✅ Responsif & Rapi | Kartu informasi toko menutupi 30% area bawah peta secara melayang dengan tombol petunjuk arah. | Card overlay melayang di bagian bawah peta tablet. | Card overlay membentang penuh di bawah peta seluler. |
 
 ---
 
-#### H. Footer & Kontak (`footer`) — 3 Layout Presets
+#### H. Footer & Kontak (`footer`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/Footer.svelte`.  
+Komponen pendukung: `FooterNewsletter.svelte`, `FooterSocialShowcase.svelte`.  
 Karakteristik: `isFullBleed = false`, memuat profil toko, link WhatsApp, alamat, dan hak cipta.
 
-| Preset Layout | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
-| :--- | :--- | :--- | :--- |
-| **`multi_column`** *(Default)* | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-8`)**: Kolom 1 (Profil Toko: Logo & Tagline), Kolom 2 (Kontak Layanan: link nomor WhatsApp & alamat toko), Kolom 3 (Informasi: menu privasi & syarat ketentuan). Diakhiri baris Copyright di bagian bawah. | Grid 3 kolom atau membungkus 2 kolom seimbang. | **1 Kolom Bertumpuk Vertikal**: Kolom Profil Toko, Kontak Layanan, dan Informasi tersusun ke bawah, diakhiri baris Copyright. |
-| **`centered_simple`** | **Layout Minimalis Terpusat**: Logo toko dan tagline terpusat di tengah, tombol kontak WhatsApp bulat ber-hover effect di tengah, dan teks hak cipta di bagian bawah. | Simetris terpusat di tengah layar. | Simetris terpusat di tengah layar mobile dengan tombol WhatsApp yang nyaman ditekan. |
-| **`cta_focused`** | **Banner Floating WhatsApp di Atas Footer**: Banner WhatsApp melayang menonjol di atas footer (`-mt-16 bg-primary text-white shadow-xl` dengan judul ajakan dan tombol "Chat Sekarang"), diikuti info toko dan alamat di bawahnya. | Banner WhatsApp melayang menyesuaikan lebar kontainer tablet. | Banner WhatsApp membungkus vertikal (judul ajakan di atas, tombol chat di bawah), diikuti profil toko dan copyright. |
+| Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
+| :--- | :---: | :--- | :--- | :--- |
+| **`multi_column`** *(Default)* | ✅ Responsif & Rapi | **Grid 3 Kolom Sejajar (`md:grid-cols-3`, `gap-8`)**: Kolom 1 (Profil Toko: Logo & Tagline), Kolom 2 (Kontak Layanan: link nomor WhatsApp & alamat toko), Kolom 3 (Informasi: menu privasi & syarat ketentuan). Diakhiri baris Copyright di bagian bawah. | Grid 3 kolom atau membungkus 2 kolom seimbang. | **1 Kolom Bertumpuk Vertikal**: Kolom Profil Toko, Kontak Layanan, dan Informasi tersusun ke bawah, diakhiri baris Copyright. |
+| **`centered_simple`** | ✅ Responsif & Rapi | **Layout Minimalis Terpusat**: Logo toko dan tagline terpusat di tengah, tombol kontak WhatsApp bulat ber-hover effect di tengah, dan teks hak cipta di bagian bawah. | Simetris terpusat di tengah layar. | Simetris terpusat di tengah layar mobile dengan tombol WhatsApp yang nyaman ditekan. |
+| **`cta_focused`** | ✅ Responsif & Rapi | **Banner Floating WhatsApp di Atas Footer**: Banner WhatsApp melayang menonjol di atas footer (`-mt-16 bg-primary text-white shadow-xl` dengan judul ajakan dan tombol "Chat Sekarang"), diikuti info toko dan alamat di bawahnya. | Banner WhatsApp melayang menyesuaikan lebar kontainer tablet. | Banner WhatsApp membungkus vertikal (judul ajakan di atas, tombol chat di bawah), diikuti profil toko dan copyright. |
+| **`minimal_single_row`** | ✅ Responsif & Rapi | Footer 1 baris ramping (`h-16`) memuat logo di kiri, copyright di tengah, dan ikon sosial media di kanan. | Footer 1 baris terkompresi dengan safe-zone `24px`. | Footer membungkus menjadi 2 baris teratur di layar seluler. |
+| **`giant_wordmark`** | ✅ Responsif & Rapi | Footer dengan nama/brand toko berukuran raksasa (*giant typography wordmark*) membentang di batas paling bawah. | Wordmark besar menyesuaikan skala lebar tablet (`text-6xl`). | Wordmark berskala responsif seluler (`text-4xl`), tidak memicu overflow. |
+| **`newsletter_centric`** | ✅ Responsif & Rapi | Footer berfokus pada form berlangganan newsletter promo toko di bagian atas sebelum baris navigasi footer. | Form newsletter terpusat di tengah layar tablet. | Form newsletter bertumpuk vertikal dengan input & tombol berlangganan. |
+| **`live_status_badge`** | ✅ Responsif & Rapi | Footer dilengkapi badge indikator status operasional toko live ("Toko Online - Siap Melayani Pesanan") dengan lampu hijau berkedip. | Status badge melayang di samping copyright. | Status badge terpusat di atas copyright seluler. |
+| **`split_map_footer`** | ✅ Responsif & Rapi | Footer gabungan 2 kolom: Info toko & kontak di kiri, frame peta lokasi mini di kanan. | Peta mini di samping info footer tablet. | Peta mini menumpuk di atas copyright footer seluler. |
+| **`social_links_grid`** | ✅ Responsif & Rapi | Showcase khusus tautan akun media sosial toko (WA, IG, FB, TikTok) dengan ikon-ikon interaktif besar. | Grid ikon sosial 4 kolom di tablet. | Grid ikon sosial 2-4 kolom terpusat di mobile. |
+| **`boxed_card_footer`** | ✅ Responsif & Rapi | Footer berbentuk kartu melayang berbingkai (`rounded-3xl border shadow-lg`) dengan margin bottom 24px. | Kartu footer melayang menyesuaikan safe-zone tablet. | Kartu footer melayang dengan padding aman `16px` di smartphone. |
 
 ---
 
@@ -921,7 +1013,7 @@ Berikut adalah rekapitulasi status fitur yang telah aktif serta rekomendasi peng
   1. **True Viewport Simulation & Auto-Scaling Canvas**: Fitur penskalaan otomatis kanvas (`transform: scale(scaleRatio)`) di `Canvas.svelte` yang menjaga layout Desktop (1200px), Tablet (768px), dan Mobile (375px) tetap render pixel-perfect tanpa distorsi breakpoint di semua resolusi monitor laptop.
   2. **Interactive Spacing Drag-Handles**: Handle geser absolut untuk Margin Top, Margin Bottom, dan Side Padding dengan status transient 60fps dan single-step history commit.
   3. **Figma-Style Layout Grid Guides**: Panduan 12-kolom Desktop, 8-kolom Tablet, 4-kolom Mobile, serta 8px Dot Pixel Grid overlay di `LayoutGridOverlay.svelte`.
-  4. **Modular Section Registry (24 Layout Presets)**: Arsitektur 8 section modular terisolasi dengan 24 varian layout presets di `src/components/builder/registry/index.ts`.
+  4. **Modular Section Registry (94 Layout Presets)**: Arsitektur 8 section modular terisolasi dengan 94 varian layout presets di `src/components/builder/registry/index.ts`.
   5. **Dual-Store State Architecture**: Pemisahan `documentStore` (data persisten) dan `canvasStore` (state UI) dengan dukungan undo/redo 20 langkah riwayat.
   6. **Hierarchical Tree & Node Navigation**: Struktur pohon section dan child-nodes pada `LayerPanel.svelte` dengan fitur reorder urutan hero slot dan array items.
   7. **Instant Quick View Modal & Dynamic Multitenant Catalog**: Integrasi katalog produk dinamis tenant dengan filter kategori dan modal pop-up pratinjau cepat di `ProductCatalogQuickView.svelte`.

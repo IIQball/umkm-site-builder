@@ -1,11 +1,15 @@
 <script lang="ts">
-  import { editorStore, activeNodeId } from '../../stores/editorStore';
+  import { editorStore, canvasStore, activeNodeId } from '../../stores/editorStore';
   import type { HeaderAnnouncementProps } from '@/types';
   import { Store } from 'lucide-svelte';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
+  export let hideTextOnMobile: boolean = false;
+
+  $: viewMode = $canvasStore?.viewMode || 'desktop';
+  $: isMobile = viewMode === 'mobile';
 
   $: logoType = props.logoType || 'image_text';
   $: logoText = props.logoText ?? 'Toko UMKM';
@@ -76,7 +80,9 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class="tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px]"
+      class={`tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
+        hideTextOnMobile && isMobile ? 'hidden' : 'inline-block'
+      }`}
     >
       {logoText || 'Nama Toko'}
     </span>

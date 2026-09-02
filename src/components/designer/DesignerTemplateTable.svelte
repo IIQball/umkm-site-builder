@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Card, Table, Pagination } from '@/components/ui';
+  import { Card, Table, Pagination, Button } from '@/components/ui';
   import DesignerTemplateCard from './DesignerTemplateCard.svelte';
   import DesignerTemplateRow from './templates/DesignerTemplateRow.svelte';
   import DesignerRejectionModal from './templates/DesignerRejectionModal.svelte';
+  import DesignerDeleteDraftModal from './templates/DesignerDeleteDraftModal.svelte';
   import { addToast } from '@/lib/toast';
 
   export let templates: Array<{
@@ -19,11 +20,18 @@
 
   let searchQuery = '';
   let activeFilter: 'all' | 'draft' | 'pending' | 'approved' | 'rejected' = 'all';
-  let viewMode: 'table' | 'grid' = 'table';
+  // Default tampilan card/grid sesuai permintaan user
+  let viewMode: 'table' | 'grid' = 'grid';
   let selectedRejection: { name: string; reason: string } | null = null;
   let copiedId: string | null = null;
   let currentPage = 1;
   const pageSize = 10;
+
+  // Batch Selection & Hard Delete Modal State
+  let selectedDraftIds: string[] = [];
+  let deleteModalOpen = false;
+  let targetsToDelete: Array<{ id: string; name: string }> = [];
+  let isDeletingDraft = false;
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -71,6 +79,89 @@
 
   $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  // Draft Selection Helpers
+  $: visibleDraftTemplates = paginatedTemplates.filter(t => t.status === 'draft');
+  $: allVisibleDraftsSelected = visibleDraftTemplates.length > 0 && visibleDraftTemplates.every(t => selectedDraftIds.includes(t.id));
+  $: hasDraftSelection = selectedDraftIds.length > 0;
+
+  const toggleDraftSelect = (id: string) => {
+    if (selectedDraftIds.includes(id)) {
+      selectedDraftIds = selectedDraftIds.filter(item => item !== id);
+    } else {
+      selectedDraftIds = [...selectedDraftIds, id];
+    }
+  };
+
+  const toggleSelectAllVisibleDrafts = () => {
+    if (allVisibleDraftsSelected) {
+      const visibleIds = new Set(visibleDraftTemplates.map(t => t.id));
+      selectedDraftIds = selectedDraftIds.filter(id => !visibleIds.has(id));
+    } else {
+      const newIds = new Set([...selectedDraftIds, ...visibleDraftTemplates.map(t => t.id)]);
+      selectedDraftIds = Array.from(newIds);
+    }
+  };
+
+  const clearDraftSelection = () => {
+    selectedDraftIds = [];
+  };
+
+  const openDeleteModalForSingle = (tpl: any) => {
+    targetsToDelete = [{ id: tpl.id, name: tpl.name }];
+    deleteModalOpen = true;
+  };
+
+  const openDeleteModalForBatch = () => {
+    const targets = templates
+      .filter(t => selectedDraftIds.includes(t.id))
+      .map(t => ({ id: t.id, name: t.name }));
+    if (targets.length === 0) return;
+    targetsToDelete = targets;
+    deleteModalOpen = true;
+  };
+
+  const handleConfirmDelete = async () => {
+    if (targetsToDelete.length === 0) return;
+    try {
+      isDeletingDraft = true;
+      const ids = targetsToDelete.map(t => t.id);
+
+      const res = await fetch('/api/designer/templates/draft', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateIds: ids }),
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        const deletedSet = new Set(ids);
+        templates = templates.filter(t => !deletedSet.has(t.id));
+        selectedDraftIds = selectedDraftIds.filter(id => !deletedSet.has(id));
+        deleteModalOpen = false;
+        targetsToDelete = [];
+
+        addToast({
+          type: 'success',
+          message: ids.length > 1
+            ? `${ids.length} draf template berhasil dihapus permanen!`
+            : 'Draf template berhasil dihapus permanen!',
+        });
+      } else {
+        addToast({
+          type: 'error',
+          message: result.error?.message || 'Gagal menghapus draf template',
+        });
+      }
+    } catch {
+      addToast({
+        type: 'error',
+        message: 'Terjadi kesalahan koneksi saat menghapus draf',
+      });
+    } finally {
+      isDeletingDraft = false;
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -82,7 +173,8 @@
     }
   };
 
-  const tableHeaders = [
+  $: tableHeaders = [
+    { label: '', align: 'center' as const, width: 'w-10' },
     { label: 'Template Desain', align: 'left' as const },
     { label: 'Harga Jual', align: 'left' as const, width: 'w-32' },
     { label: 'Penjualan', align: 'left' as const, width: 'w-28' },
@@ -164,8 +256,37 @@
         </button>
       </div>
 
+      <!-- Batch Draft Selection Button (if drafts exist) -->
+      {#if counts.draft > 0}
+        <button
+          type="button"
+          on:click={toggleSelectAllVisibleDrafts}
+          class={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+            allVisibleDraftsSelected
+              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+              : hasDraftSelection
+              ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
+              : 'bg-nested/80 border-light text-secondary hover:text-main'
+          }`}
+          title="Pilih draf template di halaman ini"
+        >
+          <span class="material-symbols-outlined text-sm">
+            {allVisibleDraftsSelected ? 'check_box' : hasDraftSelection ? 'indeterminate_check_box' : 'checklist'}
+          </span>
+          <span class="hidden sm:inline">{allVisibleDraftsSelected ? 'Lepas Pilihan' : hasDraftSelection ? `${selectedDraftIds.length} Dipilih` : 'Pilih Draf'}</span>
+        </button>
+      {/if}
+
       <!-- Toggle Table / Grid -->
       <div class="flex items-center p-1 bg-nested/80 border border-light rounded-full shadow-2xs">
+        <button
+          type="button"
+          on:click={() => (viewMode = 'grid')}
+          class="p-1 rounded-full text-xs transition-all {viewMode === 'grid' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
+          title="Tampilan Card"
+        >
+          <span class="material-symbols-outlined text-sm block">grid_view</span>
+        </button>
         <button
           type="button"
           on:click={() => (viewMode = 'table')}
@@ -174,17 +295,38 @@
         >
           <span class="material-symbols-outlined text-sm block">table_rows</span>
         </button>
-        <button
-          type="button"
-          on:click={() => (viewMode = 'grid')}
-          class="p-1 rounded-full text-xs transition-all {viewMode === 'grid' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
-          title="Tampilan Grid"
-        >
-          <span class="material-symbols-outlined text-sm block">grid_view</span>
-        </button>
       </div>
     </div>
   </div>
+
+  <!-- Batch Action Bar (Displayed when 1 or more drafts are selected) -->
+  {#if hasDraftSelection}
+    <div class="px-5 sm:px-6 py-3 bg-blue-50/80 dark:bg-blue-950/50 border-b border-blue-200/80 dark:border-blue-900/60 flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-150">
+      <div class="flex items-center gap-2.5 text-xs font-bold text-blue-900 dark:text-blue-200">
+        <span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
+        <span>{selectedDraftIds.length} draf template dipilih</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <Button
+          variant="secondary"
+          size="xs"
+          className="rounded-xl font-bold"
+          on:click={clearDraftSelection}
+        >
+          Batalkan Pilihan
+        </Button>
+        <Button
+          variant="destructive"
+          size="xs"
+          className="rounded-xl font-bold flex items-center gap-1.5 shadow-sm"
+          on:click={openDeleteModalForBatch}
+        >
+          <span class="material-symbols-outlined text-xs">delete_forever</span>
+          <span>Hapus Terpilih ({selectedDraftIds.length})</span>
+        </Button>
+      </div>
+    </div>
+  {/if}
 
   <!-- Content -->
   {#if filteredTemplates.length === 0}
@@ -207,24 +349,32 @@
       {/if}
     </div>
   {:else if viewMode === 'table'}
-    <Table headers={tableHeaders} minWidth="min-w-[820px]">
-      {#each paginatedTemplates as tpl}
+    <Table headers={tableHeaders} minWidth="min-w-[840px]">
+      {#each paginatedTemplates as tpl (tpl.id)}
         {@const badge = getStatusBadge(tpl.status)}
         <DesignerTemplateRow
           {tpl}
           {copiedId}
           {badge}
           {formatDate}
+          isSelected={selectedDraftIds.includes(tpl.id)}
+          onToggleSelect={toggleDraftSelect}
+          onDeleteDraft={openDeleteModalForSingle}
           onCopyId={copyToClipboard}
           onShowRejection={(t) => selectedRejection = { name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.' }}
         />
       {/each}
     </Table>
   {:else}
-    <!-- Grid Mode -->
+    <!-- Grid / Card Mode (Default View) -->
     <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each paginatedTemplates as tpl (tpl.id)}
-        <DesignerTemplateCard template={tpl} />
+        <DesignerTemplateCard
+          template={tpl}
+          isSelected={selectedDraftIds.includes(tpl.id)}
+          onToggleSelect={toggleDraftSelect}
+          onDeleteDraft={openDeleteModalForSingle}
+        />
       {/each}
     </div>
   {/if}
@@ -242,4 +392,18 @@
 <DesignerRejectionModal
   {selectedRejection}
   onClose={() => (selectedRejection = null)}
+/>
+
+<!-- Delete Draft Confirmation Modal -->
+<DesignerDeleteDraftModal
+  open={deleteModalOpen}
+  targetTemplates={targetsToDelete}
+  isDeleting={isDeletingDraft}
+  onConfirm={handleConfirmDelete}
+  onClose={() => {
+    if (!isDeletingDraft) {
+      deleteModalOpen = false;
+      targetsToDelete = [];
+    }
+  }}
 />

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ShoppingBag } from 'lucide-svelte';
+  import { canvasStore } from '../../stores/editorStore';
 
   export let isImageLeft: boolean = false;
   export let badgeText: string = '';
@@ -11,12 +12,15 @@
   export let imageUrl: string = '';
   export let selectNode: (e: MouseEvent, key: string) => void = () => {};
   export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
+
+  $: viewMode = $canvasStore?.viewMode || 'desktop';
+  $: isSmallScreen = viewMode === 'mobile' || viewMode === 'tablet';
 </script>
 
-<div class="w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+<div class={`w-full grid gap-8 items-center ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-12'}`}>
   {#if isImageLeft}
     <!-- Left: Image -->
-    <div data-node="image" class="md:col-span-6 w-full">
+    <div data-node="image" class={`w-full ${isSmallScreen ? 'order-2' : 'col-span-6 order-1'}`}>
       {#if imageUrl}
         <div class="p-2 rounded-2xl bg-base-200/60 dark:bg-slate-800/60 border border-base-300 dark:border-slate-800 shadow-md">
           <img
@@ -29,7 +33,7 @@
     </div>
 
     <!-- Right: Text -->
-    <div class="md:col-span-6 flex flex-col items-start text-left gap-4">
+    <div class={`flex flex-col items-start text-left gap-4 ${isSmallScreen ? 'order-1' : 'col-span-6 order-2'}`}>
       {#if badgeText}
         <div
           data-node="badge"
@@ -83,7 +87,7 @@
     </div>
   {:else}
     <!-- Left: Text -->
-    <div class="md:col-span-6 flex flex-col items-start text-left gap-4">
+    <div class={`flex flex-col items-start text-left gap-4 ${isSmallScreen ? 'col-span-1' : 'col-span-6'}`}>
       {#if badgeText}
         <div
           data-node="badge"
@@ -137,7 +141,7 @@
     </div>
 
     <!-- Right: Image -->
-    <div data-node="image" class="md:col-span-6 w-full">
+    <div data-node="image" class={`w-full ${isSmallScreen ? 'col-span-1' : 'col-span-6'}`}>
       {#if imageUrl}
         <div class="p-2 rounded-2xl bg-base-200/60 dark:bg-slate-800/60 border border-base-300 dark:border-slate-800 shadow-md">
           <img

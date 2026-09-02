@@ -9,8 +9,10 @@ export const HeaderAnnouncementPresetSchema = z.enum([
   'command_search_bar',
   'transparent_glass_header',
   'mega_menu_dropdown',
-  'minimal_action_only',
   'top_contact_bar',
+  'delivery_order_cta',
+  'store_badge_highlight',
+  'promo_countdown_banner',
 ]);
 export type HeaderAnnouncementPreset = z.infer<typeof HeaderAnnouncementPresetSchema>;
 
@@ -25,6 +27,18 @@ export const HeroPresetSchema = z.enum([
   'floating_cards_showcase',
   'oversized_bold_typography',
   'inline_email_capture',
+  'social_proof_community',
+  'dual_product_showcase',
+  'badge_ticker_split',
+  'pill_category_selector',
+  'bento_masonry_hero',
+  'split_stat_counter',
+  'sticky_whatsapp_pill_float',
+  'sticker_badge_playful',
+  'editorial_luxury_serif',
+  'side_card_booking',
+  'dual_contrast_split',
+  'brand_story_founder',
 ]);
 export type HeroPreset = z.infer<typeof HeroPresetSchema>;
 

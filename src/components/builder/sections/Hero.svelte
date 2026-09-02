@@ -7,6 +7,18 @@
   import HeroTerminalCode from './hero/HeroTerminalCode.svelte';
   import HeroFloatingCards from './hero/HeroFloatingCards.svelte';
   import HeroEmailCapture from './hero/HeroEmailCapture.svelte';
+  import HeroSocialProof from './hero/HeroSocialProof.svelte';
+  import HeroDualProduct from './hero/HeroDualProduct.svelte';
+  import HeroBadgeTicker from './hero/HeroBadgeTicker.svelte';
+  import HeroPillCategory from './hero/HeroPillCategory.svelte';
+  import HeroBentoGrid from './hero/HeroBentoGrid.svelte';
+  import HeroStatCounter from './hero/HeroStatCounter.svelte';
+  import HeroChatSimulation from './hero/HeroChatSimulation.svelte';
+  import HeroStickerPlayful from './hero/HeroStickerPlayful.svelte';
+  import HeroEditorialSerif from './hero/HeroEditorialSerif.svelte';
+  import HeroSideBooking from './hero/HeroSideBooking.svelte';
+  import HeroDualContrast from './hero/HeroDualContrast.svelte';
+  import HeroFounderStory from './hero/HeroFounderStory.svelte';
   import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-svelte';
 
   export let props: HeroProps = {};
@@ -26,6 +38,7 @@
   $: ctaText = props?.ctaText || 'Lihat Katalog';
   $: ctaLink = props?.ctaLink || '#products';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
+  $: waNumber = (props?.whatsappNumber as string) || (props?.waNumber as string) || '';
 
   $: parsedPadding = (() => {
     if (styles?.paddingTop || styles?.paddingBottom) {
@@ -81,7 +94,7 @@
 <section
   id="hero-section"
   data-node="hero_container"
-  class="relative w-full overflow-hidden select-none {sectionBgClass} {isActive ? 'relative z-10' : ''}"
+  class="relative w-full overflow-hidden select-none hero-card container-type-inline-size {sectionBgClass} {isActive ? 'relative z-10' : ''}"
   style="background-color: var(--theme-bg); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'};"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
@@ -113,8 +126,8 @@
   {/if}
 
   <div
-    class="relative z-10 w-full max-w-[var(--theme-max-width,1200px)] mx-auto px-[var(--active-safe-zone,32px)]"
-    style="padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
+    class="relative z-10 w-full max-w-[var(--theme-max-width,1200px)] mx-auto builder-safe-container box-border"
+    style="padding-left: var(--active-safe-zone, var(--active-margin, 32px)); padding-right: var(--active-safe-zone, var(--active-margin, 32px)); padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
   >
     {#if activePreset === 'full_banner_overlay' || activePreset === 'video_background_loop'}
       <HeroFullBanner
@@ -135,6 +148,153 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'social_proof_community'}
+      <HeroSocialProof
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'dual_product_showcase'}
+      <HeroDualProduct
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'badge_ticker_split'}
+      <HeroBadgeTicker
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'pill_category_selector'}
+      <HeroPillCategory
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {imageUrl}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'bento_masonry_hero'}
+      <HeroBentoGrid
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'split_stat_counter'}
+      <HeroStatCounter
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'sticky_whatsapp_pill_float'}
+      <HeroChatSimulation
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'sticker_badge_playful'}
+      <HeroStickerPlayful
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'editorial_luxury_serif'}
+      <HeroEditorialSerif
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'side_card_booking'}
+      <HeroSideBooking
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'dual_contrast_split'}
+      <HeroDualContrast
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {waNumber}
+        {selectNode}
+        {selectNodeKey}
+      />
+    {:else if activePreset === 'brand_story_founder'}
+      <HeroFounderStory
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {imageUrl}
+        {waNumber}
         {selectNode}
         {selectNodeKey}
       />
@@ -238,3 +398,92 @@
     {/if}
   </div>
 </section>
+
+<style>
+  :global(.hero-card) {
+    container-type: inline-size;
+    container-name: herocard;
+  }
+
+  :global(.cq-grid-split) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  :global(.cq-grid-dual-contrast) {
+    display: flex;
+    flex-direction: column;
+  }
+  :global(.cq-title-lg) {
+    font-size: 1.75rem;
+    line-height: 2.125rem;
+  }
+  :global(.cq-btn-group) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  :global(.cq-stat-container) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  :global(.cq-bento-grid) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  @container herocard (min-width: 680px) {
+    :global(.cq-grid-split) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 2rem;
+    }
+    :global(.cq-title-lg) {
+      font-size: 2.25rem;
+      line-height: 2.625rem;
+    }
+    :global(.cq-btn-group) {
+      flex-direction: row;
+      width: auto;
+    }
+    :global(.cq-stat-container) {
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    :global(.cq-bento-grid) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    :global(.cq-bento-span-full) {
+      grid-column: span 2;
+    }
+  }
+
+  @container herocard (min-width: 980px) {
+    :global(.cq-title-lg) {
+      font-size: 3rem;
+      line-height: 3.25rem;
+    }
+    :global(.cq-grid-dual-contrast) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    :global(.cq-bento-grid) {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    :global(.cq-bento-span-7) {
+      grid-column: span 7;
+    }
+    :global(.cq-bento-span-5) {
+      grid-column: span 5;
+    }
+    :global(.cq-bento-span-4) {
+      grid-column: span 4;
+    }
+  }
+</style>

@@ -42,6 +42,7 @@ export const buildCanvasCssVars = (
     `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
     `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
     `--active-safe-zone: ${viewMode === 'mobile' ? (layout.horizontalMarginMobile || '16px') : viewMode === 'tablet' ? (layout.horizontalMarginTablet || '24px') : (layout.horizontalMarginDesktop || '32px')}`,
+    `--active-margin: ${viewMode === 'mobile' ? (layout.horizontalMarginMobile || '16px') : viewMode === 'tablet' ? (layout.horizontalMarginTablet || '24px') : (layout.horizontalMarginDesktop || '32px')}`,
     `--theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05)`,
     `--theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1)`,
     `--theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1)`,

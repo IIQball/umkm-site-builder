@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, Trash2, ChevronUp, ChevronDown, Megaphone, Image as ImageIcon, Menu } from 'lucide-svelte';
+  import { Plus, Trash2, ChevronUp, ChevronDown, Megaphone, Image as ImageIcon, Menu, Clock, MapPin, MessageCircle, Zap, Bike, ShieldCheck } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
   import {
     makeHandlePropChange,
@@ -16,46 +16,213 @@
   $: handleRemoveArrayItem = makeHandleRemoveArrayItem(section, onUpdate);
   $: handleMoveArrayItem = makeHandleMoveArrayItem(section, onUpdate);
 
+  $: activePreset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'default_split';
+  $: isNoAnnouncement = ['compact_inline', 'transparent_glass_header', 'floating_pill_island'].includes(activePreset);
+  $: isTopContactBar = activePreset === 'top_contact_bar';
+
   $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
   $: logoType = section.props?.logoType || 'image_text';
   $: navLinks = (section.props?.navLinks as string[]) || [];
 </script>
 
 <div class="space-y-6">
-  <!-- 1. Announcement Bar Configuration -->
-  <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
-    <div class="flex items-center justify-between">
+  <!-- Top Contact Bar Configuration (for top_contact_bar preset) -->
+  {#if isTopContactBar}
+    <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
       <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content">
-        <Megaphone size={14} class="text-blue-500" />
-        <span>Announcement Bar</span>
+        <Clock size={14} class="text-emerald-500" />
+        <span>Info Kontak & Jam Operasional</span>
       </div>
-      <label class="relative inline-flex items-center cursor-pointer">
-        <input
-          type="checkbox"
-          checked={showAnnouncement}
-          on:change={(e) => handlePropChange('showAnnouncement', e.currentTarget.checked)}
-          class="sr-only peer"
-        />
-        <div class="w-8 h-4 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
-      </label>
-    </div>
 
-    {#if showAnnouncement}
       <div>
-        <label for="announcement-text" class="block font-medium text-[11px] text-base-content/70 mb-1">
-          Teks Pengumuman / Promo
+        <label for="store-hours" class="block font-medium text-[11px] text-base-content/70 mb-1">
+          Jam Operasional Toko
         </label>
         <input
-          id="announcement-text"
+          id="store-hours"
           type="text"
-          value={section.props?.announcementText ?? ''}
-          on:input={(e) => handlePropChange('announcementText', e.currentTarget.value)}
+          value={section.props?.storeHours ?? 'Buka: 08.00 - 21.00 WIB'}
+          on:input={(e) => handlePropChange('storeHours', e.currentTarget.value)}
           class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
-          placeholder="Diskon 20% khusus hari ini..."
+          placeholder="Buka: 08.00 - 21.00 WIB"
         />
       </div>
-    {/if}
-  </div>
+
+      <div>
+        <label for="store-address" class="flex items-center gap-1 font-medium text-[11px] text-base-content/70 mb-1">
+          <MapPin size={11} class="text-blue-500" />
+          <span>Alamat Toko Singkat</span>
+        </label>
+        <input
+          id="store-address"
+          type="text"
+          value={section.props?.address ?? 'Jakarta, Indonesia'}
+          on:input={(e) => handlePropChange('address', e.currentTarget.value)}
+          class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+          placeholder="Jakarta, Indonesia"
+        />
+      </div>
+
+      <div>
+        <label for="store-status" class="block font-medium text-[11px] text-base-content/70 mb-1">
+          Teks Status Toko
+        </label>
+        <input
+          id="store-status"
+          type="text"
+          value={section.props?.storeStatus ?? 'Toko Buka'}
+          on:input={(e) => handlePropChange('storeStatus', e.currentTarget.value)}
+          class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+          placeholder="Toko Buka"
+        />
+      </div>
+    </div>
+  {:else if !isNoAnnouncement}
+    <!-- 1. Editable Announcement Bar Configuration -->
+    <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content">
+          <Megaphone size={14} class="text-blue-500" />
+          <span>Announcement & Teks Promo</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showAnnouncement}
+            on:change={(e) => handlePropChange('showAnnouncement', e.currentTarget.checked)}
+            class="sr-only peer"
+          />
+          <div class="w-8 h-4 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      {#if showAnnouncement}
+        <div class="space-y-2">
+          <div>
+            <label for="announcement-text" class="block font-medium text-[11px] text-base-content/70 mb-1">
+              Teks Pengumuman / Broadcast Promo
+            </label>
+            <input
+              id="announcement-text"
+              type="text"
+              value={section.props?.announcementText ?? ''}
+              on:input={(e) => handlePropChange('announcementText', e.currentTarget.value)}
+              class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+              placeholder="Diskon 20% khusus pesanan hari ini..."
+            />
+          </div>
+
+          <div>
+            <label for="free-shipping-text" class="block font-medium text-[11px] text-base-content/70 mb-1">
+              Ketentuan Gratis Ongkir / Benefit Toko
+            </label>
+            <input
+              id="free-shipping-text"
+              type="text"
+              value={section.props?.freeShippingText ?? ''}
+              on:input={(e) => handlePropChange('freeShippingText', e.currentTarget.value)}
+              class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+              placeholder="Gratis ongkir min. belanja Rp 250rb"
+            />
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
+
+  <!-- Preset Specific Options -->
+  {#if activePreset === 'promo_countdown_banner'}
+    <div class="space-y-3 p-3 bg-rose-500/10 rounded-xl border border-rose-500/30">
+      <div class="flex items-center gap-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300">
+        <Zap size={14} class="fill-current text-rose-500" />
+        <span>Konfigurasi Promo Countdown</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label for="promo-title" class="block font-medium text-[11px] text-base-content/70 mb-1">Judul Promo</label>
+          <input
+            id="promo-title"
+            type="text"
+            value={section.props?.promoTitle ?? '⚡ FLASH SALE'}
+            on:input={(e) => handlePropChange('promoTitle', e.currentTarget.value)}
+            class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-rose-500"
+            placeholder="⚡ FLASH SALE"
+          />
+        </div>
+        <div>
+          <label for="promo-duration" class="block font-medium text-[11px] text-base-content/70 mb-1">Durasi (Jam)</label>
+          <input
+            id="promo-duration"
+            type="number"
+            min="1"
+            max="72"
+            value={section.props?.promoDurationHours ?? 4}
+            on:input={(e) => handlePropChange('promoDurationHours', Number(e.currentTarget.value) || 4)}
+            class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-rose-500"
+            placeholder="4"
+          />
+        </div>
+      </div>
+    </div>
+
+  {:else if activePreset === 'delivery_order_cta'}
+    <div class="space-y-3 p-3 bg-orange-500/10 rounded-xl border border-orange-500/30">
+      <div class="flex items-center gap-1.5 text-xs font-semibold text-orange-700 dark:text-orange-300">
+        <Bike size={14} class="text-orange-500" />
+        <span>Konfigurasi Pesan Delivery</span>
+      </div>
+      <div>
+        <label for="delivery-text" class="block font-medium text-[11px] text-base-content/70 mb-1">Info Layanan Kirim</label>
+        <input
+          id="delivery-text"
+          type="text"
+          value={section.props?.deliveryText ?? '🛵 Siap Kirim Instan: Estimasi 30 Menit'}
+          on:input={(e) => handlePropChange('deliveryText', e.currentTarget.value)}
+          class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-orange-500"
+        />
+      </div>
+      <div>
+        <label for="delivery-partners" class="block font-medium text-[11px] text-base-content/70 mb-1">Mitra Kurir</label>
+        <input
+          id="delivery-partners"
+          type="text"
+          value={section.props?.deliveryPartners ?? 'Tersedia GrabFood & GoFood'}
+          on:input={(e) => handlePropChange('deliveryPartners', e.currentTarget.value)}
+          class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-orange-500"
+        />
+      </div>
+    </div>
+
+  {:else if activePreset === 'store_badge_highlight'}
+    <div class="space-y-3 p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
+      <div class="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+        <ShieldCheck size={14} class="text-emerald-500" />
+        <span>Badges Legalitas Toko</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label for="bpom-text" class="block font-medium text-[11px] text-base-content/70 mb-1">Badge 1</label>
+          <input
+            id="bpom-text"
+            type="text"
+            value={section.props?.bpomText ?? '✓ BPOM'}
+            on:input={(e) => handlePropChange('bpomText', e.currentTarget.value)}
+            class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+        <div>
+          <label for="halal-text" class="block font-medium text-[11px] text-base-content/70 mb-1">Badge 2</label>
+          <input
+            id="halal-text"
+            type="text"
+            value={section.props?.halalText ?? '✓ Halal MUI'}
+            on:input={(e) => handlePropChange('halalText', e.currentTarget.value)}
+            class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- 2. Logo Configuration -->
   <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
@@ -228,6 +395,39 @@
         <Plus size={13} />
         <span>Tambah Menu Navigasi</span>
       </button>
+    </div>
+  </div>
+
+  <!-- 4. Tombol Aksi WhatsApp (CTA) -->
+  <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
+    <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content">
+      <MessageCircle size={14} class="text-emerald-500" />
+      <span>Tombol WhatsApp (CTA)</span>
+    </div>
+
+    <!-- Info SSOT WhatsApp Store Number -->
+    <div class="p-2.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <MessageCircle size={15} class="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+        <div>
+          <span class="font-bold block text-[11px]">No. WhatsApp Otomatis (SSOT)</span>
+          <span class="text-[10px] opacity-80">Terintegrasi otomatis dari data `stores.waNumber`.</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label for="header-cta-text" class="block font-medium text-[11px] text-base-content/70 mb-1">
+        Teks Tombol CTA
+      </label>
+      <input
+        id="header-cta-text"
+        type="text"
+        value={section.props?.ctaText ?? 'Chat WA'}
+        on:input={(e) => handlePropChange('ctaText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+        placeholder="Chat WA"
+      />
     </div>
   </div>
 </div>

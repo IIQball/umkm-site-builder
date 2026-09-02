@@ -6,6 +6,7 @@
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
+  export let onlyDesktop: boolean = false;
 
   $: isMobileView = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';
   $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
@@ -147,59 +148,61 @@
     {/if}
   </nav>
 
-  <!-- Mobile / Tablet Hamburger Button -->
-  <div class={`flex ${isMobileView ? '' : 'sm:hidden'} items-center gap-2`}>
-    {#if ctaText}
-      <a
-        href={ctaLink}
-        class="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[11px] font-semibold whitespace-nowrap"
-      >
-        {ctaText}
-      </a>
-    {/if}
-    <button
-      type="button"
-      on:click={(e) => {
-        e.stopPropagation();
-        isMobileMenuOpen = !isMobileMenuOpen;
-      }}
-      aria-label="Toggle navigation menu"
-      class="p-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-    >
-      {#if isMobileMenuOpen}
-        <X size={20} />
-      {:else}
-        <Menu size={20} />
-      {/if}
-    </button>
-  </div>
-
-  <!-- Mobile Dropdown Drawer -->
-  {#if isMobileMenuOpen}
-    <div
-      class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl p-3 z-50 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
-    >
-      {#each navLinks as link, index (link + index)}
-        <span
-          role="button"
-          tabindex="0"
-          on:click={() => (isMobileMenuOpen = false)}
-          on:keydown={(e) => e.key === 'Enter' && (isMobileMenuOpen = false)}
-          style={getLinkStyle(index)}
-          class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer block truncate"
-        >
-          {link}
-        </span>
-      {/each}
+  {#if !onlyDesktop}
+    <!-- Mobile / Tablet Hamburger Button -->
+    <div class={`flex ${isMobileView ? '' : 'sm:hidden'} items-center gap-2`}>
       {#if ctaText}
         <a
           href={ctaLink}
-          on:click={() => (isMobileMenuOpen = false)}
-          class="mt-1 w-full text-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors block"
+          class="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[11px] font-semibold whitespace-nowrap"
         >
           {ctaText}
         </a>
       {/if}
+      <button
+        type="button"
+        on:click={(e) => {
+          e.stopPropagation();
+          isMobileMenuOpen = !isMobileMenuOpen;
+        }}
+        aria-label="Toggle navigation menu"
+        class="p-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+      >
+        {#if isMobileMenuOpen}
+          <X size={20} />
+        {:else}
+          <Menu size={20} />
+        {/if}
+      </button>
     </div>
+
+    <!-- Mobile Dropdown Drawer -->
+    {#if isMobileMenuOpen}
+      <div
+        class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl p-3 z-50 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
+      >
+        {#each navLinks as link, index (link + index)}
+          <span
+            role="button"
+            tabindex="0"
+            on:click={() => (isMobileMenuOpen = false)}
+            on:keydown={(e) => e.key === 'Enter' && (isMobileMenuOpen = false)}
+            style={getLinkStyle(index)}
+            class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer block truncate"
+          >
+            {link}
+          </span>
+        {/each}
+        {#if ctaText}
+          <a
+            href={ctaLink}
+            on:click={() => (isMobileMenuOpen = false)}
+            class="mt-1 w-full text-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors block"
+          >
+            {ctaText}
+          </a>
+        {/if}
+      </div>
+    {/if}
   {/if}
 </div>

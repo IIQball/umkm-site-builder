@@ -7,7 +7,8 @@
   export let isActive: boolean = false;
 
   $: showAnnouncement = props.showAnnouncement ?? true;
-  $: announcementText = props.announcementText ?? 'Diskon 20% khusus hari ini';
+  $: announcementText = props.announcementText ?? 'Diskon 20% khusus pesanan hari ini';
+  $: freeShippingText = props.freeShippingText ?? '';
   $: align = props.announcementAlign ?? 'center';
   $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
   $: textColor = (props.announcementTextColor as string) || '#ffffff';
@@ -43,7 +44,7 @@
   };
 </script>
 
-{#if showAnnouncement && announcementText}
+{#if showAnnouncement && (announcementText || freeShippingText)}
   <div
     role="button"
     tabindex="0"
@@ -60,13 +61,16 @@
       class={`announcement-inner-container w-full mx-auto flex items-center ${
         align === 'left' ? 'justify-start text-left' : 'justify-center text-center'
       } min-w-0 box-border`}
-      style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
+      style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px));"
     >
       <p
         style={textStyleString}
-        class="w-full text-xs sm:text-sm font-medium truncate sm:whitespace-normal leading-none tracking-wide flex items-center justify-center m-0 p-0"
+        class="w-full text-xs sm:text-sm font-medium truncate sm:whitespace-normal leading-none tracking-wide flex items-center justify-center gap-2 m-0 p-0"
       >
-        {announcementText}
+        <span>{announcementText}</span>
+        {#if freeShippingText}
+          <span class="opacity-85 font-normal">| {freeShippingText}</span>
+        {/if}
       </p>
     </div>
   </div>

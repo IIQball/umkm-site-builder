@@ -13,10 +13,17 @@
     createdAt: Date | string;
     totalSold: number;
   };
+  export let isSelected: boolean = false;
+  export let onToggleSelect: ((id: string) => void) | undefined = undefined;
+  export let onDeleteDraft: ((template: any) => void) | undefined = undefined;
 
   let isDeleting = false;
 
   const handleDelete = async () => {
+    if (onDeleteDraft) {
+      onDeleteDraft(template);
+      return;
+    }
     if (!confirm('Hapus draf template ini? Tindakan tidak dapat dibatalkan.')) return;
     try {
       isDeleting = true;
@@ -64,13 +71,33 @@
 </script>
 
 <div
-  class="template-card bg-card border border-light rounded-3xl overflow-hidden shadow-xs
-         hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col group relative"
+  class={`template-card bg-card border rounded-3xl overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col group relative ${
+    isSelected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-light'
+  }`}
   data-status={template.status}
   data-name={template.name.toLowerCase()}
 >
   <!-- Thumbnail 16:9 -->
   <div class="relative w-full aspect-video bg-nested overflow-hidden border-b border-light">
+    <!-- Draft Selection Checkbox (top-left) -->
+    {#if template.status === 'draft' && onToggleSelect}
+      <div class="absolute top-3 left-3 z-20">
+        <button
+          type="button"
+          on:click|stopPropagation={() => onToggleSelect && onToggleSelect(template.id)}
+          class={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center cursor-pointer shadow-sm ${
+            isSelected
+              ? 'bg-blue-600 border-blue-600 text-white'
+              : 'bg-card/90 dark:bg-slate-900/90 border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+          }`}
+          title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
+          aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
+        >
+          <span class="material-symbols-outlined text-sm font-bold">check</span>
+        </button>
+      </div>
+    {/if}
+
     {#if template.thumbnailUrl}
       <img
         src={template.thumbnailUrl}

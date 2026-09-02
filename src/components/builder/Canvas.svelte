@@ -202,8 +202,6 @@
       </div>
     </div>
 
-    <!-- Active Template Canvas Paper Container -->
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-noninteractive-element-interactions -->
     <div
       bind:clientHeight={canvasHeight}
       class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible"
@@ -213,7 +211,11 @@
       aria-label="Editable Page Canvas"
     >
       <!-- Figma Layout Columns Overlay -->
-      <LayoutGridOverlay {viewMode} />
+      <LayoutGridOverlay
+        {viewMode}
+        showColumnGrid={$canvasStore.showColumnGrid}
+        showPixelGrid={$canvasStore.showPixelGrid}
+      />
 
       {#if sections.length === 0}
         <div class="py-24 px-8 text-center flex flex-col items-center justify-center">
@@ -229,7 +231,7 @@
         {#each renderedSections as section (section.id)}
           {@const isSelected = selectedSectionId === section.id}
           <div
-            class="relative group/section transition-all duration-150 {isSelected ? 'ring-2 ring-primary ring-inset z-20 shadow-md' : 'hover:ring-1 hover:ring-primary/40 hover:ring-inset'}"
+            class={`relative group/section transition-all duration-150 ${section.type === 'header_announcement' ? 'z-30 overflow-visible' : isSelected ? 'z-20' : 'z-10'} ${isSelected ? 'ring-2 ring-primary ring-inset shadow-md' : 'hover:ring-1 hover:ring-primary/40 hover:ring-inset'}`}
             on:click|stopPropagation={() => onSelectSection(section.id)}
             role="button"
             tabindex="0"

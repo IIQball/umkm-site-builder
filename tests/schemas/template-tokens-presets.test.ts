@@ -102,11 +102,12 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
     expect(typo?.caption?.fontSize).toBe('10px'); // 16 / 1.618
   });
 
-  it('should validate layout presets per section type (all 80 presets)', () => {
+  it('should validate layout presets per section type (all 82 presets)', () => {
     const headerPresets = [
       'default_split', 'centered_stacked', 'compact_inline', 'floating_pill_island',
       'split_nav_centered_logo', 'command_search_bar', 'transparent_glass_header',
-      'mega_menu_dropdown', 'minimal_action_only', 'top_contact_bar'
+      'mega_menu_dropdown', 'top_contact_bar', 'delivery_order_cta',
+      'store_badge_highlight', 'promo_countdown_banner'
     ];
     for (const p of headerPresets) {
       expect(HeaderAnnouncementPresetSchema.safeParse(p).success).toBe(true);
@@ -115,7 +116,11 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
     const heroPresets = [
       'split_left_text', 'split_right_text', 'centered_minimal', 'full_banner_overlay',
       'video_background_loop', 'gradient_mesh_glow', 'interactive_terminal_code',
-      'floating_cards_showcase', 'oversized_bold_typography', 'inline_email_capture'
+      'floating_cards_showcase', 'oversized_bold_typography', 'inline_email_capture',
+      'social_proof_community', 'dual_product_showcase',
+      'badge_ticker_split', 'pill_category_selector', 'bento_masonry_hero',
+      'split_stat_counter', 'sticky_whatsapp_pill_float', 'sticker_badge_playful',
+      'editorial_luxury_serif', 'side_card_booking', 'dual_contrast_split', 'brand_story_founder'
     ];
     for (const p of heroPresets) {
       expect(HeroPresetSchema.safeParse(p).success).toBe(true);

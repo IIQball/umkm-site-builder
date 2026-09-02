@@ -77,7 +77,9 @@
 <section
   id={section.id}
   style={inlineStyle}
-  class="relative box-border w-full max-w-full overflow-x-hidden min-w-0 font-[family-name:var(--theme-font-body)]"
+  class={`relative box-border w-full max-w-full min-w-0 font-[family-name:var(--theme-font-body)] ${
+    section?.type === 'header_announcement' ? 'overflow-visible z-30' : 'overflow-x-hidden'
+  }`}
 >
   {#if sectionDef}
     {#if isFullBleed}

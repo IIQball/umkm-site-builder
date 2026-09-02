@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc, and } from 'drizzle-orm';
+import { eq, isNull, desc, and, inArray } from 'drizzle-orm';
 import { AppError, validate } from '@/lib/utils';
 import {
   TemplateConfigSchema,
@@ -237,11 +237,38 @@ export async function deleteTemplateDraft(
     throw new AppError('Only draft or rejected templates can be deleted', 400);
   }
 
-  await db
-    .update(templates)
-    .set({
-      deletedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(templates.id, templateId));
+  // Hard delete draft/rejected template as requested
+  await db.delete(templates).where(eq(templates.id, templateId));
+}
+
+export async function deleteBatchTemplateDrafts(
+  templateIds: string[],
+  userId: string,
+  userRole: string
+) {
+  if (!Array.isArray(templateIds) || templateIds.length === 0) {
+    throw new AppError('Daftar ID template tidak boleh kosong', 400);
+  }
+
+  const isPrivileged = userRole === 'admin' || userRole === 'superadmin';
+
+  // Only query templates belonging to the designer (or admin) with status 'draft'
+  const targetTemplates = await db.query.templates.findMany({
+    where: and(
+      inArray(templates.id, templateIds),
+      isPrivileged ? undefined : eq(templates.designerId, userId),
+      eq(templates.status, 'draft')
+    ),
+  });
+
+  if (targetTemplates.length === 0) {
+    throw new AppError('Tidak ada template draft yang valid untuk dihapus', 404);
+  }
+
+  const eligibleIds = targetTemplates.map((t) => t.id);
+
+  // Execute hard delete
+  await db.delete(templates).where(inArray(templates.id, eligibleIds));
+
+  return { deletedCount: eligibleIds.length, deletedIds: eligibleIds };
 }

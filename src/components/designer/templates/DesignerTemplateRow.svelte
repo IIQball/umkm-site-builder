@@ -8,9 +8,33 @@
   export let formatDate: (d: Date | string) => string;
   export let onCopyId: (id: string) => void;
   export let onShowRejection: (tpl: any) => void;
+  export let isSelected: boolean = false;
+  export let onToggleSelect: ((id: string) => void) | undefined = undefined;
+  export let onDeleteDraft: ((tpl: any) => void) | undefined = undefined;
 </script>
 
-<tr class="hover:bg-nested/40 transition-colors group">
+<tr class={`transition-colors group ${isSelected ? 'bg-blue-500/5 hover:bg-blue-500/10' : 'hover:bg-nested/40'}`}>
+  <!-- Checkbox Column -->
+  <td class="pl-5 pr-1 py-4 w-10 text-center">
+    {#if tpl.status === 'draft' && onToggleSelect}
+      <button
+        type="button"
+        on:click|stopPropagation={() => onToggleSelect && onToggleSelect(tpl.id)}
+        class={`w-5 h-5 rounded-md border transition-all flex items-center justify-center cursor-pointer mx-auto ${
+          isSelected
+            ? 'bg-blue-600 border-blue-600 text-white'
+            : 'bg-card border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+        }`}
+        title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
+        aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
+      >
+        <span class="material-symbols-outlined text-xs font-bold">check</span>
+      </button>
+    {:else}
+      <span class="w-5 h-5 block"></span>
+    {/if}
+  </td>
+
   <!-- Template Info + Thumbnail -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-3.5">
@@ -83,6 +107,15 @@
   <td class="px-6 py-4 text-right whitespace-nowrap">
     <div class="flex items-center justify-end gap-2">
       {#if tpl.status === 'draft'}
+        <Button
+          variant="destructive"
+          size="xs"
+          className="rounded-xl font-bold"
+          on:click={() => onDeleteDraft && onDeleteDraft(tpl)}
+        >
+          <span class="material-symbols-outlined text-xs">delete</span>
+          <span>Hapus</span>
+        </Button>
         <Button
           href={`/builder/${tpl.id}`}
           variant="dark"

@@ -85,10 +85,11 @@ export const POST: APIRoute = async ({ request }) => {
       name,
       subdomain,
       userId: user.id,
-      templateId: 'system-default-template', // From db seed logic
+      templateId: 'system-default-template',
       waNumber,
       googleMapsUrl: googleMapsUrl || null,
       status: 'active',
+      customization: { isOnboarded: true },
     });
 
     return new Response(

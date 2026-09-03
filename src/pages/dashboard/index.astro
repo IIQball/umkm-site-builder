@@ -1,68 +1,156 @@
 ---
-/**
- * pages/dashboard/index.astro
- * Dashboard entry point — renders summary per user role.
- */
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import StatCard from '@/components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 
-// DashboardLayout already handles null session → redirect to /auth/login
-// but we also read user here for role-based rendering
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role === 'designer') return Astro.redirect('/designer/wallet');
 if (user.role === 'superadmin') return Astro.redirect('/admin/whitelist');
 
+const currentHour = new Date().getHours();
+let greeting = 'Selamat Datang';
+if (currentHour >= 4 && currentHour < 11) {
+  greeting = 'Selamat Pagi';
+} else if (currentHour >= 11 && currentHour < 15) {
+  greeting = 'Selamat Siang';
+} else if (currentHour >= 15 && currentHour < 18.5) {
+  greeting = 'Selamat Sore';
+} else {
+  greeting = 'Selamat Malam';
+}
 ---
 
 <DashboardLayout title="Dashboard">
-  <div class="space-y-6">
-    <!-- Welcome Banner -->
-    <div class="p-5 rounded-2xl bg-blue-600 text-white flex items-center justify-between shadow-lg shadow-blue-600/20">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <p class="text-blue-100 text-xs font-medium mb-0.5">Selamat datang kembali</p>
-        <h1 class="text-xl font-bold">{user.name ?? user.email}</h1>
-      </div>
-      <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-        <span class="material-symbols-outlined text-[28px]">waving_hand</span>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Pengguna'}!</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Ringkasan aktivitas dan statistik toko Anda.
+        </p>
       </div>
     </div>
 
-    {/* ── Tenant Dashboard ── */}
     {user.role === 'tenant' && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Status Toko</p>
-          <p class="text-2xl font-bold text-base-content">—</p>
-          <a href="/dashboard/store" class="text-xs text-blue-500 font-semibold hover:underline">Pengaturan toko →</a>
-        </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Produk</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/dashboard/products" class="text-xs text-blue-500 font-semibold hover:underline">Kelola produk →</a>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StatCard 
+          client:load
+          label="Status Toko" 
+          value="—" 
+          icon="storefront" 
+          cardTheme="dark"
+          badge="Aktif"
+          footerText="Kelola informasi toko"
+          delayClass="delay-100"
+        />
+        <StatCard 
+          client:load
+          label="Total Produk" 
+          value="—" 
+          icon="shopping_bag" 
+          cardTheme="default"
+          badge="Inventori"
+          footerText="Produk tersedia di katalog"
+          delayClass="delay-150"
+        />
+        <StatCard 
+          client:load
+          label="Aktivitas Toko" 
+          value="—" 
+          icon="trending_up" 
+          cardTheme="blue"
+          badge="Analytics"
+          footerText="Monitor lalu lintas toko"
+          delayClass="delay-200"
+        />
       </div>
     )}
 
-    {/* ── Admin Dashboard ── */}
     {user.role === 'admin' && (
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total Transaksi</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/transactions" class="text-xs text-blue-500 font-semibold hover:underline">Lihat semua →</a>
-        </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Total User</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/users" class="text-xs text-blue-500 font-semibold hover:underline">Manajemen user →</a>
-        </div>
-        <div class="p-5 rounded-2xl bg-base-100 border border-base-200 shadow-sm space-y-1">
-          <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Template Pending Kurasi</p>
-          <p class="text-3xl font-extrabold text-base-content">—</p>
-          <a href="/admin/templates" class="text-xs text-blue-500 font-semibold hover:underline">Kurasi →</a>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          client:load
+          label="Total Transaksi" 
+          value="—" 
+          icon="receipt_long" 
+          cardTheme="dark"
+          badge="Semua"
+          footerText="Transaksi di platform"
+          delayClass="delay-100"
+        />
+        <StatCard 
+          client:load
+          label="Total User" 
+          value="—" 
+          icon="people" 
+          cardTheme="default"
+          badge="Pengguna"
+          footerText="User terdaftar aktif"
+          delayClass="delay-150"
+        />
+        <StatCard 
+          client:load
+          label="Template Pending" 
+          value="—" 
+          icon="hourglass_top" 
+          cardTheme="orange"
+          badge="Review"
+          footerText="Template menunggu kurasi"
+          delayClass="delay-200"
+        />
+        <StatCard 
+          client:load
+          label="Platform Status" 
+          value="✓" 
+          icon="check_circle" 
+          cardTheme="blue"
+          badge="Operasional"
+          footerText="Sistem berjalan normal"
+          delayClass="delay-250"
+        />
       </div>
     )}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up delay-300">
+      {user.role === 'tenant' && (
+        <>
+          <a href="/dashboard/store" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Pengaturan Toko</h3>
+              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+            </div>
+            <p class="text-body-base text-secondary">Kelola informasi toko, subdomain, dan kontak bisnis Anda</p>
+          </a>
+          <a href="/dashboard/analytics" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Analitik Toko</h3>
+              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+            </div>
+            <p class="text-body-base text-secondary">Monitor pengunjung, klik WhatsApp, dan tingkat konversi toko</p>
+          </a>
+        </>
+      )}
+      {user.role === 'admin' && (
+        <>
+          <a href="/admin/users" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Manajemen User</h3>
+              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+            </div>
+            <p class="text-body-base text-secondary">Kelola pengguna platform, verifikasi, dan permission akses</p>
+          </a>
+          <a href="/admin/templates" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Kurasi Template</h3>
+              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+            </div>
+            <p class="text-body-base text-secondary">Review dan kurasi template design dari designer tersedia</p>
+          </a>
+        </>
+      )}
+    </div>
   </div>
 </DashboardLayout>

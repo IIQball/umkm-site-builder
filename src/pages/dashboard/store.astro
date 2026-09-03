@@ -1,9 +1,6 @@
 ---
-/**
- * pages/dashboard/store.astro
- * Halaman Pengaturan Toko untuk Tenant
- */
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import StatCard from '@/components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import StoreManager from '@/components/tenant/StoreManager.svelte';
 import { db, stores } from '@/db';
@@ -13,12 +10,17 @@ const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role !== 'tenant') return Astro.redirect('/dashboard');
 
-// Ambil data toko jika ada
 const userStore = await db.query.stores.findFirst({
   where: eq(stores.userId, user.id),
 });
 
-// Jika kita belum memiliki toko, kita set null
+const customization = userStore?.customization as Record<string, unknown> | undefined;
+const isOnboarded = customization?.isOnboarded === true;
+
+if (!userStore || !isOnboarded) {
+  return Astro.redirect('/onboarding');
+}
+
 const initialStoreData = userStore ? {
   id: userStore.id,
   name: userStore.name,
@@ -26,16 +28,62 @@ const initialStoreData = userStore ? {
   waNumber: userStore.waNumber,
   googleMapsUrl: userStore.googleMapsUrl || '',
 } : null;
-
 ---
 
 <DashboardLayout title="Pengaturan Toko">
-  <div class="max-w-4xl mx-auto space-y-8">
-    <div class="space-y-1">
-      <h1 class="text-3xl font-bold tracking-tight text-base-content">Pengaturan Toko</h1>
-      <p class="text-base-content/60 text-sm">Kelola informasi dasar toko, tautan, dan preferensi tampilan Anda.</p>
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="pb-2">
+      <h1 class="text-heading-lg font-bold tracking-tight text-main">Pengaturan Toko</h1>
+      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+        Kelola informasi dasar toko, tautan, dan preferensi tampilan toko online Anda.
+      </p>
     </div>
 
-    <StoreManager client:load initialData={initialStoreData} />
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Nama Toko" 
+        value={userStore?.name || '—'} 
+        icon="storefront" 
+        cardTheme="dark"
+        badge="Identitas"
+        footerText="Nama bisnis Anda"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="Subdomain" 
+        value={userStore?.subdomain || '—'} 
+        icon="link" 
+        cardTheme="default"
+        badge="Domain"
+        footerText="URL toko online"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="WhatsApp" 
+        value={userStore?.waNumber ? '✓' : '—'} 
+        icon="message" 
+        cardTheme="orange"
+        badge="Kontak"
+        footerText="Nomor bisnis WhatsApp"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Onboarding" 
+        value="✓" 
+        icon="check_circle" 
+        cardTheme="blue"
+        badge="Selesai"
+        footerText="Toko siap operasional"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <div class="animate-fade-in-up delay-300">
+      <StoreManager client:load initialData={initialStoreData} />
+    </div>
   </div>
 </DashboardLayout>

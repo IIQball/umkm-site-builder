@@ -3,6 +3,7 @@
 
   export let initialViews = 0;
   export let initialClicks = 0;
+  export let isOnboarded = true;
 
   interface StoreStats {
     totalViews: number;
@@ -19,7 +20,7 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
       <div class="card-body">
         <div class="flex items-center justify-between">
           <div>
@@ -43,7 +44,7 @@
       </div>
     </div>
 
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
       <div class="card-body">
         <div class="flex items-center justify-between">
           <div>
@@ -69,7 +70,7 @@
   </div>
 
   {#if stats.totalViews > 0}
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
       <div class="card-body">
         <h3 class="card-title text-lg">Tingkat Konversi</h3>
         <p class="text-sm text-base-content/60 mt-1">Berapa persen pengunjung yang menghubungi via WhatsApp</p>

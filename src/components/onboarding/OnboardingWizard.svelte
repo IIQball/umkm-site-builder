@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { subdomainField } from '@lib/validators/subdomain';
+  import { onMount } from 'svelte';
+  import { CheckCircle } from 'lucide-svelte';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
-  import OnboardingStepSuccess from './wizard/OnboardingStepSuccess.svelte';
+  import { subdomainField } from '@/lib/validators/subdomain';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
   type Step = 1 | 2 | 3;
 
   let currentStep: Step = 1;
+  const STORAGE_KEY = 'onboarding_state';
 
   // Step 1: Subdomain
   let subdomain = '';
@@ -27,6 +29,36 @@
   // Step 3: Result
   let submitStatus: SubmitStatus = 'idle';
   let submitError = '';
+
+  onMount(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        currentStep = state.currentStep || 1;
+        subdomain = state.subdomain || '';
+        storeName = state.storeName || '';
+        waNumber = state.waNumber || '';
+        googleMapsUrl = state.googleMapsUrl || '';
+        subdomainStatus = state.subdomainStatus || 'idle';
+        subdomainMessage = state.subdomainMessage || '';
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  });
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentStep,
+      subdomain,
+      storeName,
+      waNumber,
+      googleMapsUrl,
+      subdomainStatus,
+      subdomainMessage,
+    }));
+  }
 
   $: isStep1Valid = subdomainStatus === 'available';
   
@@ -131,6 +163,7 @@
   function nextStep() {
     if (currentStep === 1 && isStep1Valid) {
       currentStep = 2;
+      saveState();
     } else if (currentStep === 2) {
       if (validateStep2()) {
         submitOnboard();
@@ -141,6 +174,7 @@
   function prevStep() {
     if (currentStep > 1) {
       currentStep = (currentStep - 1) as Step;
+      saveState();
     }
   }
 
@@ -175,16 +209,17 @@
           currentStep = 1;
           subdomainStatus = 'taken';
           subdomainMessage = 'Subdomain sudah digunakan, silakan pilih yang lain';
+          saveState();
         }
         return;
       }
 
       submitStatus = 'success';
       currentStep = 3;
+      localStorage.removeItem(STORAGE_KEY);
       
-      // Auto-redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/dashboard/store';
       }, 2000);
       
     } catch {
@@ -225,10 +260,30 @@
         onNext={nextStep}
       />
     {:else if currentStep === 3}
-      <OnboardingStepSuccess
-        {subdomain}
-        {storeName}
-      />
+      <!-- STEP 3: SUCCESS -->
+      <div class="flex flex-col items-center text-center gap-4 py-8 animate-in zoom-in-95 duration-500">
+        <div class="w-16 h-16 rounded-full bg-success/20 text-success flex items-center justify-center mb-2">
+          <CheckCircle size={32} />
+        </div>
+        
+        <h2 class="text-2xl font-bold">Profil Toko Berhasil Dibuat!</h2>
+        
+        <div class="bg-nested p-4 rounded-xl w-full text-left mb-4 border border-border-light">
+          <p class="text-sm text-muted mb-1">Subdomain:</p>
+          <p class="font-mono font-medium mb-3 text-main">{subdomain}.umkm.site</p>
+          
+          <p class="text-sm text-muted mb-1">Nama Toko:</p>
+          <p class="font-medium text-main">{storeName}</p>
+        </div>
+        
+        <p class="text-base-content/70 mb-4">
+          Anda akan diarahkan ke Pengaturan Toko dalam beberapa detik...
+        </p>
+
+        <a href="/dashboard/store-settings" class="btn btn-primary w-full">
+          Ke Pengaturan Toko Sekarang
+        </a>
+      </div>
     {/if}
   </div>
 </div>

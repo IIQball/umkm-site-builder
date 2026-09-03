@@ -1,40 +1,37 @@
 <script lang="ts">
-  import { Terminal, ArrowRight } from 'lucide-svelte';
+  import HeroHeaderContent from './HeroHeaderContent.svelte';
 
   export let badgeText: string = '';
   export let tagName: string = 'h1';
   export let title: string = '';
   export let subtitle: string = '';
   export let ctaText: string = '';
-  export let ctaLink: string = '';
+  export let ctaLink: string = '#';
+  export let secondaryCtaText: string = '';
+  export let secondaryCtaLink: string = '#';
+  export let waNumber: string = '';
+  export let activeNodeId: string | null = null;
+  export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
+  export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center py-6 text-left">
-  <div class="md:col-span-6 flex flex-col gap-4">
-    {#if badgeText}
-      <div data-node="badge" class="inline-flex items-center gap-1.5 px-3.5 h-7 rounded-full bg-slate-900 text-slate-100 text-xs font-mono font-bold w-fit">
-        <Terminal size={12} class="text-emerald-400" />
-        <span>{badgeText}</span>
-      </div>
-    {/if}
-    <svelte:element this={tagName || 'h1'} data-node="title" class="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight leading-tight">
+  <div class="md:col-span-6">
+    <HeroHeaderContent
+      {badgeText}
+      {tagName}
       {title}
-    </svelte:element>
-    <p data-node="subtitle" class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] leading-relaxed">
       {subtitle}
-    </p>
-    {#if ctaText}
-      <div data-node="cta" class="pt-2">
-        <a
-          href={ctaLink}
-          style="height: var(--theme-btn-height, 44px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-          class="inline-flex items-center justify-center px-6 font-bold text-xs shadow-md active:scale-95 transition-transform"
-        >
-          <span>{ctaText}</span>
-          <ArrowRight size={14} class="ml-2" />
-        </a>
-      </div>
-    {/if}
+      {ctaText}
+      {ctaLink}
+      {secondaryCtaText}
+      {secondaryCtaLink}
+      {waNumber}
+      {activeNodeId}
+      {selectNode}
+      {selectNodeKey}
+      align="left"
+    />
   </div>
 
   <div class="md:col-span-6 w-full">

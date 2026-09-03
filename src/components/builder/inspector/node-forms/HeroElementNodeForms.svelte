@@ -7,6 +7,8 @@
     btnHeightOptions,
   } from '../nodeContent.constants';
   import HeroImageNodeForm from './HeroImageNodeForm.svelte';
+  import HeroExtraNodeForms from './HeroExtraNodeForms.svelte';
+  import { isHeroImageSupported } from '../../sections/hero/hero.helpers';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -19,6 +21,10 @@
   $: ctaText = (section.props?.ctaText as string) ?? '';
   $: ctaLink = (section.props?.ctaLink as string) ?? '#';
   $: ctaVariant = (section.props?.ctaVariant as string) ?? 'primary';
+  $: tagName = (section.props?.tagName as string) || 'h1';
+
+  $: activePreset = (section.layoutPreset || section.props?.layoutPreset || section.styles?.layoutPreset || 'split_left_text') as string;
+  $: hasImageSupport = isHeroImageSupported(activePreset);
 
   function getTitleStyle(property: 'color' | 'backgroundColor'): string {
     const nodeStyles = section.props?.nodeStyles as Record<string, Record<string, string>> | undefined;
@@ -32,7 +38,7 @@
   }
 </script>
 
-{#if nodeId === 'badge'}
+{#if nodeId === 'badge' || nodeId === 'hero_badge'}
   <div class="space-y-3">
     <div class="space-y-1">
       <label class="font-semibold text-base-content" for="badge-text-input">Teks Promo Badge</label>
@@ -61,7 +67,7 @@
       </select>
     </div>
   </div>
-{:else if nodeId === 'title'}
+{:else if nodeId === 'title' || nodeId === 'hero_title'}
   <div class="space-y-3">
     <div class="space-y-1">
       <label class="font-semibold text-base-content" for="hero-title-input">Judul Utama (Heading)</label>
@@ -73,6 +79,20 @@
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
         placeholder="Judul Toko / Headline Utama"
       ></textarea>
+    </div>
+    <div class="space-y-1">
+      <label class="font-semibold text-base-content" for="hero-title-tag">Level Tipografi (Tag Semantik)</label>
+      <select
+        id="hero-title-tag"
+        value={tagName}
+        on:change={(e) => onPropChange('tagName', e.currentTarget.value)}
+        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+      >
+        <option value="h1">H1 (Hero Only - SSOT Single H1)</option>
+        <option value="h2">H2 (Section Title)</option>
+        <option value="h3">H3 (Card Title)</option>
+        <option value="h4">H4 (Subtitle/Tagline)</option>
+      </select>
     </div>
     <div class="grid grid-cols-2 gap-2">
       <div class="space-y-1">
@@ -103,7 +123,7 @@
       </div>
     </div>
   </div>
-{:else if nodeId === 'subtitle'}
+{:else if nodeId === 'subtitle' || nodeId === 'hero_subtitle'}
   <div class="space-y-3">
     <div class="space-y-1">
       <label class="font-semibold text-base-content" for="hero-subtitle-input">Deskripsi (Subtitle)</label>
@@ -130,9 +150,15 @@
       </select>
     </div>
   </div>
-{:else if nodeId === 'image'}
-  <HeroImageNodeForm {section} {onPropChange} />
-{:else if nodeId === 'cta'}
+{:else if nodeId === 'image' || nodeId === 'hero_image' || nodeId === 'hero_media' || nodeId === 'hero_founder_photo' || nodeId === 'hero_bento_image'}
+  {#if hasImageSupport}
+    <HeroImageNodeForm {section} {onPropChange} />
+  {:else}
+    <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl">
+      Preset tata letak ini tidak menggunakan ilustrasi gambar.
+    </p>
+  {/if}
+{:else if nodeId === 'cta' || nodeId === 'hero_cta' || nodeId === 'hero_cta_primary' || nodeId === 'hero_cta_secondary'}
   <div class="space-y-3">
     <div class="space-y-1">
       <label class="font-semibold text-base-content" for="cta-text-input">Teks Tombol CTA</label>
@@ -142,18 +168,18 @@
         value={ctaText}
         on:input={(e) => onPropChange('ctaText', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
-        placeholder="Lihat Produk / Hubungi Kami"
+        placeholder="Lihat Katalog"
       />
     </div>
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="cta-link-input">Tautan / Aksi Target (Link)</label>
+      <label class="font-semibold text-base-content" for="cta-link-input">Tautan Tombol CTA (URL)</label>
       <input
         id="cta-link-input"
         type="text"
         value={ctaLink}
         on:input={(e) => onPropChange('ctaLink', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs font-mono"
-        placeholder="#katalog atau https://wa.me/..."
+        placeholder="#products"
       />
     </div>
     <div class="grid grid-cols-2 gap-2">
@@ -171,11 +197,11 @@
         </select>
       </div>
       <div class="space-y-1">
-        <label class="font-semibold text-base-content" for="cta-height-select">Ukuran Tinggi (8pt)</label>
+        <label class="font-semibold text-base-content" for="cta-height-select">Tinggi Tombol</label>
         <select
           id="cta-height-select"
-          value={section.styles?.ctaHeight || '40px'}
-          on:change={(e) => onPropChange('ctaHeight', e.currentTarget.value)}
+          value={section.styles?.buttonHeight || 'md'}
+          on:change={(e) => onPropChange('buttonHeight', e.currentTarget.value)}
           class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
         >
           {#each btnHeightOptions as opt}
@@ -185,4 +211,6 @@
       </div>
     </div>
   </div>
+{:else}
+  <HeroExtraNodeForms {section} {nodeId} {onPropChange} />
 {/if}

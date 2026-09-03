@@ -1,6 +1,7 @@
 ---
 import StorefrontLayout from '@/layouts/StorefrontLayout.astro';
 import ProductGrid from '@/components/storefront/ProductGrid.svelte';
+import StoreStatusBanner from '@/components/storefront/StoreStatusBanner.svelte';
 import { db } from '@/lib/db/client';
 import { stores, products, storeCategories } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
@@ -19,6 +20,9 @@ if (!store || store.status !== 'active') {
   return Astro.redirect('/404');
 }
 
+const customization = (store.customization as Record<string, unknown>) || {};
+const isOpen = customization.isOpen !== false;
+
 const storeProducts = await db.query.products.findMany({
   where: and(
     eq(products.storeId, store.id),
@@ -36,6 +40,7 @@ const categories = await db.query.storeCategories.findMany({
 ---
 
 <StorefrontLayout title={`${store.name} — Katalog Produk`}>
+  <StoreStatusBanner client:load isOpen={isOpen} />
   <header class="bg-white border-b border-slate-100">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
       <div>

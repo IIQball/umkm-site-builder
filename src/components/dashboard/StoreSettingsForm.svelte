@@ -6,14 +6,17 @@
   export let initialWaNumber = '';
   export let initialGoogleMapsUrl = '';
   export let subdomain = '';
+  export let initialIsOpen = true;
 
   let storeName = initialStoreName;
   let waNumber = initialWaNumber;
   let googleMapsUrl = initialGoogleMapsUrl;
+  let isOpen = initialIsOpen;
   
   let formErrors: Record<string, string> = {};
   let submitStatus: 'idle' | 'submitting' | 'success' | 'error' = 'idle';
   let submitMessage = '';
+  let statusSubmitting = false;
 
   function validate(): boolean {
     formErrors = {};
@@ -84,6 +87,36 @@
     } catch {
       submitStatus = 'error';
       submitMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+    }
+  }
+
+  async function handleStatusToggle() {
+    statusSubmitting = true;
+    try {
+      const res = await fetch('/api/stores/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isOpen }),
+      });
+
+      if (res.status === 401) {
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!data.success) {
+        isOpen = !isOpen;
+        alert(data.error || 'Gagal mengubah status toko');
+        return;
+      }
+
+    } catch {
+      isOpen = !isOpen;
+      alert('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      statusSubmitting = false;
     }
   }
 </script>
@@ -180,6 +213,30 @@
       {#if formErrors.googleMapsUrl}
         <span class="label-text-alt text-error mt-1">{formErrors.googleMapsUrl}</span>
       {/if}
+    </div>
+
+    <!-- Store Status Toggle -->
+    <div class="divider my-6"></div>
+    <div class="form-control w-full">
+      <label class="label" for="store-status">
+        <span class="label-text font-medium">Status Toko</span>
+      </label>
+      <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+        <div>
+          <p class="text-sm font-semibold">{isOpen ? 'Toko Sedang Buka' : 'Toko Sedang Tutup'}</p>
+          <p class="text-xs text-base-content/60 mt-1">
+            {isOpen ? 'Pelanggan dapat memesan' : 'Pelanggan tidak dapat memesan'}
+          </p>
+        </div>
+        <input
+          id="store-status"
+          type="checkbox"
+          class="toggle toggle-primary"
+          bind:checked={isOpen}
+          on:change={handleStatusToggle}
+          disabled={statusSubmitting}
+        />
+      </div>
     </div>
 
     <!-- Alert Messages -->

@@ -22,7 +22,12 @@ export const StoreSettingsInput = z.object({
   googleMapsUrl: z.string().url('URL Google Maps tidak valid').optional().or(z.literal('')),
 });
 
+export const StoreStatusInput = z.object({
+  isOpen: z.boolean(),
+});
+
 export type CheckSubdomainInput = z.infer<typeof CheckSubdomainInput>;
 export type RegisterSubdomainInput = z.infer<typeof RegisterSubdomainInput>;
 export type OnboardStoreInput = z.infer<typeof OnboardStoreInput>;
 export type StoreSettingsInput = z.infer<typeof StoreSettingsInput>;
+export type StoreStatusInput = z.infer<typeof StoreStatusInput>;

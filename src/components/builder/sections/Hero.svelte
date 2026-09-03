@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { editorStore } from '../stores/editorStore';
+  import { editorStore, activeNodeId } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
+  import { parsePx } from './hero/hero.helpers';
   import HeroFullBanner from './hero/HeroFullBanner.svelte';
   import HeroCenteredMinimal from './hero/HeroCenteredMinimal.svelte';
   import HeroSplitLayout from './hero/HeroSplitLayout.svelte';
@@ -19,7 +20,9 @@
   import HeroSideBooking from './hero/HeroSideBooking.svelte';
   import HeroDualContrast from './hero/HeroDualContrast.svelte';
   import HeroFounderStory from './hero/HeroFounderStory.svelte';
-  import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-svelte';
+  import HeroGradientMesh from './hero/HeroGradientMesh.svelte';
+  import HeroOversizedTypography from './hero/HeroOversizedTypography.svelte';
+  import './hero/hero.css';
 
   export let props: HeroProps = {};
   export let styles: SectionStyles = {};
@@ -37,6 +40,8 @@
   $: videoUrl = (props?.videoUrl as string) || 'https://assets.mixkit.co/videos/preview/mixkit-shopping-in-a-clothing-store-42581-large.mp4';
   $: ctaText = props?.ctaText || 'Lihat Katalog';
   $: ctaLink = props?.ctaLink || '#products';
+  $: secondaryCtaText = (props?.secondaryCtaText as string) || '';
+  $: secondaryCtaLink = (props?.secondaryCtaLink as string) || '#';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
   $: waNumber = (props?.whatsappNumber as string) || (props?.waNumber as string) || '';
 
@@ -60,13 +65,6 @@
 
   $: paddingTop = parsedPadding.top;
   $: paddingBottom = parsedPadding.bottom;
-
-  $: parsePx = (val: unknown, fallback: number = 0): number => {
-    if (typeof val === 'number') return val;
-    if (typeof val === 'string') return parseInt(val, 10) || fallback;
-    return fallback;
-  };
-
   $: marginTop = parsePx(styles?.marginTop, 0);
   $: marginBottom = parsePx(styles?.marginBottom, 0);
 
@@ -74,7 +72,7 @@
     ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
     : styles?.backgroundColor;
   $: customBgStyle = customBgColor ? `background-color: ${customBgColor};` : '';
-  $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--theme-text-primary,#0f172a)]';
+  $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--color-text-main,#0f172a)]';
 
   const selectNode = (e: MouseEvent, key: string) => {
     e.stopPropagation();
@@ -94,8 +92,8 @@
 <section
   id="hero-section"
   data-node="hero_container"
-  class="relative w-full overflow-hidden select-none hero-card container-type-inline-size {sectionBgClass} {isActive ? 'relative z-10' : ''}"
-  style="background-color: var(--theme-bg); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'};"
+  class="relative w-full overflow-hidden select-none hero-card {sectionBgClass} {isActive ? 'relative z-10' : ''}"
+  style="background-color: var(--color-bg-base, #ffffff); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
@@ -120,7 +118,7 @@
     </div>
   {:else if activePreset === 'gradient_mesh_glow'}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-      <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--theme-primary,#2563eb)] opacity-20 blur-3xl"></div>
+      <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--color-primary,#2563eb)] opacity-20 blur-3xl"></div>
       <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-purple-600 opacity-20 blur-3xl"></div>
     </div>
   {/if}
@@ -137,6 +135,8 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -148,6 +148,11 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
+        {waNumber}
+        {imageUrl}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -159,7 +164,10 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -171,7 +179,10 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -183,8 +194,11 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {imageUrl}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -195,6 +209,7 @@
         {title}
         {subtitle}
         {imageUrl}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -206,8 +221,11 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {imageUrl}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -219,8 +237,11 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {imageUrl}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -232,7 +253,10 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -246,6 +270,7 @@
         {ctaLink}
         {imageUrl}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -270,6 +295,7 @@
         {subtitle}
         {ctaText}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -281,7 +307,10 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -293,95 +322,80 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {imageUrl}
         {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
     {:else if activePreset === 'gradient_mesh_glow'}
-      <div class="py-12 flex flex-col items-center text-center gap-6">
-        {#if badgeText}
-          <div
-            data-node="badge"
-            role="button"
-            tabindex="0"
-            on:click={(e) => selectNode(e, 'badge')}
-            on:keydown={(e) => selectNodeKey(e, 'badge')}
-            class="inline-flex items-center gap-1.5 px-4 h-8 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[var(--theme-primary,#2563eb)] text-xs font-bold border border-blue-200 dark:border-blue-800 cursor-pointer shadow-sm"
-          >
-            <Sparkles size={13} />
-            <span>{badgeText}</span>
-          </div>
-        {/if}
-
-        <svelte:element
-          this={tagName || 'h1'}
-          data-node="title"
-          role="button"
-          tabindex="0"
-          on:click={(e) => selectNode(e, 'title')}
-          on:keydown={(e) => selectNodeKey(e, 'title')}
-          class="font-black tracking-tight text-3xl sm:text-5xl lg:text-6xl text-[var(--theme-text-primary,#0f172a)] cursor-pointer leading-tight"
-        >
-          {title}
-        </svelte:element>
-
-        <p data-node="subtitle" class="text-sm sm:text-base text-[var(--theme-text-muted,#64748b)] max-w-2xl leading-relaxed">
-          {subtitle}
-        </p>
-
-        <div class="w-full max-w-md p-6 rounded-2xl bg-[var(--theme-surface,#f8fafc)]/80 backdrop-blur-md border border-base-200 dark:border-slate-800 shadow-xl flex flex-col items-center gap-4">
-          <div class="flex items-center gap-4 text-xs font-medium text-[var(--theme-text-muted,#64748b)]">
-            <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Kualitas Asli</span>
-            <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Siap Kirim</span>
-            <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Garansi Aman</span>
-          </div>
-          {#if ctaText}
-            <a
-              href={ctaLink}
-              style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-              class="w-full inline-flex items-center justify-center font-bold text-sm shadow-md hover:brightness-105 active:scale-95 transition-all"
-            >
-              <span>{ctaText}</span>
-              <ArrowRight size={16} class="ml-2" />
-            </a>
-          {/if}
-        </div>
-      </div>
+      <HeroGradientMesh
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        activeNodeId={$activeNodeId}
+        {selectNode}
+        {selectNodeKey}
+      />
     {:else if activePreset === 'interactive_terminal_code'}
-      <HeroTerminalCode {badgeText} {tagName} {title} {subtitle} {ctaText} {ctaLink} />
+      <HeroTerminalCode
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
+        {waNumber}
+        activeNodeId={$activeNodeId}
+        {selectNode}
+        {selectNodeKey}
+      />
     {:else if activePreset === 'floating_cards_showcase'}
-      <HeroFloatingCards {badgeText} {tagName} {title} {subtitle} {ctaText} {ctaLink} />
+      <HeroFloatingCards
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
+        {waNumber}
+        activeNodeId={$activeNodeId}
+        {selectNode}
+        {selectNodeKey}
+      />
     {:else if activePreset === 'oversized_bold_typography'}
-      <div class="py-12 flex flex-col items-center text-center gap-6">
-        {#if badgeText}
-          <span data-node="badge" class="px-4 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">{badgeText}</span>
-        {/if}
-        <svelte:element
-          this={tagName || 'h1'}
-          data-node="title"
-          class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tighter leading-none"
-        >
-          {title}
-        </svelte:element>
-        <p data-node="subtitle" class="text-base sm:text-xl text-[var(--theme-text-muted,#64748b)] max-w-2xl font-medium leading-relaxed">
-          {subtitle}
-        </p>
-        {#if ctaText}
-          <div data-node="cta" class="pt-4">
-            <a
-              href={ctaLink}
-              style="height: var(--theme-btn-height, 52px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-              class="inline-flex items-center justify-center px-10 font-bold text-base shadow-xl active:scale-95 transition-transform"
-            >
-              <span>{ctaText}</span>
-              <ArrowRight size={18} class="ml-2" />
-            </a>
-          </div>
-        {/if}
-      </div>
+      <HeroOversizedTypography
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        activeNodeId={$activeNodeId}
+        {selectNode}
+        {selectNodeKey}
+      />
     {:else if activePreset === 'inline_email_capture'}
-      <HeroEmailCapture {badgeText} {tagName} {title} {subtitle} {ctaText} {ctaLink} />
+      <HeroEmailCapture
+        {badgeText}
+        {tagName}
+        {title}
+        {subtitle}
+        {ctaText}
+        {ctaLink}
+        activeNodeId={$activeNodeId}
+        {selectNode}
+        {selectNodeKey}
+      />
     {:else}
       <HeroSplitLayout
         isImageLeft={activePreset === 'split_right_text'}
@@ -391,99 +405,14 @@
         {subtitle}
         {ctaText}
         {ctaLink}
+        {secondaryCtaText}
+        {secondaryCtaLink}
         {imageUrl}
+        {waNumber}
+        activeNodeId={$activeNodeId}
         {selectNode}
         {selectNodeKey}
       />
     {/if}
   </div>
 </section>
-
-<style>
-  :global(.hero-card) {
-    container-type: inline-size;
-    container-name: herocard;
-  }
-
-  :global(.cq-grid-split) {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  :global(.cq-grid-dual-contrast) {
-    display: flex;
-    flex-direction: column;
-  }
-  :global(.cq-title-lg) {
-    font-size: 1.75rem;
-    line-height: 2.125rem;
-  }
-  :global(.cq-btn-group) {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 0.75rem;
-  }
-  :global(.cq-stat-container) {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  :global(.cq-bento-grid) {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  @container herocard (min-width: 680px) {
-    :global(.cq-grid-split) {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      align-items: center;
-      gap: 2rem;
-    }
-    :global(.cq-title-lg) {
-      font-size: 2.25rem;
-      line-height: 2.625rem;
-    }
-    :global(.cq-btn-group) {
-      flex-direction: row;
-      width: auto;
-    }
-    :global(.cq-stat-container) {
-      flex-direction: row;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    :global(.cq-bento-grid) {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    :global(.cq-bento-span-full) {
-      grid-column: span 2;
-    }
-  }
-
-  @container herocard (min-width: 980px) {
-    :global(.cq-title-lg) {
-      font-size: 3rem;
-      line-height: 3.25rem;
-    }
-    :global(.cq-grid-dual-contrast) {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    :global(.cq-bento-grid) {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-    }
-    :global(.cq-bento-span-7) {
-      grid-column: span 7;
-    }
-    :global(.cq-bento-span-5) {
-      grid-column: span 5;
-    }
-    :global(.cq-bento-span-4) {
-      grid-column: span 4;
-    }
-  }
-</style>

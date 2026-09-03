@@ -100,9 +100,12 @@ umkm-site-builder/
 │   │   │   │   ├── canvasCss.helpers.ts        # [50 baris] Helper kalkulasi variabel CSS & Golden Ratio
 │   │   │   │   └── CanvasSpacingHandles.svelte # [61 baris] Drag handles margin & padding section
 │   │   │   ├── content/
+│   │   │   │   ├── features/
+│   │   │   │   │   ├── FeaturesComparisonContent.svelte# [144 baris] Form inspector komparasi keunggulan fitur
+│   │   │   │   │   └── FeaturesRepeaterContent.svelte  # [173 baris] Form repeater item keunggulan fitur
 │   │   │   │   ├── content.helpers.ts          # [51 baris] Helper pengisian konten section builder
 │   │   │   │   ├── FaqContent.svelte           # [91 baris] Form inspector konten FAQ section
-│   │   │   │   ├── FeaturesContent.svelte      # [99 baris] Form inspector konten features section
+│   │   │   │   ├── FeaturesContent.svelte      # [68 baris] Form inspector konten features section
 │   │   │   │   ├── FooterContent.svelte        # [50 baris] Form inspector konten footer section
 │   │   │   │   ├── GoogleMapsContent.svelte    # [82 baris] Form inspector konten Google Maps section
 │   │   │   │   ├── HeaderContent.svelte        # [234 baris] Form inspector konten header section
@@ -116,10 +119,18 @@ umkm-site-builder/
 │   │   │   │   │   └── HeaderNavPanel.svelte   # [137 baris] Panel menu navigasi menu header
 │   │   │   │   ├── node-forms/
 │   │   │   │   │   ├── AnnouncementNodeForm.svelte# [73 baris] Form spesifik node pengumuman
+│   │   │   │   │   ├── CatalogNodeForms.svelte # [⚠️ mepet 300 baris - 264 baris] Form spesifik node katalog produk
+│   │   │   │   │   ├── FaqNodeForms.svelte     # [138 baris] Form spesifik node tanya jawab FAQ
+│   │   │   │   │   ├── FeatureHeadingNodeForm.svelte# [69 baris] Form spesifik heading section fitur
+│   │   │   │   │   ├── FeatureImageNodeForm.svelte# [86 baris] Form upload gambar kartu fitur
+│   │   │   │   │   ├── FeatureItemNodeForm.svelte# [201 baris] Form konfigurasi item benefit fitur
 │   │   │   │   │   ├── HeroElementNodeForms.svelte# [189 baris] Form elemen visual/teks hero
+│   │   │   │   │   ├── HeroExtraNodeForms.svelte# [87 baris] Form elemen pendukung hero
 │   │   │   │   │   ├── HeroImageNodeForm.svelte# [121 baris] Form konfigurasi node gambar hero
 │   │   │   │   │   ├── LogoNodeForm.svelte     # [139 baris] Form logo toko pada header
-│   │   │   │   │   └── NavLinksNodeForm.svelte # [61 baris] Form menu navigasi
+│   │   │   │   │   ├── MapsNodeForms.svelte    # [249 baris] Form spesifik node lokasi & peta Google Maps
+│   │   │   │   │   ├── NavLinksNodeForm.svelte # [61 baris] Form menu navigasi
+│   │   │   │   │   └── TestimonialsNodeForms.svelte# [⚠️ mepet 300 baris - 280 baris] Form spesifik node testimoni
 │   │   │   │   ├── theme/
 │   │   │   │   │   ├── ThemeButtonsTab.svelte  # [107 baris] Tab kustomisasi tombol tema builder
 │   │   │   │   │   ├── ThemeColorsTab.svelte   # [49 baris] Tab kustomisasi palet warna tema builder
@@ -135,8 +146,8 @@ umkm-site-builder/
 │   │   │   │   ├── HeaderStylesTab.svelte      # [23 baris] Tab konfigurasi gaya navigasi header
 │   │   │   │   ├── imageUpload.helpers.ts      # [91 baris] Helper validasi/upload gambar
 │   │   │   │   ├── NodeButtonStyles.svelte     # [64 baris] Panel kustomisasi styling tombol node
-│   │   │   │   ├── nodeContent.constants.ts    # [53 baris] Konstanta isi konten default node
-│   │   │   │   ├── NodeContentForm.svelte      # [36 baris] Form input konten dinamis tiap block
+│   │   │   │   ├── nodeContent.constants.ts    # [127 baris] Konstanta label & deskripsi sub-node
+│   │   │   │   ├── NodeContentForm.svelte      # [63 baris] Form input konten dinamis tiap block
 │   │   │   │   ├── nodeStyles.constants.ts     # [62 baris] Konstanta default style CSS node block
 │   │   │   │   ├── SectionAppearancePanel.svelte# [190 baris] Panel background & border-radius section
 │   │   │   │   ├── SectionLayoutPanel.svelte   # [36 baris] Panel layout flex/grid section
@@ -146,33 +157,63 @@ umkm-site-builder/
 │   │   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
 │   │   │   ├── layer/
 │   │   │   │   ├── AddNodeDropdown.svelte      # [45 baris] Tombol nambah block section baru
-│   │   │   │   ├── layerPanel.helpers.ts       # [115 baris] Helper manipulasi susunan layer
+│   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 299 baris] Helper manipulasi susunan layer adaptif
 │   │   │   │   └── LayerSectionItem.svelte     # [180 baris] Komponen item baris layer section
 │   │   │   ├── registry/
 │   │   │   │   ├── index.ts                    # [235 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   └── registry.types.ts           # [17 baris] Definisi tipe registry map section
 │   │   │   ├── sections/
 │   │   │   │   ├── catalog/
-│   │   │   │   │   ├── CatalogBentoSpotlight.svelte# [89 baris] Layout bento spotlight katalog
-│   │   │   │   │   ├── CatalogCarouselMasonry.svelte# [88 baris] Layout carousel & masonry katalog
+│   │   │   │   │   ├── catalog.css             # [118 baris] Container queries `@container productcard`
+│   │   │   │   │   ├── CatalogAccordion.svelte # [73 baris] Layout katalog akordeon minimalis
+│   │   │   │   │   ├── CatalogBentoSpotlight.svelte# [162 baris] Layout bento spotlight katalog
+│   │   │   │   │   ├── CatalogBundleTiers.svelte# [106 baris] Layout paket bundling produk bertingkat
+│   │   │   │   │   ├── CatalogCarouselMasonry.svelte# [73 baris] Layout masonry & lookbook katalog
+│   │   │   │   │   ├── CatalogCarouselScroll.svelte# [141 baris] Layout slider carousel produk horizontal
 │   │   │   │   │   ├── CatalogCheckoutModal.svelte# [211 baris] Modal checkout cepat katalog
-│   │   │   │   │   ├── CatalogGridStandard.svelte# [68 baris] Layout grid katalog standar
-│   │   │   │   │   ├── CatalogListCompact.svelte# [39 baris] Layout list compact horizontal
-│   │   │   │   │   ├── CatalogPriceTable.svelte# [45 baris] Layout daftar harga tabular
-│   │   │   │   │   ├── CatalogSidebarFilter.svelte# [87 baris] Layout katalog dengan sidebar kategori
+│   │   │   │   │   ├── CatalogFlashSale.svelte # [140 baris] Layout promo flash sale countdown
+│   │   │   │   │   ├── CatalogGridStandard.svelte# [176 baris] Layout grid katalog standar
+│   │   │   │   │   ├── CatalogHeader.svelte    # [43 baris] Header judul & deskripsi katalog produk
+│   │   │   │   │   ├── CatalogListCompact.svelte# [101 baris] Layout list compact horizontal
+│   │   │   │   │   ├── CatalogLookbook.svelte  # [82 baris] Layout lookbook galeri visual majalah
+│   │   │   │   │   ├── CatalogMasonry.svelte   # [107 baris] Layout masonry katalog 3 kolom
+│   │   │   │   │   ├── CatalogPriceTable.svelte# [80 baris] Layout daftar harga tabular
+│   │   │   │   │   ├── CatalogSidebarFilter.svelte# [154 baris] Layout katalog dengan sidebar kategori
+│   │   │   │   │   ├── CatalogSingleFocus.svelte# [124 baris] Layout fokus tunggal produk unggulan
+│   │   │   │   │   ├── CatalogSpecialCards.svelte# [176 baris] Layout kartu spesial katalog
 │   │   │   │   │   ├── ProductCatalogCard.svelte# [213 baris] Komponen visual kartu katalog produk
 │   │   │   │   │   └── ProductCatalogQuickView.svelte# [156 baris] Detail popup cepat ulasan produk
 │   │   │   │   ├── faq/
+│   │   │   │   │   ├── faq.css                 # [54 baris] Container queries `@container faqcard`
+│   │   │   │   │   ├── faq.helpers.ts          # [76 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── FaqAccordionSingle.svelte# [61 baris] Preset FAQ akordeon 1 kolom terpusat
+│   │   │   │   │   ├── FaqAccordionTwoCol.svelte# [111 baris] Preset FAQ akordeon 2 kolom simetris
 │   │   │   │   │   ├── FaqBoxedCardsGrid.svelte# [35 baris] Preset FAQ kotak kartu grid
-│   │   │   │   │   ├── FaqCategorizedTabs.svelte# [61 baris] Preset FAQ dengan tab kategori
-│   │   │   │   │   ├── FaqChatStyle.svelte     # [29 baris] Preset FAQ gaya balon obrolan
-│   │   │   │   │   ├── FaqSearchFiltered.svelte# [66 baris] Preset FAQ dengan filter pencarian
-│   │   │   │   │   └── FaqSplitSidebar.svelte  # [64 baris] Preset FAQ layout split sidebar
+│   │   │   │   │   ├── FaqCategorizedTabs.svelte# [104 baris] Preset FAQ dengan tab kategori
+│   │   │   │   │   ├── FaqChatStyle.svelte     # [51 baris] Preset FAQ gaya balon obrolan
+│   │   │   │   │   ├── FaqGridCards.svelte     # [47 baris] Preset FAQ grid 2 kolom kartu terbuka
+│   │   │   │   │   ├── FaqHeader.svelte        # [52 baris] Header judul H2 FAQ & sub-node selection
+│   │   │   │   │   ├── FaqHelpCenter.svelte    # [60 baris] Preset FAQ gaya Help Center floating cards
+│   │   │   │   │   ├── FaqHorizontalCards.svelte# [51 baris] Preset FAQ kartu horizontal slider
+│   │   │   │   │   ├── FaqNumberedList.svelte  # [50 baris] Preset FAQ daftar bernomor 01, 02, 03
+│   │   │   │   │   ├── FaqSearchFiltered.svelte# [97 baris] Preset FAQ dengan filter pencarian real-time
+│   │   │   │   │   └── FaqSplitSidebar.svelte  # [105 baris] Preset FAQ layout split sidebar CS WhatsApp
 │   │   │   │   ├── features/
-│   │   │   │   │   ├── FeaturesBentoGrid.svelte# [53 baris] Preset fitur layout bento grid
-│   │   │   │   │   ├── FeaturesComparison.svelte# [41 baris] Preset fitur tabel komparasi keunggulan
-│   │   │   │   │   ├── FeaturesInteractiveTabs.svelte# [46 baris] Preset fitur tab interaktif
-│   │   │   │   │   └── FeaturesVerticalAccordion.svelte# [45 baris] Preset fitur akordeon vertikal
+│   │   │   │   │   ├── featureIcons.ts         # [103 baris] Helper pemetaan icon Lucide fitur
+│   │   │   │   │   ├── features.css            # [138 baris] Container queries `@container featurecard`
+│   │   │   │   │   ├── features.helpers.ts     # [109 baris] Helper fallback mock data & preset features
+│   │   │   │   │   ├── FeaturesAlternatingZigzag.svelte# [127 baris] Preset fitur zigzag bergantian
+│   │   │   │   │   ├── FeaturesBannerInlineBar.svelte# [74 baris] Preset fitur pita/ribbon mendatar
+│   │   │   │   │   ├── FeaturesBentoGrid.svelte# [245 baris] Preset fitur layout bento grid asimetris
+│   │   │   │   │   ├── FeaturesComparison.svelte# [114 baris] Preset fitur tabel komparasi keunggulan
+│   │   │   │   │   ├── FeaturesDenseMatrix.svelte# [88 baris] Preset fitur matriks ikon padat 4 kolom
+│   │   │   │   │   ├── FeaturesGrid3Cards.svelte# [112 baris] Preset fitur grid 3 kartu standar
+│   │   │   │   │   ├── FeaturesHeaderTitle.svelte# [53 baris] Komponen judul heading H2 section fitur
+│   │   │   │   │   ├── FeaturesHorizontalList.svelte# [121 baris] Preset fitur daftar kartu horizontal
+│   │   │   │   │   ├── FeaturesInteractiveTabs.svelte# [160 baris] Preset fitur tab interaktif
+│   │   │   │   │   ├── FeaturesStickyScroll.svelte# [127 baris] Preset fitur scroll sticky highlight
+│   │   │   │   │   ├── FeaturesVerticalAccordion.svelte# [150 baris] Preset fitur akordeon vertikal
+│   │   │   │   │   └── index.ts                # [26 baris] Barrel export sub-komponen features
 │   │   │   │   ├── footer/
 │   │   │   │   │   ├── FooterNewsletter.svelte # [39 baris] Preset footer langganan newsletter
 │   │   │   │   │   └── FooterSocialShowcase.svelte# [27 baris] Preset footer showcase media sosial
@@ -188,43 +229,70 @@ umkm-site-builder/
 │   │   │   │   │   ├── HeaderPromoCountdown.svelte# [124 baris] Preset header promo banner countdown flash sale
 │   │   │   │   │   └── HeaderStoreBadge.svelte # [72 baris] Preset header sorotan legalitas BPOM & Halal toko
 │   │   │   │   ├── hero/
+│   │   │   │   │   ├── hero.css                # [44 baris] Container queries `@container herocard`
+│   │   │   │   │   ├── hero.helpers.ts         # [27 baris] Helper konversi nilai pixel & padding hero
 │   │   │   │   │   ├── HeroBadgeTicker.svelte  # [85 baris] Preset hero badge ticker sertifikasi mutu & stempel
-│   │   │   │   │   ├── HeroBentoGrid.svelte    # [94 baris] Preset hero bento grid ubin visual & promo
-│   │   │   │   │   ├── HeroCenteredMinimal.svelte# [70 baris] Template hero minimalis tengah
-│   │   │   │   │   ├── HeroChatSimulation.svelte# [73 baris] Preset hero simulasi chat WhatsApp interaktif
-│   │   │   │   │   ├── HeroDualContrast.svelte # [78 baris] Preset hero duo-tone kontras kuota & pendaftaran
-│   │   │   │   │   ├── HeroDualProduct.svelte  # [89 baris] Preset hero showcase 2 kartu produk terlaris
-│   │   │   │   │   ├── HeroEditorialSerif.svelte# [68 baris] Preset hero editorial mewah tipografi serif
+│   │   │   │   │   ├── HeroBentoGrid.svelte    # [126 baris] Preset hero bento grid ubin visual & promo
+│   │   │   │   │   ├── HeroCenteredMinimal.svelte# [50 baris] Template hero minimalis tengah
+│   │   │   │   │   ├── HeroChatSimulation.svelte# [71 baris] Preset hero simulasi chat WhatsApp interaktif
+│   │   │   │   │   ├── HeroDualContrast.svelte # [64 baris] Preset hero duo-tone kontras kuota & pendaftaran
+│   │   │   │   │   ├── HeroDualProduct.svelte  # [99 baris] Preset hero showcase 2 kartu produk terlaris
+│   │   │   │   │   ├── HeroEditorialSerif.svelte# [86 baris] Preset hero editorial mewah tipografi serif
 │   │   │   │   │   ├── HeroElementToolbar.svelte# [94 baris] Floating toolbar elemen teks/gambar hero
-│   │   │   │   │   ├── HeroEmailCapture.svelte # [38 baris] Preset hero penangkap email prospek
-│   │   │   │   │   ├── HeroFloatingCards.svelte# [45 baris] Preset hero kartu mengambang 3D
-│   │   │   │   │   ├── HeroFounderStory.svelte # [76 baris] Preset hero kisah profil pendiri & artisan
-│   │   │   │   │   ├── HeroFullBanner.svelte   # [60 baris] Template hero latar belakang penuh
-│   │   │   │   │   ├── HeroPillCategory.svelte # [67 baris] Preset hero pemilih kategori produk pill filter
+│   │   │   │   │   ├── HeroEmailCapture.svelte # [67 baris] Preset hero penangkap email prospek
+│   │   │   │   │   ├── HeroFloatingCards.svelte# [69 baris] Preset hero kartu mengambang 3D
+│   │   │   │   │   ├── HeroFounderStory.svelte # [71 baris] Preset hero kisah profil pendiri & artisan
+│   │   │   │   │   ├── HeroFullBanner.svelte   # [106 baris] Template hero latar belakang penuh
+│   │   │   │   │   ├── HeroGradientMesh.svelte # [44 baris] Preset hero gradien mesh berkilau dinamis
+│   │   │   │   │   ├── HeroHeaderContent.svelte# [127 baris] Heading H1 hero & CTA button cluster
+│   │   │   │   │   ├── HeroOversizedTypography.svelte# [99 baris] Preset hero tipografi super besar
+│   │   │   │   │   ├── HeroPillCategory.svelte # [79 baris] Preset hero pemilih kategori produk pill filter
 │   │   │   │   │   ├── HeroSideBooking.svelte  # [97 baris] Preset hero form booking janji temu samping
-│   │   │   │   │   ├── HeroSocialProof.svelte  # [82 baris] Preset hero avatar wall komunitas & ulasan rating
-│   │   │   │   │   ├── HeroSplitLayout.svelte  # [145 baris] Template hero 50/50 visual terpisah
-│   │   │   │   │   ├── HeroStatCounter.svelte  # [85 baris] Preset hero split kolom dengan 3 baris metrik angka
-│   │   │   │   │   ├── HeroStickerPlayful.svelte# [73 baris] Preset hero gaya playful stiker miring dinamis
-│   │   │   │   │   └── HeroTerminalCode.svelte # [52 baris] Preset hero gaya terminal developer
+│   │   │   │   │   ├── HeroSocialProof.svelte  # [81 baris] Preset hero avatar wall komunitas & ulasan rating
+│   │   │   │   │   ├── HeroSplitLayout.svelte  # [104 baris] Template hero 50/50 visual terpisah
+│   │   │   │   │   ├── HeroStatCounter.svelte  # [97 baris] Preset hero split kolom dengan 3 baris metrik angka
+│   │   │   │   │   ├── HeroStickerPlayful.svelte# [132 baris] Preset hero gaya playful stiker miring dinamis
+│   │   │   │   │   └── HeroTerminalCode.svelte # [57 baris] Preset hero gaya terminal developer
 │   │   │   │   ├── maps/
+│   │   │   │   │   ├── maps.css                # [80 baris] Container queries `@container mapscard`
+│   │   │   │   │   ├── maps.helpers.ts         # [63 baris] Helper sanitasi URL embed & navigasi Google Maps
+│   │   │   │   │   ├── MapsCardOverlay.svelte  # [95 baris] Preset maps bilah penutup bawah melayang
+│   │   │   │   │   ├── MapsCompactBoxed.svelte # [84 baris] Preset maps kotak kompak terpusat
 │   │   │   │   │   ├── MapsDirectionsGuide.svelte# [35 baris] Preset maps panduan rute & navigasi
-│   │   │   │   │   └── MapsMultiBranch.svelte  # [32 baris] Preset maps banyak cabang toko UMKM
+│   │   │   │   │   ├── MapsFloatingCard.svelte # [93 baris] Preset maps kartu alamat pojok kanan atas
+│   │   │   │   │   ├── MapsFullwidth.svelte    # [89 baris] Preset maps peta penuh kartu glassmorphism melayang
+│   │   │   │   │   ├── MapsHeader.svelte       # [49 baris] Header judul H2 maps & sub-node selection
+│   │   │   │   │   ├── MapsMinimalFramed.svelte# [60 baris] Preset maps bingkai bersih minimalis
+│   │   │   │   │   ├── MapsMultiBranch.svelte  # [128 baris] Preset maps multi-cabang outlet dengan tab interaktif
+│   │   │   │   │   ├── MapsRouteFinder.svelte  # [61 baris] Preset maps tombol rute langsung lebar penuh
+│   │   │   │   │   ├── MapsSplitInfo.svelte    # [128 baris] Preset maps 2 kolom info detail & peta
+│   │   │   │   │   ├── MapsStoreHours.svelte   # [78 baris] Preset maps penyorot jam operasional real-time
+│   │   │   │   │   └── MapsTwoColumnDirections.svelte# [112 baris] Preset maps instruksi petunjuk arah & parkir
 │   │   │   │   ├── testimonials/
-│   │   │   │   │   ├── TestimonialsMarquee.svelte# [30 baris] Preset testimoni berjalan otomatis
-│   │   │   │   │   ├── TestimonialsSocialCards.svelte# [34 baris] Preset testimoni kartu media sosial
+│   │   │   │   │   ├── testimonials.css        # [51 baris] Container queries `@container testicard` & marquee keyframes
+│   │   │   │   │   ├── testimonials.helpers.ts # [89 baris] Helper kalkulasi rating rata-rata & mock data
+│   │   │   │   │   ├── TestimonialsCarouselSlider.svelte# [71 baris] Preset testimoni slider carousel panah
+│   │   │   │   │   ├── TestimonialsChatBubble.svelte# [56 baris] Preset testimoni bubble chat WhatsApp
+│   │   │   │   │   ├── TestimonialsHeader.svelte# [47 baris] Header judul H2 testimoni & sub-node selection
+│   │   │   │   │   ├── TestimonialsLogoCloud.svelte# [48 baris] Preset testimoni logo client cloud
+│   │   │   │   │   ├── TestimonialsMarquee.svelte# [58 baris] Preset testimoni running text horizontal 25s
+│   │   │   │   │   ├── TestimonialsMasonryGrid.svelte# [80 baris] Preset testimoni masonry grid 3 kolom
+│   │   │   │   │   ├── TestimonialsSideBySide.svelte# [97 baris] Preset testimoni 3 kartu berdampingan
+│   │   │   │   │   ├── TestimonialsSocialCards.svelte# [87 baris] Preset testimoni kartu postingan media sosial
+│   │   │   │   │   ├── TestimonialsSplitStats.svelte# [107 baris] Preset testimoni split rating stats 4.9/5
+│   │   │   │   │   ├── TestimonialsSpotlight.svelte# [79 baris] Preset testimoni kutipan tunggal spotlight
 │   │   │   │   │   ├── TestimonialsSpotlightCarousel.svelte# [93 baris] Preset testimoni spotlight & slider
-│   │   │   │   │   └── TestimonialsVideoCards.svelte# [34 baris] Preset testimoni kartu video ulasan
-│   │   │   │   ├── FAQ.svelte                  # [212 baris] Komponen visual Frequently Asked Questions
-│   │   │   │   ├── Features.svelte             # [⚠️ mepet 300 baris - 275 baris] Komponen visual daftar keunggulan/layanan
+│   │   │   │   │   └── TestimonialsVideoCards.svelte# [85 baris] Preset testimoni kartu video ulasan vertikal
+│   │   │   │   ├── FAQ.svelte                  # [80 baris] Komponen visual Frequently Asked Questions
+│   │   │   │   ├── Features.svelte             # [178 baris] Komponen visual daftar keunggulan/layanan
 │   │   │   │   ├── Footer.svelte               # [165 baris] Footer publik website toko tenant
-│   │   │   │   ├── GoogleMaps.svelte           # [156 baris] Komponen visual embed lokasi Google Maps
+│   │   │   │   ├── GoogleMaps.svelte           # [178 baris] Komponen visual embed lokasi Google Maps
 │   │   │   │   ├── HeaderAnnouncement.svelte   # [⚠️ mepet 300 baris - 299 baris] Komponen visual announcement bar
-│   │   │   │   ├── Hero.svelte                 # [⚠️ >300 baris - 471 baris] Banner hero publik website toko tenant
-│   │   │   │   ├── productCatalog.helpers.ts   # [55 baris] Helper load data produk toko
-│   │   │   │   ├── ProductCatalog.svelte       # [242 baris] Komponen visual daftar katalog produk
+│   │   │   │   ├── Hero.svelte                 # [⚠️ >300 baris - 418 baris] Banner hero publik website toko tenant
+│   │   │   │   ├── productCatalog.helpers.ts   # [102 baris] Helper load data produk toko & format rupiah
+│   │   │   │   ├── ProductCatalog.svelte       # [170 baris] Komponen visual daftar katalog produk
 │   │   │   │   ├── SectionRenderer.svelte      # [166 baris] Renderer block layout editor no-code
-│   │   │   │   └── Testimonials.svelte         # [165 baris] Komponen visual ulasan/testimoni pelanggan
+│   │   │   │   └── Testimonials.svelte         # [71 baris] Komponen visual ulasan/testimoni pelanggan
 │   │   │   ├── stores/
 │   │   │   │   ├── canvasStore.ts              # [117 baris] Svelte store state kanvas & grid guides
 │   │   │   │   ├── documentStore.actions.ts    # [193 baris] Action mutator dokumen & riwayat undo/redo
@@ -695,7 +763,7 @@ Berikut adalah detail spesifikasi arsitektur teknis dari no-code visual template
 
 ### 1. Spesifikasi Modular Section & Layout Presets
 
-Seluruh section terdaftar di **Section Registry Central** (`src/components/builder/registry/index.ts`). Terdapat total **8 Tipe Section** dengan **94 Varian Layout Preset** (Header memiliki 12 preset terisolasi, Hero memiliki 22 preset terisolasi, dan 6 section lainnya masing-masing memiliki 10 preset layout).
+Seluruh section terdaftar di **Section Registry Central** (`src/components/builder/registry/index.ts`). Terdapat total **8 Tipe Section** dengan **104 Varian Layout Preset** (Header 12 preset, Hero 22 preset, Features 10 preset, Product Catalog 20 preset, Testimonials 10 preset, FAQ 10 preset, Google Maps 10 preset, dan Footer 10 preset).
 
 Di bawah ini adalah penjelasan detail per section, jumlah layout, serta perilaku dan representasi visual layout tersebut di ketiga ukuran device (**Desktop: 1200px**, **Tablet: 768px**, dan **Mobile: 375px**):
 
@@ -775,9 +843,9 @@ Karakteristik: `isFullBleed = false`, mendukung drag-and-drop kartu langsung di 
 
 ---
 
-#### D. Katalog Produk (`product_catalog`) — 10 Layout Presets
+#### D. Katalog Produk (`product_catalog`) — 20 Layout Presets
 Komponen utama: `src/components/builder/sections/ProductCatalog.svelte`  
-Komponen pendukung: `ProductCatalogCard.svelte`, `ProductCatalogQuickView.svelte`, `CatalogGridStandard.svelte`, `CatalogCarouselMasonry.svelte`, `CatalogListCompact.svelte`, `CatalogBentoSpotlight.svelte`, `CatalogSidebarFilter.svelte`, `CatalogPriceTable.svelte`, `CatalogCheckoutModal.svelte`, `productCatalog.helpers.ts`.  
+Komponen pendukung: `ProductCatalogCard.svelte`, `ProductCatalogQuickView.svelte`, `CatalogGridStandard.svelte`, `CatalogCarouselScroll.svelte`, `CatalogListCompact.svelte`, `CatalogMasonry.svelte`, `CatalogBentoSpotlight.svelte`, `CatalogSidebarFilter.svelte`, `CatalogPriceTable.svelte`, `CatalogLookbook.svelte`, `CatalogFlashSale.svelte`, `CatalogBundleTiers.svelte`, `CatalogSingleFocus.svelte`, `CatalogSpecialCards.svelte`, `CatalogAccordion.svelte`, `CatalogCheckoutModal.svelte`, `productCatalog.helpers.ts`.  
 Karakteristik: `isFullBleed = false`, mendukung tab kategori dinamis, live search, pagination "Muat Lebih Banyak", dan Quick View modal popup.
 
 | Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
@@ -792,6 +860,16 @@ Karakteristik: `isFullBleed = false`, mendukung tab kategori dinamis, live searc
 | **`price_table_view`** | ✅ Responsif & Rapi | Format tabel harga tabular lengkap dengan kolom nama produk, spesifikasi, harga IDR, dan tombol Beli. | Tabel harga dilengkapi fitur horizontal scroll halus jika kolom melebihi kontainer. | Tabel otomatis bertransformasi menjadi format daftar kartu ringkas di mobile. |
 | **`lookbook_gallery`** | ✅ Responsif & Rapi | Galeri visual gaya lookbook majalah 3 kolom dengan caption overlay harga saat gambar di-hover. | Galeri visual 2 kolom dengan caption harga selalu terlihat di tablet. | Galeri visual 1 kolom membentang 100% lebar safe-zone mobile. |
 | **`flash_sale_countdown`** | ✅ Responsif & Rapi | Katalog promo flash sale dengan banner timer hitung mundur melayang di atas grid produk promo. | Timer promo terpusat di atas grid produk 2 kolom. | Timer promo ringkas 1 baris dengan badge diskon merah menonjol. |
+| **`interactive_filter_tabs`** | ✅ Responsif & Rapi | Bilah tab kategori interaktif di atas grid produk dengan animasi transisi filter instan. | Tab filter horizontal rapat di tablet 768px. | Tab filter dapat digeser horizontal (*scrollable snap*) di mobile. |
+| **`quick_buy_whatsapp_direct`** | ✅ Responsif & Rapi | Kartu produk dilengkapi input quantity langsung dan tombol checkout WhatsApp direct tanpa buka modal. | Input kuantitas dan tombol WA tersusun rapi di setiap kartu 2 kolom tablet. | Input kuantitas dan tombol WA memenuhi lebar kartu di seluler. |
+| **`bundle_package_tiers`** | ✅ Responsif & Rapi | Grid 3 kartu paket bundling bertingkat (Hemat, Populer, Komplit) dengan penanda tier terlaris. | 3 Tier tersusun rapi dengan kartu populer menonjol di tablet. | 3 Tier bertumpuk vertikal dengan urutan jelas di mobile. |
+| **`single_product_deep_focus`** | ✅ Responsif & Rapi | Layout sorotan mendalam 1 produk heroik (galeri foto kiri, rincian varian & beli kanan). | 2 Kolom seimbang (foto di kiri, varian & tombol di kanan). | Foto produk di atas, rincian varian & tombol pesan di bawahnya. |
+| **`badge_stock_scarcity`** | ✅ Responsif & Rapi | Kartu produk dilengkapi bilah progress bar kelangkaan stok ("Sisa 3 Pcs!") untuk memicu urgensi beli. | Bar indikator stok proporsional di setiap kartu 2–3 kolom tablet. | Bar indikator stok jelas dan ringkas di seluler. |
+| **`seasonal_hampers_gift`** | ✅ Responsif & Rapi | Layout kartu hampers musiman dengan ornamen pita kado, opsi kartu ucapan, dan tombol konsultasi paket. | Kartu hampers tersusun 2 kolom elegan di tablet. | Kartu hampers bertumpuk 1 kolom dengan tombol kustomisasi paket. |
+| **`before_after_product_effect`** | ✅ Responsif & Rapi | Kartu perbandingan efek hasil sebelum dan sesudah pemakaian produk dengan slider/split visual. | 2 Kartu efek hasil sejajar dengan label pembeda. | 2 Kartu efek hasil bertumpuk vertikal dengan label Before/After. |
+| **`digital_download_catalog`** | ✅ Responsif & Rapi | Format khusus produk digital/jasa/e-book dengan ikon file, format ekstensi, dan tombol unduh/pesan. | Grid 2–3 kolom kartu produk digital di tablet. | Grid 1–2 kolom kartu produk digital di seluler. |
+| **`customer_review_paired_card`** | ✅ Responsif & Rapi | Kartu produk yang disandingkan langsung dengan 1 kutipan ulasan bintang 5 pembeli di bawah foto produk. | Kartu berpasangan review tersusun 2 kolom seimbang. | Kartu berpasangan review tersusun 1 kolom rapi. |
+| **`minimal_accordion_catalog`** | ✅ Responsif & Rapi | Daftar katalog format akordeon ringkas berbasis teks & baris harga yang dapat dibuka untuk melihat detail. | Akordeon katalog terpusat rapi di tablet. | Akordeon katalog hemat ruang di mobile. |
 
 ---
 
@@ -837,7 +915,7 @@ Karakteristik: `isFullBleed = false`, mendukung animasi ekspansi akordeon buka-t
 
 #### G. Google Maps & Lokasi (`google_maps`) — 10 Layout Presets
 Komponen utama: `src/components/builder/sections/GoogleMaps.svelte`.  
-Komponen pendukung: `MapsDirectionsGuide.svelte`, `MapsMultiBranch.svelte`.  
+Komponen pendukung: `MapsHeader.svelte`, `MapsFullwidth.svelte`, `MapsSplitInfo.svelte`, `MapsCompactBoxed.svelte`, `MapsFloatingCard.svelte`, `MapsTwoColumnDirections.svelte`, `MapsStoreHours.svelte`, `MapsRouteFinder.svelte`, `MapsMinimalFramed.svelte`, `MapsMultiBranch.svelte`, `MapsCardOverlay.svelte`, `maps.helpers.ts`, `maps.css`.  
 Karakteristik: `isFullBleed = false`, rendering iframe Google Maps live tanpa API key berbayar.
 
 | Preset Layout | Status Responsif | Desktop (1200px) | Tablet (768px) | Mobile (375px) |
@@ -1013,7 +1091,7 @@ Berikut adalah rekapitulasi status fitur yang telah aktif serta rekomendasi peng
   1. **True Viewport Simulation & Auto-Scaling Canvas**: Fitur penskalaan otomatis kanvas (`transform: scale(scaleRatio)`) di `Canvas.svelte` yang menjaga layout Desktop (1200px), Tablet (768px), dan Mobile (375px) tetap render pixel-perfect tanpa distorsi breakpoint di semua resolusi monitor laptop.
   2. **Interactive Spacing Drag-Handles**: Handle geser absolut untuk Margin Top, Margin Bottom, dan Side Padding dengan status transient 60fps dan single-step history commit.
   3. **Figma-Style Layout Grid Guides**: Panduan 12-kolom Desktop, 8-kolom Tablet, 4-kolom Mobile, serta 8px Dot Pixel Grid overlay di `LayoutGridOverlay.svelte`.
-  4. **Modular Section Registry (94 Layout Presets)**: Arsitektur 8 section modular terisolasi dengan 94 varian layout presets di `src/components/builder/registry/index.ts`.
+  4. **Modular Section Registry (104 Layout Presets)**: Arsitektur 8 section modular terisolasi dengan 104 varian layout presets di `src/components/builder/registry/index.ts`.
   5. **Dual-Store State Architecture**: Pemisahan `documentStore` (data persisten) dan `canvasStore` (state UI) dengan dukungan undo/redo 20 langkah riwayat.
   6. **Hierarchical Tree & Node Navigation**: Struktur pohon section dan child-nodes pada `LayerPanel.svelte` dengan fitur reorder urutan hero slot dan array items.
   7. **Instant Quick View Modal & Dynamic Multitenant Catalog**: Integrasi katalog produk dinamis tenant dengan filter kategori dan modal pop-up pratinjau cepat di `ProductCatalogQuickView.svelte`.

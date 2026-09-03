@@ -1,0 +1,61 @@
+/* Container Query Context for FAQ Section */
+.faq-card {
+  container-type: inline-size;
+  container-name: faqcard;
+  width: 100%;
+}
+
+/* Base Mobile Layouts */
+.cq-faq-split {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cq-faq-grid-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cq-faq-grid-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cq-chat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Tablet Breakpoint (min-width: 640px) */
+@container faqcard (min-width: 640px) {
+  .cq-faq-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .cq-faq-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* Desktop Breakpoint (min-width: 960px) */
+@container faqcard (min-width: 960px) {
+  .cq-faq-split {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .cq-faq-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}

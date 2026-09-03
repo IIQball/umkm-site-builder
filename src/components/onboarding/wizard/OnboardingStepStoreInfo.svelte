@@ -81,7 +81,7 @@
     
     <Button
       variant="primary"
-      disabled={submitStatus === 'submitting'}
+      disabled={submitStatus === 'submitting' || !storeName || !waNumber}
       on:click={onNext}
     >
       {#if submitStatus === 'submitting'}

@@ -1,38 +1,57 @@
 <script lang="ts">
-  import type { ProductCatalogProps, SectionStyles, ProductItem } from "@/types";
-  import { ShoppingCart } from "lucide-svelte";
-  import { DEFAULT_DEMO_PRODUCTS, getBadgeColorClass, getCardPresetClass } from "./productCatalog.helpers";
-  import CatalogCheckoutModal from "./catalog/CatalogCheckoutModal.svelte";
-  import CatalogPriceTable from "./catalog/CatalogPriceTable.svelte";
-  import CatalogBentoSpotlight from "./catalog/CatalogBentoSpotlight.svelte";
-  import CatalogSidebarFilter from "./catalog/CatalogSidebarFilter.svelte";
-  import CatalogGridStandard from "./catalog/CatalogGridStandard.svelte";
-  import CatalogListCompact from "./catalog/CatalogListCompact.svelte";
-  import CatalogCarouselMasonry from "./catalog/CatalogCarouselMasonry.svelte";
-  import { fly } from "svelte/transition";
+  import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
+  import { ShoppingCart } from 'lucide-svelte';
+  import { DEFAULT_DEMO_PRODUCTS, getCleanWaNumber } from './productCatalog.helpers';
+  import CatalogHeader from './catalog/CatalogHeader.svelte';
+  import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
+  import CatalogCarouselScroll from './catalog/CatalogCarouselScroll.svelte';
+  import CatalogListCompact from './catalog/CatalogListCompact.svelte';
+  import CatalogMasonry from './catalog/CatalogMasonry.svelte';
+  import CatalogBentoSpotlight from './catalog/CatalogBentoSpotlight.svelte';
+  import CatalogSidebarFilter from './catalog/CatalogSidebarFilter.svelte';
+  import CatalogPriceTable from './catalog/CatalogPriceTable.svelte';
+  import CatalogLookbook from './catalog/CatalogLookbook.svelte';
+  import CatalogFlashSale from './catalog/CatalogFlashSale.svelte';
+  import CatalogBundleTiers from './catalog/CatalogBundleTiers.svelte';
+  import CatalogSingleFocus from './catalog/CatalogSingleFocus.svelte';
+  import CatalogSpecialCards from './catalog/CatalogSpecialCards.svelte';
+  import CatalogAccordion from './catalog/CatalogAccordion.svelte';
+  import CatalogCheckoutModal from './catalog/CatalogCheckoutModal.svelte';
+  import { fly } from 'svelte/transition';
+  import './catalog/catalog.css';
 
+  export let sectionId: string = '';
   export let props: ProductCatalogProps & { storeId?: string } = {};
   export let styles: SectionStyles = {};
-  export let layoutPreset: string = "grid_standard";
+  export let layoutPreset: string = 'grid_standard';
 
-  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || "grid_standard";
+  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'grid_standard';
 
   let dynamicProducts: ProductItem[] = [];
   let categories: { id: string; name: string; slug: string }[] = [];
-  let activeCategoryId: string = "all";
-  interface CartItem {
-    product: ProductItem;
-    selections: Record<string, { name: string }>;
-    variantId: string;
-    qty: number;
-    price: number;
-    subtotal: number;
-  }
 
-  let currentView: "catalog" | "checkout" = "catalog";
-  let storeWaNumber: string = "";
-  let cart: CartItem[] = [];
-  let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
+  let activeCategoryId: string = "all";
+interface CartItem {
+  product: ProductItem;
+  selections: Record<string, { name: string }>;
+  variantId: string;
+  qty: number;
+  price: number;
+  subtotal: number;
+}
+
+let currentView: "catalog" | "checkout" = "catalog";
+let storeWaNumber: string = "";
+let cart: CartItem[] = [];
+let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
+
+$: products = ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props?.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+$: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') || '' : ''));
+
+$: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
+$: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
+$: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
+
 
   $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
   $: detailedCart = cart.map((item) => ({ ...item, subtotal: item.price * item.qty }));
@@ -61,7 +80,7 @@
 
   const handleBuyNow = (product: ProductItem, selections: Record<string, string>) => {
     handleAddToCart(product, selections);
-    currentView = "checkout";
+    currentView = 'checkout';
   };
 
   const updateCartQty = (idx: number, delta: number) => {
@@ -76,176 +95,99 @@
 
   const handleCheckout = () => {
     if (!form.name || !form.phone || !form.address) {
-      alert("Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.");
+      alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.');
       return;
     }
     const itemsSummary = detailedCart
-      .map((item) => {
+
+    .map((item) => {
         const p = item.product;
         const s = item.selections;
         return `• ${p.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
       })
       .join("\n");
+      
     const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
-    const rawTargetPhone = (storeWaNumber || (props.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') : '') || '6281234567890') as string;
-    let targetPhone = rawTargetPhone.replace(/[^0-9]/g, "");
-    if (targetPhone.startsWith("0")) targetPhone = "62" + targetPhone.slice(1);
-    if (!targetPhone.startsWith("62")) targetPhone = "62" + targetPhone;
-    window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`, "_blank");
+    
+    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
-
-  $: products = ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
-  $: cardPresetClass = getCardPresetClass(styles?.cardPreset || '');
-  $: isHorizontalLayout = styles?.cardPreset === "horizontal" || activePreset === "list_compact";
-  $: cardRadiusClass = styles?.cardRadius === "sharp" ? "rounded-none" : styles?.cardRadius === "smooth" ? "rounded-2xl" : styles?.cardRadius === "extra_rounded" ? "rounded-3xl" : "rounded-xl";
-  $: imageAspectClass = styles?.imageAspectRatio === "square" ? "aspect-square" : styles?.imageAspectRatio === "portrait" ? "aspect-[3/4]" : styles?.imageAspectRatio === "widescreen" ? "aspect-video" : isHorizontalLayout ? "aspect-square sm:aspect-[4/3]" : "aspect-square";
-  $: badgePosClass = styles?.badgePosition === "top_right" ? "top-3 right-3" : "top-3 left-3";
-  $: badgeColorClass = getBadgeColorClass(styles?.badgeColor || '');
-  $: nameSizeClass = styles?.productNameSize === "sm" ? "text-xs" : styles?.productNameSize === "lg" ? "text-base" : "text-sm";
-  $: nameWeightClass = styles?.productNameWeight === "normal" ? "font-normal" : styles?.productNameWeight === "semibold" ? "font-semibold" : styles?.productNameWeight === "extrabold" ? "font-black" : "font-bold";
-  $: ctaBtnRadiusClass = styles?.ctaButtonRadius === "sharp" ? "rounded-none" : styles?.ctaButtonRadius === "smooth" ? "rounded-xl" : styles?.ctaButtonRadius === "pill" ? "rounded-full" : "rounded-lg";
 </script>
 
-<div data-node="product_catalog_container" class="w-full box-border py-12 relative">
-  <!-- Dynamic Category Filter Rail -->
-  {#if categories.length > 0}
-    <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
-      <button
-        type="button"
-        on:click={() => (activeCategoryId = "all")}
-        class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {activeCategoryId === 'all'
-          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-xs'
-          : 'bg-nested/80 border border-light text-secondary hover:text-main'}"
-      >
-        Semua Produk
-      </button>
-      {#each categories as cat}
-        <button
-          type="button"
-          on:click={() => (activeCategoryId = cat.id)}
-          class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {activeCategoryId === cat.id
-            ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-xs'
-            : 'bg-nested/80 border border-light text-secondary hover:text-main'}"
-        >
-          {cat.name}
-        </button>
-      {/each}
-    </div>
-  {/if}
+<div
+  data-node="product_catalog_container"
+  class="product-card w-full box-border py-12 px-4 sm:px-6 relative overflow-hidden"
+  style="container-type: inline-size; container-name: productcard;"
+>
+  <div class="max-w-6xl mx-auto">
+    <!-- Catalog Header -->
+    <CatalogHeader
+      {sectionId}
+      {title}
+      {subtitle}
+      {badgeText}
+      align="center"
+    />
 
-  {#if activePreset === "bento_spotlight"}
-    <CatalogBentoSpotlight
-      {products}
-      {cardPresetClass}
-      {cardRadiusClass}
-      {imageAspectClass}
-      {badgePosClass}
-      {badgeColorClass}
-      {nameSizeClass}
-      {nameWeightClass}
-      {ctaBtnRadiusClass}
-      {isHorizontalLayout}
-      onAddToCart={handleAddToCart}
-      onBuyNow={handleBuyNow}
-    />
-  {:else if activePreset === "price_table"}
-    <CatalogPriceTable {products} onBuyNow={handleBuyNow} />
-  {:else if activePreset === "sidebar_filter"}
-    <CatalogSidebarFilter
-      {products}
-      {categories}
-      {activeCategoryId}
-      {cardPresetClass}
-      {cardRadiusClass}
-      {imageAspectClass}
-      {badgePosClass}
-      {badgeColorClass}
-      {nameSizeClass}
-      {nameWeightClass}
-      {ctaBtnRadiusClass}
-      {isHorizontalLayout}
-      onCategorySelect={(id) => (activeCategoryId = id)}
-      onAddToCart={handleAddToCart}
-      onBuyNow={handleBuyNow}
-    />
-  {:else if activePreset === "list_compact"}
-    <CatalogListCompact
-      {products}
-      {activePreset}
-      {cardPresetClass}
-      {cardRadiusClass}
-      {imageAspectClass}
-      {badgePosClass}
-      {badgeColorClass}
-      {nameSizeClass}
-      {nameWeightClass}
-      {ctaBtnRadiusClass}
-      onAddToCart={handleAddToCart}
-      onBuyNow={handleBuyNow}
-    />
-  {:else if activePreset === "horizontal_carousel" || activePreset === "masonry_dynamic" || activePreset === "grid_3_wide"}
-    <CatalogCarouselMasonry
-      {activePreset}
-      {products}
-      {cardPresetClass}
-      {cardRadiusClass}
-      {imageAspectClass}
-      {badgePosClass}
-      {badgeColorClass}
-      {nameSizeClass}
-      {nameWeightClass}
-      {ctaBtnRadiusClass}
-      {isHorizontalLayout}
-      onAddToCart={handleAddToCart}
-      onBuyNow={handleBuyNow}
-    />
-  {:else}
-    <CatalogGridStandard
-      {products}
-      {activePreset}
-      {cardPresetClass}
-      {cardRadiusClass}
-      {imageAspectClass}
-      {badgePosClass}
-      {badgeColorClass}
-      {nameSizeClass}
-      {nameWeightClass}
-      {ctaBtnRadiusClass}
-      {isHorizontalLayout}
-      onAddToCart={handleAddToCart}
-      onBuyNow={handleBuyNow}
-    />
-  {/if}
+    <!-- Preset Dispatcher -->
+    {#if activePreset === 'carousel_scroll'}
+      <CatalogCarouselScroll {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'list_compact'}
+      <CatalogListCompact {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'masonry_catalog'}
+      <CatalogMasonry {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'bento_product_spotlight'}
+      <CatalogBentoSpotlight {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'split_category_sidebar'}
+      <CatalogSidebarFilter {sectionId} {products} {categories} {activeCategoryId} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'price_table_view'}
+      <CatalogPriceTable {sectionId} {products} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'lookbook_gallery'}
+      <CatalogLookbook {sectionId} {products} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'flash_sale_countdown'}
+      <CatalogFlashSale {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'bundle_package_tiers'}
+      <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'single_product_deep_focus'}
+      <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
+      <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {:else if activePreset === 'minimal_accordion_catalog'}
+      <CatalogAccordion {sectionId} {products} onBuyNow={handleBuyNow} />
+    {:else}
+      <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
+      <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+    {/if}
+  </div>
 
   <!-- Floating Sticky Cart Pill -->
-  {#if totalCartItems > 0 && currentView === "catalog"}
+  {#if totalCartItems > 0 && currentView === 'catalog'}
     <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
       <button
         type="button"
-        on:click={() => (currentView = "checkout")}
+        on:click={() => (currentView = 'checkout')}
         class="bg-slate-900 text-white dark:bg-primary dark:text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
       >
         <div class="relative">
           <ShoppingCart size={18} />
-          <span class="absolute -top-2 -right-2 bg-orange text-white text-3xs w-4 h-4 rounded-full flex items-center justify-center font-mono">
+          <span class="absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-mono">
             {totalCartItems}
           </span>
         </div>
         <span>Keranjang</span>
         <span class="font-mono bg-white/20 px-2 py-0.5 rounded-full text-xs">
-          Rp {cartTotal.toLocaleString("id-ID")}
+          Rp {cartTotal.toLocaleString('id-ID')}
         </span>
       </button>
     </div>
   {/if}
 
   <!-- Integrated WhatsApp Checkout Dialog Modal -->
-  {#if currentView === "checkout"}
+  {#if currentView === 'checkout'}
     <CatalogCheckoutModal
       {detailedCart}
       {cartTotal}
       bind:form
-      onBackToCatalog={() => (currentView = "catalog")}
+      onBackToCatalog={() => (currentView = 'catalog')}
       onUpdateQty={updateCartQty}
       onRemoveItem={removeFromCart}
       onCheckout={handleCheckout}

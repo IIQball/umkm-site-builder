@@ -1,32 +1,76 @@
 <script lang="ts">
   import { Play } from 'lucide-svelte';
   import type { TestimonialItem } from '@/types';
+  import { canvasStore } from '../../stores/editorStore';
+  import { DEFAULT_VIDEO_REVIEWS } from './testimonials.helpers';
 
+  export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+
+  $: videoItems = testimonials.length > 0 ? testimonials : (DEFAULT_VIDEO_REVIEWS as any);
+
+  function selectCard(e: Event, idx: number, item: any) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, item.id || `testi_item_${idx}`);
+    }
+  }
+
+  function selectAvatar(e: Event, idx: number) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, `testi_avatar_${idx}`);
+    }
+  }
 </script>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-left">
-  {#each testimonials as item}
-    <div class="rounded-2xl overflow-hidden bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-md flex flex-col">
-      <!-- Video Preview Card Mockup -->
-      <div class="relative w-full aspect-[9/12] bg-slate-900 flex items-center justify-center overflow-hidden group">
-        {#if item.avatar}
-          <img src={item.avatar} alt={item.customerName} class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" />
-        {/if}
-        <button
-          type="button"
-          class="w-14 h-14 rounded-full bg-white/90 text-[var(--theme-primary,#2563eb)] flex items-center justify-center shadow-xl group-hover:scale-110 active:scale-95 transition-all cursor-pointer z-10"
-        >
-          <Play size={24} class="ml-1 fill-current" />
-        </button>
-        <div class="absolute bottom-3 left-3 right-3 text-white z-10">
-          <p class="text-xs font-bold truncate">{item.customerName}</p>
-          <p class="text-[10px] text-white/80 line-clamp-1">"{item.comment}"</p>
+<div class="cq-testi-grid-3 text-left">
+  {#each videoItems as item, index (item.id || item.customerName + index)}
+    {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {@const isAvatarActive = $canvasStore.selectedNodeId === `testi_avatar_${index}`}
+    {@const coverImg = item.coverImageUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500'}
+
+    <div
+      role="button"
+      tabindex="0"
+      on:click={(e) => selectCard(e, index, item)}
+      on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
+      class={`relative rounded-3xl overflow-hidden aspect-[9/15] bg-slate-900 shadow-md group cursor-pointer transition-all duration-200 ${
+        isCardActive
+          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          : 'hover:shadow-xl'
+      }`}
+    >
+      <div
+        role="button"
+        tabindex="0"
+        on:click={(e) => selectAvatar(e, index)}
+        on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
+        class={`absolute inset-0 cursor-pointer ${isAvatarActive ? 'ring-2 ring-blue-500' : ''}`}
+      >
+        <img
+          src={coverImg}
+          alt={item.customerName}
+          class="w-full h-full object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+      </div>
+
+      <!-- Play Button Overlay -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="w-12 h-12 rounded-full bg-white/95 text-slate-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform pl-0.5">
+          <Play size={20} class="fill-slate-950 text-slate-950" />
         </div>
       </div>
-      <div class="p-4 flex items-center justify-between text-xs">
-        <span class="font-bold text-[var(--theme-text-primary,#0f172a)]">{item.customerName}</span>
-        <span class="text-[11px] text-emerald-600 font-bold">⭐ Verified Review</span>
+
+      <!-- Bottom Card Info -->
+      <div class="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white pointer-events-none">
+        <h4 class="font-heading font-bold text-xs sm:text-sm text-white line-clamp-1">
+          {item.title || item.comment || 'Video Ulasan Pelanggan'}
+        </h4>
+        <p class="text-[11px] text-slate-300 mt-0.5 truncate">
+          {item.customerName} {item.location ? `• ${item.location}` : ''}
+        </p>
       </div>
     </div>
   {/each}

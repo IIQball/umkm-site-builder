@@ -1,155 +1,163 @@
 <script lang="ts">
   import type { GoogleMapsProps, SectionStyles } from '@/types';
-  import { MapPin, Navigation, Clock, Phone, Copy, Check } from 'lucide-svelte';
-  import MapsDirectionsGuide from './maps/MapsDirectionsGuide.svelte';
+  import './maps/maps.css';
+  import {
+    DEFAULT_MAP_ADDRESS,
+    DEFAULT_MAP_TITLE,
+    DEFAULT_STORE_NAME,
+    DEFAULT_STORE_HOURS,
+    DEFAULT_BRANCHES,
+    buildMapEmbedUrl,
+    buildDirectMapsUrl,
+    buildWhatsAppHelpLink,
+    type MapBranchItem,
+  } from './maps/maps.helpers';
+  import MapsHeader from './maps/MapsHeader.svelte';
+  import MapsFullwidth from './maps/MapsFullwidth.svelte';
+  import MapsSplitInfo from './maps/MapsSplitInfo.svelte';
+  import MapsCompactBoxed from './maps/MapsCompactBoxed.svelte';
+  import MapsFloatingCard from './maps/MapsFloatingCard.svelte';
+  import MapsTwoColumnDirections from './maps/MapsTwoColumnDirections.svelte';
+  import MapsStoreHours from './maps/MapsStoreHours.svelte';
+  import MapsRouteFinder from './maps/MapsRouteFinder.svelte';
+  import MapsMinimalFramed from './maps/MapsMinimalFramed.svelte';
   import MapsMultiBranch from './maps/MapsMultiBranch.svelte';
+  import MapsCardOverlay from './maps/MapsCardOverlay.svelte';
 
   export let props: GoogleMapsProps = {};
   export let styles: SectionStyles = {};
   export let sectionId: string = '';
   export let isActive: boolean = false;
   export let layoutPreset: string = 'fullwidth_map';
+  export let store: { googleMapsUrl?: string; waNumber?: string; name?: string; address?: string } | null = null;
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'fullwidth_map';
-  $: address = props?.address || 'Jl. Raya Jember No.KM 13, Labanasem, Kab. Banyuwangi, Jawa Timur 68461';
-  $: markerTitle = props?.markerTitle || 'Lokasi Toko Kami';
-  $: zoom = props?.zoom || 15;
-  $: mapHeight = props?.mapHeight || '400px';
-  $: storeHours = (props?.storeHours as string) || 'Buka Setiap Hari: 08.00 - 20.00 WIB';
 
-  let copied = false;
-  let activeBranchIdx = 0;
+  // Dual-mode data: Tenant DB vs Designer props
+  $: rawAddress = store?.address || props?.address || DEFAULT_MAP_ADDRESS;
+  $: rawGoogleMapsUrl = store?.googleMapsUrl || props?.googleMapsUrl || '';
+  $: rawWaNumber = store?.waNumber || props?.whatsappNumber || '';
+  $: storeName = store?.name || (props?.markerTitle as string) || DEFAULT_STORE_NAME;
 
-  const branches = [
-    { name: 'Pusat (Banyuwangi)', address: 'Jl. Raya Jember No.KM 13, Labanasem, Banyuwangi' },
-    { name: 'Cabang Jember', address: 'Jl. Kalimantan No. 45, Sumbersari, Jember' },
-    { name: 'Cabang Surabaya', address: 'Jl. Tunjungan No. 88, Genteng, Surabaya' },
-  ];
+  $: badge = (props?.badge as string) ?? 'Lokasi Gerai Fisik';
+  $: title = (props?.title as string) || DEFAULT_MAP_TITLE;
+  $: subtitle = (props?.subtitle as string) ?? '';
+  $: storeHours = (props?.storeHours as string) || DEFAULT_STORE_HOURS;
+  $: storeHoursStatus = (props?.storeHoursStatus as string) || 'Toko Buka Sekarang';
+  $: facilities = (props?.facilities as string) || 'Parkir Mobil/Bus Luas, Musholla, Toilet Bersih';
+  $: directionsLandmark = (props?.directionsLandmark as string) || '100 meter ke arah timur dari bundaran kota, toko berada di sisi kiri jalan.';
+  $: directionsParking = (props?.directionsParking as string) || 'Lahan parkir aman memuat mobil dan motor dengan pengawasan juru parkir resmi.';
+  $: mapHeight = (props?.mapHeight as string) || '380px';
+  $: zoom = typeof props?.zoom === 'number' ? props.zoom : 14;
 
-  $: currentAddress = activePreset === 'multi_branch_tabs' ? branches[activeBranchIdx]?.address || address : address;
-  $: mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(currentAddress)}&t=&z=${zoom}&ie=UTF8&iwloc=&output=embed`;
+  $: branches = (Array.isArray(props?.branches) && props.branches.length > 0
+    ? props.branches
+    : DEFAULT_BRANCHES) as MapBranchItem[];
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText(currentAddress);
-    copied = true;
-    setTimeout(() => (copied = false), 2000);
-  };
+  $: mapEmbedUrl = buildMapEmbedUrl(rawGoogleMapsUrl || rawAddress, zoom);
+  $: directMapsUrl = buildDirectMapsUrl(rawGoogleMapsUrl || rawAddress);
+  $: whatsappUrl = buildWhatsAppHelpLink(rawWaNumber);
+
+  // Preset 3 and 8 handle their own minimal titles
+  $: showHeader = activePreset !== 'compact_boxed' && activePreset !== 'minimal_framed_map';
 </script>
 
-<div
-  id={sectionId ? `map-${sectionId}` : undefined}
-  data-node="maps_container"
-  class={`w-full box-border py-12 ${isActive ? 'relative z-10' : ''}`}
+<section
+  id={sectionId ? `section-${sectionId}` : undefined}
+  data-section-type="google_maps"
+  class={`maps-card relative w-full py-8 text-left transition-all ${
+    isActive ? 'relative z-10' : ''
+  }`}
 >
-  {#if activePreset === 'split_map_info'}
-    <!-- Preset 2: Split Map Info -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch text-left">
-      <div data-node="map_info_card" class="md:col-span-5 p-6 sm:p-8 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm flex flex-col justify-between gap-6">
-        <div class="flex flex-col gap-4">
-          <div class="inline-flex items-center gap-2 text-xs font-bold text-[var(--theme-primary,#2563eb)] uppercase tracking-wider">
-            <MapPin size={16} />
-            <span>Kunjungi Toko Kami</span>
-          </div>
-          <h3 class="text-2xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight">
-            {markerTitle}
-          </h3>
-          <p class="text-sm text-[var(--theme-text-muted,#64748b)] leading-relaxed">
-            {address}
-          </p>
+  <div class="builder-safe-container">
+    {#if showHeader}
+      <MapsHeader {sectionId} {badge} {title} {subtitle} />
+    {/if}
 
-          <div class="pt-4 border-t border-base-200 dark:border-slate-800 flex flex-col gap-3 text-xs text-[var(--theme-text-muted,#64748b)]">
-            <div class="flex items-center gap-2">
-              <Clock size={16} class="text-[var(--theme-primary,#2563eb)]" />
-              <span>{storeHours}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Phone size={16} class="text-[var(--theme-primary,#2563eb)]" />
-              <span>Layanan Pelanggan Siap Membantu</span>
-            </div>
-          </div>
-        </div>
-
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-          target="_blank"
-          rel="noreferrer"
-          style="height: var(--theme-btn-height, 48px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-          class="inline-flex items-center justify-center px-6 font-bold text-sm shadow-md hover:brightness-105 active:scale-95 transition-all"
-        >
-          <Navigation size={16} class="mr-2" />
-          <span>Buka Petunjuk Arah</span>
-        </a>
-      </div>
-
-      <div data-node="map_frame" class="md:col-span-7 rounded-2xl overflow-hidden border border-base-200 dark:border-slate-800 shadow-md min-h-[360px]">
-        <iframe src={mapEmbedUrl} title="Google Map Location" width="100%" height="100%" style="border:0; min-height: 360px;" loading="lazy" allowfullscreen></iframe>
-      </div>
-    </div>
-
-  {:else if activePreset === 'floating_glass_card'}
-    <!-- Preset 3: Floating Glass Card Over Full Map -->
-    <div class="relative w-full rounded-3xl overflow-hidden border border-base-200 dark:border-slate-800 shadow-xl min-h-[420px]">
-      <iframe src={mapEmbedUrl} title="Google Map Location" width="100%" height="420" style="border:0;" loading="lazy" allowfullscreen></iframe>
-      <div class="absolute top-6 left-6 max-w-sm p-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-white/40 dark:border-slate-700 shadow-2xl text-left flex flex-col gap-3">
-        <h4 class="font-black text-base text-[var(--theme-text-primary,#0f172a)]">{markerTitle}</h4>
-        <p class="text-xs text-[var(--theme-text-muted,#64748b)] leading-relaxed">{address}</p>
-        <button
-          type="button"
-          on:click={copyAddress}
-          class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold text-[var(--theme-text-primary,#0f172a)] hover:bg-slate-200 transition-colors w-fit cursor-pointer"
-        >
-          {#if copied}
-            <Check size={14} class="text-emerald-500" />
-            <span class="text-emerald-600">Alamat Disalin!</span>
-          {:else}
-            <Copy size={14} />
-            <span>Salin Alamat</span>
-          {/if}
-        </button>
-      </div>
-    </div>
-
-  {:else if activePreset === 'two_column_directions'}
-    <MapsDirectionsGuide {address} {mapEmbedUrl} />
-
-  {:else if activePreset === 'multi_branch_tabs'}
-    <MapsMultiBranch {branches} {activeBranchIdx} {mapEmbedUrl} onSelectBranch={(idx) => (activeBranchIdx = idx)} />
-
-  {:else if activePreset === 'curved_border_hero_map'}
-    <!-- Preset 8: Curved Border Hero Map -->
-    <div class="relative w-full rounded-[40px] overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl min-h-[380px]">
-      <iframe src={mapEmbedUrl} title="Google Map Location" width="100%" height="380" style="border:0;" loading="lazy" allowfullscreen></iframe>
-    </div>
-
-  {:else if activePreset === 'contact_hours_ribbon'}
-    <!-- Preset 9: Contact & Hours Ribbon Below Map -->
-    <div class="flex flex-col gap-4">
-      <div class="rounded-2xl overflow-hidden border border-base-200 dark:border-slate-800 shadow-md min-h-[320px]">
-        <iframe src={mapEmbedUrl} title="Google Map Location" width="100%" height="320" style="border:0;" loading="lazy" allowfullscreen></iframe>
-      </div>
-      <div class="p-4 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 flex flex-wrap items-center justify-around gap-4 text-xs text-[var(--theme-text-primary,#0f172a)]">
-        <span class="flex items-center gap-2"><MapPin size={16} class="text-blue-500" /> {address}</span>
-        <span class="flex items-center gap-2"><Clock size={16} class="text-emerald-500" /> {storeHours}</span>
-      </div>
-    </div>
-
-  {:else}
-    <!-- Preset 1 (Default): Fullwidth Map -->
-    <div
-      data-node="map_frame"
-      class="w-full rounded-2xl overflow-hidden border border-base-200 dark:border-slate-800 shadow-sm"
-      style={`height: ${mapHeight};`}
-    >
-      <iframe
-        src={mapEmbedUrl}
-        title="Google Map Location"
-        width="100%"
-        height="100%"
-        style="border:0;"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        allowfullscreen
-      ></iframe>
-    </div>
-  {/if}
-</div>
+    {#if activePreset === 'split_map_info'}
+      <MapsSplitInfo
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        {whatsappUrl}
+        {storeName}
+        address={rawAddress}
+        {storeHours}
+        {facilities}
+      />
+    {:else if activePreset === 'compact_boxed'}
+      <MapsCompactBoxed
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        {storeName}
+        address={rawAddress}
+      />
+    {:else if activePreset === 'floating_address_card'}
+      <MapsFloatingCard
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        {storeName}
+        address={rawAddress}
+        {facilities}
+        {mapHeight}
+      />
+    {:else if activePreset === 'two_column_directions'}
+      <MapsTwoColumnDirections
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        title={storeName}
+        {directionsLandmark}
+        {directionsParking}
+      />
+    {:else if activePreset === 'store_hours_highlight'}
+      <MapsStoreHours
+        {sectionId}
+        {mapEmbedUrl}
+        {whatsappUrl}
+        {storeHoursStatus}
+        {storeHours}
+      />
+    {:else if activePreset === 'interactive_route_finder'}
+      <MapsRouteFinder
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+      />
+    {:else if activePreset === 'minimal_framed_map'}
+      <MapsMinimalFramed
+        {sectionId}
+        {mapEmbedUrl}
+        {storeName}
+        address={rawAddress}
+      />
+    {:else if activePreset === 'multi_branch_tabs'}
+      <MapsMultiBranch
+        {sectionId}
+        {branches}
+      />
+    {:else if activePreset === 'card_overlay_bottom'}
+      <MapsCardOverlay
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        {storeName}
+        {storeHours}
+        {mapHeight}
+      />
+    {:else}
+      <!-- Preset 1 (Default): fullwidth_map -->
+      <MapsFullwidth
+        {sectionId}
+        {mapEmbedUrl}
+        {directMapsUrl}
+        {storeName}
+        address={rawAddress}
+        {storeHoursStatus}
+        {mapHeight}
+      />
+    {/if}
+  </div>
+</section>

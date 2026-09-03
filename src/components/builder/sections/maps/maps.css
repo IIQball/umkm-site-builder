@@ -1,0 +1,84 @@
+/* Container Query Context for Google Maps Section */
+.maps-card {
+  container-type: inline-size;
+  container-name: mapscard;
+  width: 100%;
+}
+
+.cq-map-split {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cq-floating-card-bottom {
+  position: static;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.cq-floating-card-corner {
+  position: static;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.cq-overlay-bottom {
+  position: static;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.cq-map-frame-height {
+  height: 260px;
+}
+
+@container mapscard (min-width: 680px) {
+  .cq-map-split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+  .cq-map-frame-height {
+    height: 350px;
+  }
+  .cq-floating-card-bottom {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    width: auto;
+    margin-top: 0;
+  }
+  .cq-floating-card-corner {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 18rem;
+    margin-top: 0;
+  }
+  .cq-overlay-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+  }
+}
+
+@container mapscard (min-width: 980px) {
+  .cq-map-split {
+    grid-template-columns: 5fr 7fr;
+    gap: 2rem;
+  }
+  .cq-map-frame-height {
+    height: 420px;
+  }
+  .cq-floating-card-bottom {
+    bottom: 2rem;
+    left: 2rem;
+    right: auto;
+    max-width: 22rem;
+  }
+}

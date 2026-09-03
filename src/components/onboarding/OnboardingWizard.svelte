@@ -120,6 +120,7 @@
       if (!data.ok) {
         subdomainStatus = 'invalid';
         subdomainMessage = data.error?.message ?? 'Validasi gagal';
+        console.warn('[onboarding] subdomain check failed:', data.error);
         return;
       }
 
@@ -130,9 +131,10 @@
         subdomainStatus = 'taken';
         subdomainMessage = 'Subdomain sudah digunakan';
       }
-    } catch {
+    } catch (err) {
       subdomainStatus = 'error';
       subdomainMessage = 'Gagal memeriksa ketersediaan';
+      console.error('[onboarding] subdomain check error:', err);
     }
   }
 

@@ -1,40 +1,73 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
+  import { canvasStore } from '../../stores/editorStore';
+  import { formatRupiah } from '../productCatalog.helpers';
 
+  export let sectionId: string = '';
   export let products: ProductItem[] = [];
-  export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void;
+  export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
+
+  function selectRows(e: Event) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, 'catalog_price_rows');
+    }
+  }
+
+  function selectCard(e: Event, idx: number, prod: ProductItem) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, prod.id || `product_item_${idx}`);
+    }
+  }
 </script>
 
-<div class="w-full overflow-x-auto rounded-2xl border border-base-200 dark:border-slate-800 shadow-sm bg-[var(--theme-surface,#f8fafc)] text-left">
+<div
+  role="button"
+  aria-label="Tabel Daftar Harga"
+  tabindex="0"
+  on:click={selectRows}
+  on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
+  class={`w-full overflow-x-auto rounded-3xl border border-light/80 shadow-xs bg-card text-left transition-all duration-200 cursor-pointer ${
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : ''
+  }`}
+>
   <table class="w-full text-xs text-left">
-    <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-700">
+    <thead class="bg-nested/80 text-secondary uppercase tracking-wider font-heading font-bold border-b border-light">
       <tr>
-        <th class="p-4">Produk</th>
-        <th class="p-4 hidden sm:table-cell">Deskripsi</th>
-        <th class="p-4">Harga</th>
+<th class="p-4">Daftar Produk</th>
+        <th class="p-4 hidden sm:table-cell">Keterangan / Min. Order</th>
+        <th class="p-4">Harga Satuan</th>
         <th class="p-4 text-right">Aksi</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-      {#each products as product}
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-          <td class="p-4 font-bold text-[var(--theme-text-primary,#0f172a)] flex items-center gap-3">
-            {#if product.imageUrl}
-              <img src={product.imageUrl} alt={product.name} class="w-10 h-10 rounded-lg object-cover" />
-            {/if}
-            <span>{product.name}</span>
+    <tbody class="divide-y divide-light">
+      {#each products as product, idx (product.id || product.name + idx)}
+        {@const isItemActive = $canvasStore.selectedNodeId === (product.id || `product_item_${idx}`)}
+        <tr
+          tabindex="0"
+          on:click={(e) => selectCard(e, idx, product)}
+          on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
+          class={`hover:bg-nested/40 transition-colors cursor-pointer ${isItemActive ? 'bg-blue-50/60 dark:bg-blue-950/40' : ''}`}
+        >
+          <td class="p-4 font-heading font-bold text-main">
+            {product.name}
           </td>
-          <td class="p-4 text-slate-500 max-w-xs truncate hidden sm:table-cell">{product.description || "-"}</td>
-          <td class="p-4 font-mono font-bold text-[var(--theme-primary,#2563eb)]">
-            Rp {typeof product.price === 'number' ? product.price.toLocaleString('id-ID') : product.price}
+          <td class="p-4 text-secondary max-w-xs truncate hidden sm:table-cell">
+            {product.description || (product.badge ? `${product.badge}` : 'Stok Tersedia')}
+          </td>
+
+          <td class="p-4 font-heading font-black text-primary">
+            {formatRupiah(product.price)}
+
           </td>
           <td class="p-4 text-right">
             <button
               type="button"
-              on:click={() => onBuyNow(product, {})}
-              class="px-4 py-1.5 rounded-lg bg-[var(--theme-primary,#2563eb)] text-white font-bold text-xs hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              on:click|stopPropagation={() => onBuyNow(product, {})}
+              class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-bold text-xs transition-all"
             >
-              Beli
+              Pesan
             </button>
           </td>
         </tr>

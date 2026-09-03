@@ -6,11 +6,22 @@
   import LogoNodeForm from './node-forms/LogoNodeForm.svelte';
   import NavLinksNodeForm from './node-forms/NavLinksNodeForm.svelte';
   import HeroElementNodeForms from './node-forms/HeroElementNodeForms.svelte';
+  import FeatureHeadingNodeForm from './node-forms/FeatureHeadingNodeForm.svelte';
+  import FeatureItemNodeForm from './node-forms/FeatureItemNodeForm.svelte';
+  import FeatureImageNodeForm from './node-forms/FeatureImageNodeForm.svelte';
+  import CatalogNodeForms from './node-forms/CatalogNodeForms.svelte';
+  import TestimonialsNodeForms from './node-forms/TestimonialsNodeForms.svelte';
+  import FaqNodeForms from './node-forms/FaqNodeForms.svelte';
+  import MapsNodeForms from './node-forms/MapsNodeForms.svelte';
+  import { IMAGE_SUPPORTED_FEATURE_PRESETS } from '../sections/features/features.helpers';
 
   export let section: TemplateSection;
   export let nodeId: string;
   export let onPropChange: (key: string, value: unknown) => void = () => {};
   export let onSectionUpdate: (section: TemplateSection) => void = () => {};
+
+  $: activePreset = (section.layoutPreset || section.props?.layoutPreset || section.styles?.layoutPreset || 'grid_3_cards') as string;
+  $: hasFeatureImageSupport = IMAGE_SUPPORTED_FEATURE_PRESETS.includes(activePreset);
 </script>
 
 <div class="p-4 space-y-4 text-xs text-base-content/80">
@@ -30,6 +41,26 @@
     <LogoNodeForm {section} {onPropChange} />
   {:else if nodeId === 'nav_links'}
     <NavLinksNodeForm {section} {onPropChange} {onSectionUpdate} />
+  {:else if section.type === 'features' && (nodeId === 'features_heading' || nodeId === 'header')}
+    <FeatureHeadingNodeForm {section} {onPropChange} />
+  {:else if section.type === 'features' && (nodeId.startsWith('feature_item_') || nodeId.startsWith('item_'))}
+    <FeatureItemNodeForm {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'features' && (nodeId === 'features_image' || nodeId === 'image')}
+    {#if hasFeatureImageSupport}
+      <FeatureImageNodeForm {section} {onPropChange} />
+    {:else}
+      <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl">
+        Preset tata letak ini tidak menggunakan ilustrasi gambar.
+      </p>
+    {/if}
+  {:else if section.type === 'product_catalog'}
+    <CatalogNodeForms {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'testimonials'}
+    <TestimonialsNodeForms {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'faq'}
+    <FaqNodeForms {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'google_maps'}
+    <MapsNodeForms {section} {nodeId} {onPropChange} />
   {:else}
     <HeroElementNodeForms {section} {nodeId} {onPropChange} />
   {/if}

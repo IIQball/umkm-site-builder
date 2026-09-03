@@ -41,6 +41,14 @@ const categories = await db.query.storeCategories.findMany({
     isNull(storeCategories.deletedAt),
   ),
 });
+
+// Set cache headers for CDN and browser
+// Cache for 1 hour (3600s) in browser, 24 hours in Cloudflare edge
+Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+// Surrogate-Control for Cloudflare cache purge API
+Astro.response.headers.set('Surrogate-Control', 'public, max-age=86400');
+// Allow CDN to cache even with Set-Cookie (for authenticated users on storefront)
+Astro.response.headers.set('Surrogate-Key', `store-${store.id}`);
 ---
 
 <StorefrontLayout title={`${store.name} — Katalog Produk`}>

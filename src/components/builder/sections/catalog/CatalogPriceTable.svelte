@@ -35,8 +35,8 @@
   <table class="w-full text-xs text-left">
     <thead class="bg-nested/80 text-secondary uppercase tracking-wider font-heading font-bold border-b border-light">
       <tr>
-        <th class="p-4">Daftar Produk</th>
-        <th class="p-4">Keterangan / Min. Order</th>
+<th class="p-4">Daftar Produk</th>
+        <th class="p-4 hidden sm:table-cell">Keterangan / Min. Order</th>
         <th class="p-4">Harga Satuan</th>
         <th class="p-4 text-right">Aksi</th>
       </tr>
@@ -53,11 +53,13 @@
           <td class="p-4 font-heading font-bold text-main">
             {product.name}
           </td>
-          <td class="p-4 text-secondary max-w-xs truncate">
+          <td class="p-4 text-secondary max-w-xs truncate hidden sm:table-cell">
             {product.description || (product.badge ? `${product.badge}` : 'Stok Tersedia')}
           </td>
+
           <td class="p-4 font-heading font-black text-primary">
             {formatRupiah(product.price)}
+
           </td>
           <td class="p-4 text-right">
             <button

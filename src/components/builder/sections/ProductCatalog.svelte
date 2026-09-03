@@ -29,18 +29,29 @@
 
   let dynamicProducts: ProductItem[] = [];
   let categories: { id: string; name: string; slug: string }[] = [];
-  let activeCategoryId: string = 'all';
-  let storeWaNumber: string = '';
-  let currentView: 'catalog' | 'checkout' = 'catalog';
-  let cart: any[] = [];
-  let form = { name: '', phone: '', address: '', delivery: 'Reguler', notes: '' };
 
-  $: products = ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props?.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
-  $: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') || '' : ''));
+  let activeCategoryId: string = "all";
+interface CartItem {
+  product: ProductItem;
+  selections: Record<string, { name: string }>;
+  variantId: string;
+  qty: number;
+  price: number;
+  subtotal: number;
+}
 
-  $: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
-  $: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
-  $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
+let currentView: "catalog" | "checkout" = "catalog";
+let storeWaNumber: string = "";
+let cart: CartItem[] = [];
+let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
+
+$: products = ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props?.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+$: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') || '' : ''));
+
+$: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
+$: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
+$: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
+
 
   $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
   $: detailedCart = cart.map((item) => ({ ...item, subtotal: item.price * item.qty }));
@@ -49,13 +60,22 @@
   const handleAddToCart = (product: ProductItem, selections: Record<string, string>) => {
     const variantId = JSON.stringify(selections);
     const existing = cart.find((c) => c.product.id === product.id && c.variantId === variantId);
-    if (existing) {
-      existing.qty++;
-      cart = [...cart];
-    } else {
-      let base = typeof product.price === 'number' ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, '')) || 0;
-      cart = [...cart, { product, variantId, selections, qty: 1, price: base, subtotal: base }];
-    }
+      if (existing) {
+        existing.qty++;
+        cart = [...cart];
+      } else {
+        let base = typeof product.price === "number" ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, "")) || 0;
+        if (product.variants && Array.isArray(product.variants)) {
+          for (const group of product.variants) {
+            const selectedOptionName = selections[group.groupName];
+            if (selectedOptionName && group.options) {
+              const opt = group.options.find((o: Record<string, unknown>) => o.name === selectedOptionName);
+              if (opt && typeof opt.priceAdjustment === "number") base += opt.priceAdjustment;
+            }
+          }
+        }
+        cart = [...cart, { product, variantId, selections: selections as any, qty: 1, price: base, subtotal: base }];
+      }
   };
 
   const handleBuyNow = (product: ProductItem, selections: Record<string, string>) => {
@@ -79,10 +99,17 @@
       return;
     }
     const itemsSummary = detailedCart
-      .map((item) => `• ${item.product.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString('id-ID')}\n  Varian: ${Object.values(item.selections).join(', ') || 'Standar'}`)
-      .join('\n');
-    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString('id-ID')}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || '-'}\n\nMohon konfirmasi ketersediaan & info rekening. Terima kasih!`;
-    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, '_blank');
+
+    .map((item) => {
+        const p = item.product;
+        const s = item.selections;
+        return `• ${p.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
+      })
+      .join("\n");
+      
+    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    
+    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 </script>
 

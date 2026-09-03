@@ -17,7 +17,6 @@
   export let storeWaNumber: string = '';
 
   let activeCategory = 'all';
-  let loadedImages = new Set<string>();
 
   $: filteredProducts = activeCategory === 'all' 
     ? storeProducts 

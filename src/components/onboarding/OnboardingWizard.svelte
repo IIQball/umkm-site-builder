@@ -3,7 +3,6 @@
   import { CheckCircle } from 'lucide-svelte';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
-  import { subdomainField } from '@/lib/validators/subdomain';
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -92,9 +91,26 @@
   }
 
   function validateSubdomainLocally(input: string): string | null {
-    const result = subdomainField.safeParse(input);
-    if (!result.success) {
-      return result.error.errors[0].message;
+    // Client-side validation without Zod (avoids CSP eval issues)
+    if (!input) return null;
+    if (input.length < 3) return 'Subdomain minimal 3 karakter';
+    if (input.length > 63) return 'Subdomain maksimal 63 karakter';
+    if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(input)) {
+      return 'Subdomain hanya boleh huruf kecil, angka, dan tanda hubung';
+    }
+    if (input.startsWith('-') || input.endsWith('-')) {
+      return 'Subdomain tidak boleh diawali atau diakhiri tanda hubung';
+    }
+    const blacklist = new Set([
+      'admin', 'administrator', 'api', 'app', 'auth', 'billing', 'blog', 
+      'cache', 'cdn', 'dashboard', 'db', 'dev', 'developer', 'docs', 'help',
+      'host', 'login', 'mail', 'manage', 'manager', 'metrics', 'ns1', 'ns2',
+      'panel', 'portal', 'prod', 'register', 'root', 'secure', 'server',
+      'setup', 'shop', 'smtp', 'stage', 'staging', 'static', 'store', 'support',
+      'sys', 'system', 'test', 'update', 'web', 'www'
+    ]);
+    if (blacklist.has(input.toLowerCase())) {
+      return 'Subdomain tidak tersedia (kata terlarang)';
     }
     return null;
   }
@@ -120,6 +136,7 @@
       if (!data.ok) {
         subdomainStatus = 'invalid';
         subdomainMessage = data.error?.message ?? 'Validasi gagal';
+        console.warn('[onboarding] subdomain check failed:', data.error);
         return;
       }
 
@@ -130,14 +147,18 @@
         subdomainStatus = 'taken';
         subdomainMessage = 'Subdomain sudah digunakan';
       }
-    } catch {
+    } catch (err) {
       subdomainStatus = 'error';
       subdomainMessage = 'Gagal memeriksa ketersediaan';
+      console.error('[onboarding] subdomain check error:', err);
     }
   }
 
   function onSubdomainInput(e: Event) {
-    const raw = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const input = (e.target || e.currentTarget) as HTMLInputElement | null;
+    if (!input) return;
+    
+    const raw = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     subdomain = raw;
     
     clearTimeout(debounceTimer);

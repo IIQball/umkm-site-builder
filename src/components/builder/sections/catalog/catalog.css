@@ -1,0 +1,135 @@
+.product-card {
+  container-type: inline-size;
+  container-name: productcard;
+  width: 100%;
+}
+
+/* 1. Mobile Default (< 640px) */
+.cq-prod-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.cq-prod-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cq-prod-split-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cq-prod-bento-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cq-masonry-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cq-lookbook-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cq-compact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cq-compact-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-top: 1px solid var(--color-border, rgba(15, 23, 42, 0.08));
+  padding-top: 0.75rem;
+}
+
+.cq-title-catalog {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* 2. Tablet Container Breakpoint (>= 640px) */
+@container productcard (min-width: 640px) {
+  .cq-prod-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .cq-prod-grid-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .cq-masonry-view {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .cq-lookbook-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .cq-compact-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cq-compact-action {
+    width: auto;
+    border-top: none;
+    padding-top: 0;
+    gap: 1rem;
+  }
+  .cq-title-catalog {
+    font-size: 2rem;
+    line-height: 2.25rem;
+  }
+  .cq-prod-split-view {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+  }
+}
+
+/* 3. Desktop Container Breakpoint (>= 960px) */
+@container productcard (min-width: 960px) {
+  .cq-prod-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .cq-prod-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+  .cq-masonry-view {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .cq-lookbook-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .cq-prod-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .cq-bento-primary {
+    grid-column: span 8 / span 8;
+  }
+  .cq-bento-secondary {
+    grid-column: span 2 / span 2;
+  }
+}

@@ -85,4 +85,100 @@ describe('Section Registry Map Architecture', () => {
     expect(retrieved?.label).toBe('Promo Countdown Timer');
     expect(retrieved?.type).toBe('custom_countdown');
   });
+
+  it('contains all 10 defined layout presets for features section', () => {
+    const featuresDef = getSectionDefinition('features');
+    expect(featuresDef).toBeDefined();
+    expect(featuresDef?.layoutPresets).toEqual([
+      'grid_3_cards',
+      'horizontal_list',
+      'banner_inline_bar',
+      'bento_grid_asymmetric',
+      'alternating_zigzag_rows',
+      'interactive_tabs',
+      'vertical_accordion_showcase',
+      'sticky_scroll_highlight',
+      'dense_icon_matrix',
+      'before_after_comparison',
+    ]);
+  });
+
+  it('contains all 20 defined layout presets for product_catalog section', () => {
+    const catalogDef = getSectionDefinition('product_catalog');
+    expect(catalogDef).toBeDefined();
+    expect(catalogDef?.layoutPresets).toEqual([
+      'grid_standard',
+      'carousel_scroll',
+      'list_compact',
+      'masonry_catalog',
+      'bento_product_spotlight',
+      'split_category_sidebar',
+      'compact_mini_cards',
+      'price_table_view',
+      'lookbook_gallery',
+      'flash_sale_countdown',
+      'interactive_filter_tabs',
+      'quick_buy_whatsapp_direct',
+      'bundle_package_tiers',
+      'single_product_deep_focus',
+      'badge_stock_scarcity',
+      'seasonal_hampers_gift',
+      'before_after_product_effect',
+      'digital_download_catalog',
+      'customer_review_paired_card',
+      'minimal_accordion_catalog',
+    ]);
+  });
+
+  it('contains all 10 defined layout presets for testimonials section', () => {
+    const testiDef = getSectionDefinition('testimonials');
+    expect(testiDef).toBeDefined();
+    expect(testiDef?.layoutPresets).toEqual([
+      'masonry_grid',
+      'single_spotlight',
+      'chat_bubble_flow',
+      'infinite_marquee_scroll',
+      'video_review_cards',
+      'social_post_cards',
+      'side_by_side_3_cards',
+      'logo_client_cloud',
+      'split_rating_stats',
+      'carousel_slider',
+    ]);
+  });
+
+  it('contains all 10 defined layout presets for faq section', () => {
+    const faqDef = getSectionDefinition('faq');
+    expect(faqDef).toBeDefined();
+    expect(faqDef?.layoutPresets).toEqual([
+      'accordion_single_col',
+      'split_faq_sidebar',
+      'grid_2_col_cards',
+      'accordion_two_col',
+      'chat_style_faq',
+      'search_filtered_faq',
+      'categorized_tabs_faq',
+      'compact_numbered_list',
+      'floating_help_center',
+      'horizontal_faq_cards',
+    ]);
+  });
+
+  it('contains all 10 defined layout presets for google_maps section', () => {
+    const mapsDef = getSectionDefinition('google_maps');
+    expect(mapsDef).toBeDefined();
+    expect(mapsDef?.layoutPresets).toEqual([
+      'fullwidth_map',
+      'split_map_info',
+      'compact_boxed',
+      'floating_address_card',
+      'two_column_directions',
+      'store_hours_highlight',
+      'interactive_route_finder',
+      'minimal_framed_map',
+      'multi_branch_tabs',
+      'card_overlay_bottom',
+    ]);
+  });
 });
+

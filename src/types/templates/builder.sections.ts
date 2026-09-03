@@ -44,15 +44,30 @@ export interface HeroProps {
 export interface FeatureItem {
   id?: string;
   icon?: string;
+  iconName?: string;
   title: string;
   description: string;
+  badge?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  statValue?: string;
+  statLabel?: string;
+  [key: string]: unknown;
 }
 
 export interface FeaturesProps {
+  badgeText?: string;
   title?: string;
   subtitle?: string;
   columns?: number;
+  items?: FeatureItem[];
   features?: FeatureItem[];
+  mainImageUrl?: string;
+  layoutPreset?: string;
+  beforeTitle?: string;
+  beforeItems?: string[];
+  afterTitle?: string;
+  afterItems?: string[];
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }
@@ -90,8 +105,12 @@ export interface TestimonialItem {
   customerName?: string;
   role?: string;
   avatar?: string;
-  comment: string;
+  avatarUrl?: string;
+  comment?: string;
+  content?: string;
   rating?: number;
+  platform?: string;
+  verified?: boolean;
 }
 
 export interface TestimonialsProps {
@@ -106,6 +125,8 @@ export interface FAQItem {
   id?: string;
   question: string;
   answer: string;
+  category?: string;
+  iconName?: string;
 }
 
 export interface FAQProps {
@@ -116,15 +137,36 @@ export interface FAQProps {
   [key: string]: unknown;
 }
 
+export interface MapBranchItem {
+  id?: string;
+  name: string;
+  title?: string;
+  address: string;
+  googleMapsUrl?: string;
+}
+
 export interface GoogleMapsProps {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
   apiKey?: string;
   address?: string;
+  googleMapsUrl?: string;
   latitude?: number;
   longitude?: number;
   zoom?: number;
   mapHeight?: string;
   showMarker?: boolean;
   markerTitle?: string;
+  storeHours?: string;
+  storeHoursStatus?: string;
+  phone?: string;
+  whatsappNumber?: string;
+  facilities?: string;
+  directionsLandmark?: string;
+  directionsParking?: string;
+  branches?: MapBranchItem[];
+  storeImageUrl?: string;
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }

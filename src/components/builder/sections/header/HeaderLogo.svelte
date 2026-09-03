@@ -80,7 +80,7 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class={`tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
+      class={`font-heading font-bold text-lg text-[var(--color-text-main,#0f172a)] tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
         hideTextOnMobile && isMobile ? 'hidden' : 'inline-block'
       }`}
     >

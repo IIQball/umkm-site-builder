@@ -1,60 +1,104 @@
 <script lang="ts">
   import { Search, ChevronDown } from 'lucide-svelte';
   import type { FAQItem } from '@/types';
+  import { canvasStore } from '../../stores/editorStore';
 
+  export let sectionId: string = '';
   export let faqs: FAQItem[] = [];
-  export let title: string = '';
 
   let searchQuery = '';
-  let expandedIndex: number | null = 0;
+  let openIndex: number | null = 0;
 
   $: filteredFaqs = faqs.filter((item) => {
-    return !searchQuery || item.question.toLowerCase().includes(searchQuery.toLowerCase()) || item.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (item.question && item.question.toLowerCase().includes(q)) ||
+      (item.answer && item.answer.toLowerCase().includes(q))
+    );
   });
 
-  const toggle = (idx: number) => {
-    expandedIndex = expandedIndex === idx ? null : idx;
-  };
+  function toggle(idx: number) {
+    openIndex = openIndex === idx ? null : idx;
+  }
+
+  function selectSearchBar(e: Event) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, 'faq_search_bar');
+    }
+  }
+
+  function selectItem(e: Event, idx: number, item: FAQItem) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, item.id || `faq_item_${idx}`);
+    }
+  }
 </script>
 
-<div class="max-w-3xl mx-auto flex flex-col gap-6 text-center">
-  <div>
-    <h2 class="text-2xl sm:text-3xl font-black text-[var(--theme-text-primary,#0f172a)] tracking-tight mb-2">
-      {title || 'Pusat Bantuan Cepat'}
-    </h2>
-    <p class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)]">Ketik kata kunci untuk mencari jawaban langsung</p>
-  </div>
-
-  <!-- Search Input -->
-  <div class="relative w-full max-w-lg mx-auto">
-    <Search size={16} class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+<div class="max-w-2xl mx-auto flex flex-col gap-6 text-center">
+  <!-- Search Input Bar -->
+  <div
+    role="button"
+    tabindex="0"
+    on:click={selectSearchBar}
+    on:keydown={(e) => { if (e.key === 'Enter') selectSearchBar(e); }}
+    class={`relative w-full mx-auto transition-all rounded-2xl ${
+      $canvasStore.selectedNodeId === 'faq_search_bar'
+        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
+        : ''
+    }`}
+  >
+    <Search size={16} class="absolute left-4 top-1/2 -translate-y-1/2 text-secondary/60" />
     <input
       type="text"
       bind:value={searchQuery}
-      placeholder="Cari pertanyaan (misal: pengiriman, pembayaran)..."
-      class="w-full pl-11 pr-4 py-3 rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-slate-200 dark:border-slate-700 text-xs text-[var(--theme-text-primary,#0f172a)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#2563eb)]"
+      on:click|stopPropagation
+      placeholder="Ketik kata kunci (misal: pengiriman, expired, COD)..."
+      class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-nested/50 border border-light/80 text-xs text-main shadow-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
     />
   </div>
 
-  <div class="flex flex-col gap-3 text-left">
+  <!-- Filtered FAQs List -->
+  <div class="space-y-2 text-left">
     {#if filteredFaqs.length === 0}
-      <div class="p-8 text-center text-xs text-slate-400 bg-[var(--theme-surface,#f8fafc)] rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div class="p-8 text-center text-xs text-secondary bg-card rounded-2xl border border-light/80">
         Tidak ditemukan pertanyaan yang cocok dengan "{searchQuery}".
       </div>
     {:else}
-      {#each filteredFaqs as item, index}
-        {@const isExpanded = expandedIndex === index}
-        <div class="rounded-2xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      {#each filteredFaqs as item, index (item.id || index)}
+        {@const isOpen = openIndex === index}
+        {@const isItemActive = $canvasStore.selectedNodeId === (item.id || `faq_item_${index}`)}
+
+        <div
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectItem(e, index, item)}
+          on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
+          class={`rounded-2xl border border-light/80 bg-nested/40 overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
+            isItemActive
+              ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+              : 'hover:border-slate-300 dark:hover:border-slate-700'
+          }`}
+        >
           <button
             type="button"
-            on:click={() => toggle(index)}
-            class="w-full p-4 flex items-center justify-between gap-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+            on:click|stopPropagation={() => toggle(index)}
+            class="w-full p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm text-main hover:text-primary transition-colors cursor-pointer"
           >
-            <span class="font-bold text-xs sm:text-sm text-[var(--theme-text-primary,#0f172a)]">{item.question}</span>
-            <ChevronDown size={16} class={`text-[var(--theme-primary,#2563eb)] transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            <span class="flex-1 min-w-0">{item.question}</span>
+            <span
+              class={`p-1 rounded-lg text-secondary transition-transform duration-200 shrink-0 ${
+                isOpen ? 'rotate-180 text-primary' : ''
+              }`}
+            >
+              <ChevronDown size={15} />
+            </span>
           </button>
-          {#if isExpanded}
-            <div class="px-4 pb-4 pt-1 text-xs text-[var(--theme-text-muted,#64748b)] leading-relaxed border-t border-base-200 dark:border-slate-800">
+
+          {#if isOpen}
+            <div class="px-4 pb-4 pt-1 text-xs text-secondary leading-relaxed border-t border-light/60">
               {item.answer}
             </div>
           {/if}

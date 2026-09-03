@@ -1,9 +1,34 @@
 <script lang="ts">
   import { ArrowLeft, Plus, Minus, Trash2 } from 'lucide-svelte';
-  import { slide, fly } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
   import WhatsAppIcon from '../../../ui/WhatsAppIcon.svelte';
+  import Button from '../../../ui/Button.svelte';
+  import Input from '../../../ui/Input.svelte';
+  import Textarea from '../../../ui/Textarea.svelte';
+  import Select from '../../../ui/Select.svelte';
+  import Card from '../../../ui/Card.svelte';
 
-  export let detailedCart: any[] = [];
+  interface StoreProduct {
+    id?: string;
+    name: string;
+    basePrice?: number;
+    price?: number;
+    imageUrls?: string[];
+    imageUrl?: string;
+    category?: { name: string };
+    description?: string;
+    variants?: Record<string, unknown>[];
+  }
+
+  interface CartItem {
+    product: StoreProduct;
+    selections: Record<string, { name: string }>;
+    qty: number;
+    price: number;
+    subtotal: number;
+  }
+
+  export let detailedCart: CartItem[] = [];
   export let cartTotal: number = 0;
   export let form = {
     name: '',
@@ -16,6 +41,12 @@
   export let onUpdateQty: (idx: number, delta: number) => void;
   export let onRemoveItem: (idx: number) => void;
   export let onCheckout: () => void;
+
+  const getVariantText = (selections: unknown) => {
+    if (!selections) return 'Standar';
+    const sel = selections as Record<string, { name: string }>;
+    return Object.values(sel).map(s => s.name).join(', ') || 'Standar';
+  };
 </script>
 
 <div
@@ -24,12 +55,14 @@
   class="py-4 sm:py-8 max-w-5xl mx-auto text-left"
 >
   <div class="flex items-center gap-4 mb-8">
-    <button
-      class="btn btn-circle btn-ghost btn-sm hover:scale-105 active:scale-95 transition-all"
+    <Button
+      variant="ghost"
+      size="icon"
+      class="rounded-full hover:scale-105 active:scale-95 transition-all text-slate-600"
       on:click={onBackToCatalog}
     >
       <ArrowLeft size={20} />
-    </button>
+    </Button>
     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
       Selesaikan Pesanan Anda
     </h2>
@@ -38,7 +71,7 @@
   <div class="flex flex-col lg:flex-row gap-6 lg:gap-10">
     <!-- BAGIAN KIRI: RINGKASAN PESANAN -->
     <div class="flex-1 lg:sticky lg:top-8 self-start">
-      <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col h-fit">
+      <Card variant="elevated" padding="lg" radius="2xl" class="flex flex-col h-fit bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
         <h3 class="text-base font-bold mb-6 text-slate-800 dark:text-slate-100">
           Ringkasan Pesanan
         </h3>
@@ -46,19 +79,23 @@
         {#if detailedCart.length === 0}
           <div class="p-8 text-center border border-slate-200 dark:border-slate-700 border-dashed rounded-2xl">
             <p class="font-medium text-slate-500">Keranjang kosong.</p>
-            <button
-              class="btn btn-sm mt-4 rounded-full bg-[var(--theme-primary,#4f00ff)] text-white hover:brightness-110 border-none hover:scale-105 transition-all"
+            <Button
+              variant="primary"
+              size="sm"
+              class="mt-4 rounded-full"
               on:click={onBackToCatalog}
             >
               Kembali Belanja
-            </button>
+            </Button>
           </div>
         {:else}
           <div class="space-y-4 flex-1">
             {#each detailedCart as item, idx}
-              <div
-                class="flex gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl group hover:bg-slate-100 transition-colors"
-                transition:slide={{ duration: 300 }}
+              <Card
+                variant="nested"
+                padding="xs"
+                radius="xl"
+                class="flex gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 group hover:bg-slate-100 transition-colors"
               >
                 <div class="w-[72px] h-[72px] rounded-xl overflow-hidden bg-slate-200 flex-shrink-0">
                   {#if item.product.imageUrl}
@@ -74,7 +111,7 @@
                     {item.product.name}
                   </h4>
                   <p class="text-[12px] text-slate-500 mt-0.5">
-                    Varian: {Object.values(item.selections).join(', ')}
+                    Varian: {getVariantText(item.selections)}
                   </p>
                   <p class="text-[var(--theme-primary,#4f00ff)] font-extrabold font-mono mt-1.5 text-sm tracking-tight">
                     Rp {item.price.toLocaleString('id-ID')}
@@ -82,28 +119,34 @@
                 </div>
                 <div class="flex items-center gap-3">
                   <div class="flex flex-col items-center bg-white dark:bg-slate-600 rounded-xl shadow-sm overflow-hidden border border-slate-100 dark:border-slate-500">
-                    <button
-                      class="btn btn-xs btn-ghost rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
                       on:click={() => onUpdateQty(idx, 1)}
                     >
                       <Plus size={14} />
-                    </button>
+                    </Button>
                     <span class="text-xs font-bold w-8 text-center py-0.5">{item.qty}</span>
-                    <button
-                      class="btn btn-xs btn-ghost rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
                       on:click={() => onUpdateQty(idx, -1)}
                     >
                       <Minus size={14} />
-                    </button>
+                    </Button>
                   </div>
-                  <button
-                    class="btn btn-ghost btn-sm btn-circle text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
                     on:click={() => onRemoveItem(idx)}
                   >
                     <Trash2 size={18} />
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             {/each}
           </div>
 
@@ -119,12 +162,12 @@
             </div>
           </div>
         {/if}
-      </div>
+      </Card>
     </div>
 
     <!-- BAGIAN KANAN: INFORMASI PENGIRIMAN -->
     <div class="w-full lg:w-[480px]">
-      <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+      <Card variant="elevated" padding="lg" radius="2xl" class="bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
         <h3 class="text-base font-bold mb-6 text-slate-800 dark:text-slate-100">
           Informasi Pengiriman
         </h3>
@@ -132,79 +175,71 @@
         <div class="space-y-5">
           <div class="flex flex-col sm:flex-row gap-5">
             <div class="flex-1">
-              <label for="form-name" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-                Nama Lengkap *
-              </label>
-              <input
+              <Input
                 id="form-name"
-                type="text"
+                label="Nama Lengkap"
+                required={true}
                 bind:value={form.name}
                 placeholder="Misal: Budi Santoso"
-                class="input input-sm h-11 w-full rounded-xl bg-slate-50 border-slate-200 focus:border-[var(--theme-primary,#4f00ff)] focus:ring-[var(--theme-primary,#4f00ff)] placeholder:text-slate-400 placeholder:italic placeholder:font-light transition-colors"
               />
             </div>
             <div class="flex-1">
-              <label for="form-phone" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-                Nomor WhatsApp *
-              </label>
-              <input
+              <Input
                 id="form-phone"
                 type="tel"
+                label="Nomor WhatsApp"
+                required={true}
                 bind:value={form.phone}
                 placeholder="Contoh: 08123456789"
-                class="input input-sm h-11 w-full rounded-xl bg-slate-50 border-slate-200 focus:border-[var(--theme-primary,#4f00ff)] focus:ring-[var(--theme-primary,#4f00ff)] placeholder:text-slate-400 placeholder:italic placeholder:font-light transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label for="form-address" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-              Alamat Lengkap *
-            </label>
-            <textarea
+            <Textarea
               id="form-address"
+              label="Alamat Lengkap"
+              required={true}
               bind:value={form.address}
               placeholder="Jalan, No Rumah, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten, Kodepos"
-              class="textarea w-full rounded-xl bg-slate-50 border-slate-200 h-24 focus:border-[var(--theme-primary,#4f00ff)] focus:ring-[var(--theme-primary,#4f00ff)] placeholder:text-slate-400 placeholder:italic placeholder:font-light transition-colors pt-3"
-            ></textarea>
-          </div>
-
-          <div>
-            <label for="form-delivery" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-              Opsi Pengantaran *
-            </label>
-            <select
-              id="form-delivery"
-              bind:value={form.delivery}
-              class="select select-sm h-11 w-full rounded-xl bg-slate-50 border-slate-200 focus:border-[var(--theme-primary,#4f00ff)] focus:ring-[var(--theme-primary,#4f00ff)] transition-colors"
-            >
-              <option value="Reguler">Reguler (Estimasi 2-3 Hari)</option>
-              <option value="Instan">Instan (Gojek/Grab)</option>
-            </select>
-          </div>
-
-          <div class="mb-8">
-            <label for="form-notes" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-              Catatan Tambahan (Opsional)
-            </label>
-            <input
-              id="form-notes"
-              type="text"
-              bind:value={form.notes}
-              placeholder="Misal: Warna khusus, patokan rumah"
-              class="input input-sm h-11 w-full rounded-xl bg-slate-50 border-slate-200 focus:border-[var(--theme-primary,#4f00ff)] focus:ring-[var(--theme-primary,#4f00ff)] placeholder:text-slate-400 placeholder:italic placeholder:font-light transition-colors"
+              rows={3}
             />
           </div>
 
-          <button
-            class="btn w-full rounded-xl text-white shadow-md border-none flex gap-2 h-12 bg-[#25D366] hover:bg-[#20BA56] hover:scale-[1.02] active:scale-[0.98] transition-all font-bold text-sm cursor-pointer"
+          <div>
+            <Select
+              id="form-delivery"
+              label="Opsi Pengantaran"
+              required={true}
+              bind:value={form.delivery}
+              options={[
+                { value: 'Reguler', label: 'Reguler (Estimasi 2-3 Hari)' },
+                { value: 'Instan', label: 'Instan (Gojek/Grab)' }
+              ]}
+            />
+          </div>
+
+          <div class="mb-8">
+            <Input
+              id="form-notes"
+              label="Catatan Tambahan (Opsional)"
+              bind:value={form.notes}
+              placeholder="Misal: Warna khusus, patokan rumah"
+            />
+          </div>
+
+          <Button
+            size="lg"
+            class="w-full text-white shadow-md border-none flex gap-1.5 sm:gap-2 bg-[#25D366] hover:bg-[#20BA56] px-2 sm:px-4"
             disabled={detailedCart.length === 0}
             on:click={onCheckout}
           >
-            <WhatsAppIcon size={18} /> Kirim Pesanan via WhatsApp
-          </button>
+            <WhatsAppIcon size={18} />
+            <span class="sm:hidden text-[13px] whitespace-nowrap">Pesan via WA</span>
+            <span class="hidden sm:inline">Kirim Pesanan via WhatsApp</span>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   </div>
 </div>

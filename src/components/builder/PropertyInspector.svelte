@@ -28,12 +28,24 @@
       case 'logo': return 'Logo & Brand';
       case 'nav_links': return 'Navigation Menu';
       case 'header': return 'Section Header';
+      case 'features_heading': return 'Judul & Subjudul Fitur';
+      case 'features_image': return 'Gambar Ilustrasi Fitur';
       case 'items': return 'Card Items';
       case 'whatsapp': return 'WhatsApp Contact';
       case 'address': return 'Store Location';
       case 'info': return 'Information Links';
       case 'copyright': return 'Copyright Text';
-      default: return nodeId.startsWith('nav_') ? 'Navigation Menu' : nodeId;
+      default: {
+        if (nodeId.startsWith('feature_item_')) {
+          const idx = parseInt(nodeId.replace('feature_item_', ''), 10);
+          return `Kartu Fitur #${isNaN(idx) ? 1 : idx + 1}`;
+        }
+        if (nodeId.startsWith('item_')) {
+          const idx = parseInt(nodeId.replace('item_', ''), 10);
+          return `Item #${isNaN(idx) ? 1 : idx + 1}`;
+        }
+        return nodeId.startsWith('nav_') ? 'Navigation Menu' : nodeId;
+      }
     }
   };
 

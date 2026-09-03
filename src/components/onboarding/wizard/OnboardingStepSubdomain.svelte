@@ -13,6 +13,10 @@
   export let onNext: () => void;
 
   const MAX_LENGTH = 63;
+
+  function handleInput(e: Event) {
+    onInput(e);
+  }
 </script>
 
 <div class="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -28,7 +32,7 @@
       id="subdomain-input"
       label="Subdomain Toko"
       bind:value={subdomain}
-      on:input={onInput}
+      on:input={handleInput}
       placeholder="nama-toko"
       error={(subdomainStatus === 'taken' || subdomainStatus === 'invalid' || subdomainStatus === 'error') ? subdomainMessage : ''}
       maxlength={MAX_LENGTH}

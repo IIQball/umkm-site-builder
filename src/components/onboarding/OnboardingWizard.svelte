@@ -139,7 +139,10 @@
   }
 
   function onSubdomainInput(e: Event) {
-    const raw = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const input = (e.target || e.currentTarget) as HTMLInputElement | null;
+    if (!input) return;
+    
+    const raw = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     subdomain = raw;
     
     clearTimeout(debounceTimer);

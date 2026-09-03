@@ -10,7 +10,7 @@
     <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-700">
       <tr>
         <th class="p-4">Produk</th>
-        <th class="p-4">Deskripsi</th>
+        <th class="p-4 hidden sm:table-cell">Deskripsi</th>
         <th class="p-4">Harga</th>
         <th class="p-4 text-right">Aksi</th>
       </tr>
@@ -24,7 +24,7 @@
             {/if}
             <span>{product.name}</span>
           </td>
-          <td class="p-4 text-slate-500 max-w-xs truncate">{product.description || "-"}</td>
+          <td class="p-4 text-slate-500 max-w-xs truncate hidden sm:table-cell">{product.description || "-"}</td>
           <td class="p-4 font-mono font-bold text-[var(--theme-primary,#2563eb)]">
             Rp {typeof product.price === 'number' ? product.price.toLocaleString('id-ID') : product.price}
           </td>

@@ -20,9 +20,18 @@
   let dynamicProducts: ProductItem[] = [];
   let categories: { id: string; name: string; slug: string }[] = [];
   let activeCategoryId: string = "all";
-  let storeWaNumber: string = "";
+  interface CartItem {
+    product: ProductItem;
+    selections: Record<string, { name: string }>;
+    variantId: string;
+    qty: number;
+    price: number;
+    subtotal: number;
+  }
+
   let currentView: "catalog" | "checkout" = "catalog";
-  let cart: any[] = [];
+  let storeWaNumber: string = "";
+  let cart: CartItem[] = [];
   let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
 
   $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -32,22 +41,22 @@
   const handleAddToCart = (product: ProductItem, selections: Record<string, string>) => {
     const variantId = JSON.stringify(selections);
     const existing = cart.find((c) => c.product.id === product.id && c.variantId === variantId);
-    if (existing) {
-      existing.qty++;
-      cart = [...cart];
-    } else {
-      let base = typeof product.price === "number" ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, "")) || 0;
-      if (product.variants && Array.isArray(product.variants)) {
-        for (const group of product.variants) {
-          const selectedOptionName = selections[group.groupName];
-          if (selectedOptionName && group.options) {
-            const opt = group.options.find((o: any) => o.name === selectedOptionName);
-            if (opt && typeof opt.priceAdjustment === "number") base += opt.priceAdjustment;
+      if (existing) {
+        existing.qty++;
+        cart = [...cart];
+      } else {
+        let base = typeof product.price === "number" ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, "")) || 0;
+        if (product.variants && Array.isArray(product.variants)) {
+          for (const group of product.variants) {
+            const selectedOptionName = selections[group.groupName];
+            if (selectedOptionName && group.options) {
+              const opt = group.options.find((o: Record<string, unknown>) => o.name === selectedOptionName);
+              if (opt && typeof opt.priceAdjustment === "number") base += opt.priceAdjustment;
+            }
           }
         }
+        cart = [...cart, { product, variantId, selections: selections as any, qty: 1, price: base, subtotal: base }];
       }
-      cart = [...cart, { product, variantId, selections, qty: 1, price: base, subtotal: base }];
-    }
   };
 
   const handleBuyNow = (product: ProductItem, selections: Record<string, string>) => {
@@ -71,9 +80,13 @@
       return;
     }
     const itemsSummary = detailedCart
-      .map((item) => `• ${item.product.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(item.selections).join(", ") || "Standar"}`)
+      .map((item) => {
+        const p = item.product;
+        const s = item.selections;
+        return `• ${p.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
+      })
       .join("\n");
-    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info rekening. Terima kasih!`;
+    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     const rawTargetPhone = (storeWaNumber || (props.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') : '') || '6281234567890') as string;
     let targetPhone = rawTargetPhone.replace(/[^0-9]/g, "");
     if (targetPhone.startsWith("0")) targetPhone = "62" + targetPhone.slice(1);

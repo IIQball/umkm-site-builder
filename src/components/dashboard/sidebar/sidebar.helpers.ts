@@ -66,7 +66,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Ringkasan',
         items: [
-          { label: 'Dashboard', href: '/dashboard', icon: 'monitoring', group: 'Ringkasan' },
+          { label: 'Dashboard', href: '/admin', icon: 'monitoring', group: 'Ringkasan' },
           { label: 'Mutasi Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Ringkasan' },
         ],
       },
@@ -93,7 +93,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         title: 'Administrasi Utama',
         items: [
           { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: 'admin_panel_settings', group: 'Administrasi Utama' },
-          { label: 'Overview Dashboard', href: '/dashboard', icon: 'dashboard', group: 'Administrasi Utama' },
+          { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Administrasi Utama' },
         ],
       },
     ];

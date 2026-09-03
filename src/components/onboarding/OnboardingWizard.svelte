@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { CheckCircle, XCircle, Loader2, AlertCircle, Store, MapPin, Phone, ArrowRight, ArrowLeft } from 'lucide-svelte';
+  import { CheckCircle } from 'lucide-svelte';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
   import { subdomainField } from '@/lib/validators/subdomain';

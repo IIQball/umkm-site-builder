@@ -1,10 +1,11 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateGallery from '@/components/dashboard/TemplateGallery.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { stores } from '@/db/schema';
+import { stores, templates } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -20,22 +21,24 @@ const [store] = await db.select().from(stores).where(eq(stores.userId, user.id))
 if (!store) {
   return Astro.redirect('/onboarding');
 }
+
+const approvedTemplates = await db.select()
+  .from(templates)
+  .where(eq(templates.status, 'approved'));
+
+const totalTemplates = approvedTemplates.length;
 ---
 
 <DashboardLayout title="Koleksi Template Toko" breadcrumb="Dashboard / Galeri Template">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <!-- Page Header (matching standard dashboard header layout) -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5 font-heading">
-          <span>Koleksi Template Desain Toko</span>
-        </h1>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">Koleksi Template Desain</h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pilih dan terapkan template website yang telah Anda miliki ke toko online UMKM Anda seketika.
+          Pilih dan terapkan template website ke toko online UMKM Anda dengan mudah.
         </p>
       </div>
 
-      <!-- Quick Action Button -->
       <div class="flex items-center gap-2 flex-shrink-0">
         <Button
           client:load
@@ -50,11 +53,59 @@ if (!store) {
       </div>
     </div>
 
-    <!-- Template Gallery Component -->
-    <TemplateGallery
-      client:load
-      storeId={store.id}
-      currentTemplateId={store.templateId}
-    />
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Template Tersedia" 
+        value={totalTemplates} 
+        rawValue={totalTemplates}
+        icon="layers" 
+        cardTheme="dark"
+        badge="Katalog"
+        footerText="Template dari designer"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="Template Aktif" 
+        value={store.templateId ? 1 : 0} 
+        rawValue={store.templateId ? 1 : 0}
+        icon="check_circle" 
+        cardTheme="default"
+        badge="Terpilih"
+        footerText="Template aktif di toko"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="Desain Premium" 
+        value={approvedTemplates.filter(t => t.price > 0).length} 
+        rawValue={approvedTemplates.filter(t => t.price > 0).length}
+        icon="diamond" 
+        cardTheme="orange"
+        badge="Berbayar"
+        footerText="Template dengan harga"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Gratis Template" 
+        value={approvedTemplates.filter(t => t.price === 0).length} 
+        rawValue={approvedTemplates.filter(t => t.price === 0).length}
+        icon="gift" 
+        cardTheme="blue"
+        badge="Bebas"
+        footerText="Template gratis tersedia"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <div class="animate-fade-in-up delay-300">
+      <TemplateGallery
+        client:load
+        storeId={store.id}
+        currentTemplateId={store.templateId}
+      />
+    </div>
   </div>
 </DashboardLayout>

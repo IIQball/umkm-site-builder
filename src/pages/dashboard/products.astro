@@ -1,8 +1,10 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import ProductTable from '@/components/tenant/ProductTable.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
 import { db } from '@/lib/db/client';
-import { storeCategories, stores } from '@/db/schema';
+import { storeCategories, stores, products } from '@/db/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 
@@ -25,43 +27,121 @@ const categories = hasStore
         isNull(storeCategories.deletedAt)
       ))
   : [];
+
+const productList = hasStore
+  ? await db.select()
+      .from(products)
+      .where(and(
+        eq(products.storeId, STORE_ID!),
+        isNull(products.deletedAt)
+      ))
+  : [];
+
+const totalProducts = productList.length;
+const activeProducts = productList.filter(p => p.status === 'active').length;
+const lowStockProducts = productList.filter(p => p.stock !== null && p.stock < 5).length;
 ---
 
 <DashboardLayout title="Manajemen Produk" breadcrumb="Produk">
-  <div class="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-    <div>
-      <h1 class="text-heading-lg font-bold tracking-tight text-main">Manajemen Produk</h1>
-      <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">Kelola daftar produk, varian, dan harga untuk toko Anda.</p>
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg font-bold tracking-tight text-main">Manajemen Produk</h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">Kelola daftar produk, varian, dan harga untuk toko Anda.</p>
+      </div>
+      {hasStore ? (
+        <Button
+          client:load
+          id="add-product-btn"
+          variant="primary"
+          size="md"
+          class="font-bold flex-shrink-0"
+        >
+          <span class="material-symbols-outlined text-base">add</span>
+          <span>Tambah Produk</span>
+        </Button>
+      ) : null}
     </div>
-    {hasStore ? (
-      <button id="add-product-btn" class="bg-primary text-white hover:bg-primary/90 font-bold shadow-sm rounded-xl px-5 py-2.5 flex items-center transition-all cursor-pointer">
-        <span class="material-symbols-outlined text-lg mr-1.5">add</span>
-        Tambah Produk
-      </button>
-    ) : null}
-  </div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('add-product-btn');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('open-add-product'));
-        });
-      }
-    });
-  </script>
-  
-  <div>
-    {hasStore ? (
-      <ProductTable client:load storeId={STORE_ID!} categories={categories} />
-    ) : (
-      <div class="bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-hidden p-6 text-center py-12">
-        <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">store_off</span>
-        <h3 class="text-lg font-bold text-base-content mb-2">Toko Belum Diatur</h3>
-        <p class="text-base-content/60 mb-6">Anda belum memiliki toko yang aktif. Silakan buat atau atur toko Anda terlebih dahulu.</p>
-        <a href="/dashboard/store" class="bg-primary text-white hover:bg-primary/90 font-bold px-6 py-3 rounded-xl inline-block transition-all shadow-sm">Atur Toko Sekarang</a>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('add-product-btn');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('open-add-product'));
+          });
+        }
+      });
+    </script>
+
+    {hasStore && (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          client:load
+          label="Total Produk" 
+          value={totalProducts} 
+          rawValue={totalProducts}
+          icon="shopping_bag" 
+          cardTheme="dark"
+          badge="Katalog"
+          footerText="Jumlah produk dibuat"
+          delayClass="delay-100"
+        />
+        <StatCard 
+          client:load
+          label="Produk Aktif" 
+          value={activeProducts} 
+          rawValue={activeProducts}
+          icon="check_circle" 
+          cardTheme="default"
+          badge="Aktif"
+          footerText="Tersedia untuk dijual"
+          delayClass="delay-150"
+        />
+        <StatCard 
+          client:load
+          label="Stok Terbatas" 
+          value={lowStockProducts} 
+          rawValue={lowStockProducts}
+          icon="warning" 
+          cardTheme="orange"
+          badge="Perhatian"
+          footerText="Produk dengan stok < 5"
+          delayClass="delay-200"
+        />
+        <StatCard 
+          client:load
+          label="Kategori" 
+          value={categories.length} 
+          rawValue={categories.length}
+          icon="layers" 
+          cardTheme="blue"
+          badge="Organisir"
+          footerText="Kategori produk toko"
+          delayClass="delay-250"
+        />
       </div>
     )}
+
+    <div class="animate-fade-in-up {hasStore ? 'delay-300' : 'delay-100'}">
+      {hasStore ? (
+        <ProductTable client:load storeId={STORE_ID!} categories={categories} />
+      ) : (
+        <div class="bg-card border border-light shadow-sm rounded-2xl overflow-hidden p-6 text-center py-12">
+          <span class="material-symbols-outlined text-6xl text-muted/30 mb-4">store_off</span>
+          <h3 class="text-lg font-bold text-main mb-2">Toko Belum Diatur</h3>
+          <p class="text-secondary mb-6">Anda belum memiliki toko yang aktif. Silakan buat atau atur toko Anda terlebih dahulu.</p>
+          <Button
+            client:load
+            href="/dashboard/store"
+            variant="primary"
+            size="md"
+            class="font-bold"
+          >
+            Atur Toko Sekarang
+          </Button>
+        </div>
+      )}
+    </div>
   </div>
 </DashboardLayout>

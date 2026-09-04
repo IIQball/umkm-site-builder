@@ -1,10 +1,21 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.svelte';
 ---
 <BaseLayout title="401 Tidak Diberikan Izin">
-  <div class="flex flex-col items-center justify-center min-h-screen text-center px-4">
-    <h1 class="text-6xl font-bold text-error mb-4">401</h1>
-    <p class="text-xl mb-6">Anda harus masuk untuk mengakses halaman ini.</p>
-    <a href="/auth/login" class="btn btn-primary">Masuk</a>
+  <div class="flex flex-col items-center justify-center min-h-screen text-center px-4 bg-slate-100 dark:bg-slate-950">
+    <div class="max-w-md w-full bg-card border border-light rounded-2xl shadow-sm p-8 md:p-12 flex flex-col items-center">
+      <div class="w-20 h-20 bg-orange/15 rounded-full flex items-center justify-center mb-6">
+        <span class="material-symbols-outlined text-4xl text-orange">lock</span>
+      </div>
+      <h1 class="text-heading-xl font-heading font-bold text-main mb-3">401</h1>
+      <h2 class="text-heading-sm font-heading font-semibold text-main mb-3">Akses Ditolak</h2>
+      <p class="text-body-base text-secondary mb-8">
+        Anda harus masuk ke akun Anda terlebih dahulu untuk dapat mengakses halaman ini.
+      </p>
+      <Button client:load href="/auth/login" variant="primary" fullWidth size="lg">
+        Masuk Sekarang
+      </Button>
+    </div>
   </div>
 </BaseLayout>

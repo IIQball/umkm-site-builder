@@ -43,6 +43,7 @@ One pack. Never a second. No emojis as substitutes.
 
 | Component | File | Built from | Props |
 |---|---|---|---|
+| ImageFallback | src/components/ui/ImageFallback.svelte | lucide icons (ImageOff), tailwind | src, alt, className, loading, fallbackText |
 | ImageUpload | src/components/shared/ImageUpload.svelte | card, btn, alert, progress, lucide icons | folder, maxFiles, maxSizeMB, existingUrls, onUpload |
 | TrafficWidget | src/components/dashboard/TrafficWidget.svelte | card, btn, alert, progress, lucide icons (TrendingUp, Users, MessageCircle, Loader2) | storeId |
 

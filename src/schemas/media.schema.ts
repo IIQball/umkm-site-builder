@@ -57,3 +57,10 @@ export const MediaCleanupOptionsSchema = z.object({
 
 export type MediaCleanupOptions = z.infer<typeof MediaCleanupOptionsSchema>;
 
+
+export const MediaSyncOptionsSchema = z.object({
+  dryRun: z.boolean().optional().default(false),
+});
+
+export type MediaSyncOptions = z.infer<typeof MediaSyncOptionsSchema>;
+

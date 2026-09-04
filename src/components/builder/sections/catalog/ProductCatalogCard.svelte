@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Package, ShoppingCart } from 'lucide-svelte';
   import type { ProductItem } from '@/types';
+  import ImageFallback from '@/components/ui/ImageFallback.svelte';
 
   export let product: ProductItem;
   export let index: number;
@@ -75,35 +76,36 @@
   on:dragover={(e) => onDragOver(e, index)}
   on:dragleave={onDragLeave}
   on:drop={(e) => onDrop(e, index)}
-  class={`relative overflow-hidden transition-all duration-200 ${cardRadiusClass} ${cardPresetClass} ${
+  class="relative overflow-hidden transition-all duration-200 {cardRadiusClass} {cardPresetClass} {
     activePreset === 'carousel_scroll' ? 'min-w-[260px] max-w-[280px] snap-start flex flex-col' : isHorizontalLayout || activePreset === 'list_compact' ? 'flex flex-row items-stretch' : 'flex flex-col'
-  } ${isActive ? 'cursor-grab active:cursor-grabbing' : ''} ${
+  } {isActive ? 'cursor-grab active:cursor-grabbing' : ''} {
     dropTargetIdx === index ? 'ring-2 ring-blue-500 shadow-xl' : ''
-  } ${draggedIdx === index ? 'opacity-30' : ''}`}
+  } {draggedIdx === index ? 'opacity-30' : ''}"
 >
   <!-- Image with Nested Radius -->
   <div
     data-node="product_image"
-    class={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 ${isHorizontalLayout || activePreset === 'list_compact' ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}`}
+    class="relative overflow-hidden bg-slate-100 dark:bg-slate-800 {isHorizontalLayout || activePreset === 'list_compact' ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}"
   >
     {#if product.imageUrl}
-      <img
+      <ImageFallback
         src={product.imageUrl}
         alt={product.name || 'Produk'}
-        class={`${imageAspectClass} transition-transform duration-300 hover:scale-105`}
+        className="{imageAspectClass} transition-transform duration-300 hover:scale-105"
         loading="lazy"
+        fallbackText="Foto Produk"
       />
     {:else}
       <div
-        class={`w-full ${isHorizontalLayout || activePreset === 'list_compact' ? 'h-full min-h-[140px]' : 'h-48'} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4`}
+        class="w-full {isHorizontalLayout || activePreset === 'list_compact' ? 'h-full min-h-[140px]' : 'h-48'} flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4"
       >
         <Package size={26} class="text-slate-300 dark:text-slate-600" />
         <span class="text-[10px] font-medium text-slate-400">Foto Produk</span>
       </div>
     {/if}
     {#if product.badge}
-      <div data-node="product_badge" class={`absolute ${badgePosClass} z-10`}>
-        <span class={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${badgeColorClass}`}>
+      <div data-node="product_badge" class="absolute {badgePosClass} z-10">
+        <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider {badgeColorClass}">
           {product.badge}
         </span>
       </div>
@@ -111,11 +113,11 @@
   </div>
 
   <!-- Details -->
-  <div class={`p-4 flex-1 flex flex-col justify-between ${isHorizontalLayout || activePreset === 'list_compact' ? 'min-w-0' : ''}`}>
+  <div class="p-4 flex-1 flex flex-col justify-between {isHorizontalLayout || activePreset === 'list_compact' ? 'min-w-0' : ''}">
     <div>
       <h3
         data-node="product_title"
-        class={`mb-1 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 ${nameSizeClass} ${nameWeightClass}`}
+        class="mb-1 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 {nameSizeClass} {nameWeightClass}"
       >
         {product.name || 'Nama Produk'}
       </h3>
@@ -141,11 +143,11 @@
                       type="button"
                       disabled={!opt.isAvailable}
                       on:click={() => handleVariantChange(group.groupName, opt.name)}
-                      class={`px-3 py-1 text-[10px] font-semibold rounded-full border transition-all ${
+                      class="px-3 py-1 text-[10px] font-semibold rounded-full border transition-all {
                         selections[group.groupName] === opt.name
                           ? 'bg-[var(--theme-primary,#4f00ff)] border-[var(--theme-primary,#4f00ff)] text-white shadow-sm'
                           : 'border-slate-300 text-slate-500 hover:border-slate-400'
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      } disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {opt.name} {opt.priceAdjustment ? `(+Rp ${opt.priceAdjustment.toLocaleString('id-ID')})` : ''}
                     </button>
@@ -172,14 +174,14 @@
           <button
             type="button"
             on:click={() => { if (!isActive) onAddToCart(product, selections); }}
-            class={`px-3 py-2 text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white ${ctaBtnRadiusClass}`}
+            class="px-3 py-2 text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white {ctaBtnRadiusClass}"
           >
             <ShoppingCart size={14} />
           </button>
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary,#4f00ff)] text-white ${ctaBtnRadiusClass}`}
+            class="px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary,#4f00ff)] text-white {ctaBtnRadiusClass}"
           >
             <span>Beli</span>
           </button>
@@ -194,14 +196,14 @@
           <button
             type="button"
             on:click={() => { if (!isActive) onAddToCart(product, selections); }}
-            class={`px-4 py-2.5 text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white ${ctaBtnRadiusClass}`}
+            class="px-4 py-2.5 text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white {ctaBtnRadiusClass}"
           >
             <ShoppingCart size={16} />
           </button>
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary,#4f00ff)] text-white ${ctaBtnRadiusClass}`}
+            class="flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary,#4f00ff)] text-white {ctaBtnRadiusClass}"
           >
             <span>Beli Sekarang</span>
           </button>

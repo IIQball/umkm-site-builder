@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { StatCard, Card, Badge, Button } from '@/components/ui';
+  import { StatCard, Card, Button } from '@/components/ui';
   import { formatIDR, formatDate } from '@/lib/utils/format';
   import { toast } from '@/lib/toast';
 

@@ -29,6 +29,7 @@ const totalTemplatesSold = soldInfo?.count || 0;
 
 const settingsList = await db.select().from(platformSettings).limit(1);
 const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
+const platformFeePercentage = settingsList.length > 0 ? settingsList[0].platformFeePercentage : 30;
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -92,6 +93,7 @@ if (currentHour >= 4 && currentHour < 11) {
       totalNetIncome={totalNetIncome}
       totalTemplatesSold={totalTemplatesSold}
       settlementDelayDays={settlementDelayDays}
+      platformFeePercentage={platformFeePercentage}
     />
   </div>
 </DashboardLayout>

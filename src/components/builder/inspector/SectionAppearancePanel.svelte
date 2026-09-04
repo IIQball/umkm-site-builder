@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlignLeft, AlignCenter, AlignRight, Type, PaintBucket, Sparkles } from 'lucide-svelte';
+  import { PaintBucket, Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
@@ -26,22 +26,6 @@
     { value: '150ms', label: '150ms' },
     { value: '300ms', label: '300ms' },
     { value: '500ms', label: '500ms' },
-  ];
-
-  const alignButtons = [
-    { value: 'left', icon: AlignLeft, title: 'Rata Kiri' },
-    { value: 'center', icon: AlignCenter, title: 'Rata Tengah' },
-    { value: 'right', icon: AlignRight, title: 'Rata Kanan' },
-  ];
-
-  // Token-Based Color Presets
-  const textTokenOptions = [
-    { value: '', label: 'Default (Mengikuti Tema)' },
-    { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
-    { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
-    { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
-    { value: '#ffffff', label: 'Putih Bersih (White)' },
   ];
 
   const bgTokenOptions = [
@@ -116,39 +100,11 @@
     {/if}
   </div>
 
-  <!-- 2. Typography Alignment -->
-  <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Type size={13} class="text-[var(--theme-primary,#2563eb)]" />
-      <span>Typography Alignment</span>
-    </div>
-
-    <div>
-      <span class="block font-semibold text-xs text-base-content/80 mb-1">Perataan Teks (Text Align)</span>
-      <div class="grid grid-cols-3 gap-1 bg-base-200/60 p-1 rounded-lg border border-base-300 dark:border-slate-700">
-        {#each alignButtons as btn}
-          <button
-            type="button"
-            on:click={() => onStyleChange('textAlign', btn.value)}
-            class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
-              section.styles?.textAlign === btn.value || (btn.value === 'left' && !section.styles?.textAlign)
-                ? 'bg-base-100 text-base-content font-bold shadow-sm'
-                : 'text-base-content/60 hover:text-base-content'
-            }`}
-            title={btn.title}
-          >
-            <svelte:component this={btn.icon} size={14} />
-          </button>
-        {/each}
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. Token-Based Colors -->
+  <!-- 2. Token-Based Background Color -->
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
       <PaintBucket size={13} class="text-[var(--theme-primary,#2563eb)]" />
-      <span>Warna Background & Teks (Token Sistem)</span>
+      <span>Warna Background (Token Sistem)</span>
     </div>
 
     <div>
@@ -164,23 +120,6 @@
       >
         {#each bgTokenOptions as bg}
           <option value={bg.value}>{bg.label}</option>
-        {/each}
-      </select>
-    </div>
-
-    <div>
-      <label for="style-text-token" class="block font-semibold text-xs text-base-content/80 mb-1">
-        Warna Teks Section
-      </label>
-      <select
-        id="style-text-token"
-        value={section.styles?.color || ''}
-        on:change={(e) => onStyleChange('color', e.currentTarget.value)}
-        on:input={(e) => onStyleChange('color', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
-      >
-        {#each textTokenOptions as txt}
-          <option value={txt.value}>{txt.label}</option>
         {/each}
       </select>
     </div>

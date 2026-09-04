@@ -5,38 +5,57 @@ Berikut adalah struktur folder lengkap beserta seluruh berkas yang ada di dalam 
 
 ```
 umkm-site-builder/
-├── .agents/                                    # Konfigurasi & workflow agen AI pintar
-│   ├── rules/
+├── .agents/ # Konfigurasi & workflow agen AI pintar
+│   ├── rules/ # Standar aturan & panduan pengembangan
+│   │   ├── 00-stack.md                         # [155 baris] Definisi teknologi & framework stack SaaS
+│   │   ├── 10-process.md                       # [77 baris] SOP & workflow proses pengembangan fitur
+│   │   ├── 15-file-size-limits.md              # [20 baris] Batas maksimal 300 baris per file & modularisasi
+│   │   ├── 20-code-standards.md                # [91 baris] Standar penulisan clean code & konvensi penamaan
+│   │   ├── 30-ui-ux.md                         # [147 baris] Panduan standar desain UI/UX & aksesibilitas
+│   │   ├── 31-component-patterns.md            # [51 baris] Pola arsitektur komponen Svelte & Astro
+│   │   ├── 40-security.md                      # [98 baris] Protokol keamanan web, otentikasi, & proteksi role
+│   │   ├── 50-design-system-rules.md           # [11 baris] Aturan konsistensi token Design System global
+│   │   ├── 50-qa-testing.md                    # [110 baris] Standar penulisan test suite unit & integrasi Vitest
+│   │   ├── 60-git-strict.md                    # [115 baris] Standar pesan commit Git & version control
+│   │   ├── 61-git-light.md                     # [89 baris] Prosedur commit ringan untuk iterasi cepat
+│   │   ├── 70-database-selection.md            # [234 baris] Pedoman skema database Postgres & Drizzle ORM
+│   │   ├── 71-media-selection.md               # [176 baris] Pedoman manajemen media Cloudinary & signed uploads
 │   │   └── language-standards.md               # [18 baris] Standar aturan penulisan bahasa UI frontend
-│   └── skills/                                 # Kumpulan skill agen AI cerdas
-│       ├── animate/                            # Skill orkestrasi animasi & transisi UI
-│       ├── apple-design/                       # Skill desain interaksi & gestur Apple-grade
-│       ├── caveman/                            # Skill komunikasi terkompresi efisien token
-│       ├── clean-code/                         # Skill penulisan kode bersih standar Robert C. Martin
-│       ├── design-taste-frontend/              # Skill anti-slop visual landing page & frontend
-│       ├── emil-design-eng/                    # Skill mikro-interaksi & UI polish Emil Kowalski
-│       ├── find-animation-opportunities/       # Skill deteksi peluang animasi UI
-│       ├── improve-animations/                 # Skill audit & perbaikan kualitas animasi
-│       └── ponytail/                           # Skill implementasi minimalis & solusi pragmatis
-│
-├── docs/                                       # Dokumentasi teknis & ERD data model
-│   ├── memory/
+│   ├── skills/ # Kumpulan skill agen AI cerdas
+│   │   ├── animate/                            # Skill orkestrasi animasi & transisi UI
+│   │   ├── apple-design/                       # Skill desain interaksi & gestur Apple-grade
+│   │   ├── caveman/                            # Skill komunikasi terkompresi efisien token
+│   │   ├── clean-code/                         # Skill penulisan kode bersih standar Robert C. Martin
+│   │   ├── design-taste-frontend/              # Skill anti-slop visual landing page & frontend
+│   │   ├── emil-design-eng/                    # Skill mikro-interaksi & UI polish Emil Kowalski
+│   │   ├── find-animation-opportunities/       # Skill deteksi peluang animasi UI
+│   │   ├── improve-animations/                 # Skill audit & perbaikan kualitas animasi
+│   │   ├── ponytail/                           # Skill implementasi minimalis & solusi pragmatis
+│   │   └── review-animations/                  # Skill audit & tinjauan performa animasi UI
+│   ├── workflows/ # Workflow otomatisasi pengerjaan projek
+│   │   ├── 00-kickoff.md                       # [155 baris] Workflow kick-off inisialisasi pengerjaan fitur
+│   │   ├── 01-cleanup.md                       # [153 baris] Workflow pembersihan kode usang & file yatim
+│   │   ├── 10-feature.md                       # [88 baris] Workflow siklus hidup implementasi fitur baru
+│   │   └── 20-review.md                        # [100 baris] Workflow audit review kode sebelum rilis
+│   └── README.md                               # [131 baris] Dokumentasi pedoman konfigurasi agen AI
+├── docs/ # Dokumentasi teknis & ERD data model
+│   ├── memory/ # Catatan memori codebase & arsitektur
 │   │   ├── codebase-map.md                     # [89 baris] Ringkasan modul krusial arsitektur SaaS
 │   │   ├── css-vars.md                         # [70 baris] Standar gaya & variabel CSS global
 │   │   ├── feature-01-project-setup.md         # [102 baris] Rencana inisialisasi Astro dev environment
 │   │   ├── feature-01b-database-layer.md       # [147 baris] Rancangan migrasi skema database Drizzle
 │   │   ├── feature-h1-xendit-setup.md          # [101 baris] Rancangan integrasi sandbox e-invoice Xendit
 │   │   └── ui-inventory.md                     # [77 baris] Inventarisasi komponen visual & state layout
-│   ├── planning/
+│   ├── planning/ # Rencana roadmap & jadwal rilis fitur
 │   │   └── roadmap.md                          # [199 baris] Jadwal tahapan penyelesaian rilis fitur SaaS
-│   ├── prd/
+│   ├── prd/ # Product Requirements Document platform
+│   │   ├── features/ # Spesifikasi kebutuhan fitur sistem
+│   │   │   └── _template.md                    # [79 baris] Template format dokumen prd fitur baru
 │   │   ├── 00-overview.md                      # [84 baris] Latar belakang & batasan produk platform
 │   │   ├── personas.md                         # [55 baris] Profil segmen tenant & desainer template
 │   │   ├── user-journeys.md                    # [197 baris] Alur pengguna dari registrasi hingga go-live
-│   │   ├── user-stories.md                     # [⚠️ mepet 300 baris - 256 baris] Kasus penggunaan fungsionalitas sistem
-│   │   └── features/
-│   │       └── _template.md                    # [79 baris] Template format dokumen prd fitur baru
-│   ├── tech/
+│   │   └── user-stories.md                     # [⚠️ mepet 300 baris - 256 baris] Kasus penggunaan fungsionalitas sistem
+│   ├── tech/ # Spesifikasi arsitektur teknis & API
 │   │   ├── api-spec.md                         # [⚠️ >300 baris - 511 baris] Spesifikasi request/response endpoint HTTP API
 │   │   ├── architecture.md                     # [⚠️ >300 baris - 388 baris] Penjelasan struktur Clean Architecture SaaS
 │   │   ├── code-standards.md                   # [⚠️ >300 baris - 373 baris] Aturan penulisan kode, penamaan, & clean code
@@ -44,11 +63,10 @@ umkm-site-builder/
 │   │   ├── permissions-matrix.md               # [226 baris] Tabel pembatasan hak akses rute per role
 │   │   ├── security.md                         # [200 baris] Protokol enkripsi data, token, & validasi payload
 │   │   └── testing-strategy.md                 # [⚠️ >300 baris - 350 baris] Panduan pembagian cakupan test suite (vitest)
-│   ├── PROJECT-STATE.md                        # [⚠️ >300 baris - 411 baris] Checkpoint state update live per sesi handoff
+│   ├── PROJECT-STATE.md                        # [⚠️ >300 baris - 566 baris] Checkpoint state update live per sesi handoff
 │   └── README.md                               # [65 baris] Dokumentasi awal ringkasan pengerjaan sistem
-│
-├── drizzle/                                    # Berkas migrasi database SQL Drizzle ORM
-│   ├── meta/
+├── drizzle/ # Berkas migrasi database SQL Drizzle ORM
+│   ├── meta/ # Metadata snapshot & jurnal migrasi database
 │   │   ├── _journal.json                       # [34 baris] Jurnal urutan berkas migrasi database
 │   │   ├── 0000_snapshot.json                  # [⚠️ >300 baris - 2019 baris] Snapshot metadata migrasi tahap 1
 │   │   ├── 0001_snapshot.json                  # [⚠️ >300 baris - 2020 baris] Snapshot metadata migrasi tahap 2
@@ -58,285 +76,302 @@ umkm-site-builder/
 │   ├── 0001_exotic_madame_web.sql              # [1 baris] Migrasi database tahap 2 (tabel platform settings)
 │   ├── 0002_overconfident_ted_forrester.sql    # [1 baris] Migrasi database tahap 3 (tabel bank & payout)
 │   └── 0003_sloppy_mephisto.sql                # [2 baris] Migrasi database tahap 4 (settlement delay)
-│
-├── public/                                     # Aset statis (gambar, font, logo)
-│
-├── src/                                        # Kode sumber utama aplikasi
-│   ├── components/
-│   │   ├── admin/
-│   │   │   ├── category/
+├── public/ # Aset statis (gambar, font, logo)
+├── src/ # Kode sumber utama aplikasi
+│   ├── components/ # Komponen UI modular Svelte & Astro
+│   │   ├── admin/ # Komponen panel administrasi platform
+│   │   │   ├── category/ # Pengelola master kategori template
 │   │   │   │   ├── category.helpers.ts         # [21 baris] Helper slug & icon options kategori
 │   │   │   │   ├── CategoryDeleteModal.svelte  # [50 baris] Modal konfirmasi hapus kategori
 │   │   │   │   ├── CategoryFormModal.svelte    # [130 baris] Modal form tambah & edit kategori
 │   │   │   │   ├── CategoryHeader.svelte       # [60 baris] Header kontrol dan pencarian kategori
 │   │   │   │   └── CategoryTable.svelte        # [93 baris] Tabel daftar master kategori template
-│   │   │   ├── commission/
-│   │   │   │   └── CommissionSimulationCard.svelte# [73 baris] Kartu simulasi perhitungan komisi platform & desainer
-│   │   │   ├── review/
+│   │   │   ├── commission/ # Komponen pengaturan & simulasi komisi
+│   │   │   │   └── CommissionSimulationCard.svelte # [73 baris] Kartu simulasi perhitungan komisi platform & desainer
+│   │   │   ├── review/ # Komponen alur review template desainer
 │   │   │   │   ├── review.types.ts             # [14 baris] Definisi tipe data review template desainer
 │   │   │   │   ├── TemplateReviewModals.svelte # [125 baris] Kumpulan modal persetujuan/penolakan review template
 │   │   │   │   └── TemplateReviewTable.svelte  # [145 baris] Tabel daftar review template desainer
-│   │   │   ├── whitelist/
+│   │   │   ├── whitelist/ # Komponen whitelist email Google Auth admin
 │   │   │   │   ├── AdminAddModal.svelte        # [214 baris] Modal tambah whitelist email admin
 │   │   │   │   ├── AdminConfirmModal.svelte    # [104 baris] Modal konfirmasi penghapusan whitelist
 │   │   │   │   ├── AdminDetailModal.svelte     # [73 baris] Modal detail data whitelist admin
 │   │   │   │   ├── AdminWhitelistTable.svelte  # [129 baris] Tabel daftar whitelist admin
 │   │   │   │   └── whitelist.types.ts          # [16 baris] Tipe data whitelist admin
-│   │   │   ├── AdminUserDetailModal.svelte     # [37 baris] Modal detail data user admin
-│   │   │   ├── AdminUserSuspendModal.svelte    # [70 baris] Modal suspend/aktifkan user admin
+│   │   │   ├── AdminMetricsOverview.svelte     # [236 baris] Ringkasan metrik statistik operasional platform admin
+│   │   │   ├── AdminUserAddModal.svelte        # [⚠️ mepet 300 baris - 298 baris] Modal form penambahan user/admin baru oleh superadmin
+│   │   │   ├── AdminUserDetailModal.svelte     # [49 baris] Modal detail data user admin
+│   │   │   ├── AdminUserSuspendModal.svelte    # [95 baris] Modal suspend/aktifkan user admin
 │   │   │   ├── AdminWhitelistPanel.svelte      # [200 baris] Panel whitelist email Google Auth admin
 │   │   │   ├── CommissionSettingsPanel.svelte  # [⚠️ mepet 300 baris - 282 baris] Form fee %, minimum payout, & settlement delay
 │   │   │   ├── TemplateCategoryManager.svelte  # [⚠️ mepet 300 baris - 271 baris] Pengelola master kategori template admin
 │   │   │   ├── TemplateReviewPanel.svelte      # [⚠️ mepet 300 baris - 264 baris] Panel review & verifikasi template desainer
-│   │   │   └── UserManagementPanel.svelte      # [⚠️ >300 baris - 320 baris] Panel manajemen pengguna platform
-│   │   ├── auth/
-│   │   │   ├── ForgotPasswordForm.svelte       # [96 baris] Form permintaan reset password pengguna
-│   │   │   ├── GoogleAuthButton.svelte         # [56 baris] Tombol login Google SSO BetterAuth
-│   │   │   ├── LoginForm.svelte                # [168 baris] Form login tenant, designer, dan admin
-│   │   │   ├── RegisterForm.svelte             # [⚠️ mepet 300 baris - 277 baris] Form registrasi tenant baru
-│   │   │   └── ResetPasswordForm.svelte        # [198 baris] Form setel ulang kata sandi baru
-│   │   ├── builder/
-│   │   │   ├── canvas/
-│   │   │   │   ├── canvasCss.helpers.ts        # [50 baris] Helper kalkulasi variabel CSS & Golden Ratio
-│   │   │   │   └── CanvasSpacingHandles.svelte # [61 baris] Drag handles margin & padding section
-│   │   │   ├── content/
-│   │   │   │   ├── features/
-│   │   │   │   │   ├── FeaturesComparisonContent.svelte# [144 baris] Form inspector komparasi keunggulan fitur
-│   │   │   │   │   └── FeaturesRepeaterContent.svelte  # [173 baris] Form repeater item keunggulan fitur
+│   │   │   └── UserManagementPanel.svelte      # [⚠️ >300 baris - 349 baris] Panel manajemen pengguna platform
+│   │   ├── auth/ # Komponen form otentikasi & login pengguna
+│   │   │   ├── ForgotPasswordForm.svelte       # [98 baris] Form permintaan reset password pengguna
+│   │   │   ├── GoogleAuthButton.svelte         # [59 baris] Tombol login Google SSO BetterAuth
+│   │   │   ├── LoginForm.svelte                # [149 baris] Form login tenant, designer, dan admin
+│   │   │   ├── RegisterForm.svelte             # [⚠️ >300 baris - 304 baris] Form registrasi tenant baru
+│   │   │   └── ResetPasswordForm.svelte        # [164 baris] Form setel ulang kata sandi baru
+│   │   ├── builder/ # Komponen visual no-code builder template
+│   │   │   ├── canvas/ # Komponen kanvas kerja & helper drag-spacing
+│   │   │   │   ├── canvasCss.helpers.ts        # [127 baris] Helper kalkulasi variabel CSS & Golden Ratio
+│   │   │   │   ├── canvasScroll.helpers.ts     # [37 baris] Helper auto-scroll halus ke elemen kanvas saat layer diklik
+│   │   │   │   ├── CanvasSpacingHandles.svelte # [61 baris] Drag handles margin & padding section
+│   │   │   │   └── fontLoader.helpers.ts       # [101 baris] Helper pemuatan font Google Fonts dinamis ke kanvas
+│   │   │   ├── content/ # Form inspector konten per section
+│   │   │   │   ├── features/ # Form inspector konten keunggulan fitur
+│   │   │   │   │   ├── FeaturesComparisonContent.svelte # [144 baris] Form inspector komparasi keunggulan fitur
+│   │   │   │   │   └── FeaturesRepeaterContent.svelte # [173 baris] Form repeater item keunggulan fitur
 │   │   │   │   ├── content.helpers.ts          # [51 baris] Helper pengisian konten section builder
 │   │   │   │   ├── FaqContent.svelte           # [91 baris] Form inspector konten FAQ section
 │   │   │   │   ├── FeaturesContent.svelte      # [68 baris] Form inspector konten features section
-│   │   │   │   ├── FooterContent.svelte        # [50 baris] Form inspector konten footer section
+│   │   │   │   ├── FooterContent.svelte        # [78 baris] Form inspector konten footer section
 │   │   │   │   ├── GoogleMapsContent.svelte    # [82 baris] Form inspector konten Google Maps section
-│   │   │   │   ├── HeaderContent.svelte        # [234 baris] Form inspector konten header section
+│   │   │   │   ├── HeaderContent.svelte        # [⚠️ >300 baris - 434 baris] Form inspector konten header section
 │   │   │   │   ├── HeroContent.svelte          # [223 baris] Form inspector konten hero section
-│   │   │   │   ├── ProductCatalogContent.svelte# [151 baris] Form inspector data produk katalog
+│   │   │   │   ├── ProductCatalogContent.svelte # [151 baris] Form inspector data produk katalog
 │   │   │   │   └── TestimonialsContent.svelte  # [104 baris] Form inspector isi ulasan/testimonial
-│   │   │   ├── inspector/
-│   │   │   │   ├── header/
-│   │   │   │   │   ├── HeaderAnnouncementPanel.svelte# [119 baris] Panel teks pengumuman header
+│   │   │   ├── inspector/ # Panel properti kustomisasi node & tema
+│   │   │   │   ├── header/ # Sub-panel konfigurasi elemen header
+│   │   │   │   │   ├── HeaderAnnouncementPanel.svelte # [91 baris] Panel teks pengumuman header
 │   │   │   │   │   ├── HeaderLogoPanel.svelte  # [99 baris] Panel upload/URL logo toko
 │   │   │   │   │   └── HeaderNavPanel.svelte   # [137 baris] Panel menu navigasi menu header
-│   │   │   │   ├── node-forms/
-│   │   │   │   │   ├── AnnouncementNodeForm.svelte# [73 baris] Form spesifik node pengumuman
-│   │   │   │   │   ├── CatalogNodeForms.svelte # [⚠️ mepet 300 baris - 264 baris] Form spesifik node katalog produk
+│   │   │   │   ├── node-forms/ # Form input mikro spesifik sub-node
+│   │   │   │   │   ├── AnnouncementNodeForm.svelte # [73 baris] Form spesifik node pengumuman
+│   │   │   │   │   ├── CatalogNodeForms.svelte # [⚠️ mepet 300 baris - 289 baris] Form spesifik node katalog produk
 │   │   │   │   │   ├── FaqNodeForms.svelte     # [138 baris] Form spesifik node tanya jawab FAQ
-│   │   │   │   │   ├── FeatureHeadingNodeForm.svelte# [69 baris] Form spesifik heading section fitur
-│   │   │   │   │   ├── FeatureImageNodeForm.svelte# [86 baris] Form upload gambar kartu fitur
-│   │   │   │   │   ├── FeatureItemNodeForm.svelte# [201 baris] Form konfigurasi item benefit fitur
-│   │   │   │   │   ├── HeroElementNodeForms.svelte# [189 baris] Form elemen visual/teks hero
-│   │   │   │   │   ├── HeroExtraNodeForms.svelte# [87 baris] Form elemen pendukung hero
-│   │   │   │   │   ├── HeroImageNodeForm.svelte# [121 baris] Form konfigurasi node gambar hero
+│   │   │   │   │   ├── FeatureHeadingNodeForm.svelte # [83 baris] Form spesifik heading section fitur
+│   │   │   │   │   ├── FeatureImageNodeForm.svelte # [127 baris] Form upload gambar kartu fitur
+│   │   │   │   │   ├── FeatureItemNodeForm.svelte # [⚠️ mepet 300 baris - 250 baris] Form konfigurasi item benefit fitur
+│   │   │   │   │   ├── FooterNodeForms.svelte  # [237 baris] Form spesifik kustomisasi elemen sub-node footer
+│   │   │   │   │   ├── HeroElementNodeForms.svelte # [217 baris] Form elemen visual/teks hero
+│   │   │   │   │   ├── HeroExtraNodeForms.svelte # [93 baris] Form elemen pendukung hero
+│   │   │   │   │   ├── HeroImageNodeForm.svelte # [121 baris] Form konfigurasi node gambar hero
 │   │   │   │   │   ├── LogoNodeForm.svelte     # [139 baris] Form logo toko pada header
-│   │   │   │   │   ├── MapsNodeForms.svelte    # [249 baris] Form spesifik node lokasi & peta Google Maps
+│   │   │   │   │   ├── MapsNodeForms.svelte    # [⚠️ >300 baris - 331 baris] Form spesifik node lokasi & peta Google Maps
 │   │   │   │   │   ├── NavLinksNodeForm.svelte # [61 baris] Form menu navigasi
-│   │   │   │   │   └── TestimonialsNodeForms.svelte# [⚠️ mepet 300 baris - 280 baris] Form spesifik node testimoni
-│   │   │   │   ├── theme/
+│   │   │   │   │   └── TestimonialsNodeForms.svelte # [⚠️ >300 baris - 316 baris] Form spesifik node testimoni
+│   │   │   │   ├── theme/ # Tab kustomisasi token tema global
 │   │   │   │   │   ├── ThemeButtonsTab.svelte  # [107 baris] Tab kustomisasi tombol tema builder
 │   │   │   │   │   ├── ThemeColorsTab.svelte   # [49 baris] Tab kustomisasi palet warna tema builder
-│   │   │   │   │   ├── ThemeLayoutTab.svelte   # [67 baris] Tab layout spacing tema builder
-│   │   │   │   │   └── ThemeTypographyTab.svelte# [90 baris] Tab kustomisasi font tema builder
+│   │   │   │   │   ├── ThemeLayoutTab.svelte   # [71 baris] Tab layout spacing tema builder
+│   │   │   │   │   └── ThemeTypographyTab.svelte # [97 baris] Tab kustomisasi font tema builder
 │   │   │   │   ├── CatalogCardPanel.svelte     # [107 baris] Panel pengubah style kartu produk
 │   │   │   │   ├── CatalogCtaPanel.svelte      # [169 baris] Panel styling tombol CTA katalog
 │   │   │   │   ├── CatalogGridPanel.svelte     # [101 baris] Panel layout grid katalog produk
 │   │   │   │   ├── catalogStyles.helpers.ts    # [42 baris] Fungsi helper styling css katalog
 │   │   │   │   ├── CatalogStylesTab.svelte     # [22 baris] Tab pengeditan gaya katalog produk
 │   │   │   │   ├── GeneralStylesTab.svelte     # [36 baris] Tab layout jarak & padding section
-│   │   │   │   ├── GlobalThemeInspector.svelte # [136 baris] Panel warna dasar tema template builder
+│   │   │   │   ├── GlobalThemeInspector.svelte # [147 baris] Panel warna dasar tema template builder
 │   │   │   │   ├── HeaderStylesTab.svelte      # [23 baris] Tab konfigurasi gaya navigasi header
 │   │   │   │   ├── imageUpload.helpers.ts      # [91 baris] Helper validasi/upload gambar
 │   │   │   │   ├── NodeButtonStyles.svelte     # [64 baris] Panel kustomisasi styling tombol node
-│   │   │   │   ├── nodeContent.constants.ts    # [127 baris] Konstanta label & deskripsi sub-node
-│   │   │   │   ├── NodeContentForm.svelte      # [63 baris] Form input konten dinamis tiap block
+│   │   │   │   ├── nodeContent.constants.ts    # [143 baris] Konstanta label & deskripsi sub-node
+│   │   │   │   ├── NodeContentForm.svelte      # [70 baris] Form input konten dinamis tiap block
 │   │   │   │   ├── nodeStyles.constants.ts     # [62 baris] Konstanta default style CSS node block
-│   │   │   │   ├── SectionAppearancePanel.svelte# [190 baris] Panel background & border-radius section
+│   │   │   │   ├── SectionAppearancePanel.svelte # [129 baris] Panel background & border-radius section
 │   │   │   │   ├── SectionLayoutPanel.svelte   # [36 baris] Panel layout flex/grid section
-│   │   │   │   ├── SectionPresetSelector.svelte# [152 baris] Panel pemilihan preset section siap pakai
+│   │   │   │   ├── SectionPresetSelector.svelte # [166 baris] Panel pemilihan preset section siap pakai
 │   │   │   │   ├── SectionSlotReorder.svelte   # [73 baris] Panel drag-and-drop slots section
-│   │   │   │   ├── SectionSpacingControls.svelte# [234 baris] Kontrol padding & margin interaktif
+│   │   │   │   ├── SectionSpacingControls.svelte # [150 baris] Kontrol padding & margin interaktif
 │   │   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
-│   │   │   ├── layer/
+│   │   │   ├── layer/ # Komponen pohon layer section & sub-node
 │   │   │   │   ├── AddNodeDropdown.svelte      # [45 baris] Tombol nambah block section baru
-│   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 299 baris] Helper manipulasi susunan layer adaptif
-│   │   │   │   └── LayerSectionItem.svelte     # [180 baris] Komponen item baris layer section
-│   │   │   ├── registry/
-│   │   │   │   ├── index.ts                    # [235 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 291 baris] Helper manipulasi susunan layer adaptif
+│   │   │   │   └── LayerSectionItem.svelte     # [191 baris] Komponen item baris layer section
+│   │   │   ├── registry/ # Registri sentral modularisasi section builder
+│   │   │   │   ├── index.ts                    # [⚠️ mepet 300 baris - 259 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   └── registry.types.ts           # [17 baris] Definisi tipe registry map section
-│   │   │   ├── sections/
-│   │   │   │   ├── catalog/
-│   │   │   │   │   ├── catalog.css             # [118 baris] Container queries `@container productcard`
+│   │   │   ├── sections/ # Kumpulan varian preset layout per section
+│   │   │   │   ├── catalog/ # Preset layout katalog produk (20 preset)
+│   │   │   │   │   ├── catalog.css             # [136 baris] Container queries `@container productcard`
 │   │   │   │   │   ├── CatalogAccordion.svelte # [73 baris] Layout katalog akordeon minimalis
-│   │   │   │   │   ├── CatalogBentoSpotlight.svelte# [162 baris] Layout bento spotlight katalog
-│   │   │   │   │   ├── CatalogBundleTiers.svelte# [106 baris] Layout paket bundling produk bertingkat
-│   │   │   │   │   ├── CatalogCarouselMasonry.svelte# [73 baris] Layout masonry & lookbook katalog
-│   │   │   │   │   ├── CatalogCarouselScroll.svelte# [141 baris] Layout slider carousel produk horizontal
-│   │   │   │   │   ├── CatalogCheckoutModal.svelte# [211 baris] Modal checkout cepat katalog
-│   │   │   │   │   ├── CatalogFlashSale.svelte # [140 baris] Layout promo flash sale countdown
-│   │   │   │   │   ├── CatalogGridStandard.svelte# [176 baris] Layout grid katalog standar
-│   │   │   │   │   ├── CatalogHeader.svelte    # [43 baris] Header judul & deskripsi katalog produk
-│   │   │   │   │   ├── CatalogListCompact.svelte# [101 baris] Layout list compact horizontal
-│   │   │   │   │   ├── CatalogLookbook.svelte  # [82 baris] Layout lookbook galeri visual majalah
-│   │   │   │   │   ├── CatalogMasonry.svelte   # [107 baris] Layout masonry katalog 3 kolom
-│   │   │   │   │   ├── CatalogPriceTable.svelte# [80 baris] Layout daftar harga tabular
-│   │   │   │   │   ├── CatalogSidebarFilter.svelte# [154 baris] Layout katalog dengan sidebar kategori
-│   │   │   │   │   ├── CatalogSingleFocus.svelte# [124 baris] Layout fokus tunggal produk unggulan
-│   │   │   │   │   ├── CatalogSpecialCards.svelte# [176 baris] Layout kartu spesial katalog
-│   │   │   │   │   ├── ProductCatalogCard.svelte# [213 baris] Komponen visual kartu katalog produk
-│   │   │   │   │   └── ProductCatalogQuickView.svelte# [156 baris] Detail popup cepat ulasan produk
-│   │   │   │   ├── faq/
-│   │   │   │   │   ├── faq.css                 # [54 baris] Container queries `@container faqcard`
-│   │   │   │   │   ├── faq.helpers.ts          # [76 baris] Helper WhatsApp deep-link & default FAQs
-│   │   │   │   │   ├── FaqAccordionSingle.svelte# [61 baris] Preset FAQ akordeon 1 kolom terpusat
-│   │   │   │   │   ├── FaqAccordionTwoCol.svelte# [111 baris] Preset FAQ akordeon 2 kolom simetris
-│   │   │   │   │   ├── FaqBoxedCardsGrid.svelte# [35 baris] Preset FAQ kotak kartu grid
-│   │   │   │   │   ├── FaqCategorizedTabs.svelte# [104 baris] Preset FAQ dengan tab kategori
-│   │   │   │   │   ├── FaqChatStyle.svelte     # [51 baris] Preset FAQ gaya balon obrolan
-│   │   │   │   │   ├── FaqGridCards.svelte     # [47 baris] Preset FAQ grid 2 kolom kartu terbuka
-│   │   │   │   │   ├── FaqHeader.svelte        # [52 baris] Header judul H2 FAQ & sub-node selection
-│   │   │   │   │   ├── FaqHelpCenter.svelte    # [60 baris] Preset FAQ gaya Help Center floating cards
-│   │   │   │   │   ├── FaqHorizontalCards.svelte# [51 baris] Preset FAQ kartu horizontal slider
+│   │   │   │   │   ├── CatalogBentoSpotlight.svelte # [178 baris] Layout bento spotlight katalog
+│   │   │   │   │   ├── CatalogBundleTiers.svelte # [129 baris] Layout paket bundling produk bertingkat
+│   │   │   │   │   ├── CatalogCarouselMasonry.svelte # [88 baris] Layout masonry & lookbook katalog
+│   │   │   │   │   ├── CatalogCarouselScroll.svelte # [140 baris] Layout slider carousel produk horizontal
+│   │   │   │   │   ├── CatalogCheckoutModal.svelte # [246 baris] Modal checkout cepat katalog
+│   │   │   │   │   ├── CatalogFlashSale.svelte # [147 baris] Layout promo flash sale countdown
+│   │   │   │   │   ├── CatalogGridStandard.svelte # [207 baris] Layout grid katalog standar
+│   │   │   │   │   ├── CatalogHeader.svelte    # [57 baris] Header judul & deskripsi katalog produk
+│   │   │   │   │   ├── CatalogListCompact.svelte # [102 baris] Layout list compact horizontal
+│   │   │   │   │   ├── CatalogLookbook.svelte  # [87 baris] Layout lookbook galeri visual majalah
+│   │   │   │   │   ├── CatalogMasonry.svelte   # [110 baris] Layout masonry katalog 3 kolom
+│   │   │   │   │   ├── CatalogPriceTable.svelte # [78 baris] Layout daftar harga tabular
+│   │   │   │   │   ├── CatalogSidebarFilter.svelte # [162 baris] Layout katalog dengan sidebar kategori
+│   │   │   │   │   ├── CatalogSingleFocus.svelte # [143 baris] Layout fokus tunggal produk unggulan
+│   │   │   │   │   ├── CatalogSpecialCards.svelte # [168 baris] Layout kartu spesial katalog
+│   │   │   │   │   ├── ProductCatalogCard.svelte # [213 baris] Komponen visual kartu katalog produk
+│   │   │   │   │   ├── ProductCatalogQuickView.svelte # [156 baris] Detail popup cepat ulasan produk
+│   │   │   │   │   └── ProductQuickCheckoutModal.svelte # [⚠️ >300 baris - 313 baris] Modal checkout instan WhatsApp langsung dari katalog
+│   │   │   │   ├── faq/ # Preset layout FAQ tanya jawab (10 preset)
+│   │   │   │   │   ├── faq.css                 # [62 baris] Container queries `@container faqcard`
+│   │   │   │   │   ├── faq.helpers.ts          # [79 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── FaqAccordionSingle.svelte # [68 baris] Preset FAQ akordeon 1 kolom terpusat
+│   │   │   │   │   ├── FaqAccordionTwoCol.svelte # [128 baris] Preset FAQ akordeon 2 kolom simetris
+│   │   │   │   │   ├── FaqBoxedCardsGrid.svelte # [35 baris] Preset FAQ kotak kartu grid
+│   │   │   │   │   ├── FaqCategorizedTabs.svelte # [114 baris] Preset FAQ dengan tab kategori
+│   │   │   │   │   ├── FaqChatStyle.svelte     # [58 baris] Preset FAQ gaya balon obrolan
+│   │   │   │   │   ├── FaqGridCards.svelte     # [56 baris] Preset FAQ grid 2 kolom kartu terbuka
+│   │   │   │   │   ├── FaqHeader.svelte        # [66 baris] Header judul H2 FAQ & sub-node selection
+│   │   │   │   │   ├── FaqHelpCenter.svelte    # [57 baris] Preset FAQ gaya Help Center floating cards
+│   │   │   │   │   ├── FaqHorizontalCards.svelte # [53 baris] Preset FAQ kartu horizontal slider
 │   │   │   │   │   ├── FaqNumberedList.svelte  # [50 baris] Preset FAQ daftar bernomor 01, 02, 03
-│   │   │   │   │   ├── FaqSearchFiltered.svelte# [97 baris] Preset FAQ dengan filter pencarian real-time
-│   │   │   │   │   └── FaqSplitSidebar.svelte  # [105 baris] Preset FAQ layout split sidebar CS WhatsApp
-│   │   │   │   ├── features/
-│   │   │   │   │   ├── featureIcons.ts         # [103 baris] Helper pemetaan icon Lucide fitur
-│   │   │   │   │   ├── features.css            # [138 baris] Container queries `@container featurecard`
+│   │   │   │   │   ├── FaqSearchFiltered.svelte # [110 baris] Preset FAQ dengan filter pencarian real-time
+│   │   │   │   │   └── FaqSplitSidebar.svelte  # [140 baris] Preset FAQ layout split sidebar CS WhatsApp
+│   │   │   │   ├── features/ # Preset layout keunggulan fitur (10 preset)
+│   │   │   │   │   ├── featureIcons.ts         # [164 baris] Helper pemetaan icon Lucide fitur
+│   │   │   │   │   ├── features.css            # [188 baris] Container queries `@container featurecard`
 │   │   │   │   │   ├── features.helpers.ts     # [109 baris] Helper fallback mock data & preset features
-│   │   │   │   │   ├── FeaturesAlternatingZigzag.svelte# [127 baris] Preset fitur zigzag bergantian
-│   │   │   │   │   ├── FeaturesBannerInlineBar.svelte# [74 baris] Preset fitur pita/ribbon mendatar
-│   │   │   │   │   ├── FeaturesBentoGrid.svelte# [245 baris] Preset fitur layout bento grid asimetris
-│   │   │   │   │   ├── FeaturesComparison.svelte# [114 baris] Preset fitur tabel komparasi keunggulan
-│   │   │   │   │   ├── FeaturesDenseMatrix.svelte# [88 baris] Preset fitur matriks ikon padat 4 kolom
-│   │   │   │   │   ├── FeaturesGrid3Cards.svelte# [112 baris] Preset fitur grid 3 kartu standar
-│   │   │   │   │   ├── FeaturesHeaderTitle.svelte# [53 baris] Komponen judul heading H2 section fitur
-│   │   │   │   │   ├── FeaturesHorizontalList.svelte# [121 baris] Preset fitur daftar kartu horizontal
-│   │   │   │   │   ├── FeaturesInteractiveTabs.svelte# [160 baris] Preset fitur tab interaktif
-│   │   │   │   │   ├── FeaturesStickyScroll.svelte# [127 baris] Preset fitur scroll sticky highlight
-│   │   │   │   │   ├── FeaturesVerticalAccordion.svelte# [150 baris] Preset fitur akordeon vertikal
-│   │   │   │   │   └── index.ts                # [26 baris] Barrel export sub-komponen features
-│   │   │   │   ├── footer/
-│   │   │   │   │   ├── FooterNewsletter.svelte # [39 baris] Preset footer langganan newsletter
-│   │   │   │   │   └── FooterSocialShowcase.svelte# [27 baris] Preset footer showcase media sosial
-│   │   │   │   ├── header/
-│   │   │   │   │   ├── AnnouncementBar.svelte  # [69 baris] Baris pengumuman di atas navigasi
-│   │   │   │   │   ├── HeaderCommandSearch.svelte# [120 baris] Preset header pencarian cepat command palette
-│   │   │   │   │   ├── HeaderDeliveryOrder.svelte# [79 baris] Preset header promo kirim instan & opsi kurir
-│   │   │   │   │   ├── HeaderLogo.svelte       # [80 baris] Elemen visual logo website toko
-│   │   │   │   │   ├── HeaderMegaMenu.svelte   # [112 baris] Preset header mega menu navigasi
-│   │   │   │   │   ├── HeaderMobileDrawer.svelte# [162 baris] Drawer menu navigasi seluler dengan true overlay
-│   │   │   │   │   ├── HeaderNav.svelte        # [190 baris] Elemen menu navigasi toko
-│   │   │   │   │   ├── HeaderPillIsland.svelte # [62 baris] Preset header floating pill island
-│   │   │   │   │   ├── HeaderPromoCountdown.svelte# [124 baris] Preset header promo banner countdown flash sale
-│   │   │   │   │   └── HeaderStoreBadge.svelte # [72 baris] Preset header sorotan legalitas BPOM & Halal toko
-│   │   │   │   ├── hero/
-│   │   │   │   │   ├── hero.css                # [44 baris] Container queries `@container herocard`
-│   │   │   │   │   ├── hero.helpers.ts         # [27 baris] Helper konversi nilai pixel & padding hero
-│   │   │   │   │   ├── HeroBadgeTicker.svelte  # [85 baris] Preset hero badge ticker sertifikasi mutu & stempel
-│   │   │   │   │   ├── HeroBentoGrid.svelte    # [126 baris] Preset hero bento grid ubin visual & promo
-│   │   │   │   │   ├── HeroCenteredMinimal.svelte# [50 baris] Template hero minimalis tengah
-│   │   │   │   │   ├── HeroChatSimulation.svelte# [71 baris] Preset hero simulasi chat WhatsApp interaktif
-│   │   │   │   │   ├── HeroDualContrast.svelte # [64 baris] Preset hero duo-tone kontras kuota & pendaftaran
-│   │   │   │   │   ├── HeroDualProduct.svelte  # [99 baris] Preset hero showcase 2 kartu produk terlaris
-│   │   │   │   │   ├── HeroEditorialSerif.svelte# [86 baris] Preset hero editorial mewah tipografi serif
-│   │   │   │   │   ├── HeroElementToolbar.svelte# [94 baris] Floating toolbar elemen teks/gambar hero
-│   │   │   │   │   ├── HeroEmailCapture.svelte # [67 baris] Preset hero penangkap email prospek
-│   │   │   │   │   ├── HeroFloatingCards.svelte# [69 baris] Preset hero kartu mengambang 3D
-│   │   │   │   │   ├── HeroFounderStory.svelte # [71 baris] Preset hero kisah profil pendiri & artisan
-│   │   │   │   │   ├── HeroFullBanner.svelte   # [106 baris] Template hero latar belakang penuh
-│   │   │   │   │   ├── HeroGradientMesh.svelte # [44 baris] Preset hero gradien mesh berkilau dinamis
-│   │   │   │   │   ├── HeroHeaderContent.svelte# [127 baris] Heading H1 hero & CTA button cluster
-│   │   │   │   │   ├── HeroOversizedTypography.svelte# [99 baris] Preset hero tipografi super besar
-│   │   │   │   │   ├── HeroPillCategory.svelte # [79 baris] Preset hero pemilih kategori produk pill filter
-│   │   │   │   │   ├── HeroSideBooking.svelte  # [97 baris] Preset hero form booking janji temu samping
-│   │   │   │   │   ├── HeroSocialProof.svelte  # [81 baris] Preset hero avatar wall komunitas & ulasan rating
-│   │   │   │   │   ├── HeroSplitLayout.svelte  # [104 baris] Template hero 50/50 visual terpisah
-│   │   │   │   │   ├── HeroStatCounter.svelte  # [97 baris] Preset hero split kolom dengan 3 baris metrik angka
-│   │   │   │   │   ├── HeroStickerPlayful.svelte# [132 baris] Preset hero gaya playful stiker miring dinamis
-│   │   │   │   │   └── HeroTerminalCode.svelte # [57 baris] Preset hero gaya terminal developer
-│   │   │   │   ├── maps/
-│   │   │   │   │   ├── maps.css                # [80 baris] Container queries `@container mapscard`
-│   │   │   │   │   ├── maps.helpers.ts         # [63 baris] Helper sanitasi URL embed & navigasi Google Maps
-│   │   │   │   │   ├── MapsCardOverlay.svelte  # [95 baris] Preset maps bilah penutup bawah melayang
-│   │   │   │   │   ├── MapsCompactBoxed.svelte # [84 baris] Preset maps kotak kompak terpusat
-│   │   │   │   │   ├── MapsDirectionsGuide.svelte# [35 baris] Preset maps panduan rute & navigasi
-│   │   │   │   │   ├── MapsFloatingCard.svelte # [93 baris] Preset maps kartu alamat pojok kanan atas
-│   │   │   │   │   ├── MapsFullwidth.svelte    # [89 baris] Preset maps peta penuh kartu glassmorphism melayang
-│   │   │   │   │   ├── MapsHeader.svelte       # [49 baris] Header judul H2 maps & sub-node selection
-│   │   │   │   │   ├── MapsMinimalFramed.svelte# [60 baris] Preset maps bingkai bersih minimalis
-│   │   │   │   │   ├── MapsMultiBranch.svelte  # [128 baris] Preset maps multi-cabang outlet dengan tab interaktif
-│   │   │   │   │   ├── MapsRouteFinder.svelte  # [61 baris] Preset maps tombol rute langsung lebar penuh
-│   │   │   │   │   ├── MapsSplitInfo.svelte    # [128 baris] Preset maps 2 kolom info detail & peta
-│   │   │   │   │   ├── MapsStoreHours.svelte   # [78 baris] Preset maps penyorot jam operasional real-time
-│   │   │   │   │   └── MapsTwoColumnDirections.svelte# [112 baris] Preset maps instruksi petunjuk arah & parkir
-│   │   │   │   ├── testimonials/
-│   │   │   │   │   ├── testimonials.css        # [51 baris] Container queries `@container testicard` & marquee keyframes
-│   │   │   │   │   ├── testimonials.helpers.ts # [89 baris] Helper kalkulasi rating rata-rata & mock data
-│   │   │   │   │   ├── TestimonialsCarouselSlider.svelte# [71 baris] Preset testimoni slider carousel panah
-│   │   │   │   │   ├── TestimonialsChatBubble.svelte# [56 baris] Preset testimoni bubble chat WhatsApp
-│   │   │   │   │   ├── TestimonialsHeader.svelte# [47 baris] Header judul H2 testimoni & sub-node selection
-│   │   │   │   │   ├── TestimonialsLogoCloud.svelte# [48 baris] Preset testimoni logo client cloud
-│   │   │   │   │   ├── TestimonialsMarquee.svelte# [58 baris] Preset testimoni running text horizontal 25s
-│   │   │   │   │   ├── TestimonialsMasonryGrid.svelte# [80 baris] Preset testimoni masonry grid 3 kolom
-│   │   │   │   │   ├── TestimonialsSideBySide.svelte# [97 baris] Preset testimoni 3 kartu berdampingan
-│   │   │   │   │   ├── TestimonialsSocialCards.svelte# [87 baris] Preset testimoni kartu postingan media sosial
-│   │   │   │   │   ├── TestimonialsSplitStats.svelte# [107 baris] Preset testimoni split rating stats 4.9/5
-│   │   │   │   │   ├── TestimonialsSpotlight.svelte# [79 baris] Preset testimoni kutipan tunggal spotlight
-│   │   │   │   │   ├── TestimonialsSpotlightCarousel.svelte# [93 baris] Preset testimoni spotlight & slider
-│   │   │   │   │   └── TestimonialsVideoCards.svelte# [85 baris] Preset testimoni kartu video ulasan vertikal
-│   │   │   │   ├── FAQ.svelte                  # [80 baris] Komponen visual Frequently Asked Questions
+│   │   │   │   │   ├── FeaturesAlternatingZigzag.svelte # [165 baris] Preset fitur zigzag bergantian
+│   │   │   │   │   ├── FeaturesBannerInlineBar.svelte # [82 baris] Preset fitur pita/ribbon mendatar
+│   │   │   │   │   ├── FeaturesBentoGrid.svelte # [⚠️ mepet 300 baris - 283 baris] Preset fitur layout bento grid asimetris
+│   │   │   │   │   ├── FeaturesComparison.svelte # [129 baris] Preset fitur tabel komparasi keunggulan
+│   │   │   │   │   ├── FeaturesDenseMatrix.svelte # [92 baris] Preset fitur matriks ikon padat 4 kolom
+│   │   │   │   │   ├── FeaturesGrid3Cards.svelte # [138 baris] Preset fitur grid 3 kartu standar
+│   │   │   │   │   ├── FeaturesHeaderTitle.svelte # [56 baris] Komponen judul heading H2 section fitur
+│   │   │   │   │   ├── FeaturesHorizontalList.svelte # [147 baris] Preset fitur daftar kartu horizontal
+│   │   │   │   │   ├── FeaturesInteractiveTabs.svelte # [196 baris] Preset fitur tab interaktif
+│   │   │   │   │   ├── FeaturesStickyScroll.svelte # [151 baris] Preset fitur scroll sticky highlight
+│   │   │   │   │   ├── FeaturesVerticalAccordion.svelte # [180 baris] Preset fitur akordeon vertikal
+│   │   │   │   │   └── index.ts                # [13 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   ├── footer/ # Preset layout footer & kontak (10 preset)
+│   │   │   │   │   ├── footer.css              # [101 baris] Container queries `@container footercard` & gaya footer
+│   │   │   │   │   ├── footer.helpers.ts       # [161 baris] Helper navigasi & default data konten section footer
+│   │   │   │   │   ├── FooterBoxedCard.svelte  # [91 baris] Preset footer kartu melayang berbingkai
+│   │   │   │   │   ├── FooterCenteredSimple.svelte # [75 baris] Preset footer minimalis terpusat
+│   │   │   │   │   ├── FooterCtaFocused.svelte # [97 baris] Preset footer banner WhatsApp menonjol
+│   │   │   │   │   ├── FooterGiantWordmark.svelte # [94 baris] Preset footer tipografi wordmark raksasa
+│   │   │   │   │   ├── FooterLiveStatusBadge.svelte # [72 baris] Preset footer status operasional toko live
+│   │   │   │   │   ├── FooterMinimalSingleRow.svelte # [76 baris] Preset footer 1 baris ramping
+│   │   │   │   │   ├── FooterMultiColumn.svelte # [132 baris] Preset footer multi-kolom standar
+│   │   │   │   │   ├── FooterNewsletter.svelte # [59 baris] Preset footer langganan newsletter
+│   │   │   │   │   ├── FooterNewsletterCentric.svelte # [91 baris] Preset footer form newsletter promo
+│   │   │   │   │   ├── FooterSocialLinksGrid.svelte # [192 baris] Preset footer showcase tautan akun media sosial
+│   │   │   │   │   ├── FooterSocialShowcase.svelte # [40 baris] Preset footer showcase media sosial
+│   │   │   │   │   ├── FooterSplitMap.svelte   # [85 baris] Preset footer info toko & peta mini
+│   │   │   │   │   └── index.ts                # [12 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   ├── header/ # Preset layout header & announcement (12 preset)
+│   │   │   │   │   ├── AnnouncementBar.svelte  # [78 baris] Baris pengumuman di atas navigasi
+│   │   │   │   │   ├── HeaderCommandSearch.svelte # [132 baris] Preset header pencarian cepat command palette
+│   │   │   │   │   ├── HeaderDeliveryOrder.svelte # [89 baris] Preset header promo kirim instan & opsi kurir
+│   │   │   │   │   ├── HeaderLogo.svelte       # [91 baris] Elemen visual logo website toko
+│   │   │   │   │   ├── HeaderMegaMenu.svelte   # [126 baris] Preset header mega menu navigasi
+│   │   │   │   │   ├── HeaderMobileDrawer.svelte # [176 baris] Drawer menu navigasi seluler dengan true overlay
+│   │   │   │   │   ├── HeaderNav.svelte        # [209 baris] Elemen menu navigasi toko
+│   │   │   │   │   ├── HeaderPillIsland.svelte # [70 baris] Preset header floating pill island
+│   │   │   │   │   ├── HeaderPromoCountdown.svelte # [141 baris] Preset header promo banner countdown flash sale
+│   │   │   │   │   └── HeaderStoreBadge.svelte # [82 baris] Preset header sorotan legalitas BPOM & Halal toko
+│   │   │   │   ├── hero/ # Preset layout hero banner (22 preset)
+│   │   │   │   │   ├── hero.css                # [92 baris] Container queries `@container herocard`
+│   │   │   │   │   ├── hero.helpers.ts         # [30 baris] Helper konversi nilai pixel & padding hero
+│   │   │   │   │   ├── HeroBadgeTicker.svelte  # [66 baris] Preset hero badge ticker sertifikasi mutu & stempel
+│   │   │   │   │   ├── HeroBentoGrid.svelte    # [106 baris] Preset hero bento grid ubin visual & promo
+│   │   │   │   │   ├── HeroCenteredMinimal.svelte # [59 baris] Template hero minimalis tengah
+│   │   │   │   │   ├── HeroChatSimulation.svelte # [60 baris] Preset hero simulasi chat WhatsApp interaktif
+│   │   │   │   │   ├── HeroDualContrast.svelte # [52 baris] Preset hero duo-tone kontras kuota & pendaftaran
+│   │   │   │   │   ├── HeroDualProduct.svelte  # [79 baris] Preset hero showcase 2 kartu produk terlaris
+│   │   │   │   │   ├── HeroEditorialSerif.svelte # [77 baris] Preset hero editorial mewah tipografi serif
+│   │   │   │   │   ├── HeroElementToolbar.svelte # [102 baris] Floating toolbar elemen teks/gambar hero
+│   │   │   │   │   ├── HeroEmailCapture.svelte # [59 baris] Preset hero penangkap email prospek
+│   │   │   │   │   ├── HeroFloatingCards.svelte # [53 baris] Preset hero kartu mengambang 3D
+│   │   │   │   │   ├── HeroFounderStory.svelte # [63 baris] Preset hero kisah profil pendiri & artisan
+│   │   │   │   │   ├── HeroFullBanner.svelte   # [100 baris] Template hero latar belakang penuh
+│   │   │   │   │   ├── HeroGradientMesh.svelte # [38 baris] Preset hero gradien mesh berkilau dinamis
+│   │   │   │   │   ├── HeroHeaderContent.svelte # [115 baris] Heading H1 hero & CTA button cluster
+│   │   │   │   │   ├── HeroOversizedTypography.svelte # [94 baris] Preset hero tipografi super besar
+│   │   │   │   │   ├── HeroPillCategory.svelte # [77 baris] Preset hero pemilih kategori produk pill filter
+│   │   │   │   │   ├── HeroSideBooking.svelte  # [94 baris] Preset hero form booking janji temu samping
+│   │   │   │   │   ├── HeroSocialProof.svelte  # [67 baris] Preset hero avatar wall komunitas & ulasan rating
+│   │   │   │   │   ├── HeroSplitLayout.svelte  # [114 baris] Template hero 50/50 visual terpisah
+│   │   │   │   │   ├── HeroStatCounter.svelte  # [86 baris] Preset hero split kolom dengan 3 baris metrik angka
+│   │   │   │   │   ├── HeroStickerPlayful.svelte # [113 baris] Preset hero gaya playful stiker miring dinamis
+│   │   │   │   │   └── HeroTerminalCode.svelte # [53 baris] Preset hero gaya terminal developer
+│   │   │   │   ├── maps/ # Preset layout Google Maps lokasi (10 preset)
+│   │   │   │   │   ├── maps.css                # [85 baris] Container queries `@container mapscard`
+│   │   │   │   │   ├── maps.helpers.ts         # [69 baris] Helper sanitasi URL embed & navigasi Google Maps
+│   │   │   │   │   ├── MapsCardOverlay.svelte  # [93 baris] Preset maps bilah penutup bawah melayang
+│   │   │   │   │   ├── MapsCompactBoxed.svelte # [93 baris] Preset maps kotak kompak terpusat
+│   │   │   │   │   ├── MapsDirectionsGuide.svelte # [65 baris] Preset maps panduan rute & navigasi
+│   │   │   │   │   ├── MapsFloatingCard.svelte # [102 baris] Preset maps kartu alamat pojok kanan atas
+│   │   │   │   │   ├── MapsFullwidth.svelte    # [100 baris] Preset maps peta penuh kartu glassmorphism melayang
+│   │   │   │   │   ├── MapsHeader.svelte       # [64 baris] Header judul H2 maps & sub-node selection
+│   │   │   │   │   ├── MapsMinimalFramed.svelte # [73 baris] Preset maps bingkai bersih minimalis
+│   │   │   │   │   ├── MapsMultiBranch.svelte  # [130 baris] Preset maps multi-cabang outlet dengan tab interaktif
+│   │   │   │   │   ├── MapsRouteFinder.svelte  # [64 baris] Preset maps tombol rute langsung lebar penuh
+│   │   │   │   │   ├── MapsSplitInfo.svelte    # [129 baris] Preset maps 2 kolom info detail & peta
+│   │   │   │   │   ├── MapsStoreHours.svelte   # [85 baris] Preset maps penyorot jam operasional real-time
+│   │   │   │   │   └── MapsTwoColumnDirections.svelte # [127 baris] Preset maps instruksi petunjuk arah & parkir
+│   │   │   │   ├── testimonials/ # Preset layout testimoni ulasan (10 preset)
+│   │   │   │   │   ├── testimonials.css        # [94 baris] Container queries `@container testicard` & marquee keyframes
+│   │   │   │   │   ├── testimonials.helpers.ts # [110 baris] Helper kalkulasi rating rata-rata & mock data
+│   │   │   │   │   ├── TestimonialsCarouselSlider.svelte # [83 baris] Preset testimoni slider carousel panah
+│   │   │   │   │   ├── TestimonialsChatBubble.svelte # [54 baris] Preset testimoni bubble chat WhatsApp
+│   │   │   │   │   ├── TestimonialsHeader.svelte # [57 baris] Header judul H2 testimoni & sub-node selection
+│   │   │   │   │   ├── TestimonialsLogoCloud.svelte # [45 baris] Preset testimoni logo client cloud
+│   │   │   │   │   ├── TestimonialsMarquee.svelte # [54 baris] Preset testimoni running text horizontal 25s
+│   │   │   │   │   ├── TestimonialsMasonryGrid.svelte # [81 baris] Preset testimoni masonry grid 3 kolom
+│   │   │   │   │   ├── TestimonialsSideBySide.svelte # [88 baris] Preset testimoni 3 kartu berdampingan
+│   │   │   │   │   ├── TestimonialsSocialCards.svelte # [91 baris] Preset testimoni kartu postingan media sosial
+│   │   │   │   │   ├── TestimonialsSplitStats.svelte # [113 baris] Preset testimoni split rating stats 4.9/5
+│   │   │   │   │   ├── TestimonialsSpotlight.svelte # [83 baris] Preset testimoni kutipan tunggal spotlight
+│   │   │   │   │   ├── TestimonialsSpotlightCarousel.svelte # [93 baris] Preset testimoni spotlight & slider
+│   │   │   │   │   └── TestimonialsVideoCards.svelte # [78 baris] Preset testimoni kartu video ulasan vertikal
+│   │   │   │   ├── FAQ.svelte                  # [85 baris] Komponen visual Frequently Asked Questions
 │   │   │   │   ├── Features.svelte             # [178 baris] Komponen visual daftar keunggulan/layanan
-│   │   │   │   ├── Footer.svelte               # [165 baris] Footer publik website toko tenant
-│   │   │   │   ├── GoogleMaps.svelte           # [178 baris] Komponen visual embed lokasi Google Maps
-│   │   │   │   ├── HeaderAnnouncement.svelte   # [⚠️ mepet 300 baris - 299 baris] Komponen visual announcement bar
+│   │   │   │   ├── Footer.svelte               # [241 baris] Footer publik website toko tenant
+│   │   │   │   ├── GoogleMaps.svelte           # [168 baris] Komponen visual embed lokasi Google Maps
+│   │   │   │   ├── HeaderAnnouncement.svelte   # [⚠️ >300 baris - 324 baris] Komponen visual announcement bar
 │   │   │   │   ├── Hero.svelte                 # [⚠️ >300 baris - 418 baris] Banner hero publik website toko tenant
-│   │   │   │   ├── productCatalog.helpers.ts   # [102 baris] Helper load data produk toko & format rupiah
-│   │   │   │   ├── ProductCatalog.svelte       # [170 baris] Komponen visual daftar katalog produk
-│   │   │   │   ├── SectionRenderer.svelte      # [166 baris] Renderer block layout editor no-code
+│   │   │   │   ├── productCatalog.helpers.ts   # [106 baris] Helper load data produk toko & format rupiah
+│   │   │   │   ├── ProductCatalog.svelte       # [197 baris] Komponen visual daftar katalog produk
+│   │   │   │   ├── SectionRenderer.svelte      # [168 baris] Renderer block layout editor no-code
 │   │   │   │   └── Testimonials.svelte         # [71 baris] Komponen visual ulasan/testimoni pelanggan
-│   │   │   ├── stores/
+│   │   │   ├── stores/ # Store state Svelte manajemen editor builder
 │   │   │   │   ├── canvasStore.ts              # [117 baris] Svelte store state kanvas & grid guides
-│   │   │   │   ├── documentStore.actions.ts    # [193 baris] Action mutator dokumen & riwayat undo/redo
+│   │   │   │   ├── documentStore.actions.ts    # [211 baris] Action mutator dokumen & riwayat undo/redo
 │   │   │   │   ├── documentStore.ts            # [⚠️ mepet 300 baris - 298 baris] Svelte store template dokumen, preset, & tokens
 │   │   │   │   ├── editorStore.mutations.ts    # [193 baris] Operasi mutasi state no-code (save, update)
 │   │   │   │   ├── editorStore.ts              # [32 baris] Svelte writable store state builder editor
 │   │   │   │   └── editorStore.types.ts        # [76 baris] Tipe TypeScript state editor builder
-│   │   │   ├── template-form/
+│   │   │   ├── template-form/ # Komponen wizard draf pembuatan template
 │   │   │   │   ├── TemplateBasicDetails.svelte # [84 baris] Input nama, kategori, & thumbnail draf
 │   │   │   │   ├── TemplateCardPreview.svelte  # [104 baris] Mockup kartu preview live draf template
-│   │   │   │   └── TemplatePricingSimulator.svelte# [100 baris] Simulator split harga & fee komisi
-│   │   │   ├── topbar/
-│   │   │   │   └── TopBarViewportControls.svelte# [90 baris] Kontrol viewport breakpoint & zoom editor
-│   │   │   ├── BuilderEditor.svelte            # [219 baris] Halaman utama editor visual no-code builder
-│   │   │   ├── Canvas.svelte                   # [⚠️ mepet 300 baris - 253 baris] Lembar kerja visual kanvas editor builder
+│   │   │   │   └── TemplatePricingSimulator.svelte # [100 baris] Simulator split harga & fee komisi
+│   │   │   ├── topbar/ # Bar atas kontrol viewport, grid, & zoom
+│   │   │   │   └── TopBarViewportControls.svelte # [90 baris] Kontrol viewport breakpoint & zoom editor
+│   │   │   ├── BuilderEditor.svelte            # [221 baris] Halaman utama editor visual no-code builder
+│   │   │   ├── Canvas.svelte                   # [⚠️ mepet 300 baris - 262 baris] Lembar kerja visual kanvas editor builder
 │   │   │   ├── ContentTab.svelte               # [16 baris] Tab pengisian teks & gambar konten node
 │   │   │   ├── LayerPanel.svelte               # [120 baris] Panel pohon layer hirarki section template
-│   │   │   ├── LayoutGridOverlay.svelte        # [57 baris] Overlay panduan kolom Figma 12/8/4 & pixel grid
+│   │   │   ├── LayoutGridOverlay.svelte        # [61 baris] Overlay panduan kolom Figma 12/8/4 & pixel grid
 │   │   │   ├── NewTemplateForm.svelte          # [239 baris] Form pembuatan template draft desainer
 │   │   │   ├── NodeStylesTab.svelte            # [246 baris] Tab kustomisasi spesifik style per node
-│   │   │   ├── PropertyInspector.svelte        # [201 baris] Panel samping inspection properti node & tema
-│   │   │   ├── ReadOnlyPreview.svelte          # [246 baris] Pratinjau baca-saja live template
+│   │   │   ├── PropertyInspector.svelte        # [213 baris] Panel samping inspection properti node & tema
+│   │   │   ├── ReadOnlyPreview.svelte          # [240 baris] Pratinjau baca-saja live template
 │   │   │   ├── StylesTab.svelte                # [18 baris] Tab helper navigasi styles
 │   │   │   ├── SubmitReviewModal.svelte        # [220 baris] Modal pengajuan review template ke admin
 │   │   │   └── TopBar.svelte                   # [152 baris] Bar atas editor (undo, redo, zoom, breakpoint)
-│   │   ├── checkout/
+│   │   ├── checkout/ # Komponen halaman pembayaran & checkout e-invoice
 │   │   │   ├── CheckoutItemDetails.svelte      # [129 baris] Rincian item produk template checkout
 │   │   │   ├── CheckoutPaymentBreakdown.svelte # [135 baris] Rincian perhitungan total tagihan & admin fee
 │   │   │   ├── CheckoutSummaryCard.svelte      # [114 baris] Ringkasan detail tagihan checkout invoice
 │   │   │   ├── PaymentModal.svelte             # [65 baris] Modal pembayaran invoice Xendit
 │   │   │   └── TransactionStatus.svelte        # [81 baris] Status tagihan invoice (polling & status badge)
-│   │   ├── common/
+│   │   ├── common/ # Komponen navigasi & shell layout umum
 │   │   │   ├── Navbar.astro                    # [23 baris] Navigasi utama header base layout
 │   │   │   ├── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
 │   │   │   └── ThemeToggle.astro               # [37 baris] Tombol pengubah dark mode / light mode
-│   │   ├── dashboard/
-│   │   │   ├── category/
-│   │   │   │   ├── TenantCategoryDeleteModal.svelte# [41 baris] Modal konfirmasi hapus kategori tenant
-│   │   │   │   └── TenantCategoryFormModal.svelte# [52 baris] Modal form tambah & edit kategori tenant
-│   │   │   ├── navbar/
+│   │   ├── dashboard/ # Komponen dashboard manajemen tenant
+│   │   │   ├── category/ # Pengelola master kategori template
+│   │   │   │   ├── TenantCategoryDeleteModal.svelte # [41 baris] Modal konfirmasi hapus kategori tenant
+│   │   │   │   └── TenantCategoryFormModal.svelte # [52 baris] Modal form tambah & edit kategori tenant
+│   │   │   ├── navbar/ # Komponen navigasi dashboard tenant
 │   │   │   │   └── NavbarUserMenu.svelte       # [133 baris] Dropdown profil & opsi logout navbar
-│   │   │   ├── orders/
+│   │   │   ├── orders/ # Komponen riwayat pesanan dashboard
 │   │   │   │   └── TenantOrderRow.svelte       # [117 baris] Baris riwayat transaksi pesanan tenant
-│   │   │   ├── sidebar/
+│   │   │   ├── sidebar/ # Komponen navigasi samping dashboard tenant
 │   │   │   │   ├── sidebar.helpers.ts          # [170 baris] Helper navigasi sidebar dashboard
 │   │   │   │   ├── SidebarDesktop.svelte       # [195 baris] Sidebar dashboard versi layar desktop
 │   │   │   │   ├── SidebarMobile.svelte        # [178 baris] Drawer sidebar dashboard versi mobile
@@ -344,57 +379,59 @@ umkm-site-builder/
 │   │   │   ├── CategoryManager.svelte          # [⚠️ mepet 300 baris - 258 baris] Pengelola CRUD kategori produk tenant
 │   │   │   ├── ConfirmTemplateModal.svelte     # [82 baris] Modal konfirmasi penerapan template toko
 │   │   │   ├── DashboardNavbar.svelte          # [176 baris] Navigasi panel dashboard tenant
+│   │   │   ├── IncompleteDataWarning.svelte    # [11 baris] Banner peringatan kelengkapan data profil toko
 │   │   │   ├── OrderHistoryTable.svelte        # [228 baris] Tabel riwayat pesanan/transaksi tenant
 │   │   │   ├── Sidebar.svelte                  # [57 baris] Menu navigasi sidebar panel tenant
-│   │   │   ├── StoreSettingsForm.svelte        # [213 baris] Konfigurasi WhatsApp, Google Maps, & profil toko
+│   │   │   ├── StoreSettingsForm.svelte        # [⚠️ mepet 300 baris - 270 baris] Konfigurasi WhatsApp, Google Maps, & profil toko
 │   │   │   ├── TemplateGallery.svelte          # [243 baris] Galeri pilihan template desain toko
-│   │   │   └── TrafficWidget.svelte            # [96 baris] Widget statistik trafik kunjungan storefront
-│   │   ├── designer/
-│   │   │   ├── orders/
+│   │   │   └── TrafficWidget.svelte            # [97 baris] Widget statistik trafik kunjungan storefront
+│   │   ├── designer/ # Komponen dashboard desainer template
+│   │   │   ├── orders/ # Komponen riwayat pesanan dashboard
 │   │   │   │   └── DesignerOrderRow.svelte     # [100 baris] Baris tabel pesanan template desainer
-│   │   │   ├── templates/
-│   │   │   │   ├── DesignerDeleteDraftModal.svelte# [80 baris] Modal validasi hard delete draf template desainer
-│   │   │   │   ├── DesignerRejectionModal.svelte# [46 baris] Modal alasan penolakan template desainer
-│   │   │   │   └── DesignerTemplateRow.svelte  # [160 baris] Baris data tabel kelola template desainer
-│   │   │   ├── wallet/
-│   │   │   │   ├── DesignerWeeklyChart.svelte  # [105 baris] Grafik tren pendapatan mingguan desainer
-│   │   │   │   └── wallet.helpers.ts           # [78 baris] Helper kalkulasi saldo & mutasi dompet
-│   │   │   ├── DesignerBankCard.svelte         # [174 baris] Kartu info rekening bank terhubung desainer
+│   │   │   ├── templates/ # Komponen manajemen template desainer
+│   │   │   │   ├── DesignerDeleteDraftModal.svelte # [84 baris] Modal validasi hard delete draf template desainer
+│   │   │   │   ├── DesignerRejectionModal.svelte # [46 baris] Modal alasan penolakan template desainer
+│   │   │   │   └── DesignerTemplateRow.svelte  # [164 baris] Baris data tabel kelola template desainer
+│   │   │   ├── wallet/ # Komponen dompet & mutasi saldo desainer
+│   │   │   │   ├── DesignerWeeklyChart.svelte  # [123 baris] Grafik tren pendapatan mingguan desainer
+│   │   │   │   └── wallet.helpers.ts           # [44 baris] Helper kalkulasi saldo & mutasi dompet
+│   │   │   ├── DesignerBankCard.svelte         # [181 baris] Kartu info rekening bank terhubung desainer
 │   │   │   ├── DesignerBankModal.svelte        # [107 baris] Modal data rekening bank desainer
-│   │   │   ├── DesignerBankWithdraw.svelte     # [⚠️ mepet 300 baris - 294 baris] Form rekening bank & modal payout desainer
+│   │   │   ├── DesignerBankWithdraw.svelte     # [⚠️ mepet 300 baris - 284 baris] Form rekening bank & modal payout desainer
 │   │   │   ├── DesignerMutationTable.svelte    # [214 baris] Tabel daftar mutasi keuangan desainer
 │   │   │   ├── DesignerOrdersTable.svelte      # [236 baris] Tabel pesanan masuk dari tenant untuk desainer
-│   │   │   ├── DesignerPayoutHistoryTable.svelte# [224 baris] Tabel riwayat payout desainer
+│   │   │   ├── DesignerPayoutHistoryTable.svelte # [224 baris] Tabel riwayat payout desainer
 │   │   │   ├── DesignerStatCards.svelte        # [94 baris] Ringkasan balance, komisi, & template terjual
-│   │   │   ├── DesignerTemplateCard.svelte     # [186 baris] Kartu template buatan desainer (status review)
-│   │   │   ├── DesignerTemplateTable.svelte    # [237 baris] Tabel kelola template desainer
-│   │   │   ├── DesignerWalletOverview.svelte   # [92 baris] Ringkasan dompet desainer & tombol withdraw
+│   │   │   ├── DesignerTemplateCard.svelte     # [213 baris] Kartu template buatan desainer (status review)
+│   │   │   ├── DesignerTemplateTable.svelte    # [⚠️ >300 baris - 410 baris] Tabel kelola template desainer
+│   │   │   ├── DesignerWalletOverview.svelte   # [94 baris] Ringkasan dompet desainer & tombol withdraw
 │   │   │   └── DesignerWithdrawModal.svelte    # [174 baris] Modal konfirmasi withdraw desainer
-│   │   ├── onboarding/
-│   │   │   ├── wizard/
-│   │   │   │   ├── OnboardingStepStoreInfo.svelte# [97 baris] Step form nama toko & kontak
-│   │   │   │   ├── OnboardingStepSubdomain.svelte# [76 baris] Step form pemilihan subdomain
-│   │   │   │   └── OnboardingStepSuccess.svelte# [32 baris] Step sukses inisialisasi onboarding
-│   │   │   └── OnboardingWizard.svelte         # [235 baris] Form inisialisasi subdomain & toko baru tenant
-│   │   ├── public/
+│   │   ├── onboarding/ # Komponen wizard onboarding toko tenant
+│   │   │   ├── wizard/ # Step form wizard pendaftaran toko baru
+│   │   │   │   ├── OnboardingStepStoreInfo.svelte # [97 baris] Step form nama toko & kontak
+│   │   │   │   ├── OnboardingStepSubdomain.svelte # [101 baris] Step form pemilihan subdomain
+│   │   │   │   └── OnboardingStepSuccess.svelte # [32 baris] Step status sukses inisialisasi toko
+│   │   │   └── OnboardingWizard.svelte         # [⚠️ >300 baris - 311 baris] Form inisialisasi subdomain & toko baru tenant
+│   │   ├── public/ # Aset statis (gambar, font, logo)
 │   │   │   ├── marketplace/
 │   │   │   │   ├── marketplace.helpers.ts      # [58 baris] Helper filter & pengurutan pasar template
 │   │   │   │   ├── MarketplaceCard.svelte      # [119 baris] Kartu template visual marketplace
 │   │   │   │   └── MarketplaceFilterBar.svelte # [124 baris] Toolbar filter kategori & harga
 │   │   │   ├── marketplace.types.ts            # [23 baris] Tipe data catalog template marketplace
-│   │   │   ├── PublicTemplateMarketplace.svelte# [199 baris] Pasar katalog template interaktif
-│   │   │   ├── StoreDirectory.svelte           # [199 baris] Direktori daftar pencarian toko UMKM publik
+│   │   │   ├── PublicTemplateMarketplace.svelte # [199 baris] Pasar katalog template interaktif
+│   │   │   ├── StoreDirectory.svelte           # [⚠️ mepet 300 baris - 250 baris] Direktori daftar pencarian toko UMKM publik
 │   │   │   └── TemplateCardAction.svelte       # [100 baris] Kartu katalog template dengan tombol beli & demo
-│   │   ├── shared/
+│   │   ├── shared/ # Komponen bersama lintas peran pengguna
 │   │   │   └── ImageUpload.svelte              # [⚠️ >300 baris - 312 baris] Pengunggah gambar terintegrasi Cloudinary API
-│   │   ├── storefront/
+│   │   ├── storefront/ # Komponen rendering toko storefront tenant
 │   │   │   ├── DynamicSection.svelte           # [41 baris] Komponen rendering section dinamis storefront
 │   │   │   ├── Footer.svelte                   # [10 baris] Footer publik website toko tenant
 │   │   │   ├── Hero.svelte                     # [18 baris] Banner hero publik website toko tenant
-│   │   │   ├── ProductGrid.svelte              # [104 baris] Grid daftar produk di storefront
-│   │   │   └── PromoBanner.svelte              # [11 baris] Banner promosi publik website toko tenant
-│   │   ├── tenant/
-│   │   │   ├── product/
+│   │   │   ├── ProductGrid.svelte              # [⚠️ mepet 300 baris - 295 baris] Grid daftar produk di storefront
+│   │   │   ├── PromoBanner.svelte              # [11 baris] Banner promosi publik website toko tenant
+│   │   │   └── StoreStatusBanner.svelte        # [30 baris] Banner status operasional toko storefront tenant
+│   │   ├── tenant/ # Komponen manajemen operasional tenant
+│   │   │   ├── product/ # Komponen input data & varian produk dagangan
 │   │   │   │   ├── ProductBasicFields.svelte   # [58 baris] Form field dasar produk (nama, harga, kategori)
 │   │   │   │   ├── productForm.helpers.ts      # [56 baris] Helper serialisasi & validasi form produk
 │   │   │   │   └── ProductVariantEditor.svelte # [155 baris] Pengelola grup & opsi varian produk
@@ -402,8 +439,8 @@ umkm-site-builder/
 │   │   │   ├── ProductFormModal.svelte         # [⚠️ mepet 300 baris - 283 baris] Modal tambah/edit data produk toko
 │   │   │   ├── ProductTable.svelte             # [⚠️ >300 baris - 335 baris] Tabel daftar produk dagangan tenant
 │   │   │   ├── ProductTableRow.svelte          # [101 baris] Baris data produk toko tenant
-│   │   │   └── StoreManager.svelte             # [245 baris] Panel monitoring penjualan tenant
-│   │   ├── tokens/
+│   │   │   └── StoreManager.svelte             # [248 baris] Panel monitoring penjualan tenant
+│   │   ├── tokens/ # Definisi token warna, tipografi, & radius
 │   │   │   ├── animations.ts                   # [41 baris] Token durasi & kurva easing transisi
 │   │   │   ├── colors.ts                       # [129 baris] Token warna primer, sekunder, & netral
 │   │   │   ├── index.ts                        # [12 baris] Registri sentral modularisasi modul section builder
@@ -411,186 +448,186 @@ umkm-site-builder/
 │   │   │   ├── shadows.ts                      # [23 baris] Token elevasi bayangan shadow box
 │   │   │   ├── spacing.ts                      # [42 baris] Token grid 8pt layout spacing
 │   │   │   └── typography.ts                   # [73 baris] Token scale & font-family Golden Ratio
-│   │   └── ui/
+│   │   └── ui/ # Komponen design system dasar modular
 │   │       ├── Badge.svelte                    # [57 baris] Komponen badge info status visual
 │   │       ├── Button.svelte                   # [123 baris] Komponen tombol interaktif modular
 │   │       ├── Card.svelte                     # [72 baris] Komponen pembungkus kartu visual
 │   │       ├── index.ts                        # [17 baris] Registri sentral modularisasi modul section builder
 │   │       ├── Input.svelte                    # [186 baris] Komponen kolom isian teks input
-│   │       ├── Modal.svelte                    # [141 baris] Komponen popup modal dialog
+│   │       ├── Modal.svelte                    # [167 baris] Komponen popup modal dialog
 │   │       ├── Pagination.svelte               # [103 baris] Komponen paginasi kontrol halaman data
+│   │       ├── RateLimitAlert.svelte           # [33 baris] Alert notifikasi pembatasan laju request (rate limit)
 │   │       ├── Select.svelte                   # [126 baris] Komponen dropdown select pilihan
 │   │       ├── StatCard.svelte                 # [118 baris] Komponen card ringkasan statistik modular
 │   │       ├── Table.svelte                    # [57 baris] Komponen tabel tabular modular
 │   │       ├── Textarea.svelte                 # [106 baris] Komponen kolom input text area
 │   │       ├── ToastContainer.svelte           # [123 baris] Kontainer notifikasi toast mengambang
 │   │       └── WhatsAppIcon.svelte             # [18 baris] Ikon WhatsApp SVG modular
-│   ├── db/
+│   ├── db/ # Konfigurasi koneksi & skema database Drizzle
 │   │   ├── index.ts                            # [28 baris] Registri sentral modularisasi modul section builder
 │   │   ├── schema.ts                           # [⚠️ >300 baris - 440 baris] Skema relasi database & tabel SaaS Drizzle
 │   │   └── seed.ts                             # [127 baris] Script seeding data demo database
-│   ├── layouts/
-│   │   ├── BaseLayout.astro                    # [49 baris] Layout dasar halaman publik web
+│   ├── layouts/ # Layout dasar pembungkus halaman Astro
+│   │   ├── BaseLayout.astro                    # [51 baris] Layout dasar halaman publik web
 │   │   ├── DashboardLayout.astro               # [63 baris] Layout terproteksi admin/tenant/designer
-│   │   └── StorefrontLayout.astro              # [25 baris] Layout storefront khusus tenant (subdomain)
-│   ├── lib/
-│   │   ├── auth/
-│   │   │   └── .gitkeep                        # [1 baris] Modul pendukung
-│   │   ├── config/
+│   │   └── StorefrontLayout.astro              # [38 baris] Layout storefront khusus tenant (subdomain)
+│   ├── lib/ # Pustaka fungsi utilitas, auth, & integrasi pihak ke-3
+│   │   ├── config/ # Konstanta konfigurasi aplikasi SaaS
 │   │   │   └── app.ts                          # [61 baris] Konfigurasi konstanta platform & branding
-│   │   ├── db/
+│   │   ├── db/ # Konfigurasi koneksi & skema database Drizzle
 │   │   │   └── client.ts                       # [33 baris] Klien database siap pakai
-│   │   ├── errors/
-│   │   │   └── .gitkeep                        # [1 baris] Modul pendukung
-│   │   ├── finance/
+│   │   ├── finance/ # Integrasi e-invoice & penarikan dana Xendit
 │   │   │   ├── index.ts                        # [5 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── xendit.ts                       # [192 baris] Integrasi SDK e-invoice & payout Xendit
-│   │   ├── routes/
-│   │   │   └── .gitkeep                        # [1 baris] Modul pendukung
-│   │   ├── routing/
+│   │   ├── routing/ # Utilitas routing & multitenancy subdomain
 │   │   │   └── subdomain.ts                    # [29 baris] Utilitas parsing & ekstraksi subdomain multitenancy
-│   │   ├── stores/
-│   │   │   └── schemas.ts                      # [29 baris] Skema validasi state svelte store
-│   │   ├── templates/
+│   │   ├── stores/ # Store state Svelte manajemen editor builder
+│   │   │   └── schemas.ts                      # [34 baris] Skema validasi state svelte store
+│   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   ├── index.ts                        # [5 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── migration.ts                    # [202 baris] Logika pipeline migrasi skema template
-│   │   ├── utils/
+│   │   ├── utils/ # Kumpulan fungsi pembantu (helper utilities)
 │   │   │   ├── api-handler.ts                  # [76 baris] Pembungkus standar API route handler
 │   │   │   ├── designMath.ts                   # [35 baris] Utilitas rumus radius & Golden Ratio
 │   │   │   ├── email.ts                        # [48 baris] Utilitas template pengiriman email notifikasi
 │   │   │   ├── format.ts                       # [35 baris] Fungsi formatter mata uang IDR & waktu
 │   │   │   ├── index.ts                        # [7 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── logger.ts                       # [24 baris] Logger console terstandar
+│   │   │   ├── rate-limiter.ts                 # [67 baris] Utilitas pembatas laju request (rate limiter in-memory)
 │   │   │   └── validation.ts                   # [20 baris] Utilitas validator skema Zod
-│   │   ├── validators/
+│   │   ├── validators/ # Validasi Zod form input & subdomain
 │   │   │   └── subdomain.ts                    # [28 baris] Utilitas parsing & ekstraksi subdomain multitenancy
 │   │   ├── auth-client.ts                      # [9 baris] Klien inisialisasi auth BetterAuth (frontend)
-│   │   ├── auth.ts                             # [⚠️ mepet 300 baris - 260 baris] Konfigurasi server BetterAuth & database adapter
+│   │   ├── auth.ts                             # [⚠️ mepet 300 baris - 262 baris] Konfigurasi server BetterAuth & database adapter
 │   │   ├── cloudinary.ts                       # [142 baris] Pembantu upload gambar aman ke Cloudinary
 │   │   ├── currency.ts                         # [24 baris] Utilitas manipulasi nilai rupiah
 │   │   ├── toast.ts                            # [71 baris] State store penampil alert notifikasi melayang
-│   │   └── whatsapp.ts                         # [27 baris] Utilitas generator URL chat WhatsApp
-│   ├── pages/
-│   │   ├── admin/
-│   │   │   ├── settings/
+│   │   └── whatsapp.ts                         # [39 baris] Utilitas generator URL chat WhatsApp
+│   ├── pages/ # Rute halaman aplikasi Astro & endpoint API
+│   │   ├── admin/ # Komponen panel administrasi platform
+│   │   │   ├── settings/ # Halaman konfigurasi platform admin
 │   │   │   │   └── index.astro                 # [47 baris] Modul pendukung
-│   │   │   ├── template-categories/
+│   │   │   ├── template-categories/ # Halaman master kategori template
 │   │   │   │   └── index.astro                 # [100 baris] Modul pendukung
-│   │   │   ├── templates/
+│   │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   │   └── index.astro                 # [119 baris] Modul pendukung
-│   │   │   ├── users/
+│   │   │   ├── users/ # Halaman manajemen data user admin
 │   │   │   │   └── index.astro                 # [21 baris] Modul pendukung
-│   │   │   └── whitelist/
-│   │   │       └── index.astro                 # [21 baris] Modul pendukung
-│   │   ├── api/
-│   │   │   ├── admin/
-│   │   │   │   ├── media/
+│   │   │   ├── whitelist/ # Komponen whitelist email Google Auth admin
+│   │   │   │   └── index.astro                 # [21 baris] Modul pendukung
+│   │   │   └── index.astro                     # [42 baris] Modul pendukung
+│   │   ├── api/ # Endpoint HTTP API backend serverless
+│   │   │   ├── admin/ # Komponen panel administrasi platform
+│   │   │   │   ├── media/ # Endpoint integrasi manajemen media Cloudinary
 │   │   │   │   │   └── cleanup.ts              # [39 baris] Modul pendukung
-│   │   │   │   ├── settings/
+│   │   │   │   ├── settings/ # Halaman konfigurasi platform admin
 │   │   │   │   │   └── commission.ts           # [48 baris] Tipe skema bagi hasil komisi
-│   │   │   │   ├── template-categories/
+│   │   │   │   ├── template-categories/ # Halaman master kategori template
 │   │   │   │   │   ├── [id].ts                 # [46 baris] Modul pendukung
 │   │   │   │   │   └── index.ts                # [36 baris] Registri sentral modularisasi modul section builder
-│   │   │   │   ├── templates/
+│   │   │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   │   │   ├── [id]/
 │   │   │   │   │   │   └── review.ts           # [36 baris] Modul pendukung
 │   │   │   │   │   └── index.ts                # [21 baris] Registri sentral modularisasi modul section builder
-│   │   │   │   ├── users/
+│   │   │   │   ├── users/ # Halaman manajemen data user admin
 │   │   │   │   │   ├── [userId]/
 │   │   │   │   │   │   └── status.ts           # [57 baris] Modul pendukung
-│   │   │   │   │   └── index.ts                # [31 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   │   ├── index.ts                # [31 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   │   └── register.ts             # [55 baris] Modul pendukung
+│   │   │   │   ├── metrics.ts                  # [95 baris] Modul pendukung
 │   │   │   │   └── whitelist.ts                # [125 baris] Modul pendukung
-│   │   │   ├── analytics/
+│   │   │   ├── analytics/ # Endpoint pelacakan metrik trafik
 │   │   │   │   └── track.ts                    # [24 baris] Modul pendukung
-│   │   │   ├── auth/
+│   │   │   ├── auth/ # Komponen form otentikasi & login pengguna
 │   │   │   │   ├── [...all].ts                 # [22 baris] Modul pendukung
 │   │   │   │   ├── check-email.ts              # [30 baris] Modul pendukung
 │   │   │   │   ├── error.ts                    # [14 baris] Modul pendukung
 │   │   │   │   └── reset-password.ts           # [42 baris] Modul pendukung
-│   │   │   ├── builder/
+│   │   │   ├── builder/ # Komponen visual no-code builder template
 │   │   │   │   └── save.ts                     # [30 baris] Modul pendukung
 │   │   │   ├── categories/
 │   │   │   │   └── index.ts                    # [125 baris] Registri sentral modularisasi modul section builder
-│   │   │   ├── designer/
+│   │   │   ├── designer/ # Komponen dashboard desainer template
 │   │   │   │   ├── payout/
 │   │   │   │   │   └── status.ts               # [43 baris] Modul pendukung
-│   │   │   │   ├── templates/
-│   │   │   │   │   ├── draft.ts                # [124 baris] Modul pendukung
+│   │   │   │   ├── templates/ # Komponen manajemen template desainer
+│   │   │   │   │   ├── draft.ts                # [133 baris] Modul pendukung
 │   │   │   │   │   └── submit-review.ts        # [28 baris] Modul pendukung
 │   │   │   │   ├── bank-account.ts             # [84 baris] Modul pendukung
 │   │   │   │   └── payout.ts                   # [145 baris] Modul pendukung
-│   │   │   ├── directory/
-│   │   │   │   └── search.ts                   # [108 baris] Modul pendukung
-│   │   │   ├── media/
+│   │   │   ├── directory/ # Endpoint pencarian direktori toko publik
+│   │   │   │   └── search.ts                   # [117 baris] Modul pendukung
+│   │   │   ├── media/ # Endpoint integrasi manajemen media Cloudinary
 │   │   │   │   ├── delete.ts                   # [33 baris] Modul pendukung
 │   │   │   │   └── sign.ts                     # [59 baris] Modul pendukung
-│   │   │   ├── products/
+│   │   │   ├── products/ # Endpoint CRUD produk toko tenant
 │   │   │   │   ├── [id]/
 │   │   │   │   │   ├── stock.ts                # [47 baris] Modul pendukung
 │   │   │   │   │   └── variants.ts             # [147 baris] Modul pendukung
 │   │   │   │   ├── [id].ts                     # [107 baris] Modul pendukung
 │   │   │   │   └── index.ts                    # [106 baris] Registri sentral modularisasi modul section builder
-│   │   │   ├── public/
-│   │   │   │   ├── template-categories/
+│   │   │   ├── public/ # Aset statis (gambar, font, logo)
+│   │   │   │   ├── template-categories/ # Halaman master kategori template
 │   │   │   │   │   └── index.ts                # [11 baris] Registri sentral modularisasi modul section builder
-│   │   │   │   ├── templates/
+│   │   │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   │   │   └── index.ts                # [15 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   ├── transactions/
 │   │   │   │   │   └── status/
 │   │   │   │   │       └── [invoiceId].ts      # [36 baris] Modul pendukung
 │   │   │   │   └── commission.ts               # [20 baris] Tipe skema bagi hasil komisi
-│   │   │   ├── storefront/
+│   │   │   ├── storefront/ # Komponen rendering toko storefront tenant
 │   │   │   │   └── catalog.ts                  # [50 baris] Modul pendukung
-│   │   │   ├── stores/
+│   │   │   ├── stores/ # Store state Svelte manajemen editor builder
 │   │   │   │   ├── [storeId]/
 │   │   │   │   │   ├── apply-template.ts       # [54 baris] Modul pendukung
 │   │   │   │   │   └── products.ts             # [91 baris] Modul pendukung
 │   │   │   │   ├── check-subdomain.ts          # [51 baris] Modul pendukung
-│   │   │   │   ├── onboard.ts                  # [113 baris] Modul pendukung
+│   │   │   │   ├── onboard.ts                  # [114 baris] Modul pendukung
 │   │   │   │   ├── register-subdomain.ts       # [111 baris] Modul pendukung
-│   │   │   │   └── settings.ts                 # [64 baris] Modul pendukung
-│   │   │   ├── template-categories/
+│   │   │   │   ├── settings.ts                 # [64 baris] Modul pendukung
+│   │   │   │   └── status.ts                   # [101 baris] Modul pendukung
+│   │   │   ├── template-categories/ # Halaman master kategori template
 │   │   │   │   └── index.ts                    # [11 baris] Registri sentral modularisasi modul section builder
-│   │   │   ├── templates/
+│   │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   │   └── index.ts                    # [20 baris] Registri sentral modularisasi modul section builder
-│   │   │   ├── tenant/
-│   │   │   │   ├── templates/
+│   │   │   ├── tenant/ # Komponen manajemen operasional tenant
+│   │   │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   │   │   └── index.ts                # [21 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   └── transactions/
 │   │   │   │       └── template-purchase.ts    # [42 baris] Modul pendukung
-│   │   │   └── webhooks/
+│   │   │   └── webhooks/ # Endpoint penerima webhook transaksi Xendit
 │   │   │       └── xendit.ts                   # [98 baris] Integrasi SDK e-invoice & payout Xendit
-│   │   ├── auth/
-│   │   │   ├── error.astro                     # [61 baris] Modul pendukung
-│   │   │   ├── forgot-password.astro           # [25 baris] Modul pendukung
-│   │   │   ├── login.astro                     # [172 baris] Modul pendukung
-│   │   │   └── reset-password.astro            # [25 baris] Modul pendukung
-│   │   ├── builder/
-│   │   │   ├── preview/
+│   │   ├── auth/ # Komponen form otentikasi & login pengguna
+│   │   │   ├── error.astro                     # [63 baris] Modul pendukung
+│   │   │   ├── forgot-password.astro           # [27 baris] Modul pendukung
+│   │   │   ├── login.astro                     # [209 baris] Modul pendukung
+│   │   │   └── reset-password.astro            # [27 baris] Modul pendukung
+│   │   ├── builder/ # Komponen visual no-code builder template
+│   │   │   ├── preview/ # Halaman live preview interaktif template
 │   │   │   │   └── [templateId].astro          # [55 baris] Modul pendukung
 │   │   │   ├── [templateId].astro              # [28 baris] Modul pendukung
 │   │   │   └── new.astro                       # [25 baris] Modul pendukung
-│   │   ├── checkout/
+│   │   ├── checkout/ # Komponen halaman pembayaran & checkout e-invoice
 │   │   │   └── [invoiceId].astro               # [163 baris] Modul pendukung
-│   │   ├── dashboard/
-│   │   │   ├── analytics.astro                 # [39 baris] Modul pendukung
-│   │   │   ├── categories.astro                # [52 baris] Modul pendukung
-│   │   │   ├── index.astro                     # [69 baris] Modul pendukung
+│   │   ├── dashboard/ # Komponen dashboard manajemen tenant
+│   │   │   ├── analytics.astro                 # [122 baris] Modul pendukung
+│   │   │   ├── categories.astro                # [118 baris] Modul pendukung
+│   │   │   ├── index.astro                     # [91 baris] Modul pendukung
 │   │   │   ├── orders.astro                    # [114 baris] Modul pendukung
-│   │   │   ├── products.astro                  # [68 baris] Modul pendukung
-│   │   │   ├── store-settings.astro            # [42 baris] Modul pendukung
-│   │   │   ├── store.astro                     # [42 baris] Modul pendukung
-│   │   │   └── templates.astro                 # [61 baris] Modul pendukung
-│   │   ├── designer/
+│   │   │   ├── products.astro                  # [148 baris] Modul pendukung
+│   │   │   ├── store-settings.astro            # [81 baris] Modul pendukung
+│   │   │   ├── store.astro                     # [90 baris] Modul pendukung
+│   │   │   └── templates.astro                 # [112 baris] Modul pendukung
+│   │   ├── designer/ # Komponen dashboard desainer template
 │   │   │   ├── orders.astro                    # [117 baris] Modul pendukung
 │   │   │   ├── templates.astro                 # [128 baris] Modul pendukung
-│   │   │   └── wallet.astro                    # [98 baris] Modul pendukung
-│   │   ├── onboarding/
-│   │   │   └── index.astro                     # [18 baris] Modul pendukung
-│   │   ├── storefront/
-│   │   │   ├── [subdomain].astro               # [83 baris] Modul pendukung
+│   │   │   └── wallet.astro                    # [100 baris] Modul pendukung
+│   │   ├── onboarding/ # Komponen wizard onboarding toko tenant
+│   │   │   └── index.astro                     # [31 baris] Modul pendukung
+│   │   ├── storefront/ # Komponen rendering toko storefront tenant
+│   │   │   ├── [subdomain].astro               # [136 baris] Modul pendukung
 │   │   │   └── index.astro                     # [45 baris] Modul pendukung
-│   │   ├── templates/
+│   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   └── index.astro                     # [92 baris] Modul pendukung
 │   │   ├── 401.astro                           # [11 baris] Modul pendukung
 │   │   ├── 403.astro                           # [11 baris] Modul pendukung
@@ -600,29 +637,29 @@ umkm-site-builder/
 │   │   ├── register.astro                      # [5 baris] Modul pendukung
 │   │   ├── test-store.astro                    # [27 baris] Modul pendukung
 │   │   └── umkm.astro                          # [28 baris] Modul pendukung
-│   ├── schemas/
-│   │   ├── admin/
-│   │   │   ├── admin.schema.ts                 # [60 baris] Skema Zod komisi & parameter platform settings
+│   ├── schemas/ # Skema validasi runtime data model Zod
+│   │   ├── admin/ # Komponen panel administrasi platform
+│   │   │   ├── admin.schema.ts                 # [73 baris] Skema Zod komisi & parameter platform settings
 │   │   │   └── index.ts                        # [2 baris] Registri sentral modularisasi modul section builder
-│   │   ├── designer/
-│   │   │   ├── bank-account.schema.ts          # [10 baris] Skema Zod rekening bank desainer
+│   │   ├── designer/ # Komponen dashboard desainer template
+│   │   │   ├── bank-account.schema.ts          # [19 baris] Skema Zod rekening bank desainer
 │   │   │   └── payout.schema.ts                # [9 baris] Skema Zod nominal pengajuan payout desainer
-│   │   ├── finance/
+│   │   ├── finance/ # Integrasi e-invoice & penarikan dana Xendit
 │   │   │   ├── index.ts                        # [5 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── transaction.schema.ts           # [44 baris] Skema Zod verifikasi parameter transaksi
-│   │   ├── templates/
+│   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   ├── index.ts                        # [6 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── template-category.schema.ts     # [28 baris] Skema Zod validasi kategori template
 │   │   │   ├── template.defaults.ts            # [241 baris] Default konfigurasi sections & themes template
-│   │   │   ├── template.presets.ts             # [126 baris] Skema Zod validasi preset layout section
+│   │   │   ├── template.presets.ts             # [150 baris] Skema Zod validasi preset layout section
 │   │   │   ├── template.schema.ts              # [147 baris] Skema Zod visual draf & metadata template
 │   │   │   └── template.tokens.ts              # [46 baris] Skema Zod token warna & tipografi template
 │   │   ├── auth.schema.ts                      # [40 baris] Skema Zod validasi kredensial pengguna
 │   │   ├── index.ts                            # [13 baris] Registri sentral modularisasi modul section builder
 │   │   ├── media.schema.ts                     # [60 baris] Skema Zod upload data berkas gambar
 │   │   └── product-variant.schema.ts           # [31 baris] Skema Zod varian produk
-│   ├── services/
-│   │   ├── finance/
+│   ├── services/ # Lapisan business logic & domain service SaaS
+│   │   ├── finance/ # Integrasi e-invoice & penarikan dana Xendit
 │   │   │   ├── commission.service.ts           # [132 baris] Logika bagi hasil komisi platform & desainer
 │   │   │   ├── index.ts                        # [9 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── payout.service.ts               # [169 baris] Logika transaksi penarikan dana desainer
@@ -630,126 +667,147 @@ umkm-site-builder/
 │   │   │   ├── transaction.service.ts          # [234 baris] Logika pembuatan invoice & aktivasi toko
 │   │   │   ├── wallet.helpers.ts               # [78 baris] Helper kalkulasi saldo & mutasi dompet
 │   │   │   └── wallet.service.ts               # [218 baris] Ledger mutasi wallet & hitung saldo matang
-│   │   ├── media/
+│   │   ├── media/ # Endpoint integrasi manajemen media Cloudinary
 │   │   │   ├── cleanup.helpers.ts              # [165 baris] Helper ekstraksi URL & identifier Cloudinary
 │   │   │   ├── cleanup.service.ts              # [157 baris] Logika deteksi & pembersihan orphan media Cloudinary
 │   │   │   └── index.ts                        # [2 baris] Registri sentral modularisasi modul section builder
-│   │   ├── template-categories/
+│   │   ├── template-categories/ # Halaman master kategori template
 │   │   │   ├── index.ts                        # [2 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── template-category.service.ts    # [119 baris] Logika database CRUD kategori template
-│   │   ├── templates/
+│   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   ├── index.ts                        # [7 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── template.admin.service.ts       # [75 baris] Logika review & verifikasi template admin
-│   │   │   └── template.service.ts             # [248 baris] Logika database template & status review
+│   │   │   └── template.service.ts             # [⚠️ mepet 300 baris - 275 baris] Logika database template & status review
 │   │   ├── analytics.service.ts                # [55 baris] Logika analytics trafik
 │   │   ├── index.ts                            # [12 baris] Registri sentral modularisasi modul section builder
 │   │   └── store-template.service.ts           # [192 baris] Logika penerapan & rendering template storefront
-│   ├── styles/
-│   │   └── global.css                          # [⚠️ >300 baris - 324 baris] Variabel Tailwind, gaya global, & reset CSS
-│   ├── types/
-│   │   ├── admin/
+│   ├── styles/ # Gaya global CSS, reset, & Tailwind variables
+│   │   ├── critical.css                        # [112 baris] Gaya CSS kritis untuk optimasi LCP & first paint
+│   │   └── global.css                          # [⚠️ >300 baris - 366 baris] Variabel Tailwind, gaya global, & reset CSS
+│   ├── types/ # Definisi tipe TypeScript modul aplikasi
+│   │   ├── admin/ # Komponen panel administrasi platform
 │   │   │   └── index.ts                        # [29 baris] Registri sentral modularisasi modul section builder
-│   │   ├── auth/
+│   │   ├── auth/ # Komponen form otentikasi & login pengguna
 │   │   │   └── index.ts                        # [15 baris] Registri sentral modularisasi modul section builder
-│   │   ├── common/
+│   │   ├── common/ # Komponen navigasi & shell layout umum
 │   │   │   ├── api.ts                          # [70 baris] Tipe standard HTTP API responses
 │   │   │   ├── index.ts                        # [7 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── toast.ts                        # [10 baris] State store penampil alert notifikasi melayang
-│   │   ├── finance/
+│   │   ├── finance/ # Integrasi e-invoice & penarikan dana Xendit
 │   │   │   ├── commission.ts                   # [19 baris] Tipe skema bagi hasil komisi
 │   │   │   ├── index.ts                        # [8 baris] Registri sentral modularisasi modul section builder
 │   │   │   ├── transactions.ts                 # [109 baris] Tipe invoice transaksi & log webhook
-│   │   │   └── wallet.ts                       # [59 baris] Tipe ledger wallet, mutasi, & detail payout
-│   │   ├── media/
+│   │   │   └── wallet.ts                       # [61 baris] Tipe ledger wallet, mutasi, & detail payout
+│   │   ├── media/ # Endpoint integrasi manajemen media Cloudinary
 │   │   │   └── index.ts                        # [22 baris] Registri sentral modularisasi modul section builder
-│   │   ├── templates/
-│   │   │   ├── builder.sections.ts             # [161 baris] Tipe data props spesifik per section builder
+│   │   ├── templates/ # Komponen manajemen template desainer
+│   │   │   ├── builder.sections.ts             # [243 baris] Tipe data props spesifik per section builder
 │   │   │   ├── builder.ts                      # [147 baris] Tipe data visual block editor no-code
 │   │   │   ├── index.ts                        # [7 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── template.ts                     # [49 baris] Tipe data model template & pratinjau
 │   │   └── index.ts                            # [13 baris] Registri sentral modularisasi modul section builder
 │   ├── env.d.ts                                # [32 baris] Deklarasi global compiler TypeScript Astro
-│   └── middleware.ts                           # [83 baris] Middleware otentikasi & pengecekan role
-│
-├── tests/                                      # Suite pengujian unit & integrasi (Vitest)
-│   ├── api/
-│   │   ├── analytics/
-│   │   │   └── track.test.ts                   # [99 baris] Uji analitik event track
-│   │   ├── builder/
-│   │   │   └── save.test.ts                    # [60 baris] Uji proteksi penyimpanan draf builder
+│   └── middleware.ts                           # [117 baris] Middleware otentikasi & pengecekan role
+├── tests/ # Suite pengujian unit & integrasi (Vitest)
+│   ├── api/ # Endpoint HTTP API backend serverless
+│   │   ├── admin/ # Komponen panel administrasi platform
+│   │   │   ├── metrics.test.ts                 # [121 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   └── users-register.test.ts          # [131 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── analytics/ # Endpoint pelacakan metrik trafik
+│   │   │   └── track.test.ts                   # [99 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── builder/ # Komponen visual no-code builder template
+│   │   │   └── save.test.ts                    # [60 baris] Uji pengujian unit / integrasi Vitest
 │   │   ├── categories/
-│   │   │   └── index.test.ts                   # [102 baris] Uji API CRUD kategori produk tenant
-│   │   ├── designer/
-│   │   │   ├── templates/
-│   │   │   │   ├── draft-delete.test.ts        # [103 baris] Uji API hard delete draf template desainer
-│   │   │   │   └── submit-review.test.ts       # [210 baris] Uji API pengajuan review template desainer
-│   │   │   ├── bank-account.test.ts            # [⚠️ mepet 300 baris - 250 baris] Uji API CRUD rekening desainer
-│   │   │   ├── payout-status.test.ts           # [90 baris] Uji API status penarikan dana desainer
-│   │   │   └── payout.test.ts                  # [243 baris] Uji API pencairan komisi desainer
-│   │   ├── directory/                          
-│   │   │   └── search.test.ts                  # [33 baris] Uji API pencarian direktori toko UMKM
-│   │   ├── products/
-│   │   │   ├── index.test.ts                   # [146 baris] Uji API CRUD produk toko tenant
-│   │   │   ├── stock.test.ts                   # [72 baris] Uji API pembaruan stok produk instan
-│   │   │   └── variants.test.ts                # [⚠️ mepet 300 baris - 274 baris] Uji API CRUD varian produk
-│   │   ├── public/
-│   │   │   ├── templates/
-│   │   │   │   └── index.test.ts               # [17 baris] Uji API katalog template publik
-│   │   │   └── commission.test.ts              # [28 baris] Uji API pembacaan komisi untuk publik
-│   │   ├── storefront/
-│   │   │   └── catalog.test.ts                 # [59 baris] Uji API catalog storefront tenant
-│   │   ├── stores/
+│   │   │   └── index.test.ts                   # [102 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── designer/ # Komponen dashboard desainer template
+│   │   │   ├── templates/ # Komponen manajemen template desainer
+│   │   │   │   ├── draft-delete.test.ts        # [122 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   │   └── submit-review.test.ts       # [210 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   ├── bank-account.test.ts            # [⚠️ mepet 300 baris - 250 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   ├── payout-status.test.ts           # [90 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   └── payout.test.ts                  # [243 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── directory/ # Endpoint pencarian direktori toko publik
+│   │   │   └── search.test.ts                  # [68 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── products/ # Endpoint CRUD produk toko tenant
+│   │   │   ├── index.test.ts                   # [146 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   ├── stock.test.ts                   # [72 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   └── variants.test.ts                # [⚠️ mepet 300 baris - 274 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── public/ # Aset statis (gambar, font, logo)
+│   │   │   ├── templates/ # Komponen manajemen template desainer
+│   │   │   │   └── index.test.ts               # [17 baris] Uji pengujian unit / integrasi Vitest
+│   │   │   └── commission.test.ts              # [28 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── storefront/ # Komponen rendering toko storefront tenant
+│   │   │   └── catalog.test.ts                 # [59 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── stores/ # Store state Svelte manajemen editor builder
 │   │   │   └── [storeId]/
-│   │   │       ├── apply-template.test.ts      # [151 baris] Uji fungsionalitas penerapan template ke toko
-│   │   │       └── products.test.ts            # [138 baris] Uji API katalog produk spesifik toko
-│   │   ├── webhooks/
-│   │   │   └── xendit.test.ts                  # [153 baris] Uji penanganan webhook e-invoice Xendit
-│   │   ├── admin-media-cleanup.test.ts         # [126 baris] Uji API pembersihan aset orphan Cloudinary
-│   │   ├── check-subdomain.test.ts             # [64 baris] Uji validasi subdomain input Zod
-│   │   ├── media-sign.test.ts                  # [69 baris] Uji Cloudinary signed upload generator
-│   │   └── template-categories.test.ts         # [119 baris] Uji API & skema master kategori template
-│   ├── builder/
-│   │   └── section-registry.test.ts            # [88 baris] Uji modularitas section registry map
-│   ├── finance/
-│   │   ├── commission-and-masking.test.ts      # [⚠️ mepet 300 baris - 297 baris] Uji engine komisi & masking nominal rupiah
-│   │   ├── payout-disbursement.test.ts         # [242 baris] Uji webhook disbursement & saldo payout
-│   │   └── price-sync.test.ts                  # [⚠️ >300 baris - 326 baris] Uji sinkronisasi harga template & komisi
-│   ├── lib/
+│   │   │       ├── apply-template.test.ts      # [151 baris] Uji pengujian unit / integrasi Vitest
+│   │   │       └── products.test.ts            # [138 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── webhooks/ # Endpoint penerima webhook transaksi Xendit
+│   │   │   └── xendit.test.ts                  # [153 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── admin-media-cleanup.test.ts         # [126 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── check-subdomain.test.ts             # [64 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── media-sign.test.ts                  # [69 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── template-categories.test.ts         # [119 baris] Uji pengujian unit / integrasi Vitest
+│   ├── builder/ # Komponen visual no-code builder template
+│   │   ├── global-design-system.test.ts        # [120 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── section-registry.test.ts            # [202 baris] Uji pengujian unit / integrasi Vitest
+│   ├── finance/ # Integrasi e-invoice & penarikan dana Xendit
+│   │   ├── commission-and-masking.test.ts      # [⚠️ mepet 300 baris - 297 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── payout-disbursement.test.ts         # [242 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── price-sync.test.ts                  # [⚠️ >300 baris - 326 baris] Uji pengujian unit / integrasi Vitest
+│   ├── lib/ # Pustaka fungsi utilitas, auth, & integrasi pihak ke-3
 │   │   ├── transactions/
-│   │   │   └── service.test.ts                 # [⚠️ >300 baris - 402 baris] Uji modul internal transaction service
-│   │   ├── auth-google-whitelist.test.ts       # [199 baris] Uji redirect & whitelist email BetterAuth
-│   │   ├── auth-helpers.test.ts                # [238 baris] Uji helper otentikasi role user
-│   │   ├── templates-migration.test.ts         # [226 baris] Uji pipeline migrasi skema template config
-│   │   ├── toast.test.ts                       # [68 baris] Uji state writable toast alert notifications
-│   │   └── xendit.test.ts                      # [233 baris] Uji API call tagihan & disbursement Xendit
-│   ├── routing/
-│   │   └── subdomain.test.ts                   # [82 baris] Uji utilitas parsing subdomain & reserved blacklist
-│   ├── schemas/
-│   │   ├── auth.test.ts                        # [109 baris] Uji validasi kredensial pengguna Zod
-│   │   ├── media.test.ts                       # [106 baris] Uji validasi Zod payload media
-│   │   ├── product-variant.test.ts             # [159 baris] Uji validasi Zod payload varian produk
-│   │   ├── store-settings.test.ts              # [61 baris] Uji validasi input setting tokomu
-│   │   ├── template-tokens-presets.test.ts     # [⚠️ >300 baris - 356 baris] Uji token warna, typo, 8pt preset, & safe-zone
-│   │   └── template.test.ts                    # [235 baris] Uji validasi Zod visual data template
-│   ├── services/
-│   │   ├── analytics.service.test.ts           # [121 baris] Uji logic service analytics
-│   │   ├── media-cleanup.test.ts               # [⚠️ mepet 300 baris - 270 baris] Uji garbage collection orphan image Cloudinary
-│   │   └── store-template.service.test.ts      # [159 baris] Uji logic service storefront rendering
+│   │   │   └── service.test.ts                 # [⚠️ >300 baris - 402 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── auth-google-whitelist.test.ts       # [199 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── auth-helpers.test.ts                # [238 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── templates-migration.test.ts         # [226 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── toast.test.ts                       # [68 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── xendit.test.ts                      # [233 baris] Uji pengujian unit / integrasi Vitest
+│   ├── products/ # Endpoint CRUD produk toko tenant
+│   │   └── catalog.test.ts                     # [100 baris] Uji pengujian unit / integrasi Vitest
+│   ├── routing/ # Utilitas routing & multitenancy subdomain
+│   │   └── subdomain.test.ts                   # [82 baris] Uji pengujian unit / integrasi Vitest
+│   ├── schemas/ # Skema validasi runtime data model Zod
+│   │   ├── auth.test.ts                        # [109 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── media.test.ts                       # [106 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── product-variant.test.ts             # [159 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── store-settings.test.ts              # [61 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── template-tokens-presets.test.ts     # [⚠️ >300 baris - 361 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── template.test.ts                    # [235 baris] Uji pengujian unit / integrasi Vitest
+│   ├── services/ # Lapisan business logic & domain service SaaS
+│   │   ├── analytics.service.test.ts           # [121 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── media-cleanup.test.ts               # [⚠️ mepet 300 baris - 270 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── store-template.service.test.ts      # [159 baris] Uji pengujian unit / integrasi Vitest
+│   ├── storefront/ # Komponen rendering toko storefront tenant
+│   │   └── cache-headers.test.ts               # [22 baris] Uji pengujian unit / integrasi Vitest
 │   ├── transactions/
-│   │   ├── e2e-template-marketplace-flow.test.ts# [182 baris] Uji e2e alur template (review -> beli -> lunas)
-│   │   ├── template-purchase-flow.test.ts      # [⚠️ mepet 300 baris - 270 baris] Uji transaksi pembayaran template desainer
-│   │   └── wallet-and-fulfillment.test.ts      # [199 baris] Uji trigger pemenuhan invoice & kredit wallet
-│   ├── ui/
-│   │   └── design-system.test.ts               # [119 baris] Uji validasi token Design System
-│   └── utils/
-│       ├── api-handler.test.ts                 # [133 baris] Uji wrapper standar error handler HTTP API
-│       ├── design-math.test.ts                 # [78 baris] Uji rumus concentric radius, pill, & debounce
-│       └── validation.test.ts                  # [34 baris] Uji wrapper validasi Zod & formatted error
-│
+│   │   ├── e2e-template-marketplace-flow.test.ts # [182 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── template-purchase-flow.test.ts      # [⚠️ mepet 300 baris - 270 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── wallet-and-fulfillment.test.ts      # [199 baris] Uji pengujian unit / integrasi Vitest
+│   ├── ui/ # Komponen design system dasar modular
+│   │   └── design-system.test.ts               # [119 baris] Uji pengujian unit / integrasi Vitest
+│   └── utils/ # Kumpulan fungsi pembantu (helper utilities)
+│       ├── api-handler.test.ts                 # [133 baris] Uji pengujian unit / integrasi Vitest
+│       ├── design-math.test.ts                 # [78 baris] Uji pengujian unit / integrasi Vitest
+│       └── validation.test.ts                  # [34 baris] Uji pengujian unit / integrasi Vitest
+├── .env.example                                # [33 baris] Contoh variabel lingkungan environment aplikasi
+├── .eslintrc.cjs                               # [72 baris] Konfigurasi linter ESLint JavaScript & TypeScript
+├── .gitattributes                              # [33 baris] Aturan konfigurasi atribut Git & line endings
+├── .gitignore                                  # [28 baris] Daftar berkas & folder yang diabaikan Git
+├── AGENTS.md                                   # [56 baris] Instruksi & guideline sistem bagi agen AI
 ├── astro.config.mjs                            # [31 baris] Konfigurasi Astro Framework
+├── CLAUDE.md                                   # [23 baris] Panduan & instruksi arsitektur untuk Claude Code
 ├── drizzle.config.ts                           # [13 baris] Konfigurasi Drizzle ORM
+├── GEMINI.md                                   # [⚠️ >300 baris - 1165 baris] Peta struktur folder & dokumentasi komprehensif projek
+├── opencode.json                               # [28 baris] Konfigurasi open code environment
 ├── package.json                                # [65 baris] Berkas dependensi npm & bun scripts
+├── postcss.config.mjs                          # [7 baris] Konfigurasi PostCSS & Tailwind
+├── PRD.md                                      # [153 baris] Dokumen spesifikasi kebutuhan produk platform (PRD)
+├── README.md                                   # [70 baris] Dokumentasi ringkasan projek SaaS UMKM Site Builder
+├── SETUP.md                                    # [172 baris] Panduan setup & inisialisasi lingkungan lokal
+├── skills-lock.json                            # [48 baris] Lockfile dependency skill AI
 ├── tailwind.config.mjs                         # [93 baris] Konfigurasi styling token Tailwind CSS
+├── tsconfig.json                               # [33 baris] Konfigurasi compiler TypeScript
 └── vitest.config.ts                            # [27 baris] Konfigurasi testing framework Vitest
 ```
 

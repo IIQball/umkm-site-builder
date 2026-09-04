@@ -37,43 +37,48 @@
   class="faq-card w-full box-border py-12"
   style="container-type: inline-size; container-name: faqcard;"
 >
-  <!-- Header Section (hidden inside sidebar split preset since it renders its own heading) -->
-  {#if activePreset !== 'split_faq_sidebar'}
-    <FaqHeader
-      {sectionId}
-      {title}
-      {subtitle}
-      {badgeText}
-      align="center"
-    />
-  {/if}
+  <div
+    class="builder-safe-container w-full"
+    style="max-width: var(--active-max-width, var(--theme-max-width, 1200px)); margin: 0 auto; padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
+  >
+    <!-- Header Section (hidden inside sidebar split preset since it renders its own heading) -->
+    {#if activePreset !== 'split_faq_sidebar'}
+      <FaqHeader
+        {sectionId}
+        {title}
+        {subtitle}
+        {badgeText}
+        align="center"
+      />
+    {/if}
 
-  {#if activePreset === 'split_faq_sidebar'}
-    <FaqSplitSidebar
-      {sectionId}
-      {faqs}
-      {waNumber}
-      {title}
-      {subtitle}
-    />
-  {:else if activePreset === 'grid_2_col_cards'}
-    <FaqGridCards {sectionId} {faqs} />
-  {:else if activePreset === 'accordion_two_col'}
-    <FaqAccordionTwoCol {sectionId} {faqs} />
-  {:else if activePreset === 'chat_style_faq'}
-    <FaqChatStyle {sectionId} {faqs} />
-  {:else if activePreset === 'search_filtered_faq'}
-    <FaqSearchFiltered {sectionId} {faqs} />
-  {:else if activePreset === 'categorized_tabs_faq'}
-    <FaqCategorizedTabs {sectionId} {faqs} />
-  {:else if activePreset === 'compact_numbered_list'}
-    <FaqNumberedList {sectionId} {faqs} />
-  {:else if activePreset === 'floating_help_center'}
-    <FaqHelpCenter {sectionId} {faqs} />
-  {:else if activePreset === 'horizontal_faq_cards'}
-    <FaqHorizontalCards {sectionId} {faqs} />
-  {:else}
-    <!-- Default: accordion_single_col -->
-    <FaqAccordionSingle {sectionId} {faqs} />
-  {/if}
+    {#if activePreset === 'split_faq_sidebar'}
+      <FaqSplitSidebar
+        {sectionId}
+        {faqs}
+        {waNumber}
+        {title}
+        {subtitle}
+      />
+    {:else if activePreset === 'grid_2_col_cards'}
+      <FaqGridCards {sectionId} {faqs} />
+    {:else if activePreset === 'accordion_two_col'}
+      <FaqAccordionTwoCol {sectionId} {faqs} />
+    {:else if activePreset === 'chat_style_faq'}
+      <FaqChatStyle {sectionId} {faqs} />
+    {:else if activePreset === 'search_filtered_faq'}
+      <FaqSearchFiltered {sectionId} {faqs} />
+    {:else if activePreset === 'categorized_tabs_faq'}
+      <FaqCategorizedTabs {sectionId} {faqs} />
+    {:else if activePreset === 'compact_numbered_list'}
+      <FaqNumberedList {sectionId} {faqs} />
+    {:else if activePreset === 'floating_help_center'}
+      <FaqHelpCenter {sectionId} {faqs} />
+    {:else if activePreset === 'horizontal_faq_cards'}
+      <FaqHorizontalCards {sectionId} {faqs} />
+    {:else}
+      <!-- Default: accordion_single_col -->
+      <FaqAccordionSingle {sectionId} {faqs} />
+    {/if}
+  </div>
 </div>

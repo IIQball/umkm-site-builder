@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Building2 } from 'lucide-svelte';
+  import { Building2, Pencil } from 'lucide-svelte';
   import { formatIDR } from '@/lib/utils/format';
   import { Button } from '@/components/ui';
   import type { BankAccount } from '@/types';
@@ -12,6 +12,14 @@
   export let settlementDelayDays: number = 7;
   export let onOpenBankModal: () => void;
   export let onOpenWithdrawModal: () => void;
+
+  $: resolvedHolderName = (
+    bankAccount?.accountHolder ||
+    bankAccount?.holderName ||
+    (bankAccount as any)?.accountHolderName ||
+    (bankAccount as any)?.userName ||
+    'Belum Diatur'
+  ).toUpperCase();
 </script>
 
 <div class="mb-6">
@@ -53,16 +61,15 @@
               <span>{bankAccount.bankName}</span>
             </div>
 
-            <Button
-              variant="secondary"
-              size="xs"
-              className="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 rounded-full font-bold"
+            <button
+              type="button"
+              class="px-3 py-1.5 rounded-full text-xs font-semibold text-white border border-white/40 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
               title="Ganti Rekening Bank"
               on:click={onOpenBankModal}
             >
-              <span class="material-symbols-outlined text-xs">edit</span>
+              <Pencil size={12} class="text-white" />
               <span>Ganti Rekening</span>
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -83,7 +90,7 @@
                 Pemilik Rekening
               </span>
               <p class="text-xs sm:text-sm font-bold text-white uppercase truncate font-mono tracking-wide">
-                {bankAccount.holderName}
+                {resolvedHolderName}
               </p>
             </div>
 

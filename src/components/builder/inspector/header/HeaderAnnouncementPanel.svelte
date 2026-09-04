@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Megaphone, AlignCenter, AlignLeft } from 'lucide-svelte';
+  import { Megaphone } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
   export let onConfigChange: (key: string, value: unknown) => void;
 
-  $: align = section.props?.announcementAlign || 'center';
   $: bgColor = (section.props?.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
   $: textColor = (section.props?.announcementTextColor as string) || '#ffffff';
   $: paddingY = (section.props?.announcementPaddingY as string) || '8px';
@@ -37,33 +36,6 @@
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
     <Megaphone size={14} class="text-[var(--theme-primary,#2563eb)]" />
     <span>Gaya Announcement Bar</span>
-  </div>
-
-  <!-- Text Alignment -->
-  <div>
-    <span class="block font-medium text-[11px] text-base-content/70 mb-1">Posisi Teks</span>
-    <div class="grid grid-cols-2 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
-      <button
-        type="button"
-        on:click={() => onConfigChange('announcementAlign', 'center')}
-        class={`flex items-center justify-center gap-1 py-1 rounded font-medium transition-colors cursor-pointer ${
-          align === 'center' ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
-        }`}
-      >
-        <AlignCenter size={13} />
-        <span>Tengah</span>
-      </button>
-      <button
-        type="button"
-        on:click={() => onConfigChange('announcementAlign', 'left')}
-        class={`flex items-center justify-center gap-1 py-1 rounded font-medium transition-colors cursor-pointer ${
-          align === 'left' ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
-        }`}
-      >
-        <AlignLeft size={13} />
-        <span>Kiri</span>
-      </button>
-    </div>
   </div>
 
   <!-- Token-based Colors: Background & Text -->

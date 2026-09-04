@@ -54,6 +54,16 @@ export const getNodeLabel = (id: string): string => {
     case 'maps_hours_badge': return 'Bilah Status Jam Buka';
     case 'maps_branch_tabs': return 'Bilah Tab Cabang';
     case 'maps_cta_button': return 'Tombol Petunjuk Arah';
+    case 'footer_brand':
+    case 'footer_brand_logo': return 'Identitas & Logo Brand';
+    case 'footer_contact': return 'Kontak & Alamat Toko';
+    case 'footer_navigation': return 'Menu Navigasi Footer';
+    case 'footer_floating_cta': return 'Banner Penawaran (CTA)';
+    case 'footer_newsletter': return 'Form Langganan Promo WA';
+    case 'footer_status_badge': return 'Bilah Status Toko Buka';
+    case 'footer_mini_map': return 'Peta Mini Lokasi Toko';
+    case 'footer_socials': return 'Ubin Tautan Sosial Media';
+    case 'footer_copyright': return 'Baris Hak Cipta (Copyright)';
     default: {
       if (id.startsWith('faq_item_')) {
         const idx = parseInt(id.replace('faq_item_', ''), 10);

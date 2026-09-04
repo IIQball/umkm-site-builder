@@ -24,6 +24,7 @@
 <div class="mb-3">
   <Input
     label="Nama Produk"
+    placeholder="contoh: Kaos Polos Katun Combed 30s"
     bind:value={name}
     error={fieldErrors.name}
   />
@@ -52,6 +53,7 @@
 <div class="mb-3">
   <Textarea
     label="Deskripsi"
+    placeholder="contoh: Kaos berbahan katun 100% yang lembut, mudah menyerap keringat, dan sangat nyaman dipakai beraktivitas sehari-hari..."
     bind:value={description}
   />
 </div>

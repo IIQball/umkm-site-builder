@@ -4,7 +4,7 @@
   import type { products as productsSchema } from "../../db/schema";
   import type { VariantGroup } from "../../schemas/product-variant.schema";
   import ImageUpload from "../shared/ImageUpload.svelte";
-  import { Button, Input } from "@/components/ui";
+  import { Button, Input, Modal } from "@/components/ui";
   import ProductVariantEditor from "./product/ProductVariantEditor.svelte";
   import ProductBasicFields from "./product/ProductBasicFields.svelte";
   import { deserializeVariants, validateVariantGroups } from "./product/productForm.helpers";
@@ -18,7 +18,6 @@
   export let editingProduct: Product | null = null;
 
   const dispatch = createEventDispatcher();
-  let dialogElement: HTMLDialogElement;
   let formLoading = false;
   let wasOpen = false;
   let errorMessage = "";
@@ -67,17 +66,11 @@
       isAvailable = true;
       sortOrder = 0;
       variantGroups = [];
+      variantGroups = [];
       imageUrls = [];
-    }
-
-    if (dialogElement && !dialogElement.open) {
-      dialogElement.showModal();
     }
   } else if (!showModal && wasOpen) {
     wasOpen = false;
-    if (dialogElement && dialogElement.open) {
-      dialogElement.close();
-    }
   }
 
   const closeModal = () => {
@@ -168,18 +161,16 @@
   };
 </script>
 
-<dialog
-  class="modal backdrop-blur-sm"
-  bind:this={dialogElement}
-  on:close={closeModal}
->
-  <div class="modal-box rounded-2xl p-6 md:p-8 max-w-2xl bg-card border border-light shadow-xl">
-    <h3 class="font-bold text-heading-md text-main tracking-tight font-heading mb-6">
+<Modal bind:open={showModal} size="lg">
+  <svelte:fragment slot="header">
+    <h3 class="font-bold text-heading-md text-main tracking-tight font-heading">
       {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
     </h3>
+  </svelte:fragment>
 
+  <div class="py-2">
     {#if errorMessage}
-      <div class="alert alert-error mb-4 shadow-sm">
+      <div class="alert alert-error mb-6 shadow-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="stroke-current shrink-0 h-6 w-6"
@@ -254,29 +245,26 @@
         />
       </label>
     </div>
-
-    <div class="modal-action mt-8 flex items-center justify-end gap-3">
-      <Button
-        variant="secondary"
-        size="sm"
-        disabled={formLoading}
-        on:click={closeModal}
-      >
-        Batal
-      </Button>
-      <Button
-        variant="dark"
-        size="sm"
-        on:click={handleSaveProduct}
-        disabled={formLoading}
-        loading={formLoading}
-        className="font-bold"
-      >
-        Simpan
-      </Button>
-    </div>
   </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+
+  <svelte:fragment slot="footer">
+    <Button
+      variant="secondary"
+      size="sm"
+      disabled={formLoading}
+      on:click={closeModal}
+    >
+      Batal
+    </Button>
+    <Button
+      variant="dark"
+      size="sm"
+      on:click={handleSaveProduct}
+      disabled={formLoading}
+      loading={formLoading}
+      className="font-bold"
+    >
+      Simpan
+    </Button>
+  </svelte:fragment>
+</Modal>

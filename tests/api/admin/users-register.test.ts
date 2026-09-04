@@ -37,21 +37,23 @@ vi.mock('@/lib/auth', () => ({
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    ...actual as any,
+    ...(actual as Record<string, unknown>),
     eq: vi.fn(),
   };
 });
+
+import type { APIContext } from 'astro';
 
 describe('POST /api/admin/users/register', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const mockContext = (body: any) => ({
+  const mockContext = (body: Record<string, unknown>) => ({
     request: {
       json: vi.fn().mockResolvedValue(body),
     },
-  } as any);
+  } as unknown as APIContext);
 
   it('should successfully register a new user and delete the created session', async () => {
     const payload = {
@@ -109,7 +111,7 @@ describe('POST /api/admin/users/register', () => {
           limit: vi.fn().mockResolvedValue([{ id: 'existing_user' }]),
         })),
       })),
-    }) as any);
+    }) as unknown as ReturnType<typeof db.select>);
 
     const payload = {
       role: 'tenant',

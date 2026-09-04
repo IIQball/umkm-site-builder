@@ -32,23 +32,32 @@
       align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center'
     } ${
       isHeaderSelected
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-blue-400/60'
+        ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2'
+        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,#2563eb)]/60'
     }`}
   >
     {#if badgeText}
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-950/60 text-primary border border-blue-100 dark:border-blue-900/60 mb-2">
-        <HelpCircle size={12} class="text-primary" />
+      <div
+        class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2 font-heading"
+        style="background: rgba(var(--color-primary-rgb, 37 99 235), 0.1); color: var(--theme-primary, var(--color-primary, #2563eb)); border: 1px solid rgba(var(--color-primary-rgb, 37 99 235), 0.2); border-radius: var(--btn-radius, var(--theme-btn-radius, 9999px));"
+      >
+        <HelpCircle size={12} class="text-[var(--theme-primary,#2563eb)]" />
         <span>{badgeText}</span>
       </div>
     {/if}
     {#if title}
-      <h2 class="text-heading-lg font-heading text-main tracking-tight font-black">
+      <h2
+        class="text-heading-lg font-heading text-main tracking-tight font-black"
+        style="color: var(--color-text-main, #0f172a); font-family: var(--font-heading);"
+      >
         {title}
       </h2>
     {/if}
     {#if subtitle}
-      <p class="text-xs sm:text-sm text-secondary max-w-xl mx-auto mt-2 leading-relaxed">
+      <p
+        class="text-xs sm:text-sm text-secondary max-w-xl mx-auto mt-2 leading-relaxed"
+        style="color: var(--color-text-secondary, #334155); font-family: var(--font-family);"
+      >
         {subtitle}
       </p>
     {/if}

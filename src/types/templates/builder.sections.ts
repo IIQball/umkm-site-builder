@@ -171,21 +171,61 @@ export interface GoogleMapsProps {
   [key: string]: unknown;
 }
 
+export interface FooterSocialLink {
+  platform: string;
+  url: string;
+  label?: string;
+  handle?: string;
+  subtext?: string;
+}
+
+export interface FooterMenuLink {
+  label: string;
+  url: string;
+}
+
 export interface FooterProps {
+  layoutPreset?: string;
   logoText?: string;
+  brandName?: string;
   logoImageUrl?: string;
+  logoType?: 'image_text' | 'text_only' | 'image_only';
   tagline?: string;
+  description?: string;
   copyrightText?: string;
   whatsappNumber?: string;
   address?: string;
-  socialLinks?: Array<{
-    platform: string;
-    url: string;
-  }>;
-  footerLinks?: Array<{
-    label: string;
-    url: string;
-  }>;
+  storeHours?: string;
+  googleMapsUrl?: string;
+  // Preset 3: CTA Focused
+  floatingCtaTitle?: string;
+  floatingCtaSubtitle?: string;
+  floatingCtaButtonText?: string;
+  // Preset 6: Newsletter Centric
+  newsletterBadge?: string;
+  newsletterTitle?: string;
+  newsletterSubtitle?: string;
+  newsletterButtonText?: string;
+  newsletterPlaceholder?: string;
+  // Preset 7: Live Status Badge
+  statusBadgeText?: string;
+  statusBadgeSubtext?: string;
+  statusChatButtonText?: string;
+  // Preset 9: Social Links Grid
+  communityTitle?: string;
+  communitySubtitle?: string;
+  // Preset 10: Boxed Card
+  boxedOfficialBadge?: string;
+  boxedStoreTitle?: string;
+  boxedStoreSubtitle?: string;
+  boxedPrimaryCtaText?: string;
+  boxedPrimaryCtaLink?: string;
+  boxedSecondaryCtaText?: string;
+  boxedSecondaryCtaLink?: string;
+  // Links
+  socialLinks?: FooterSocialLink[];
+  footerLinks?: FooterMenuLink[];
+  menuLinks?: FooterMenuLink[];
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }

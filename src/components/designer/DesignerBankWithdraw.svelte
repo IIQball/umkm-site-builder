@@ -13,26 +13,19 @@
   let bankAccount: BankAccount | null = null;
   let showBankModal = false;
   let showWithdrawModal = false;
-
-  // Form fields for Bank Account
   let inputBankName = 'BCA';
   let inputAccountNumber = '';
   let inputHolderName = '';
-
-  // Form fields for Withdrawal
   let withdrawAmount = '';
   let withdrawError = '';
   let isWithdrawing = false;
   let withdrawSuccess = false;
-
-  // Global loading/error state
   let isLoading = false;
   let apiError = '';
-
-  // Payout request history
   let payoutHistory: PayoutHistoryItem[] = [];
   let isLoadingPayouts = false;
   let minPayoutLimit = 50000;
+  let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   async function fetchPayoutHistory() {
     isLoadingPayouts = true;
@@ -50,8 +43,6 @@
     }
   }
 
-  let pollingInterval: ReturnType<typeof setInterval> | null = null;
-
   async function pollStatus() {
     try {
       const res = await fetch('/api/designer/payout/status');
@@ -62,11 +53,7 @@
           balance = Number(result.data.wallet.balance);
           availableBalance = Number(result.data.wallet.availableBalance);
         }
-
-        const stillProcessing = payoutHistory.some(p => p.status.toLowerCase() === 'processing');
-        if (!stillProcessing) {
-          stopPolling();
-        }
+        if (!payoutHistory.some((p) => p.status.toLowerCase() === 'processing')) stopPolling();
       }
     } catch (err) {
       console.error('Error during status polling:', err);
@@ -75,11 +62,8 @@
 
   function checkAndStartPolling() {
     if (typeof window === 'undefined') return;
-    const hasProcessing = payoutHistory.some(p => p.status.toLowerCase() === 'processing');
-    if (hasProcessing) {
-      if (!pollingInterval) {
-        pollingInterval = setInterval(pollStatus, 4000);
-      }
+    if (payoutHistory.some((p) => p.status.toLowerCase() === 'processing')) {
+      if (!pollingInterval) pollingInterval = setInterval(pollStatus, 4000);
     } else {
       stopPolling();
     }
@@ -92,15 +76,8 @@
     }
   }
 
-  $: {
-    if (payoutHistory) {
-      checkAndStartPolling();
-    }
-  }
-
-  onDestroy(() => {
-    stopPolling();
-  });
+  $: if (payoutHistory) checkAndStartPolling();
+  onDestroy(() => stopPolling());
 
   const fetchBankAccount = async () => {
     isLoading = true;
@@ -110,10 +87,15 @@
       const result = await res.json();
       if (res.ok && result.success && result.data) {
         const data = result.data as BankAccount;
-        bankAccount = data;
+        const resolvedName = data.accountHolder || data.holderName || (data as any).accountHolderName || '';
+        bankAccount = {
+          ...data,
+          holderName: resolvedName,
+          accountHolder: resolvedName,
+        };
         inputBankName = data.bankName;
         inputAccountNumber = data.accountNumber;
-        inputHolderName = data.holderName;
+        inputHolderName = resolvedName;
       } else {
         bankAccount = null;
       }
@@ -131,9 +113,10 @@
 
   const openBankModal = () => {
     if (bankAccount) {
+      const resolvedName = bankAccount.accountHolder || bankAccount.holderName || '';
       inputBankName = bankAccount.bankName;
       inputAccountNumber = bankAccount.accountNumber;
-      inputHolderName = bankAccount.holderName;
+      inputHolderName = resolvedName;
     } else {
       inputBankName = 'BCA';
       inputAccountNumber = '';
@@ -158,13 +141,20 @@
         body: JSON.stringify({
           bankName: inputBankName,
           accountNumber: inputAccountNumber,
+          accountHolder: inputHolderName,
           holderName: inputHolderName
         })
       });
 
       const result = await res.json();
       if (res.ok && result.success) {
-        bankAccount = result.data;
+        const saved = result.data;
+        const resolvedName = saved.accountHolder || saved.holderName || inputHolderName;
+        bankAccount = {
+          ...saved,
+          holderName: resolvedName,
+          accountHolder: resolvedName,
+        };
         showBankModal = false;
       } else {
         apiError = result.error?.message || 'Gagal menyimpan rekening bank.';

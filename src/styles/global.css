@@ -9,6 +9,8 @@
 :root,
 html[data-theme="light"],
 [data-theme="light"] {
+  --font-ui-sans: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-ui-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   
@@ -54,6 +56,8 @@ html[data-theme="light"],
 html[data-theme="dark"],
 [data-theme="dark"],
 .dark {
+  --font-ui-sans: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-ui-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-heading: 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif;
   
@@ -322,3 +326,41 @@ html[data-theme="dark"],
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* Builder Shell & Workspace Strict Font Isolation */
+.builder-root,
+.builder-root header,
+.builder-root aside,
+.builder-root [data-builder-shell] {
+  font-family: var(--font-ui-sans, 'Poppins', system-ui, -apple-system, sans-serif);
+}
+
+.builder-root h1,
+.builder-root h2,
+.builder-root h3,
+.builder-root h4,
+.builder-root h5,
+.builder-root h6 {
+  font-family: var(--font-ui-heading, 'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif);
+}
+
+/* Canvas Preview Strict Variable & Typography Scoping */
+#canvas-frame,
+.builder-canvas-viewport {
+  font-family: var(--font-family, var(--theme-font-body, system-ui, -apple-system, sans-serif));
+}
+
+#canvas-frame h1,
+#canvas-frame h2,
+#canvas-frame h3,
+#canvas-frame h4,
+#canvas-frame h5,
+#canvas-frame h6,
+.builder-canvas-viewport h1,
+.builder-canvas-viewport h2,
+.builder-canvas-viewport h3,
+.builder-canvas-viewport h4,
+.builder-canvas-viewport h5,
+.builder-canvas-viewport h6 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+}

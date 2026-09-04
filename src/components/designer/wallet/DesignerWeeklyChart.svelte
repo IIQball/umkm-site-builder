@@ -1,10 +1,28 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { Card, Badge } from '@/components/ui';
   import { formatCurrency } from '@/lib/utils';
 
   export let weeklyData: Array<{ label: string; amount: number; isToday: boolean }> = [];
   export let maxWeekly: number = 1;
   export let topTemplates: Array<{ name: string; amount: number; pct: number; color: string }> = [];
+  export let platformFeePercentage: number = 30;
+
+  $: designerSharePercent = Math.max(0, 100 - platformFeePercentage);
+
+  onMount(async () => {
+    try {
+      const res = await fetch('/api/public/commission');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && typeof json.data.platformFeePercentage === 'number') {
+          platformFeePercentage = json.data.platformFeePercentage;
+        }
+      }
+    } catch {
+      // Keep default or passed prop on error
+    }
+  });
 </script>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -96,7 +114,7 @@
 
       <div class="p-4 bg-nested/50 border-t border-light text-center">
         <span class="text-3xs text-muted font-sans">
-          Pembagian hasil: 70% Desainer • 30% Platform
+          Pembagian hasil: {designerSharePercent}% Desainer • {platformFeePercentage}% Platform
         </span>
       </div>
     </Card>

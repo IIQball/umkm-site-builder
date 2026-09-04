@@ -38,7 +38,7 @@
   <div class="p-3 border-b border-light flex items-center justify-between gap-1.5">
     <div class="flex items-center gap-2 text-main min-w-0 flex-1">
       <Layers size={16} class="text-primary flex-shrink-0" />
-      <span class="text-label-caps text-main truncate">Layers ({sections.length})</span>
+      <span class="text-label-caps text-main truncate">Lapisan ({sections.length})</span>
     </div>
 
     <div class="flex items-center gap-1 flex-shrink-0">
@@ -58,11 +58,11 @@
             type="button"
             class="fixed inset-0 z-40 cursor-default bg-transparent w-full h-full border-none outline-none"
             on:click={() => (isAddMenuOpen = false)}
-            aria-label="Close menu"
+            aria-label="Tutup menu tambah"
           />
           <div class="absolute right-0 mt-1 w-56 bg-card border border-light rounded-lg shadow-xl py-1 z-50 overflow-hidden text-main">
             <div class="px-3 py-1.5 text-3xs font-semibold text-muted uppercase tracking-caps border-b border-light">
-              Pilih Tipe Section
+              Pilih Komponen Seksi
             </div>
             {#each sectionTypes as type}
               <button
@@ -83,8 +83,8 @@
         type="button"
         on:click={() => canvasStore.toggleLeftSidebar()}
         class="p-1 rounded-md text-muted hover:text-main hover:bg-nested border border-transparent hover:border-light transition-colors cursor-pointer"
-        title="Tutup Sidebar Kiri (Ctrl+\)"
-        aria-label="Tutup Sidebar Kiri"
+        title="Tutup Panel Lapisan (Ctrl+\)"
+        aria-label="Tutup Panel Lapisan"
       >
         <PanelLeftClose size={15} />
       </button>
@@ -95,7 +95,7 @@
   <div class="flex-1 overflow-y-auto p-2 space-y-1">
     {#if sections.length === 0}
       <div class="p-4 text-center text-xs text-muted">
-        Belum ada section. Klik tombol Tambah di atas.
+        Belum ada seksi pada halaman. Klik tombol Tambah di atas.
       </div>
     {:else}
       {#each sections as section, index (section.id)}

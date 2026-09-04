@@ -34,8 +34,8 @@
   tabindex="0"
   on:click={(e) => selectNode(e, 'maps_iframe')}
   on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
-  class={`relative w-full rounded-2xl overflow-hidden shadow-md border border-base-200 dark:border-slate-800 bg-base-200/40 transition-all outline-none ${
-    isIframeSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+  class={`relative w-full rounded-2xl overflow-hidden shadow-md border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] transition-all outline-none ${
+    isIframeSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
   }`}
 >
   <iframe
@@ -53,19 +53,28 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`cq-floating-card-bottom bg-card/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl border border-light text-left transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+    class={`cq-floating-card-bottom bg-[var(--color-card-base,var(--theme-surface,#ffffff))]/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl border border-[var(--color-border,rgba(15,23,42,0.08))] text-left transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
     }`}
   >
-    <div class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+    <div
+      class="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400 uppercase bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-[var(--theme-font-heading,var(--font-heading,inherit))]"
+      style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));"
+    >
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
       <span>{storeHoursStatus}</span>
     </div>
 
-    <h4 class="font-heading font-bold text-sm text-main mt-2 mb-1">
+    <h3
+      class="font-[var(--theme-font-heading,var(--font-heading,inherit))] text-[var(--theme-text-primary,var(--color-text-main,#0f172a))] mt-2 mb-1"
+      style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+    >
       {storeName}
-    </h4>
-    <p class="text-xs text-secondary leading-relaxed mb-4">
+    </h3>
+    <p
+      class="text-[var(--theme-text-muted,var(--color-text-secondary,#64748b))] font-[var(--theme-font-body,var(--font-family,inherit))] leading-relaxed mb-4"
+      style="font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-family: var(--theme-font-body, var(--font-family, inherit));"
+    >
       {address}
     </p>
 
@@ -77,9 +86,10 @@
       tabindex="0"
       on:click={(e) => selectNode(e, 'maps_cta_button')}
       on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
-      class={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-4 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-heading font-bold hover:bg-slate-800 dark:hover:bg-white active:scale-[0.98] transition-all outline-none ${
-        isCtaSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+      class={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-[var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary,#2563eb)))] text-[var(--theme-btn-primary-text,var(--btn-primary-text,#ffffff))] font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
+        isCtaSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
       }`}
+      style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);"
     >
       <Navigation size={13} />
       <span>Buka Petunjuk Arah</span>

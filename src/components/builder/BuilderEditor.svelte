@@ -116,9 +116,11 @@
 
 <div
   data-theme={$canvasStore.editorTheme}
+  data-builder-shell
   class={`builder-root h-screen w-full flex flex-col transition-colors overflow-hidden ${
     $canvasStore.editorTheme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'
   }`}
+  style="font-family: var(--font-ui-sans, 'Poppins', system-ui, -apple-system, sans-serif);"
 >
   {#if loading}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">

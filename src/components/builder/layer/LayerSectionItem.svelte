@@ -3,6 +3,7 @@
   import type { TemplateSection } from '@/schemas';
   import { editorStore } from '../stores/editorStore';
   import { getSectionNodes, sectionTypeLabels, sectionTypeIcons } from './layerPanel.helpers';
+  import { scrollToCanvasElement } from '../canvas/canvasScroll.helpers';
   import AddNodeDropdown from './AddNodeDropdown.svelte';
 
   export let section: TemplateSection;
@@ -19,6 +20,16 @@
   export let onToggleAddNodeDropdown: (id: string) => void;
 
   $: nodes = getSectionNodes(section);
+
+  const handleSelectSection = () => {
+    onSelectNode(section.id, null);
+    scrollToCanvasElement(section.id, null);
+  };
+
+  const handleSelectNode = (nodeId: string) => {
+    onSelectNode(section.id, nodeId);
+    scrollToCanvasElement(section.id, nodeId);
+  };
 
   const moveHeroNode = (sec: TemplateSection, nodeId: string, direction: 'up' | 'down') => {
     const order =
@@ -41,8 +52,8 @@
   <div
     role="button"
     tabindex="0"
-    on:click={() => onSelectNode(section.id, null)}
-    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectNode(section.id, null)}
+    on:click={handleSelectSection}
+    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSection()}
     class={`group w-full flex items-center justify-between p-2 rounded-lg text-left transition-all border cursor-pointer ${
       isSectionSelected && !selectedNodeId
         ? 'bg-primary/10 border-primary/30 text-primary shadow-sm'
@@ -56,7 +67,7 @@
         type="button"
         on:click|stopPropagation={() => onToggleExpand(section.id)}
         class="p-0.5 text-muted hover:text-main rounded cursor-pointer transition-transform"
-        title={isExpanded ? 'Collapse' : 'Expand'}
+        title={isExpanded ? 'Tutup Detail' : 'Buka Detail'}
       >
         <svelte:component this={isExpanded ? ChevronDown : ChevronRight} size={13} />
       </button>
@@ -77,7 +88,7 @@
         on:click|stopPropagation={() => onReorderSection(section.id, 'up')}
         disabled={index === 0}
         class="p-1 hover:bg-nested rounded text-muted hover:text-main disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
-        title="Pindah ke Atas"
+        title="Geser ke Atas"
       >
         <ChevronUp size={13} />
       </button>
@@ -86,7 +97,7 @@
         on:click|stopPropagation={() => onReorderSection(section.id, 'down')}
         disabled={index === totalSections - 1}
         class="p-1 hover:bg-nested rounded text-muted hover:text-main disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
-        title="Pindah ke Bawah"
+        title="Geser ke Bawah"
       >
         <ChevronDown size={13} />
       </button>
@@ -94,7 +105,7 @@
         type="button"
         on:click|stopPropagation={() => onDeleteSection(section.id)}
         class="p-1 hover:bg-error/10 rounded text-muted hover:text-error cursor-pointer"
-        title="Hapus Section"
+        title="Hapus Seksi"
       >
         <Trash2 size={13} />
       </button>
@@ -109,8 +120,8 @@
         <div
           role="button"
           tabindex="0"
-          on:click|stopPropagation={() => onSelectNode(section.id, node.id)}
-          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelectNode(section.id, node.id)}
+          on:click|stopPropagation={() => handleSelectNode(node.id)}
+          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectNode(node.id)}
           class={`group/node w-full flex items-center justify-between px-2 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
             isNodeSelected
               ? 'bg-primary text-white font-semibold shadow-sm'
@@ -133,7 +144,7 @@
                 on:click|stopPropagation={() => moveHeroNode(section, node.id, 'up')}
                 disabled={nodeIdx === 0}
                 class="p-0.5 hover:text-white disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-                title="Pindah ke Atas"
+                title="Geser ke Atas"
               >
                 <ChevronUp size={11} />
               </button>
@@ -142,7 +153,7 @@
                 on:click|stopPropagation={() => moveHeroNode(section, node.id, 'down')}
                 disabled={nodeIdx === nodes.length - 1}
                 class="p-0.5 hover:text-white disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-                title="Pindah ke Bawah"
+                title="Geser ke Bawah"
               >
                 <ChevronDown size={11} />
               </button>

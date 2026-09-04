@@ -34,7 +34,7 @@
       const param = activeTab === 'all' ? '' : `?status=${activeTab}`;
       const res = await fetch(`/api/admin/templates${param}`);
       const result = await res.json();
-      if (result.success && Array.isArray(result.data)) {
+      if (result.ok && Array.isArray(result.data)) {
         templates = result.data;
       }
     } catch {
@@ -92,7 +92,7 @@
       });
       const result = await res.json();
 
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         addToast({
           type: 'success',
           message:

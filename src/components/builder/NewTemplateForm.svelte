@@ -111,7 +111,7 @@
 
       const result = await response.json();
 
-      if (response.ok && result.success && result.data?.id) {
+      if (response.ok && result.ok && result.data?.id) {
         window.location.href = `/builder/${result.data.id}`;
       } else {
         error = result.error?.message || 'Gagal membuat template baru. Silakan coba lagi.';

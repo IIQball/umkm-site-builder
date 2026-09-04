@@ -44,7 +44,7 @@
     try {
       const res = await fetch('/api/admin/users');
       const result = await res.json();
-      if (result.success && Array.isArray(result.data)) {
+      if (result.ok && Array.isArray(result.data)) {
         users = result.data;
       } else if (result.error) {
         showToast(result.error.message || 'Gagal memuat pengguna', 'error');
@@ -108,7 +108,7 @@
       });
       const result = await res.json();
       
-      if (res.ok && (result.success || result.ok)) {
+      if (res.ok && (result.ok)) {
         showToast(newStatus === 'active' ? 'Akun berhasil diaktifkan' : 'Akun berhasil ditangguhkan', 'success');
         closeModal();
         await fetchUsers();

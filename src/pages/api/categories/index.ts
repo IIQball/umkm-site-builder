@@ -2,13 +2,14 @@ import type { APIRoute } from 'astro';
 import { db } from '../../../db';
 import { storeCategories } from '../../../db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
+import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const storeId = url.searchParams.get('storeId');
   
   if (!storeId) {
-    return new Response(JSON.stringify({ error: 'storeId required' }), { status: 400 });
+    return jsonError('storeId required', 400);
   }
 
   const categories = await db
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ request }) => {
     .from(storeCategories)
     .where(and(eq(storeCategories.storeId, storeId), isNull(storeCategories.deletedAt)));
 
-  return new Response(JSON.stringify(categories), { status: 200 });
+  return jsonSuccess(categories, 200);
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -36,7 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
           .set({ slug: `${existing.slug}-deleted-${Date.now()}` })
           .where(eq(storeCategories.id, existing.id));
       } else {
-        return new Response(JSON.stringify({ error: 'Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.' }), { status: 400 });
+        return jsonError('Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.', 400);
       }
     }
 
@@ -47,18 +48,18 @@ export const POST: APIRoute = async ({ request }) => {
       slug,
     });
 
-    return new Response(JSON.stringify({ success: true }), { status: 201 });
+    return jsonSuccess({ success: true }, 201);
   } catch (error: unknown) {
     const err = error as { code?: string; cause?: { code?: string } };
     const code = err?.code || err?.cause?.code;
 
     if (code === '23503') {
-      return new Response(JSON.stringify({ error: 'Store ID tidak ditemukan' }), { status: 400 });
+      return jsonError('Store ID tidak ditemukan', 400);
     }
     if (code === '23505') {
-      return new Response(JSON.stringify({ error: 'Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.' }), { status: 400 });
+      return jsonError('Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.', 400);
     }
-    return new Response(JSON.stringify({ error: 'Gagal menyimpan data' }), { status: 500 });
+    return jsonError('Gagal menyimpan data', 500);
   }
 };
 
@@ -71,7 +72,7 @@ export const PATCH: APIRoute = async ({ request }) => {
   });
 
   if (!currentCat) {
-    return new Response(JSON.stringify({ error: 'Kategori tidak ditemukan' }), { status: 404 });
+    return jsonError('Kategori tidak ditemukan', 404);
   }
 
   const existing = await db.query.storeCategories.findFirst({
@@ -84,7 +85,7 @@ export const PATCH: APIRoute = async ({ request }) => {
         .set({ slug: `${existing.slug}-deleted-${Date.now()}` })
         .where(eq(storeCategories.id, existing.id));
     } else {
-      return new Response(JSON.stringify({ error: 'Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.' }), { status: 400 });
+      return jsonError('Slug sudah digunakan untuk toko ini. Silakan gunakan slug lain.', 400);
     }
   }
 
@@ -92,7 +93,7 @@ export const PATCH: APIRoute = async ({ request }) => {
     .set({ name, slug, updatedAt: new Date() })
     .where(eq(storeCategories.id, id));
 
-  return new Response(JSON.stringify({ success: true }), { status: 200 });
+  return jsonSuccess({ success: true }, 200);
 };
 
 export const DELETE: APIRoute = async ({ request }) => {
@@ -101,7 +102,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     const id = url.searchParams.get('id');
     
     if (!id) {
-      return new Response(JSON.stringify({ error: 'id required' }), { status: 400 });
+      return jsonError('id required', 400);
     }
 
     const currentCat = await db.query.storeCategories.findFirst({
@@ -117,8 +118,8 @@ export const DELETE: APIRoute = async ({ request }) => {
         .where(eq(storeCategories.id, id));
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return jsonSuccess({ success: true }, 200);
   } catch {
-    return new Response(JSON.stringify({ error: 'Gagal menghapus kategori' }), { status: 500 });
+    return jsonError('Gagal menghapus kategori', 500);
   }
 };

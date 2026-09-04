@@ -15,7 +15,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const categories = await getTemplateCategories();
-    return jsonSuccess(categories, 'Template categories fetched');
+    return jsonSuccess(categories);
   });
 };
 
@@ -30,6 +30,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const input = validate(TemplateCategoryCreateSchema, body);
 
     const created = await createTemplateCategory(input);
-    return jsonSuccess(created, 'Template category created', 201);
+    return jsonSuccess(created, 201);
   });
 };

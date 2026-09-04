@@ -42,7 +42,7 @@
     try {
       const res = await fetch('/api/public/template-categories');
       const data = await res.json();
-      if (data.success) {
+      if (data.ok) {
         categories = data.data;
       }
     } catch (err: unknown) {
@@ -73,7 +73,7 @@
       const res = await fetch(url.toString());
       const data = await res.json();
       
-      if (!res.ok || !data.success) {
+      if (!res.ok || !data.ok) {
         throw new Error(data.error?.message || 'Gagal memuat data direktori');
       }
       

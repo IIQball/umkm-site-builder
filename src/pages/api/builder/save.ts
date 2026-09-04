@@ -23,7 +23,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     const updated = await updateTemplateDraft(templateId, input, user.id, user.role);
 
-    return jsonSuccess(updated, 'Template saved successfully');
+    return jsonSuccess(updated);
   });
 };
 

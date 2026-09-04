@@ -28,6 +28,6 @@ export const POST: APIRoute = async (context) => {
 
     await deleteFromCloudinary(targetPublicId);
 
-    return jsonSuccess({ deleted: true, publicId: targetPublicId }, 'Gambar lama berhasil dihapus');
+    return jsonSuccess({ deleted: true, publicId: targetPublicId });
   });
 };

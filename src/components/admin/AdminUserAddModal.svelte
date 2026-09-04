@@ -69,7 +69,7 @@
       });
       const result = await res.json();
 
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         toast.success(`Akun ${selectedRole === 'tenant' ? 'Tenant' : 'Designer'} berhasil didaftarkan`);
         resetForm();
         dispatch('success');

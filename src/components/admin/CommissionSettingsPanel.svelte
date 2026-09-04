@@ -16,7 +16,7 @@
     try {
       const res = await fetch('/api/admin/settings/commission');
       const result = await res.json();
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         if (result.data.platformFeePercentage !== undefined) {
           platformFeePercentage = Number(result.data.platformFeePercentage);
         }
@@ -58,7 +58,7 @@
       });
       const result = await res.json();
 
-      if (res.ok && (result.success || result.ok)) {
+      if (res.ok && (result.ok)) {
         addToast({
           type: 'success',
           message: 'Pengaturan komisi & settlement platform berhasil disimpan!',

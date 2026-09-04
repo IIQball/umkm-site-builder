@@ -66,7 +66,7 @@
           body: JSON.stringify({ templateId: template.id }),
         });
         const result = await res.json();
-        if (res.ok && result.success) {
+        if (res.ok && result.ok) {
           addToast({
             type: 'success',
             message: `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
@@ -97,7 +97,7 @@
         body: JSON.stringify({ templateId: template.id }),
       });
       const result = await res.json();
-      if (res.ok && result.success && result.data?.externalId) {
+      if (res.ok && result.ok && result.data?.externalId) {
         window.location.href = `/checkout/${result.data.externalId}`;
       } else {
         addToast({

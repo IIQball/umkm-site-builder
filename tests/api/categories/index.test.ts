@@ -35,7 +35,7 @@ describe('Categories API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toEqual(mockCategories);
+    expect(data).toEqual({ ok: true, data: mockCategories });
   });
 
   it('POST creates a category', async () => {

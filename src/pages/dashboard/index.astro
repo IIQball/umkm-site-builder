@@ -35,7 +35,6 @@ if (currentHour >= 4 && currentHour < 11) {
       </div>
     </div>
 
-    {user.role === 'tenant' && (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard 
           client:load
@@ -68,90 +67,24 @@ if (currentHour >= 4 && currentHour < 11) {
           delayClass="delay-200"
         />
       </div>
-    )}
 
-    {user.role === 'admin' && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          client:load
-          label="Total Transaksi" 
-          value="—" 
-          icon="receipt_long" 
-          cardTheme="dark"
-          badge="Semua"
-          footerText="Transaksi di platform"
-          delayClass="delay-100"
-        />
-        <StatCard 
-          client:load
-          label="Total User" 
-          value="—" 
-          icon="people" 
-          cardTheme="default"
-          badge="Pengguna"
-          footerText="User terdaftar aktif"
-          delayClass="delay-150"
-        />
-        <StatCard 
-          client:load
-          label="Template Pending" 
-          value="—" 
-          icon="hourglass_top" 
-          cardTheme="orange"
-          badge="Review"
-          footerText="Template menunggu kurasi"
-          delayClass="delay-200"
-        />
-        <StatCard 
-          client:load
-          label="Platform Status" 
-          value="✓" 
-          icon="check_circle" 
-          cardTheme="blue"
-          badge="Operasional"
-          footerText="Sistem berjalan normal"
-          delayClass="delay-250"
-        />
-      </div>
-    )}
+
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up delay-300">
-      {user.role === 'tenant' && (
-        <>
-          <a href="/dashboard/store" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Pengaturan Toko</h3>
-              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
-            </div>
-            <p class="text-body-base text-secondary">Kelola informasi toko, subdomain, dan kontak bisnis Anda</p>
-          </a>
-          <a href="/dashboard/analytics" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Analitik Toko</h3>
-              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
-            </div>
-            <p class="text-body-base text-secondary">Monitor pengunjung, klik WhatsApp, dan tingkat konversi toko</p>
-          </a>
-        </>
-      )}
-      {user.role === 'admin' && (
-        <>
-          <a href="/admin/users" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Manajemen User</h3>
-              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
-            </div>
-            <p class="text-body-base text-secondary">Kelola pengguna platform, verifikasi, dan permission akses</p>
-          </a>
-          <a href="/admin/templates" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Kurasi Template</h3>
-              <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
-            </div>
-            <p class="text-body-base text-secondary">Review dan kurasi template design dari designer tersedia</p>
-          </a>
-        </>
-      )}
+      <a href="/dashboard/store" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Pengaturan Toko</h3>
+          <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+        </div>
+        <p class="text-body-base text-secondary">Kelola informasi toko, subdomain, dan kontak bisnis Anda</p>
+      </a>
+      <a href="/dashboard/analytics" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Analitik Toko</h3>
+          <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
+        </div>
+        <p class="text-body-base text-secondary">Monitor pengunjung, klik WhatsApp, dan tingkat konversi toko</p>
+      </a>
     </div>
   </div>
 </DashboardLayout>

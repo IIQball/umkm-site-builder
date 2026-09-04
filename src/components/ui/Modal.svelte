@@ -4,10 +4,12 @@
   export let open: boolean = false;
   export let title: string = '';
   export let description: string = '';
-  export let size: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'md';
+  export let size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'md';
   export let closeOnEsc: boolean = true;
   export let closeOnBackdrop: boolean = true;
   export let showCloseButton: boolean = true;
+  export let bodyPadding: boolean = true;
+  export let borderless: boolean = false;
   let className: string = '';
   export { className as class };
 
@@ -17,6 +19,7 @@
   }>();
 
   const sizeStyles = {
+    xs: 'max-w-xs',
     sm: 'max-w-sm',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
@@ -79,9 +82,9 @@
       aria-describedby={description ? 'modal-desc' : undefined}
     >
       <!-- Modal Header -->
-      {#if title || $$slots.header || showCloseButton}
-        <div class="px-6 sm:px-7 py-5 border-b border-light flex items-center justify-between gap-4">
-          <div class="min-w-0 flex-1">
+      {#if title || $$slots.header}
+        <div class="px-6 sm:px-7 py-5 flex items-start justify-between gap-4 {borderless ? '' : 'border-b border-light'}">
+          <div class="min-w-0 flex-1 {borderless ? 'mt-2' : ''}">
             {#if $$slots.header}
               <slot name="header" />
             {:else}
@@ -91,7 +94,7 @@
                 </h3>
               {/if}
               {#if description}
-                <p id="modal-desc" class="text-body-sm text-secondary mt-0.5">
+                <p id="modal-desc" class="text-body-sm text-secondary mt-1">
                   {description}
                 </p>
               {/if}
@@ -102,7 +105,7 @@
             <button
               type="button"
               on:click={handleClose}
-              class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-muted hover:text-main flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer"
+              class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-muted hover:text-main flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer {borderless ? '-mr-2 -mt-1' : ''}"
               aria-label="Tutup Dialog"
             >
               <svg
@@ -122,16 +125,39 @@
             </button>
           {/if}
         </div>
+      {:else if showCloseButton}
+        <!-- Absolute Close Button for headerless modals -->
+        <button
+          type="button"
+          on:click={handleClose}
+          class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-nested/80 backdrop-blur hover:bg-nested border border-light text-muted hover:text-main flex items-center justify-center transition-colors cursor-pointer"
+          aria-label="Tutup Dialog"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       {/if}
 
       <!-- Modal Body -->
-      <div class="px-6 sm:px-7 py-6 max-h-[75vh] overflow-y-auto">
+      <div class="px-6 sm:px-7 max-h-[75vh] overflow-y-auto {bodyPadding ? (borderless ? 'pb-6' : 'py-6') : 'py-0'}">
         <slot />
       </div>
 
       <!-- Modal Footer -->
       {#if $$slots.footer}
-        <div class="px-6 sm:px-7 py-4 bg-nested/50 border-t border-light flex flex-wrap items-center justify-end gap-3">
+        <div class="px-6 sm:px-7 py-5 flex flex-wrap items-center justify-end gap-3 {borderless ? '' : 'bg-nested/50 border-t border-light'}">
           <slot name="footer" />
         </div>
       {/if}

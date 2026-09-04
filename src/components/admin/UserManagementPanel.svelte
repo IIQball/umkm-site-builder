@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Search, UserX, CheckCircle2, AlertCircle, Users } from 'lucide-svelte';
+  import { Search, UserX, CheckCircle2, AlertCircle, FileText, CheckCircle, Ban } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
   import { Badge, Card, Button, Input, Select } from '@/components/ui';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
+  import AdminUserAddModal from './AdminUserAddModal.svelte';
 
   export let initialUsersJson: string = '[]';
   let users: AdminUserItem[] = [];
@@ -23,6 +24,7 @@
   let suspendModalOpen = false;
   let unsuspendModalOpen = false;
   let detailModalOpen = false;
+  let isAddModalOpen = false;
   let suspendReason = '';
   let actionLoading = false;
   let toast: { message: string; type: 'success' | 'error' } | null = null;
@@ -152,50 +154,64 @@
 </script>
 
 <div class="space-y-6 md:space-y-8 animate-fade-in-up">
-  <Card variant="bordered" padding="lg" radius="2xl" className="shadow-xs hover:shadow-md transition-all">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
-          <Users size={20} />
-        </div>
-        <div>
-          <h1 class="text-heading-md font-bold text-main leading-tight">Manajemen Pengguna</h1>
-          <p class="text-body-sm text-secondary mt-0.5">Kelola dan tinjau status akun pengguna di platform</p>
-        </div>
+  <!-- Page Header -->
+  <div class="flex flex-col gap-6 pb-2">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Manajemen Pengguna</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Kelola dan tinjau status akun pengguna di platform.
+        </p>
       </div>
-      
-      <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-        <div class="w-full md:w-64 relative">
+
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          variant="secondary"
+          size="md"
+          on:click={() => isAddModalOpen = true}
+          class="font-bold"
+        >
+          <span class="material-symbols-outlined text-primary text-base">person_add</span>
+          <span>Tambah Pengguna</span>
+        </Button>
+      </div>
+    </div>
+    
+    <div class="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
+        <div class="w-full sm:w-64 xl:w-72 relative">
           <Input 
             bind:value={searchQuery}
             placeholder="Cari nama atau email..." 
-            size="sm"
+            size="md"
           >
-            <div slot="prefix"><Search size={16} /></div>
+            <div slot="prefix"><Search size={18} class="text-muted" /></div>
           </Input>
         </div>
         
-        <div class="flex gap-2 w-full md:w-auto">
-          <div class="w-full md:w-36">
+        <div class="flex gap-3 w-full sm:w-auto">
+          <div class="w-full sm:w-40">
             <Select 
               bind:value={roleFilter}
               options={roleOptions}
-              size="sm"
+              size="md"
             />
           </div>
-          <div class="w-full md:w-40">
+          <div class="w-full sm:w-40">
             <Select 
               bind:value={statusFilter}
               options={statusOptions}
-              size="sm"
+              size="md"
             />
           </div>
         </div>
       </div>
     </div>
-  </Card>
+  </div>
 
-  <Card variant="bordered" padding="none" radius="2xl" className="overflow-hidden shadow-xs">
+  <Card variant="bordered" padding="none" radius="2xl" class="overflow-hidden shadow-xs">
     {#if isLoading && users.length === 0}
       <div class="flex justify-center items-center py-16">
         <span class="loading loading-spinner loading-lg text-primary"></span>
@@ -237,42 +253,49 @@
                 </td>
                 <td class="px-4 py-4">
                   {#if item.status === 'active'}
-                    <Badge variant="emerald" dot size="sm">
-                      AKTIF
+                    <Badge variant="emerald" size="sm">
+                      <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
+                      Aktif
                     </Badge>
                   {:else}
-                    <Badge variant="rose" dot size="sm">
-                      DITANGGUHKAN
+                    <Badge variant="rose" size="sm">
+                      <Ban size={12} strokeWidth={3} class="mr-1 inline" />
+                      Ditangguhkan
                     </Badge>
                   {/if}
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-2">
+                  <div class="flex items-center justify-end gap-1.5">
                     {#if item.status === 'active'}
                       <Button 
                         size="xs"
                         variant="destructive"
                         on:click={() => openSuspendModal(item)}
+                        title="Tangguhkan Pengguna"
                       >
-                        Tangguhkan
+                        <AlertCircle size={13} class="mr-1" />
+                        <span>Tangguhkan</span>
                       </Button>
                     {:else}
                       {#if item.suspendReason}
                         <Button 
                           size="xs"
-                          variant="outline"
+                          variant="secondary"
                           title="Lihat Alasan"
                           on:click={() => openDetailModal(item)}
                         >
-                          Alasan
+                          <FileText size={13} class="mr-1" />
+                          <span>Alasan</span>
                         </Button>
                       {/if}
                       <Button 
                         size="xs"
-                        class="!bg-success hover:!bg-success/90 text-white"
+                        variant="primary"
                         on:click={() => openUnsuspendModal(item)}
+                        title="Aktifkan Pengguna"
                       >
-                        Aktifkan
+                        <CheckCircle2 size={13} class="mr-1" />
+                        <span>Aktifkan</span>
                       </Button>
                     {/if}
                   </div>
@@ -299,8 +322,14 @@
 
 <AdminUserDetailModal
   isOpen={detailModalOpen}
-  {selectedUser}
+  selectedUser={selectedUser}
   onClose={closeModal}
+/>
+
+<AdminUserAddModal 
+  isOpen={isAddModalOpen} 
+  on:close={() => isAddModalOpen = false} 
+  on:success={() => { isAddModalOpen = false; fetchUsers(); }} 
 />
 
 {#if toast}

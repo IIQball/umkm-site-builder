@@ -14,7 +14,7 @@ vi.mock('@/db/index', () => {
   const mockDb = {
     select: vi.fn(),
   };
-  return { db: mockDb, transactions: {}, activityLogs: {} };
+  return { db: mockDb, transactions: {}, activityLogs: {}, templates: {}, payoutRequests: {}, users: {} };
 });
 
 describe('Admin Metrics API Endpoint', () => {

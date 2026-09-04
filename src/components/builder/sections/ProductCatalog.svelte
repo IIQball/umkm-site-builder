@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { ShoppingCart } from 'lucide-svelte';
+  import { formatIDR } from '@/lib/currency';
   import { DEFAULT_DEMO_PRODUCTS, getCleanWaNumber } from './productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
   import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
@@ -99,15 +100,14 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
       return;
     }
     const itemsSummary = detailedCart
-
-    .map((item) => {
+      .map((item) => {
         const p = item.product;
         const s = item.selections;
-        return `• ${p.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
+        return `• ${p.name} (x${item.qty}) - ${formatIDR(item.subtotal)}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
       })
       .join("\n");
       
-    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     
     window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -175,7 +175,7 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
         </div>
         <span>Keranjang</span>
         <span class="font-mono bg-white/20 px-2 py-0.5 rounded-full text-xs">
-          Rp {cartTotal.toLocaleString('id-ID')}
+          {formatIDR(cartTotal)}
         </span>
       </button>
     </div>

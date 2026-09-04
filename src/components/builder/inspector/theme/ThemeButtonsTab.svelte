@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { RADIUS_PRESETS } from '@/components/tokens/radius';
 
   export let theme: TemplateTheme;
   export let onButtonVariantChange: (variantKey: string, key: string, value: string) => void = () => {};
@@ -7,28 +8,23 @@
 
   $: buttons = theme.buttons || {};
 
-  const radiusPresets = [
-    { label: 'Sharp', value: '0px' },
-    { label: 'SM (4px)', value: '4px' },
-    { label: 'MD (8px)', value: '8px' },
-    { label: 'LG (16px)', value: '16px' },
-    { label: 'Pill', value: '9999px' },
-  ];
-
   const getButtonVariant = (key: string) => {
     return buttons[key as 'primary' | 'secondary'] || {};
   };
+
+  const getRadiusString = (val: number): string => `${val}px`;
 </script>
 
 <div class="space-y-4">
   <div>
     <span class="block font-semibold text-base-content/80 mb-1">Global Border Radius</span>
     <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
-      {#each radiusPresets as rp}
+      {#each RADIUS_PRESETS as rp}
+        {@const valStr = getRadiusString(rp.value)}
         <button
           type="button"
-          on:click={() => onButtonRadiusChange(rp.value)}
-          class={`py-1 rounded font-medium transition-colors cursor-pointer ${(buttons.borderRadius || '8px') === rp.value ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}
+          on:click={() => onButtonRadiusChange(valStr)}
+          class={`py-1 rounded font-medium transition-colors cursor-pointer ${(buttons.borderRadius || '8px') === valStr ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'}`}
         >
           {rp.label}
         </button>

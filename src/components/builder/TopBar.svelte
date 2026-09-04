@@ -3,13 +3,12 @@
     Save,
     Send,
     CheckCircle2,
-    Loader2,
     ArrowLeft,
   } from 'lucide-svelte';
   import { editorStore } from './stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
   import TopBarViewportControls from './topbar/TopBarViewportControls.svelte';
-  import { Badge } from '@/components/ui';
+  import { Badge, Button } from '@/components/ui';
 
   export let templateId: string = '';
   export let templateName: string = 'Template';
@@ -104,34 +103,39 @@
   <!-- Right actions -->
   <div class="flex items-center gap-2">
     <!-- Save Status / Button -->
-    <button
-      on:click={onSave}
+    <Button
+      variant={saveSuccess ? 'secondary' : isDirty ? 'primary' : 'secondary'}
+      size="sm"
+      loading={saving}
       disabled={saving}
-      class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all {saveSuccess ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : isDirty ? 'bg-primary text-white border-transparent hover:bg-primary/90 shadow-xs' : 'bg-nested text-secondary hover:text-main border-light'}"
+      on:click={onSave}
+      class={saveSuccess ? '!bg-emerald-500/10 !text-emerald-600 dark:!text-emerald-400 !border-emerald-500/20' : ''}
       title={isDirty ? 'Ada perubahan belum disimpan (Ctrl+S)' : 'Semua perubahan tersimpan'}
     >
-      {#if saving}
-        <Loader2 size={13} class="animate-spin" />
-        <span class="hidden sm:inline">Menyimpan...</span>
-      {:else if saveSuccess}
-        <CheckCircle2 size={13} />
-        <span class="hidden sm:inline">Tersimpan</span>
+      {#if !saving}
+        {#if saveSuccess}
+          <CheckCircle2 size={13} />
+          <span class="hidden sm:inline">Tersimpan</span>
+        {:else}
+          <Save size={13} />
+          <span class="hidden sm:inline">{isDirty ? 'Simpan' : 'Tersimpan'}</span>
+        {/if}
       {:else}
-        <Save size={13} />
-        <span class="hidden sm:inline">{isDirty ? 'Simpan' : 'Tersimpan'}</span>
+        <span class="hidden sm:inline">Menyimpan...</span>
       {/if}
-    </button>
+    </Button>
 
     <!-- Ajukan Kurasi (Review) Button -->
     {#if status === 'draft' || status === 'rejected'}
-      <button
+      <Button
+        variant="dark"
+        size="sm"
         on:click={() => (isSubmitModalOpen = true)}
-        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-lg hover:opacity-90 transition-all shadow-xs"
         title="Ajukan template ke admin untuk ditinjau"
       >
         <Send size={13} />
         <span class="hidden sm:inline">Ajukan Review</span>
-      </button>
+      </Button>
     {/if}
   </div>
 </header>

@@ -37,12 +37,13 @@ One pack. Never a second. No emojis as substitutes.
 | progress | progress-primary, progress-success | shared/ImageUpload.svelte, dashboard/TrafficWidget.svelte |
 | stat | implicit via card + flex layout | dashboard/TrafficWidget.svelte (two stat cards) |
 | progress | progress-primary | shared/ImageUpload.svelte |
-| modal | modal, modal-open, modal-box, modal-action | dashboard/ConfirmTemplateModal.svelte |
+| modal | modal, modal-open, modal-box, modal-backdrop, modal-action | src/components/ui/Modal.svelte |
 
 ## 3.1 Composite components (project-specific)
 
 | Component | File | Built from | Props |
 |---|---|---|---|
+| Modal | src/components/ui/Modal.svelte | modal, modal-open, modal-box, modal-backdrop, modal-action, teleport, lucide icons | open, title, description, size, closeOnEsc, closeOnBackdrop, showCloseButton, bodyPadding, borderless, class |
 | ImageUpload | src/components/shared/ImageUpload.svelte | card, btn, alert, progress, lucide icons | folder, maxFiles, maxSizeMB, existingUrls, onUpload |
 | TrafficWidget | src/components/dashboard/TrafficWidget.svelte | card, btn, alert, progress, lucide icons (TrendingUp, Users, MessageCircle, Loader2) | storeId |
 
@@ -59,7 +60,8 @@ different cards.
 | empty state | | | |
 | loading state | | | |
 | error state | | | |
-| confirm dialog | | | |
+| modal / dialog | src/components/ui/Modal.svelte | All modal dialogues | **Modal Canonical**: Gunakan `src/components/ui/Modal.svelte`. Komponen ini adalah standard wrapper resmi proyek yang membungkus primitif daisyUI (`modal`, `modal-box`, `modal-backdrop`, `modal-action`) dan menangani aksesibilitas (`teleport`, click-outside backdrop, `Escape` listener, internal flexible scroll) secara sentral. Dilarang menulis backdrop manual atau memanggil tag `<dialog class="modal">` secara mentah. |
+| confirm dialog | src/components/ui/Modal.svelte | admin/whitelist, tenant/ProductDeleteModal | Use Modal with slot header & footer actions |
 
 ## 5. Version gotchas
 
@@ -72,5 +74,5 @@ first time it bites.
 
 Components available but not yet needed. Move a row up to §3 when introduced.
 
-navbar, modal, tabs, table, tooltip, skeleton, stat, drawer, dropdown, menu, pagination,
+navbar, tabs, table, tooltip, skeleton, stat, drawer, dropdown, menu, pagination,
 alert, toast, badge, avatar, breadcrumbs, steps, accordion.

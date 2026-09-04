@@ -1,18 +1,26 @@
+import { formatIDR } from './currency';
+
 export const DEFAULT_DEMO_WA_NUMBER = '6281234567890';
 
-export function formatWhatsAppNumber(phone: string): string {
+export function normalizeWhatsAppNumber(phone?: string | null): string {
   if (!phone) return '';
   let cleaned = phone.replace(/\D/g, '');
   if (cleaned.startsWith('0')) {
     cleaned = '62' + cleaned.substring(1);
+  } else if (cleaned.startsWith('620')) {
+    cleaned = '62' + cleaned.substring(3);
   } else if (cleaned.startsWith('8')) {
     cleaned = '62' + cleaned;
   }
   return cleaned;
 }
 
+export function formatWhatsAppNumber(phone: string): string {
+  return normalizeWhatsAppNumber(phone);
+}
+
 export function getEffectiveWhatsAppNumber(phone?: string | null): string {
-  const formatted = formatWhatsAppNumber(phone || '');
+  const formatted = normalizeWhatsAppNumber(phone);
   return formatted || DEFAULT_DEMO_WA_NUMBER;
 }
 
@@ -22,12 +30,16 @@ export function generateWhatsAppLink(phone?: string | null, customText?: string)
   return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
 }
 
+export function buildWhatsAppUrl(phone?: string | null, customText?: string): string {
+  return generateWhatsAppLink(phone, customText);
+}
+
 export function generateWhatsAppOrderUrl(phone: string, productName: string, productPrice?: number, variantInfo?: string): string {
   const formattedPhone = getEffectiveWhatsAppNumber(phone);
 
   let message = `Halo, saya tertarik dengan produk ${productName}`;
   if (typeof productPrice === 'number') {
-    message += ` (Rp ${productPrice.toLocaleString('id-ID')})`;
+    message += ` (${formatIDR(productPrice)})`;
   }
   if (variantInfo) {
     message += `\n*Varian: ${variantInfo}*`;
@@ -36,3 +48,4 @@ export function generateWhatsAppOrderUrl(phone: string, productName: string, pro
 
   return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
 }
+

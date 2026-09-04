@@ -1,22 +1,36 @@
 import { z } from 'zod';
+import {
+  COLOR_TOKENS,
+  RADIUS_STEPS,
+  FONT_FAMILIES,
+  FONT_FAMILY_OPTIONS,
+} from '@/components/tokens';
 
-export const ColorTokenSchema = z.enum([
-  'primary',
-  'secondary',
-  'accent',
-  'background',
-  'surface',
-  'text_primary',
-  'text_muted',
-  'textPrimary',
-  'textMuted',
-  'transparent',
-]);
-
+export const ColorTokenSchema = z.enum(COLOR_TOKENS);
 export type ColorToken = z.infer<typeof ColorTokenSchema>;
 
 export const TypographyTokenSchema = z.enum(['h1', 'h2', 'h3', 'body', 'caption']);
 export type TypographyToken = z.infer<typeof TypographyTokenSchema>;
+
+export const RadiusStepSchema = z.union(
+  RADIUS_STEPS.map((step) => z.literal(step)) as [
+    z.ZodLiteral<number>,
+    z.ZodLiteral<number>,
+    ...z.ZodLiteral<number>[]
+  ]
+);
+export type RadiusStep = z.infer<typeof RadiusStepSchema>;
+
+export const FontFamilySchema = z.string().refine(
+  (val) => {
+    return (
+      (FONT_FAMILIES as readonly string[]).some((f) => val.includes(f)) ||
+      FONT_FAMILY_OPTIONS.some((opt) => opt.value === val)
+    );
+  },
+  { message: 'Invalid font family' }
+);
+export type FontFamily = z.infer<typeof FontFamilySchema>;
 
 export const SpacingStepSchema = z.union([
   z.literal(0),

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { UserPlus, X, Store, Paintbrush, ArrowRight, ArrowLeft, Eye, EyeOff, Check, CheckCircle2 } from 'lucide-svelte';
+  import { UserPlus, Store, Paintbrush, ArrowRight, ArrowLeft, Eye, EyeOff, Check, CheckCircle2 } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
-  import { Button, Input, Card } from '@/components/ui';
+  import { Button, Input, Card, Modal } from '@/components/ui';
 
   export let isOpen = false;
 
@@ -84,28 +84,15 @@
   };
 </script>
 
-{#if isOpen}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-nested/80 backdrop-blur-sm" on:click={close} on:keydown={(e) => e.key === 'Escape' && close()} role="button" tabindex="0"></div>
-    <div class="relative bg-card w-full max-w-lg rounded-3xl shadow-2xl border border-light overflow-hidden animate-scale-up">
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-light flex justify-between items-center bg-nested/30">
-        <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
-          <UserPlus size={18} class="text-primary" />
-          <span class="pt-1">Pendaftaran Pengguna Baru</span>
-        </h3>
-        <Button
-          variant="secondary"
-          size="icon"
-          on:click={close}
-          disabled={isSubmitting}
-          title="Tutup"
-        >
-          <X size={18} class="text-secondary" />
-        </Button>
-      </div>
+<Modal open={isOpen} on:close={close} size="md">
+  <svelte:fragment slot="header">
+    <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
+      <UserPlus size={18} class="text-primary" />
+      <span>Pendaftaran Pengguna Baru</span>
+    </h3>
+  </svelte:fragment>
 
-      <div class="p-6">
+  <div class="py-1">
         <!-- Step Indicator -->
         <div class="flex items-center justify-center mb-8 gap-4">
           <div class="flex items-center gap-2 {step === 'role' ? 'text-primary font-bold' : 'text-success'}">
@@ -265,33 +252,33 @@
         {/if}
       </div>
 
-      <!-- Footer Actions -->
-      <div class="px-6 py-4 border-t border-light bg-nested/20 flex justify-between items-center">
-        {#if step === 'role'}
-          <Button variant="secondary" size="sm" on:click={close}>Batal</Button>
-          <Button variant="primary" size="sm" disabled={!selectedRole} on:click={goToDetails} className="font-bold px-6">
-            <span>Lanjut</span>
-            <ArrowRight size={16} class="ml-1" />
-          </Button>
-        {:else if step === 'details'}
-          <Button variant="secondary" size="sm" on:click={goBack} disabled={isSubmitting}>
-            <ArrowLeft size={16} class="mr-1" />
-            <span>Kembali</span>
-          </Button>
-          <Button 
-            type="button"
-            variant="primary" 
-            size="sm" 
-            disabled={isSubmitting || !newName || !newEmail || !newPassword || !confirmPassword} 
-            loading={isSubmitting}
-            on:click={handleAdd}
-            className="font-bold px-6"
-          >
-            <UserPlus size={16} class="mr-1" />
-            <span>Daftarkan Akun</span>
-          </Button>
-        {/if}
-      </div>
+  <!-- Footer Actions -->
+  <svelte:fragment slot="footer">
+    <div class="w-full flex justify-between items-center">
+      {#if step === 'role'}
+        <Button variant="secondary" size="sm" on:click={close}>Batal</Button>
+        <Button variant="primary" size="sm" disabled={!selectedRole} on:click={goToDetails} className="font-bold px-6">
+          <span>Lanjut</span>
+          <ArrowRight size={16} class="ml-1" />
+        </Button>
+      {:else if step === 'details'}
+        <Button variant="secondary" size="sm" on:click={goBack} disabled={isSubmitting}>
+          <ArrowLeft size={16} class="mr-1" />
+          <span>Kembali</span>
+        </Button>
+        <Button 
+          type="button"
+          variant="primary" 
+          size="sm" 
+          disabled={isSubmitting || !newName || !newEmail || !newPassword || !confirmPassword} 
+          loading={isSubmitting}
+          on:click={handleAdd}
+          className="font-bold px-6"
+        >
+          <UserPlus size={16} class="mr-1" />
+          <span>Daftarkan Akun</span>
+        </Button>
+      {/if}
     </div>
-  </div>
-{/if}
+  </svelte:fragment>
+</Modal>

@@ -60,22 +60,11 @@
 {#if open}
   <div
     use:teleport
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/60 backdrop-blur-sm animate-fade-in transition-all"
+    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm transition-all"
     role="presentation"
   >
-    <!-- Accessible backdrop dismiss button -->
-    {#if closeOnBackdrop}
-      <button
-        type="button"
-        class="fixed inset-0 w-full h-full bg-transparent cursor-default border-none outline-none -z-10"
-        tabindex="-1"
-        aria-hidden="true"
-        on:click={handleClose}
-      ></button>
-    {/if}
-
     <div
-      class="w-full bg-card border border-light rounded-3xl shadow-2xl overflow-hidden relative animate-fade-in-up text-main my-auto {sizeStyles[size] || sizeStyles.md} {className}"
+      class="modal-box w-full p-0 max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-light rounded-3xl shadow-2xl overflow-hidden relative text-main my-auto {sizeStyles[size] || sizeStyles.md} {className}"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
@@ -83,7 +72,7 @@
     >
       <!-- Modal Header -->
       {#if title || $$slots.header}
-        <div class="px-6 sm:px-7 py-5 flex items-start justify-between gap-4 {borderless ? '' : 'border-b border-light'}">
+        <div class="px-6 sm:px-7 py-5 flex items-start justify-between gap-4 flex-shrink-0 {borderless ? '' : 'border-b border-light'}">
           <div class="min-w-0 flex-1 {borderless ? 'mt-2' : ''}">
             {#if $$slots.header}
               <slot name="header" />
@@ -108,17 +97,7 @@
               class="w-8 h-8 rounded-full bg-nested hover:bg-nested/80 border border-light text-muted hover:text-main flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer {borderless ? '-mr-2 -mt-1' : ''}"
               aria-label="Tutup Dialog"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -126,24 +105,13 @@
           {/if}
         </div>
       {:else if showCloseButton}
-        <!-- Absolute Close Button for headerless modals -->
         <button
           type="button"
           on:click={handleClose}
           class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-nested/80 backdrop-blur hover:bg-nested border border-light text-muted hover:text-main flex items-center justify-center transition-colors cursor-pointer"
           aria-label="Tutup Dialog"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -151,16 +119,23 @@
       {/if}
 
       <!-- Modal Body -->
-      <div class="px-6 sm:px-7 max-h-[75vh] overflow-y-auto {bodyPadding ? (borderless ? 'pb-6' : 'py-6') : 'py-0'}">
+      <div class="px-6 sm:px-7 flex-1 min-h-0 overflow-y-auto {bodyPadding ? (borderless ? 'pb-6' : 'py-6') : 'py-0'}">
         <slot />
       </div>
 
       <!-- Modal Footer -->
       {#if $$slots.footer}
-        <div class="px-6 sm:px-7 py-5 flex flex-wrap items-center justify-end gap-3 {borderless ? '' : 'bg-nested/50 border-t border-light'}">
+        <div class="modal-action m-0 px-6 sm:px-7 py-5 flex flex-wrap items-center justify-end gap-3 flex-shrink-0 {borderless ? '' : 'bg-nested/50 border-t border-light'}">
           <slot name="footer" />
         </div>
       {/if}
     </div>
+
+    <!-- daisyUI Modal Backdrop -->
+    {#if closeOnBackdrop}
+      <form method="dialog" class="modal-backdrop">
+        <button type="button" on:click={handleClose} class="cursor-default outline-none">close</button>
+      </form>
+    {/if}
   </div>
 {/if}

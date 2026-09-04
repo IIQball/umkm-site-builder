@@ -1,3 +1,5 @@
+import { FONT_SIZES, FONT_WEIGHTS } from '@/components/tokens/typography';
+
 export const fontFamilies = [
   { label: 'Default (Inter)', value: 'Inter, sans-serif' },
   { label: 'Plus Jakarta Sans (Modern)', value: '"Plus Jakarta Sans", sans-serif' },
@@ -6,21 +8,9 @@ export const fontFamilies = [
   { label: 'Outfit (Clean)', value: 'Outfit, sans-serif' },
 ];
 
-export const fontSizes = [
-  { label: 'Caption / Badge (10px)', value: 'var(--theme-text-caption, 10px)' },
-  { label: 'Body Text (16px)', value: 'var(--theme-text-body, 16px)' },
-  { label: 'H3 - Subtitle / Card (20px)', value: 'var(--theme-text-h3, 20px)' },
-  { label: 'H2 - Section Heading (26px)', value: 'var(--theme-text-h2, 26px)' },
-  { label: 'H1 - Hero Title (42px)', value: 'var(--theme-text-h1, 42px)' },
-];
+export const fontSizes = FONT_SIZES;
 
-export const fontWeights = [
-  { label: 'Normal (400)', value: '400' },
-  { label: 'Medium (500)', value: '500' },
-  { label: 'Semi Bold (600)', value: '600' },
-  { label: 'Bold (700)', value: '700' },
-  { label: 'Extra Bold (800)', value: '800' },
-];
+export const fontWeights = FONT_WEIGHTS;
 
 export const radiusPresets = [
   { label: 'Kotak (0px)', value: '0px' },

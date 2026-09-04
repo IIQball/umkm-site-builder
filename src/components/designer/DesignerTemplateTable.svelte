@@ -5,6 +5,7 @@
   import DesignerRejectionModal from './templates/DesignerRejectionModal.svelte';
   import DesignerDeleteDraftModal from './templates/DesignerDeleteDraftModal.svelte';
   import { addToast } from '@/lib/toast';
+  import { formatDate } from '@/lib/utils/format';
 
   export let templates: Array<{
     id: string;
@@ -46,12 +47,6 @@
       // clipboard unavailable
     }
   };
-
-  const formatDate = (d: Date | string): string =>
-    new Date(d).toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
 
   $: counts = {
     all: templates.length,

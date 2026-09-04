@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
+  import { formatIDR, formatCurrencyInput } from '@/lib/currency';
   import TemplateCardPreview from './template-form/TemplateCardPreview.svelte';
   import TemplatePricingSimulator from './template-form/TemplatePricingSimulator.svelte';
   import TemplateBasicDetails from './template-form/TemplateBasicDetails.svelte';
@@ -67,23 +68,21 @@
 
   $: pricePreview =
     numericPriceState > 0
-      ? `Rp ${new Intl.NumberFormat('id-ID').format(numericPriceState)}`
+      ? formatIDR(numericPriceState)
       : 'Gratis';
 
   /** Auto-format visual masking while typing */
   const handlePriceInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
     const rawDigits = target.value.replace(/\D/g, '');
-    target.value = rawDigits
-      ? new Intl.NumberFormat('id-ID').format(Number(rawDigits))
-      : '';
+    target.value = formatCurrencyInput(rawDigits);
     priceDisplay = target.value;
     numericPriceState = Number(rawDigits) || 0;
   };
 
   const selectPricePreset = (val: number) => {
     numericPriceState = val;
-    priceDisplay = val > 0 ? new Intl.NumberFormat('id-ID').format(val) : '0';
+    priceDisplay = val > 0 ? formatCurrencyInput(val) : '0';
   };
 
   const handleSubmit = async (e: Event) => {

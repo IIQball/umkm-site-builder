@@ -3,6 +3,29 @@
  * Matches CSS Semantic Variables in src/styles/global.css
  */
 
+export const DEFAULT_THEME_COLOR_FIELDS = [
+  { key: 'primary', label: 'Primary Brand Color', defaultVal: '#2563eb' },
+  { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#334155' },
+  { key: 'background', label: 'Background Kanvas', defaultVal: '#ffffff' },
+  { key: 'surface', label: 'Surface / Card Background', defaultVal: '#f8fafc' },
+  { key: 'textPrimary', label: 'Teks Utama (Primary)', defaultVal: '#0f172a' },
+  { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' },
+] as const;
+
+export const COLOR_TOKENS = [
+  'primary',
+  'secondary',
+  'accent',
+  'background',
+  'surface',
+  'text_primary',
+  'text_muted',
+  'textPrimary',
+  'textMuted',
+  'transparent',
+] as const;
+export type ColorToken = (typeof COLOR_TOKENS)[number];
+
 export const colors = {
   primary: {
     DEFAULT: '#2563eb',
@@ -125,4 +148,3 @@ export type BadgeVariant =
   | 'amber'
   | 'rose'
   | 'orange';
-

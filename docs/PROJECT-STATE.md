@@ -11,6 +11,62 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
+- **Marketplace Template Purchase Endpoint Fix**:
+  - Fixed 404 error on marketplace checkout by updating [`src/components/public/PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/public/PublicTemplateMarketplace.svelte) from non-existent `/api/checkout/create` and `/api/tenant/template/apply` to the canonical transaction endpoint `/api/tenant/transactions/template-purchase`.
+  - Seamlessly handles both free template claims (`isFree: true`) and paid checkout redirections (`/checkout/${result.data.externalId}`).
+
+- **Migrate Remaining Modals to Canonical `ui/Modal.svelte` & Resolve Issue #70:**
+  - **Eliminated Raw `<dialog class="modal">` and Hand-Rolled Backdrops**:
+    - `src/components/tenant/ProductFormModal.svelte`: Replaced raw `<dialog>` element and imperative `.showModal()` / `.close()` with `<Modal open={showModal} on:close={closeModal} size="lg" title="...">`. File shortened from 283 to 258 lines.
+    - `src/components/checkout/PaymentModal.svelte`: Replaced raw `<dialog>` with `<Modal open={open} on:close={closeModal} size="xl" bodyPadding={false} ...>`.
+    - `src/components/checkout/CheckoutSummaryCard.svelte`: Wired reactive `isPaymentModalOpen` state to `<PaymentModal>`.
+    - `src/components/admin/AdminUserAddModal.svelte`: Removed hand-rolled `fixed inset-0` backdrop, keydown handler, and container div in favor of `<Modal open={isOpen} on:close={close} size="md">` with custom header & footer action slots. Reduced from 298 to 285 lines ($\le 300$ limit).
+    - `src/components/admin/whitelist/AdminAddModal.svelte`: Replaced hand-rolled backdrop with `<Modal open={isOpen} on:close={close} size="md">`.
+    - `src/components/admin/whitelist/AdminDetailModal.svelte`: Replaced hand-rolled backdrop with `<Modal open={!!admin} on:close={close} size="md">`.
+  - **Catalog Inline Checkout Clarification**: Added explanatory header comment to [`src/components/builder/sections/catalog/CatalogCheckoutModal.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/catalog/CatalogCheckoutModal.svelte) noting it is an in-canvas inline block component rather than an overlay dialog.
+  - **Documentation Alignment**: Updated [`docs/memory/ui-inventory.md`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/docs/memory/ui-inventory.md) to formally designate `src/components/ui/Modal.svelte` as the project's single canonical modal component.
+  - Strict 0 occurrences of `<dialog class="modal">` in `src/components`.
+  - 0 typecheck errors (`bun run type-check`), 0 lint warnings (`bun run lint`), 100% tests passing (378 tests in 54 suites).
+
+- **Revitalize Design System Tokens as SSOT & Eliminate Triplicate Definitions (Issue #68):**
+  - **Revitalized `src/components/tokens/` as Canonical SSOT**:
+    - `radius.ts`: Exported `RADIUS_STEPS` (0, 4, 8, 12, 16, 20, 24, 32, 9999) and complete `RADIUS_PRESETS` with all UI labels.
+    - `typography.ts`: Exported `FONT_FAMILIES`, `FONT_FAMILY_OPTIONS`, `FONT_SIZES`, `FONT_WEIGHTS`, and `TYPOGRAPHY_SCALES`.
+    - `spacing.ts`: Exported `MAX_WIDTH_OPTIONS` alongside standard 8pt grid and safe-zone constraints.
+    - `colors.ts`: Exported `COLOR_TOKENS` and `DEFAULT_THEME_COLOR_FIELDS`.
+    - `index.ts`: Full barrel re-export of all constants, presets, and inferred types.
+  - **Synchronized Zod Validation Schemas ([`src/schemas/templates/template.tokens.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/schemas/templates/template.tokens.ts))**:
+    - Derived `ColorTokenSchema` directly from `COLOR_TOKENS`.
+    - Derived `RadiusStepSchema` dynamically from `RADIUS_STEPS`.
+    - Validated `FontFamilySchema` against `FONT_FAMILIES` and `FONT_FAMILY_OPTIONS`.
+  - **Eliminated Hardcoded Lists in Builder Theme Inspector Tabs ([`src/components/builder/inspector/theme/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/theme/))**:
+    - `ThemeButtonsTab.svelte`: Replaced local `radiusPresets` with canonical `RADIUS_PRESETS` from tokens (restoring missing 12px, 20px, 24px, 32px options in UI).
+    - `ThemeTypographyTab.svelte`: Replaced inline lists with `FONT_FAMILY_OPTIONS` and `TYPOGRAPHY_SCALES`.
+    - `ThemeLayoutTab.svelte`: Replaced inline max-width options with `MAX_WIDTH_OPTIONS`.
+    - `ThemeColorsTab.svelte`: Consumes `DEFAULT_THEME_COLOR_FIELDS` from `colors.ts`.
+  - **Cleaned `nodeStyles.constants.ts` ([`src/components/builder/inspector/nodeStyles.constants.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/nodeStyles.constants.ts))**:
+    - Removed duplicate manual definitions of `fontSizes` and `fontWeights`, mapping directly to `FONT_SIZES` and `FONT_WEIGHTS` from `tokens/typography.ts`.
+  - 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites).
+
+- **Consolidation of Canonical Shared Helpers & Issue #69 Resolution:**
+  - **Single Source of Truth Currency Formatter (`formatIDR`)**:
+    - Eliminated inline `Intl.NumberFormat('id-ID')` and ad-hoc `'Rp ' + ...` across all 12 target components + catalog files (`StatCard`, `DesignerBankWithdraw`, `ProductCatalog`, `CheckoutPaymentBreakdown`, `NewTemplateForm`, `SubmitReviewModal`, `ProductBasicFields`, `ProductCatalogCard`, `CatalogCheckoutModal`, `TemplatePricingSimulator`, `ProductCatalogQuickView`, `ProductTableRow`, `ProductGrid`, `orders.astro`).
+    - Verified strict 0 matches for `Intl.NumberFormat('id-ID')` outside [`src/lib/currency.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/currency.ts).
+  - **Canonical WhatsApp Utilities (`normalizeWhatsAppNumber`, `buildWhatsAppUrl`, `generateWhatsAppLink`)**:
+    - Centralized WhatsApp parsing and URL formatting in [`src/lib/whatsapp.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/whatsapp.ts), fixing the leading `8...` prefix bug and supporting `08...`, `8...`, `620...`, `+62...`.
+    - Consolidated helper calls in `footer.helpers.ts`, `faq.helpers.ts`, `maps.helpers.ts`, `productCatalog.helpers.ts`, `ProductGrid.svelte`, and `[subdomain].astro`.
+    - Sanitized builder WhatsApp input in [`FooterNodeForms.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/node-forms/FooterNodeForms.svelte) with live normalization and validation pattern.
+  - **Single Source of Truth Date Formatter (`formatDate`)**:
+    - Extended [`src/lib/utils/format.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts) `formatDate` to accept optional `Intl.DateTimeFormatOptions`.
+    - Replaced all ad-hoc `toLocaleDateString` / `Intl.DateTimeFormat` in `AdminDetailModal`, `AdminWhitelistTable`, `UserManagementPanel`, `DesignerTemplateTable`, `DesignerTemplateCard`, and `DashboardNavbar`.
+  - **Standardized Admin Whitelist Table & Modularization**:
+    - Refactored [`AdminWhitelistTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/whitelist/AdminWhitelistTable.svelte) from raw `<table>` markup to standardized `<Table>` component.
+    - Modularized [`AdminUserTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/user/AdminUserTable.svelte) from [`UserManagementPanel.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/UserManagementPanel.svelte), bringing panel size from 349 lines down to 265 lines ($\le 300$ limit).
+  - **Standardized `--theme-primary` Fallbacks**:
+    - Replaced hardcoded `#4f00ff` fallback with canonical `#2563eb` across all catalog components (`ProductCatalogCard`, `CatalogCheckoutModal`, `ProductQuickCheckoutModal`, `ProductGrid`).
+    - Verified strict 0 matches for `#4f00ff` in the entire repository.
+  - 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites), zero live testing.
+
 - **Designer Wallet UI & Commission Synchronization ([`src/pages/designer/wallet.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/designer/wallet.astro), [`src/components/designer/DesignerBankCard.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankCard.svelte), [`src/components/designer/wallet/DesignerWeeklyChart.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/wallet/DesignerWeeklyChart.svelte)):**
   - **High-Contrast Bank Action Button**: Refactored "Ganti Rekening" button on [`DesignerBankCard.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankCard.svelte) with pure high-contrast white styling (`border-white/40 hover:border-white bg-white/10 hover:bg-white/20 text-white`) and Lucide Svelte `Pencil` icon, ensuring crisp visibility across both light and dark themes.
   - **Defensive Account Holder Resolution**: Standardized `accountHolder` / `holderName` mapping across [`bank-account.schema.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/schemas/designer/bank-account.schema.ts), [`wallet.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/types/finance/wallet.ts), and [`DesignerBankWithdraw.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankWithdraw.svelte), eliminating `UNDEFINED` text and rendering uppercase validated names.

@@ -1,4 +1,6 @@
 import type { ProductItem } from '@/types';
+import { formatIDR } from '@/lib/currency';
+import { getEffectiveWhatsAppNumber } from '@/lib/whatsapp';
 
 export const IMAGE_SUPPORTED_CATALOG_PRESETS = [
   'grid_standard',
@@ -25,25 +27,13 @@ export function isCatalogImageSupported(preset: string): boolean {
   return (IMAGE_SUPPORTED_CATALOG_PRESETS as readonly string[]).includes(preset);
 }
 
-export function formatRupiah(amount: number | string): string {
-  const num = typeof amount === 'number' ? amount : parseFloat(String(amount || 0).replace(/[^0-9.-]+/g, '')) || 0;
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(num);
-}
+export const formatRupiah = formatIDR;
 
-export function getCleanWaNumber(rawPhone: string): string {
-  let cleaned = (rawPhone || '').replace(/[^0-9]/g, '');
-  if (cleaned.startsWith('0')) cleaned = '62' + cleaned.slice(1);
-  if (!cleaned.startsWith('62') && cleaned.length > 0) cleaned = '62' + cleaned;
-  return cleaned || '6281234567890';
-}
+export const getCleanWaNumber = getEffectiveWhatsAppNumber;
 
 export function buildWhatsAppOrderLink(waNumber: string, productName: string, price: number | string): string {
-  const cleanPhone = getCleanWaNumber(waNumber);
-  const text = `Halo, saya ingin memesan: ${productName} (${formatRupiah(price)}). Mohon info ketersediaan stok & rekening. Terima kasih!`;
+  const cleanPhone = getEffectiveWhatsAppNumber(waNumber);
+  const text = `Halo, saya ingin memesan: ${productName} (${formatIDR(price)}). Mohon info ketersediaan stok & rekening. Terima kasih!`;
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
 }
 

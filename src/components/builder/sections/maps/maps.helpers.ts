@@ -1,3 +1,5 @@
+import { getEffectiveWhatsAppNumber, buildWhatsAppUrl } from '@/lib/whatsapp';
+
 export interface MapBranchItem {
   id: string;
   name: string;
@@ -35,16 +37,11 @@ export const DEFAULT_BRANCHES: MapBranchItem[] = [
   },
 ];
 
-export function getCleanWaNumber(wa?: string): string {
-  if (!wa) return '6281234567890';
-  let clean = wa.replace(/\D/g, '');
-  if (clean.startsWith('0')) clean = '62' + clean.slice(1);
-  return clean || '6281234567890';
-}
+export const getCleanWaNumber = getEffectiveWhatsAppNumber;
 
 export function buildWhatsAppHelpLink(waNumber?: string, message: string = 'Halo admin, saya ingin bertanya tentang rute dan jam operasional toko.'): string {
-  const clean = getCleanWaNumber(waNumber);
-  return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
+  const clean = getEffectiveWhatsAppNumber(waNumber);
+  return buildWhatsAppUrl(clean, message);
 }
 
 export function buildMapEmbedUrl(addressOrUrl?: string, zoom: number = 14): string {

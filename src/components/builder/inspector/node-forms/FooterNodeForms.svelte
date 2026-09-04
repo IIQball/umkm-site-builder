@@ -3,10 +3,16 @@
   import type { TemplateSection } from '@/schemas';
   import type { FooterMenuLink } from '@/types';
   import { DEFAULT_MENU_LINKS } from '../../sections/footer/footer.helpers';
+  import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
 
   export let section: TemplateSection;
   export let nodeId: string | null = null;
   export let onPropChange: (prop: string, val: unknown) => void;
+
+  const handleWaChange = (val: string) => {
+    const cleaned = normalizeWhatsAppNumber(val);
+    onPropChange('whatsappNumber', cleaned);
+  };
 
   $: props = section.props || {};
   $: activePreset = (section.layoutPreset || props.layoutPreset || section.styles?.layoutPreset || 'multi_column') as string;
@@ -86,7 +92,18 @@
       {/if}
       <div>
         <label for="b-tagline" class="block text-xs font-semibold text-base-content/70 mb-1">Deskripsi / Tagline Toko</label>
-        <textarea id="b-tagline" rows="2" value={tagline} on:input={(e) => { onPropChange('tagline', e.currentTarget.value); onPropChange('description', e.currentTarget.value); }} placeholder="Pelopor kuliner khas nusantara..." class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"></textarea>
+        <textarea
+          id="b-tagline"
+          rows="2"
+          value={tagline}
+          on:input={(e) => {
+            const v = e.currentTarget.value;
+            onPropChange('tagline', v);
+            onPropChange('description', v);
+          }}
+          placeholder="Pelopor kuliner khas nusantara..."
+          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"
+        ></textarea>
       </div>
     </div>
 
@@ -95,7 +112,17 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Kontak & Alamat Toko</h4>
       <div>
         <label for="c-wa" class="block text-xs font-semibold text-base-content/70 mb-1">Nomor WhatsApp</label>
-        <input id="c-wa" type="text" value={whatsappNumber} on:input={(e) => onPropChange('whatsappNumber', e.currentTarget.value)} placeholder="6281234567890" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono" />
+        <input
+          id="c-wa"
+          type="tel"
+          value={whatsappNumber}
+          on:input={(e) => {
+            handleWaChange(e.currentTarget.value);
+          }}
+          placeholder="6281234567890"
+          pattern="^628[0-9]&#123;8,13&#125;$"
+          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+        />
       </div>
       <div>
         <label for="c-addr" class="block text-xs font-semibold text-base-content/70 mb-1">Alamat Fisik</label>

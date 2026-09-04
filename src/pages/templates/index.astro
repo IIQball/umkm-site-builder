@@ -1,0 +1,91 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PublicTemplateMarketplace from '@/components/public/PublicTemplateMarketplace.svelte';
+import { db } from '@/lib/db/client';
+import { templates, templateCategories, userTemplates, designers, users } from '@/db/schema';
+import { eq, and, isNull, desc, asc } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+export const prerender = false;
+
+const currentUser = await getAuthenticatedUser(Astro.request);
+
+// Fetch all approved templates with category and designer data
+const rawTemplates = await db
+  .select({
+    id: templates.id,
+    name: templates.name,
+    description: templates.description,
+    thumbnailUrl: templates.thumbnailUrl,
+    price: templates.price,
+    status: templates.status,
+    createdAt: templates.createdAt,
+    categoryId: templates.categoryId,
+    categoryName: templateCategories.name,
+    categorySlug: templateCategories.slug,
+    categoryIcon: templateCategories.icon,
+    designerName: users.name,
+  })
+  .from(templates)
+  .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
+  .leftJoin(designers, eq(templates.designerId, designers.userId))
+  .leftJoin(users, eq(designers.userId, users.id))
+  .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+  .orderBy(desc(templates.createdAt));
+
+// Fetch all master template categories
+const categories = await db
+  .select({
+    id: templateCategories.id,
+    name: templateCategories.name,
+    slug: templateCategories.slug,
+    icon: templateCategories.icon,
+    description: templateCategories.description,
+  })
+  .from(templateCategories)
+  .orderBy(asc(templateCategories.name));
+
+// Fetch owned template IDs if user is logged in
+let ownedTemplateIds: string[] = [];
+if (currentUser) {
+  const owned = await db
+    .select({ templateId: userTemplates.templateId })
+    .from(userTemplates)
+    .where(eq(userTemplates.userId, currentUser.id));
+  ownedTemplateIds = owned.map((o) => o.templateId);
+}
+---
+
+<BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko">
+  <div class="min-h-screen bg-canvas py-10 md:py-14 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-8 md:space-y-10">
+      <!-- Clean Hero Banner Header -->
+      <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 text-white p-8 sm:p-10 md:p-12 shadow-sm dark:bg-slate-900/90 dark:border-slate-800">
+        <div class="relative z-10 max-w-3xl space-y-4">
+          <div class="inline-flex items-center gap-2 bg-slate-800/80 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-700 shadow-xs">
+            <span class="material-symbols-outlined text-sm text-indigo-400">storefront</span>
+            <span>Marketplace Template UMKM</span>
+          </div>
+
+          <h1 class="text-heading-xl md:text-display-sm font-extrabold tracking-tight text-white leading-tight">
+            Koleksi Desain Siap Pakai untuk Toko Online Anda
+          </h1>
+
+          <p class="text-body-base md:text-body-lg text-slate-300 leading-relaxed font-sans">
+            Jelajahi template toko responsif yang dirancang khusus oleh desainer profesional untuk meningkatkan omzet dan kepercayaan pembeli bisnis Anda.
+          </p>
+        </div>
+      </div>
+
+      <!-- Marketplace Interactive Catalog -->
+      <PublicTemplateMarketplace
+        client:load
+        initialTemplates={rawTemplates}
+        {categories}
+        {ownedTemplateIds}
+        isLoggedIn={!!currentUser}
+        userRole={currentUser?.role || null}
+      />
+    </div>
+  </div>
+</BaseLayout>

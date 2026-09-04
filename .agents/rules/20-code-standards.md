@@ -80,7 +80,7 @@ rendered inline `div`. Field-level validation messages stay next to their field.
 
 ## 9. Comments
 
-Comment why, not what. No commented-out code left behind. No emojis. Match the density and
+Comment why, not what. No commented-out code left behind. No emojis in comments, code, or terminal console logs. Match the density and
 idiom of the surrounding file.
 
 ## 10. Enforcement

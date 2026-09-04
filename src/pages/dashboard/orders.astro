@@ -1,0 +1,113 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { transactionService } from '@/services/finance/transaction.service';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin') {
+  return Astro.redirect('/dashboard');
+}
+
+let initialOrders: Awaited<ReturnType<typeof transactionService.getTenantOrders>> = [];
+try {
+  initialOrders = await transactionService.getTenantOrders(user.id);
+} catch {
+  initialOrders = [];
+}
+
+const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
+const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
+
+const totalSpent = totalPaidOrders.reduce((sum, o) => sum + o.amount, 0);
+const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpent)}`;
+---
+
+<DashboardLayout title="Riwayat Pesanan Template" breadcrumb="Dashboard / Riwayat Pesanan">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching designer/wallet & designer/templates style) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Riwayat Pesanan & Tagihan</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, atau terapkan tema yang telah lunas.
+        </p>
+      </div>
+
+      <!-- Quick Action Pill -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          client:load
+          href="/dashboard/templates"
+          variant="secondary"
+          size="md"
+          class="font-bold"
+        >
+          <span class="material-symbols-outlined text-primary text-base">palette</span>
+          <span>Galeri Template Toko</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
+      <StatCard
+        client:load
+        label="Total Pesanan"
+        value={initialOrders.length}
+        rawValue={initialOrders.length}
+        icon="receipt_long"
+        cardTheme="dark"
+        badge="Semua Transaksi"
+        footerText="Riwayat seluruh invoice"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Template Lunas"
+        value={totalPaidOrders.length}
+        rawValue={totalPaidOrders.length}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Siap Pakai"
+        footerText="Dapat langsung diterapkan"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Menunggu Pembayaran"
+        value={totalPendingOrders.length}
+        rawValue={totalPendingOrders.length}
+        icon="hourglass_top"
+        cardTheme="orange"
+        badge="Pending"
+        footerText="Selesaikan tagihan pembayaran"
+        delayClass="delay-200"
+      />
+      <StatCard
+        client:load
+        label="Total Pengeluaran"
+        value={formattedTotalSpent}
+        rawValue={totalSpent}
+        icon="payments"
+        cardTheme="blue"
+        badge="Akumulasi"
+        footerText="Total pembelian template lunas"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <!-- Interactive Table Card -->
+    <div class="animate-fade-in-up delay-300">
+      <OrderHistoryTable client:load {initialOrders} />
+    </div>
+  </div>
+</DashboardLayout>

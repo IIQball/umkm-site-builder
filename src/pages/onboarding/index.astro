@@ -1,0 +1,30 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/db';
+import { stores } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+
+if (user.status !== 'active') return Astro.redirect('/auth/login');
+if (user.role !== 'tenant') return Astro.redirect('/dashboard');
+
+// Check if user already has an active store (regardless of isOnboarded flag)
+const [store] = await db.select().from(stores).where(
+  eq(stores.userId, user.id)
+).limit(1);
+
+// If store exists, skip onboarding and go to settings
+if (store) {
+  return Astro.redirect('/dashboard/store-settings');
+}
+---
+
+<DashboardLayout title="Setup Toko Baru - UMKM Site Builder">
+  <div class="flex flex-col items-center justify-center p-4 py-12">
+    <OnboardingWizard client:load />
+  </div>
+</DashboardLayout>

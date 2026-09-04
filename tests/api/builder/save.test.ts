@@ -1,0 +1,59 @@
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { POST } from '@/pages/api/builder/save';
+import * as authLib from '@/lib/auth';
+
+vi.mock('@/lib/auth', () => ({
+  getAuthenticatedUser: vi.fn(),
+  isAuthorizedDesigner: vi.fn(),
+}));
+
+describe('POST /api/builder/save', () => {
+  const mockGetAuthUser = authLib.getAuthenticatedUser as unknown as Mock;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return 401 when request has no auth session', async () => {
+    mockGetAuthUser.mockResolvedValue(null);
+
+    const request = new Request('http://localhost:4321/api/builder/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Updated Template' }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    expect(res.status).toBe(401);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('should return 401 for body with Zod issues when unauthenticated', async () => {
+    mockGetAuthUser.mockResolvedValue(null);
+
+    const request = new Request('http://localhost:4321/api/builder/save?templateId=tpl_test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price: -50, // would be invalid, but auth check fires first
+      }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    // Auth guard fires before validation
+    expect(res.status).toBe(401);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('UNAUTHORIZED');
+  });
+});

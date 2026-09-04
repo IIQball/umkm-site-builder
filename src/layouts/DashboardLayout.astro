@@ -1,0 +1,62 @@
+---
+/**
+ * DashboardLayout.astro
+ * Authenticated dashboard shell. Redirects to /auth/login if no session.
+ * Wraps pages with Sidebar + sticky DashboardNavbar. Builder pages bypass this layout.
+ */
+import { getAuthenticatedUser } from '@/lib/auth';
+import Sidebar from '@/components/dashboard/Sidebar.svelte';
+import DashboardNavbar from '@/components/dashboard/DashboardNavbar.svelte';
+import ToastContainer from '@/components/ui/ToastContainer.svelte';
+
+interface Props {
+  title?: string;
+  /** Optional breadcrumb label to show in the top navbar */
+  breadcrumb?: string;
+  /** Option to hide sidebar in certain pages (like onboarding wizard) */
+  hideSidebar?: boolean;
+}
+
+const { title = 'Dashboard', breadcrumb, hideSidebar = false } = Astro.props;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+
+const userJson = JSON.stringify(user);
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — UMKM Builder</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    <!-- Theme init: read localStorage before first paint to prevent flash -->
+    <script is:inline>
+      const t = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    </script>
+  </head>
+  <body class="bg-base-200 min-h-screen overflow-x-hidden">
+    <ToastContainer client:load />
+    <div class="flex h-screen overflow-hidden">
+      <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
+      {!hideSidebar && <Sidebar client:load userJson={userJson} currentPath={Astro.url.pathname} />}
+
+      <!-- Main: sticky header + scrollable content -->
+      <div class="flex flex-col flex-1 min-w-0 overflow-hidden" id="dashboard-main">
+        {!hideSidebar && <DashboardNavbar client:load userJson={userJson} breadcrumb={breadcrumb} />}
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

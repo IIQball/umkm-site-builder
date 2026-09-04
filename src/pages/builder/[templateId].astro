@@ -1,0 +1,27 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BuilderEditor from '@/components/builder/BuilderEditor.svelte';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import { getPlatformFeePercentage } from '@/services/finance';
+
+const { templateId } = Astro.params;
+
+if (!templateId) {
+  return Astro.redirect('/');
+}
+
+const user = await getAuthenticatedUser(Astro.request);
+
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login');
+}
+
+const platformFeePercentage = await getPlatformFeePercentage();
+---
+
+<BaseLayout title="Template Builder" hideNavbar={true}>
+  <div class="h-screen w-full bg-base-100 overflow-hidden flex flex-col">
+    <BuilderEditor client:only="svelte" {templateId} {platformFeePercentage} />
+  </div>
+</BaseLayout>
+

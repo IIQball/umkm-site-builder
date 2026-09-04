@@ -1,0 +1,22 @@
+---
+/**
+ * Navbar.astro
+ * Responsive Public Header with brand logo, links, theme toggle, and authenticated user dropdown
+ */
+import PublicNavbar from './PublicNavbar.svelte';
+
+const user = Astro.locals.user;
+const currentPath = Astro.url.pathname;
+---
+
+<PublicNavbar
+  client:load
+  user={user ? {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    image: user.image,
+  } : null}
+  currentPath={currentPath}
+/>

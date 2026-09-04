@@ -1,0 +1,54 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ReadOnlyPreview from '@/components/builder/ReadOnlyPreview.svelte';
+import { db } from '@/lib/db/client';
+import { templates, stores } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { getAuthenticatedUser } from '@/lib/auth';
+import type { EditorTemplate } from '@/components/builder/stores/editorStore';
+import { migrateTemplateConfig } from '@/lib/templates';
+
+export const prerender = false;
+
+const currentUser = await getAuthenticatedUser(Astro.request);
+const { templateId } = Astro.params;
+
+if (!templateId) {
+  return Astro.redirect('/');
+}
+
+const templateRecord = await db.query.templates.findFirst({
+  where: eq(templates.id, templateId),
+});
+
+if (!templateRecord) {
+  return new Response('Template tidak ditemukan', { status: 404 });
+}
+
+const isOwner = !!currentUser && currentUser.id === templateRecord.designerId;
+
+const previewTemplate: EditorTemplate = {
+  id: templateRecord.id,
+  name: templateRecord.name,
+  description: templateRecord.description,
+  thumbnailUrl: templateRecord.thumbnailUrl,
+  price: templateRecord.price,
+  status: templateRecord.status,
+  rejectionReason: templateRecord.rejectionReason,
+  config: migrateTemplateConfig(templateRecord.config),
+};
+
+let tenantStoreId: string | null = null;
+if (currentUser && currentUser.role === 'tenant') {
+  const storeRecord = await db.query.stores.findFirst({
+    where: eq(stores.userId, currentUser.id),
+  });
+  if (storeRecord) {
+    tenantStoreId = storeRecord.id;
+  }
+}
+---
+
+<BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
+  <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} storeId={tenantStoreId} />
+</BaseLayout>

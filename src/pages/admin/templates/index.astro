@@ -1,0 +1,118 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import TemplateReviewPanel from '@/components/admin/TemplateReviewPanel.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getTemplatesForAdmin } from '@/services';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (!isAuthorizedAdmin(user)) {
+  return Astro.redirect('/dashboard');
+}
+
+let initialTemplates: Awaited<ReturnType<typeof getTemplatesForAdmin>> = [];
+try {
+  initialTemplates = await getTemplatesForAdmin();
+} catch {
+  initialTemplates = [];
+}
+
+const counts = {
+  all: initialTemplates.length,
+  pending: initialTemplates.filter((t) => t.status === 'pending').length,
+  approved: initialTemplates.filter((t) => t.status === 'approved').length,
+  rejected: initialTemplates.filter((t) => t.status === 'rejected').length,
+};
+
+const initialTemplatesJson = JSON.stringify(initialTemplates);
+---
+
+<DashboardLayout title="Kurasi Template" breadcrumb="Admin / Kurasi Template">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching designer/wallet & designer/templates style) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Kurasi & Review Template</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Verifikasi kelayakan desain, tata letak, dan standar visual template yang diajukan oleh para desainer.
+        </p>
+      </div>
+
+      <!-- Quick Action / Link -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          client:load
+          href="/admin/template-categories"
+          variant="secondary"
+          size="md"
+          class="font-bold"
+        >
+          <span class="material-symbols-outlined text-primary text-base">category</span>
+          <span>Kelola Kategori Template</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
+      <StatCard
+        client:load
+        label="Total Pengajuan"
+        value={counts.all}
+        rawValue={counts.all}
+        icon="palette"
+        cardTheme="dark"
+        badge="Koleksi"
+        footerText="Seluruh template terdaftar"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Menunggu Review"
+        value={counts.pending}
+        rawValue={counts.pending}
+        icon="hourglass_top"
+        cardTheme="orange"
+        badge="Antrean"
+        footerText="Memerlukan tindakan admin"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Disetujui"
+        value={counts.approved}
+        rawValue={counts.approved}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Aktif"
+        footerText="Tersedia di marketplace publik"
+        delayClass="delay-200"
+      />
+      <StatCard
+        client:load
+        label="Ditolak / Revisi"
+        value={counts.rejected}
+        rawValue={counts.rejected}
+        icon="cancel"
+        cardTheme="blue"
+        badge="Revisi"
+        footerText="Perlu perbaikan oleh desainer"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <!-- Interactive Table Panel -->
+    <div class="animate-fade-in-up delay-300">
+      <TemplateReviewPanel client:load {initialTemplatesJson} />
+    </div>
+  </div>
+</DashboardLayout>

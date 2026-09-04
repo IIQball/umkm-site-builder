@@ -1,0 +1,44 @@
+---
+import StorefrontLayout from '../../layouts/StorefrontLayout.astro';
+import DynamicSection from '../../components/storefront/DynamicSection.svelte';
+
+// Contoh data loader backend (simulasi data JSONB dari database)
+// Dalam implementasi nyata, ini akan diambil dari DB berdasarkan tenant/toko
+const sections = [
+  {
+    id: 'section-1',
+    type: 'promoBanner',
+    props: {
+      text: 'Diskon 50% untuk pembelian pertama! Gunakan kode: BARU50',
+      bgColor: 'bg-primary',
+      textColor: 'text-primary-content'
+    }
+  },
+  {
+    id: 'section-2',
+    type: 'hero',
+    props: {
+      title: 'Selamat Datang di Toko Kami',
+      subtitle: 'Temukan berbagai produk berkualitas dengan harga terbaik.',
+      buttonText: 'Belanja Sekarang',
+      buttonLink: '/products',
+      align: 'center'
+    }
+  },
+  {
+    id: 'section-3',
+    type: 'footer',
+    props: {
+      text: '© 2026 LakuBase Storefront. Hak cipta dilindungi.'
+    }
+  }
+];
+---
+
+<StorefrontLayout title="Storefront Dinamis">
+  <main class="w-full">
+    {sections.map((section) => (
+      <DynamicSection client:load section={section} />
+    ))}
+  </main>
+</StorefrontLayout>

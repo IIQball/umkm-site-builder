@@ -1,0 +1,24 @@
+---
+/**
+ * pages/builder/new.astro
+ * Create-new-template form. Auth-guarded: designer or superadmin only.
+ * Rendered inside DashboardLayout shell (with Sidebar + Navbar).
+ */
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import NewTemplateForm from '@/components/builder/NewTemplateForm.svelte';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import { getTemplateCategories } from '@/services/template-categories';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login');
+}
+
+const categories = await getTemplateCategories();
+---
+
+<DashboardLayout title="Buat Template Baru" breadcrumb="Template Saya / Buat Baru">
+  <div class="min-h-full py-4 md:py-6 flex items-center justify-center animate-fade-in-up">
+    <NewTemplateForm client:load categories={categories} backHref="/designer/templates" />
+  </div>
+</DashboardLayout>

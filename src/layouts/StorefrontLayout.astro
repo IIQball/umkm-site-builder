@@ -1,0 +1,37 @@
+---
+import '@/styles/global.css';
+import criticalCSS from '@/styles/critical.css?raw';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="LakuBase Storefront" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    
+    {/* Inline critical CSS — blocks render until parsed (by design for LCP optimization) */}
+    <style is:inline set:html={criticalCSS} />
+    
+    {/* Defer non-critical global styles — load async to avoid blocking */}
+    <link rel="preload" href="/styles/global.css" as="style" />
+    <link rel="stylesheet" href="/styles/global.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="/styles/global.css" /></noscript>
+    
+    {/* Preconnect to external resources */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="min-h-screen bg-base-100 flex flex-col font-sans antialiased text-base-content">
+    <slot />
+  </body>
+</html>

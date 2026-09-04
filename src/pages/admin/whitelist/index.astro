@@ -1,0 +1,20 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import AdminWhitelistPanel from '@/components/admin/AdminWhitelistPanel.svelte';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<DashboardLayout title="Whitelist Admin" breadcrumb="Admin / Whitelist">
+  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
+    <AdminWhitelistPanel client:load />
+  </div>
+</DashboardLayout>

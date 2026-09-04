@@ -1,0 +1,20 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import UserManagementPanel from '@/components/admin/UserManagementPanel.svelte';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (!isAuthorizedAdmin(user)) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<DashboardLayout title="Manajemen Pengguna" breadcrumb="Admin / Pengguna">
+  <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
+    <UserManagementPanel client:load />
+  </div>
+</DashboardLayout>

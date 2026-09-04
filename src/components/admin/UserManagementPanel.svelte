@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import { Search, UserX, CheckCircle2, AlertCircle, FileText, CheckCircle, Ban } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Badge, Card, Button, Input, Select } from '@/components/ui';
+  import { Badge, Card, Button, Input, Select, StatCard } from '@/components/ui';
+  import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
@@ -27,7 +28,6 @@
   let isAddModalOpen = false;
   let suspendReason = '';
   let actionLoading = false;
-  let toast: { message: string; type: 'success' | 'error' } | null = null;
   
   // Basic filtering state
   let searchQuery = '';
@@ -35,8 +35,8 @@
   let statusFilter: 'all' | 'active' | 'suspended' = 'all';
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    toast = { message, type };
-    setTimeout(() => { if (toast?.message === message) toast = null; }, 4000);
+    if (type === 'success') toast.success(message);
+    else toast.error(message);
   };
 
   const fetchUsers = async () => {
@@ -168,46 +168,54 @@
 
       <div class="flex items-center gap-2 flex-shrink-0">
         <Button
-          variant="secondary"
+          variant="primary"
           size="md"
           on:click={() => isAddModalOpen = true}
           class="font-bold"
         >
-          <span class="material-symbols-outlined text-primary text-base">person_add</span>
+          <span class="material-symbols-outlined text-white text-base">person_add</span>
           <span>Tambah Pengguna</span>
         </Button>
       </div>
     </div>
     
-    <div class="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
-        <div class="w-full sm:w-64 xl:w-72 relative">
-          <Input 
-            bind:value={searchQuery}
-            placeholder="Cari nama atau email..." 
-            size="md"
-          >
-            <div slot="prefix"><Search size={18} class="text-muted" /></div>
-          </Input>
-        </div>
-        
-        <div class="flex gap-3 w-full sm:w-auto">
-          <div class="w-full sm:w-40">
-            <Select 
-              bind:value={roleFilter}
-              options={roleOptions}
-              size="md"
-            />
-          </div>
-          <div class="w-full sm:w-40">
-            <Select 
-              bind:value={statusFilter}
-              options={statusOptions}
-              size="md"
-            />
-          </div>
-        </div>
-      </div>
+
+  </div>
+
+
+  <!-- User Stats Summary -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-100" />
+    <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-150" />
+    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="orange" icon="block" delayClass="delay-200" />
+  </div>
+
+  <!-- Filters (Search & Selects) -->
+  <div class="flex flex-col sm:flex-row gap-4">
+    <div class="relative flex-1">
+      <Input 
+        bind:value={searchQuery}
+        placeholder="Cari nama atau email..." 
+        size="md"
+      >
+        <div slot="prefix"><Search size={18} class="text-muted" /></div>
+      </Input>
+    </div>
+    
+    <div class="w-full sm:w-48 shrink-0">
+      <Select 
+        bind:value={roleFilter}
+        options={roleOptions}
+        size="md"
+      />
+    </div>
+    
+    <div class="w-full sm:w-48 shrink-0">
+      <Select 
+        bind:value={statusFilter}
+        options={statusOptions}
+        size="md"
+      />
     </div>
   </div>
 
@@ -332,17 +340,3 @@
   on:success={() => { isAddModalOpen = false; fetchUsers(); }} 
 />
 
-{#if toast}
-  <div class="fixed bottom-4 right-4 z-[9999] transition-all animate-fade-in-up">
-    <div 
-      class="alert text-xs rounded-xl flex items-center gap-2 px-4 py-3 shadow-lg {toast.type === 'success' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'}"
-    >
-      {#if toast.type === 'success'}
-        <CheckCircle2 size={16} class="flex-shrink-0" />
-      {:else}
-        <AlertCircle size={16} class="flex-shrink-0" />
-      {/if}
-      <span class="font-bold">{toast.message}</span>
-    </div>
-  </div>
-{/if}

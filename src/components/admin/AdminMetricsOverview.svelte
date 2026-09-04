@@ -97,16 +97,16 @@
   {:else}
     <!-- Top Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-      <div class="w-full">
+      <div class="w-full h-full">
         <StatCard {...transactionCard} />
       </div>
-      <div class="w-full">
+      <div class="w-full h-full">
         <StatCard {...revenueCard} />
       </div>
-      <div class="w-full">
+      <div class="w-full h-full">
         <StatCard {...activityCard} />
       </div>
-      <div class="w-full">
+      <div class="w-full h-full">
         <StatCard {...userCard} />
       </div>
     </div>
@@ -114,56 +114,18 @@
     <!-- Bento Grid Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- Left Column: Recent Transactions & Activity Stream -->
+      <!-- Left Column: Removed Transactions List to keep dashboard cleaner -->
       <div class="lg:col-span-2 space-y-6">
-        
-        <!-- Recent Transactions List -->
-        <Card class="animate-fade-in-up delay-300 flex flex-col h-full" padding="lg">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h3 class="text-heading-sm font-bold">Transaksi Terbaru</h3>
-              <p class="text-body-sm text-secondary">5 riwayat pembayaran sukses terakhir</p>
-            </div>
-            <Button variant="ghost" size="sm" href="/admin/transactions" class="text-primary hidden sm:flex">
-              Lihat Semua
-            </Button>
+        <div class="w-full h-full rounded-3xl bg-nested/50 border border-dashed border-light flex flex-col items-center justify-center p-12 text-center">
+          <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-[32px]">monitoring</span>
           </div>
-
-          <div class="flex-1 flex flex-col gap-4">
-            {#if metrics.recentTransactions.length === 0}
-              <div class="flex-1 flex items-center justify-center text-secondary text-body-sm py-8 border border-dashed border-light rounded-2xl">
-                Belum ada transaksi
-              </div>
-            {:else}
-              {#each metrics.recentTransactions as tx}
-                <div class="flex items-center justify-between p-4 rounded-2xl bg-nested hover:bg-light transition-colors group">
-                  <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <span class="material-symbols-outlined text-[20px]">
-                        {tx.type === 'template_purchase' ? 'shopping_bag' : 'payment'}
-                      </span>
-                    </div>
-                    <div>
-                      <p class="font-bold text-main line-clamp-1">{tx.userName || 'Pengguna Tanpa Nama'}</p>
-                      <p class="text-xs text-secondary">{formatDate(tx.createdAt)}</p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-main">{formatIDR(tx.amount)}</p>
-                    <Badge variant={tx.status === 'success' ? 'success' : tx.status === 'pending' ? 'warning' : 'error'} size="sm">
-                      {tx.status}
-                    </Badge>
-                  </div>
-                </div>
-              {/each}
-            {/if}
-          </div>
-          
-          <div class="mt-4 sm:hidden">
-            <Button variant="outline" size="sm" class="w-full" href="/admin/transactions">Lihat Semua</Button>
-          </div>
-        </Card>
-
+          <h3 class="font-bold text-main mb-2">Grafik Mutasi Transaksi</h3>
+          <p class="text-sm text-secondary max-w-sm mb-6">Area ini dipersiapkan untuk integrasi grafik analitik mutasi dan pendapatan platform di masa depan.</p>
+          <Button variant="primary" href="/admin/transactions">
+            Lihat Detail Mutasi
+          </Button>
+        </div>
       </div>
 
       <!-- Right Column: Quick Actions & Alerts -->

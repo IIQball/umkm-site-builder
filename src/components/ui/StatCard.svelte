@@ -23,19 +23,29 @@
   $: isOrangeCard = resolvedTheme === 'orange';
   $: isBlueCard = resolvedTheme === 'blue';
   $: isColoredCard = isDarkCard || isOrangeCard || isBlueCard;
+  let animationId: number;
 
-  onMount(() => {
+  const animate = (val: string | number, rawVal?: number) => {
+    if (typeof window === 'undefined') {
+      displayValue = typeof val === 'string' ? val : String(val);
+      return;
+    }
+
+    if (animationId) {
+      window.cancelAnimationFrame(animationId);
+    }
+    
     let target = 0;
     let isCurrency = false;
 
-    if (typeof rawValue === 'number') {
-      target = rawValue;
-      isCurrency = typeof value === 'string' && value.includes('Rp');
-    } else if (typeof value === 'number') {
-      target = value;
-    } else if (typeof value === 'string') {
-      isCurrency = value.includes('Rp');
-      const clean = value.replace(/[^0-9]/g, '');
+    if (typeof rawVal === 'number') {
+      target = rawVal;
+      isCurrency = typeof val === 'string' && val.includes('Rp');
+    } else if (typeof val === 'number') {
+      target = val;
+    } else if (typeof val === 'string') {
+      isCurrency = val.includes('Rp');
+      const clean = val.replace(/[^0-9]/g, '');
       target = parseInt(clean, 10) || 0;
     }
 
@@ -56,15 +66,23 @@
         }
 
         if (progress < 1) {
-          requestAnimationFrame(updateCount);
+          animationId = requestAnimationFrame(updateCount);
         } else {
-          displayValue = typeof value === 'string' ? value : String(value);
+          displayValue = typeof val === 'string' ? val : String(val);
         }
       };
 
-      requestAnimationFrame(updateCount);
+      animationId = requestAnimationFrame(updateCount);
+    } else {
+      displayValue = typeof val === 'string' ? val : String(val);
     }
-  });
+  };
+
+  $: {
+    if (value !== undefined) {
+      animate(value, rawValue);
+    }
+  }
 </script>
 
 <div
@@ -75,7 +93,7 @@
     : isBlueCard
     ? 'bg-primary text-white border border-primary/20 shadow-md shadow-primary/10'
     : 'bg-card border border-light shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md'}
-    rounded-3xl p-6 transition-all flex flex-col justify-between min-h-[168px] w-full animate-fade-in-up {borderAccent} {delayClass}"
+    rounded-3xl p-6 transition-all flex flex-col justify-between min-h-[168px] w-full h-full animate-fade-in-up {borderAccent} {delayClass}"
 >
   <!-- Header: Label + Icon Container -->
   <div class="flex items-center justify-between gap-2.5">

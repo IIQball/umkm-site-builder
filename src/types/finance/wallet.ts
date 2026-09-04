@@ -39,7 +39,9 @@ export interface BankAccount {
   id: string;
   bankName: string;
   accountNumber: string;
-  holderName: string;
+  holderName?: string;
+  accountHolder?: string;
+  accountHolderName?: string;
 }
 
 export interface PayoutHistoryItem {

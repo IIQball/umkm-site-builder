@@ -23,20 +23,30 @@
       tabindex="0"
       on:click={(e) => selectCard(e, index, item)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
-      class={`p-5 sm:p-6 rounded-3xl border border-light/80 bg-card shadow-xs flex flex-col justify-between space-y-3 transition-all duration-200 cursor-pointer ${
+      class={`p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-3 transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-          : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
+          ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 shadow-md'
+          : 'hover:border-[var(--theme-primary,#2563eb)]/50'
       }`}
+      style="background: var(--color-card-base, #ffffff); border: 1px solid var(--color-border, rgba(15, 23, 42, 0.08)); border-radius: var(--btn-radius, var(--theme-btn-radius, 24px));"
     >
       <div class="space-y-2">
-        <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-primary flex items-center justify-center">
+        <div
+          class="w-8 h-8 rounded-xl flex items-center justify-center"
+          style="background: rgba(var(--color-primary-rgb, 37 99 235), 0.1); color: var(--theme-primary, var(--color-primary, #2563eb));"
+        >
           <HelpCircle size={16} />
         </div>
-        <h3 class="font-heading font-bold text-xs sm:text-sm text-main">
+        <h3
+          class="font-heading font-bold text-xs sm:text-sm"
+          style="color: var(--color-text-main, #0f172a); font-family: var(--font-heading);"
+        >
           {item.question}
         </h3>
-        <p class="text-xs text-secondary leading-relaxed pt-1 border-t border-light/60">
+        <p
+          class="text-xs leading-relaxed pt-1 border-t"
+          style="color: var(--color-text-secondary, #334155); border-color: var(--color-border, rgba(15, 23, 42, 0.08)); font-family: var(--font-family);"
+        >
           {item.answer}
         </p>
       </div>

@@ -51,18 +51,19 @@
     on:click={(e) => selectNode(e, 'maps_branch_tabs')}
     on:keydown={(e) => handleKeydown(e, 'maps_branch_tabs')}
     class={`flex flex-wrap items-center gap-2 p-1 rounded-2xl transition-all outline-none ${
-      isTabsSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''
+      isTabsSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--theme-primary,#2563eb)]/5' : ''
     }`}
   >
     {#each branches as branch, idx}
       <button
         type="button"
         on:click={(e) => handleBranchClick(e, idx)}
-        class={`px-4 py-2 rounded-xl text-xs font-heading font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+        style={`border-radius: var(--theme-btn-radius, var(--btn-radius, 12px)); font-size: var(--theme-text-body, var(--text-body-size, 14px)); ${
           activeBranchIdx === idx
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-base-200/70 dark:bg-slate-800 text-secondary hover:text-main hover:bg-base-200'
+            ? 'background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, #ffffff));'
+            : 'background-color: var(--theme-btn-secondary-bg, var(--btn-secondary-bg, var(--color-nested-base, #f1f5f9))); color: var(--theme-btn-secondary-text, var(--btn-secondary-text, var(--color-text-secondary, #475569)));'
         }`}
+        class="px-4 py-2 font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs hover:opacity-90 border border-[var(--theme-btn-outline-border,transparent)]"
       >
         <Building2 size={13} class="shrink-0" />
         <span>{branch.name}</span>
@@ -76,15 +77,16 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`bg-card p-3 sm:p-4 rounded-xl border border-base-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-secondary transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+    class={`bg-[var(--theme-surface,var(--color-card-base,#ffffff))] p-3 sm:p-4 rounded-xl border border-[var(--color-border,rgba(15,23,42,0.08))] flex flex-wrap items-center justify-between gap-3 text-[var(--theme-text-muted,var(--color-text-secondary,#334155))] font-[var(--theme-font-body,var(--font-family,inherit))] transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
     }`}
+    style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
   >
     <div class="flex items-start sm:items-center gap-2">
-      <MapPin size={15} class="text-primary mt-0.5 sm:mt-0 shrink-0" />
+      <MapPin size={15} class="text-[var(--theme-primary,#2563eb)] mt-0.5 sm:mt-0 shrink-0" />
       <div>
-        <span class="font-heading font-bold text-main">{activeBranch.name}:</span>
-        <span class="ml-1 text-secondary">{activeBranch.address}</span>
+        <span class="font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold text-[var(--theme-text-primary,var(--color-text-main,#0f172a))]">{activeBranch.name}:</span>
+        <span class="ml-1 text-[var(--theme-text-muted,var(--color-text-secondary,#64748b))] font-[var(--theme-font-body,var(--font-family,inherit))]">{activeBranch.address}</span>
       </div>
     </div>
 
@@ -96,9 +98,10 @@
       tabindex="0"
       on:click={(e) => selectNode(e, 'maps_cta_button')}
       on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
-      class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[11px] font-heading font-bold hover:bg-slate-800 dark:hover:bg-white active:scale-[0.98] transition-all outline-none ${
-        isCtaSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+      class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--theme-btn-radius,var(--btn-radius,8px))] bg-[var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary,#2563eb)))] text-[var(--theme-btn-primary-text,var(--btn-primary-text,#ffffff))] font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
+        isCtaSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
       }`}
+      style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.9);"
     >
       <Navigation size={11} />
       <span>Buka Petunjuk Arah</span>
@@ -111,8 +114,8 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_iframe')}
     on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
-    class={`w-full cq-map-frame-height rounded-2xl overflow-hidden border border-base-200 dark:border-slate-800 bg-base-200/40 transition-all outline-none ${
-      isIframeSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+    class={`w-full cq-map-frame-height rounded-2xl overflow-hidden border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] transition-all outline-none ${
+      isIframeSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
     }`}
   >
     <iframe

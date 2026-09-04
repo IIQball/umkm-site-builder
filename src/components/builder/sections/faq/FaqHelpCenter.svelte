@@ -34,21 +34,21 @@
       tabindex="0"
       on:click={(e) => selectCard(e, index, item)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
-      class={`p-5 rounded-3xl border border-light/80 bg-card shadow-xs space-y-3 transition-all duration-200 cursor-pointer ${
+      class={`p-5 rounded-3xl border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] shadow-xs space-y-3 transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-          : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
+          ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          : 'hover:shadow-md hover:border-[var(--theme-primary,#2563eb)]/30'
       }`}
     >
-      <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-primary border border-blue-100 dark:border-blue-900/60 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-2xl bg-[var(--theme-primary,#2563eb)]/10 text-[var(--theme-primary,#2563eb)] border border-[var(--theme-primary,#2563eb)]/20 flex items-center justify-center">
         <svelte:component this={IconComponent} size={18} />
       </div>
 
-      <h4 class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-1">
+      <h4 class="font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--color-text-main,var(--theme-text-primary,#0f172a))] line-clamp-1">
         {item.question}
       </h4>
 
-      <p class="text-xs text-secondary leading-relaxed line-clamp-3 pt-1 border-t border-light/60">
+      <p class="text-xs text-[var(--color-text-secondary,var(--theme-text-muted,#64748b))] leading-relaxed line-clamp-3 pt-1 border-t border-[var(--color-border,rgba(15,23,42,0.08))] font-[var(--font-family,inherit)]">
         {item.answer}
       </p>
     </div>

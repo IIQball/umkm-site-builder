@@ -26,7 +26,7 @@
   <!-- 2. Slot Reorder (Up / Down) -->
   <SectionSlotReorder {section} />
 
-  <!-- 3 & 4. Container Width & Spacing -->
+  <!-- 3. Spacing (Padding & Margin) -->
   <SectionSpacingControls
     {section}
     {onStyleChange}

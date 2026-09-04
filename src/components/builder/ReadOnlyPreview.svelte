@@ -16,6 +16,8 @@
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';
   import { Badge } from '@/components/ui';
+  import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
+  import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
@@ -37,18 +39,10 @@
   $: sections = template?.config?.sections || [];
   $: theme = template?.config?.theme || {};
 
-  $: canvasCssVars = [
-    `--theme-primary: ${theme.colors?.primary || '#3b82f6'}`,
-    `--theme-secondary: ${theme.colors?.secondary || '#64748b'}`,
-    `--theme-bg: ${isDark ? '#090d16' : (theme.colors?.background || '#ffffff')}`,
-    `--theme-surface: ${isDark ? '#111827' : (theme.colors?.surface || '#f8fafc')}`,
-    `--theme-text-primary: ${isDark ? '#f8fafc' : (theme.colors?.textPrimary || '#0f172a')}`,
-    `--theme-text-muted: ${isDark ? '#94a3b8' : (theme.colors?.textMuted || '#64748b')}`,
-    `--theme-font-heading: ${theme.typography?.headingFont || 'Inter, sans-serif'}`,
-    `--theme-font-body: ${theme.typography?.bodyFont || 'Inter, sans-serif'}`,
-    `--theme-btn-radius: ${theme.buttons?.borderRadius || '8px'}`,
-    `--theme-max-width: ${theme.layout?.maxWidth || '1200px'}`,
-  ].join('; ');
+  $: canvasCssVars = buildCanvasCssVars(theme, isDark, viewMode);
+  $: {
+    loadDynamicGoogleFonts(theme?.typography?.headingFont, theme?.typography?.bodyFont);
+  }
 
   $: if (viewMode) {
     editorStore.setViewMode(viewMode);

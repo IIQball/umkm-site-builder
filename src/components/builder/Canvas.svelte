@@ -6,6 +6,7 @@
   import type { TemplateSection, TemplateTheme } from '@/schemas';
   import { editorStore, canvasStore } from './stores/editorStore';
   import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
+  import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
 
   export let sections: TemplateSection[] = [];
   export let selectedSectionId: string | null = null;
@@ -53,6 +54,9 @@
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
   $: isDarkPreview = $canvasStore.previewTheme === 'dark';
   $: canvasCssVars = buildCanvasCssVars(theme, isDarkPreview, viewMode);
+  $: {
+    loadDynamicGoogleFonts(theme?.typography?.headingFont, theme?.typography?.bodyFont);
+  }
 
   const parsePx = (val: unknown, defaultVal: number = 0): number => {
     if (typeof val !== 'string' && typeof val !== 'number') return defaultVal;
@@ -203,8 +207,9 @@
     </div>
 
     <div
+      id="canvas-frame"
       bind:clientHeight={canvasHeight}
-      class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible"
+      class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible builder-canvas-viewport"
       style="{canvasCssVars};"
       on:click|stopPropagation
       role="region"
@@ -231,6 +236,8 @@
         {#each renderedSections as section (section.id)}
           {@const isSelected = selectedSectionId === section.id}
           <div
+            id={`section-${section.id}`}
+            data-section-id={section.id}
             class={`relative group/section transition-all duration-150 ${section.type === 'header_announcement' ? 'z-30 overflow-visible' : isSelected ? 'z-20' : 'z-10'} ${isSelected ? 'ring-2 ring-primary ring-inset shadow-md' : 'hover:ring-1 hover:ring-primary/40 hover:ring-inset'}`}
             on:click|stopPropagation={() => onSelectSection(section.id)}
             role="button"

@@ -51,12 +51,30 @@ export function buildUpdatedTheme(
   currentTheme: Partial<TemplateTheme>,
   updates: Partial<TemplateTheme>
 ): TemplateTheme {
+  const currentTypo = (currentTheme.typography || {}) as Record<string, unknown>;
+  const updateTypo = (updates.typography || {}) as Record<string, unknown>;
+
+  const mergedTypography: Record<string, unknown> = {
+    ...currentTypo,
+    ...updateTypo,
+  };
+
+  const typoTags = ['h1', 'h2', 'h3', 'body', 'caption'];
+  for (const tag of typoTags) {
+    if (currentTypo[tag] || updateTypo[tag]) {
+      mergedTypography[tag] = {
+        ...((currentTypo[tag] as Record<string, unknown>) || {}),
+        ...((updateTypo[tag] as Record<string, unknown>) || {}),
+      };
+    }
+  }
+
   return {
     ...DEFAULT_TEMPLATE_THEME,
     ...currentTheme,
     ...updates,
     colors: { ...(currentTheme.colors || {}), ...(updates.colors || {}) },
-    typography: { ...(currentTheme.typography || {}), ...(updates.typography || {}) },
+    typography: mergedTypography as TemplateTheme['typography'],
     buttons: {
       ...(currentTheme.buttons || {}),
       ...(updates.buttons || {}),

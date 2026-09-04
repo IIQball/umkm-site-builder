@@ -48,9 +48,9 @@
     tabindex="0"
     on:click={selectTabs}
     on:keydown={(e) => { if (e.key === 'Enter') selectTabs(e); }}
-    class={`flex justify-center gap-2 p-1.5 rounded-2xl w-fit mx-auto transition-all ${
+    class={`flex flex-wrap justify-center gap-2 p-1.5 rounded-2xl w-fit mx-auto transition-all ${
       $canvasStore.selectedNodeId === 'faq_tabs'
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-nested/50'
+        ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--color-nested-base,#f8fafc)]'
         : ''
     }`}
   >
@@ -58,11 +58,12 @@
       <button
         type="button"
         on:click|stopPropagation={() => (activeTab = tab.id)}
-        class={`px-4 py-1.5 rounded-xl text-xs font-heading font-bold transition-all cursor-pointer ${
+        style={`border-radius: var(--btn-radius, var(--theme-btn-radius, 12px)); ${
           activeTab === tab.id
-            ? 'bg-primary text-white shadow-xs'
-            : 'bg-nested/80 text-secondary hover:text-main'
+            ? 'background-color: var(--btn-primary-bg, var(--theme-btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--btn-primary-text, var(--theme-btn-primary-text, #ffffff));'
+            : 'background-color: var(--btn-secondary-bg, var(--theme-btn-secondary-bg, var(--color-nested-base, #f1f5f9))); color: var(--btn-secondary-text, var(--theme-btn-secondary-text, var(--color-text-secondary, #475569)));'
         }`}
+        class="px-4 py-2 text-xs font-[var(--font-heading,inherit)] font-bold transition-all cursor-pointer shadow-xs hover:opacity-90"
       >
         {tab.label}
       </button>
@@ -80,21 +81,21 @@
         tabindex="0"
         on:click={(e) => selectItem(e, index, item)}
         on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
-        class={`rounded-2xl border border-light/80 bg-nested/40 overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
+        class={`rounded-2xl border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
           isItemActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-            : 'hover:border-slate-300 dark:hover:border-slate-700'
+            ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+            : 'hover:border-[var(--theme-primary,#2563eb)]/30'
         }`}
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(index)}
-          class="w-full p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm text-main hover:text-primary transition-colors cursor-pointer"
+          class="w-full p-4 flex items-center justify-between gap-4 text-left font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--color-text-main,var(--theme-text-primary,#0f172a))] hover:text-[var(--theme-primary,#2563eb)] transition-colors cursor-pointer"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
-            class={`p-1 rounded-lg text-secondary transition-transform duration-200 shrink-0 ${
-              isOpen ? 'rotate-180 text-primary' : ''
+            class={`p-1 rounded-lg text-[var(--color-text-secondary,var(--theme-text-muted,#64748b))] transition-transform duration-200 shrink-0 ${
+              isOpen ? 'rotate-180 text-[var(--theme-primary,#2563eb)]' : ''
             }`}
           >
             <ChevronDown size={15} />
@@ -102,7 +103,7 @@
         </button>
 
         {#if isOpen}
-          <div class="px-4 pb-4 pt-1 text-xs text-secondary leading-relaxed border-t border-light/60">
+          <div class="px-4 pb-4 pt-1 text-xs text-[var(--color-text-secondary,var(--theme-text-muted,#64748b))] leading-relaxed border-t border-[var(--color-border,rgba(15,23,42,0.08))] font-[var(--font-family,inherit)]">
             {item.answer}
           </div>
         {/if}

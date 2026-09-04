@@ -10,9 +10,15 @@
   const fontOptions = [
     { label: 'League Spartan (SSOT Default Heading)', value: "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif" },
     { label: 'Poppins (SSOT Default Body)', value: "'Poppins', system-ui, -apple-system, sans-serif" },
-    { label: 'Inter', value: 'Inter, system-ui, -apple-system, sans-serif' },
-    { label: 'Plus Jakarta Sans', value: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif' },
-    { label: 'Outfit', value: 'Outfit, system-ui, -apple-system, sans-serif' },
+    { label: 'Inter (Clean & Modern)', value: 'Inter, system-ui, -apple-system, sans-serif' },
+    { label: 'Plus Jakarta Sans (Geometric)', value: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif' },
+    { label: 'DM Sans (Contemporary)', value: '"DM Sans", system-ui, -apple-system, sans-serif' },
+    { label: 'Outfit (Trendy Minimal)', value: 'Outfit, system-ui, -apple-system, sans-serif' },
+    { label: 'Playfair Display (Serif/Luxury)', value: "'Playfair Display', Georgia, serif" },
+    { label: 'Merriweather (Editorial Serif)', value: 'Merriweather, Georgia, serif' },
+    { label: 'Montserrat (Punchy Sans)', value: 'Montserrat, system-ui, -apple-system, sans-serif' },
+    { label: 'Roboto (Neutral Sans)', value: 'Roboto, system-ui, -apple-system, sans-serif' },
+    { label: 'JetBrains Mono (Code/Tech)', value: "'JetBrains Mono', monospace" },
     { label: 'System Sans', value: 'system-ui, -apple-system, sans-serif' },
   ];
 
@@ -37,6 +43,7 @@
       id="typo-heading-font"
       value={typography.headingFont || "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif"}
       on:change={(e) => onTypographyChange('headingFont', e.currentTarget.value)}
+      on:input={(e) => onTypographyChange('headingFont', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-primary"
     >
       {#each fontOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
@@ -48,6 +55,7 @@
       id="typo-body-font"
       value={typography.bodyFont || "'Poppins', system-ui, -apple-system, sans-serif"}
       on:change={(e) => onTypographyChange('bodyFont', e.currentTarget.value)}
+      on:input={(e) => onTypographyChange('bodyFont', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-primary"
     >
       {#each fontOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}

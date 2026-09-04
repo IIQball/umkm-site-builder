@@ -1,164 +1,240 @@
 <script lang="ts">
-  import { MessageCircle, MapPin, Clock } from 'lucide-svelte';
-  import { canvasStore } from '../stores/editorStore';
-  import type { FooterProps, SectionStyles } from '@/types';
-  import FooterNewsletter from './footer/FooterNewsletter.svelte';
-  import FooterSocialShowcase from './footer/FooterSocialShowcase.svelte';
+  import { canvasStore, documentStore, activeNodeId } from '../stores/editorStore';
+  import type { FooterProps, SectionStyles, FooterSocialLink, FooterMenuLink } from '@/types';
+  import './footer/footer.css';
+  import {
+    DEFAULT_BRAND_NAME,
+    DEFAULT_TAGLINE,
+    DEFAULT_ADDRESS,
+    DEFAULT_STORE_HOURS,
+    DEFAULT_WA_NUMBER,
+    DEFAULT_SOCIAL_LINKS,
+    buildWhatsAppFooterLink,
+    buildMiniMapEmbedUrl,
+    formatCopyrightText,
+    getDynamicLandingNavLinks,
+  } from './footer/footer.helpers';
+  import {
+    FooterMultiColumn,
+    FooterCenteredSimple,
+    FooterCtaFocused,
+    FooterMinimalSingleRow,
+    FooterGiantWordmark,
+    FooterNewsletterCentric,
+    FooterLiveStatusBadge,
+    FooterSplitMap,
+    FooterSocialLinksGrid,
+    FooterBoxedCard,
+  } from './footer';
 
   export let props: FooterProps = {};
   export let styles: SectionStyles = {};
+  export let sectionId: string = '';
+  export let isActive: boolean = false;
   export let layoutPreset: string = 'multi_column';
+  export let store: {
+    name?: string;
+    waNumber?: string;
+    googleMapsUrl?: string;
+    address?: string;
+    storeHours?: string;
+    customization?: any;
+  } | null = null;
 
-  $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'multi_column';
-  $: isMobileView = $canvasStore?.viewMode === 'mobile';
-  $: whatsappNumber = props?.whatsappNumber || '6281234567890';
-  $: address = props?.address || 'Jl. Raya Sudirman No. 123, Jakarta Pusat';
-  $: copyrightText = props?.copyrightText || '© 2026 Toko Kami. Semua hak dilindungi.';
-  $: tagline = props?.tagline || 'Pusat belanja produk UMKM terpercaya berkualitas tinggi.';
-  $: logoText = props?.logoText || 'TOKO KAMI';
-  $: storeHours = (props?.storeHours as string) || 'Buka Setiap Hari: 08.00 - 21.00 WIB';
+  $: activePreset =
+    layoutPreset ||
+    (props?.layoutPreset as string) ||
+    (styles?.layoutPreset as string) ||
+    'multi_column';
+
+  // Otomatis sinkronisasi logo & nama toko dari Header
+  $: headerSection = $documentStore?.template?.config?.sections?.find((s) => s.type === 'header_announcement');
+  $: headerLogoText = (headerSection?.props?.logoText as string) || '';
+  $: headerLogoImageUrl = (headerSection?.props?.logoImageUrl as string) || '';
+
+  // Dual-mode data fallback: Tenant DB vs Header SSOT vs Designer Props
+  $: brandName = store?.name || headerLogoText || props?.brandName || props?.logoText || DEFAULT_BRAND_NAME;
+  $: logoImageUrl = headerLogoImageUrl || (props?.logoImageUrl as string) || '';
+  $: tagline = store?.customization?.tagline || props?.tagline || props?.description || DEFAULT_TAGLINE;
+  $: address = store?.customization?.address || store?.address || props?.address || DEFAULT_ADDRESS;
+  $: storeHours = store?.customization?.storeHours || store?.storeHours || (props?.storeHours as string) || DEFAULT_STORE_HOURS;
+  $: rawWaNumber = store?.waNumber || props?.whatsappNumber || DEFAULT_WA_NUMBER;
+  $: whatsappNumber = rawWaNumber;
+  $: whatsappLink = buildWhatsAppFooterLink(rawWaNumber, brandName);
+
+  $: googleMapsUrl = store?.googleMapsUrl || props?.googleMapsUrl || '';
+  $: mapEmbedUrl = buildMiniMapEmbedUrl(googleMapsUrl || address);
+
+  $: dynamicNavLinks = getDynamicLandingNavLinks($documentStore?.template?.config?.sections);
+  $: menuLinks = (Array.isArray(props?.footerLinks) && props.footerLinks.length > 0
+    ? props.footerLinks
+    : Array.isArray(props?.menuLinks) && props.menuLinks.length > 0
+      ? props.menuLinks
+      : dynamicNavLinks) as FooterMenuLink[];
+
+  $: socialLinks = (Array.isArray(props?.socialLinks) && props.socialLinks.length > 0
+    ? props.socialLinks
+    : Array.isArray(store?.customization?.socialLinks) && store?.customization?.socialLinks.length > 0
+      ? store.customization.socialLinks
+      : DEFAULT_SOCIAL_LINKS) as FooterSocialLink[];
+
+  $: copyrightText = formatCopyrightText(props?.copyrightText, brandName);
+
+  // Preset specific customizable props
+  $: floatingCtaTitle = props?.floatingCtaTitle || 'Ingin Pesan Menu Katering Hari Ini?';
+  $: floatingCtaSubtitle = props?.floatingCtaSubtitle || 'Dapatkan diskon ongkir untuk pemesanan minimal 10 porsi.';
+  $: floatingCtaButtonText = props?.floatingCtaButtonText || 'Chat Sekarang';
+
+  $: newsletterBadge = props?.newsletterBadge || 'Voucher Diskon 15%';
+  $: newsletterTitle = props?.newsletterTitle || 'Dapatkan Info Promo Langsung di HP';
+  $: newsletterSubtitle = props?.newsletterSubtitle || 'Ketik nomor WhatsApp Anda untuk menerima info diskon dan produk baru.';
+  $: newsletterButtonText = props?.newsletterButtonText || 'Daftar Promo';
+  $: newsletterPlaceholder = props?.newsletterPlaceholder || 'Masukkan nomor WhatsApp...';
+
+  $: statusBadgeText = props?.statusBadgeText || 'TOKO BUKA';
+  $: statusBadgeSubtext = props?.statusBadgeSubtext || 'Siap Menerima Pesanan WhatsApp';
+  $: statusChatButtonText = props?.statusChatButtonText || 'Chat Sekarang';
+
+  $: communityTitle = props?.communityTitle || 'Terhubung dengan Kami di Sosial Media';
+  $: communitySubtitle = props?.communitySubtitle || 'Ikuti info pembaruan menu harian, voucer promo, dan giveaway menarik.';
+
+  $: boxedOfficialBadge = props?.boxedOfficialBadge || 'Gerai Resmi UMKM';
+  $: boxedPrimaryCtaText = props?.boxedPrimaryCtaText || 'Katalog Resmi';
+  $: boxedPrimaryCtaLink = props?.boxedPrimaryCtaLink || '#products';
+  $: boxedSecondaryCtaText = props?.boxedSecondaryCtaText || 'Konsultasi Pesanan';
+
+  const handleSelectNode = (e: MouseEvent | KeyboardEvent, key: string) => {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, key);
+    }
+  };
 </script>
 
 <footer
+  id={sectionId ? `section-${sectionId}` : undefined}
   data-node="footer_container"
-  class="w-full box-border select-none {activePreset === 'boxed_card_footer' ? 'p-4 sm:p-6' : 'pt-12 pb-6'}"
+  class="footer-card w-full box-border relative transition-all {isActive ? 'relative z-10' : ''} {activePreset === 'boxed_card_footer' || activePreset === 'cta_focused' ? 'py-4' : 'pt-10 pb-6'}"
+  style="container-type: inline-size; container-name: footercard;"
 >
-  {#if activePreset === 'boxed_card_footer'}
-    <!-- Preset 10: Boxed Card Container Footer -->
-    <div class="max-w-6xl mx-auto p-8 rounded-3xl bg-[var(--theme-surface,#f8fafc)] border border-base-200 dark:border-slate-800 shadow-xl flex flex-col gap-8 text-left">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-        <div class="md:col-span-6 flex flex-col gap-2">
-          <h3 class="text-xl font-black text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
-          <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-sm">{tagline}</p>
-        </div>
-        <div class="md:col-span-6 flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4">
-          {#if whatsappNumber}
-            <a
-              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noreferrer"
-              style="height: var(--theme-btn-height, 40px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-              class="inline-flex items-center justify-center px-6 text-xs font-bold shadow-md hover:brightness-105 active:scale-95 transition-all"
-            >
-              <MessageCircle size={14} class="mr-1.5" />
-              <span>Chat WhatsApp</span>
-            </a>
-          {/if}
-        </div>
-      </div>
-      <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--theme-text-muted,#64748b)]">
-        <p>{copyrightText}</p>
-        <p class="flex items-center gap-1"><MapPin size={12} class="text-[var(--theme-primary,#2563eb)]" /> {address}</p>
-      </div>
-    </div>
-
-  {:else if activePreset === 'minimal_single_row'}
-    <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-base-200 dark:border-slate-800 text-xs">
-      <span class="font-black tracking-wider text-[var(--theme-text-primary,#0f172a)]">{logoText}</span>
-      <div class="flex items-center gap-6 text-[var(--theme-text-muted,#64748b)]">
-        <a href="#products" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">Katalog</a>
-        <a href="#about" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">Tentang</a>
-        <a href="#faq" class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">FAQ</a>
-      </div>
-      <p class="text-[var(--theme-text-muted,#64748b)]">{copyrightText}</p>
-    </div>
-
-  {:else if activePreset === 'giant_wordmark'}
-    <div class="w-full flex flex-col items-center text-center gap-8 py-8 overflow-hidden">
-      <div class="flex flex-col items-center gap-2 max-w-xl">
-        <p class="text-xs sm:text-sm text-[var(--theme-text-muted,#64748b)]">{tagline}</p>
-        {#if whatsappNumber}
-          <a
-            href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
-            target="_blank"
-            rel="noreferrer"
-            class="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1 mt-1"
-          >
-            <MessageCircle size={14} />
-            <span>Hubungi kami via WhatsApp: +{whatsappNumber}</span>
-          </a>
-        {/if}
-      </div>
-
-      <div class="w-full select-none pointer-events-none py-4">
-        <span class="text-4xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-slate-200 dark:text-slate-800/60 uppercase block truncate">
-          {logoText}
-        </span>
-      </div>
-
-      <div class="w-full pt-4 border-t border-base-200 dark:border-slate-800 text-center text-xs text-[var(--theme-text-muted,#64748b)]">
-        <p>{copyrightText}</p>
-      </div>
-    </div>
-
-  {:else if activePreset === 'newsletter_centric'}
-    <FooterNewsletter {logoText} {tagline} {copyrightText} />
-
-  {:else if activePreset === 'social_showcase_footer'}
-    <FooterSocialShowcase {logoText} {tagline} {copyrightText} />
-
-  {:else if activePreset === 'centered_brand_column'}
-    <div class="w-full flex flex-col items-center text-center gap-4 py-8">
-      <span class="font-black text-xl tracking-tight text-[var(--theme-text-primary,#0f172a)]">{logoText}</span>
-      <p class="text-xs text-[var(--theme-text-muted,#64748b)] max-w-md">{tagline}</p>
-      <div class="flex items-center gap-6 text-xs text-[var(--theme-text-muted,#64748b)] pt-2">
-        <a href="#products" class="hover:text-[var(--theme-primary,#2563eb)]">Katalog</a>
-        <a href="#about" class="hover:text-[var(--theme-primary,#2563eb)]">Tentang</a>
-        <a href="#faq" class="hover:text-[var(--theme-primary,#2563eb)]">FAQ</a>
-      </div>
-      <p class="text-[11px] text-[var(--theme-text-muted,#64748b)] pt-6 border-t border-base-200 dark:border-slate-800 w-full">
+  <div
+    class="builder-safe-container"
+    style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); margin: 0 auto; padding-left: var(--active-safe-zone, var(--theme-safe-zone-desktop, 32px)); padding-right: var(--active-safe-zone, var(--theme-safe-zone-desktop, 32px));"
+  >
+    {#if activePreset === 'centered_simple'}
+      <FooterCenteredSimple
+        {brandName}
+        {tagline}
+        {logoImageUrl}
+        {whatsappLink}
+        chatButtonText={statusChatButtonText}
         {copyrightText}
-      </p>
-    </div>
-
-  {:else}
-    <!-- Preset 1 (Default): Multi-Column Footer -->
-    <div class="w-full grid {isMobileView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-12'} gap-8 text-left">
-      <div class="md:col-span-4 flex flex-col gap-3">
-        <h3 class="font-black text-lg text-[var(--theme-text-primary,#0f172a)]">{logoText}</h3>
-        <p class="text-xs text-[var(--theme-text-muted,#64748b)] leading-relaxed">{tagline}</p>
-      </div>
-
-      <div class="md:col-span-3 flex flex-col gap-2.5">
-        <h4 class="font-bold text-xs uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)]">Tautan Cepat</h4>
-        <a href="#products" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Katalog Produk</a>
-        <a href="#about" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Tentang Kami</a>
-        <a href="#faq" class="text-xs text-[var(--theme-text-muted,#64748b)] hover:text-[var(--theme-primary,#2563eb)]">Tanya Jawab (FAQ)</a>
-      </div>
-
-      <div class="md:col-span-5 flex flex-col gap-3">
-        <h4 class="font-bold text-xs uppercase tracking-wider text-[var(--theme-text-primary,#0f172a)]">Kontak & Lokasi</h4>
-        <p class="text-xs text-[var(--theme-text-muted,#64748b)] flex items-start gap-2">
-          <MapPin size={15} class="text-[var(--theme-primary,#2563eb)] mt-0.5 flex-shrink-0" />
-          <span>{address}</span>
-        </p>
-        <p class="text-xs text-[var(--theme-text-muted,#64748b)] flex items-center gap-2">
-          <Clock size={15} class="text-[var(--theme-primary,#2563eb)] flex-shrink-0" />
-          <span>{storeHours}</span>
-        </p>
-        {#if whatsappNumber}
-          <div class="pt-1">
-            <a
-              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noreferrer"
-              style="height: var(--theme-btn-height, 36px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
-              class="inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 transition-all"
-            >
-              <MessageCircle size={14} class="mr-1.5" />
-              <span>Hubungi CS WhatsApp</span>
-            </a>
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <div class="mt-8 pt-6 border-t border-base-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--theme-text-muted,#64748b)]">
-      <p>{copyrightText}</p>
-      <div class="flex items-center gap-4">
-        <a href="#terms" class="hover:underline">Syarat & Ketentuan</a>
-        <a href="#privacy" class="hover:underline">Kebijakan Privasi</a>
-      </div>
-    </div>
-  {/if}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'cta_focused'}
+      <FooterCtaFocused
+        {brandName}
+        {address}
+        {floatingCtaTitle}
+        {floatingCtaSubtitle}
+        {floatingCtaButtonText}
+        {whatsappLink}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'minimal_single_row'}
+      <FooterMinimalSingleRow
+        {brandName}
+        {logoImageUrl}
+        {copyrightText}
+        {socialLinks}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'giant_wordmark'}
+      <FooterGiantWordmark
+        {brandName}
+        {tagline}
+        {whatsappNumber}
+        {whatsappLink}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'newsletter_centric'}
+      <FooterNewsletterCentric
+        {newsletterBadge}
+        {newsletterTitle}
+        {newsletterSubtitle}
+        {newsletterButtonText}
+        {newsletterPlaceholder}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'live_status_badge'}
+      <FooterLiveStatusBadge
+        {statusBadgeText}
+        {statusBadgeSubtext}
+        {statusChatButtonText}
+        {whatsappLink}
+        {copyrightText}
+        {storeHours}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'split_map_footer'}
+      <FooterSplitMap
+        {brandName}
+        {tagline}
+        {address}
+        {whatsappNumber}
+        {whatsappLink}
+        {mapEmbedUrl}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'social_links_grid'}
+      <FooterSocialLinksGrid
+        {communityTitle}
+        {communitySubtitle}
+        {socialLinks}
+        {whatsappLink}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else if activePreset === 'boxed_card_footer'}
+      <FooterBoxedCard
+        {boxedOfficialBadge}
+        {brandName}
+        {tagline}
+        {boxedPrimaryCtaText}
+        {boxedPrimaryCtaLink}
+        {boxedSecondaryCtaText}
+        {whatsappLink}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {:else}
+      <!-- Preset 1: multi_column (Default) -->
+      <FooterMultiColumn
+        {brandName}
+        {tagline}
+        {logoImageUrl}
+        {address}
+        {storeHours}
+        {whatsappNumber}
+        {whatsappLink}
+        {menuLinks}
+        {copyrightText}
+        activeNodeId={$activeNodeId}
+        selectNode={handleSelectNode}
+      />
+    {/if}
+  </div>
 </footer>

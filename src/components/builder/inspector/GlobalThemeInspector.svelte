@@ -12,24 +12,29 @@
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
 
-  const setCanvasCssVar = (prop: string, val: string) => {
+  const setCanvasCssVar = (props: string | Record<string, string>, val?: string) => {
     if (typeof document === 'undefined') return;
-    const canvasContainers = document.querySelectorAll<HTMLElement>('[data-theme]');
-    canvasContainers.forEach((el) => el.style.setProperty(prop, val));
-  };
-
-  const colorCssVarMap: Record<string, string> = {
-    primary: '--theme-primary',
-    secondary: '--theme-secondary',
-    background: '--theme-bg',
-    surface: '--theme-surface',
-    textPrimary: '--theme-text-primary',
-    textMuted: '--theme-text-muted',
+    const targets = document.querySelectorAll<HTMLElement>('#canvas-frame, [aria-label="Editable Page Canvas"]');
+    const updateEntries: [string, string][] = typeof props === 'string' && val !== undefined
+      ? [[props, val]]
+      : Object.entries(props as Record<string, string>);
+    targets.forEach((el) => {
+      for (const [p, v] of updateEntries) {
+        el.style.setProperty(p, v);
+      }
+    });
   };
 
   const updateColorOptimistic = (key: string, value: string) => {
-    const cssVar = colorCssVarMap[key];
-    if (cssVar) setCanvasCssVar(cssVar, value);
+    const cssMap: Record<string, Record<string, string>> = {
+      primary: { '--theme-primary': value, '--color-primary': value },
+      secondary: { '--theme-secondary': value, '--color-secondary': value },
+      background: { '--theme-bg': value, '--color-bg-base': value },
+      surface: { '--theme-surface': value, '--color-card-base': value },
+      textPrimary: { '--theme-text-primary': value, '--color-text-main': value },
+      textMuted: { '--theme-text-muted': value, '--color-text-secondary': value, '--color-text-muted': value },
+    };
+    if (cssMap[key]) setCanvasCssVar(cssMap[key]);
     editorStore.updateGlobalTheme({
       colors: { [key]: value },
       ...(key === 'primary' ? { primaryColor: value } : {}),
@@ -37,29 +42,35 @@
   };
 
   const updateTypography = (key: string, value: unknown) => {
-    if (key === 'headingFont') setCanvasCssVar('--theme-font-heading', String(value));
-    if (key === 'bodyFont') setCanvasCssVar('--theme-font-body', String(value));
+    const valStr = String(value);
+    if (key === 'headingFont') setCanvasCssVar({ '--theme-font-heading': valStr, '--font-heading': valStr });
+    if (key === 'bodyFont') setCanvasCssVar({ '--theme-font-body': valStr, '--font-family': valStr, '--font-sans': valStr });
     editorStore.updateGlobalTheme({
       typography: { [key]: value },
-      ...(key === 'bodyFont' ? { fontFamily: String(value) } : {}),
+      ...(key === 'bodyFont' ? { fontFamily: valStr } : {}),
     });
   };
 
   const updateScale = (tag: string, field: string, value: string) => {
     const current = (theme.typography as Record<string, Record<string, string> | undefined>)?.[tag] || {};
-    if (field === 'fontSize') setCanvasCssVar(`--theme-text-${tag}`, value);
+    if (field === 'fontSize') {
+      setCanvasCssVar({
+        [`--theme-text-${tag}`]: value,
+        [`--text-${tag}-size`]: value,
+      });
+    }
     editorStore.updateGlobalTheme({
       typography: { [tag]: { ...current, [field]: value } },
     });
   };
 
   const updateButtonVariantOptimistic = (variantKey: string, key: string, value: string) => {
-    if (variantKey === 'primary' && key === 'backgroundColor') setCanvasCssVar('--theme-btn-primary-bg', value);
-    if (variantKey === 'primary' && key === 'textColor') setCanvasCssVar('--theme-btn-primary-text', value);
-    if (variantKey === 'secondary' && key === 'backgroundColor') setCanvasCssVar('--theme-btn-secondary-bg', value);
-    if (variantKey === 'secondary' && key === 'textColor') setCanvasCssVar('--theme-btn-secondary-text', value);
-    if (variantKey === 'outline' && key === 'borderColor') setCanvasCssVar('--theme-btn-outline-border', value);
-    if (variantKey === 'outline' && key === 'textColor') setCanvasCssVar('--theme-btn-outline-text', value);
+    if (variantKey === 'primary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-primary-bg': value, '--btn-primary-bg': value });
+    if (variantKey === 'primary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-primary-text': value, '--btn-primary-text': value });
+    if (variantKey === 'secondary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-secondary-bg': value, '--btn-secondary-bg': value });
+    if (variantKey === 'secondary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-secondary-text': value, '--btn-secondary-text': value });
+    if (variantKey === 'outline' && key === 'borderColor') setCanvasCssVar({ '--theme-btn-outline-border': value, '--btn-outline-border': value });
+    if (variantKey === 'outline' && key === 'textColor') setCanvasCssVar({ '--theme-btn-outline-text': value, '--btn-outline-text': value });
 
     const variant = variantKey as 'primary' | 'secondary' | 'outline';
     const current = (theme.buttons || {})[variant] || {};
@@ -69,15 +80,15 @@
   };
 
   const updateButtonRadius = (value: string) => {
-    setCanvasCssVar('--theme-btn-radius', value);
+    setCanvasCssVar({ '--theme-btn-radius': value, '--btn-radius': value });
     editorStore.updateGlobalTheme({ buttons: { borderRadius: value } });
   };
 
   const updateLayoutParam = (key: string, value: string) => {
-    if (key === 'maxWidth') setCanvasCssVar('--theme-max-width', value);
-    if (key === 'horizontalMarginDesktop') setCanvasCssVar('--theme-safe-zone-desktop', value);
-    if (key === 'horizontalMarginTablet') setCanvasCssVar('--theme-safe-zone-tablet', value);
-    if (key === 'horizontalMarginMobile') setCanvasCssVar('--theme-safe-zone-mobile', value);
+    if (key === 'maxWidth') setCanvasCssVar({ '--theme-max-width': value, '--active-max-width': value });
+    if (key === 'horizontalMarginDesktop') setCanvasCssVar({ '--theme-safe-zone-desktop': value, '--active-safe-zone': value });
+    if (key === 'horizontalMarginTablet') setCanvasCssVar({ '--theme-safe-zone-tablet': value, '--active-safe-zone': value });
+    if (key === 'horizontalMarginMobile') setCanvasCssVar({ '--theme-safe-zone-mobile': value, '--active-safe-zone': value });
     editorStore.updateGlobalTheme({ layout: { [key]: value } });
   };
 </script>

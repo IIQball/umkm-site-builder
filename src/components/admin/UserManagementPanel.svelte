@@ -114,8 +114,8 @@
         await fetchUsers();
       } else {
         let errorMsg = result.error?.message || 'Gagal memperbarui status akun';
-        if (result.details) {
-          const detailVals = Object.values(result.details).flat().filter(Boolean);
+        if (result.error?.details) {
+          const detailVals = Object.values(result.error.details).flat().filter(Boolean);
           if (detailVals.length > 0) {
             errorMsg = detailVals[0] as string;
           }

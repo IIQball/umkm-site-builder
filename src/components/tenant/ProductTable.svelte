@@ -77,7 +77,7 @@
       if (res.ok && data.ok) {
         product.isAvailable = newStatus;
         products = [...products];
-        toast.success(data.message || "Status stok berhasil diubah");
+        toast.success("Status stok berhasil diubah");
       } else {
         product.isAvailable = !newStatus;
         products = [...products];

@@ -39,7 +39,10 @@ export const POST: APIRoute = async (context) => {
     return jsonSuccess({ storeId: store.id, isOpen: data.isOpen }, 200);
   } catch (error) {
     if (error instanceof ZodError) {
-      return jsonError('Validation error', 400, error.errors, 500);
+      return jsonError('Validation error', 400, error.errors, 'VALIDATION_ERROR');
+    }
+    console.error('Store status update error:', error);
+    return jsonError('Internal Server Error', 500);
   }
 };
 

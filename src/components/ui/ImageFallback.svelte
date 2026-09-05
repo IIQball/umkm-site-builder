@@ -9,6 +9,8 @@
 
   let hasError = false;
 
+  $: { src; hasError = false; }
+
   function handleError() {
     hasError = true;
   }

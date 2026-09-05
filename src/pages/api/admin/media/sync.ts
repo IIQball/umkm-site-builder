@@ -1,19 +1,27 @@
 import type { APIRoute } from 'astro';
+import crypto from 'node:crypto';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { handleApiRoute, jsonSuccess, AppError, validate } from '@/lib/utils';
+import { handleApiRoute, AppError, validate } from '@/lib/utils';
 import { runMediaSync } from '@/services/media/sync.service';
 import { MediaSyncOptionsSchema } from '@/schemas/media.schema';
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     // 1. Check authorization via Admin Session OR CRON Secret Header
-    const cronSecret = process.env.CRON_SECRET || (import.meta as unknown as { env: Record<string, string | undefined> }).env?.CRON_SECRET;
+    const cronSecret = process.env.CRON_SECRET || import.meta.env?.CRON_SECRET;
     const authHeader = context.request.headers.get('Authorization') || '';
     const cronHeader = context.request.headers.get('x-cron-secret') || '';
 
+    const checkSecret = (input: string, secret: string) => {
+      if (!input || !secret) return false;
+      const inputBuf = Buffer.from(input);
+      const secretBuf = Buffer.from(secret);
+      return inputBuf.length === secretBuf.length && crypto.timingSafeEqual(inputBuf, secretBuf);
+    };
+
     const isCronAuthorized =
       Boolean(cronSecret) &&
-      (cronHeader === cronSecret || authHeader === `Bearer ${cronSecret}`);
+      (checkSecret(cronHeader, cronSecret as string) || checkSecret(authHeader, `Bearer ${cronSecret}`));
 
     if (!isCronAuthorized) {
       const user = await getAuthenticatedUser(context.request);
@@ -31,6 +39,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       dryRun: validated.dryRun,
     });
 
-    return jsonSuccess(report, validated.dryRun ? 'Media sync dry run completed' : 'Media sync executed successfully');
+    return Response.json({
+      success: true,
+      ok: true,
+      message: validated.dryRun ? 'Media sync dry run completed' : 'Media sync executed successfully',
+      data: report,
+    }, { status: 200 });
   });
 };

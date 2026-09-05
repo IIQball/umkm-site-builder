@@ -24,22 +24,33 @@ export async function fetchCloudinaryAssets(options: {
   const { cloudName, apiKey, apiSecret } = getCloudinaryCredentials();
 
   const authHeader = `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`;
-  const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?prefix=${encodeURIComponent(prefix)}&max_results=${maxResults}`;
+  let allAssets: CloudinaryAsset[] = [];
+  let nextCursor: string | undefined = undefined;
 
-  const response = await fetchFn(url, {
-    method: 'GET',
-    headers: {
-      Authorization: authHeader,
-    },
-  });
+  do {
+    let url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?prefix=${encodeURIComponent(prefix)}&max_results=${maxResults}`;
+    if (nextCursor) {
+      url += `&next_cursor=${encodeURIComponent(nextCursor)}`;
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to fetch Cloudinary resources: ${response.status} ${errorText}`);
-  }
+    const response = await fetchFn(url, {
+      method: 'GET',
+      headers: {
+        Authorization: authHeader,
+      },
+    });
 
-  const data = await response.json();
-  return (data.resources || []) as CloudinaryAsset[];
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch Cloudinary resources: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    allAssets = allAssets.concat((data.resources || []) as CloudinaryAsset[]);
+    nextCursor = data.next_cursor;
+  } while (nextCursor);
+
+  return allAssets;
 }
 
 /**

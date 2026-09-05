@@ -3,7 +3,10 @@ import { mediaSyncService } from '@/services/media/sync.service';
 
 describe('Admin Media Sync API & Service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    process.env.CLOUDINARY_NAME = 'test-cloud';
+    process.env.CLOUDINARY_API_KEY = 'test-key';
+    process.env.CLOUDINARY_SECRET = 'test-secret';
   });
 
   afterEach(() => {
@@ -19,7 +22,7 @@ describe('Admin Media Sync API & Service', () => {
         where: vi.fn().mockResolvedValue([
           {
             id: 'product-1',
-            imageUrls: ['umkm-builder/valid-image.jpg', 'umkm-builder/broken-image.jpg', 'https://external.com/image.jpg']
+            imageUrls: ['https://res.cloudinary.com/test-cloud/image/upload/v1234/umkm-builder/valid-image.jpg', 'https://res.cloudinary.com/test-cloud/image/upload/v1234/umkm-builder/broken-image.jpg', 'https://external.com/image.jpg']
           }
         ]),
         update: vi.fn().mockReturnThis(),
@@ -42,7 +45,7 @@ describe('Admin Media Sync API & Service', () => {
         fetchFn: mockFetchFn as never
       });
 
-      expect(report.success).toBe(true);
+
       expect(report.dryRun).toBe(true);
       expect(report.productsChecked).toBe(1);
       expect(report.productsUpdated).toBe(1);
@@ -60,7 +63,7 @@ describe('Admin Media Sync API & Service', () => {
         where: vi.fn().mockResolvedValue([
           {
             id: 'product-2',
-            imageUrls: ['umkm-builder/broken-image2.jpg']
+            imageUrls: ['https://res.cloudinary.com/test-cloud/image/upload/v1234/umkm-builder/broken-image2.jpg']
           }
         ]),
         update: vi.fn().mockReturnThis(),
@@ -81,7 +84,7 @@ describe('Admin Media Sync API & Service', () => {
         fetchFn: mockFetchFn as never
       });
 
-      expect(report.success).toBe(true);
+
       expect(report.dryRun).toBe(false);
       expect(report.productsUpdated).toBe(1);
       

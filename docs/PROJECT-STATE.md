@@ -52,7 +52,7 @@ Keep it short and current. This is a checkpoint, not a changelog.
   - **Single Source of Truth Currency Formatter (`formatIDR`)**:
     - Eliminated inline `Intl.NumberFormat('id-ID')` and ad-hoc `'Rp ' + ...` across all 12 target components + catalog files (`StatCard`, `DesignerBankWithdraw`, `ProductCatalog`, `CheckoutPaymentBreakdown`, `NewTemplateForm`, `SubmitReviewModal`, `ProductBasicFields`, `ProductCatalogCard`, `CatalogCheckoutModal`, `TemplatePricingSimulator`, `ProductCatalogQuickView`, `ProductTableRow`, `ProductGrid`, `orders.astro`).
     - Verified strict 0 matches for `Intl.NumberFormat('id-ID')` outside [`src/lib/currency.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/currency.ts).
-  - **Canonical WhatsApp Utilities (`normalizeWhatsAppNumber`, `buildWhatsAppUrl`, `generateWhatsAppLink`)**:
+  - **Canonical WhatsApp Utilities (`normalizeWhatsAppNumber`, `generateWhatsAppLink`, `generateWhatsAppOrderUrl`)**:
     - Centralized WhatsApp parsing and URL formatting in [`src/lib/whatsapp.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/whatsapp.ts), fixing the leading `8...` prefix bug and supporting `08...`, `8...`, `620...`, `+62...`.
     - Consolidated helper calls in `footer.helpers.ts`, `faq.helpers.ts`, `maps.helpers.ts`, `productCatalog.helpers.ts`, `ProductGrid.svelte`, and `[subdomain].astro`.
     - Sanitized builder WhatsApp input in [`FooterNodeForms.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/node-forms/FooterNodeForms.svelte) with live normalization and validation pattern.

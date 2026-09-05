@@ -1,5 +1,5 @@
 import type { FAQItem } from '@/types';
-import { getEffectiveWhatsAppNumber, buildWhatsAppUrl } from '@/lib/whatsapp';
+import { getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const DEFAULT_FAQS: (FAQItem & { category?: string; iconName?: string })[] = [
   {
@@ -51,7 +51,7 @@ export const getCleanWaNumber = getEffectiveWhatsAppNumber;
 export function buildWhatsAppHelpLink(wa?: string, message?: string): string {
   const cleanWa = getEffectiveWhatsAppNumber(wa);
   const text = message || 'Halo admin, saya ingin bertanya seputar produk/layanan toko.';
-  return buildWhatsAppUrl(cleanWa, text);
+  return generateWhatsAppLink(cleanWa, text);
 }
 
 export function filterFaqs(

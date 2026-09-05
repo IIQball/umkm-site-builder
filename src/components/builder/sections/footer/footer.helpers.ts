@@ -11,7 +11,7 @@ import {
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, FooterMenuLink, FooterSocialLink } from '@/types';
-import { normalizeWhatsAppNumber, getEffectiveWhatsAppNumber, buildWhatsAppUrl } from '@/lib/whatsapp';
+import { normalizeWhatsAppNumber, getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const DEFAULT_BRAND_NAME = 'Warung Berkah';
 export const DEFAULT_TAGLINE = 'Pelopor kuliner & aneka camilan khas tradisional dengan resep otentik nusantara. Diproses higienis setiap hari.';
@@ -62,7 +62,7 @@ export function buildWhatsAppFooterLink(waNumber?: string, storeName?: string, m
   const digits = getEffectiveWhatsAppNumber(waNumber || DEFAULT_WA_NUMBER);
   const name = storeName || DEFAULT_BRAND_NAME;
   const defaultText = `Halo ${name}, saya ingin bertanya mengenai toko Anda.`;
-  return buildWhatsAppUrl(digits, message || defaultText);
+  return generateWhatsAppLink(digits, message || defaultText);
 }
 
 export function buildMiniMapEmbedUrl(queryOrUrl?: string): string {

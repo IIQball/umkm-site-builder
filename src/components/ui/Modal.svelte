@@ -60,7 +60,7 @@
 {#if open}
   <div
     use:teleport
-    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm transition-all"
+    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 !bg-slate-950/60 backdrop-blur-sm transition-all"
     role="presentation"
   >
     <div
@@ -125,7 +125,7 @@
 
       <!-- Modal Footer -->
       {#if $$slots.footer}
-        <div class="modal-action m-0 px-6 sm:px-7 py-5 flex flex-wrap items-center justify-end gap-3 flex-shrink-0 {borderless ? '' : 'bg-nested/50 border-t border-light'}">
+        <div class="px-6 sm:px-7 py-5 flex flex-wrap items-center justify-end gap-3 flex-shrink-0 {borderless ? '' : 'bg-nested/50 border-t border-light'}">
           <slot name="footer" />
         </div>
       {/if}

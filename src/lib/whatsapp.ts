@@ -12,11 +12,10 @@ export function normalizeWhatsAppNumber(phone?: string | null): string {
   } else if (cleaned.startsWith('8')) {
     cleaned = '62' + cleaned;
   }
+  if (cleaned && !cleaned.startsWith('62')) {
+    cleaned = '62' + cleaned;
+  }
   return cleaned;
-}
-
-export function formatWhatsAppNumber(phone: string): string {
-  return normalizeWhatsAppNumber(phone);
 }
 
 export function getEffectiveWhatsAppNumber(phone?: string | null): string {
@@ -28,10 +27,6 @@ export function generateWhatsAppLink(phone?: string | null, customText?: string)
   const formattedPhone = getEffectiveWhatsAppNumber(phone);
   const message = customText || 'Halo, saya tertarik dengan produk di toko Anda. Boleh minta informasi lebih lanjut?';
   return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-}
-
-export function buildWhatsAppUrl(phone?: string | null, customText?: string): string {
-  return generateWhatsAppLink(phone, customText);
 }
 
 export function generateWhatsAppOrderUrl(phone: string, productName: string, productPrice?: number, variantInfo?: string): string {

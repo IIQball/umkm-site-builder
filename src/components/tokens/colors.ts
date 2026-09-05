@@ -5,7 +5,7 @@
 
 export const DEFAULT_THEME_COLOR_FIELDS = [
   { key: 'primary', label: 'Primary Brand Color', defaultVal: '#2563eb' },
-  { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#334155' },
+  { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#64748b' },
   { key: 'background', label: 'Background Kanvas', defaultVal: '#ffffff' },
   { key: 'surface', label: 'Surface / Card Background', defaultVal: '#f8fafc' },
   { key: 'textPrimary', label: 'Teks Utama (Primary)', defaultVal: '#0f172a' },

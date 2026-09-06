@@ -13,8 +13,7 @@ describe('POST /api/admin/media/cleanup', () => {
   const mockGetAuthUser = getAuthenticatedUser as unknown as Mock;
   const mockIsAuthorizedAdmin = isAuthorizedAdmin as unknown as Mock;
   let mockRunMediaCleanup: MockInstance<
-    Parameters<typeof mediaCleanupModule.runMediaCleanup>,
-    ReturnType<typeof mediaCleanupModule.runMediaCleanup>
+    (...args: Parameters<typeof mediaCleanupModule.runMediaCleanup>) => ReturnType<typeof mediaCleanupModule.runMediaCleanup>
   >;
 
   beforeEach(() => {

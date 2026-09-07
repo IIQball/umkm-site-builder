@@ -49,6 +49,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError(errorMessage, 500);
     }
 
-    return jsonSuccess({ id: newUserId }, 'User account registered successfully');
+    return jsonSuccess({ id: newUserId });
   });
 };

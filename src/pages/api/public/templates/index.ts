@@ -6,7 +6,7 @@ export const GET: APIRoute = async (): Promise<Response> => {
   return handleApiRoute(async () => {
     const list = await getPublicTemplates();
 
-    const res = jsonSuccess(list, 'Katalog template berhasil dimuat');
+    const res = jsonSuccess(list);
     res.headers.set('Cache-Control', 'public, max-age=10, s-maxage=30');
     return res;
   });

@@ -44,7 +44,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.success).toBe(false);
+      expect(body.ok).toBe(false);
       expect(body.error.code).toBe('UNAUTHORIZED');
     });
 
@@ -67,7 +67,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toEqual(mockRecord);
     });
 
@@ -82,7 +82,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toBeNull();
     });
   });
@@ -105,7 +105,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.success).toBe(false);
+      expect(body.ok).toBe(false);
       expect(body.error.code).toBe('UNAUTHORIZED');
     });
 
@@ -134,7 +134,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.success).toBe(false);
+      expect(body.ok).toBe(false);
       expect(body.error.code).toBe('VALIDATION_ERROR');
     });
 
@@ -187,7 +187,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toEqual(newRecord);
     });
 
@@ -242,7 +242,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toEqual(updatedRecord);
     });
   });

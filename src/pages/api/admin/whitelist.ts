@@ -24,7 +24,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     .where(eq(users.role, 'admin'))
     .orderBy(desc(users.createdAt));
 
-    return jsonSuccess(admins, 'Admin list fetched successfully');
+    return jsonSuccess(admins);
   });
 };
 
@@ -73,7 +73,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       addedBy: user.id,
     });
 
-    return jsonSuccess({ id: newUserId }, 'Admin account registered successfully');
+    return jsonSuccess({ id: newUserId });
   });
 };
 
@@ -91,7 +91,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     const validated = validate(adminStatusUpdateSchema, body);
 
     await db.update(users).set({ status: validated.status }).where(eq(users.id, id));
-    return jsonSuccess(null, `Admin status updated successfully to ${validated.status}`);
+    return jsonSuccess(null);
   });
 };
 
@@ -119,6 +119,6 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     await db.delete(users).where(eq(users.id, id));
     await db.delete(adminWhitelist).where(eq(adminWhitelist.email, targetUser[0].email));
 
-    return jsonSuccess(null, 'Admin account deleted permanently');
+    return jsonSuccess(null);
   });
 };

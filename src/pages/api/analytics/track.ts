@@ -18,6 +18,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     const result = await trackEvent(storeId, eventType);
 
-    return jsonSuccess(result, 'Event analitik berhasil dicatat', 200);
+    return jsonSuccess(result, 200);
   });
 };

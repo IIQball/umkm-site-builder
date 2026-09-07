@@ -89,6 +89,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       recentActivities,
     };
 
-    return jsonSuccess(metrics, 'Metrics fetched successfully');
+    return jsonSuccess(metrics);
   });
 };

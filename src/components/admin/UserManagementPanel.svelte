@@ -44,7 +44,7 @@
     try {
       const res = await fetch('/api/admin/users');
       const result = await res.json();
-      if (result.success && Array.isArray(result.data)) {
+      if (result.ok && Array.isArray(result.data)) {
         users = result.data;
       } else if (result.error) {
         showToast(result.error.message || 'Gagal memuat pengguna', 'error');
@@ -108,14 +108,14 @@
       });
       const result = await res.json();
       
-      if (res.ok && (result.success || result.ok)) {
+      if (res.ok && (result.ok)) {
         showToast(newStatus === 'active' ? 'Akun berhasil diaktifkan' : 'Akun berhasil ditangguhkan', 'success');
         closeModal();
         await fetchUsers();
       } else {
         let errorMsg = result.error?.message || 'Gagal memperbarui status akun';
-        if (result.details) {
-          const detailVals = Object.values(result.details).flat().filter(Boolean);
+        if (result.error?.details) {
+          const detailVals = Object.values(result.error.details).flat().filter(Boolean);
           if (detailVals.length > 0) {
             errorMsg = detailVals[0] as string;
           }

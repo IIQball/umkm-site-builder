@@ -85,4 +85,4 @@ is stale it is worse than empty, because it gets trusted.
 
 Things that surprised a previous session. Each entry saves the next one an hour.
 
-- ...
+- **API Response Drift:** The documented response shape `{ ok, data } / { ok, error: { code, message } }` (used in `src/types/common/api.ts`) is currently the minority pattern (4 routes). 29 routes use `jsonSuccess()`/`jsonError()` from `src/lib/utils/api-handler.ts` which emits `{ success, ok, message, data }`. Another 13 routes hand-roll `new Response(...)`, often omitting `error.code` (drift is heaviest in product, store, and category routes). Consequence: client code must tolerate all three variants.

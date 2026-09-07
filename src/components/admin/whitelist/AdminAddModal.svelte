@@ -39,7 +39,7 @@
       });
       const result = await res.json();
 
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         toast.success('Akun admin berhasil didaftarkan');
         newName = '';
         newEmail = '';

@@ -71,7 +71,7 @@
 
       const data = await res.json();
 
-      if (!data.success) {
+      if (!data.ok) {
         submitStatus = 'error';
         submitMessage = data.error || 'Gagal menyimpan pengaturan toko';
         return;
@@ -106,7 +106,7 @@
 
       const data = await res.json();
 
-      if (!data.success) {
+      if (!data.ok) {
         isOpen = !isOpen;
         alert(data.error || 'Gagal mengubah status toko');
         return;

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
+  import { formatIDR } from '@/lib/currency';
   import DesignerBankCard from './DesignerBankCard.svelte';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
@@ -32,7 +33,7 @@
     try {
       const res = await fetch('/api/designer/payout');
       const result = await res.json();
-      if (result.success && result.data) {
+      if (result.ok && result.data) {
         payoutHistory = result.data.payouts || [];
         minPayoutLimit = result.data.minPayoutLimit || 50000;
       }
@@ -47,7 +48,7 @@
     try {
       const res = await fetch('/api/designer/payout/status');
       const result = await res.json();
-      if (res.ok && result.success && result.data) {
+      if (res.ok && result.ok && result.data) {
         payoutHistory = result.data.payouts || [];
         if (result.data.wallet) {
           balance = Number(result.data.wallet.balance);
@@ -85,7 +86,7 @@
     try {
       const res = await fetch('/api/designer/bank-account');
       const result = await res.json();
-      if (res.ok && result.success && result.data) {
+      if (res.ok && result.ok && result.data) {
         const data = result.data as BankAccount;
         const resolvedName = data.accountHolder || data.holderName || (data as any).accountHolderName || '';
         bankAccount = {
@@ -147,7 +148,7 @@
       });
 
       const result = await res.json();
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         const saved = result.data;
         const resolvedName = saved.accountHolder || saved.holderName || inputHolderName;
         bankAccount = {
@@ -171,7 +172,7 @@
     const amountNum = Number(withdrawAmount);
 
     if (isNaN(amountNum) || amountNum < minPayoutLimit) {
-      withdrawError = `Jumlah penarikan minimal Rp ${minPayoutLimit.toLocaleString('id-ID')}`;
+      withdrawError = `Jumlah penarikan minimal ${formatIDR(minPayoutLimit)}`;
       return;
     }
 
@@ -194,7 +195,7 @@
       });
 
       const result = await res.json();
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         isWithdrawing = false;
         withdrawSuccess = true;
         

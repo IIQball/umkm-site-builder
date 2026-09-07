@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Search, UserX, CheckCircle2, AlertCircle, FileText, CheckCircle, Ban } from 'lucide-svelte';
+  import { Search, CheckCircle2, AlertCircle } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Badge, Card, Button, Input, Select } from '@/components/ui';
+  import { Card, Button, Input, Select } from '@/components/ui';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
+  import AdminUserTable from './user/AdminUserTable.svelte';
 
   export let initialUsersJson: string = '[]';
   let users: AdminUserItem[] = [];
@@ -44,7 +45,7 @@
     try {
       const res = await fetch('/api/admin/users');
       const result = await res.json();
-      if (result.success && Array.isArray(result.data)) {
+      if (result.ok && Array.isArray(result.data)) {
         users = result.data;
       } else if (result.error) {
         showToast(result.error.message || 'Gagal memuat pengguna', 'error');
@@ -62,19 +63,20 @@
     }
   });
 
-  const openSuspendModal = (u: AdminUserItem) => { 
-    selectedUser = u; 
-    suspendReason = ''; 
-    suspendModalOpen = true; 
+  const openSuspendModal = (user: AdminUserItem) => {
+    selectedUser = user;
+    suspendReason = '';
+    suspendModalOpen = true;
   };
-  
-  const openUnsuspendModal = (u: AdminUserItem) => { 
-    selectedUser = u; 
-    unsuspendModalOpen = true; 
+
+  const openUnsuspendModal = (user: AdminUserItem) => {
+    selectedUser = user;
+    suspendReason = '';
+    unsuspendModalOpen = true;
   };
-  
-  const openDetailModal = (u: AdminUserItem) => {
-    selectedUser = u;
+
+  const openDetailModal = (user: AdminUserItem) => {
+    selectedUser = user;
     detailModalOpen = true;
   };
 
@@ -108,14 +110,14 @@
       });
       const result = await res.json();
       
-      if (res.ok && (result.success || result.ok)) {
+      if (res.ok && (result.ok || result.success)) {
         showToast(newStatus === 'active' ? 'Akun berhasil diaktifkan' : 'Akun berhasil ditangguhkan', 'success');
         closeModal();
         await fetchUsers();
       } else {
         let errorMsg = result.error?.message || 'Gagal memperbarui status akun';
-        if (result.details) {
-          const detailVals = Object.values(result.details).flat().filter(Boolean);
+        if (result.error?.details) {
+          const detailVals = Object.values(result.error.details).flat().filter(Boolean);
           if (detailVals.length > 0) {
             errorMsg = detailVals[0] as string;
           }
@@ -127,10 +129,6 @@
     } finally {
       actionLoading = false;
     }
-  };
-
-  const formatDate = (d: string): string => {
-    return d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
   };
 
   $: filteredUsers = users.filter((u) => {
@@ -216,95 +214,13 @@
       <div class="flex justify-center items-center py-16">
         <span class="loading loading-spinner loading-lg text-primary"></span>
       </div>
-    {:else if filteredUsers.length === 0}
-      <div class="py-16 px-8 flex flex-col items-center text-center">
-        <div class="w-14 h-14 rounded-2xl bg-nested flex items-center justify-center mb-4 text-muted">
-          <UserX size={28} />
-        </div>
-        <h4 class="text-sm font-bold text-main mb-1.5">Tidak Ada Pengguna</h4>
-        <p class="text-xs text-secondary max-w-xs leading-relaxed">Belum ada pengguna yang sesuai dengan pencarian atau filter Anda.</p>
-      </div>
     {:else}
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[640px]">
-          <thead>
-            <tr class="bg-nested/60 border-b border-light">
-              <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-4">Pengguna</th>
-              <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-4">Peran</th>
-              <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-4">Tanggal Daftar</th>
-              <th class="text-left text-xs font-extrabold uppercase tracking-widest text-muted px-4 py-4">Status</th>
-              <th class="text-right text-xs font-extrabold uppercase tracking-widest text-muted px-6 py-4">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-border-light)]">
-            {#each filteredUsers as item (item.id)}
-              <tr class="hover:bg-nested/40 transition-colors">
-                <td class="px-6 py-4">
-                  <p class="font-bold text-xs text-main">{item.name}</p>
-                  <p class="text-xs text-muted truncate max-w-[200px]">{item.email}</p>
-                </td>
-                <td class="px-4 py-4">
-                  <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
-                    {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Tenant' : item.role}
-                  </span>
-                </td>
-                <td class="px-4 py-4 text-xs text-muted">
-                  {formatDate(item.createdAt)}
-                </td>
-                <td class="px-4 py-4">
-                  {#if item.status === 'active'}
-                    <Badge variant="emerald" size="sm">
-                      <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
-                      Aktif
-                    </Badge>
-                  {:else}
-                    <Badge variant="rose" size="sm">
-                      <Ban size={12} strokeWidth={3} class="mr-1 inline" />
-                      Ditangguhkan
-                    </Badge>
-                  {/if}
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-1.5">
-                    {#if item.status === 'active'}
-                      <Button 
-                        size="xs"
-                        variant="destructive"
-                        on:click={() => openSuspendModal(item)}
-                        title="Tangguhkan Pengguna"
-                      >
-                        <AlertCircle size={13} class="mr-1" />
-                        <span>Tangguhkan</span>
-                      </Button>
-                    {:else}
-                      {#if item.suspendReason}
-                        <Button 
-                          size="xs"
-                          variant="secondary"
-                          title="Lihat Alasan"
-                          on:click={() => openDetailModal(item)}
-                        >
-                          <FileText size={13} class="mr-1" />
-                          <span>Alasan</span>
-                        </Button>
-                      {/if}
-                      <Button 
-                        size="xs"
-                        variant="primary"
-                        on:click={() => openUnsuspendModal(item)}
-                        title="Aktifkan Pengguna"
-                      >
-                        <CheckCircle2 size={13} class="mr-1" />
-                        <span>Aktifkan</span>
-                      </Button>
-                    {/if}
-                  </div>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <AdminUserTable
+        users={filteredUsers}
+        onSuspend={openSuspendModal}
+        onUnsuspend={openUnsuspendModal}
+        onShowDetail={openDetailModal}
+      />
     {/if}
   </Card>
 </div>

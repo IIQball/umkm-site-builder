@@ -1,4 +1,5 @@
 import type { FAQItem } from '@/types';
+import { getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const DEFAULT_FAQS: (FAQItem & { category?: string; iconName?: string })[] = [
   {
@@ -45,18 +46,12 @@ export const DEFAULT_FAQS: (FAQItem & { category?: string; iconName?: string })[
   },
 ];
 
-export function getCleanWaNumber(wa?: string): string {
-  if (!wa) return '6281234567890';
-  const cleaned = wa.replace(/[^0-9]/g, '');
-  if (cleaned.startsWith('0')) return '62' + cleaned.slice(1);
-  if (cleaned.startsWith('8')) return '62' + cleaned;
-  return cleaned || '6281234567890';
-}
+export const getCleanWaNumber = getEffectiveWhatsAppNumber;
 
 export function buildWhatsAppHelpLink(wa?: string, message?: string): string {
-  const cleanWa = getCleanWaNumber(wa);
+  const cleanWa = getEffectiveWhatsAppNumber(wa);
   const text = message || 'Halo admin, saya ingin bertanya seputar produk/layanan toko.';
-  return `https://wa.me/${cleanWa}?text=${encodeURIComponent(text)}`;
+  return generateWhatsAppLink(cleanWa, text);
 }
 
 export function filterFaqs(

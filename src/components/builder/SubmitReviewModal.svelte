@@ -9,6 +9,7 @@
     Coins,
   } from 'lucide-svelte';
   import { Modal, Button, Badge } from '@/components/ui';
+  import { formatIDR } from '@/lib/currency';
 
   export let isOpen: boolean = false;
   export let templateId: string = '';
@@ -32,14 +33,6 @@
   $: designerAmount = templatePrice > 0
     ? templatePrice - platformFeeAmount
     : 0;
-
-  const formatRupiah = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
 
   const fetchCommissionSettings = async () => {
     try {
@@ -167,14 +160,14 @@
         <div class="flex justify-between items-center text-xs text-secondary">
           <span>Harga Jual Template:</span>
           <span class="font-bold text-main font-mono">
-            {templatePrice > 0 ? formatRupiah(templatePrice) : 'Gratis (Rp 0)'}
+            {templatePrice > 0 ? formatIDR(templatePrice) : 'Gratis (Rp 0)'}
           </span>
         </div>
 
         {#if templatePrice > 0}
           <div class="flex justify-between items-center text-xs text-muted">
             <span>Fee Platform ({platformFeePercentage}%):</span>
-            <span class="text-warning font-mono">-{formatRupiah(platformFeeAmount)}</span>
+            <span class="text-warning font-mono">-{formatIDR(platformFeeAmount)}</span>
           </div>
           <div class="border-t border-light pt-1.5 flex justify-between items-center font-bold text-xs">
             <span class="text-success flex items-center gap-1">
@@ -182,7 +175,7 @@
               Estimasi Pendapatan Desainer:
             </span>
             <span class="text-success font-extrabold font-mono">
-              {formatRupiah(designerAmount)}
+              {formatIDR(designerAmount)}
             </span>
           </div>
         {:else}

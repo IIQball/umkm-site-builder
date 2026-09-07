@@ -68,7 +68,7 @@ describe('POST /api/admin/users/register', () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json.success).toBe(true);
+    expect(json.ok).toBe(true);
     expect(json.data.id).toBe('new_user_123');
 
     // verify signUpEmail is called with empty Headers
@@ -100,7 +100,7 @@ describe('POST /api/admin/users/register', () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json.success).toBe(false);
+    expect(json.ok).toBe(false);
     expect(json.error).toBeDefined();
   });
 

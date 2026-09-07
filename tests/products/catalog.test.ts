@@ -1,26 +1,36 @@
 import { describe, it, expect } from 'vitest';
-import { generateWhatsAppLink, generateWhatsAppOrderUrl, formatWhatsAppNumber, getEffectiveWhatsAppNumber, DEFAULT_DEMO_WA_NUMBER } from '@/lib/whatsapp';
+import { generateWhatsAppLink, generateWhatsAppOrderUrl, normalizeWhatsAppNumber, getEffectiveWhatsAppNumber, DEFAULT_DEMO_WA_NUMBER } from '@/lib/whatsapp';
 
 describe('Catalog & WhatsApp Integration', () => {
-  describe('formatWhatsAppNumber', () => {
+  describe('normalizeWhatsAppNumber', () => {
     it('should format 08... to 628...', () => {
-      expect(formatWhatsAppNumber('081234567890')).toBe('6281234567890');
+      expect(normalizeWhatsAppNumber('081234567890')).toBe('6281234567890');
     });
 
     it('should format 8... to 628...', () => {
-      expect(formatWhatsAppNumber('81234567890')).toBe('6281234567890');
+      expect(normalizeWhatsAppNumber('81234567890')).toBe('6281234567890');
+    });
+
+    it('should format 620... to 62...', () => {
+      expect(normalizeWhatsAppNumber('620812345678')).toBe('62812345678');
+    });
+
+    it('should fallback and prefix 62 for non-standard numbers', () => {
+      expect(normalizeWhatsAppNumber('21555000')).toBe('6221555000');
+      expect(normalizeWhatsAppNumber('7123456789')).toBe('627123456789');
+      expect(normalizeWhatsAppNumber('123456789')).toBe('62123456789');
     });
 
     it('should keep 628... as is', () => {
-      expect(formatWhatsAppNumber('6281234567890')).toBe('6281234567890');
+      expect(normalizeWhatsAppNumber('6281234567890')).toBe('6281234567890');
     });
 
     it('should remove non-numeric characters', () => {
-      expect(formatWhatsAppNumber('+62 812-3456-7890')).toBe('6281234567890');
+      expect(normalizeWhatsAppNumber('+62 812-3456-7890')).toBe('6281234567890');
     });
 
     it('should return empty string if no phone provided', () => {
-      expect(formatWhatsAppNumber('')).toBe('');
+      expect(normalizeWhatsAppNumber('')).toBe('');
     });
   });
 

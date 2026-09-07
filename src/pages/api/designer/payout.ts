@@ -6,6 +6,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
 import { payoutSchema } from '@/schemas';
 import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
+import { formatIDR } from '@/lib/currency';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -36,7 +37,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan', 401, undefined, 'UNAUTHORIZED');
+      throw new AppError('Akses desainer diperlukan', 401, undefined);
     }
 
     const body = await context.request.json().catch(() => ({}));
@@ -55,7 +56,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const settingsList = await db.select().from(platformSettings).limit(1);
     const minBalance = settingsList.length > 0 ? settingsList[0].payoutMinimumBalance : 50000;
     if (amount < minBalance) {
-      throw new AppError(`Nominal penarikan minimal Rp ${minBalance.toLocaleString('id-ID')}`, 400, undefined, 'VALIDATION_ERROR');
+      throw new AppError(`Nominal penarikan minimal ${formatIDR(minBalance)}`, 400, undefined, 'VALIDATION_ERROR');
     }
 
     // 3. Verify amount is <= eligible/available balance

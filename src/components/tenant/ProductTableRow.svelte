@@ -3,6 +3,7 @@
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
   import { Button, Badge } from "@/components/ui";
+  import { formatIDR } from "@/lib/currency";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
@@ -60,7 +61,7 @@
   </td>
   <td class="px-6 py-4 align-top whitespace-nowrap">
     <span class="text-xs font-bold font-mono text-main">
-      Rp {product.basePrice.toLocaleString("id-ID")}
+      {formatIDR(product.basePrice)}
     </span>
   </td>
   <td class="px-6 py-4 align-top">

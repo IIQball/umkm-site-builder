@@ -1,19 +1,7 @@
 import { z } from 'zod';
+import { COLOR_TOKENS } from '@/components/tokens';
 
-export const ColorTokenSchema = z.enum([
-  'primary',
-  'secondary',
-  'accent',
-  'background',
-  'surface',
-  'text_primary',
-  'text_muted',
-  'textPrimary',
-  'textMuted',
-  'transparent',
-]);
-
-export type ColorToken = z.infer<typeof ColorTokenSchema>;
+export const ColorTokenSchema = z.enum(COLOR_TOKENS);
 
 export const TypographyTokenSchema = z.enum(['h1', 'h2', 'h3', 'body', 'caption']);
 export type TypographyToken = z.infer<typeof TypographyTokenSchema>;

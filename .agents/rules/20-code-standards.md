@@ -83,7 +83,16 @@ rendered inline `div`. Field-level validation messages stay next to their field.
 Comment why, not what. No commented-out code left behind. No emojis in comments, code, or terminal console logs. Match the density and
 idiom of the surrounding file.
 
-## 10. Enforcement
+## 10. Canonical Shared Helpers & SSOT
+
+Formatting and common platform integration functions must strictly use Single Source of Truth (SSOT) modules:
+
+- **Currency (`formatIDR`)**: Always import `formatIDR` from `@/lib/currency` (or `formatCurrencyInput` / `parseCurrencyInput`). Never write inline `Intl.NumberFormat('id-ID')` or `value.toLocaleString('id-ID')` in components or pages.
+- **Date Formatting (`formatDate`)**: Always import `formatDate` from `@/lib/utils/format`. Never call `new Date().toLocaleDateString('id-ID')` or `new Intl.DateTimeFormat('id-ID')` directly inside UI templates.
+- **WhatsApp Integration**: Always import `normalizeWhatsAppNumber`, `buildWhatsAppUrl`, or `generateWhatsAppLink` from `@/lib/whatsapp`. Never write custom regex or manual phone prefix replacements (`08...`, `8...`, `+62...`) in section helpers or components.
+- **Primary Color Fallback**: The fallback color for `--theme-primary` must always be `#2563eb` (`var(--theme-primary, #2563eb)`). Never use arbitrary fallbacks like `#4f00ff`.
+
+## 11. Enforcement
 
 These are part of the definition of done. A change that adds an unguarded async, leaks
 server detail, hand-rolls a response shape, declares a shared type inline, or copy-pastes

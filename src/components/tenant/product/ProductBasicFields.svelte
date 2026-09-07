@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Input, Select, Textarea } from "@/components/ui";
+  import { formatCurrencyInput, parseCurrencyInput } from "@/lib/currency";
 
   type Category = { id: string; name: string };
 
@@ -14,10 +15,8 @@
     const customEvent = event as CustomEvent;
     const target = (customEvent.detail?.target || event.target) as HTMLInputElement;
     if (!target) return;
-    const rawValue = target.value.replace(/\D/g, "");
-    basePrice = rawValue ? parseInt(rawValue, 10) : 0;
-    const formatted = basePrice ? basePrice.toLocaleString("id-ID") : "";
-    target.value = formatted;
+    basePrice = parseCurrencyInput(target.value);
+    target.value = formatCurrencyInput(target.value);
   };
 </script>
 
@@ -44,7 +43,7 @@
     label="Harga Dasar"
     type="text"
     placeholder="0"
-    value={basePrice ? basePrice.toLocaleString("id-ID") : ""}
+    value={formatCurrencyInput(basePrice)}
     on:input={handlePriceInput}
     error={fieldErrors.basePrice}
   />

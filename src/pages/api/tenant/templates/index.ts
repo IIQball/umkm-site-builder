@@ -15,6 +15,6 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const templates = await getTenantOwnedTemplates(user.id);
-    return jsonSuccess({ templates }, 'Daftar template milik tenant berhasil dimuat');
+    return jsonSuccess({ templates });
   });
 };

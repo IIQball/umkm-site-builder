@@ -32,7 +32,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       dryRun: validated.dryRun,
     });
 
-    return jsonSuccess(report, validated.dryRun ? 'Media cleanup dry run completed' : 'Media cleanup executed successfully');
+    return jsonSuccess(report);
   });
 };
 

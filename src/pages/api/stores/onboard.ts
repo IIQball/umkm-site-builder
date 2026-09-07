@@ -4,18 +4,9 @@ import { stores } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { OnboardStoreInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
-import {
-  unauthorized,
-  forbidden,
-  validationError,
-  duplicateKeyError,
-  invalidStateError,
-  internalError,
-  okResponse,
-} from '@/types';
 import { ZodError } from 'zod';
+import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 
-const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 
 async function hasExistingStore(userId: string): Promise<boolean> {
@@ -39,24 +30,15 @@ async function isSubdomainTaken(subdomain: string): Promise<boolean> {
 export const POST: APIRoute = async ({ request }) => {
   const user = await getAuthenticatedUser(request);
   if (!user) {
-    return new Response(JSON.stringify(unauthorized()), {
-      status: 401,
-      headers: JSON_HEADERS,
-    });
+    return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
   }
 
   if (user.status !== 'active') {
-    return new Response(JSON.stringify(forbidden('Akun Anda ditangguhkan')), {
-      status: 403,
-      headers: JSON_HEADERS,
-    });
+    return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
   }
 
   if (user.role !== 'tenant') {
-    return new Response(JSON.stringify(forbidden('Hanya tenant yang dapat membuat profil toko')), {
-      status: 403,
-      headers: JSON_HEADERS,
-    });
+    return jsonError('Hanya tenant yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
   }
 
   try {
@@ -65,17 +47,11 @@ export const POST: APIRoute = async ({ request }) => {
     const { subdomain, name, waNumber, googleMapsUrl } = parsedData;
 
     if (await hasExistingStore(user.id)) {
-      return new Response(
-        JSON.stringify(invalidStateError('Anda sudah memiliki toko aktif')),
-        { status: 409, headers: JSON_HEADERS },
-      );
+      return jsonError('Anda sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
     }
 
     if (await isSubdomainTaken(subdomain)) {
-      return new Response(
-        JSON.stringify(duplicateKeyError('Subdomain sudah digunakan')),
-        { status: 409, headers: JSON_HEADERS },
-      );
+      return jsonError('Subdomain sudah digunakan', 409, undefined, 'DUPLICATE_KEY');
     }
 
     const storeId = crypto.randomUUID();
@@ -92,23 +68,13 @@ export const POST: APIRoute = async ({ request }) => {
       customization: { isOnboarded: true },
     });
 
-    return new Response(
-      JSON.stringify(okResponse({ storeId, subdomain, name })),
-      { status: 201, headers: JSON_HEADERS },
-    );
+    return jsonSuccess({ storeId, subdomain, name }, 201);
   } catch (err) {
     if (err instanceof ZodError) {
-      return new Response(
-        JSON.stringify(validationError(err.errors[0]?.message)),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError(err.errors[0]?.message || 'Validation failed', 400, err.errors);
     }
 
-    // eslint-disable-next-line no-console
     console.error('[STORE] onboard failed:', err);
-    return new Response(
-      JSON.stringify(internalError()),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500, undefined, 'INTERNAL');
   }
 };

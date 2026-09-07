@@ -18,24 +18,22 @@ vi.mock('@/lib/utils/logger', () => ({
 describe('API Route Handler Utilities', () => {
   describe('jsonSuccess', () => {
     it('creates standard success response', async () => {
-      const res = jsonSuccess({ foo: 'bar' }, 'Done');
+      const res = jsonSuccess({ foo: 'bar' });
       expect(res.status).toBe(200);
       
       const body = await res.json();
       expect(body).toEqual({
-        success: true,
         ok: true,
-        message: 'Done',
         data: { foo: 'bar' },
       });
     });
 
     it('uses custom status code', async () => {
-      const res = jsonSuccess(null, 'Created', 201);
+      const res = jsonSuccess(null, 201);
       expect(res.status).toBe(201);
       
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
     });
   });
 
@@ -46,14 +44,12 @@ describe('API Route Handler Utilities', () => {
       
       const body = await res.json();
       expect(body).toEqual({
-        success: false,
         ok: false,
-        message: 'Bad stuff',
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Bad stuff',
+          details: { fields: 'invalid' },
         },
-        details: { fields: 'invalid' },
       });
     });
 
@@ -62,21 +58,21 @@ describe('API Route Handler Utilities', () => {
       expect(res.status).toBe(500);
       
       const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.details).toBeUndefined();
+      expect(body.ok).toBe(false);
+      expect(body.error.details).toBeUndefined();
     });
   });
 
   describe('handleApiRoute wrapper', () => {
     it('executes function and returns standard response on success', async () => {
       const route = () => handleApiRoute(async () => {
-        return jsonSuccess('data', 'OK');
+        return jsonSuccess('data');
       });
 
       const res = await route();
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toBe('data');
     });
 
@@ -90,10 +86,10 @@ describe('API Route Handler Utilities', () => {
       const res = await route();
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.message).toBe('Data validation error');
+      expect(body.ok).toBe(false);
+      expect(body.error.message).toBe('Data validation error');
       expect(body.error.code).toBe('VALIDATION_ERROR');
-      expect(body.details).toHaveProperty('value');
+      expect(body.error.details).toHaveProperty('value');
     });
 
     it('handles AppError / SetError with custom status and message', async () => {
@@ -104,9 +100,9 @@ describe('API Route Handler Utilities', () => {
       const res = await route();
       expect(res.status).toBe(404);
       const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.message).toBe('Resource not found');
-      expect(body.details).toEqual({ id: '123' });
+      expect(body.ok).toBe(false);
+      expect(body.error.message).toBe('Resource not found');
+      expect(body.error.details).toEqual({ id: '123' });
     });
 
     it('handles unexpected errors by logging and returning 500', async () => {
@@ -119,8 +115,8 @@ describe('API Route Handler Utilities', () => {
       const res = await route();
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.success).toBe(false);
-      expect(body.message).toBe('Database connection lost');
+      expect(body.ok).toBe(false);
+      expect(body.error.message).toBe('Database connection lost');
       
       expect(mockErrorLog).toHaveBeenCalledWith(
         'API_HANDLER',

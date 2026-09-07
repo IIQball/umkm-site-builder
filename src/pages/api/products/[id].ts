@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 
 import { deleteFromCloudinary } from '../../../lib/cloudinary';
+import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 
 const productUpdateInput = z.object({
   storeId: z.string().min(1).optional(),
@@ -24,12 +25,12 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
   try {
     // 1. Authenticate
     if (!locals.user) {
-      return new Response(JSON.stringify({ ok: false, error: { message: 'Silakan login terlebih dahulu' } }), { status: 401 });
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
     
     // 2. Authorize
     if (locals.user.role !== 'tenant' && locals.user.role !== 'superadmin') {
-      return new Response(JSON.stringify({ ok: false, error: { message: 'Hanya tenant yang dapat mengubah produk' } }), { status: 403 });
+      return jsonError('Hanya tenant yang dapat mengubah produk', 403, undefined, 'FORBIDDEN');
     }
 
     const id = params.id;
@@ -39,18 +40,12 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     const result = productUpdateInput.safeParse(body);
 
     if (!result.success) {
-      return new Response(JSON.stringify({ 
-        ok: false, 
-        error: { message: 'Validation failed', issues: result.error.issues } 
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonError('Validation failed', 400, result.error.issues, 'VALIDATION_ERROR');
     }
 
     const existingProduct = await db.select().from(products).where(eq(products.id, id));
     if (existingProduct.length === 0) {
-      return new Response(JSON.stringify({ ok: false, error: { message: 'Product not found' } }), { status: 404 });
+      return jsonError('Product not found', 404, undefined, 'NOT_FOUND');
     }
 
     const updated = await db.update(products)
@@ -58,16 +53,10 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       .where(eq(products.id, id))
       .returning();
 
-    return new Response(JSON.stringify({ ok: true, data: updated[0] }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonSuccess(updated[0], 200);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: { message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonError(message, 500);
   }
 };
 
@@ -78,7 +67,7 @@ export const DELETE: APIRoute = async ({ params }) => {
 
     const existingProduct = await db.select().from(products).where(eq(products.id, id));
     if (existingProduct.length === 0) {
-      return new Response(JSON.stringify({ ok: false, error: { message: 'Product not found' } }), { status: 404 });
+      return jsonError('Product not found', 404, undefined);
     }
 
     await db.update(products)
@@ -92,15 +81,9 @@ export const DELETE: APIRoute = async ({ params }) => {
       await deleteFromCloudinary(imageUrls[0].publicId);
     }
 
-    return new Response(JSON.stringify({ ok: true, data: { id } }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonSuccess({ id }, 200);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: { message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonError(message, 500);
   }
 };

@@ -17,7 +17,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       where: (bankAccounts, { eq }) => eq(bankAccounts.designerId, user.id),
     });
 
-    return jsonSuccess(record || null, 'Rekening bank berhasil diambil');
+    return jsonSuccess(record || null);
   });
 };
 
@@ -75,7 +75,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       result = updatedRecord;
     }
 
-    return jsonSuccess(result, 'Rekening bank berhasil disimpan');
+    return jsonSuccess(result);
   });
 };
 

@@ -75,7 +75,7 @@
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || 'Gagal menerapkan template');
+        throw new Error(result.error?.message || 'Gagal menerapkan template');
       }
 
       currentTemplateId = pendingTemplateId;

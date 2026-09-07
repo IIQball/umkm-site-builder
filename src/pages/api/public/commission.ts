@@ -10,7 +10,7 @@ export const GET: APIRoute = async (): Promise<Response> => {
     const res = jsonSuccess({
       platformFeePercentage,
       designerPercentage,
-    }, 'Informasi split komisi berhasil diambil');
+    });
 
     res.headers.set('Cache-Control', 'no-store, max-age=0');
     return res;

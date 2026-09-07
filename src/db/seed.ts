@@ -11,7 +11,7 @@ import { db } from "@/db";
 import { users, accounts, adminWhitelist, templateCategories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomBytes, scrypt } from "node:crypto";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 const DEFAULT_CATEGORIES = [
   { id: 'cat-kuliner', name: 'Kuliner & Makanan', slug: 'kuliner-makanan', description: 'Template khusus resto, kafe, dan kuliner nusantara', icon: 'restaurant' },

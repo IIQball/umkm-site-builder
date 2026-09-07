@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import type { FullAutoFill } from 'svelte/elements';
 
   export let value: string | number = '';
   export let type: string = 'text';
@@ -15,7 +16,7 @@
   export let min: number | string | undefined = undefined;
   export let max: number | string | undefined = undefined;
   export let step: number | string | undefined = undefined;
-  export let autocomplete: string = 'off';
+  export let autocomplete: FullAutoFill = 'off';
   export let fullWidth: boolean = true;
   export let size: 'sm' | 'md' | 'lg' = 'md';
   let className: string = '';

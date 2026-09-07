@@ -95,8 +95,7 @@
           on:input={(e) => handleArrayItemChange('testimonials', index, 'comment', e.currentTarget.value)}
           rows="2"
           class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-700 rounded text-base-content focus:outline-none focus:border-blue-500"
-          placeholder="Ulasan pelanggan..."
-        />
+          placeholder="Ulasan pelanggan..."></textarea>
       </div>
     {/each}
   </div>

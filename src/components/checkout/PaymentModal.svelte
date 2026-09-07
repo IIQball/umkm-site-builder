@@ -39,8 +39,7 @@
         src={paymentUrl}
         class="absolute inset-0 w-full h-full border-none"
         title="Pembayaran"
-        allow="payment"
-      />
+        allow="payment"></iframe>
     {:else}
       <div class="flex flex-col items-center justify-center h-full gap-4 p-6">
         <div class="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>

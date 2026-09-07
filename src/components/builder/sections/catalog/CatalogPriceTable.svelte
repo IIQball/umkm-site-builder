@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah } from '../productCatalog.helpers';
+  import { formatIDR } from '@/lib/currency';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
@@ -35,7 +35,7 @@
   <table class="w-full text-xs text-left">
     <thead class="bg-nested/80 text-secondary uppercase tracking-wider font-heading font-bold border-b border-light">
       <tr>
-<th class="p-4">Daftar Produk</th>
+        <th class="p-4">Daftar Produk</th>
         <th class="p-4 hidden sm:table-cell">Keterangan / Min. Order</th>
         <th class="p-4">Harga Satuan</th>
         <th class="p-4 text-right">Aksi</th>
@@ -58,8 +58,7 @@
           </td>
 
           <td class="p-4 font-heading font-black text-primary">
-            {formatRupiah(product.price)}
-
+            {formatIDR(product.price)}
           </td>
           <td class="p-4 text-right">
             <button

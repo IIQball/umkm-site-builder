@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { formatIDR } from '@/lib/currency';
 
   export let label: string;
   export let value: string | number;
@@ -50,7 +51,7 @@
         const current = Math.round(target * ease);
 
         if (isCurrency) {
-          displayValue = 'Rp ' + current.toLocaleString('id-ID');
+          displayValue = formatIDR(current);
         } else {
           displayValue = current.toLocaleString('id-ID');
         }

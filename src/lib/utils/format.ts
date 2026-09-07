@@ -20,15 +20,20 @@ export function parsePriceInput(value: string | number | null | undefined): numb
   return parseCurrencyInput(value);
 }
 
-export function formatDate(date: string | Date | null | undefined): string {
+export function formatDate(
+  date: string | Date | null | undefined,
+  options?: Intl.DateTimeFormatOptions
+): string {
   if (!date) return '-';
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('id-ID', {
+  const defaultOptions: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(d);
+  };
+  return new Intl.DateTimeFormat('id-ID', options ?? defaultOptions).format(d);
 }
+
 

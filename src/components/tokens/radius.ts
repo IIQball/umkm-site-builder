@@ -3,6 +3,21 @@
  * Border Radius Scales & Geometric Helpers (Nested & Pill Formulas)
  */
 
+export const RADIUS_STEPS = [0, 4, 8, 12, 16, 20, 24, 32, 9999] as const;
+export type RadiusStep = (typeof RADIUS_STEPS)[number];
+
+export const RADIUS_PRESETS = [
+  { label: 'None (0px)', value: 0 },
+  { label: 'Small (4px)', value: 4 },
+  { label: 'Base (8px)', value: 8 },
+  { label: 'Medium (12px)', value: 12 },
+  { label: 'Large (16px)', value: 16 },
+  { label: 'XL (20px)', value: 20 },
+  { label: '2XL (24px)', value: 24 },
+  { label: '3XL (32px)', value: 32 },
+  { label: 'Full / Pill (9999px)', value: 9999 },
+] as const;
+
 export const radiusTokens = {
   none: '0px',
   xs: '4px',

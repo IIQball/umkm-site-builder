@@ -11,6 +11,7 @@ import {
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, FooterMenuLink, FooterSocialLink } from '@/types';
+import { normalizeWhatsAppNumber, getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const DEFAULT_BRAND_NAME = 'Warung Berkah';
 export const DEFAULT_TAGLINE = 'Pelopor kuliner & aneka camilan khas tradisional dengan resep otentik nusantara. Diproses higienis setiap hari.';
@@ -55,22 +56,13 @@ export const DEFAULT_SOCIAL_LINKS: FooterSocialLink[] = [
   { platform: 'facebook', url: 'https://facebook.com/warungberkah', label: 'Facebook', handle: 'Warung Berkah', subtext: 'Halaman Toko' },
 ];
 
-export function cleanWaNumber(raw?: string): string {
-  if (!raw) return '';
-  let digits = raw.replace(/\D/g, '');
-  if (digits.startsWith('08')) {
-    digits = '62' + digits.slice(1);
-  }
-  return digits;
-}
+export const cleanWaNumber = normalizeWhatsAppNumber;
 
 export function buildWhatsAppFooterLink(waNumber?: string, storeName?: string, message?: string): string {
-  const digits = cleanWaNumber(waNumber || DEFAULT_WA_NUMBER);
-  if (!digits) return '#';
+  const digits = getEffectiveWhatsAppNumber(waNumber || DEFAULT_WA_NUMBER);
   const name = storeName || DEFAULT_BRAND_NAME;
   const defaultText = `Halo ${name}, saya ingin bertanya mengenai toko Anda.`;
-  const text = encodeURIComponent(message || defaultText);
-  return `https://wa.me/${digits}?text=${text}`;
+  return generateWhatsAppLink(digits, message || defaultText);
 }
 
 export function buildMiniMapEmbedUrl(queryOrUrl?: string): string {

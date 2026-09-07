@@ -1,19 +1,11 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { DEFAULT_THEME_COLOR_FIELDS } from '@/components/tokens/colors';
 
   export let theme: TemplateTheme;
   export let onColorChange: (key: string, value: string) => void = () => {};
 
   $: colors = theme.colors || {};
-
-  const colorFields: Array<{ key: string; label: string; defaultVal: string }> = [
-    { key: 'primary', label: 'Primary Brand Color', defaultVal: '#3b82f6' },
-    { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#64748b' },
-    { key: 'background', label: 'Background Kanvas', defaultVal: '#ffffff' },
-    { key: 'surface', label: 'Surface / Card Background', defaultVal: '#f8fafc' },
-    { key: 'textPrimary', label: 'Teks Utama (Primary)', defaultVal: '#0f172a' },
-    { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' },
-  ];
 
   const getColorVal = (key: string, defaultVal: string): string => {
     const record = colors as Record<string, string | undefined>;
@@ -22,7 +14,7 @@
 </script>
 
 <div class="space-y-3">
-  {#each colorFields as item}
+  {#each DEFAULT_THEME_COLOR_FIELDS as item}
     {@const val = getColorVal(item.key, item.defaultVal)}
     <div>
       <label for={`color-${item.key}`} class="block font-semibold text-base-content/80 mb-1">{item.label}</label>

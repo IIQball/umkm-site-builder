@@ -57,58 +57,35 @@
       return;
     }
 
-    if (template.price === 0) {
-      purchasingId = template.id;
-      try {
-        const res = await fetch('/api/tenant/template/apply', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ templateId: template.id }),
-        });
-        const result = await res.json();
-        if (res.ok && result.ok) {
-          addToast({
-            type: 'success',
-            message: `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
-          });
-          window.location.href = '/dashboard';
-        } else {
-          addToast({
-            type: 'error',
-            message: result.error?.message || 'Gagal menerapkan template',
-          });
-        }
-      } catch {
-        addToast({
-          type: 'error',
-          message: 'Terjadi kesalahan koneksi',
-        });
-      } finally {
-        purchasingId = null;
-      }
-      return;
-    }
-
     purchasingId = template.id;
     try {
-      const res = await fetch('/api/checkout/create', {
+      const res = await fetch('/api/tenant/transactions/template-purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateId: template.id }),
       });
       const result = await res.json();
-      if (res.ok && result.ok && result.data?.externalId) {
+      if (!res.ok || !result.ok) {
+        throw new Error(result.error?.message || 'Gagal memproses transaksi');
+      }
+
+      if (result.isFree) {
+        addToast({
+          type: 'success',
+          message: `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
+        });
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      } else if (result.data?.externalId) {
         window.location.href = `/checkout/${result.data.externalId}`;
       } else {
-        addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal membuat tagihan pembayaran',
-        });
+        throw new Error('Respons tidak valid dari server');
       }
-    } catch {
+    } catch (err) {
       addToast({
         type: 'error',
-        message: 'Gagal menghubungi server pembayaran',
+        message: err instanceof Error ? err.message : 'Gagal menghubungi server pembayaran',
       });
     } finally {
       purchasingId = null;

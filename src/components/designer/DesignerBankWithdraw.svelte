@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
+  import { formatIDR } from '@/lib/currency';
   import DesignerBankCard from './DesignerBankCard.svelte';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
@@ -171,7 +172,7 @@
     const amountNum = Number(withdrawAmount);
 
     if (isNaN(amountNum) || amountNum < minPayoutLimit) {
-      withdrawError = `Jumlah penarikan minimal Rp ${minPayoutLimit.toLocaleString('id-ID')}`;
+      withdrawError = `Jumlah penarikan minimal ${formatIDR(minPayoutLimit)}`;
       return;
     }
 

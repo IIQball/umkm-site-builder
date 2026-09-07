@@ -20,3 +20,12 @@ export const shadowTokens = {
 } as const;
 
 export type ShadowTokenKey = keyof typeof shadowTokens;
+
+export const SHADOW_PRESETS = [
+  { label: 'Tanpa Shadow', value: shadowTokens.none },
+  { label: 'Soft Shadow (sm)', value: shadowTokens.xs },
+  { label: 'Medium Shadow (md)', value: shadowTokens.md },
+  { label: 'Large Shadow (lg)', value: shadowTokens.lg },
+] as const;
+
+export type ShadowPreset = (typeof SHADOW_PRESETS)[number];

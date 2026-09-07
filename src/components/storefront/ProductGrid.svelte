@@ -2,6 +2,8 @@
   import type { InferSelectModel } from 'drizzle-orm';
   import type { products, storeCategories } from '@/db/schema';
   import { formatCurrency } from '@/lib/utils/format';
+  import { formatIDR } from '@/lib/currency';
+  import { generateWhatsAppLink } from '@/lib/whatsapp';
   import { ShoppingCart } from 'lucide-svelte';
   import { fly } from 'svelte/transition';
   import CatalogCheckoutModal from '../builder/sections/catalog/CatalogCheckoutModal.svelte';
@@ -129,17 +131,13 @@
       .map((item) => {
         const p = item.product;
         const s = item.selections;
-        return `• ${p.name} (x${item.qty}) - Rp ${item.subtotal.toLocaleString("id-ID")}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
+        return `• ${p.name} (x${item.qty}) - ${formatIDR(item.subtotal)}\n  Varian: ${Object.values(s).map(opt => opt.name).join(", ") || "Standar"}`;
       })
       .join("\n");
       
-    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* Rp ${cartTotal.toLocaleString("id-ID")}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    const message = `Halo, saya ingin memesan dari katalog toko:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     
-    let targetPhone = (storeWaNumber || '6281234567890').replace(/[^0-9]/g, "");
-    if (targetPhone.startsWith("0")) targetPhone = "62" + targetPhone.slice(1);
-    if (!targetPhone.startsWith("62")) targetPhone = "62" + targetPhone;
-    
-    window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`, "_blank");
+    window.open(generateWhatsAppLink(storeWaNumber, message), "_blank");
   };
 </script>
 
@@ -215,7 +213,7 @@
               <h3 class="font-bold text-slate-900 mb-1 line-clamp-2" title={product.name}>{product.name}</h3>
               
               <div class="mt-auto pt-3 flex flex-col gap-3">
-                <p class="text-lg text-[var(--theme-primary,#4f00ff)] font-black font-mono tracking-tight">{formatCurrency(product.basePrice)}</p>
+                <p class="text-lg text-[var(--theme-primary,#2563eb)] font-black font-mono tracking-tight">{formatCurrency(product.basePrice)}</p>
                 <div class="flex flex-col xl:grid xl:grid-cols-[auto_1fr] gap-1.5 sm:gap-2 w-full">
                   <Button variant="secondary" class="rounded-xl border-slate-200 text-slate-600 w-full xl:w-12 h-10 flex items-center justify-center shadow-none hover:bg-slate-100" on:click={() => handleAddToCart(product)}>
                     <ShoppingCart size={18} />
@@ -276,7 +274,7 @@
         </div>
         <span class="font-bold hidden sm:inline">Keranjang</span>
         <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-mono font-bold tracking-tight">
-          Rp {cartTotal.toLocaleString("id-ID")}
+          {formatIDR(cartTotal)}
         </span>
       </Button>
     </div>

@@ -32,7 +32,7 @@
     try {
       const res = await fetch('/api/admin/whitelist');
       const result = await res.json();
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         admins = result.data;
       }
     } catch {
@@ -69,7 +69,7 @@
       });
       const result = await res.json();
 
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         toast.success(`Akses admin berhasil ${newStatus === 'active' ? 'diaktifkan' : 'diblokir'}`);
         await fetchAdmins();
       } else {
@@ -98,7 +98,7 @@
       const res = await fetch(`/api/admin/whitelist?id=${id}`, { method: 'DELETE' });
       const result = await res.json();
 
-      if (res.ok && result.success) {
+      if (res.ok && result.ok) {
         toast.success('Akun admin berhasil dihapus permanen');
         if (selectedAdmin?.id === id) selectedAdmin = null;
         await fetchAdmins();

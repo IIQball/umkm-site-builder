@@ -47,10 +47,6 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
       await db.delete(sessions).where(eq(sessions.userId, userId));
     }
 
-    const message = validated.status === 'active' 
-      ? 'User account activated successfully' 
-      : 'User account suspended successfully';
-
-    return jsonSuccess(null, message);
+    return jsonSuccess(null);
   });
 };

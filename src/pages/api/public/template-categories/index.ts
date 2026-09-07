@@ -5,6 +5,6 @@ import { getTemplateCategories } from '@/services/template-categories';
 export const GET: APIRoute = async (): Promise<Response> => {
   return handleApiRoute(async () => {
     const categories = await getTemplateCategories();
-    return jsonSuccess(categories, 'Template categories fetched');
+    return jsonSuccess(categories);
   });
 };

@@ -31,11 +31,10 @@
     }
   };
 
+  let isPaymentModalOpen = false;
+
   const openPaymentModal = () => {
-    const modal = document.getElementById('payment_modal');
-    if (modal instanceof HTMLDialogElement) {
-      modal.showModal();
-    }
+    isPaymentModalOpen = true;
   };
 </script>
 
@@ -109,5 +108,9 @@
     </div>
   </div>
 
-  <PaymentModal paymentUrl={pageData.paymentUrl || ''} />
+  <PaymentModal
+    open={isPaymentModalOpen}
+    paymentUrl={pageData.paymentUrl || ''}
+    onClose={() => (isPaymentModalOpen = false)}
+  />
 </main>

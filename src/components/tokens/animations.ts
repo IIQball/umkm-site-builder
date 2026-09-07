@@ -35,6 +35,17 @@ export const animationClasses = {
   spin: 'animate-spin',
 } as const;
 
+export const NODE_ANIMATION_OPTIONS = [
+  { value: '', label: 'Tanpa Animasi' },
+  { value: 'fadeIn', label: 'Fade In (Halus)' },
+  { value: 'fadeInUp', label: 'Fade In Up (Muncul dari Bawah)' },
+  { value: 'slideUp', label: 'Slide Up (Muncul dari Bawah)' },
+  { value: 'slideLeft', label: 'Slide In Left (Dari Kanan)' },
+  { value: 'slideRight', label: 'Slide In Right (Dari Kiri)' },
+  { value: 'zoomIn', label: 'Zoom In (Membesar)' },
+] as const;
+
 export type TransitionToken = keyof typeof transitions;
 export type DurationToken = keyof typeof durations;
 export type EasingToken = keyof typeof easings;
+export type NodeAnimationOption = (typeof NODE_ANIMATION_OPTIONS)[number];

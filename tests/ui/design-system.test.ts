@@ -101,6 +101,32 @@ describe('Centralized Design System Tokens (SSOT)', () => {
       expect(tokens.animationClasses.fadeInUp).toBe('animate-fade-in-up');
     });
   });
+
+  describe('SSOT Constants & Presets (Issue #68)', () => {
+    it('defines complete RADIUS_STEPS and RADIUS_PRESETS including 12px, 20px, 24px, 32px', () => {
+      expect(tokens.RADIUS_STEPS).toContain(12);
+      expect(tokens.RADIUS_STEPS).toContain(20);
+      expect(tokens.RADIUS_STEPS).toContain(24);
+      expect(tokens.RADIUS_STEPS).toContain(32);
+      expect(tokens.RADIUS_PRESETS.length).toBe(9);
+      expect(tokens.RADIUS_PRESETS.some((p) => p.value === 12)).toBe(true);
+      expect(tokens.RADIUS_PRESETS.some((p) => p.value === 20)).toBe(true);
+      expect(tokens.RADIUS_PRESETS.some((p) => p.value === 24)).toBe(true);
+      expect(tokens.RADIUS_PRESETS.some((p) => p.value === 32)).toBe(true);
+    });
+
+    it('defines FONT_FAMILIES and FONT_FAMILY_OPTIONS', () => {
+      expect(tokens.FONT_FAMILIES).toContain('League Spartan');
+      expect(tokens.FONT_FAMILIES).toContain('Poppins');
+      expect(tokens.FONT_FAMILY_OPTIONS.length).toBeGreaterThan(5);
+    });
+
+    it('defines MAX_WIDTH_OPTIONS and DEFAULT_THEME_COLOR_FIELDS', () => {
+      expect(tokens.MAX_WIDTH_OPTIONS.length).toBe(4);
+      expect(tokens.DEFAULT_THEME_COLOR_FIELDS.length).toBe(6);
+      expect(tokens.COLOR_TOKENS).toContain('primary');
+    });
+  });
 });
 
 describe('Atomic UI Components Exports & Definition', () => {

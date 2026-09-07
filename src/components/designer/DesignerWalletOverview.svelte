@@ -22,6 +22,7 @@
   export let totalNetIncome: number;
   export let totalTemplatesSold: number;
   export let settlementDelayDays = 7;
+  export let platformFeePercentage = 30;
 
   type WalletMutation = (typeof walletSummary.mutations)[number];
 
@@ -84,6 +85,7 @@
     {weeklyData}
     {maxWeekly}
     {topTemplates}
+    {platformFeePercentage}
   />
 
   <!-- Ledger Mutation Table -->

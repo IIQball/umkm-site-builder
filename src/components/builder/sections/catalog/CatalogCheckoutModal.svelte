@@ -1,3 +1,4 @@
+<!-- Note: Inline checkout block component (rendered in-place inside catalog canvas, not an overlay dialog). -->
 <script lang="ts">
   import { ArrowLeft, Plus, Minus, Trash2 } from 'lucide-svelte';
   import { fly } from 'svelte/transition';
@@ -7,6 +8,7 @@
   import Textarea from '../../../ui/Textarea.svelte';
   import Select from '../../../ui/Select.svelte';
   import Card from '../../../ui/Card.svelte';
+  import { formatIDR } from '@/lib/currency';
 
   interface StoreProduct {
     id?: string;
@@ -113,8 +115,8 @@
                   <p class="text-[12px] text-slate-500 mt-0.5">
                     Varian: {getVariantText(item.selections)}
                   </p>
-                  <p class="text-[var(--theme-primary,#4f00ff)] font-extrabold font-mono mt-1.5 text-sm tracking-tight">
-                    Rp {item.price.toLocaleString('id-ID')}
+                  <p class="text-[var(--theme-primary,#2563eb)] font-extrabold font-mono mt-1.5 text-sm tracking-tight">
+                    {formatIDR(item.price)}
                   </p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -153,8 +155,8 @@
           <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex justify-between items-end">
             <span class="font-bold text-slate-700 dark:text-slate-300">Total Harga</span>
             <div class="text-right">
-              <p class="text-2xl font-black font-mono text-[var(--theme-primary,#4f00ff)] tracking-tight">
-                Rp {cartTotal.toLocaleString('id-ID')}
+              <p class="text-2xl font-black font-mono text-[var(--theme-primary,#2563eb)] tracking-tight">
+                {formatIDR(cartTotal)}
               </p>
               <p class="text-[10px] text-slate-400 mt-1">
                 *Belum termasuk ongkos kirim

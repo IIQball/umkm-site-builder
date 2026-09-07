@@ -20,7 +20,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       platformFeePercentage: settings.platformFeePercentage,
       payoutMinimumBalance: settings.payoutMinimumBalance,
       settlementDelayDays: settings.settlementDelayDays,
-    }, 'Commission settings fetched successfully');
+    });
   });
 };
 
@@ -39,7 +39,7 @@ export const saveSettings: APIRoute = async (context): Promise<Response> => {
 
     const updatedRecord = await updatePlatformSettings(validated, user.id);
 
-    return jsonSuccess(updatedRecord, 'Commission settings updated successfully');
+    return jsonSuccess(updatedRecord);
   });
 };
 

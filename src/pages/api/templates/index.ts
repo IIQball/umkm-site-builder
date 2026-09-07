@@ -10,10 +10,10 @@ export const GET: APIRoute = async ({ request }) => {
 
     if (user && user.role === 'tenant') {
       const templates = await getTenantOwnedTemplates(user.id);
-      return jsonSuccess({ templates }, 'Daftar template milik tenant berhasil dimuat');
+      return jsonSuccess({ templates });
     }
 
     const templates = await getPublicTemplates();
-    return jsonSuccess({ templates }, 'Daftar template publik berhasil dimuat');
+    return jsonSuccess({ templates });
   });
 };

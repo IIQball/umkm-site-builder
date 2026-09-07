@@ -12,7 +12,7 @@ describe('GET /api/settings/commission', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
-    expect(body.success).toBe(true);
+    expect(body.ok).toBe(true);
     expect(typeof body.data.platformFeePercentage).toBe('number');
     expect(typeof body.data.designerPercentage).toBe('number');
     expect(body.data.platformFeePercentage + body.data.designerPercentage).toBe(100);

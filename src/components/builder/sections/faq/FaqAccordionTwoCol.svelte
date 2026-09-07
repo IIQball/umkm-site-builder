@@ -41,29 +41,35 @@
         tabindex="0"
         on:click={(e) => selectItem(e, originalIdx, item)}
         on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, originalIdx, item); }}
-        class={`rounded-2xl border border-light/80 bg-card overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
+        class={`overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
           isItemActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-            : 'hover:border-slate-300 dark:hover:border-slate-700'
+            ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 shadow-md'
+            : 'hover:border-[var(--theme-primary,#2563eb)]/50'
         }`}
+        style="background: var(--color-card-base, #ffffff); border: 1px solid var(--color-border, rgba(15, 23, 42, 0.08)); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(originalIdx)}
-          class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs text-main hover:text-primary transition-colors cursor-pointer"
+          class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs hover:opacity-80 transition-colors cursor-pointer"
+          style="color: var(--color-text-main, #0f172a); font-family: var(--font-heading);"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
-            class={`p-1.5 rounded-xl bg-nested text-secondary transition-transform duration-200 shrink-0 ${
-              isOpen ? 'rotate-180 text-primary' : ''
+            class={`p-1.5 rounded-xl transition-transform duration-200 shrink-0 ${
+              isOpen ? 'rotate-180' : ''
             }`}
+            style="background: var(--color-nested-base, #f1f5f9); color: {isOpen ? 'var(--theme-primary, #2563eb)' : 'var(--color-text-secondary, #334155)'};"
           >
             <ChevronDown size={14} />
           </span>
         </button>
 
         {#if isOpen}
-          <div class="px-4 pb-4 pt-1 text-xs text-secondary leading-relaxed border-t border-light/60">
+          <div
+            class="px-4 pb-4 pt-1 text-xs leading-relaxed border-t"
+            style="color: var(--color-text-secondary, #334155); border-color: var(--color-border, rgba(15, 23, 42, 0.08)); font-family: var(--font-family);"
+          >
             {item.answer}
           </div>
         {/if}
@@ -83,29 +89,35 @@
         tabindex="0"
         on:click={(e) => selectItem(e, originalIdx, item)}
         on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, originalIdx, item); }}
-        class={`rounded-2xl border border-light/80 bg-card overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
+        class={`overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
           isItemActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-            : 'hover:border-slate-300 dark:hover:border-slate-700'
+            ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 shadow-md'
+            : 'hover:border-[var(--theme-primary,#2563eb)]/50'
         }`}
+        style="background: var(--color-card-base, #ffffff); border: 1px solid var(--color-border, rgba(15, 23, 42, 0.08)); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(originalIdx)}
-          class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs text-main hover:text-primary transition-colors cursor-pointer"
+          class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs hover:opacity-80 transition-colors cursor-pointer"
+          style="color: var(--color-text-main, #0f172a); font-family: var(--font-heading);"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
-            class={`p-1.5 rounded-xl bg-nested text-secondary transition-transform duration-200 shrink-0 ${
-              isOpen ? 'rotate-180 text-primary' : ''
+            class={`p-1.5 rounded-xl transition-transform duration-200 shrink-0 ${
+              isOpen ? 'rotate-180' : ''
             }`}
+            style="background: var(--color-nested-base, #f1f5f9); color: {isOpen ? 'var(--theme-primary, #2563eb)' : 'var(--color-text-secondary, #334155)'};"
           >
             <ChevronDown size={14} />
           </span>
         </button>
 
         {#if isOpen}
-          <div class="px-4 pb-4 pt-1 text-xs text-secondary leading-relaxed border-t border-light/60">
+          <div
+            class="px-4 pb-4 pt-1 text-xs leading-relaxed border-t"
+            style="color: var(--color-text-secondary, #334155); border-color: var(--color-border, rgba(15, 23, 42, 0.08)); font-family: var(--font-family);"
+          >
             {item.answer}
           </div>
         {/if}

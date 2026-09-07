@@ -1,10 +1,9 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import ProductTable from '@/components/tenant/ProductTable.svelte';
-import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { db } from '@/lib/db/client';
-import { storeCategories, stores, products } from '@/db/schema';
+import { storeCategories, stores } from '@/db/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 
@@ -28,18 +27,8 @@ const categories = hasStore
       ))
   : [];
 
-const productList = hasStore
-  ? await db.select()
-      .from(products)
-      .where(and(
-        eq(products.storeId, STORE_ID!),
-        isNull(products.deletedAt)
-      ))
-  : [];
 
-const totalProducts = productList.length;
-const activeProducts = productList.filter(p => p.status === 'active').length;
-const lowStockProducts = productList.filter(p => p.stock !== null && p.stock < 5).length;
+
 ---
 
 <DashboardLayout title="Manajemen Produk" breadcrumb="Produk">
@@ -73,55 +62,6 @@ const lowStockProducts = productList.filter(p => p.stock !== null && p.stock < 5
         }
       });
     </script>
-
-    {hasStore && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          client:load
-          label="Total Produk" 
-          value={totalProducts} 
-          rawValue={totalProducts}
-          icon="shopping_bag" 
-          cardTheme="dark"
-          badge="Katalog"
-          footerText="Jumlah produk dibuat"
-          delayClass="delay-100"
-        />
-        <StatCard 
-          client:load
-          label="Produk Aktif" 
-          value={activeProducts} 
-          rawValue={activeProducts}
-          icon="check_circle" 
-          cardTheme="default"
-          badge="Aktif"
-          footerText="Tersedia untuk dijual"
-          delayClass="delay-150"
-        />
-        <StatCard 
-          client:load
-          label="Stok Terbatas" 
-          value={lowStockProducts} 
-          rawValue={lowStockProducts}
-          icon="warning" 
-          cardTheme="orange"
-          badge="Perhatian"
-          footerText="Produk dengan stok < 5"
-          delayClass="delay-200"
-        />
-        <StatCard 
-          client:load
-          label="Kategori" 
-          value={categories.length} 
-          rawValue={categories.length}
-          icon="layers" 
-          cardTheme="blue"
-          badge="Organisir"
-          footerText="Kategori produk toko"
-          delayClass="delay-250"
-        />
-      </div>
-    )}
 
     <div class="animate-fade-in-up {hasStore ? 'delay-300' : 'delay-100'}">
       {hasStore ? (

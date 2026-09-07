@@ -13,19 +13,19 @@
   type NodeOption = { type: string; label: string };
 
   const heroNodes: NodeOption[] = [
-    { type: 'badge', label: '+ Promo Badge' },
-    { type: 'title', label: '+ Heading Title' },
-    { type: 'subtitle', label: '+ Subtitle Description' },
-    { type: 'image', label: '+ Banner Image' },
-    { type: 'cta', label: '+ Action Button (CTA)' },
+    { type: 'badge', label: '+ Lencana Promo' },
+    { type: 'title', label: '+ Judul Utama' },
+    { type: 'subtitle', label: '+ Subjudul & Deskripsi' },
+    { type: 'image', label: '+ Gambar Banner' },
+    { type: 'cta', label: '+ Tombol Aksi (CTA)' },
   ];
 
   const sectionNodeMap: Partial<Record<TemplateSection['type'], NodeOption[]>> = {
-    header_announcement: [{ type: 'nav', label: '+ Nav Link Menu' }],
-    features: [{ type: 'item', label: '+ Card Fitur Baru' }],
-    product_catalog: [{ type: 'item', label: '+ Produk Baru' }],
-    testimonials: [{ type: 'item', label: '+ Review Testimoni' }],
-    faq: [{ type: 'item', label: '+ FAQ Accordion' }],
+    header_announcement: [{ type: 'nav', label: '+ Menu Tautan Navigasi' }],
+    features: [{ type: 'item', label: '+ Kartu Keunggulan Baru' }],
+    product_catalog: [{ type: 'item', label: '+ Item Produk Baru' }],
+    testimonials: [{ type: 'item', label: '+ Ulasan Pelanggan Baru' }],
+    faq: [{ type: 'item', label: '+ Pertanyaan Tanya Jawab' }],
   };
 
   $: nodeOptions = section.type === 'hero' ? heroNodes : (sectionNodeMap[section.type] || []);

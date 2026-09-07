@@ -13,6 +13,7 @@
   import TestimonialsNodeForms from './node-forms/TestimonialsNodeForms.svelte';
   import FaqNodeForms from './node-forms/FaqNodeForms.svelte';
   import MapsNodeForms from './node-forms/MapsNodeForms.svelte';
+  import FooterNodeForms from './node-forms/FooterNodeForms.svelte';
   import { IMAGE_SUPPORTED_FEATURE_PRESETS } from '../sections/features/features.helpers';
 
   export let section: TemplateSection;
@@ -61,6 +62,8 @@
     <FaqNodeForms {section} {nodeId} {onPropChange} />
   {:else if section.type === 'google_maps'}
     <MapsNodeForms {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'footer'}
+    <FooterNodeForms {section} {nodeId} {onPropChange} />
   {:else}
     <HeroElementNodeForms {section} {nodeId} {onPropChange} />
   {/if}

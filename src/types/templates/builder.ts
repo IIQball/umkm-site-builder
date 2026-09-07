@@ -1,16 +1,6 @@
 import type { ComponentType } from 'svelte';
-
-export type ColorToken =
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'background'
-  | 'surface'
-  | 'textPrimary'
-  | 'textMuted'
-  | 'text_primary'
-  | 'text_muted'
-  | 'transparent';
+import type { ColorToken } from '@/components/tokens/colors';
+export type { ColorToken };
 
 export type TypographyToken = 'h1' | 'h2' | 'h3' | 'body' | 'caption';
 

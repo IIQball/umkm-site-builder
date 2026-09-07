@@ -68,8 +68,12 @@
   class={`maps-card relative w-full py-8 text-left transition-all ${
     isActive ? 'relative z-10' : ''
   }`}
+  style="container-type: inline-size; container-name: mapscard;"
 >
-  <div class="builder-safe-container">
+  <div
+    class="builder-safe-container"
+    style="max-width: var(--active-max-width, var(--theme-max-width, 1200px)); margin: 0 auto; padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
+  >
     {#if showHeader}
       <MapsHeader {sectionId} {badge} {title} {subtitle} />
     {/if}

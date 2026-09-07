@@ -4,6 +4,7 @@ import { products } from '../../../db/schema';
 import { eq, and, isNull, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
+import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 
 const productInput = z.object({
   storeId: z.string().min(1),
@@ -24,10 +25,7 @@ export const GET: APIRoute = async ({ request }) => {
     const storeId = url.searchParams.get('storeId');
 
     if (!storeId) {
-      return new Response(JSON.stringify({ ok: false, error: { message: 'storeId is required' } }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonError('storeId is required', 400);
     }
 
     const query = db.select().from(products).where(
@@ -35,16 +33,10 @@ export const GET: APIRoute = async ({ request }) => {
     ).orderBy(desc(products.createdAt));
     const allProducts = await query;
 
-    return new Response(JSON.stringify({ ok: true, data: allProducts }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonSuccess(allProducts, 200);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: { message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonError(message, 500);
   }
 };
 
@@ -52,18 +44,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // 1. Authenticate
     if (!locals.user) {
-      return new Response(JSON.stringify({ ok: false, error: { code: 'UNAUTHORIZED', message: 'Silakan login terlebih dahulu' } }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonError('Silakan login terlebih dahulu', 401, undefined);
     }
 
     // 2. Authorize — tenant only
     if (locals.user.role !== 'tenant' && locals.user.role !== 'superadmin') {
-      return new Response(JSON.stringify({ ok: false, error: { code: 'FORBIDDEN', message: 'Hanya tenant yang dapat menambah produk' } }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonError('Hanya tenant yang dapat menambah produk', 403, undefined, 'FORBIDDEN');
     }
 
     // 3. Parse input — accept JSON body with pre-uploaded imageUrls
@@ -71,13 +57,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const result = productInput.safeParse(body);
 
     if (!result.success) {
-      return new Response(JSON.stringify({ 
-        ok: false, 
-        error: { code: 'VALIDATION_ERROR', message: 'Validasi gagal', issues: result.error.issues } 
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonError('Validasi gagal', 400, result.error.issues, 'VALIDATION_ERROR');
     }
 
     // 4. Insert product with pre-uploaded image URLs
@@ -88,18 +68,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const inserted = await db.insert(products).values(newProductData).returning();
 
-    return new Response(JSON.stringify({ ok: true, data: inserted[0] }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonSuccess(inserted[0], 201);
   } catch (error: unknown) {
     // eslint-disable-next-line no-console
     console.error('[PRODUCT] create error:', error instanceof Error ? error.message : error);
     const message = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return new Response(JSON.stringify({ ok: false, error: { code: 'INTERNAL', message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return jsonError(message, 500, undefined);
   }
 };
 

@@ -5,6 +5,7 @@ import StoreStatusBanner from "@/components/storefront/StoreStatusBanner.svelte"
 import { db } from "@/lib/db/client";
 import { stores, products, storeCategories } from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
+import { generateWhatsAppLink } from "@/lib/whatsapp";
 
 const { subdomain } = Astro.params;
 
@@ -62,7 +63,7 @@ Astro.response.headers.set('Surrogate-Key', `store-${store.id}`);
         {
           store.waNumber && (
             <a
-              href={`https://wa.me/${store.waNumber.replace(/[^0-9]/g, "")}`}
+              href={generateWhatsAppLink(store.waNumber)}
               target="_blank"
               rel="noopener noreferrer"
               class="text-sm text-emerald-600 hover:underline inline-flex items-center gap-1 mt-1"

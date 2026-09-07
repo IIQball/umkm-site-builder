@@ -3,6 +3,7 @@
   import type { AuthenticatedUser } from "@/lib/auth";
   import { getRoleConfig } from "./sidebar/sidebar.helpers";
   import NavbarUserMenu from "./navbar/NavbarUserMenu.svelte";
+  import { formatDate } from "@/lib/utils/format";
 
   export let userJson: string;
   export let breadcrumb: string | undefined = undefined;
@@ -35,11 +36,11 @@
   };
 
   const getTodayFormatted = () => {
-    return new Intl.DateTimeFormat("id-ID", {
+    return formatDate(new Date(), {
       weekday: "short",
       day: "numeric",
       month: "short",
-    }).format(new Date());
+    });
   };
 </script>
 

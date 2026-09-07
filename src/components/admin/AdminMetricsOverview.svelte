@@ -20,7 +20,7 @@
     try {
       const res = await fetch('/api/admin/metrics');
       const json = await res.json();
-      if (res.ok && json.success) {
+      if (res.ok && json.ok) {
         metrics = json.data;
       } else {
         toast.error(json.error?.message || 'Gagal memuat metrik admin');

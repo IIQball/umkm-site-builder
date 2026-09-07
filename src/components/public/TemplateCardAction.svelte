@@ -37,7 +37,7 @@
       }
 
       if (result.isFree) {
-        successMessage = result.message || 'Template gratis ditambahkan!';
+        successMessage = 'Template gratis ditambahkan!';
         addToast({
           type: 'success',
           message: 'Template berhasil ditambahkan ke akun Anda!',

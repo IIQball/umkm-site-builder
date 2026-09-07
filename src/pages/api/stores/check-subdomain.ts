@@ -4,18 +4,14 @@ import { stores } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { CheckSubdomainInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { unauthorized, validationError, internalError, okResponse } from '@/types';
 import { ZodError } from 'zod';
+import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 
-const JSON_HEADERS = { 'Content-Type': 'application/json' } as const;
 
 export const POST: APIRoute = async ({ request }) => {
   const user = await getAuthenticatedUser(request);
   if (!user) {
-    return new Response(JSON.stringify(unauthorized()), {
-      status: 401,
-      headers: JSON_HEADERS,
-    });
+    return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
   }
 
   try {
@@ -28,23 +24,13 @@ export const POST: APIRoute = async ({ request }) => {
       .where(and(eq(stores.subdomain, subdomain), isNull(stores.deletedAt)))
       .limit(1);
 
-    return new Response(
-      JSON.stringify(okResponse({ available: !existing, subdomain })),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonSuccess({ available: !existing, subdomain }, 200);
   } catch (err) {
     if (err instanceof ZodError) {
-      return new Response(
-        JSON.stringify(validationError(err.errors[0]?.message)),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError(err.errors[0]?.message || 'Validation failed', 400, err.errors);
     }
 
-    // eslint-disable-next-line no-console
     console.error('[STORE] check-subdomain failed:', err);
-    return new Response(
-      JSON.stringify(internalError()),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500, undefined, 'INTERNAL');
   }
 };

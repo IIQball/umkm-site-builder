@@ -41,6 +41,6 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
       })
       .where(eq(products.id, id));
 
-    return jsonSuccess({ id, isAvailable: validated.isAvailable }, 'Status ketersediaan produk berhasil diubah');
+    return jsonSuccess({ id, isAvailable: validated.isAvailable });
   });
 };

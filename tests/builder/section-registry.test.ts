@@ -180,5 +180,22 @@ describe('Section Registry Map Architecture', () => {
       'card_overlay_bottom',
     ]);
   });
+
+  it('contains all 10 defined layout presets for footer section', () => {
+    const footerDef = getSectionDefinition('footer');
+    expect(footerDef).toBeDefined();
+    expect(footerDef?.layoutPresets).toEqual([
+      'multi_column',
+      'centered_simple',
+      'cta_focused',
+      'minimal_single_row',
+      'giant_wordmark',
+      'newsletter_centric',
+      'live_status_badge',
+      'split_map_footer',
+      'social_links_grid',
+      'boxed_card_footer',
+    ]);
+  });
 });
 

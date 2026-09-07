@@ -1,6 +1,6 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-09-03 by feature/builder-features-presets-refactor
+Status: LIVE · Updated: 2026-09-04 by feature/designer-wallet-fixes
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
@@ -11,7 +11,134 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
-10 Features & Keunggulan section layout presets fully refactored with Container Queries (`@container featurecard`), Design System tokens, Lucide Svelte icons, and fully customizable inspector controls. 0 typecheck errors, 0 lint warnings, 100% passing tests.
+- **Marketplace Template Purchase Endpoint Fix**:
+  - Fixed 404 error on marketplace checkout by updating [`src/components/public/PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/public/PublicTemplateMarketplace.svelte) from non-existent `/api/checkout/create` and `/api/tenant/template/apply` to the canonical transaction endpoint `/api/tenant/transactions/template-purchase`.
+  - Seamlessly handles both free template claims (`isFree: true`) and paid checkout redirections (`/checkout/${result.data.externalId}`).
+
+- **Migrate Remaining Modals to Canonical `ui/Modal.svelte` & Resolve Issue #70:**
+  - **Eliminated Raw `<dialog class="modal">` and Hand-Rolled Backdrops**:
+    - `src/components/tenant/ProductFormModal.svelte`: Replaced raw `<dialog>` element and imperative `.showModal()` / `.close()` with `<Modal open={showModal} on:close={closeModal} size="lg" title="...">`. File shortened from 283 to 258 lines.
+    - `src/components/checkout/PaymentModal.svelte`: Replaced raw `<dialog>` with `<Modal open={open} on:close={closeModal} size="xl" bodyPadding={false} ...>`.
+    - `src/components/checkout/CheckoutSummaryCard.svelte`: Wired reactive `isPaymentModalOpen` state to `<PaymentModal>`.
+    - `src/components/admin/AdminUserAddModal.svelte`: Removed hand-rolled `fixed inset-0` backdrop, keydown handler, and container div in favor of `<Modal open={isOpen} on:close={close} size="md">` with custom header & footer action slots. Reduced from 298 to 285 lines ($\le 300$ limit).
+    - `src/components/admin/whitelist/AdminAddModal.svelte`: Replaced hand-rolled backdrop with `<Modal open={isOpen} on:close={close} size="md">`.
+    - `src/components/admin/whitelist/AdminDetailModal.svelte`: Replaced hand-rolled backdrop with `<Modal open={!!admin} on:close={close} size="md">`.
+  - **Catalog Inline Checkout Clarification**: Added explanatory header comment to [`src/components/builder/sections/catalog/CatalogCheckoutModal.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/catalog/CatalogCheckoutModal.svelte) noting it is an in-canvas inline block component rather than an overlay dialog.
+  - **Documentation Alignment**: Updated [`docs/memory/ui-inventory.md`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/docs/memory/ui-inventory.md) to formally designate `src/components/ui/Modal.svelte` as the project's single canonical modal component.
+  - Strict 0 occurrences of `<dialog class="modal">` in `src/components`.
+  - 0 typecheck errors (`bun run type-check`), 0 lint warnings (`bun run lint`), 100% tests passing (378 tests in 54 suites).
+
+- **Revitalize Design System Tokens as SSOT & Eliminate Triplicate Definitions (Issue #68):**
+  - **Revitalized `src/components/tokens/` as Canonical SSOT**:
+    - `radius.ts`: Exported `RADIUS_STEPS` (0, 4, 8, 12, 16, 20, 24, 32, 9999) and complete `RADIUS_PRESETS` with all UI labels.
+    - `typography.ts`: Exported `FONT_FAMILIES`, `FONT_FAMILY_OPTIONS`, `FONT_SIZES`, `FONT_WEIGHTS`, and `TYPOGRAPHY_SCALES`.
+    - `spacing.ts`: Exported `MAX_WIDTH_OPTIONS` alongside standard 8pt grid and safe-zone constraints.
+    - `colors.ts`: Exported `COLOR_TOKENS` and `DEFAULT_THEME_COLOR_FIELDS`.
+    - `index.ts`: Full barrel re-export of all constants, presets, and inferred types.
+  - **Synchronized Zod Validation Schemas ([`src/schemas/templates/template.tokens.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/schemas/templates/template.tokens.ts))**:
+    - Derived `ColorTokenSchema` directly from `COLOR_TOKENS`.
+    - Derived `RadiusStepSchema` dynamically from `RADIUS_STEPS`.
+    - Validated `FontFamilySchema` against `FONT_FAMILIES` and `FONT_FAMILY_OPTIONS`.
+  - **Eliminated Hardcoded Lists in Builder Theme Inspector Tabs ([`src/components/builder/inspector/theme/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/theme/))**:
+    - `ThemeButtonsTab.svelte`: Replaced local `radiusPresets` with canonical `RADIUS_PRESETS` from tokens (restoring missing 12px, 20px, 24px, 32px options in UI).
+    - `ThemeTypographyTab.svelte`: Replaced inline lists with `FONT_FAMILY_OPTIONS` and `TYPOGRAPHY_SCALES`.
+    - `ThemeLayoutTab.svelte`: Replaced inline max-width options with `MAX_WIDTH_OPTIONS`.
+    - `ThemeColorsTab.svelte`: Consumes `DEFAULT_THEME_COLOR_FIELDS` from `colors.ts`.
+  - **Cleaned `nodeStyles.constants.ts` ([`src/components/builder/inspector/nodeStyles.constants.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/nodeStyles.constants.ts))**:
+    - Removed duplicate manual definitions of `fontSizes` and `fontWeights`, mapping directly to `FONT_SIZES` and `FONT_WEIGHTS` from `tokens/typography.ts`.
+  - 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites).
+
+- **Consolidation of Canonical Shared Helpers & Issue #69 Resolution:**
+  - **Single Source of Truth Currency Formatter (`formatIDR`)**:
+    - Eliminated inline `Intl.NumberFormat('id-ID')` and ad-hoc `'Rp ' + ...` across all 12 target components + catalog files (`StatCard`, `DesignerBankWithdraw`, `ProductCatalog`, `CheckoutPaymentBreakdown`, `NewTemplateForm`, `SubmitReviewModal`, `ProductBasicFields`, `ProductCatalogCard`, `CatalogCheckoutModal`, `TemplatePricingSimulator`, `ProductCatalogQuickView`, `ProductTableRow`, `ProductGrid`, `orders.astro`).
+    - Verified strict 0 matches for `Intl.NumberFormat('id-ID')` outside [`src/lib/currency.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/currency.ts).
+  - **Canonical WhatsApp Utilities (`normalizeWhatsAppNumber`, `generateWhatsAppLink`, `generateWhatsAppOrderUrl`)**:
+    - Centralized WhatsApp parsing and URL formatting in [`src/lib/whatsapp.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/whatsapp.ts), fixing the leading `8...` prefix bug and supporting `08...`, `8...`, `620...`, `+62...`.
+    - Consolidated helper calls in `footer.helpers.ts`, `faq.helpers.ts`, `maps.helpers.ts`, `productCatalog.helpers.ts`, `ProductGrid.svelte`, and `[subdomain].astro`.
+    - Sanitized builder WhatsApp input in [`FooterNodeForms.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/node-forms/FooterNodeForms.svelte) with live normalization and validation pattern.
+  - **Single Source of Truth Date Formatter (`formatDate`)**:
+    - Extended [`src/lib/utils/format.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/lib/utils/format.ts) `formatDate` to accept optional `Intl.DateTimeFormatOptions`.
+    - Replaced all ad-hoc `toLocaleDateString` / `Intl.DateTimeFormat` in `AdminDetailModal`, `AdminWhitelistTable`, `UserManagementPanel`, `DesignerTemplateTable`, `DesignerTemplateCard`, and `DashboardNavbar`.
+  - **Standardized Admin Whitelist Table & Modularization**:
+    - Refactored [`AdminWhitelistTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/whitelist/AdminWhitelistTable.svelte) from raw `<table>` markup to standardized `<Table>` component.
+    - Modularized [`AdminUserTable.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/user/AdminUserTable.svelte) from [`UserManagementPanel.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/admin/UserManagementPanel.svelte), bringing panel size from 349 lines down to 265 lines ($\le 300$ limit).
+  - **Standardized `--theme-primary` Fallbacks**:
+    - Replaced hardcoded `#4f00ff` fallback with canonical `#2563eb` across all catalog components (`ProductCatalogCard`, `CatalogCheckoutModal`, `ProductQuickCheckoutModal`, `ProductGrid`).
+    - Verified strict 0 matches for `#4f00ff` in the entire repository.
+  - 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites), zero live testing.
+
+- **Designer Wallet UI & Commission Synchronization ([`src/pages/designer/wallet.astro`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/pages/designer/wallet.astro), [`src/components/designer/DesignerBankCard.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankCard.svelte), [`src/components/designer/wallet/DesignerWeeklyChart.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/wallet/DesignerWeeklyChart.svelte)):**
+  - **High-Contrast Bank Action Button**: Refactored "Ganti Rekening" button on [`DesignerBankCard.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankCard.svelte) with pure high-contrast white styling (`border-white/40 hover:border-white bg-white/10 hover:bg-white/20 text-white`) and Lucide Svelte `Pencil` icon, ensuring crisp visibility across both light and dark themes.
+  - **Defensive Account Holder Resolution**: Standardized `accountHolder` / `holderName` mapping across [`bank-account.schema.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/schemas/designer/bank-account.schema.ts), [`wallet.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/types/finance/wallet.ts), and [`DesignerBankWithdraw.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/DesignerBankWithdraw.svelte), eliminating `UNDEFINED` text and rendering uppercase validated names.
+  - **Dynamic Commission Split Rate**: Dynamically integrated `platformFeePercentage` from `platformSettings` into [`DesignerWeeklyChart.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/designer/wallet/DesignerWeeklyChart.svelte) via SSR props and live fallback fetch (`GET /api/public/commission`), replacing static "70% Desainer • 30% Platform" with reactive `Pembagian hasil: {designerSharePercent}% Desainer • {platformFeePercentage}% Platform`.
+  - Zero raw emojis, 100% Lucide Svelte SVG icons, strictly $\le 300$ lines per file, 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites).
+
+- **100% Indonesian Localization for Layers Panel & Canvas Auto-Scroll:**
+  - **100% Indonesian Localization ([`src/components/builder/layer/layerPanel.helpers.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/layer/layerPanel.helpers.ts), [`src/components/builder/LayerPanel.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/LayerPanel.svelte), [`src/components/builder/layer/LayerSectionItem.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/layer/LayerSectionItem.svelte), [`src/components/builder/layer/AddNodeDropdown.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/layer/AddNodeDropdown.svelte)):**
+    - Localized all section labels, sub-node labels, dropdowns, headers, and tooltips adhering strictly to `.agents/rules/language-standards.md` standard.
+    - Header: `Lapisan (N)`, `Tambah`, `Pilih Komponen Seksi`, `Tutup Panel Lapisan (Ctrl+\)`.
+    - Main Section Types: `Header & Pengumuman`, `Banner Utama (Hero)`, `Fitur & Keunggulan`, `Katalog Produk`, `Testimoni Pelanggan`, `FAQ (Tanya Jawab)`, `Google Maps & Lokasi`, `Footer & Kontak`.
+    - Sub-nodes across all 8 sections: `Lencana & Kategori`, `Judul Utama (H1)`, `Subjudul / Deskripsi`, `Grup Tombol Aksi (CTA)`, `Gambar Utama (Showcase)`, `Bilah Kontak Atas`, `Logo Toko & Brand`, `Menu Navigasi`, `Kartu Keunggulan`, `Paket Bundling Hemat`, `Ulasan Pelanggan`, `Tanya Jawab`, `Bingkai Peta Interaktif`, `Kartu Informasi Melayang`, `Hak Cipta & Menu Bawah`.
+    - Action Tooltips: `Geser ke Atas`, `Geser ke Bawah`, `Hapus Seksi`, `Hapus Elemen`, `Buka Detail`, `Tutup Detail`.
+  - **Canvas Smooth Auto-Scroll ([`src/components/builder/canvas/canvasScroll.helpers.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/canvas/canvasScroll.helpers.ts), [`src/components/builder/Canvas.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/Canvas.svelte)):**
+    - Implemented `scrollToCanvasElement(sectionId, nodeId?)` with smooth center alignment.
+    - Added `id={`section-${section.id}`}` and `data-section-id={section.id}` to Canvas section containers.
+    - Integrated automatic scroll trigger when clicking section rows or child sub-nodes in `LayerSectionItem.svelte`.
+  - Zero raw emojis, 100% Lucide Svelte SVG icons, strictly $\le 300$ lines per file, 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests in 54 test suites).
+
+- **FAQ Section Global Design System Synchronization ([`src/components/builder/sections/FAQ.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/FAQ.svelte)):**
+  - Synchronized all 10 FAQ presets and subcomponents under [`src/components/builder/sections/faq/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/faq/) with Global Design System tokens:
+    - Typography: Bound headers, questions, answers, and tags to `--font-heading` (`font-[var(--font-heading,inherit)]`) and `--font-family` (`font-[var(--font-family,inherit)]`).
+    - Colors & Surfaces: Replaced hardcoded Tailwind colors with `--color-text-main`, `--color-text-secondary`, `--color-border`, `--color-card-base`, `--color-nested-base`, and `--theme-primary`.
+    - Buttons & Interactive Elements: Bound tab buttons (`--btn-primary-bg`, `--btn-primary-text`, `--btn-secondary-bg`, `--btn-secondary-text`), button radiuses (`--btn-radius`), search inputs, and accordion toggles to design system tokens.
+    - Layout Sizing: Wrapped section container in `.builder-safe-container` with `max-width: var(--active-max-width, var(--theme-max-width, 1200px))` and inline safe-zone padding `var(--active-safe-zone, 32px)`.
+  - Zero raw emojis, 100% Lucide Svelte SVG icons, 0 typecheck errors, 0 lint warnings, 100% passing tests (375 tests).
+
+- **Live Reactive Engine for Global Design System & Complete SSOT Sync:**
+  - **Centralized CSS Variable Ingestion ([`src/components/builder/canvas/canvasCss.helpers.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/canvas/canvasCss.helpers.ts))**:
+    - Unified mapping of all design system tokens: `--color-*`, `--font-*`, typography scales `--text-*`, buttons `--btn-*`, and responsive layout dimensions (`--active-max-width`, `--active-safe-zone`, `--active-gutter`).
+    - Full backward compatibility aliases (`--theme-*`) for existing sections.
+  - **Dynamic Google Fonts Loader ([`src/components/builder/canvas/fontLoader.helpers.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/canvas/fontLoader.helpers.ts))**:
+    - Dynamically generates and injects valid Google Fonts `<link>` into `<head>` when switching fonts (Inter, Poppins, League Spartan, Plus Jakarta Sans, DM Sans, Outfit, Playfair Display, Merriweather, Montserrat, Roboto, JetBrains Mono).
+  - **Strict CSS Scoping & Theme Isolation ([`src/components/builder/inspector/GlobalThemeInspector.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/GlobalThemeInspector.svelte), [`src/components/builder/Canvas.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/Canvas.svelte), [`src/components/builder/BuilderEditor.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/BuilderEditor.svelte), [`src/styles/global.css`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/styles/global.css))**:
+    - **No Global Variable Leakage**: Removed `[data-theme]` from optimistic DOM mutator `setCanvasCssVar`, strictly targeting `#canvas-frame, [aria-label="Editable Page Canvas"]`.
+    - **Builder Shell Isolation**: Explicitly locked builder shell/chrome (`.builder-root`, `header`, `aside`, `TopBar`, `LayerPanel`, `PropertyInspector`) to native UI sans-serif fonts (`var(--font-ui-sans, 'Poppins', system-ui, sans-serif)` and `var(--font-ui-heading, 'League Spartan', sans-serif)`).
+    - **Scoped Template Variables**: All dynamic template colors, typography scales, button radiuses, and fonts are applied exclusively to `#canvas-frame` / `.builder-canvas-viewport`.
+  - 0 typecheck errors, 0 lint warnings, 100% passing tests (375 passed in 54 test suites).
+
+- **Google Maps Section Global Design System & Live Scaled Typography Parity ([`src/components/builder/sections/GoogleMaps.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/GoogleMaps.svelte)):**
+  - Synchronized all 10 Google Maps presets and subcomponents under [`src/components/builder/sections/maps/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/maps/) with Global Design System tokens:
+    - **Live Dynamic Typography Scaling**:
+      * Main section titles (`<h2>` in `MapsHeader.svelte`, `MapsMinimalFramed.svelte`, `MapsCompactBoxed.svelte`): `font-size: var(--theme-text-h2, var(--text-h2-size, 26px))` / `font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700)); font-family: var(--theme-font-heading, var(--font-heading, inherit));`.
+      * Card titles & panel headers (`<h3>` in `MapsFullwidth.svelte`, `MapsFloatingCard.svelte`, `MapsCardOverlay.svelte`, `MapsSplitInfo.svelte`, `MapsTwoColumnDirections.svelte`): `font-size: var(--theme-text-h3, var(--text-h3-size, 20px))` / `font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600)); font-family: var(--theme-font-heading, var(--font-heading, inherit));`.
+      * Body text, addresses, directions & button labels: `font-size: var(--theme-text-body, var(--text-body-size, 14px-16px)); font-family: var(--theme-font-body, var(--font-family, inherit));`.
+      * Badges, captions & operation status: `font-size: var(--theme-text-caption, var(--text-caption-size, 10px-11px)); font-family: var(--theme-font-heading, var(--font-heading, inherit));`.
+    - **Colors & Surfaces**: Standardized cards and backgrounds with `--color-text-main`, `--color-text-secondary`, `--color-border`, `--color-card-base`, `--color-nested-base`, and `--theme-primary`.
+    - **Buttons & Badges**: Bound primary CTA buttons (`--btn-primary-bg`, `--btn-primary-text`), secondary action buttons (`--btn-secondary-bg`, `--btn-secondary-text`), and button radiuses (`--btn-radius`, `--theme-btn-radius`).
+    - **Sub-node Active Rings**: Standardized active selection highlights with `ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900`.
+    - **Layout Sizing**: Wrapped section container in `.builder-safe-container` with `max-width: var(--active-max-width, var(--theme-max-width, 1200px))` and inline safe-zone padding `var(--active-safe-zone, 32px)`.
+  - Zero raw emojis, 100% Lucide Svelte SVG icons, 0 typecheck errors, 0 lint warnings, strictly $\le 300$ lines per file, 100% passing tests (375 tests in 54 test suites).
+
+- **100% Global Design System Parity for Footer & Contact Sections ([`src/components/builder/sections/Footer.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/Footer.svelte)):**
+  - Refactored and synchronized `Footer.svelte` and all 10 presets under [`src/components/builder/sections/footer/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/footer/) with Global Design System tokens:
+    - **Dual-Variable / SSOT Synchronization**: Bound to `var(--theme-X, var(--SSOT-X, fallback))` for instant live preview response from `GlobalThemeInspector` while maintaining complete design system token compliance.
+    - **Semantic Font Families**: Brand titles, column headings, and CTA banner titles use `var(--theme-font-heading, var(--font-heading, inherit))`. Descriptions, links, addresses, and copyright use `var(--theme-font-body, var(--font-family, inherit))`. Preserved bold aesthetic for `giant_wordmark`.
+    - **Live Scalable Dynamic Typography**:
+      * Store names / CTA banner titles: `font-size: var(--theme-text-h3, var(--text-h3-size, 20px))` / `font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700))`.
+      * Column headings: `font-size: var(--theme-text-caption, var(--text-caption-size, 12px))` / `font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;`.
+      * Body text / descriptions / links / contact items: `font-size: var(--theme-text-body, var(--text-body-size, 14px))`.
+      * Copyright / sub-badges: `font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85)`.
+    - **Semantic Colors & Surfaces**: Replaced hardcoded Tailwind colors (`bg-slate-*`, `text-slate-*`) with `--color-card-base`/`--theme-surface`, `--color-nested-base`, `--color-text-main`/`--theme-text-primary`, `--color-text-secondary`/`--theme-text-muted`, `--color-border`, and `--theme-primary`.
+    - **Buttons & Badges**: Standardized with `--btn-primary-bg`/`--theme-btn-primary-bg`, `--btn-secondary-bg`/`--theme-btn-secondary-bg`, `--btn-radius`/`--theme-btn-radius`, and `active:scale-[0.98]`.
+    - **Layout & Safe-Zone Spacing**: Container width bound to `max-width: var(--theme-max-width, var(--active-max-width, 1200px))` and safe-zone padding `var(--active-safe-zone, var(--theme-safe-zone-desktop, 32px))`.
+  - **Live CSS Var Ingestion Update ([`src/components/builder/inspector/GlobalThemeInspector.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/GlobalThemeInspector.svelte))**:
+    - Upgraded `setCanvasCssVar` to target both `[data-theme]` and `[aria-label="Editable Page Canvas"]`, simultaneously updating `--theme-*` and `--color-*`/`--font-*`/`--btn-*`/`--active-*` tokens.
+  - 0 typecheck errors, 0 lint warnings, strictly $\le 300$ lines per file, 100% passing tests (375 tests in 54 test suites).
+  - **Adaptive Layer Tree ([`src/components/builder/layer/layerPanel.helpers.ts`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/layer/layerPanel.helpers.ts))**: File tetap $\le$ 300 baris (296 baris).
+  - **Contextual Cloudinary WebP Uploader ([`src/components/builder/inspector/node-forms/FooterNodeForms.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/inspector/node-forms/FooterNodeForms.svelte))**: File strictly $\le$ 300 baris (296 baris).
+  - **Zero Emojis**: 100% Lucide Svelte SVG icons.
+  - **Strict Limit $\le$ 300 Baris per File**: 0 lint warnings, 0 typecheck errors, 100% unit tests passed.
+
 
 - **10 Features & Keunggulan Layout Presets ([`src/components/builder/sections/Features.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/Features.svelte)):**
   - Modularized all 10 presets under [`src/components/builder/sections/features/`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/builder/sections/features/):

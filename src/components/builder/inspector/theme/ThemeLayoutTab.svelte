@@ -1,17 +1,11 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { MAX_WIDTH_OPTIONS } from '@/components/tokens/spacing';
 
   export let theme: TemplateTheme;
   export let onLayoutChange: (key: string, value: string) => void = () => {};
 
   $: layout = theme.layout || {};
-
-  const maxWidthOptions = [
-    { label: '1024px (Compact)', value: '1024px' },
-    { label: '1200px (Standard)', value: '1200px' },
-    { label: '1280px (Spacious)', value: '1280px' },
-    { label: '100% (Full Width)', value: '100%' },
-  ];
 </script>
 
 <div class="space-y-4">
@@ -21,9 +15,10 @@
       id="layout-max-width"
       value={layout.maxWidth || '1200px'}
       on:change={(e) => onLayoutChange('maxWidth', e.currentTarget.value)}
+      on:input={(e) => onLayoutChange('maxWidth', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none"
     >
-      {#each maxWidthOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+      {#each MAX_WIDTH_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
     </select>
   </div>
 
@@ -35,6 +30,7 @@
         id="layout-margin-desktop"
         type="text"
         value={layout.horizontalMarginDesktop || '32px'}
+        on:input={(e) => onLayoutChange('horizontalMarginDesktop', e.currentTarget.value)}
         on:change={(e) => onLayoutChange('horizontalMarginDesktop', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono"
         placeholder="32px"
@@ -46,6 +42,7 @@
         id="layout-margin-tablet"
         type="text"
         value={layout.horizontalMarginTablet || '24px'}
+        on:input={(e) => onLayoutChange('horizontalMarginTablet', e.currentTarget.value)}
         on:change={(e) => onLayoutChange('horizontalMarginTablet', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono"
         placeholder="24px"
@@ -57,6 +54,7 @@
         id="layout-margin-mobile"
         type="text"
         value={layout.horizontalMarginMobile || '16px'}
+        on:input={(e) => onLayoutChange('horizontalMarginMobile', e.currentTarget.value)}
         on:change={(e) => onLayoutChange('horizontalMarginMobile', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs font-mono"
         placeholder="16px"

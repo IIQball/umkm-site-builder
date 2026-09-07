@@ -66,6 +66,7 @@
       isAvailable = true;
       sortOrder = 0;
       variantGroups = [];
+      variantGroups = [];
       imageUrls = [];
     }
   } else if (!showModal && wasOpen) {

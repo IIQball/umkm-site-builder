@@ -19,3 +19,12 @@ export interface MediaCleanupReport {
   failedPublicIds: string[];
   skippedRecentCount: number;
 }
+
+export interface MediaSyncReport {
+  success: boolean;
+  timestamp: string;
+  dryRun: boolean;
+  productsChecked: number;
+  productsUpdated: number;
+  brokenUrlsRemoved: number;
+}

@@ -9,7 +9,6 @@
   import ProductTableRow from "./ProductTableRow.svelte";
 
   import { StatCard, Card, Table, Input } from "@/components/ui";
-
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
 
@@ -140,56 +139,82 @@
     }
   });
 
-  // Derived stats
+  // Derived stats for real-time reactivity
   $: totalProducts = filteredProducts.length;
   $: activeProducts = filteredProducts.filter((p) => p.isAvailable).length;
   $: inactiveProducts = totalProducts - activeProducts;
+  $: categoryCount = displayedCategories.length;
 </script>
 
 <div class="space-y-8">
-  <!-- Stat Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     {#key totalProducts}
-      <StatCard
-        label="Total Produk"
-        value={totalProducts}
-        description="Seluruh produk terdaftar"
-        icon="inventory_2"
-        cardTheme="default"
+      <StatCard 
+        label="Total Produk" 
+        value={totalProducts} 
+        rawValue={totalProducts}
+        icon="shopping_bag" 
+        cardTheme="dark"
+        badge="Katalog"
+        footerText="Jumlah produk dibuat"
         delayClass="delay-100"
       />
     {/key}
     {#key activeProducts}
-      <StatCard
-        label="Produk Aktif"
-        value={activeProducts}
-        description="Siap untuk dijual"
-        icon="check_circle"
+      <StatCard 
+        label="Produk Aktif" 
+        value={activeProducts} 
+        rawValue={activeProducts}
+        icon="check_circle" 
         cardTheme="default"
-        delayClass="delay-200"
+        badge="Aktif"
+        footerText="Tersedia untuk dijual"
+        delayClass="delay-150"
       />
     {/key}
     {#key inactiveProducts}
-      <StatCard
-        label="Tidak Aktif"
-        value={inactiveProducts}
-        description="Stok nonaktif"
-        icon="block"
-        cardTheme="default"
-        delayClass="delay-300"
+      <StatCard 
+        label="Stok Terbatas" 
+        value={0} 
+        rawValue={0}
+        icon="warning" 
+        cardTheme="orange"
+        badge="Perhatian"
+        footerText="Produk dengan stok < 5"
+        delayClass="delay-200"
+      />
+    {/key}
+    {#key categoryCount}
+      <StatCard 
+        label="Kategori" 
+        value={categoryCount} 
+        rawValue={categoryCount}
+        icon="layers" 
+        cardTheme="blue"
+        badge="Organisir"
+        footerText="Kategori produk toko"
+        delayClass="delay-250"
       />
     {/key}
   </div>
 
+
   <!-- Kontainer Tabel Utama -->
   <Card padding="lg" className="animate-fade-in-up delay-400">
     <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+      class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-light pb-6"
     >
-      <h2 class="text-heading-md font-bold tracking-tight text-main">
-        Daftar Produk
-      </h2>
-      <div class="flex items-center gap-3">
+      <div>
+        <div>
+          <h2 class="text-heading-md text-main font-bold font-heading leading-tight">
+            Daftar Produk
+          </h2>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">
+            Kelola daftar produk, varian, dan harga untuk toko Anda
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5">
         <div
           class="dropdown dropdown-end {isDropdownOpen ? 'dropdown-open' : ''}"
         >

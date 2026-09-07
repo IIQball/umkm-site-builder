@@ -30,6 +30,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       amountFormatted: formatCurrency(transaction.amount),
       paymentMethod: transaction.paymentChannel,
       paymentUrl,
-    }, 'Status transaksi berhasil diambil');
+    });
   });
 };

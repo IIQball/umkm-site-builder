@@ -5,6 +5,7 @@ import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services/finance/transaction.service';
+import { formatIDR } from '@/lib/currency';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
@@ -26,7 +27,7 @@ const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
 const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
 
 const totalSpent = totalPaidOrders.reduce((sum, o) => sum + o.amount, 0);
-const formattedTotalSpent = `Rp ${new Intl.NumberFormat('id-ID').format(totalSpent)}`;
+const formattedTotalSpent = formatIDR(totalSpent);
 ---
 
 <DashboardLayout title="Riwayat Pesanan Template" breadcrumb="Dashboard / Riwayat Pesanan">

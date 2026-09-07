@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button, Card, Table } from '@/components/ui';
+  import { Button, Card, Table, StatCard } from '@/components/ui';
+  import { toast } from '@/lib/toast';
   import TenantCategoryFormModal from './category/TenantCategoryFormModal.svelte';
   import TenantCategoryDeleteModal from './category/TenantCategoryDeleteModal.svelte';
   
@@ -19,7 +20,7 @@
   let isLoading = true;
   let isSaving = false;
   let error: string | null = null;
-  let success: string | null = null;
+
 
   // Modal state
   let isModalOpen = false;
@@ -91,7 +92,6 @@
     
     isSaving = true;
     error = null;
-    success = null;
     try {
       const method = editingCategory ? 'PATCH' : 'POST';
       const bodyPayload = editingCategory 
@@ -108,13 +108,14 @@
       if (res.ok) {
         await fetchCategories();
         isModalOpen = false;
-        success = editingCategory ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.';
-        setTimeout(() => success = null, 3000);
+        toast.success(editingCategory ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.');
       } else {
         error = data.error || 'Gagal menyimpan kategori';
+        toast.error(error as string);
       }
     } catch {
       error = 'Gagal menyimpan kategori';
+      toast.error(error as string);
     } finally {
       isSaving = false;
     }
@@ -135,51 +136,89 @@
     if (!deleteId) return;
     isDeleting = true;
     error = null;
-    success = null;
     try {
       const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
       const data = await res.json();
       if (res.ok) {
         categories = categories.filter(c => c.id !== deleteId);
-        success = 'Kategori berhasil dihapus.';
-        setTimeout(() => success = null, 3000);
+        toast.success('Kategori berhasil dihapus.');
         isDeleteModalOpen = false;
       } else {
         error = data.error || 'Gagal menghapus kategori';
+        toast.error(error as string);
       }
     } catch {
       error = 'Gagal menghapus kategori';
+      toast.error(error as string);
     } finally {
       isDeleting = false;
     }
   };
+  $: totalCategories = categories.length;
+  $: activeCategories = categories.length;
+  $: inactiveCategories = totalCategories - activeCategories;
 </script>
 
-<div class="space-y-6 animate-fade-in-up">
-  <!-- Header Actions -->
-  <Card variant="flat" padding="sm" className="flex items-center justify-between">
-    <div class="px-2">
-      <p class="text-body-sm text-secondary font-medium">Total <span class="text-main font-bold">{categories.length}</span> kategori</p>
-    </div>
-  </Card>
-
-  <!-- Notifications -->
-  {#if error && !isModalOpen && !isDeleteModalOpen}
-    <div class="p-4 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20 flex gap-3 items-center animate-fade-in-up">
-      <span class="material-symbols-outlined text-lg">error</span>
-      <p class="text-sm font-medium">{error}</p>
-    </div>
-  {/if}
-
-  {#if success && !isModalOpen && !isDeleteModalOpen}
-    <div class="p-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20 flex gap-3 items-center animate-fade-in-up">
-      <span class="material-symbols-outlined text-lg">check_circle</span>
-      <p class="text-sm font-medium">{success}</p>
-    </div>
-  {/if}
-
+<div class="space-y-8">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {#key totalCategories}
+      <StatCard 
+        label="Total Kategori" 
+        value={totalCategories} 
+        rawValue={totalCategories}
+        icon="layers" 
+        cardTheme="dark"
+        badge="Organisasi"
+        footerText="Total kategori dibuat"
+        delayClass="delay-100"
+      />
+    {/key}
+    {#key activeCategories}
+      <StatCard 
+        label="Kategori Aktif" 
+        value={activeCategories} 
+        rawValue={activeCategories}
+        icon="check_circle" 
+        cardTheme="default"
+        badge="Aktif"
+        footerText="Kategori yang aktif"
+        delayClass="delay-150"
+      />
+    {/key}
+    {#key inactiveCategories}
+      <StatCard 
+        label="Tidak Aktif" 
+        value={inactiveCategories} 
+        rawValue={inactiveCategories}
+        icon="visibility_off" 
+        cardTheme="orange"
+        badge="Tersembunyi"
+        footerText="Kategori tidak ditampilkan"
+        delayClass="delay-200"
+      />
+    {/key}
+    <StatCard 
+      label="Status Organisir" 
+      value="—" 
+      icon="done_all" 
+      cardTheme="blue"
+      badge="Siap"
+      footerText="Kategori terorganisir"
+      delayClass="delay-250"
+    />
+  </div>
   <!-- Content -->
-  <Card padding="none" className="min-h-[400px] flex flex-col">
+  <Card padding="lg" className="animate-fade-in-up delay-300">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-light pb-6">
+      <div>
+        <h2 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Daftar Kategori Produk
+        </h2>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Kelola grup pengkategorian untuk mengorganisir katalog produk Anda
+        </p>
+      </div>
+    </div>
     {#if isLoading}
       <div class="flex-1 flex items-center justify-center p-12">
         <span class="loading loading-spinner loading-lg text-primary"></span>

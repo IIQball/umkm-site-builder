@@ -31,7 +31,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const template = await getTemplateById(templateId, user.id, user.role);
 
-    return jsonSuccess(template, 'Template berhasil diambil');
+    return jsonSuccess(template);
   });
 };
 
@@ -47,7 +47,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     const newTemplate = await createTemplateDraft(input, user.id);
 
-    return jsonSuccess(newTemplate, 'Template draft created', 201);
+    return jsonSuccess(newTemplate, 201);
   });
 };
 
@@ -70,7 +70,7 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
 
     const updated = await updateTemplateDraft(templateId, input, user.id, user.role);
 
-    return jsonSuccess(updated, 'Template draft updated');
+    return jsonSuccess(updated);
   });
 };
 
@@ -99,7 +99,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
       config: input.config,
     });
 
-    return jsonSuccess(submitted, 'Template submitted for review');
+    return jsonSuccess(submitted);
   });
 };
 
@@ -117,7 +117,7 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     // Handle batch deletion if templateIds array is provided
     if (Array.isArray(body?.templateIds) && body.templateIds.length > 0) {
       const result = await deleteBatchTemplateDrafts(body.templateIds, user.id, user.role);
-      return jsonSuccess(result, `${result.deletedCount} template draft berhasil dihapus permanen`);
+      return jsonSuccess(result);
     }
 
     const targetId = templateId || body?.templateId;
@@ -127,6 +127,6 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
 
     await deleteTemplateDraft(targetId, user.id, user.role);
 
-    return jsonSuccess(null, 'Template draft berhasil dihapus permanen');
+    return jsonSuccess(null);
   });
 };

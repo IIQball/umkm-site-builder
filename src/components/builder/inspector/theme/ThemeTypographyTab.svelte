@@ -1,34 +1,12 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { FONT_FAMILY_OPTIONS, TYPOGRAPHY_SCALES } from '@/components/tokens/typography';
 
   export let theme: TemplateTheme;
   export let onTypographyChange: (key: string, value: unknown) => void = () => {};
   export let onScaleChange: (tag: string, field: string, value: string) => void = () => {};
 
   $: typography = theme.typography || {};
-
-  const fontOptions = [
-    { label: 'League Spartan (SSOT Default Heading)', value: "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif" },
-    { label: 'Poppins (SSOT Default Body)', value: "'Poppins', system-ui, -apple-system, sans-serif" },
-    { label: 'Inter (Clean & Modern)', value: 'Inter, system-ui, -apple-system, sans-serif' },
-    { label: 'Plus Jakarta Sans (Geometric)', value: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif' },
-    { label: 'DM Sans (Contemporary)', value: '"DM Sans", system-ui, -apple-system, sans-serif' },
-    { label: 'Outfit (Trendy Minimal)', value: 'Outfit, system-ui, -apple-system, sans-serif' },
-    { label: 'Playfair Display (Serif/Luxury)', value: "'Playfair Display', Georgia, serif" },
-    { label: 'Merriweather (Editorial Serif)', value: 'Merriweather, Georgia, serif' },
-    { label: 'Montserrat (Punchy Sans)', value: 'Montserrat, system-ui, -apple-system, sans-serif' },
-    { label: 'Roboto (Neutral Sans)', value: 'Roboto, system-ui, -apple-system, sans-serif' },
-    { label: 'JetBrains Mono (Code/Tech)', value: "'JetBrains Mono', monospace" },
-    { label: 'System Sans', value: 'system-ui, -apple-system, sans-serif' },
-  ];
-
-  const typographyScales = [
-    { tag: 'h1', label: 'H1 (Hero Display)', defaultSize: '42px', defaultWeight: '700' },
-    { tag: 'h2', label: 'H2 (Section Heading)', defaultSize: '26px', defaultWeight: '700' },
-    { tag: 'h3', label: 'H3 (Card Heading)', defaultSize: '20px', defaultWeight: '600' },
-    { tag: 'body', label: 'Body Text', defaultSize: '16px', defaultWeight: '400' },
-    { tag: 'caption', label: 'Caption / Badge', defaultSize: '10px', defaultWeight: '700' },
-  ];
 
   const getScaleData = (tag: string): Record<string, string> => {
     const record = typography as Record<string, Record<string, string> | undefined>;
@@ -46,7 +24,7 @@
       on:input={(e) => onTypographyChange('headingFont', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-primary"
     >
-      {#each fontOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+      {#each FONT_FAMILY_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
     </select>
   </div>
   <div>
@@ -58,13 +36,13 @@
       on:input={(e) => onTypographyChange('bodyFont', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content text-xs focus:outline-none focus:border-primary"
     >
-      {#each fontOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+      {#each FONT_FAMILY_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
     </select>
   </div>
 
   <div class="pt-2 border-t border-base-200 dark:border-slate-800 space-y-2.5">
     <span class="block font-bold text-xs text-base-content uppercase tracking-wider">Skala Tipografi (Golden Ratio SSOT)</span>
-    {#each typographyScales as scale}
+    {#each TYPOGRAPHY_SCALES as scale}
       {@const scaleData = getScaleData(scale.tag)}
       <div class="p-2 bg-base-200/40 dark:bg-slate-900/60 rounded-lg border border-base-300 dark:border-slate-800 space-y-1.5">
         <div class="flex items-center justify-between">

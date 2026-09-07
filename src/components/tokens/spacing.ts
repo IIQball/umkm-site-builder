@@ -3,6 +3,13 @@
  * Standard 8pt Spacing Grid & Container Padding / Breakpoint Constraints
  */
 
+export const MAX_WIDTH_OPTIONS = [
+  { label: '1024px (Compact)', value: '1024px' },
+  { label: '1200px (Standard)', value: '1200px' },
+  { label: '1280px (Spacious)', value: '1280px' },
+  { label: '100% (Full Width)', value: '100%' },
+] as const;
+
 export const spacingGrid = {
   0: '0px',
   0.5: '2px',

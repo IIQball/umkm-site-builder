@@ -25,6 +25,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     .where(inArray(users.role, ['tenant', 'designer']))
     .orderBy(desc(users.createdAt));
 
-    return jsonSuccess(allUsers, 'Users fetched successfully');
+    return jsonSuccess(allUsers);
   });
 };

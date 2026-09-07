@@ -59,7 +59,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.success).toBe(false);
+      expect(body.ok).toBe(false);
       expect(body.error.code).toBe('UNAUTHORIZED');
     });
 
@@ -100,7 +100,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data.payouts[0].id).toBe('po_1');
       expect(body.data.payouts[0].amount).toBe(50000);
       expect(body.data.payouts[0].status).toBe('processing');
@@ -235,7 +235,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.success).toBe(true);
+      expect(body.ok).toBe(true);
       expect(body.data).toEqual(mockResult);
     });
   });

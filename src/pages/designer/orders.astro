@@ -5,6 +5,7 @@ import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { transactionService } from '@/services/finance/transaction.service';
+import { formatIDR } from '@/lib/currency';
 
 export const prerender = false;
 
@@ -29,7 +30,7 @@ const totalNetEarned = totalPaidOrders.reduce(
   0
 );
 
-const formattedNetIncome = `Rp ${new Intl.NumberFormat('id-ID').format(totalNetEarned)}`;
+const formattedNetIncome = formatIDR(totalNetEarned);
 ---
 
 <DashboardLayout title="Pesanan Masuk" breadcrumb="Desainer / Pesanan Masuk">

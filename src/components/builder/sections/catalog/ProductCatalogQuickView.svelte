@@ -2,6 +2,7 @@
   import { X, Package } from 'lucide-svelte';
   import WhatsAppIcon from '../../../ui/WhatsAppIcon.svelte';
   import { generateWhatsAppOrderUrl } from '../../../../lib/whatsapp';
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
 
   export let quickViewProduct: ProductItem | null = null;
@@ -116,7 +117,7 @@
                             : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
-                        {opt.name} {opt.priceAdjustment ? `(+Rp ${opt.priceAdjustment.toLocaleString('id-ID')})` : ''}
+                        {opt.name} {opt.priceAdjustment ? `(+${formatIDR(opt.priceAdjustment)})` : ''}
                       </button>
                     {/each}
                   </div>
@@ -128,7 +129,7 @@
           <div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
             <span class="text-xs uppercase font-semibold text-slate-400 block mb-1">Total Harga</span>
             <p class="text-2xl font-extrabold text-blue-600 mb-4 font-mono">
-              Rp {computedPrice.toLocaleString('id-ID')}
+              {formatIDR(computedPrice)}
             </p>
             
             <a

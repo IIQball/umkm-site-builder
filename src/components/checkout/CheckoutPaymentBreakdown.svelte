@@ -10,6 +10,7 @@
   } from 'lucide-svelte';
   import type { CheckoutPageData } from '@/types';
   import { Button } from '@/components/ui';
+  import { formatIDR } from '@/lib/currency';
 
   export let pageData: CheckoutPageData;
   export let checkoutTitle: string;
@@ -53,7 +54,7 @@
   <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
     <div class="flex justify-between items-center text-secondary">
       <span>Biaya Lisensi Template</span>
-      <span class="font-mono font-medium text-main">Rp {pageData.amount.toLocaleString('id-ID')}</span>
+      <span class="font-mono font-medium text-main">{formatIDR(pageData.amount)}</span>
     </div>
     <div class="flex justify-between items-center text-secondary">
       <span>Biaya Layanan & Payment Gateway</span>
@@ -67,7 +68,7 @@
     <div class="flex justify-between items-baseline pt-4 border-t border-slate-200 dark:border-slate-800">
       <span class="text-sm font-extrabold text-main font-heading">Total Pembayaran</span>
       <span class="font-mono text-2xl font-black text-primary">
-        Rp {pageData.amount.toLocaleString('id-ID')}
+        {formatIDR(pageData.amount)}
       </span>
     </div>
   </div>
@@ -112,7 +113,7 @@
         on:click={onOpenPaymentModal}
       >
         <CreditCard size={18} class="mr-1.5" />
-        <span>Bayar Sekarang (Rp {pageData.amount.toLocaleString('id-ID')})</span>
+        <span>Bayar Sekarang ({formatIDR(pageData.amount)})</span>
       </Button>
 
       <div class="flex items-center justify-center gap-2 pt-1 text-2xs text-secondary">

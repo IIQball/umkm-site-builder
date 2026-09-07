@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Input } from '@/components/ui';
+  import { formatIDR } from '@/lib/currency';
 
   export let numericPriceState: number = 50000;
   export let priceDisplay: string = '50.000';
@@ -83,7 +84,7 @@
           Hak Desainer ({designerPercentage}%)
         </span>
         <span class="font-extrabold text-success text-xs">
-          Rp {new Intl.NumberFormat('id-ID').format(designerShare)}
+          {formatIDR(designerShare)}
         </span>
       </div>
       <div class="bg-card p-2 rounded-xl border border-light">
@@ -91,7 +92,7 @@
           Fee Platform ({platformFeePercentage}%)
         </span>
         <span class="font-bold text-secondary text-xs">
-          Rp {new Intl.NumberFormat('id-ID').format(platformShare)}
+          {formatIDR(platformShare)}
         </span>
       </div>
     </div>

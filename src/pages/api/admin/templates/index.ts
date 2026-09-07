@@ -15,6 +15,6 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const records = await getTemplatesForAdmin(statusFilter);
 
-    return jsonSuccess(records, 'Templates fetched successfully');
+    return jsonSuccess(records);
   });
 };

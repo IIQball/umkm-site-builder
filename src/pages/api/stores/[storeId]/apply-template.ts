@@ -42,13 +42,10 @@ export const POST: APIRoute = async ({ params, request }) => {
     const migratedConfig = migrateTemplateConfig(result.template.config);
     await applyTemplateToStore(storeId, templateId, migratedConfig);
 
-    return jsonSuccess(
-      {
-        storeId,
-        templateId,
-        templateName: result.template.name,
-      },
-      'Template berhasil diterapkan ke toko'
-    );
+    return jsonSuccess({
+      storeId,
+      templateId,
+      templateName: result.template.name,
+    });
   });
 };

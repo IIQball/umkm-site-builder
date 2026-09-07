@@ -23,7 +23,7 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
     const input = validate(TemplateCategoryUpdateSchema, body);
 
     const updated = await updateTemplateCategory(id, input);
-    return jsonSuccess(updated, 'Template category updated');
+    return jsonSuccess(updated);
   });
 };
 
@@ -40,6 +40,6 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     }
 
     const result = await deleteTemplateCategory(id);
-    return jsonSuccess(result, 'Template category deleted');
+    return jsonSuccess(result);
   });
 };

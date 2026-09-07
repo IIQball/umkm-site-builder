@@ -1,17 +1,11 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { MAX_WIDTH_OPTIONS } from '@/components/tokens/spacing';
 
   export let theme: TemplateTheme;
   export let onLayoutChange: (key: string, value: string) => void = () => {};
 
   $: layout = theme.layout || {};
-
-  const maxWidthOptions = [
-    { label: '1024px (Compact)', value: '1024px' },
-    { label: '1200px (Standard)', value: '1200px' },
-    { label: '1280px (Spacious)', value: '1280px' },
-    { label: '100% (Full Width)', value: '100%' },
-  ];
 </script>
 
 <div class="space-y-4">
@@ -24,7 +18,7 @@
       on:input={(e) => onLayoutChange('maxWidth', e.currentTarget.value)}
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content focus:outline-none"
     >
-      {#each maxWidthOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+      {#each MAX_WIDTH_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
     </select>
   </div>
 

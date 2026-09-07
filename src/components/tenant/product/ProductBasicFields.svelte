@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Input, Select, Textarea } from "@/components/ui";
+  import { formatCurrencyInput, parseCurrencyInput } from "@/lib/currency";
 
   type Category = { id: string; name: string };
 
@@ -14,16 +15,15 @@
     const customEvent = event as CustomEvent;
     const target = (customEvent.detail?.target || event.target) as HTMLInputElement;
     if (!target) return;
-    const rawValue = target.value.replace(/\D/g, "");
-    basePrice = rawValue ? parseInt(rawValue, 10) : 0;
-    const formatted = basePrice ? basePrice.toLocaleString("id-ID") : "";
-    target.value = formatted;
+    basePrice = parseCurrencyInput(target.value);
+    target.value = formatCurrencyInput(target.value);
   };
 </script>
 
 <div class="mb-3">
   <Input
     label="Nama Produk"
+    placeholder="contoh: Kaos Polos Katun Combed 30s"
     bind:value={name}
     error={fieldErrors.name}
   />
@@ -43,7 +43,7 @@
     label="Harga Dasar"
     type="text"
     placeholder="0"
-    value={basePrice ? basePrice.toLocaleString("id-ID") : ""}
+    value={formatCurrencyInput(basePrice)}
     on:input={handlePriceInput}
     error={fieldErrors.basePrice}
   />
@@ -52,6 +52,7 @@
 <div class="mb-3">
   <Textarea
     label="Deskripsi"
+    placeholder="contoh: Kaos berbahan katun 100% yang lembut, mudah menyerap keringat, dan sangat nyaman dipakai beraktivitas sehari-hari..."
     bind:value={description}
   />
 </div>

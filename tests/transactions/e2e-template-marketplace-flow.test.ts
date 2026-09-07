@@ -90,7 +90,7 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(reviewRes.status).toBe(200);
     const reviewData = await reviewRes.json();
-    expect(reviewData.success).toBe(true);
+    expect(reviewData.ok).toBe(true);
     expect(reviewData.template.status).toBe('approved');
 
     // Step 2: Admin sets dynamic platform fee percentage to 20%
@@ -109,7 +109,7 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(settingRes.status).toBe(200);
     const settingData = await settingRes.json();
-    expect(settingData.success).toBe(true);
+    expect(settingData.ok).toBe(true);
     expect(settingData.data.platformFeePercentage).toBe(20);
 
     // Step 3: Tenant purchases the approved template

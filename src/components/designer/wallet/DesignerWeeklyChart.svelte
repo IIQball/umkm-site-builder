@@ -15,7 +15,7 @@
       const res = await fetch('/api/public/commission');
       if (res.ok) {
         const json = await res.json();
-        if (json.success && json.data && typeof json.data.platformFeePercentage === 'number') {
+        if (json.ok && json.data && typeof json.data.platformFeePercentage === 'number') {
           platformFeePercentage = json.data.platformFeePercentage;
         }
       }

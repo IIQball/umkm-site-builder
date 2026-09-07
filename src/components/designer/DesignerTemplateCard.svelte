@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatCurrency } from '@/lib/utils/format';
+  import { formatCurrency, formatDate } from '@/lib/utils/format';
   import { Badge, Button } from '@/components/ui';
 
   export let template: {
@@ -149,7 +149,7 @@
     <div class="pt-3.5 border-t border-light flex items-center justify-between gap-2">
       <div class="flex items-center gap-1.5 text-2xs text-muted font-mono">
         <span class="material-symbols-outlined text-xs">calendar_today</span>
-        <span>{new Date(template.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+        <span>{formatDate(template.createdAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
       </div>
 
       <!-- Actions -->

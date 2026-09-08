@@ -27,5 +27,21 @@ export function getDb(): Database {
   return dbInstance;
 }
 
-export const db = getDb();
+// Deferred so a missing DATABASE_URL fails the request that needs the database, not the
+// module import. `getDb()` at module scope throws while the Worker is evaluating its entry
+// module, which Cloudflare answers as an empty 500 on *every* route including 404s, with the
+// real error visible only in the Worker logs.
+export const db = new Proxy({} as Database, {
+  get(_target, prop) {
+    const instance = getDb();
+    const value = Reflect.get(instance, prop);
+    // Bind methods to the real client: called as `db.select()`, `this` would otherwise be
+    // the proxy, and Drizzle reads its own internals off `this`.
+    return typeof value === 'function' ? value.bind(instance) : value;
+  },
+  has(_target, prop) {
+    return Reflect.has(getDb(), prop);
+  },
+}) as Database;
+
 export default db;

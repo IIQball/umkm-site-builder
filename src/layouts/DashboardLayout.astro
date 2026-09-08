@@ -4,6 +4,7 @@
  * Authenticated dashboard shell. Redirects to /auth/login if no session.
  * Wraps pages with Sidebar + sticky DashboardNavbar. Builder pages bypass this layout.
  */
+import '@/styles/global.css';
 import { getAuthenticatedUser } from '@/lib/auth';
 import Sidebar from '@/components/dashboard/Sidebar.svelte';
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar.svelte';
@@ -36,7 +37,6 @@ const userJson = JSON.stringify(user);
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-    <link rel="stylesheet" href="/src/styles/global.css" />
     <!-- Theme init: read localStorage before first paint to prevent flash -->
     <script is:inline>
       const t = localStorage.getItem('theme') ||

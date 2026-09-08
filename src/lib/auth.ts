@@ -5,7 +5,13 @@ import { db, users, sessions, accounts, verifications, designers, wallets } from
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/lib/utils/email";
 
-const authBaseUrl = process.env.BETTER_AUTH_URL || "http://localhost:4321";
+// Accept a bare host (e.g. "umkm-web-builder.iqdevmp.workers.dev"). `new URL()` throws on a
+// missing scheme, and this runs at module load, so an unprefixed value would fail the import
+// of this module and take every route down with it rather than just breaking sign-in.
+const rawAuthBaseUrl = (process.env.BETTER_AUTH_URL || "http://localhost:4321").trim();
+const authBaseUrl = /^https?:\/\//i.test(rawAuthBaseUrl)
+  ? rawAuthBaseUrl
+  : `https://${rawAuthBaseUrl}`;
 
 // Trust the origin BETTER_AUTH_URL points at so this follows the deployment instead of a
 // hardcoded list. Local dev hosts stay trusted only outside production builds.

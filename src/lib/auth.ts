@@ -99,20 +99,9 @@ export const auth = betterAuth({
     },
   },
   onAPIError: {
-    onError: (error, ctx) => {
-      const err = error as { message?: string } | undefined;
-      if (err?.message === "UNAUTHORIZED_EMAIL" || err?.message?.includes("UNAUTHORIZED")) {
-        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-        if (typeof redirectCtx?.redirect === "function") {
-          throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
-        }
-      }
-      if (err?.message === "ACCOUNT_SUSPENDED") {
-        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-        if (typeof redirectCtx?.redirect === "function") {
-          throw redirectCtx.redirect("/auth/login?error=account_suspended");
-        }
-      }
+    onError: () => {
+      // Allow BetterAuth to handle API errors naturally.
+      // Redirecting here forces 302 on fetch requests, which breaks the frontend client.
     },
   },
   databaseHooks: {
@@ -129,10 +118,6 @@ export const auth = betterAuth({
             });
 
             if (!existingUser) {
-              const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-              if (typeof redirectCtx?.redirect === "function") {
-                throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
-              }
               throw new APIError("UNAUTHORIZED", {
                 message: "UNAUTHORIZED_EMAIL",
               });
@@ -164,16 +149,12 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        before: async (session, ctx) => {
+        before: async (session) => {
           const user = await db.query.users.findFirst({
             where: (u) => eq(u.id, session.userId),
           });
 
           if (user?.status === 'suspended') {
-            const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-            if (typeof redirectCtx?.redirect === "function") {
-              throw redirectCtx.redirect("/auth/login?error=account_suspended");
-            }
             throw new APIError("UNAUTHORIZED", {
               message: "ACCOUNT_SUSPENDED",
             });

@@ -14,5 +14,8 @@ export default defineConfig({
     server: {
       allowedHosts: true,
     },
+    build: {
+      chunkSizeWarningLimit: 2000, // Menghilangkan warning chunk > 500kb
+    },
   },
 });

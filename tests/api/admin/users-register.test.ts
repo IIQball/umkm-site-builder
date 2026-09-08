@@ -34,13 +34,7 @@ vi.mock('@/lib/auth', () => ({
   },
 }));
 
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...(actual as Record<string, unknown>),
-    eq: vi.fn(),
-  };
-});
+
 
 import type { APIContext } from 'astro';
 
@@ -105,13 +99,13 @@ describe('POST /api/admin/users/register', () => {
   });
 
   it('should return 400 if email already exists', async () => {
-    vi.mocked(db.select).mockImplementationOnce(() => ({
+    (db.select as unknown as { mockImplementationOnce: (fn: unknown) => void }).mockImplementationOnce(() => ({
       from: vi.fn(() => ({
         where: vi.fn(() => ({
           limit: vi.fn().mockResolvedValue([{ id: 'existing_user' }]),
         })),
       })),
-    }) as unknown as ReturnType<typeof db.select>);
+    }));
 
     const payload = {
       role: 'tenant',

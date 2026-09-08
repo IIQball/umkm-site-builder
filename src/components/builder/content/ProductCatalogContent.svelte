@@ -50,8 +50,7 @@
       on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
       rows="2"
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"
-      placeholder="Pilih produk terbaik kami dengan jaminan mutu dan kemudahan pemesanan"
-    />
+      placeholder="Pilih produk terbaik kami dengan jaminan mutu dan kemudahan pemesanan"></textarea>
   </div>
 
   <div class="flex items-center justify-between pt-2 border-t border-base-200 dark:border-slate-800">

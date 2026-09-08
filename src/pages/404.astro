@@ -1,10 +1,21 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.svelte';
 ---
 <BaseLayout title="404 Tidak Ditemukan">
-  <div class="flex flex-col items-center justify-center min-h-screen text-center px-4">
-    <h1 class="text-6xl font-bold text-base-content mb-4">404</h1>
-    <p class="text-xl mb-6 text-base-content/70">Halaman yang Anda cari tidak dapat ditemukan atau telah dipindahkan.</p>
-    <a href="/" class="btn btn-primary">Kembali ke Beranda</a>
+  <div class="flex flex-col items-center justify-center min-h-screen text-center px-4 bg-slate-100 dark:bg-slate-950">
+    <div class="max-w-md w-full bg-card border border-light rounded-2xl shadow-sm p-8 md:p-12 flex flex-col items-center">
+      <div class="w-20 h-20 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+        <span class="material-symbols-outlined text-4xl text-slate-500 dark:text-slate-400">search_off</span>
+      </div>
+      <h1 class="text-heading-xl font-heading font-bold text-main mb-3">404</h1>
+      <h2 class="text-heading-sm font-heading font-semibold text-main mb-3">Tidak Ditemukan</h2>
+      <p class="text-body-base text-secondary mb-8">
+        Maaf, halaman yang Anda cari tidak dapat ditemukan atau telah dipindahkan.
+      </p>
+      <Button client:load href="/" variant="primary" fullWidth size="lg">
+        Kembali ke Beranda
+      </Button>
+    </div>
   </div>
 </BaseLayout>

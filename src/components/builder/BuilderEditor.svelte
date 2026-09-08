@@ -124,7 +124,7 @@
 >
   {#if loading}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">
-      <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+      <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
       <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Memuat workspace template...</p>
     </div>
   {:else if fetchError || $editorStore.error && !$editorStore.template}

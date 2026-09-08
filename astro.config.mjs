@@ -6,11 +6,7 @@ import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({
-    runtime: {
-      mode: 'local',
-    },
-  }),
+  adapter: cloudflare(),
   integrations: [
     svelte(),
   ],
@@ -18,13 +14,8 @@ export default defineConfig({
     server: {
       allowedHosts: true,
     },
-    ssr: {
-      external: ['svelte', 'node:crypto'],
-    },
-    resolve: {
-      alias: {
-        crypto: 'node:crypto',
-      },
+    build: {
+      chunkSizeWarningLimit: 2000, // Menghilangkan warning chunk > 500kb
     },
   },
 });

@@ -84,8 +84,7 @@
           <progress
             class="progress progress-success w-full"
             value={stats.totalWaClicks}
-            max={stats.totalViews}
-          />
+            max={stats.totalViews}></progress>
           <p class="text-xs text-base-content/60 mt-2">
             {stats.totalWaClicks} dari {stats.totalViews} pengunjung menghubungi Anda
           </p>

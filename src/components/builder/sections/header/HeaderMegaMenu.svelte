@@ -65,8 +65,7 @@
           <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
           <div
             class="fixed inset-0 z-40 cursor-default bg-transparent"
-            on:click={() => (showMegaMenu = false)}
-          />
+            on:click={() => (showMegaMenu = false)}></div>
           <div class="absolute top-full left-0 mt-2 w-80 p-4 rounded-2xl bg-[var(--theme-surface,white)] dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 grid grid-cols-2 gap-3 text-left animate-in fade-in zoom-in-95 duration-150">
             {#each displayCategories as cat}
               <a

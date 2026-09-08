@@ -43,8 +43,7 @@
   <div
     class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-200"
     on:click|stopPropagation={onClose}
-    aria-label="Tutup Menu"
-  />
+    aria-label="Tutup Menu"></div>
 
   <!-- Drawer Panel: True overlay dropping down right below navbar, internal scroll, NO parent resize -->
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->

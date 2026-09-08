@@ -3,15 +3,13 @@
   "compilerOptions": {
     "allowArbitraryExtensions": true,
     "jsxImportSource": "svelte",
-    "baseUrl": ".",
-    "ignoreDeprecations": "5.0",
     "paths": {
-      "@/*": ["src/*"],
-      "@components/*": ["src/components/*"],
-      "@lib/*": ["src/lib/*"],
-      "@services/*": ["src/services/*"],
-      "@types/*": ["src/types/*"],
-      "@db/*": ["src/db/*"]
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@services/*": ["./src/services/*"],
+      "@types/*": ["./src/types/*"],
+      "@db/*": ["./src/db/*"]
     },
     "strictNullChecks": true,
     "strictFunctionTypes": true,

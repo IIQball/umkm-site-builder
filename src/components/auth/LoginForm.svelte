@@ -60,7 +60,11 @@
       });
 
       if (errResponse) {
-        generalError = errResponse.message || "Email atau kata sandi tidak valid";
+        if (errResponse.message === "ACCOUNT_SUSPENDED") {
+          generalError = "Akun Anda telah ditangguhkan. Silakan hubungi admin untuk bantuan lebih lanjut.";
+        } else {
+          generalError = errResponse.message || "Email atau kata sandi tidak valid";
+        }
         return;
       }
 

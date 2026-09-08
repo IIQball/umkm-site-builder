@@ -5,6 +5,30 @@ import { db, users, sessions, accounts, verifications, designers, wallets } from
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/lib/utils/email";
 
+// Accept a bare host (e.g. "umkm-web-builder.iqdevmp.workers.dev"). `new URL()` throws on a
+// missing scheme, and this runs at module load, so an unprefixed value would fail the import
+// of this module and take every route down with it rather than just breaking sign-in.
+const rawAuthBaseUrl = (process.env.BETTER_AUTH_URL || "http://localhost:4321").trim();
+const authBaseUrl = /^https?:\/\//i.test(rawAuthBaseUrl)
+  ? rawAuthBaseUrl
+  : `https://${rawAuthBaseUrl}`;
+
+// Trust the origin BETTER_AUTH_URL points at so this follows the deployment instead of a
+// hardcoded list. Local dev hosts stay trusted only outside production builds.
+const devOrigins = [
+  "http://localhost:4321",
+  "http://localhost:4322",
+  "http://127.0.0.1:4321",
+  "http://127.0.0.1:4322",
+];
+const trustedOrigins = [
+  ...new Set(
+    import.meta.env?.PROD
+      ? [new URL(authBaseUrl).origin]
+      : [new URL(authBaseUrl).origin, ...devOrigins],
+  ),
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -16,8 +40,8 @@ export const auth = betterAuth({
     },
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4321",
-  trustedOrigins: ["http://localhost:4321", "http://localhost:4322", "http://127.0.0.1:4321", "http://127.0.0.1:4322"],
+  baseURL: authBaseUrl,
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -81,20 +105,9 @@ export const auth = betterAuth({
     },
   },
   onAPIError: {
-    onError: (error, ctx) => {
-      const err = error as { message?: string } | undefined;
-      if (err?.message === "UNAUTHORIZED_EMAIL" || err?.message?.includes("UNAUTHORIZED")) {
-        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-        if (typeof redirectCtx?.redirect === "function") {
-          throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
-        }
-      }
-      if (err?.message === "ACCOUNT_SUSPENDED") {
-        const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-        if (typeof redirectCtx?.redirect === "function") {
-          throw redirectCtx.redirect("/auth/login?error=account_suspended");
-        }
-      }
+    onError: () => {
+      // Allow BetterAuth to handle API errors naturally.
+      // Redirecting here forces 302 on fetch requests, which breaks the frontend client.
     },
   },
   databaseHooks: {
@@ -111,10 +124,6 @@ export const auth = betterAuth({
             });
 
             if (!existingUser) {
-              const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-              if (typeof redirectCtx?.redirect === "function") {
-                throw redirectCtx.redirect("/auth/login?error=unauthorized_email");
-              }
               throw new APIError("UNAUTHORIZED", {
                 message: "UNAUTHORIZED_EMAIL",
               });
@@ -146,16 +155,12 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        before: async (session, ctx) => {
+        before: async (session) => {
           const user = await db.query.users.findFirst({
             where: (u) => eq(u.id, session.userId),
           });
 
           if (user?.status === 'suspended') {
-            const redirectCtx = ctx as unknown as { redirect?: (url: string) => never };
-            if (typeof redirectCtx?.redirect === "function") {
-              throw redirectCtx.redirect("/auth/login?error=account_suspended");
-            }
             throw new APIError("UNAUTHORIZED", {
               message: "ACCOUNT_SUSPENDED",
             });

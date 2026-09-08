@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { firstProductImageUrl } from '@/lib/products/image';
   import type { InferSelectModel } from 'drizzle-orm';
   import type { products, storeCategories } from '@/db/schema';
   import { formatCurrency } from '@/lib/utils/format';
@@ -30,7 +31,7 @@
     id: string;
     name: string;
     basePrice: number;
-    imageUrls?: string[];
+    imageUrls?: unknown;
     imageUrl?: string;
     category?: { name: string };
     description?: string;
@@ -91,7 +92,7 @@
       cart = [...cart];
     } else {
       cart = [...cart, { 
-        product: { ...product, imageUrl: product.imageUrls?.[0] || product.imageUrl || null } as StoreProduct, 
+        product: { ...product, imageUrl: firstProductImageUrl(product.imageUrls) || product.imageUrl || null } as StoreProduct, 
         variantId: cartVariantId, 
         selections: sel, 
         qty, 
@@ -187,9 +188,9 @@
           <Card variant="elevated" padding="none" class="group flex flex-col h-full">
             <!-- Image Container -->
             <div class="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-slate-50 flex-shrink-0">
-              {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0}
+              {#if firstProductImageUrl(product.imageUrls)}
                 <img 
-                  src={product.imageUrls[0]} 
+                  src={firstProductImageUrl(product.imageUrls)} 
                   alt={product.name}
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -22,7 +22,9 @@
     if (!currentPath) return false;
     const cleanCurrent = currentPath.replace(/\/$/, "") || "/";
     const cleanHref = href.replace(/\/$/, "") || "/";
-    if (cleanHref === "/dashboard") return cleanCurrent === "/dashboard";
+    if (cleanHref === "/dashboard" || cleanHref === "/admin") {
+      return cleanCurrent === cleanHref;
+    }
     return (
       cleanCurrent === cleanHref || cleanCurrent.startsWith(cleanHref + "/")
     );

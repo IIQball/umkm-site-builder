@@ -65,7 +65,9 @@ export const accounts = pgTable('accounts', {
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
   scope: text('scope'),
+  // `expires_at` is mapped to better-auth's `accessTokenExpiresAt` in src/lib/auth.ts.
   expiresAt: timestamp('expires_at'),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
   password: text('password'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()

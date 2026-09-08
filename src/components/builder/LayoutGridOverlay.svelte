@@ -30,8 +30,7 @@
     {#if activeShowPixelGrid}
       <div
         class="absolute inset-0 w-full h-full opacity-40"
-        style="background-size: 8px 8px; background-image: linear-gradient(to right, rgba(99, 102, 241, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.15) 1px, transparent 1px);"
-      />
+        style="background-size: 8px 8px; background-image: linear-gradient(to right, rgba(99, 102, 241, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.15) 1px, transparent 1px);"></div>
     {/if}
 
     <!-- Column Grid Overlay (Figma-Style) -->

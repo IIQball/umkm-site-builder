@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { db } from '@/lib/db/client';
+import { withTransaction } from '@/lib/db/transaction';
 import { wallets, walletMutations, payoutRequests, platformSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
@@ -68,7 +69,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     // 4. Run atomic database transaction
     let newPayout;
     try {
-      newPayout = await db.transaction(async (tx) => {
+      newPayout = await withTransaction(async (tx) => {
         const walletList = await tx.select().from(wallets).where(eq(wallets.designerId, user.id)).limit(1);
         if (walletList.length === 0) {
           throw new Error('WALLET_NOT_FOUND');
@@ -81,7 +82,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         }
 
         // Check eligible balance inside transaction to avoid race conditions
-        const txEligible = await calculateEligibleBalance(user.id, tx as unknown as typeof db);
+        const txEligible = await calculateEligibleBalance(user.id, tx);
         if (amount > txEligible) {
           throw new Error('INSUFFICIENT_BALANCE');
         }

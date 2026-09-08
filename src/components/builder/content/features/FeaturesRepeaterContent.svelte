@@ -134,8 +134,7 @@
           on:input={(e) => handleFeatureFieldChange(index, 'description', e.currentTarget.value)}
           rows="2"
           class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none focus:border-blue-500 resize-y"
-          placeholder="Deskripsi singkat keunggulan..."
-        />
+          placeholder="Deskripsi singkat keunggulan..."></textarea>
 
         <!-- Row 4: Links and Conditional Image URL -->
         {#if hasImageSupport}

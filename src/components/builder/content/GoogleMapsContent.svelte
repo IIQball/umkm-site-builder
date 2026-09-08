@@ -37,8 +37,7 @@
       on:input={(e) => handlePropChange('address', e.currentTarget.value)}
       rows="3"
       class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"
-      placeholder="Jl. Merdeka Barat No. 12, Gambir, Jakarta Pusat"
-    />
+      placeholder="Jl. Merdeka Barat No. 12, Gambir, Jakarta Pusat"></textarea>
     <p class="text-[11px] text-base-content/50 mt-1">
       Peta akan otomatis mencari koordinat dari teks alamat ini.
     </p>

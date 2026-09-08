@@ -15,7 +15,7 @@
     name: string;
     basePrice?: number;
     price?: number;
-    imageUrls?: string[];
+    imageUrls?: unknown;
     imageUrl?: string;
     category?: { name: string };
     description?: string;

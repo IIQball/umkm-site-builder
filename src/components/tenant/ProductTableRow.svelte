@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { firstProductImageUrl } from '@/lib/products/image';
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
@@ -29,8 +30,8 @@
   <td class="px-6 py-4 align-top">
     <div class="flex items-center gap-4">
       <div class="w-14 h-14 rounded-2xl bg-nested flex items-center justify-center overflow-hidden border border-light shadow-sm flex-shrink-0">
-        {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && (product.imageUrls[0].url || typeof product.imageUrls[0] === "string")}
-          <img src={product.imageUrls[0].url || product.imageUrls[0]} alt={product.name} class="object-cover w-full h-full" />
+        {#if firstProductImageUrl(product.imageUrls)}
+          <img src={firstProductImageUrl(product.imageUrls)} alt={product.name} class="object-cover w-full h-full" />
         {:else}
           <span class="text-3xs text-muted font-bold uppercase tracking-wider">Img</span>
         {/if}

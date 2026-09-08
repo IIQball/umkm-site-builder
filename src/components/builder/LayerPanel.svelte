@@ -58,8 +58,7 @@
             type="button"
             class="fixed inset-0 z-40 cursor-default bg-transparent w-full h-full border-none outline-none"
             on:click={() => (isAddMenuOpen = false)}
-            aria-label="Tutup menu tambah"
-          />
+            aria-label="Tutup menu tambah"></button>
           <div class="absolute right-0 mt-1 w-56 bg-card border border-light rounded-lg shadow-xl py-1 z-50 overflow-hidden text-main">
             <div class="px-3 py-1.5 text-3xs font-semibold text-muted uppercase tracking-caps border-b border-light">
               Pilih Komponen Seksi

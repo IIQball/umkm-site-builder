@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { firstProductImageUrl } from '@/lib/products/image';
   import { ArrowLeft, Plus, Minus } from 'lucide-svelte';
   import { fly } from 'svelte/transition';
   import WhatsAppIcon from '../../../ui/WhatsAppIcon.svelte';
@@ -15,7 +16,7 @@
     id: string;
     name: string;
     basePrice: number;
-    imageUrls?: string[];
+    imageUrls?: unknown;
     imageUrl?: string;
     category?: { name: string };
     description?: string;
@@ -121,9 +122,9 @@
       <Card variant="elevated" padding="none" radius="2xl" class="flex flex-col overflow-hidden bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
         <!-- Image Container -->
         <div class="relative aspect-square sm:aspect-video lg:aspect-square overflow-hidden bg-slate-50 w-full flex-shrink-0">
-          {#if Array.isArray(product.imageUrls) && product.imageUrls.length > 0}
+          {#if firstProductImageUrl(product.imageUrls)}
             <img 
-              src={product.imageUrls[0]} 
+              src={firstProductImageUrl(product.imageUrls)} 
               alt={product.name}
               class="w-full h-full object-cover"
             />

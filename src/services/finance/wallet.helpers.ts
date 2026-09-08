@@ -2,7 +2,9 @@ import { db } from '@/lib/db/client';
 import { wallets, commissions, payoutRequests, platformSettings } from '@/db/schema';
 import { eq, lte, and, inArray, sum } from 'drizzle-orm';
 
-export type DbExecutor = typeof db;
+import type { DbExecutor } from '@/types';
+
+export type { DbExecutor };
 
 export interface ReturningQuery<T> {
   returning?: () => Promise<T[]>;

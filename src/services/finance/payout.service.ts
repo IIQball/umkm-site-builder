@@ -1,12 +1,12 @@
 import { db } from '@/lib/db/client';
+import { withTransaction } from '@/lib/db/transaction';
 import { payoutRequests, bankAccounts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { AppError } from '@/lib/utils';
-import type { PayoutStatus, PayoutDisbursementResult } from '@/types';
+import type { PayoutStatus, PayoutDisbursementResult, DbExecutor } from '@/types';
 
-type DbExecutor = typeof db;
 
 /**
  * Initiates payout request disbursement to Xendit.
@@ -142,12 +142,10 @@ export async function processDisbursementWebhook(payload: {
 
     if (payload.tx) {
       await executeRollback(payload.tx);
-    } else if (typeof db.transaction === 'function') {
-      await db.transaction(async (tx) => {
-        await executeRollback(tx as DbExecutor);
-      });
     } else {
-      await executeRollback(db);
+      await withTransaction(async (tx) => {
+        await executeRollback(tx);
+      });
     }
 
     return {

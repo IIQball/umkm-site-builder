@@ -149,8 +149,7 @@
       on:input={(e) => updateItemField('description', e.currentTarget.value)}
       rows="3"
       class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs resize-y"
-      placeholder="Deskripsi keunggulan..."
-    />
+      placeholder="Deskripsi keunggulan..."></textarea>
   </div>
 
   <!-- Badge & Stat Label -->

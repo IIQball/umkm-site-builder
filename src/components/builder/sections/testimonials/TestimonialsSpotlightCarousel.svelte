@@ -44,9 +44,9 @@
           {#each testimonials as _, i}
             <button
               type="button"
+              aria-label="Lihat testimoni {i + 1}"
               on:click={() => onSelectSpotlight(i)}
-              class="w-2.5 h-2.5 rounded-full transition-all cursor-pointer {activeSpotlightIdx === i ? 'bg-[var(--theme-primary,#2563eb)] w-6' : 'bg-base-300 dark:bg-slate-700'}"
-            />
+              class="w-2.5 h-2.5 rounded-full transition-all cursor-pointer {activeSpotlightIdx === i ? 'bg-[var(--theme-primary,#2563eb)] w-6' : 'bg-base-300 dark:bg-slate-700'}"></button>
           {/each}
         </div>
       {/if}

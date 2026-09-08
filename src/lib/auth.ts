@@ -5,6 +5,24 @@ import { db, users, sessions, accounts, verifications, designers, wallets } from
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/lib/utils/email";
 
+const authBaseUrl = process.env.BETTER_AUTH_URL || "http://localhost:4321";
+
+// Trust the origin BETTER_AUTH_URL points at so this follows the deployment instead of a
+// hardcoded list. Local dev hosts stay trusted only outside production builds.
+const devOrigins = [
+  "http://localhost:4321",
+  "http://localhost:4322",
+  "http://127.0.0.1:4321",
+  "http://127.0.0.1:4322",
+];
+const trustedOrigins = [
+  ...new Set(
+    import.meta.env?.PROD
+      ? [new URL(authBaseUrl).origin]
+      : [new URL(authBaseUrl).origin, ...devOrigins],
+  ),
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -16,8 +34,8 @@ export const auth = betterAuth({
     },
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4321",
-  trustedOrigins: ["http://localhost:4321", "http://localhost:4322", "http://127.0.0.1:4321", "http://127.0.0.1:4322"],
+  baseURL: authBaseUrl,
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

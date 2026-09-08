@@ -55,8 +55,7 @@
       on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
       rows="2"
       class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500 resize-y"
-      placeholder="Penjelasan ringkas keunggulan produk/layanan"
-    />
+      placeholder="Penjelasan ringkas keunggulan produk/layanan"></textarea>
   </div>
 
   {#if isComparison}

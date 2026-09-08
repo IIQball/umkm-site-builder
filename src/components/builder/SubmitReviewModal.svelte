@@ -104,15 +104,15 @@
 
       <ul class="text-xs text-secondary space-y-1.5 pl-1.5 font-sans">
         <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
           <span>Status template akan beralih menjadi <strong>"Menunggu Review"</strong>.</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
           <span>Tim Admin akan meninjau kelayakan desain, tata letak responsif, dan konten template.</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 shrink-0" />
+          <span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 shrink-0"></span>
           <span class="flex items-center gap-1">
             <span>Selama peninjauan, template akan dikunci untuk pengeditan.</span>
             <Lock size={11} class="text-warning inline shrink-0" />

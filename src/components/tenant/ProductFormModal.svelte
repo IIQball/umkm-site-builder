@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { productImageUrls } from '@/lib/products/image';
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
@@ -55,9 +56,7 @@
       isAvailable = editingProduct.isAvailable;
       sortOrder = editingProduct.sortOrder;
       variantGroups = deserializeVariants(editingProduct.variants);
-      imageUrls = Array.isArray(editingProduct.imageUrls)
-        ? editingProduct.imageUrls.map(String)
-        : [];
+      imageUrls = productImageUrls(editingProduct.imageUrls);
     } else {
       name = "";
       categoryId = categories.length > 0 ? categories[0].id : "";

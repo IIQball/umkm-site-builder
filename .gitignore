@@ -25,3 +25,12 @@ pnpm-debug.log*
 
 # External Reference Repositories
 .reference/
+# cloudflare build logs
+*.build.log
+*.build.log:Zone.Identifier
+
+# local browser QA artifacts
+.playwright-cli/
+
+# wrangler local state
+.wrangler/

@@ -68,7 +68,7 @@
       <span class="hidden sm:inline">Kembali</span>
     </a>
 
-    <div class="h-4 w-px bg-nested border-r border-light" />
+    <div class="h-4 w-px bg-nested border-r border-light"></div>
 
     {#if isEditingName}
       <input

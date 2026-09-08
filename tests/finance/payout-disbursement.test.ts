@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { createXenditDisbursement, processDisbursementWebhook } from '@/services/finance/payout.service';
 import { xenditClient } from '@/lib/finance/xendit';
 import { db } from '@/lib/db/client';
+import { withTransaction } from '@/lib/db/transaction';
 import { payoutRequests, wallets, walletMutations } from '@/db/schema';
 
 // Mock DB client
@@ -10,10 +11,14 @@ vi.mock('@/lib/db/client', () => {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
-    transaction: vi.fn(),
   };
   return { db: mockDb };
 });
+
+// Mock the transaction helper (money paths use a short-lived pool, not `db`)
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(),
+}));
 
 // Mock Xendit client
 vi.mock('@/lib/finance/xendit', () => {
@@ -27,7 +32,7 @@ vi.mock('@/lib/finance/xendit', () => {
 describe('Payout Service (Xendit Payouts & Webhook processing)', () => {
   const mockSelect = db.select as unknown as Mock;
   const mockUpdate = db.update as unknown as Mock;
-  const mockTransaction = db.transaction as unknown as Mock;
+  const mockTransaction = withTransaction as unknown as Mock;
   const mockCreateDisbursement = xenditClient.createDisbursement as unknown as Mock;
 
   beforeEach(() => {

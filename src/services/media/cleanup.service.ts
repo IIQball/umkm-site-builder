@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client';
 import { validate } from '@/lib/utils';
 import { MediaCleanupOptionsSchema } from '@/schemas';
-import type { CloudinaryAsset, MediaCleanupReport } from '@/types';
+import type { CloudinaryAsset, MediaCleanupReport, DbExecutor } from '@/types';
 import {
   getCloudinaryCredentials,
   collectActivePublicIds,
@@ -10,7 +10,6 @@ import {
 
 export * from './cleanup.helpers';
 
-type DbExecutor = typeof db;
 
 /**
  * Fetches assets from Cloudinary Admin API under the specified prefix.

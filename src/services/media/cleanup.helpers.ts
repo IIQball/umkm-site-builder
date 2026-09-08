@@ -1,9 +1,8 @@
 import { db } from '@/lib/db/client';
 import { users, templates, stores, products } from '@/db/schema';
 import { isNotNull, isNull } from 'drizzle-orm';
-import type { CloudinaryAsset } from '@/types';
+import type { CloudinaryAsset, DbExecutor } from '@/types';
 
-type DbExecutor = typeof db;
 
 export function getCloudinaryCredentials() {
   const cloudName = process.env.CLOUDINARY_NAME || (import.meta as unknown as { env: Record<string, string | undefined> }).env?.CLOUDINARY_NAME;

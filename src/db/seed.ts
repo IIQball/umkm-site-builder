@@ -7,7 +7,7 @@
  * Requires SEED_SUPERADMIN_EMAIL, SEED_SUPERADMIN_PASSWORD, and SEED_SUPERADMIN_NAME in .env.
  */
 import "dotenv/config";
-import { db } from "@/db";
+import { withTransaction } from "@/lib/db/transaction";
 import { users, accounts, adminWhitelist, templateCategories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomBytes, scrypt } from "node:crypto";
@@ -47,7 +47,7 @@ function hashPassword(pass: string): Promise<string> {
 async function seed() {
   const now = new Date();
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     // 1. Seed default template categories
     for (const cat of DEFAULT_CATEGORIES) {
       const existingCat = await tx.query.templateCategories.findFirst({

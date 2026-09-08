@@ -3,6 +3,7 @@ import { GET, POST } from '@/pages/api/designer/payout';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
 import { db } from '@/lib/db/client';
+import { withTransaction } from '@/lib/db/transaction';
 
 // Mock auth helpers
 vi.mock('@/lib/auth', () => ({
@@ -16,7 +17,6 @@ vi.mock('@/lib/db/client', () => {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
-    transaction: vi.fn(),
     query: {
       bankAccounts: {
         findFirst: vi.fn(),
@@ -28,6 +28,11 @@ vi.mock('@/lib/db/client', () => {
   };
   return { db: mockDb };
 });
+
+// Mock the transaction helper (money paths use a short-lived pool, not `db`)
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(),
+}));
 
 // Mock finance services
 vi.mock('@/services/finance', () => ({
@@ -43,7 +48,7 @@ describe('Designer Payout Request API Endpoints', () => {
   const mockFindFirstBankAccount = db.query.bankAccounts.findFirst as unknown as Mock;
   const mockFindManyPayoutRequests = db.query.payoutRequests.findMany as unknown as Mock;
   const mockSelect = db.select as unknown as Mock;
-  const mockTransaction = db.transaction as unknown as Mock;
+  const mockTransaction = withTransaction as unknown as Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();

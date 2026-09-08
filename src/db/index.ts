@@ -1,24 +1,12 @@
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
-import * as schema from './schema';
-
-// Mendukung pembacaan env lewat Vite (import.meta.env) maupun Node.js (process.env)
-const databaseUrl =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DATABASE_URL) ||
-  process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is not set');
-}
-
 /**
- * Initialize Drizzle ORM with the Neon HTTP driver.
+ * Re-exports the shared Drizzle client alongside the schema.
  *
- * Stateless per query, so this client is safe to share across Cloudflare Workers
- * requests. A WebSocket Pool is not: its socket belongs to the request that opened it.
- * For transactions use `withTransaction` from '@/lib/db/transaction'.
+ * This module used to build a second, independent Neon client from its own env lookup, which
+ * meant two connection paths with different fallback rules and two module-scope throws when
+ * DATABASE_URL was absent. It now defers to `@/lib/db/client`, whose `db` is lazy — see the
+ * note there for why a throw during module evaluation takes down every route on Workers.
  */
-export const db = drizzle(neon(databaseUrl), { schema });
+export { db, getDb, type Database } from '@/lib/db/client';
 
 // Export schema for use in other files
 export * from './schema';

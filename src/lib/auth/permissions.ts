@@ -1,41 +1,8 @@
-export type Role = 'superadmin' | 'admin' | 'designer' | 'tenant' | 'public';
-
-export type Resource = 
-  | 'users' 
-  | 'admin_whitelist' 
-  | 'transactions' 
-  | 'stores' 
-  | 'products' 
-  | 'templates' 
-  | 'user_templates' 
-  | 'commissions' 
-  | 'wallets' 
-  | 'wallet_mutations' 
-  | 'bank_accounts' 
-  | 'payout_requests' 
-  | 'activity_logs' 
-  | 'platform_settings';
-
-export type Action = 
-  | 'create' 
-  | 'read' 
-  | 'update' 
-  | 'delete' 
-  | 'approve' 
-  | 'reject' 
-  | 'refund' 
-  | 'process' 
-  | 'cancel';
-
-type PermissionMatrix = {
-  [K in Resource]?: {
-    [A in Action]?: Role[];
-  };
-};
+import type { Role, Resource, Action, PermissionMatrix } from '@/types/auth';
 
 const matrix: PermissionMatrix = {
   users: {
-    create: ['designer'], // self register
+    create: ['admin', 'superadmin'], // admin/superadmin register users
     read: ['superadmin', 'admin', 'designer', 'tenant'], // own/any
     update: ['superadmin', 'admin', 'designer', 'tenant'], // own/any
     delete: ['superadmin'], // any
@@ -53,13 +20,13 @@ const matrix: PermissionMatrix = {
     refund: ['superadmin', 'admin'],
   },
   stores: {
-    create: ['admin'], // admin setup
+    create: ['tenant'], // admin ditolak
     read: ['superadmin', 'admin', 'tenant', 'public'], // own/any/public
     update: ['superadmin', 'admin', 'tenant'], // config/subdomain
     delete: ['superadmin'],
   },
   products: {
-    create: ['tenant'], // own store
+    create: ['tenant', 'superadmin'], // own store or superadmin
     read: ['superadmin', 'admin', 'tenant', 'public'], // own/any/public
     update: ['tenant'], // own store
     delete: ['tenant'], // own store
@@ -68,7 +35,7 @@ const matrix: PermissionMatrix = {
     create: ['designer'],
     read: ['superadmin', 'admin', 'designer', 'tenant', 'public'],
     update: ['designer'],
-    approve: ['admin'],
+    approve: ['admin', 'superadmin'],
     reject: ['admin'],
     delete: ['superadmin', 'designer'],
   },

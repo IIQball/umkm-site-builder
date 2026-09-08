@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { canUserAction, type Role, type Resource, type Action } from '@/lib/auth/permissions';
+import { canUserAction } from '@/lib/auth/permissions';
+import type { Role, Resource, Action } from '@/types/auth';
 
 describe('Permissions Matrix (canUserAction)', () => {
   const allRoles: Role[] = ['superadmin', 'admin', 'designer', 'tenant', 'public'];
@@ -13,8 +14,8 @@ describe('Permissions Matrix (canUserAction)', () => {
   };
 
   describe('Users', () => {
-    it('allows designer to create (self register)', () => {
-      expectAllowedRoles('users', 'create', ['designer']);
+    it('allows admin and superadmin to create users', () => {
+      expectAllowedRoles('users', 'create', ['admin', 'superadmin']);
     });
     
     it('allows superadmin, admin, designer, tenant to read', () => {
@@ -58,8 +59,8 @@ describe('Permissions Matrix (canUserAction)', () => {
   });
 
   describe('Stores', () => {
-    it('allows admin to create', () => {
-      expectAllowedRoles('stores', 'create', ['admin']);
+    it('allows tenant to create', () => {
+      expectAllowedRoles('stores', 'create', ['tenant']);
     });
     
     it('allows superadmin, admin, tenant, public to read', () => {
@@ -76,8 +77,8 @@ describe('Permissions Matrix (canUserAction)', () => {
   });
 
   describe('Products', () => {
-    it('allows tenant to create, update, delete', () => {
-      expectAllowedRoles('products', 'create', ['tenant']);
+    it('allows tenant and superadmin to create, tenant to update, delete', () => {
+      expectAllowedRoles('products', 'create', ['tenant', 'superadmin']);
       expectAllowedRoles('products', 'update', ['tenant']);
       expectAllowedRoles('products', 'delete', ['tenant']);
     });
@@ -100,8 +101,8 @@ describe('Permissions Matrix (canUserAction)', () => {
       expectAllowedRoles('templates', 'update', ['designer']);
     });
     
-    it('allows admin to approve and reject', () => {
-      expectAllowedRoles('templates', 'approve', ['admin']);
+    it('allows admin and superadmin to approve, admin to reject', () => {
+      expectAllowedRoles('templates', 'approve', ['admin', 'superadmin']);
       expectAllowedRoles('templates', 'reject', ['admin']);
     });
     

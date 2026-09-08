@@ -1,5 +1,17 @@
 module.exports = {
   root: true,
+  // Build output and generated files are not ours to lint. `bun run lint` only targets
+  // `src tests` so the CLI never saw them, but editor ESLint integrations lint whatever
+  // file you open — without this, opening a bundled chunk in dist/ reports dozens of
+  // errors from minified vendor code.
+  ignorePatterns: [
+    "dist/",
+    "node_modules/",
+    ".astro/",
+    ".wrangler/",
+    "coverage/",
+    "drizzle/",
+  ],
   env: {
     browser: true,
     es2021: true,

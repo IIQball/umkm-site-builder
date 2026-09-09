@@ -5,15 +5,26 @@ import Button from '@/components/ui/Button.svelte';
 import { db } from '@/lib/db/client';
 import { storeCategories, stores } from '@/db/schema';
 import { eq, isNull, and } from 'drizzle-orm';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 
-const userStores = await db.select()
-  .from(stores)
-  .where(and(eq(stores.userId, user.id), isNull(stores.deletedAt)))
-  .limit(1);
+const storeIdParam = Astro.url.searchParams.get('storeId');
+
+const userStores = storeIdParam
+  ? await db.select()
+      .from(stores)
+      .where(and(eq(stores.id, storeIdParam), isNull(stores.deletedAt)))
+      .limit(1)
+  : await db.select()
+      .from(stores)
+      .where(and(eq(stores.userId, user.id), isNull(stores.deletedAt)))
+      .limit(1);
+
+if (storeIdParam && userStores.length > 0 && !canManageStore(user, userStores[0])) {
+  return Astro.redirect(user.role === 'admin' ? '/admin' : '/dashboard');
+}
 
 const hasStore = userStores.length > 0;
 const STORE_ID = hasStore ? userStores[0].id : null;

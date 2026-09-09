@@ -85,6 +85,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan
   const roleMap = [
+    // Superadmin-only: platform settings, master categories, kurasi template, whitelist, user management
+    { prefix: '/admin/settings', roles: ['superadmin'] },
+    { prefix: '/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/admin/templates', roles: ['superadmin'] },
+    { prefix: '/admin/whitelist', roles: ['superadmin'] },
+    { prefix: '/admin/users', roles: ['superadmin'] },
+    { prefix: '/api/admin/settings', roles: ['superadmin'] },
+    { prefix: '/api/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/api/admin/templates', roles: ['superadmin'] },
+    { prefix: '/api/admin/whitelist', roles: ['superadmin'] },
+    { prefix: '/api/admin/users', roles: ['superadmin'] },
+
+    // Admin & Superadmin general access
+    { prefix: '/admin', roles: ['admin', 'superadmin'] },
+    { prefix: '/api/admin', roles: ['admin', 'superadmin'] },
+
+    // Role-specific protected routes
     { prefix: '/dashboard', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/onboarding', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/builder', roles: ['designer', 'tenant', 'admin', 'superadmin'] },
@@ -98,16 +115,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (protectedRoute) {
     // Jika rute diproteksi tapi tidak ada user (belum login)
     if (!user) {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/401');
     }
     
     // Jika akun ditangguhkan
     if ((user as { status?: string }).status === 'suspended') {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Akun Anda ditangguhkan' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/auth/login?error=account_suspended');
     }
 
     // Jika sudah login tapi role tidak sesuai
     if (!protectedRoute.roles.includes(user.role as string)) {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/403');
     }
   }

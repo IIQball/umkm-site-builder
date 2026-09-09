@@ -36,16 +36,21 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
   }
 
-  if (user.role !== 'tenant') {
-    return jsonError('Hanya tenant yang dapat mendaftarkan subdomain', 403, undefined, 'FORBIDDEN');
+  const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
+  if (user.role !== 'tenant' && !isAdminOrSuper) {
+    return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat mendaftarkan subdomain', 403, undefined, 'FORBIDDEN');
   }
 
   try {
     const body = await request.json();
-    const { subdomain, googleMapsUrl } = RegisterSubdomainInput.parse(body);
+    const { subdomain, googleMapsUrl, tenantId } = RegisterSubdomainInput.parse(body);
 
-    if (await hasExistingStore(user.id)) {
-      return jsonError('Anda sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
+    const targetUserId = (isAdminOrSuper && tenantId) ? tenantId : user.id;
+    const registeredBy = isAdminOrSuper ? user.id : null;
+    const lastEditedBy = user.id;
+
+    if (await hasExistingStore(targetUserId)) {
+      return jsonError('Pengguna ini sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
     }
 
     if (await isSubdomainTaken(subdomain)) {
@@ -58,11 +63,13 @@ export const POST: APIRoute = async ({ request }) => {
       id: storeId,
       name: subdomain,
       subdomain,
-      userId: user.id,
+      userId: targetUserId,
       templateId: 'default',
       waNumber: '',
       googleMapsUrl,
       status: 'active',
+      registeredBy,
+      lastEditedBy,
     });
 
     return jsonSuccess({ storeId, subdomain }, 201);

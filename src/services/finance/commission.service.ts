@@ -7,8 +7,10 @@ import type { CommissionCalculation, PlatformSettings } from '@/types';
 export type { CommissionCalculation, PlatformSettings };
 
 export const DEFAULT_PLATFORM_FEE_PERCENTAGE = 30;
+export const DEFAULT_ADMIN_SERVICE_FEE = 5000;
 export const DEFAULT_SETTINGS = {
   platformFeePercentage: 30,
+  adminServiceFee: 5000,
   payoutMinimumBalance: 50000,
   settlementDelayDays: 7,
 };
@@ -37,6 +39,7 @@ export async function getPlatformSettings(
 export async function updatePlatformSettings(
   data: {
     platformFeePercentage: number;
+    adminServiceFee?: number;
     payoutMinimumBalance?: number;
     settlementDelayDays?: number;
   },
@@ -45,6 +48,9 @@ export async function updatePlatformSettings(
 ): Promise<PlatformSettings> {
   if (data.platformFeePercentage < 0 || data.platformFeePercentage > 100) {
     throw new AppError('Platform fee percentage must be between 0% and 100%', 400, undefined, 'INVALID_PERCENTAGE');
+  }
+  if (data.adminServiceFee !== undefined && data.adminServiceFee < 0) {
+    throw new AppError('Admin service fee cannot be negative', 400, undefined, 'INVALID_ADMIN_FEE');
   }
   if (data.settlementDelayDays !== undefined && data.settlementDelayDays < 0) {
     throw new AppError('Settlement delay days cannot be negative', 400, undefined, 'INVALID_DELAY_DAYS');
@@ -58,6 +64,7 @@ export async function updatePlatformSettings(
       .values({
         id: `ps_${Date.now()}`,
         platformFeePercentage: data.platformFeePercentage,
+        adminServiceFee: data.adminServiceFee ?? DEFAULT_SETTINGS.adminServiceFee,
         payoutMinimumBalance: data.payoutMinimumBalance ?? DEFAULT_SETTINGS.payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays ?? DEFAULT_SETTINGS.settlementDelayDays,
         updatedBy: userId,
@@ -70,6 +77,7 @@ export async function updatePlatformSettings(
       .update(platformSettings)
       .set({
         platformFeePercentage: data.platformFeePercentage,
+        adminServiceFee: data.adminServiceFee !== undefined ? data.adminServiceFee : existingList[0].adminServiceFee,
         payoutMinimumBalance: data.payoutMinimumBalance !== undefined ? data.payoutMinimumBalance : existingList[0].payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays !== undefined ? data.settlementDelayDays : existingList[0].settlementDelayDays,
         updatedBy: userId,
@@ -79,6 +87,33 @@ export async function updatePlatformSettings(
       .returning();
     return updatedRecord;
   }
+}
+
+/**
+ * Retrieves the current active admin service fee from platform settings.
+ *
+ * @param dbClient Optional database client
+ * @returns Active admin service fee (defaults to 5000)
+ */
+export async function getAdminServiceFee(
+  dbClient: typeof db = db
+): Promise<number> {
+  try {
+    const settings = await dbClient
+      .select({
+        adminServiceFee: platformSettings.adminServiceFee,
+      })
+      .from(platformSettings)
+      .limit(1);
+
+    if (settings.length > 0 && typeof settings[0].adminServiceFee === 'number') {
+      return settings[0].adminServiceFee;
+    }
+  } catch {
+    // Fallback to default if table is not seeded or query fails
+  }
+
+  return DEFAULT_ADMIN_SERVICE_FEE;
 }
 
 /**

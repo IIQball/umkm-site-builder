@@ -15,12 +15,18 @@ if (!subdomain) {
 
 const store = await db.query.stores.findFirst({
   where: eq(stores.subdomain, subdomain),
+  with: {
+    registrar: {
+      columns: { name: true },
+    },
+  },
 });
 
 if (!store || store.status !== "active") {
   return Astro.redirect("/404");
 }
 
+const managedByAdmin = store.registeredBy && store.registrar ? { name: store.registrar.name } : null;
 const customization = (store.customization as Record<string, unknown>) || {};
 const isOpen = customization.isOpen !== false;
 
@@ -59,7 +65,30 @@ Astro.response.headers.set('Surrogate-Key', `store-${store.id}`);
       class="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between"
     >
       <div>
-        <h1 class="text-xl font-bold text-slate-900">{store.name}</h1>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-xl font-bold text-slate-900">{store.name}</h1>
+          {
+            managedByAdmin && (
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Didampingi oleh {managedByAdmin.name}
+              </span>
+            )
+          }
+        </div>
         {
           store.waNumber && (
             <a

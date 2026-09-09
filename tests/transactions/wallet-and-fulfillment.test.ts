@@ -194,5 +194,127 @@ describe('Financial Engine & Ledger Service', () => {
       expect(result.status).toBe('success');
       expect(result.message).toBe('Webhook processed successfully');
     });
+
+    it('should fulfill admin assisted template_purchase transaction by crediting both designer and admin wallet', async () => {
+      // 1. Query transaction in processWebhook
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: 'txn_assisted_1',
+              userId: 'tenant_1',
+              type: 'template_purchase',
+              templateId: 'tpl_1',
+              amount: 55000,
+              adminFee: 5000,
+              assistedBy: 'admin_1',
+              status: 'pending',
+            },
+          ]),
+        }),
+      });
+
+      // 2. Update transaction status to success
+      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+
+      // 3. Insert userTemplates
+      mockDb.insert.mockReturnValueOnce({ values: vi.fn().mockResolvedValue(undefined) });
+
+      // 4. Query template info
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'tpl_1', name: 'Coffee Template', designerId: 'd_barista' }]),
+          }),
+        }),
+      });
+
+      // 5. Query platformSettings for calculateCommission (30% fee)
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ platformFeePercentage: 30 }]) }),
+      });
+
+      // 6. Insert commissions
+      let recordedCommission: Record<string, unknown> = {};
+      mockDb.insert.mockReturnValueOnce({
+        values: vi.fn().mockImplementation((val) => {
+          recordedCommission = val;
+          return Promise.resolve(undefined);
+        }),
+      });
+
+      // 7. Credit designer wallet
+      // 7a. Get designer wallet
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'w_barista', userId: 'd_barista', balance: 0 }]),
+          }),
+        }),
+      });
+      // 7b. Update designer wallet
+      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+      // 7c. Insert designer wallet mutation
+      mockDb.insert.mockReturnValueOnce({
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ id: 'wm_d', walletId: 'w_barista', type: 'CREDIT', amount: 35000, balanceAfter: 35000 }]),
+        }),
+      });
+
+      // 8. Credit admin wallet
+      // 8a. Get admin wallet
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'w_admin', userId: 'admin_1', balance: 10000 }]),
+          }),
+        }),
+      });
+      // 8b. Update admin wallet
+      let recordedAdminWalletUpdate: Record<string, unknown> = {};
+      mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockImplementation((val) => {
+          recordedAdminWalletUpdate = val;
+          return { where: vi.fn().mockResolvedValue(undefined) };
+        }),
+      });
+      // 8c. Insert admin wallet mutation
+      let recordedAdminMutation: Record<string, unknown> = {};
+      mockDb.insert.mockReturnValueOnce({
+        values: vi.fn().mockImplementation((val) => {
+          recordedAdminMutation = val;
+          return {
+            returning: vi.fn().mockResolvedValue([
+              { id: 'wm_admin', walletId: 'w_admin', type: 'CREDIT', amount: 5000, balanceAfter: 15000 },
+            ]),
+          };
+        }),
+      });
+
+      const result = await transactionService.processWebhook({
+        id: 'x_inv_assisted',
+        external_id: 'INV-assisted-1',
+        amount: 55000,
+        status: 'PAID',
+        paid: true,
+      });
+
+      expect(result.status).toBe('success');
+      expect(result.message).toBe('Webhook processed successfully');
+
+      // Verify Commission recording:
+      // Base amount = 55000 - 5000 = 50000. 30% platform fee = 15000, designer = 35000, admin = 5000
+      expect(recordedCommission.totalAmount).toBe(55000);
+      expect(recordedCommission.platformFee).toBe(15000);
+      expect(recordedCommission.designerAmount).toBe(35000);
+      expect(recordedCommission.adminAmount).toBe(5000);
+      expect(recordedCommission.adminId).toBe('admin_1');
+
+      // Verify Admin Wallet Credit:
+      expect(recordedAdminWalletUpdate.balance).toBe(15000);
+      expect(recordedAdminMutation.amount).toBe(5000);
+      expect(recordedAdminMutation.description).toBe('Fee Pendampingan Pembelian Template');
+      expect(recordedAdminMutation.type).toBe('CREDIT');
+    });
   });
 });

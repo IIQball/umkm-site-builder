@@ -261,6 +261,17 @@ export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): boolean 
   return isActive(user) && isSuperAdmin(user);
 }
 
+export function canManageStore(
+  user: AuthenticatedUser | null,
+  store: { userId: string; registeredBy?: string | null }
+): boolean {
+  if (!user || !isActive(user)) return false;
+  if (user.role === 'superadmin') return true;
+  if (user.role === 'tenant') return store.userId === user.id;
+  if (user.role === 'admin') return store.registeredBy === user.id;
+  return false;
+}
+
 export function getRedirectUrlForRole(role?: string | null): string {
   if (role === 'designer') return '/designer/wallet';
   return '/dashboard';

@@ -1,12 +1,13 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../lib/db/client';
-import { products } from '../../../db/schema';
+import { products, stores } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 
 import { deleteFromCloudinary } from '../../../lib/cloudinary';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
+import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
 
 const productUpdateInput = z.object({
   storeId: z.string().min(1).optional(),
@@ -27,11 +28,6 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     if (!locals.user) {
       return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
-    
-    // 2. Authorize
-    if (locals.user.role !== 'tenant' && locals.user.role !== 'superadmin') {
-      return jsonError('Hanya tenant yang dapat mengubah produk', 403, undefined, 'FORBIDDEN');
-    }
 
     const id = params.id;
     if (!id) throw new Error('ID is required');
@@ -48,10 +44,20 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       return jsonError('Product not found', 404, undefined, 'NOT_FOUND');
     }
 
+    // 2. Authorize via canManageStore
+    const [store] = await db.select().from(stores).where(eq(stores.id, existingProduct[0].storeId)).limit(1);
+    if (!store || !canManageStore(locals.user as AuthenticatedUser, store)) {
+      return jsonError('Anda tidak memiliki izin mengelola produk toko ini', 403, undefined, 'FORBIDDEN');
+    }
+
     const updated = await db.update(products)
       .set({ ...result.data, updatedAt: new Date() })
       .where(eq(products.id, id))
       .returning();
+
+    await db.update(stores)
+      .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
+      .where(eq(stores.id, store.id));
 
     return jsonSuccess(updated[0], 200);
   } catch (error: unknown) {
@@ -60,8 +66,13 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
+    // 1. Authenticate
+    if (!locals.user) {
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
+    }
+
     const id = params.id;
     if (!id) throw new Error('ID is required');
 
@@ -70,10 +81,20 @@ export const DELETE: APIRoute = async ({ params }) => {
       return jsonError('Product not found', 404, undefined);
     }
 
+    // 2. Authorize via canManageStore
+    const [store] = await db.select().from(stores).where(eq(stores.id, existingProduct[0].storeId)).limit(1);
+    if (!store || !canManageStore(locals.user as AuthenticatedUser, store)) {
+      return jsonError('Anda tidak memiliki izin mengelola produk toko ini', 403, undefined, 'FORBIDDEN');
+    }
+
     await db.update(products)
       .set({ deletedAt: new Date() })
       .where(eq(products.id, id))
       .returning();
+
+    await db.update(stores)
+      .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
+      .where(eq(stores.id, store.id));
 
     // delete image if exists (even on soft delete, per requirements)
     const imageUrls = (existingProduct[0].imageUrls || []) as Array<{ publicId?: string; url?: string }>;

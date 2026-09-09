@@ -1,0 +1,103 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { transactions, templates } from '@/db/schema';
+import { eq, or, desc } from 'drizzle-orm';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedAdmin(user)) {
+  return Astro.redirect('/auth/login?redirect=/admin/transactions');
+}
+
+let initialOrders: Array<{
+  id: string;
+  userId: string;
+  type: string;
+  amount: number;
+  status: string;
+  storeId?: string | null;
+  templateId?: string | null;
+  externalId?: string | null;
+  paymentGatewayRef?: string | null;
+  paymentChannel?: string | null;
+  createdAt: string;
+  template?: {
+    id: string;
+    name: string;
+    thumbnailUrl?: string | null;
+    price: number;
+  } | null;
+}> = [];
+
+try {
+  const whereCondition = user.role === 'superadmin'
+    ? undefined
+    : or(eq(transactions.userId, user.id), eq(transactions.assistedBy, user.id));
+
+  const rows = await db
+    .select({
+      id: transactions.id,
+      userId: transactions.userId,
+      type: transactions.type,
+      amount: transactions.amount,
+      status: transactions.status,
+      storeId: transactions.storeId,
+      templateId: transactions.templateId,
+      externalId: transactions.externalId,
+      paymentGatewayRef: transactions.paymentGatewayRef,
+      paymentChannel: transactions.paymentChannel,
+      createdAt: transactions.createdAt,
+      templateName: templates.name,
+      templateThumbnail: templates.thumbnailUrl,
+      templatePrice: templates.price,
+    })
+    .from(transactions)
+    .leftJoin(templates, eq(transactions.templateId, templates.id))
+    .where(whereCondition)
+    .orderBy(desc(transactions.createdAt));
+
+  initialOrders = (rows || []).map((r) => ({
+    id: r.id,
+    userId: r.userId,
+    type: r.type,
+    amount: Number(r.amount),
+    status: r.status,
+    storeId: r.storeId,
+    templateId: r.templateId,
+    externalId: r.externalId,
+    paymentGatewayRef: r.paymentGatewayRef,
+    paymentChannel: r.paymentChannel,
+    createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
+    template: r.templateName ? {
+      id: r.templateId || '',
+      name: r.templateName,
+      thumbnailUrl: r.templateThumbnail,
+      price: r.templatePrice ? Number(r.templatePrice) : 0,
+    } : null,
+  }));
+} catch (error) {
+  console.error('[AdminTransactions] Failed to query transactions:', error);
+  initialOrders = [];
+}
+---
+
+<DashboardLayout title="Riwayat Transaksi" breadcrumb="Admin / Transaksi">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Riwayat Transaksi & Mutasi</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Daftar seluruh pesanan template, status invoice pembayaran, dan transaksi platform.
+        </p>
+      </div>
+    </div>
+
+    <OrderHistoryTable client:load initialOrders={initialOrders} />
+  </div>
+</DashboardLayout>

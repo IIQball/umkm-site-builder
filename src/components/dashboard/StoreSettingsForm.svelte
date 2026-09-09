@@ -5,8 +5,9 @@
   export let initialStoreName = '';
   export let initialWaNumber = '';
   export let initialGoogleMapsUrl = '';
-  export let subdomain = '';
   export let initialIsOpen = true;
+  export let subdomain = '';
+  export let storeId: string | undefined = undefined;
 
   let storeName = initialStoreName;
   let waNumber = initialWaNumber;
@@ -54,13 +55,15 @@
     submitMessage = '';
 
     try {
-      const res = await fetch('/api/stores/settings', {
+      const endpoint = storeId ? `/api/stores/settings?storeId=${encodeURIComponent(storeId)}` : '/api/stores/settings';
+      const res = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: storeName,
           waNumber,
-          googleMapsUrl
+          googleMapsUrl,
+          storeId,
         }),
       });
 

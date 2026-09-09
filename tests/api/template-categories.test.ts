@@ -7,6 +7,7 @@ import { TemplateCategoryCreateSchema, TemplateCategoryUpdateSchema, TemplateDra
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn().mockResolvedValue(null),
   isAuthorizedAdmin: vi.fn().mockReturnValue(false),
+  isAuthorizedSuperAdmin: vi.fn().mockReturnValue(false),
 }));
 
 

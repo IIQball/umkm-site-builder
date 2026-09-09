@@ -15,13 +15,25 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     const body = await context.request.json().catch(() => ({}));
-    const { templateId } = validate(TemplatePurchaseInputSchema, body);
+    const { templateId, tenantId, assistedBy } = validate(TemplatePurchaseInputSchema, body);
 
     const protocol = context.request.url.startsWith('https') ? 'https' : 'http';
     const host = context.request.headers.get('host') || 'localhost:4321';
     const baseUrl = `${protocol}://${host}`;
 
-    const result = await transactionService.purchaseTemplate(user.id, templateId, baseUrl);
+    let targetUserId = user.id;
+    let actingAssistedBy: string | null = null;
+
+    if (user.role === 'admin' || user.role === 'superadmin') {
+      if (tenantId) {
+        targetUserId = tenantId;
+        actingAssistedBy = assistedBy || user.id;
+      } else if (assistedBy) {
+        actingAssistedBy = assistedBy;
+      }
+    }
+
+    const result = await transactionService.purchaseTemplate(targetUserId, templateId, baseUrl, actingAssistedBy);
 
     if (result.isFree) {
       return Response.json({

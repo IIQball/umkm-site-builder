@@ -11,9 +11,11 @@ export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): Tr
     userId: tx.userId,
     type: tx.type,
     amount: tx.amount,
+    adminFee: tx.adminFee,
     status: tx.status,
     storeId: tx.storeId || undefined,
     templateId: tx.templateId || undefined,
+    assistedBy: tx.assistedBy || undefined,
     externalId: tx.externalId,
     paymentGatewayRef: tx.paymentGatewayRef || undefined,
     paymentChannel: tx.paymentChannel || undefined,
@@ -38,17 +40,21 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
     const templateList = await db.select().from(templates).where(eq(templates.id, transaction.templateId)).limit(1);
     if (templateList.length > 0) {
       const template = templateList[0];
-      const { platformFee, designerAmount } = await calculateCommission(transaction.amount);
+      const adminAmount = Number(transaction.adminFee || 0);
+      const baseAmount = Math.max(0, Number(transaction.amount) - adminAmount);
+      const { platformFee, designerAmount } = await calculateCommission(baseAmount);
 
       const commissionId = `comm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       await db.insert(commissions).values({
         id: commissionId,
         designerId: template.designerId,
+        adminId: transaction.assistedBy || null,
         transactionId: transaction.id,
         templateId: template.id,
         totalAmount: transaction.amount,
         platformFee,
         designerAmount,
+        adminAmount,
         createdAt: new Date(),
       });
 
@@ -58,6 +64,15 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         description: `Komisi Penjualan Template: ${template.name}`,
         referenceId: transaction.id,
       });
+
+      if (adminAmount > 0 && transaction.assistedBy) {
+        await creditWallet({
+          designerId: transaction.assistedBy,
+          amount: adminAmount,
+          description: 'Fee Pendampingan Pembelian Template',
+          referenceId: transaction.id,
+        });
+      }
     }
   }
 }

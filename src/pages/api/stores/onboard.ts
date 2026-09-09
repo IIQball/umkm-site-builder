@@ -37,17 +37,22 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
   }
 
-  if (user.role !== 'tenant') {
-    return jsonError('Hanya tenant yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
+  const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
+  if (user.role !== 'tenant' && !isAdminOrSuper) {
+    return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
   }
 
   try {
     const body = await request.json();
     const parsedData = OnboardStoreInput.parse(body);
-    const { subdomain, name, waNumber, googleMapsUrl } = parsedData;
+    const { subdomain, name, waNumber, googleMapsUrl, tenantId } = parsedData;
 
-    if (await hasExistingStore(user.id)) {
-      return jsonError('Anda sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
+    const targetUserId = (isAdminOrSuper && tenantId) ? tenantId : user.id;
+    const registeredBy = isAdminOrSuper ? user.id : null;
+    const lastEditedBy = user.id;
+
+    if (await hasExistingStore(targetUserId)) {
+      return jsonError('Pengguna ini sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
     }
 
     if (await isSubdomainTaken(subdomain)) {
@@ -60,12 +65,14 @@ export const POST: APIRoute = async ({ request }) => {
       id: storeId,
       name,
       subdomain,
-      userId: user.id,
+      userId: targetUserId,
       templateId: 'system-default-template',
       waNumber,
       googleMapsUrl,
       status: 'active',
       customization: { isOnboarded: true },
+      registeredBy,
+      lastEditedBy,
     });
 
     return jsonSuccess({ storeId, subdomain, name }, 201);

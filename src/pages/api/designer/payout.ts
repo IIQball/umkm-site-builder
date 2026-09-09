@@ -17,7 +17,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const records = await db.query.payoutRequests.findMany({
-      where: (payoutRequests, { eq }) => eq(payoutRequests.designerId, user.id),
+      where: (payoutRequests, { eq }) => eq(payoutRequests.userId, user.id),
       with: {
         bankAccount: true,
       },
@@ -47,7 +47,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     // 1. Verify bank account exists and belongs to the designer
     const bankAcc = await db.query.bankAccounts.findFirst({
-      where: (bankAccounts, { and, eq }) => and(eq(bankAccounts.id, bankAccountId), eq(bankAccounts.designerId, user.id)),
+      where: (bankAccounts, { and, eq }) => and(eq(bankAccounts.id, bankAccountId), eq(bankAccounts.userId, user.id)),
     });
     if (!bankAcc) {
       throw new AppError('Rekening bank tidak ditemukan', 400, undefined, 'VALIDATION_ERROR');
@@ -70,7 +70,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let newPayout;
     try {
       newPayout = await withTransaction(async (tx) => {
-        const walletList = await tx.select().from(wallets).where(eq(wallets.designerId, user.id)).limit(1);
+        const walletList = await tx.select().from(wallets).where(eq(wallets.userId, user.id)).limit(1);
         if (walletList.length === 0) {
           throw new Error('WALLET_NOT_FOUND');
         }
@@ -117,7 +117,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         const [record] = await tx.insert(payoutRequests)
           .values({
             id: payoutId,
-            designerId: user.id,
+            userId: user.id,
             bankAccountId,
             amount,
             status: 'processing',

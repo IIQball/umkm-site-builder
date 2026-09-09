@@ -94,7 +94,7 @@ export async function debitWallet({
     const existingWallets = await client
       .select()
       .from(wallets)
-      .where(eq(wallets.designerId, designerId))
+      .where(eq(wallets.userId, designerId))
       .limit(1);
 
     if (!existingWallets || !existingWallets.length) {
@@ -164,7 +164,7 @@ export async function getDesignerWalletSummary(
   const existingWallets = await client
     .select()
     .from(wallets)
-    .where(eq(wallets.designerId, designerId))
+    .where(eq(wallets.userId, designerId))
     .limit(1);
 
   if (!existingWallets || !existingWallets.length) {

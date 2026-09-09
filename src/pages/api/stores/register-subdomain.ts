@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.json();
-    const { subdomain } = RegisterSubdomainInput.parse(body);
+    const { subdomain, googleMapsUrl } = RegisterSubdomainInput.parse(body);
 
     if (await hasExistingStore(user.id)) {
       return jsonError('Anda sudah memiliki toko aktif', 409, undefined, 'INVALID_STATE');
@@ -61,6 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
       userId: user.id,
       templateId: 'default',
       waNumber: '',
+      googleMapsUrl,
       status: 'active',
     });
 

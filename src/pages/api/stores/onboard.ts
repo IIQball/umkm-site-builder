@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
       userId: user.id,
       templateId: 'system-default-template',
       waNumber,
-      googleMapsUrl: googleMapsUrl || null,
+      googleMapsUrl,
       status: 'active',
       customization: { isOnboarded: true },
     });

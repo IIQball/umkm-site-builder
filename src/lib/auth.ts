@@ -146,7 +146,7 @@ export const auth = betterAuth({
 
             await db.insert(wallets).values({
               id: `wal_${crypto.randomUUID()}`,
-              designerId: user.id,
+              userId: user.id,
               balance: 0,
             }).onConflictDoNothing();
           }

@@ -38,7 +38,7 @@ export const PUT: APIRoute = async (context) => {
       .set({
         name: data.name,
         waNumber: data.waNumber,
-        googleMapsUrl: data.googleMapsUrl || null,
+        googleMapsUrl: data.googleMapsUrl || undefined,
         updatedAt: new Date(),
       })
       .where(eq(stores.id, existingStore.id));

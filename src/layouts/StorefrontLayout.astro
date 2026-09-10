@@ -10,7 +10,7 @@ const { title } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="LakuBase Storefront" />
@@ -26,7 +26,7 @@ const { title } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body class="min-h-screen bg-base-100 flex flex-col font-sans antialiased text-base-content">
+  <body class="min-h-screen flex flex-col antialiased overflow-x-hidden">
     <slot />
   </body>
 </html>

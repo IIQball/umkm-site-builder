@@ -1,21 +1,43 @@
 ---
 import StorefrontLayout from "@/layouts/StorefrontLayout.astro";
-import ProductGrid from "@/components/storefront/ProductGrid.svelte";
-import StoreStatusBanner from "@/components/storefront/StoreStatusBanner.svelte";
+import StorefrontDynamicPage from "@/components/storefront/StorefrontDynamicPage.svelte";
 import { db } from "@/lib/db/client";
 import { stores, products, storeCategories } from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
-import { generateWhatsAppLink } from "@/lib/whatsapp";
+import { migrateTemplateConfig } from "@/lib/templates/migration";
+import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
+import { buildCanvasCssVars } from "@/components/builder/canvas/canvasCss.helpers";
+import { extractFontNames, buildGoogleFontsUrl } from "@/components/builder/canvas/fontLoader.helpers";
+import { firstProductImageUrl } from "@/lib/products/image";
+import { deserializeVariants } from "@/components/tenant/product/productForm.helpers";
 
 const { subdomain } = Astro.params;
 
 if (!subdomain) {
-  return Astro.redirect("/404");
+  return new Response(null, { status: 404, statusText: "Not Found" });
 }
 
+// 1. Isolasi Akses Langsung: Jika diakses langsung via domain utama (bukan dari rewrite subdomain), redirect ke subdomain URL
+const isDirectAccess = !Astro.locals.subdomain || Astro.locals.subdomain !== subdomain;
+if (isDirectAccess) {
+  const mainDomain = import.meta.env.PUBLIC_MAIN_DOMAIN || "localhost:4321";
+  const cleanMainDomain = mainDomain.replace(/^www\./, "");
+  return Astro.redirect(`${Astro.url.protocol || "http:"}//${subdomain}.${cleanMainDomain}/`, 301);
+}
+
+// 2. Data Fetching: Ambil store dengan relasi template, templateCategory, dan businessCategory
 const store = await db.query.stores.findFirst({
-  where: eq(stores.subdomain, subdomain),
+  where: and(
+    eq(stores.subdomain, subdomain),
+    isNull(stores.deletedAt)
+  ),
   with: {
+    category: true,
+    template: {
+      with: {
+        category: true,
+      },
+    },
     registrar: {
       columns: { name: true },
     },
@@ -23,18 +45,15 @@ const store = await db.query.stores.findFirst({
 });
 
 if (!store || store.status !== "active") {
-  return Astro.redirect("/404");
+  return new Response(null, { status: 404, statusText: "Store Not Found or Inactive" });
 }
 
-const managedByAdmin = store.registeredBy && store.registrar ? { name: store.registrar.name } : null;
-const customization = (store.customization as Record<string, unknown>) || {};
-const isOpen = customization.isOpen !== false;
-
-const storeProducts = await db.query.products.findMany({
+// 3. Ambil data produk aktif & kategori toko
+const dbProducts = await db.query.products.findMany({
   where: and(
     eq(products.storeId, store.id),
     eq(products.isAvailable, true),
-    isNull(products.deletedAt),
+    isNull(products.deletedAt)
   ),
   with: {
     category: true,
@@ -42,124 +61,117 @@ const storeProducts = await db.query.products.findMany({
   orderBy: [sql`${products.sortOrder} ASC`],
 });
 
-const categories = await db.query.storeCategories.findMany({
+const storeProducts = dbProducts.map((p) => {
+  const resolvedImage = firstProductImageUrl(p.imageUrls);
+  return {
+    id: p.id,
+    name: p.name,
+    // DB column is basePrice, not price
+    price: Number(p.basePrice || 0),
+    basePrice: Number(p.basePrice || 0),
+    image: resolvedImage,
+    imageUrl: resolvedImage,
+    imageUrls: Array.isArray(p.imageUrls) ? (p.imageUrls as string[]) : [],
+    description: p.description || '',
+    variants: deserializeVariants(p.variants),
+    category: p.category ? { id: p.category.id, name: p.category.name, slug: p.category.slug } : null,
+    categoryName: p.category?.name || null,
+    badge: p.isAvailable ? undefined : 'Habis',
+    sortOrder: p.sortOrder,
+  };
+});
+
+const dbCategories = await db.query.storeCategories.findMany({
   where: and(
     eq(storeCategories.storeId, store.id),
-    isNull(storeCategories.deletedAt),
+    isNull(storeCategories.deletedAt)
   ),
 });
 
-// Set cache headers for CDN and browser
-// Cache for 1 hour (3600s) in browser, 24 hours in Cloudflare edge
-Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
-// Surrogate-Control for Cloudflare cache purge API
-Astro.response.headers.set('Surrogate-Control', 'public, max-age=86400');
-// Allow CDN to cache even with Set-Cookie (for authenticated users on storefront)
-Astro.response.headers.set('Surrogate-Key', `store-${store.id}`);
+const categories = dbCategories.map((c) => ({
+  id: c.id,
+  name: c.name,
+  slug: c.slug,
+}));
+
+// 4. Normalisasi & Deep Merge Konfigurasi Template Toko
+const baseTemplateConfig = store.template?.config;
+const normalizedConfig = migrateTemplateConfig(baseTemplateConfig);
+
+// Resolve Google Maps shortlinks (goo.gl / maps.app.goo.gl) to full canonical place URL
+let canonicalMapsUrl = store.googleMapsUrl;
+if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl.includes('maps.app.goo.gl'))) {
+  try {
+    const headRes = await fetch(canonicalMapsUrl, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(2500),
+    });
+    const redirectLocation = headRes.headers.get('location');
+    if (redirectLocation) {
+      canonicalMapsUrl = redirectLocation;
+    }
+  } catch {
+    void 0;
+  }
+}
+
+const finalConfig = mergeStoreCustomization(normalizedConfig, store.customization, {
+  id: store.id,
+  name: store.name,
+  subdomain: store.subdomain,
+  address: store.address,
+  waNumber: store.waNumber,
+  googleMapsEmbedUrl: store.googleMapsEmbedUrl,
+  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  categoryName: store.category?.name || undefined,
+  latitude: store.latitude,
+  longitude: store.longitude,
+});
+
+// 5. Dynamic Theme Tokens & Google Fonts Injection
+const cssVars = buildCanvasCssVars(finalConfig.theme ?? {}, false, "desktop");
+
+const fontNames = [
+  ...extractFontNames(finalConfig.theme?.typography?.headingFont || ""),
+  ...extractFontNames(finalConfig.theme?.typography?.bodyFont || ""),
+];
+const googleFontsUrl = buildGoogleFontsUrl(fontNames);
+
+const customization = (store.customization as Record<string, unknown>) || {};
+const isOpen = customization.isOpen !== false;
+
+// Set cache headers
+Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+Astro.response.headers.set("Surrogate-Control", "public, max-age=86400");
+Astro.response.headers.set("Surrogate-Key", `store-${store.id}`);
+
+const safeStore = {
+  id: store.id,
+  name: store.name,
+  subdomain: store.subdomain,
+  templateId: store.templateId,
+  waNumber: store.waNumber,
+  address: store.address,
+  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  googleMapsEmbedUrl: store.googleMapsEmbedUrl,
+  latitude: store.latitude,
+  longitude: store.longitude,
+  status: store.status,
+  category: store.category ? { id: store.category.id, name: store.category.name, slug: store.category.slug } : null,
+  managedByAdmin: store.registeredBy && store.registrar?.name ? { name: store.registrar.name } : null,
+};
 ---
 
-<StorefrontLayout title={`${store.name} — Katalog Produk`}>
-  <StoreStatusBanner client:load isOpen={isOpen} />
-  <header class="bg-white border-b border-slate-100">
-    <div
-      class="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between"
-    >
-      <div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <h1 class="text-xl font-bold text-slate-900">{store.name}</h1>
-          {
-            managedByAdmin && (
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                Didampingi oleh {managedByAdmin.name}
-              </span>
-            )
-          }
-        </div>
-        {
-          store.waNumber && (
-            <a
-              href={generateWhatsAppLink(store.waNumber)}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-emerald-600 hover:underline inline-flex items-center gap-1 mt-1"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
-              Hubungi via WhatsApp
-            </a>
-          )
-        }
-      </div>
-      {
-        store.googleMapsUrl && (
-          <a
-            href={store.googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-slate-500 hover:text-slate-700 inline-flex items-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <>
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </>
-            </svg>
-            Lokasi
-          </a>
-        )
-      }
-    </div>
-  </header>
+<StorefrontLayout title={`${store.name} — ${store.category?.name || "Toko Online"}`}>
+  {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
+  <style is:inline set:html={`:root { ${cssVars} }`} />
 
-  <main class="min-h-screen bg-slate-50">
-    <ProductGrid
-      client:load
-      storeId={store.id}
-      storeProducts={storeProducts}
-      categories={categories}
-      storeWaNumber={store.waNumber || ""}
-    />
-  </main>
-
-  <footer class="bg-white border-t border-slate-100 py-6">
-    <p class="text-center text-sm text-slate-400">
-      &copy; {new Date().getFullYear()}
-      {store.name}. Dibuat dengan LakuBase.
-    </p>
-  </footer>
+  <StorefrontDynamicPage
+    client:load
+    config={finalConfig}
+    store={safeStore}
+    products={storeProducts}
+    categories={categories}
+    isOpen={isOpen}
+  />
 </StorefrontLayout>

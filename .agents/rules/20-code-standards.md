@@ -97,3 +97,33 @@ Formatting and common platform integration functions must strictly use Single So
 These are part of the definition of done. A change that adds an unguarded async, leaks
 server detail, hand-rolls a response shape, declares a shared type inline, or copy-pastes
 logic already in `lib` is not done, however green the tests are.
+
+## 12. CSS Scoping
+
+`:global()` is **Svelte compiler syntax only**. It is valid exclusively inside `<style>`
+blocks in `.svelte` files, where Svelte would otherwise scope the selector.
+
+Rules:
+- **Plain `.css` files**: Never use `:global()`. Classes are globally scoped by default.
+  Using `:global()` in a `.css` file causes `lightningcss` build warnings and has no effect.
+- **`.svelte` `<style>` blocks**: Use `:global()` only when you intentionally need a selector
+  to escape Svelte's scoping (e.g., targeting child components or runtime-injected DOM).
+- **Inside `@container`/`@media` in `.svelte`**: Svelte may not unwrap `:global()` correctly
+  inside at-rules — prefer moving those styles to a plain `.css` file imported in the
+  component script, using bare class selectors.
+
+```svelte
+<!-- ✅ Correct in .svelte <style> -->
+<style>
+  :global(.my-class) { color: red; }
+</style>
+```
+
+```css
+/* ✅ Correct in plain .css file */
+.my-class { color: red; }
+
+/* ❌ Wrong: :global() in a plain .css file */
+:global(.my-class) { color: red; }
+```
+

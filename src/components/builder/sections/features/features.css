@@ -2,14 +2,14 @@
 /* CONTAINER QUERY CONTEXT (SSOT)                                            */
 /* ========================================================================= */
 
-:global(.feature-card) {
+.feature-card {
   container-type: inline-size;
   container-name: featurecard;
   width: 100%;
   box-sizing: border-box;
 }
 
-:global(.builder-safe-container) {
+.builder-safe-container {
   width: 100%;
   padding-left: var(--active-safe-zone, 32px);
   padding-right: var(--active-safe-zone, 32px);
@@ -21,61 +21,61 @@
 /* ========================================================================= */
 
 /* 1. Mobile Default (< 680px) */
-:global(.cq-title) {
+.cq-title {
   font-size: 1.625rem;
   line-height: 2rem;
 }
-:global(.cq-grid-3) {
+.cq-grid-3 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-:global(.cq-asym-split) {
+.cq-asym-split {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-:global(.cq-sticky-left) {
+.cq-sticky-left {
   position: static !important;
 }
-:global(.cq-ribbon-bar) {
+.cq-ribbon-bar {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-:global(.cq-ribbon-desc) {
+.cq-ribbon-desc {
   display: none;
 }
-:global(.cq-bento-feature) {
+.cq-bento-feature {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-:global(.cq-zigzag-item) {
+.cq-zigzag-item {
   display: flex;
   flex-direction: column !important;
   gap: 1rem;
 }
-:global(.cq-zigzag-reverse) {
+.cq-zigzag-reverse {
   display: flex;
   flex-direction: column !important;
 }
-:global(.cq-tabs-showcase) {
+.cq-tabs-showcase {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-:global(.cq-accordion-split) {
+.cq-accordion-split {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-:global(.cq-matrix-grid) {
+.cq-matrix-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
 }
-:global(.cq-compare-grid) {
+.cq-compare-grid {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -83,39 +83,39 @@
 
 /* 2. Tablet Container Breakpoint (>= 680px) */
 @container featurecard (min-width: 680px) {
-  :global(.cq-title) {
+  .cq-title {
     font-size: 2.125rem;
     line-height: 2.5rem;
   }
-  :global(.cq-grid-3) {
+  .cq-grid-3 {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 1.25rem !important;
   }
-  :global(.cq-grid-3 > div:last-child:nth-child(odd)) {
+  .cq-grid-3 > div:last-child:nth-child(odd) {
     grid-column: span 2;
   }
-  :global(.cq-ribbon-bar) {
+  .cq-ribbon-bar {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 1rem !important;
   }
-  :global(.cq-ribbon-desc) {
+  .cq-ribbon-desc {
     display: block !important;
   }
-  :global(.cq-bento-feature) {
+  .cq-bento-feature {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-  :global(.cq-bento-span-full) {
+  .cq-bento-span-full {
     grid-column: span 2;
   }
-  :global(.cq-matrix-grid) {
+  .cq-matrix-grid {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 1rem !important;
   }
-  :global(.cq-compare-grid) {
+  .cq-compare-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 1.5rem !important;
@@ -124,62 +124,62 @@
 
 /* 3. Desktop Container Breakpoint (>= 980px) */
 @container featurecard (min-width: 980px) {
-  :global(.cq-title) {
+  .cq-title {
     font-size: 2.5rem;
     line-height: 2.875rem;
   }
-  :global(.cq-grid-3) {
+  .cq-grid-3 {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 1.5rem !important;
   }
-  :global(.cq-grid-3 > div:last-child:nth-child(odd)) {
+  .cq-grid-3 > div:last-child:nth-child(odd) {
     grid-column: auto;
   }
-  :global(.cq-asym-split) {
+  .cq-asym-split {
     display: grid !important;
     grid-template-columns: 4fr 8fr !important;
     gap: 2.5rem !important;
   }
-  :global(.cq-sticky-left) {
+  .cq-sticky-left {
     position: sticky !important;
     top: 2rem !important;
   }
-  :global(.cq-bento-feature) {
+  .cq-bento-feature {
     display: grid !important;
     grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
   }
-  :global(.cq-bento-span-8) {
+  .cq-bento-span-8 {
     grid-column: span 8;
   }
-  :global(.cq-bento-span-4) {
+  .cq-bento-span-4 {
     grid-column: span 4;
   }
-  :global(.cq-zigzag-item) {
+  .cq-zigzag-item {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-items: center;
     gap: 2.5rem !important;
   }
-  :global(.cq-zigzag-reverse) {
+  .cq-zigzag-reverse {
     direction: rtl;
   }
-  :global(.cq-zigzag-reverse > div) {
+  .cq-zigzag-reverse > div {
     direction: ltr;
   }
-  :global(.cq-tabs-showcase) {
+  .cq-tabs-showcase {
     display: grid !important;
     grid-template-columns: 5fr 7fr !important;
     align-items: center;
     gap: 2.5rem !important;
   }
-  :global(.cq-accordion-split) {
+  .cq-accordion-split {
     display: grid !important;
     grid-template-columns: 5fr 7fr !important;
     align-items: center;
     gap: 2.5rem !important;
   }
-  :global(.cq-matrix-grid) {
+  .cq-matrix-grid {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 1.25rem !important;

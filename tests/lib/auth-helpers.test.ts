@@ -1,9 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { db, users } from '@/db';
 import {
   auth,
   type AuthenticatedUser,
 } from '@/lib/auth';
+
+vi.mock('@/lib/db/client', () => {
+  const mockDb = {
+    query: {
+      users: {
+        findFirst: vi.fn(),
+      },
+    },
+  };
+  return { db: mockDb, getDb: () => mockDb };
+});
 
 type UserRecord = typeof users.$inferSelect;
 type SessionResult = Awaited<ReturnType<typeof auth.api.getSession>>;
@@ -184,7 +195,7 @@ describe('Auth Helper Functions', () => {
       };
 
       vi.spyOn(auth.api, 'getSession').mockResolvedValue(mockSession);
-      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser);
+      (db.query.users.findFirst as unknown as Mock).mockResolvedValueOnce(mockDbUser);
 
       const request = new Request('http://localhost:4321/api/test', {
         headers: { cookie: 'auth_session=123' },
@@ -223,7 +234,7 @@ describe('Auth Helper Functions', () => {
         deletedAt: null,
       };
 
-      vi.spyOn(db.query.users, 'findFirst').mockResolvedValueOnce(mockDbUser);
+      (db.query.users.findFirst as unknown as Mock).mockResolvedValueOnce(mockDbUser);
 
       const request = new Request('http://localhost:4321/api/test', {
         headers: { 'x-user-id': 'usr_dev_456' },

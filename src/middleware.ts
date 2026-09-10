@@ -5,6 +5,7 @@ import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 
 // Domain utama aplikasi, sesuaikan dengan environment
 const MAIN_DOMAIN = import.meta.env.PUBLIC_MAIN_DOMAIN || 'localhost:4321';
+const RESERVED_SUBDOMAINS = new Set(['admin', 'api', 'www']);
 
 // Inisialisasi Rate Limiter untuk API:
 // 1. Read (GET): Longgar untuk memuat data (30 request / menit)
@@ -13,9 +14,8 @@ const apiReadLimiter = new InMemoryRateLimiter(30, 60 * 1000);
 const apiWriteLimiter = new InMemoryRateLimiter(5, 60 * 1000);
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // --- SUBDOMAIN DETECTION LOGIC ---
-  const host = context.request.headers.get('host') || context.request.headers.get('x-forwarded-host') || '';
-  const url = new URL(context.request.url);
+  // --- SUBDOMAIN DETECTION & REWRITE LOGIC ---
+  const host = context.request.headers.get('host') || context.url.host || '';
   const { pathname } = context.url;
   
   // --- RATE LIMITING LOGIC ---
@@ -50,12 +50,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Simpan subdomain di locals agar bisa diakses di route handlers
   context.locals.subdomain = subdomain;
 
-  // Rewrite URL ke route internal jika ada subdomain (misalnya render dari /storefront)
-  // Kecuali untuk aset statis dan API
-  if (subdomain && !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_astro/')) {
-    // Kita bisa melakukan render internal ke suatu route, misal `/storefront/[subdomain]`
-    // Untuk saat ini, kita hanya menyimpan subdomain di context.
-    // Jika menggunakan `next('/storefront' + url.pathname)`, Anda perlu memastikan handler-nya siap
+  // Cek apakah request ditujukan ke file statis atau endpoint sistem (termasuk path internal storefront)
+  const isStaticOrSystemPath =
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_astro') ||
+    pathname.startsWith('/storefront') ||
+    pathname === '/favicon.ico' ||
+    /\.(png|jpe?g|svg|css|js|ico|webp)$/i.test(pathname);
+
+  // Rewrite internal ke route storefront jika ada subdomain valid (non-reserved & non-system)
+  if (subdomain && !RESERVED_SUBDOMAINS.has(subdomain.toLowerCase()) && !isStaticOrSystemPath) {
+    const rewritePath = pathname === '/' || pathname === ''
+      ? `/storefront/${subdomain}`
+      : `/storefront/${subdomain}${pathname}`;
+    return context.rewrite(rewritePath);
   }
   
   // --- AUTHENTICATION LOGIC ---

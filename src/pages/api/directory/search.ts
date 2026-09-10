@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { stores, businessCategories, products } from '@/db/schema';
 import { eq, ilike, or, and, desc, asc, isNull, sql, inArray } from 'drizzle-orm';
 import { z } from 'zod';
+import { firstProductImageUrl } from '@/lib/products/image';
 
 const SearchQuerySchema = z.object({
   q: z.string().optional(),
@@ -170,15 +171,11 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
             productsByStore[p.storeId] = [];
           }
           if (productsByStore[p.storeId].length < 3) {
-            let firstImage: string | null = null;
-            if (Array.isArray(p.imageUrls) && p.imageUrls.length > 0 && typeof p.imageUrls[0] === 'string') {
-              firstImage = p.imageUrls[0];
-            }
             productsByStore[p.storeId].push({
               id: p.id,
               name: p.name,
               price: Number(p.basePrice),
-              imageUrl: firstImage,
+              imageUrl: firstProductImageUrl(p.imageUrls),
             });
           }
         }

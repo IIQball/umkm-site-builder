@@ -87,7 +87,7 @@
         dispatch('granted', coords);
         isOpen = false;
       },
-      (error: GeolocationPositionError) => {
+      (error: { code: number; message: string }) => {
         loading = false;
         console.warn(`[Geolocation Error] Code ${error.code}: ${error.message}`, error);
 

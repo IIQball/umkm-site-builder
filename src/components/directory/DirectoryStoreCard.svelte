@@ -1,18 +1,8 @@
 <script lang="ts">
-  import type { DirectoryStore } from './directory.types';
+  import { type DirectoryStore, getStoreUrl } from './directory.types';
+  import { formatIDR } from '@/lib/currency';
 
   export let store: DirectoryStore;
-
-  function getStoreUrl(subdomain: string) {
-    if (typeof window === 'undefined') return '#';
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseHost = isLocal ? 'localhost:4321' : window.location.host.replace(/^www\./, '');
-    return `${window.location.protocol}//${subdomain}.${baseHost}`;
-  }
-
-  function formatPrice(val: number) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
-  }
 </script>
 
 <a
@@ -84,7 +74,7 @@
         {#each store.sampleProducts as prod (prod.id)}
           <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-600 dark:text-zinc-300">
             <span class="truncate max-w-[110px]">{prod.name}</span>
-            <span class="text-emerald-600 dark:text-emerald-400 font-medium">{formatPrice(prod.price)}</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-medium">{formatIDR(prod.price)}</span>
           </span>
         {/each}
       </div>

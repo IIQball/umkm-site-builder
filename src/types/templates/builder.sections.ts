@@ -76,11 +76,16 @@ export interface ProductItem {
   id?: string;
   name: string;
   price: number;
-  image?: string;
-  imageUrl?: string;
+  basePrice?: number;
+  image?: string | null;
+  imageUrl?: string | null;
+  imageUrls?: string[];
   description?: string;
   badge?: string;
   variants?: VariantGroup[];
+  category?: { id: string; name: string; slug: string } | null;
+  categoryName?: string | null;
+  sortOrder?: number;
 }
 
 export interface ProductCatalogProps {

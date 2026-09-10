@@ -117,10 +117,7 @@
   class="footer-card w-full box-border relative transition-all {isActive ? 'relative z-10' : ''} {activePreset === 'boxed_card_footer' || activePreset === 'cta_focused' ? 'py-4' : 'pt-10 pb-6'}"
   style="container-type: inline-size; container-name: footercard;"
 >
-  <div
-    class="builder-safe-container"
-    style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); margin: 0 auto; padding-left: var(--active-safe-zone, var(--theme-safe-zone-desktop, 32px)); padding-right: var(--active-safe-zone, var(--theme-safe-zone-desktop, 32px));"
-  >
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     {#if activePreset === 'centered_simple'}
       <FooterCenteredSimple
         {brandName}

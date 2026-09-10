@@ -30,6 +30,8 @@ vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
   isAdmin: (u: AuthenticatedUser | null) => !!u && (u.role === 'admin' || u.role === 'superadmin'),
   isAuthorizedAdmin: (u: AuthenticatedUser | null) => !!u && u.status === 'active' && (u.role === 'admin' || u.role === 'superadmin'),
+  isSuperAdmin: (u: AuthenticatedUser | null) => !!u && u.role === 'superadmin',
+  isAuthorizedSuperAdmin: (u: AuthenticatedUser | null) => !!u && u.status === 'active' && u.role === 'superadmin',
   isDesigner: (u: AuthenticatedUser | null) => !!u && (u.role === 'designer' || u.role === 'admin' || u.role === 'superadmin'),
   isAuthorizedDesigner: (u: AuthenticatedUser | null) => !!u && u.status === 'active' && (u.role === 'designer' || u.role === 'admin' || u.role === 'superadmin'),
 }));

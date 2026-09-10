@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import type { DirectoryStore } from './directory.types';
+  import { type DirectoryStore, getStoreUrl } from './directory.types';
   import { DEFAULT_PLATFORM_REGION } from '@/config/platform';
+  import { generateWhatsAppLink } from '@/lib/whatsapp';
 
   export let stores: DirectoryStore[] = [];
   export let userLocation: { lat: number; lng: number; label?: string } | null = null;
@@ -13,19 +14,6 @@
   let userMarker: any = null;
   let storeMarkers: Map<string, any> = new Map();
   let isMapReady = false;
-
-  function getStoreUrl(subdomain: string) {
-    if (typeof window === 'undefined') return '#';
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseHost = isLocal ? 'localhost:4321' : window.location.host.replace(/^www\./, '');
-    return `${window.location.protocol}//${subdomain}.${baseHost}`;
-  }
-
-  function getWhatsAppUrl(waNumber: string, storeName: string) {
-    let clean = waNumber.replace(/\D/g, '');
-    if (clean.startsWith('0')) clean = '62' + clean.slice(1);
-    return `https://wa.me/${clean}?text=${encodeURIComponent(`Halo ${storeName}, saya menemukan toko Anda di Direktori UMKM.`)}`;
-  }
 
   function renderPopupContent(store: DirectoryStore): string {
     const storeUrl = getStoreUrl(store.subdomain);
@@ -39,7 +27,7 @@
       ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px;line-height:1.3;">${store.address}</div>`
       : '';
     const waButton = store.waNumber
-      ? `<a href="${getWhatsAppUrl(store.waNumber, store.name)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:8px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;text-decoration:none;">WhatsApp</a>`
+      ? `<a href="${generateWhatsAppLink(store.waNumber, `Halo ${store.name}, saya menemukan toko Anda di Direktori UMKM.`)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:8px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;text-decoration:none;">WhatsApp</a>`
       : '';
 
     return `

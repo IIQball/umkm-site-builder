@@ -52,9 +52,23 @@ describe('Products API', () => {
 
   describe('POST /api/products', () => {
     it('creates a new product', async () => {
+      (db.select as Mock).mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+          }),
+        }),
+      });
+
       (db.insert as Mock).mockReturnValue({
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([{ id: 'new-id' }]),
+        }),
+      });
+
+      (db.update as Mock).mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue({}),
         }),
       });
 
@@ -72,7 +86,7 @@ describe('Products API', () => {
       });
 
       const locals = {
-        user: { id: 'u1', role: 'tenant', email: 'test@example.com' },
+        user: { id: 'u1', role: 'tenant', status: 'active', email: 'test@example.com' },
       };
 
       const context = { request, locals, url: new URL(request.url) } as unknown as APIContext;
@@ -86,10 +100,23 @@ describe('Products API', () => {
 
   describe('PUT /api/products/[id]', () => {
     it('updates a product using JSON', async () => {
-      (db.select as Mock).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ id: '1', imageUrls: [] }]),
-        }),
+      let selectCount = 0;
+      (db.select as Mock).mockImplementation(() => {
+        selectCount++;
+        if (selectCount === 1) {
+          return {
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ id: '1', storeId: 's1', imageUrls: [] }]),
+            }),
+          };
+        }
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+            }),
+          }),
+        };
       });
 
       (db.update as Mock).mockReturnValue({
@@ -106,7 +133,7 @@ describe('Products API', () => {
         body: JSON.stringify({ isAvailable: false }),
       });
 
-      const context = { request, locals: { user: { role: 'tenant' } }, params: { id: '1' } } as unknown as APIContext;
+      const context = { request, locals: { user: { id: 'u1', role: 'tenant', status: 'active' } }, params: { id: '1' } } as unknown as APIContext;
       const response = (await PUT(context)) as Response;
       const data = await response.json();
 
@@ -117,11 +144,25 @@ describe('Products API', () => {
 
   describe('DELETE /api/products/[id]', () => {
     it('soft deletes a product', async () => {
-      (db.select as Mock).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ id: '1', imageUrls: [] }]),
-        }),
+      let selectCount = 0;
+      (db.select as Mock).mockImplementation(() => {
+        selectCount++;
+        if (selectCount === 1) {
+          return {
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ id: '1', storeId: 's1', imageUrls: [] }]),
+            }),
+          };
+        }
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+            }),
+          }),
+        };
       });
+
       (db.update as Mock).mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -134,7 +175,7 @@ describe('Products API', () => {
         method: 'DELETE',
       });
 
-      const context = { request, params: { id: '1' } } as unknown as APIContext;
+      const context = { request, locals: { user: { id: 'u1', role: 'tenant', status: 'active' } }, params: { id: '1' } } as unknown as APIContext;
       const response = (await DELETE(context)) as Response;
       const data = await response.json();
 

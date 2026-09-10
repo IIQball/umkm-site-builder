@@ -14,7 +14,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const record = await db.query.bankAccounts.findFirst({
-      where: (bankAccounts, { eq }) => eq(bankAccounts.designerId, user.id),
+      where: (bankAccounts, { eq }) => eq(bankAccounts.userId, user.id),
     });
 
     return jsonSuccess(record || null);
@@ -38,7 +38,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       // also create wallet if it doesn't exist
       await db.insert(wallets).values({
         id: `wal_${crypto.randomUUID()}`,
-        designerId: user.id,
+        userId: user.id,
         balance: 0,
         availableBalance: 0,
       }).onConflictDoNothing();
@@ -47,7 +47,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(bankAccountSchema, body);
 
-    const existingAccount = await db.select().from(bankAccounts).where(eq(bankAccounts.designerId, user.id)).limit(1);
+    const existingAccount = await db.select().from(bankAccounts).where(eq(bankAccounts.userId, user.id)).limit(1);
 
     let result;
     if (existingAccount.length === 0) {
@@ -55,7 +55,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         .insert(bankAccounts)
         .values({
           id: `ba_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          designerId: user.id,
+          userId: user.id,
+          bankCode: validated.bankCode,
           bankName: validated.bankName,
           accountNumber: validated.accountNumber,
           accountHolder: validated.accountHolder,
@@ -66,11 +67,13 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       const [updatedRecord] = await db
         .update(bankAccounts)
         .set({
+          bankCode: validated.bankCode,
           bankName: validated.bankName,
           accountNumber: validated.accountNumber,
           accountHolder: validated.accountHolder,
+          updatedAt: new Date(),
         })
-        .where(eq(bankAccounts.designerId, user.id))
+        .where(eq(bankAccounts.userId, user.id))
         .returning();
       result = updatedRecord;
     }

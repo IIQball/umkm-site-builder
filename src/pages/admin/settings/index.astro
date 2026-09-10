@@ -1,7 +1,7 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import CommissionSettingsPanel from '@/components/admin/CommissionSettingsPanel.svelte';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { platformSettings } from '@/db/schema';
 
@@ -12,12 +12,13 @@ if (!user) {
   return Astro.redirect('/auth/login');
 }
 
-if (!isAuthorizedAdmin(user)) {
-  return Astro.redirect('/dashboard');
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect('/403');
 }
 
 let initialFeePercentage = 30;
 let initialSettlementDelayDays = 7;
+let initialAdminServiceFee = 5000;
 
 try {
   const records = await db.select().from(platformSettings).limit(1);
@@ -28,10 +29,14 @@ try {
     if (typeof records[0].settlementDelayDays === 'number') {
       initialSettlementDelayDays = records[0].settlementDelayDays;
     }
+    if (typeof records[0].adminServiceFee === 'number') {
+      initialAdminServiceFee = records[0].adminServiceFee;
+    }
   }
 } catch {
   initialFeePercentage = 30;
   initialSettlementDelayDays = 7;
+  initialAdminServiceFee = 5000;
 }
 ---
 
@@ -41,6 +46,7 @@ try {
       client:load
       {initialFeePercentage}
       {initialSettlementDelayDays}
+      {initialAdminServiceFee}
     />
   </div>
 </DashboardLayout>

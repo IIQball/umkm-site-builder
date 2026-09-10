@@ -3,7 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateReviewPanel from '@/components/admin/TemplateReviewPanel.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { getTemplatesForAdmin } from '@/services';
 
 export const prerender = false;
@@ -13,8 +13,8 @@ if (!user) {
   return Astro.redirect('/auth/login');
 }
 
-if (!isAuthorizedAdmin(user)) {
-  return Astro.redirect('/dashboard');
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect('/403');
 }
 
 let initialTemplates: Awaited<ReturnType<typeof getTemplatesForAdmin>> = [];

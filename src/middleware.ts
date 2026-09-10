@@ -5,6 +5,7 @@ import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 
 // Domain utama aplikasi, sesuaikan dengan environment
 const MAIN_DOMAIN = import.meta.env.PUBLIC_MAIN_DOMAIN || 'localhost:4321';
+const RESERVED_SUBDOMAINS = new Set(['admin', 'api', 'www']);
 
 // Inisialisasi Rate Limiter untuk API:
 // 1. Read (GET): Longgar untuk memuat data (30 request / menit)
@@ -13,9 +14,8 @@ const apiReadLimiter = new InMemoryRateLimiter(30, 60 * 1000);
 const apiWriteLimiter = new InMemoryRateLimiter(5, 60 * 1000);
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // --- SUBDOMAIN DETECTION LOGIC ---
-  const host = context.request.headers.get('host') || context.request.headers.get('x-forwarded-host') || '';
-  const url = new URL(context.request.url);
+  // --- SUBDOMAIN DETECTION & REWRITE LOGIC ---
+  const host = context.request.headers.get('host') || context.url.host || '';
   const { pathname } = context.url;
   
   // --- RATE LIMITING LOGIC ---
@@ -50,12 +50,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Simpan subdomain di locals agar bisa diakses di route handlers
   context.locals.subdomain = subdomain;
 
-  // Rewrite URL ke route internal jika ada subdomain (misalnya render dari /storefront)
-  // Kecuali untuk aset statis dan API
-  if (subdomain && !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_astro/')) {
-    // Kita bisa melakukan render internal ke suatu route, misal `/storefront/[subdomain]`
-    // Untuk saat ini, kita hanya menyimpan subdomain di context.
-    // Jika menggunakan `next('/storefront' + url.pathname)`, Anda perlu memastikan handler-nya siap
+  // Cek apakah request ditujukan ke file statis atau endpoint sistem (termasuk path internal storefront)
+  const isStaticOrSystemPath =
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_astro') ||
+    pathname.startsWith('/storefront') ||
+    pathname === '/favicon.ico' ||
+    /\.(png|jpe?g|svg|css|js|ico|webp)$/i.test(pathname);
+
+  // Rewrite internal ke route storefront jika ada subdomain valid (non-reserved & non-system)
+  if (subdomain && !RESERVED_SUBDOMAINS.has(subdomain.toLowerCase()) && !isStaticOrSystemPath) {
+    const rewritePath = pathname === '/' || pathname === ''
+      ? `/storefront/${subdomain}`
+      : `/storefront/${subdomain}${pathname}`;
+    return context.rewrite(rewritePath);
   }
   
   // --- AUTHENTICATION LOGIC ---
@@ -85,6 +93,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan
   const roleMap = [
+    // Superadmin-only: platform settings, master categories, kurasi template, whitelist, user management
+    { prefix: '/admin/settings', roles: ['superadmin'] },
+    { prefix: '/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/admin/templates', roles: ['superadmin'] },
+    { prefix: '/admin/whitelist', roles: ['superadmin'] },
+    { prefix: '/admin/users', roles: ['superadmin'] },
+    { prefix: '/api/admin/settings', roles: ['superadmin'] },
+    { prefix: '/api/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/api/admin/templates', roles: ['superadmin'] },
+    { prefix: '/api/admin/whitelist', roles: ['superadmin'] },
+    { prefix: '/api/admin/users', roles: ['superadmin'] },
+
+    // Admin & Superadmin general access
+    { prefix: '/admin', roles: ['admin', 'superadmin'] },
+    { prefix: '/api/admin', roles: ['admin', 'superadmin'] },
+
+    // Role-specific protected routes
     { prefix: '/dashboard', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/onboarding', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/builder', roles: ['designer', 'tenant', 'admin', 'superadmin'] },
@@ -98,16 +123,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (protectedRoute) {
     // Jika rute diproteksi tapi tidak ada user (belum login)
     if (!user) {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/401');
     }
     
     // Jika akun ditangguhkan
     if ((user as { status?: string }).status === 'suspended') {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Akun Anda ditangguhkan' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/auth/login?error=account_suspended');
     }
 
     // Jika sudah login tapi role tidak sesuai
     if (!protectedRoute.roles.includes(user.role as string)) {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return context.redirect('/403');
     }
   }

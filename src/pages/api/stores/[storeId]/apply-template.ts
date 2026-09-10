@@ -17,8 +17,8 @@ export const POST: APIRoute = async ({ params, request }) => {
       return jsonError('Silakan login terlebih dahulu', 401);
     }
 
-    if (user.role !== 'tenant') {
-      return jsonError('Hanya tenant yang dapat menerapkan template', 403);
+    if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin') {
+      return jsonError('Hanya tenant atau admin pendamping yang dapat menerapkan template', 403);
     }
 
     const storeId = params.storeId;
@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ params, request }) => {
 
     // Terapkan template ke store menggunakan service layer dengan config yang termigrasi
     const migratedConfig = migrateTemplateConfig(result.template.config);
-    await applyTemplateToStore(storeId, templateId, migratedConfig);
+    await applyTemplateToStore(storeId, templateId, migratedConfig, user.id);
 
     return jsonSuccess({
       storeId,

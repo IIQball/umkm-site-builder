@@ -1,6 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { getRedirectUrlForRole, auth } from "@/lib/auth";
 import { db, users } from "@/db";
+
+vi.mock("@/lib/db/client", () => {
+  const mockDb = {
+    query: {
+      users: {
+        findFirst: vi.fn(),
+      },
+    },
+  };
+  return { db: mockDb, getDb: () => mockDb };
+});
 
 type UserRecord = typeof users.$inferSelect;
 type UserInsert = typeof users.$inferInsert;
@@ -127,7 +138,7 @@ describe("Google OAuth Whitelist & Database Hooks", () => {
 
     it("should throw UNAUTHORIZED_EMAIL during OAuth flow when user email is not pre-registered in database", async () => {
       const beforeHook = getHook();
-      vi.spyOn(db.query.users, "findFirst").mockResolvedValueOnce(undefined);
+      (db.query.users.findFirst as unknown as Mock).mockResolvedValueOnce(undefined);
 
       const unregisteredUser: UserInsert = {
         id: "usr_unregistered",
@@ -178,7 +189,7 @@ describe("Google OAuth Whitelist & Database Hooks", () => {
         deletedAt: null,
       };
 
-      vi.spyOn(db.query.users, "findFirst").mockResolvedValueOnce(existingRecord);
+      (db.query.users.findFirst as unknown as Mock).mockResolvedValueOnce(existingRecord);
 
       const userPayload: UserInsert = {
         id: "usr_registered_123",

@@ -13,7 +13,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const records = await db.query.payoutRequests.findMany({
-      where: (payoutRequests, { eq }) => eq(payoutRequests.designerId, user.id),
+      where: (payoutRequests, { eq }) => eq(payoutRequests.userId, user.id),
       with: {
         bankAccount: true,
       },
@@ -26,7 +26,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
         availableBalance: wallets.availableBalance,
       })
       .from(wallets)
-      .where(eq(wallets.designerId, user.id))
+      .where(eq(wallets.userId, user.id))
       .limit(1);
 
     const wallet = walletList[0] || { balance: 0, availableBalance: 0 };

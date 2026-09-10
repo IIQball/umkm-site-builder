@@ -2,25 +2,45 @@
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StoreSettingsForm from '../../components/dashboard/StoreSettingsForm.svelte';
 import StatCard from '../../components/ui/StatCard.svelte';
-import { getAuthenticatedUser } from '../../lib/auth';
+import { getAuthenticatedUser, canManageStore } from '../../lib/auth';
 import { db } from '../../db';
 import { stores } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
   return Astro.redirect('/auth/login');
 }
 
-if (user.role !== 'tenant') {
+const storeIdParam = Astro.url.searchParams.get('storeId');
+
+if (user.role !== 'tenant' && !(user.role === 'admin' && storeIdParam) && !(user.role === 'superadmin' && storeIdParam)) {
   return Astro.redirect('/dashboard');
 }
 
-const [store] = await db.select().from(stores).where(eq(stores.userId, user.id));
-if (!store) {
-  return Astro.redirect('/onboarding');
+const store = storeIdParam
+  ? await db.query.stores.findFirst({
+      where: and(eq(stores.id, storeIdParam), isNull(stores.deletedAt)),
+      with: {
+        registrar: {
+          columns: { name: true },
+        },
+      },
+    })
+  : await db.query.stores.findFirst({
+      where: and(eq(stores.userId, user.id), isNull(stores.deletedAt)),
+      with: {
+        registrar: {
+          columns: { name: true },
+        },
+      },
+    });
+
+if (!store || !canManageStore(user, store)) {
+  return Astro.redirect(user.role === 'admin' ? '/admin' : '/onboarding');
 }
 
+const managedByAdmin = store.registeredBy && store.registrar ? { name: store.registrar.name } : null;
 const customization = (store.customization as Record<string, unknown>) || {};
 const isOpen = customization.isOpen !== false;
 ---
@@ -33,6 +53,17 @@ const isOpen = customization.isOpen !== false;
         Kelola informasi profil toko, kontak bisnis, dan preferensi tampilan Anda.
       </p>
     </div>
+
+    {managedByAdmin && (
+      <div class="p-4 rounded-2xl bg-blue-50/80 border border-blue-200/80 flex items-center gap-3 text-blue-900 animate-fade-in">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 shrink-0" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <p class="text-sm">
+          Toko ini didampingi oleh Admin <strong>{managedByAdmin.name}</strong> untuk bantuan pengelolaan dan operasional.
+        </p>
+      </div>
+    )}
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <StatCard 
@@ -70,6 +101,7 @@ const isOpen = customization.isOpen !== false;
     <div class="animate-fade-in-up delay-300">
       <StoreSettingsForm
         client:load
+        storeId={store.id}
         subdomain={store.subdomain}
         initialStoreName={store.name}
         initialWaNumber={store.waNumber}

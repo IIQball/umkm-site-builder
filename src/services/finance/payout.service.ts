@@ -132,7 +132,7 @@ export async function processDisbursementWebhook(payload: {
         .where(eq(payoutRequests.id, payout.id));
 
       await creditWallet({
-        designerId: payout.designerId,
+        designerId: payout.userId,
         amount: payout.amount,
         description: `Refund Penarikan Dana Gagal (Ref: ${payout.id})`,
         referenceId: payout.id,

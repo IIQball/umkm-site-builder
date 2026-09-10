@@ -146,7 +146,7 @@ export const auth = betterAuth({
 
             await db.insert(wallets).values({
               id: `wal_${crypto.randomUUID()}`,
-              designerId: user.id,
+              userId: user.id,
               balance: 0,
             }).onConflictDoNothing();
           }
@@ -259,6 +259,17 @@ export function isSuperAdmin(user: AuthenticatedUser | null): boolean {
 
 export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): boolean {
   return isActive(user) && isSuperAdmin(user);
+}
+
+export function canManageStore(
+  user: AuthenticatedUser | null,
+  store: { userId: string; registeredBy?: string | null }
+): boolean {
+  if (!user || !isActive(user)) return false;
+  if (user.role === 'superadmin') return true;
+  if (user.role === 'tenant') return store.userId === user.id;
+  if (user.role === 'admin') return store.registeredBy === user.id;
+  return false;
 }
 
 export function getRedirectUrlForRole(role?: string | null): string {

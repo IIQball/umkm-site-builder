@@ -178,13 +178,15 @@ export async function validateTemplateOwnership(
 export async function applyTemplateToStore(
   storeId: string,
   templateId: string,
-  templateConfig: unknown
+  templateConfig: unknown,
+  lastEditedBy?: string
 ): Promise<void> {
   await db
     .update(stores)
     .set({
       templateId,
       customization: templateConfig,
+      lastEditedBy: lastEditedBy || undefined,
       updatedAt: new Date(),
     })
     .where(eq(stores.id, storeId));

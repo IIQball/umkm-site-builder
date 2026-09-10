@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import { TemplateCategoryUpdateSchema } from '@/schemas';
 import {
@@ -10,8 +10,8 @@ import {
 export const PUT: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedAdmin(user)) {
-      throw new AppError('Admin access required', 403);
+    if (!user || !isAuthorizedSuperAdmin(user)) {
+      throw new AppError('Superadmin access required', 403);
     }
 
     const { id } = context.params;
@@ -30,8 +30,8 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
 export const DELETE: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedAdmin(user)) {
-      throw new AppError('Admin access required', 403);
+    if (!user || !isAuthorizedSuperAdmin(user)) {
+      throw new AppError('Superadmin access required', 403);
     }
 
     const { id } = context.params;

@@ -11,6 +11,8 @@ export interface TransactionInitiateInput {
   type: 'template_purchase';
   storeId?: string;
   templateId?: string;
+  assistedBy?: string | null;
+  adminFee?: number;
 }
 
 export interface TransactionInitiateResponse {
@@ -84,9 +86,11 @@ export interface TransactionRecord {
   userId: string;
   type: TransactionType;
   amount: number; // in IDR
+  adminFee?: number;
   status: PaymentStatus;
   storeId?: string;
   templateId?: string;
+  assistedBy?: string | null;
   externalId: string;
   paymentGatewayRef?: string;
   paymentChannel?: string;

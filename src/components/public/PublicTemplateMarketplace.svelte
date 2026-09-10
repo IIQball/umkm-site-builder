@@ -10,6 +10,9 @@
   export let initialTemplates: PublicTemplate[] = [];
   export let categories: CategoryItem[] = [];
   export let ownedTemplateIds: string[] = [];
+  export let assistedTenants: Array<{ id: string; name: string; storeName: string; storeId: string }> = [];
+  export let initialTenantId: string = '';
+  export let currentUserId: string | null = null;
   export let isLoggedIn: boolean = false;
   export let userRole: string | null = null;
 
@@ -20,6 +23,7 @@
   let selectedCategorySlug: string = 'all';
   let selectedPriceFilter: 'all' | 'free' | 'paid' | 'under50' | '50to100' | 'above100' = 'all';
   let selectedSort: 'newest' | 'price_asc' | 'price_desc' | 'name_asc' = 'newest';
+  let selectedTenantId: string = initialTenantId;
 
   let purchasingId: string | null = null;
   let currentPage = 1;
@@ -57,12 +61,34 @@
       return;
     }
 
+    if (userRole === 'admin' && !selectedTenantId) {
+      addToast({
+        type: 'error',
+        message: 'Silakan pilih tenant binaan terlebih dahulu di dropdown!',
+      });
+      const el = document.getElementById('assisted-tenant-select');
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     purchasingId = template.id;
     try {
+      const payload: { templateId: string; tenantId?: string; assistedBy?: string | null } = {
+        templateId: template.id,
+      };
+
+      if (userRole === 'admin' && selectedTenantId) {
+        payload.tenantId = selectedTenantId;
+        payload.assistedBy = currentUserId;
+      }
+
       const res = await fetch('/api/tenant/transactions/template-purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId: template.id }),
+        body: JSON.stringify(payload),
       });
       const result = await res.json();
       if (!res.ok || !result.ok) {
@@ -72,10 +98,12 @@
       if (result.isFree) {
         addToast({
           type: 'success',
-          message: `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
+          message: userRole === 'admin'
+            ? `Template gratis "${template.name}" berhasil dipasangkan ke tenant binaan!`
+            : `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
         });
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = userRole === 'admin' ? '/admin' : '/dashboard';
         }, 1500);
       } else if (result.data?.externalId) {
         window.location.href = `/checkout/${result.data.externalId}`;
@@ -94,6 +122,44 @@
 </script>
 
 <div class="space-y-8 animate-fade-in-up">
+  {#if userRole === 'admin'}
+    <div class="p-5 rounded-3xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">support_agent</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs font-bold text-indigo-950 dark:text-indigo-100 uppercase tracking-wider">
+              Beli untuk Tenant Binaan
+            </h3>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300">
+              Jasa Pendamping
+            </span>
+          </div>
+          <p class="text-xs text-indigo-700 dark:text-indigo-300/80 mt-0.5">
+            Pilih toko binaan untuk membelikan template. Transaksi otomatis mencatat fee pendampingan Anda.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <select
+          id="assisted-tenant-select"
+          bind:value={selectedTenantId}
+          class="px-3.5 py-2.5 rounded-2xl bg-card border border-indigo-300 dark:border-indigo-700 text-xs font-bold text-main focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs cursor-pointer min-w-[220px]"
+        >
+          <option value="">-- Pilih Tenant Binaan --</option>
+          {#each assistedTenants as tenant (tenant.id)}
+            <option value={tenant.id}>
+              {tenant.storeName} ({tenant.name})
+            </option>
+          {/each}
+        </select>
+      </div>
+    </div>
+  {/if}
+
   <!-- Search & Filter Controls -->
   <MarketplaceFilterBar
     bind:searchQuery
@@ -157,6 +223,7 @@
           {isOwned}
           {isPurchasing}
           {isTenantOrGuest}
+          {userRole}
           onPurchase={handlePurchase}
         />
       {/each}

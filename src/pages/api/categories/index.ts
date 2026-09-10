@@ -1,8 +1,9 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../db';
-import { storeCategories } from '../../../db/schema';
+import { storeCategories, stores } from '../../../db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
+import { getAuthenticatedUser, canManageStore } from '../../../lib/auth';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
@@ -22,8 +23,18 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401);
+    }
+
     const body = await request.json();
     const { storeId, name, slug } = body;
+
+    const [store] = await db.select().from(stores).where(eq(stores.id, storeId)).limit(1);
+    if (!store || !canManageStore(user, store)) {
+      return jsonError('Anda tidak memiliki izin mengelola kategori toko ini', 403);
+    }
     
     // Check if slug exists
     const existing = await db.query.storeCategories.findFirst({
@@ -48,6 +59,10 @@ export const POST: APIRoute = async ({ request }) => {
       slug,
     });
 
+    await db.update(stores)
+      .set({ lastEditedBy: user.id, updatedAt: new Date() })
+      .where(eq(stores.id, store.id));
+
     return jsonSuccess({ success: true }, 201);
   } catch (error: unknown) {
     const err = error as { code?: string; cause?: { code?: string } };
@@ -64,6 +79,11 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 export const PATCH: APIRoute = async ({ request }) => {
+  const user = await getAuthenticatedUser(request);
+  if (!user) {
+    return jsonError('Silakan login terlebih dahulu', 401);
+  }
+
   const body = await request.json();
   const { id, name, slug } = body;
   
@@ -75,12 +95,18 @@ export const PATCH: APIRoute = async ({ request }) => {
     return jsonError('Kategori tidak ditemukan', 404);
   }
 
+  const [store] = await db.select().from(stores).where(eq(stores.id, currentCat.storeId)).limit(1);
+  if (!store || !canManageStore(user, store)) {
+    return jsonError('Anda tidak memiliki izin mengelola kategori toko ini', 403);
+  }
+
   const existing = await db.query.storeCategories.findFirst({
     where: and(eq(storeCategories.storeId, currentCat.storeId), eq(storeCategories.slug, slug))
   });
 
   if (existing && existing.id !== id) {
     if (existing.deletedAt !== null) {
+      // Free up the slug from the soft-deleted record
       await db.update(storeCategories)
         .set({ slug: `${existing.slug}-deleted-${Date.now()}` })
         .where(eq(storeCategories.id, existing.id));
@@ -93,11 +119,20 @@ export const PATCH: APIRoute = async ({ request }) => {
     .set({ name, slug, updatedAt: new Date() })
     .where(eq(storeCategories.id, id));
 
+  await db.update(stores)
+    .set({ lastEditedBy: user.id, updatedAt: new Date() })
+    .where(eq(stores.id, store.id));
+
   return jsonSuccess({ success: true }, 200);
 };
 
 export const DELETE: APIRoute = async ({ request }) => {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401);
+    }
+
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
     
@@ -110,12 +145,21 @@ export const DELETE: APIRoute = async ({ request }) => {
     });
 
     if (currentCat) {
+      const [store] = await db.select().from(stores).where(eq(stores.id, currentCat.storeId)).limit(1);
+      if (!store || !canManageStore(user, store)) {
+        return jsonError('Anda tidak memiliki izin mengelola kategori toko ini', 403);
+      }
+
       await db.update(storeCategories)
         .set({ 
           deletedAt: new Date(),
           slug: `${currentCat.slug}-deleted-${Date.now()}`
         })
         .where(eq(storeCategories.id, id));
+
+      await db.update(stores)
+        .set({ lastEditedBy: user.id, updatedAt: new Date() })
+        .where(eq(stores.id, store.id));
     }
 
     return jsonSuccess({ success: true }, 200);

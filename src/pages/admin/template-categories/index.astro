@@ -3,7 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TemplateCategoryManager from '@/components/admin/TemplateCategoryManager.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
 import Button from '@/components/ui/Button.svelte';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { templateCategories } from '@/db/schema';
 import { desc } from 'drizzle-orm';
@@ -11,8 +11,12 @@ import { desc } from 'drizzle-orm';
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+if (!user) {
   return Astro.redirect('/auth/login?redirect=/admin/template-categories');
+}
+
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect('/403');
 }
 
 let initialCategories: (typeof templateCategories.$inferSelect)[] = [];

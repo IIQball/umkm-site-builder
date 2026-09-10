@@ -9,22 +9,11 @@
   import Select from '../../../ui/Select.svelte';
   import Card from '../../../ui/Card.svelte';
   import { formatIDR } from '@/lib/currency';
-
-  interface StoreProduct {
-    id?: string;
-    name: string;
-    basePrice?: number;
-    price?: number;
-    imageUrls?: unknown;
-    imageUrl?: string;
-    category?: { name: string };
-    description?: string;
-    variants?: Record<string, unknown>[];
-  }
+  import type { ProductItem } from '@/types';
 
   interface CartItem {
-    product: StoreProduct;
-    selections: Record<string, { name: string }>;
+    product: ProductItem;
+    selections: Record<string, { name: string; priceAdjustment?: number } | string>;
     qty: number;
     price: number;
     subtotal: number;
@@ -46,8 +35,17 @@
 
   const getVariantText = (selections: unknown) => {
     if (!selections) return 'Standar';
-    const sel = selections as Record<string, { name: string }>;
-    return Object.values(sel).map(s => s.name).join(', ') || 'Standar';
+    const sel = selections as Record<string, unknown>;
+    const names = Object.values(sel)
+      .map((s) => {
+        if (typeof s === 'object' && s && 'name' in s) {
+          const opt = s as { name: string; priceAdjustment?: number };
+          return opt.priceAdjustment ? `${opt.name} (+${formatIDR(opt.priceAdjustment)})` : opt.name;
+        }
+        return String(s);
+      })
+      .filter(Boolean);
+    return names.join(', ') || 'Standar';
   };
 </script>
 
@@ -93,6 +91,7 @@
         {:else}
           <div class="space-y-4 flex-1">
             {#each detailedCart as item, idx}
+              {@const itemImg = item.product.image || item.product.imageUrl || item.product.imageUrls?.[0]}
               <Card
                 variant="nested"
                 padding="xs"
@@ -100,12 +99,16 @@
                 class="flex gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 group hover:bg-slate-100 transition-colors"
               >
                 <div class="w-[72px] h-[72px] rounded-xl overflow-hidden bg-slate-200 flex-shrink-0">
-                  {#if item.product.imageUrl}
+                  {#if itemImg}
                     <img
-                      src={item.product.imageUrl}
+                      src={itemImg}
                       alt={item.product.name}
                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                  {:else}
+                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                      <span class="text-[10px]">No Foto</span>
+                    </div>
                   {/if}
                 </div>
                 <div class="flex-1 flex flex-col justify-center">

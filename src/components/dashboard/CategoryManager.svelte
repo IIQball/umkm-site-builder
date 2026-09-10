@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { Button, Card, Table, StatCard } from '@/components/ui';
   import { toast } from '@/lib/toast';
+  import { slugify } from '@/lib/utils';
   import TenantCategoryFormModal from './category/TenantCategoryFormModal.svelte';
   import TenantCategoryDeleteModal from './category/TenantCategoryDeleteModal.svelte';
   
@@ -27,16 +28,6 @@
   let editingCategory: Category | null = null;
   let formName = '';
   let formSlug = '';
-
-  const slugify = (text: string) =>
-    text
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
 
   $: formSlug = formName ? slugify(formName) : '';
 

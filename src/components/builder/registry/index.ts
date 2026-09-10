@@ -220,7 +220,7 @@ export const sectionRegistry: SectionRegistryMap = {
       'multi_branch_tabs',
       'card_overlay_bottom',
     ],
-    isFullBleed: false,
+    isFullBleed: true,
   },
   footer: {
     type: 'footer',
@@ -241,7 +241,7 @@ export const sectionRegistry: SectionRegistryMap = {
       'social_links_grid',
       'boxed_card_footer',
     ],
-    isFullBleed: false,
+    isFullBleed: true,
   },
 };
 

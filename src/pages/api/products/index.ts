@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../lib/db/client';
-import { products } from '../../../db/schema';
+import { products, stores } from '../../../db/schema';
 import { eq, and, isNull, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
+import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
 
 const productInput = z.object({
   storeId: z.string().min(1),
@@ -47,17 +48,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return jsonError('Silakan login terlebih dahulu', 401, undefined);
     }
 
-    // 2. Authorize — tenant only
-    if (locals.user.role !== 'tenant' && locals.user.role !== 'superadmin') {
-      return jsonError('Hanya tenant yang dapat menambah produk', 403, undefined, 'FORBIDDEN');
-    }
-
-    // 3. Parse input — accept JSON body with pre-uploaded imageUrls
+    // 2. Parse input — accept JSON body with pre-uploaded imageUrls
     const body = await request.json();
     const result = productInput.safeParse(body);
 
     if (!result.success) {
       return jsonError('Validasi gagal', 400, result.error.issues, 'VALIDATION_ERROR');
+    }
+
+    // 3. Authorize — check store access via canManageStore
+    const [store] = await db.select().from(stores).where(eq(stores.id, result.data.storeId)).limit(1);
+    if (!store) {
+      return jsonError('Toko tidak ditemukan', 404, undefined, 'NOT_FOUND');
+    }
+
+    if (!canManageStore(locals.user as AuthenticatedUser, store)) {
+      return jsonError('Anda tidak memiliki izin mengelola produk toko ini', 403, undefined, 'FORBIDDEN');
     }
 
     // 4. Insert product with pre-uploaded image URLs
@@ -67,6 +73,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     };
 
     const inserted = await db.insert(products).values(newProductData).returning();
+
+    await db.update(stores)
+      .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
+      .where(eq(stores.id, store.id));
 
     return jsonSuccess(inserted[0], 201);
   } catch (error: unknown) {

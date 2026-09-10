@@ -18,13 +18,22 @@ export const GET: APIRoute = async ({ request }) => handleApiRoute(async () => {
   
   // Find store by subdomain
   const store = await db.query.stores.findFirst({
-    where: eq(stores.subdomain, query.subdomain)
+    where: eq(stores.subdomain, query.subdomain),
+    with: {
+      registrar: {
+        columns: { name: true },
+      },
+    },
   });
   
   if (!store) {
     throw new AppError('Store not found', 404, undefined, 'NOT_FOUND');
   }
   
+  const managedByAdmin = store.registeredBy && (store as { registrar?: { name?: string } }).registrar?.name
+    ? { name: (store as { registrar?: { name?: string } }).registrar!.name! }
+    : null;
+
   // Get active products with their categories
   const activeProducts = await db.query.products.findMany({
     where: and(
@@ -44,6 +53,7 @@ export const GET: APIRoute = async ({ request }) => handleApiRoute(async () => {
   
   return jsonSuccess({
     products: activeProducts,
-    categories: activeCategories
+    categories: activeCategories,
+    managedByAdmin,
   });
 });

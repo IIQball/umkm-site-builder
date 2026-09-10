@@ -23,14 +23,27 @@ describe('PATCH /api/products/[id]/stock', () => {
   });
 
   it('updates product stock status', async () => {
-    (auth.getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant' });
+    (auth.getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
     
-    (db.select as Mock).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: '1', isAvailable: true }]),
+    let selectCount = 0;
+    (db.select as Mock).mockImplementation(() => {
+      selectCount++;
+      if (selectCount === 1) {
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ id: '1', storeId: 's1', isAvailable: true }]),
+            }),
+          }),
+        };
+      }
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+          }),
         }),
-      }),
+      };
     });
 
     (db.update as Mock).mockReturnValue({

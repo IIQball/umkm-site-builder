@@ -3,8 +3,8 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/db';
-import { stores } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { stores, businessCategories, templates, userTemplates, templateCategories } from '@/db/schema';
+import { eq, and, isNull, desc, asc, sql } from 'drizzle-orm';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -21,10 +21,95 @@ const [store] = await db.select().from(stores).where(
 if (store) {
   return Astro.redirect('/dashboard/store-settings');
 }
+
+const categories = await db.select({
+  id: businessCategories.id,
+  name: businessCategories.name,
+}).from(businessCategories).orderBy(asc(businessCategories.name));
+
+// 1. Fetch 3 newest templates owned by this tenant
+const ownedTemplates = await db
+  .select({
+    id: templates.id,
+    name: templates.name,
+    description: templates.description,
+    thumbnailUrl: templates.thumbnailUrl,
+    price: templates.price,
+    slug: templates.slug,
+    categoryName: templateCategories.name,
+    isOwned: sql<boolean>`true`,
+  })
+  .from(userTemplates)
+  .innerJoin(templates, eq(userTemplates.templateId, templates.id))
+  .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
+  .where(eq(userTemplates.userId, user.id))
+  .orderBy(desc(userTemplates.acquiredAt))
+  .limit(3);
+
+let availableTemplates = ownedTemplates;
+
+// 2. If user doesn't own any templates, fetch 3 newest free templates
+if (availableTemplates.length === 0) {
+  const freeTemplates = await db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      description: templates.description,
+      thumbnailUrl: templates.thumbnailUrl,
+      price: templates.price,
+      slug: templates.slug,
+      categoryName: templateCategories.name,
+      isOwned: sql<boolean>`false`,
+    })
+    .from(templates)
+    .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
+    .where(and(eq(templates.price, 0), eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+    .orderBy(desc(templates.createdAt))
+    .limit(3);
+
+  availableTemplates = freeTemplates;
+}
+
+// 3. Fallback if no free templates: fetch any approved templates
+if (availableTemplates.length === 0) {
+  const anyTemplates = await db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      description: templates.description,
+      thumbnailUrl: templates.thumbnailUrl,
+      price: templates.price,
+      slug: templates.slug,
+      categoryName: templateCategories.name,
+      isOwned: sql<boolean>`false`,
+    })
+    .from(templates)
+    .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
+    .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+    .orderBy(desc(templates.createdAt))
+    .limit(3);
+
+  availableTemplates = anyTemplates;
+}
 ---
 
-<DashboardLayout title="Setup Toko Baru - UMKM Site Builder">
-  <div class="flex flex-col items-center justify-center p-4 py-12">
-    <OnboardingWizard client:load />
+<DashboardLayout title="Setup Toko Baru - UMKM Site Builder" breadcrumb="Setup Toko">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg font-bold tracking-tight text-main">Setup Toko Baru</h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Lengkapi langkah berikut untuk mengatur subdomain, identitas toko, alamat fisik, dan desain template toko online Anda.
+        </p>
+      </div>
+    </div>
+
+    <div class="animate-fade-in-up delay-150">
+      <OnboardingWizard
+        client:load
+        categories={categories}
+        templates={availableTemplates}
+      />
+    </div>
   </div>
 </DashboardLayout>

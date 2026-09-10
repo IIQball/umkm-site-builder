@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { db } from '@db/index';
-import { stores } from '@db/schema';
+import { stores, templates } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { OnboardStoreInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const parsedData = OnboardStoreInput.parse(body);
-    const { subdomain, name, waNumber, googleMapsUrl, tenantId } = parsedData;
+    const { subdomain, name, categoryId, waNumber, googleMapsUrl, address, regionData, templateId, tenantId } = parsedData;
 
     const targetUserId = (isAdminOrSuper && tenantId) ? tenantId : user.id;
     const registeredBy = isAdminOrSuper ? user.id : null;
@@ -59,6 +59,16 @@ export const POST: APIRoute = async ({ request }) => {
       return jsonError('Subdomain sudah digunakan', 409, undefined, 'DUPLICATE_KEY');
     }
 
+    let selectedTemplateId = templateId;
+    if (!selectedTemplateId) {
+      const [firstTpl] = await db
+        .select({ id: templates.id })
+        .from(templates)
+        .where(eq(templates.status, 'approved'))
+        .limit(1);
+      selectedTemplateId = firstTpl?.id || 'tpl_1789012356261_smzf9nzf0';
+    }
+
     const storeId = crypto.randomUUID();
 
     await db.insert(stores).values({
@@ -66,11 +76,16 @@ export const POST: APIRoute = async ({ request }) => {
       name,
       subdomain,
       userId: targetUserId,
-      templateId: 'system-default-template',
+      templateId: selectedTemplateId,
+      categoryId,
+      address,
       waNumber,
       googleMapsUrl,
       status: 'active',
-      customization: { isOnboarded: true },
+      customization: {
+        isOnboarded: true,
+        ...(regionData ? { region: regionData } : {}),
+      },
       registeredBy,
       lastEditedBy,
     });

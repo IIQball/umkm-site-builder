@@ -1,11 +1,5 @@
 <script context="module" lang="ts">
-  export type NavUser = {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    role?: string | null;
-    image?: string | null;
-  };
+  export type { NavUser } from './navbar.helpers';
 </script>
 
 <script lang="ts">
@@ -14,18 +8,17 @@
   import {
     Sun,
     Moon,
-    LayoutDashboard,
-    Palette,
-    ShoppingBag,
     LogOut,
     Menu,
     X,
     ChevronDown,
-    Shield,
     Sparkles,
-    Store,
-    Wallet,
   } from 'lucide-svelte';
+  import {
+    type NavUser,
+    getRoleBadge,
+    getRoleNavLinks,
+  } from './navbar.helpers';
 
   export let user: NavUser | null = null;
   export let currentPath: string = '';
@@ -85,35 +78,9 @@
     }
   };
 
-  const getRoleBadge = (role?: string | null) => {
-    switch (role) {
-      case 'designer':
-        return { label: 'Desainer', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
-      case 'admin':
-        return { label: 'Admin', color: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30' };
-      case 'superadmin':
-        return { label: 'Super Admin', color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30' };
-      default:
-        return { label: 'Tenant Toko', color: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' };
-    }
-  };
-
-  const getDashboardHref = (role?: string | null) => {
-    if (role === 'designer') return '/designer/wallet';
-    if (role === 'admin' || role === 'superadmin') return '/admin/templates';
-    return '/dashboard';
-  };
-
-  const getDashboardLabel = (role?: string | null) => {
-    if (role === 'designer') return 'Studio Desainer';
-    if (role === 'admin' || role === 'superadmin') return 'Panel Admin';
-    return 'Dashboard Toko';
-  };
-
   $: userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U');
   $: roleMeta = getRoleBadge(user?.role);
-  $: dashboardHref = getDashboardHref(user?.role);
-  $: dashboardLabel = getDashboardLabel(user?.role);
+  $: roleNavLinks = getRoleNavLinks(user?.role);
 </script>
 
 <nav class="sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-light transition-colors shadow-xs">
@@ -253,45 +220,15 @@
 
                 <!-- Navigation Links -->
                 <div class="py-1 space-y-0.5 text-xs font-semibold text-secondary">
-                  <a
-                    href={dashboardHref}
-                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {#if user.role === 'designer'}
-                      <Wallet size={15} class="text-emerald-500" />
-                    {:else if user.role === 'admin' || user.role === 'superadmin'}
-                      <Shield size={15} class="text-indigo-500" />
-                    {:else}
-                      <Store size={15} class="text-primary" />
-                    {/if}
-                    <span>{dashboardLabel}</span>
-                  </a>
-
-                  {#if user.role === 'tenant'}
+                  {#each roleNavLinks as link}
                     <a
-                      href="/dashboard/orders"
-                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-nested transition-colors cursor-pointer"
+                      href={link.href}
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer group"
                     >
-                      <ShoppingBag size={15} class="text-amber-500" />
-                      <span>Riwayat Pembelian</span>
+                      <svelte:component this={link.icon} size={15} class="text-secondary group-hover:text-primary transition-colors shrink-0" />
+                      <span>{link.label}</span>
                     </a>
-                  {:else if user.role === 'designer'}
-                    <a
-                      href="/designer/orders"
-                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-nested transition-colors cursor-pointer"
-                    >
-                      <ShoppingBag size={15} class="text-amber-500" />
-                      <span>Pesanan Masuk</span>
-                    </a>
-                  {/if}
-
-                  <a
-                    href="/templates"
-                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-nested transition-colors cursor-pointer"
-                  >
-                    <Palette size={15} class="text-violet-500" />
-                    <span>Katalog Template</span>
-                  </a>
+                  {/each}
                 </div>
 
                 <div class="border-t border-light my-1"></div>
@@ -384,22 +321,29 @@
 
       <div class="border-t border-light pt-3">
         {#if user}
-          <div class="space-y-2">
-            <a
-              href={dashboardHref}
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white font-bold text-xs shadow-sm cursor-pointer"
-            >
-              <LayoutDashboard size={15} />
-              <span>{dashboardLabel}</span>
-            </a>
-            <button
-              type="button"
-              on:click={handleSignOut}
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-500/10 text-rose-600 font-bold text-xs cursor-pointer"
-            >
-              <LogOut size={15} />
-              <span>Keluar dari Akun</span>
-            </button>
+          <div class="space-y-1">
+            <div class="px-3.5 py-1 text-4xs font-bold uppercase tracking-wider text-muted font-mono">
+              Menu {roleMeta.label}
+            </div>
+            {#each roleNavLinks as link}
+              <a
+                href={link.href}
+                class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-main hover:bg-nested transition-colors group"
+              >
+                <svelte:component this={link.icon} size={15} class="text-secondary group-hover:text-primary transition-colors shrink-0" />
+                <span>{link.label}</span>
+              </a>
+            {/each}
+            <div class="pt-2 border-t border-light">
+              <button
+                type="button"
+                on:click={handleSignOut}
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-500/10 text-rose-600 font-bold text-xs cursor-pointer hover:bg-rose-500/20 transition-colors"
+              >
+                <LogOut size={15} />
+                <span>Keluar dari Akun</span>
+              </button>
+            </div>
           </div>
         {:else}
           <div class="grid grid-cols-2 gap-2">

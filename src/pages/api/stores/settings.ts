@@ -43,6 +43,8 @@ export const PUT: APIRoute = async (context) => {
         name: data.name,
         waNumber: data.waNumber,
         googleMapsUrl: data.googleMapsUrl || undefined,
+        ...(data.address !== undefined ? { address: data.address } : {}),
+        ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
         lastEditedBy: user.id,
         updatedAt: new Date(),
       })

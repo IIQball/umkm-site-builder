@@ -1,0 +1,22 @@
+diff --git a/dist/core/app/base.js b/dist/core/app/base.js
+index 61fa4b1..169312f 100644
+--- a/dist/core/app/base.js
++++ b/dist/core/app/base.js
+@@ -104,7 +104,7 @@ class BaseApp {
+    */
+   setFetchHandler(handler) {
+     this.#fetchHandler = handler;
+-    this.#hasCustomFetchHandler = !(handler instanceof DefaultFetchHandler);
++    this.#hasCustomFetchHandler = !(handler instanceof DefaultFetchHandler || handler?.constructor?.name === "DefaultFetchHandler");
+   }
+   /**
+    * Returns the error handler used by this app. The default is a thin
+@@ -257,7 +257,7 @@ class BaseApp {
+       waitUntil
+     };
+     let response;
+-    if (this.#fetchHandler instanceof DefaultFetchHandler) {
++    if (this.#fetchHandler instanceof DefaultFetchHandler || this.#fetchHandler?.constructor?.name === "DefaultFetchHandler") {
+       response = await handleRequest(
+         new FetchState(this.manifest, request, resolvedOptions, {
+           streaming: this.resolveStreaming(),

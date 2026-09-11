@@ -124,7 +124,13 @@
     }
   };
 
-  const handleOpenAdd = () => openAddModal();
+  const handleOpenAdd = () => {
+    if (products.length >= 10) {
+      toast.error("Batas maksimum 10 produk tercapai. Fitur berbayar.");
+      return;
+    }
+    openAddModal();
+  };
 
   onMount(() => {
     if (storeId) fetchProducts();

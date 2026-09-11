@@ -52,12 +52,21 @@ describe('Products API', () => {
 
   describe('POST /api/products', () => {
     it('creates a new product', async () => {
-      (db.select as Mock).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+      (db.select as Mock).mockImplementation((opts) => {
+        if (opts && opts.count) {
+          return {
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ count: 0 }]),
+            }),
+          };
+        }
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+            }),
           }),
-        }),
+        };
       });
 
       (db.insert as Mock).mockReturnValue({

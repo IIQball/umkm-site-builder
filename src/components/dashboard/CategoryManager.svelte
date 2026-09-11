@@ -42,9 +42,9 @@
       const res = await fetch(`/api/categories?storeId=${storeId}`);
       const data = await res.json();
       if (res.ok) {
-        categories = data;
+        categories = data.data || [];
       } else {
-        error = data.error || 'Gagal memuat kategori';
+        error = data?.error?.message || data?.error || 'Gagal memuat kategori';
       }
     } catch {
       error = 'Gagal memuat kategori';
@@ -65,6 +65,10 @@
   });
 
   const openAddModal = () => {
+    if (categories.length >= 5) {
+      toast.error("Batas maksimum 5 kategori tercapai. Fitur berbayar.");
+      return;
+    }
     editingCategory = null;
     formName = '';
     error = null;
@@ -99,9 +103,10 @@
       if (res.ok) {
         await fetchCategories();
         isModalOpen = false;
+        window.dispatchEvent(new CustomEvent('quota-updated'));
         toast.success(editingCategory ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.');
       } else {
-        error = data.error || 'Gagal menyimpan kategori';
+        error = data?.error?.message || data?.error || 'Gagal menyimpan kategori';
         toast.error(error as string);
       }
     } catch {
@@ -132,10 +137,11 @@
       const data = await res.json();
       if (res.ok) {
         categories = categories.filter(c => c.id !== deleteId);
+        window.dispatchEvent(new CustomEvent('quota-updated'));
         toast.success('Kategori berhasil dihapus.');
         isDeleteModalOpen = false;
       } else {
-        error = data.error || 'Gagal menghapus kategori';
+        error = data?.error?.message || data?.error || 'Gagal menghapus kategori';
         toast.error(error as string);
       }
     } catch {

@@ -194,6 +194,21 @@
     if (initialCategories.length === 0) {
       fetchCategories();
     }
+
+    const handleCreateEvent = () => openCreateModal();
+    window.addEventListener('open_create_category_modal', handleCreateEvent);
+
+    const topBtn = document.getElementById('btn-add-category-top');
+    if (topBtn) {
+      topBtn.addEventListener('click', handleCreateEvent);
+    }
+
+    return () => {
+      window.removeEventListener('open_create_category_modal', handleCreateEvent);
+      if (topBtn) {
+        topBtn.removeEventListener('click', handleCreateEvent);
+      }
+    };
   });
 </script>
 
@@ -202,7 +217,6 @@
     bind:searchQuery
     {loading}
     onRefresh={fetchCategories}
-    onCreate={openCreateModal}
   />
 
   <!-- Categories Table Content -->

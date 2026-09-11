@@ -138,6 +138,75 @@ export class XenditClient {
   }
 
   /**
+   * Validate a bank account via Xendit Official Inquiries API or Mock Adapter
+   */
+  async validateBankAccount(params: {
+    bankCode: string;
+    accountNumber: string;
+  }): Promise<{ isValid: boolean; accountHolderName?: string; message?: string; httpStatus?: number; isSandbox?: boolean }> {
+    const bankCodeUpper = params.bankCode.trim().toUpperCase();
+    const cleanNum = params.accountNumber.replace(/\D/g, '');
+    const isSandbox = Boolean(this.apiKey && this.apiKey.startsWith('xnd_development_'));
+    const isProduction = Boolean(this.apiKey && this.apiKey.startsWith('xnd_production_'));
+    const isMock = !isSandbox && !isProduction;
+
+    // 1. Mock Adapter for test suite and missing key
+    if (isMock) {
+      if (cleanNum.length < 5 || /^0+$/.test(cleanNum)) {
+        return { isValid: false, httpStatus: 404, message: 'Nomor rekening tidak terdaftar pada bank yang dipilih' };
+      }
+      const mocks: Record<string, string> = {
+        BCA: 'AHMAD SURYA PRATAMA (MOCK)', BRI: 'SITI RAHMAWATI (MOCK)',
+        MANDIRI: 'DIMAS ARYA KUSUMA (MOCK)', BNI: 'LESTARI WULANDARI (MOCK)',
+        BTN: 'EKO PRASETYO (MOCK)', BSI: 'MUHAMMAD RIZKY FAUZAN (MOCK)',
+        CIMB: 'FARHAN MAULANA (MOCK)', MAYBANK: 'KEVIN TANUWIJAYA (MOCK)',
+        PERMATA: 'ANDI SAPUTRA (MOCK)',
+      };
+      return { isValid: true, httpStatus: 200, accountHolderName: mocks[bankCodeUpper] || `PEMILIK ${bankCodeUpper} TEST` };
+    }
+
+    // 2. Sandbox deterministic test mapping for official test account
+    if (isSandbox && cleanNum === '1234567890') {
+      return { isValid: true, httpStatus: 200, isSandbox: true, accountHolderName: 'TEST ACCOUNT SANDBOX' };
+    }
+
+    // 3. Official Xendit Bank Account Data Inquiries
+    try {
+      const response = await fetch(`${this.baseUrl}/bank_account_data_inquiries`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${Buffer.from(`${this.apiKey}:`).toString('base64')}`,
+        },
+        body: JSON.stringify({ bank_code: bankCodeUpper, account_number: cleanNum }),
+      });
+
+      if (!response.ok) {
+        const s = response.status;
+        const msg = s === 404
+          ? (isSandbox ? 'Mode Sandbox: Gunakan nomor rekening pengujian Xendit atau beralih ke API Key Production untuk validasi rekening riil.' : 'Nomor rekening tidak terdaftar pada bank yang dipilih')
+          : (s === 400 || s === 422 ? 'Format nomor rekening tidak sesuai' : (s === 401 || s === 403 ? 'Layanan verifikasi rekening sedang bermasalah' : 'Gagal memverifikasi rekening. Silakan periksa kembali nomor Anda.'));
+        return { isValid: false, httpStatus: s, isSandbox, message: msg };
+      }
+
+      const data = await response.json().catch(() => ({}));
+      const name = data.account_holder_name || data.bank_account_holder_name;
+      if (name) {
+        return { isValid: true, httpStatus: response.status, isSandbox, accountHolderName: String(name).toUpperCase() };
+      }
+
+      return {
+        isValid: false,
+        httpStatus: 404,
+        isSandbox,
+        message: isSandbox ? 'Mode Sandbox: Gunakan nomor rekening pengujian Xendit atau beralih ke API Key Production untuk validasi rekening riil.' : 'Nomor rekening tidak terdaftar pada bank yang dipilih',
+      };
+    } catch {
+      return { isValid: false, httpStatus: 500, isSandbox, message: 'Gagal memverifikasi rekening. Silakan periksa kembali nomor Anda.' };
+    }
+  }
+
+  /**
    * Verify webhook signature
    */
   verifyWebhookSignature(payload: string, signature: string): boolean {

@@ -43,17 +43,17 @@ try {
         </p>
       </div>
 
-      <!-- Quick Action / Link -->
+      <!-- Quick Action / Add Category -->
       <div class="flex items-center gap-2 flex-shrink-0">
         <Button
           client:load
-          href="/admin/templates"
-          variant="secondary"
+          id="btn-add-category-top"
+          variant="primary"
           size="md"
-          class="font-bold"
+          class="font-bold shadow-xs cursor-pointer"
         >
-          <span class="material-symbols-outlined text-primary text-base">palette</span>
-          <span>Buka Kurasi Template</span>
+          <span class="material-symbols-outlined text-base">add</span>
+          <span>Tambah Kategori</span>
         </Button>
       </div>
     </div>
@@ -100,4 +100,10 @@ try {
       <TemplateCategoryManager client:load {initialCategories} />
     </div>
   </div>
+
+  <script>
+    document.getElementById('btn-add-category-top')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('open_create_category_modal'));
+    });
+  </script>
 </DashboardLayout>

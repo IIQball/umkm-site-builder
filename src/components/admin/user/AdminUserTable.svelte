@@ -38,7 +38,7 @@
         </td>
         <td class="px-4 py-4">
           <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
-            {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Tenant' : item.role}
+            {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Merchant' : item.role === 'admin' ? 'Admin' : item.role}
           </span>
         </td>
         <td class="px-4 py-4 text-xs text-muted">

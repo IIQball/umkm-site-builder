@@ -60,14 +60,22 @@ export const adminStatusUpdateSchema = z.object({
 export type AdminStatusUpdateInput = z.infer<typeof adminStatusUpdateSchema>;
 
 export const manualUserRegistrationSchema = z.object({
-  role: z.enum(['tenant', 'designer'], { required_error: 'Peran wajib dipilih' }),
+  role: z.enum(['tenant', 'designer', 'admin'], { required_error: 'Peran wajib dipilih' }),
   name: z.string().min(3, 'Nama minimal 3 karakter'),
   email: z.string().email('Format email tidak valid'),
-  password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
-  confirmPassword: z.string().min(8, 'Konfirmasi sandi minimal 8 karakter'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Konfirmasi kata sandi tidak cocok",
-  path: ["confirmPassword"],
-});
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter').optional(),
+  confirmPassword: z.string().min(8, 'Konfirmasi sandi minimal 8 karakter').optional(),
+}).refine(
+  (data) => {
+    if (data.role !== 'admin') {
+      return !!data.password && !!data.confirmPassword && data.password === data.confirmPassword;
+    }
+    return true;
+  },
+  {
+    message: "Kata sandi wajib diisi dan konfirmasi sandi harus cocok",
+    path: ["confirmPassword"],
+  }
+);
 
 export type ManualUserRegistrationInput = z.infer<typeof manualUserRegistrationSchema>;

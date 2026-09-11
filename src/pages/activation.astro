@@ -1,0 +1,20 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ResetPasswordForm from '@/components/auth/ResetPasswordForm.svelte';
+
+const title = "Aktivasi Akun";
+const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktifkan akun Anda.";
+
+// We reuse the ResetPasswordForm because it already handles token validation and password reset logic
+---
+
+<AuthLayout {title} {description}>
+  <div class="mb-8 animate-fade-in-up">
+    <h1 class="text-2xl font-bold text-main mb-2 tracking-tight">{title}</h1>
+    <p class="text-sm text-secondary leading-relaxed">
+      {description}
+    </p>
+  </div>
+  
+  <ResetPasswordForm client:load />
+</AuthLayout>

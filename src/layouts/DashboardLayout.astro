@@ -53,8 +53,10 @@ const userJson = JSON.stringify(user);
       <!-- Main: sticky header + scrollable content -->
       <div class="flex flex-col flex-1 min-w-0 overflow-hidden" id="dashboard-main">
         {!hideSidebar && <DashboardNavbar client:load userJson={userJson} breadcrumb={breadcrumb} />}
-        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <slot />
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8" id="dashboard-scroll-area">
+          <div class="w-full max-w-7xl mx-auto min-w-0" id="dashboard-content-container">
+            <slot />
+          </div>
         </main>
       </div>
     </div>

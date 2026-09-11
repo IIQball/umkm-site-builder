@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Plus, RefreshCw } from 'lucide-svelte';
+  import { RefreshCw } from 'lucide-svelte';
   import { Button } from '@/components/ui';
 
   export let searchQuery: string = '';
   export let loading: boolean = false;
   export let onRefresh: () => void;
-  export let onCreate: () => void;
 </script>
 
 <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -44,15 +43,6 @@
         title="Refresh Data"
       >
         <RefreshCw size={14} class={loading ? 'animate-spin' : ''} />
-      </Button>
-
-      <Button
-        variant="primary"
-        size="sm"
-        on:click={onCreate}
-      >
-        <Plus size={15} class="stroke-[2.5]" />
-        <span>Tambah Kategori</span>
       </Button>
     </div>
   </div>

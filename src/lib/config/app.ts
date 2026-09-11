@@ -38,7 +38,7 @@ export const config = {
   },
 
   payments: {
-    xenditApiKey: env('XENDIT_API_KEY'),
+    xenditApiKey: env('XENDIT_API_KEY') || env('XENDIT_SECRET_KEY'),
     xenditWebhookSecret: env('XENDIT_WEBHOOK_SECRET'),
   },
 

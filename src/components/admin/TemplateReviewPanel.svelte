@@ -165,47 +165,58 @@
         />
       </div>
 
-      <!-- Tab Status Switcher Buttons -->
-      <div class="flex items-center p-1 bg-nested/80 border border-light rounded-full shadow-2xs">
+      <!-- Segmented Status Filter (Exact matching style from OrderHistoryTable) -->
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer {activeTab === 'pending' ? 'bg-card text-main shadow-2xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handleTabChange('pending')}
+          on:click={() => handleTabChange('all')}
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeTab === 'all'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
+          Semua ({templates.length})
+        </button>
+
+        <button
+          type="button"
+          on:click={() => handleTabChange('pending')}
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'pending'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
           <span>Menunggu</span>
           {#if countPending > 0}
-            <span class="ml-1 px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-3xs font-mono">{countPending}</span>
+            <span class="opacity-80 font-mono text-3xs">({countPending})</span>
           {/if}
         </button>
 
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer {activeTab === 'approved' ? 'bg-card text-main shadow-2xs' : 'text-secondary hover:text-main'}"
           on:click={() => handleTabChange('approved')}
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'approved'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           <span>Disetujui</span>
           {#if countApproved > 0}
-            <span class="ml-1 px-1.5 py-0.2 bg-emerald-500 text-white rounded-full text-3xs font-mono">{countApproved}</span>
+            <span class="opacity-80 font-mono text-3xs">({countApproved})</span>
           {/if}
         </button>
 
         <button
           type="button"
-          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer {activeTab === 'rejected' ? 'bg-card text-main shadow-2xs' : 'text-secondary hover:text-main'}"
           on:click={() => handleTabChange('rejected')}
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'rejected'
+            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
         >
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
           <span>Ditolak</span>
           {#if countRejected > 0}
-            <span class="ml-1 px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-3xs font-mono">{countRejected}</span>
+            <span class="opacity-80 font-mono text-3xs">({countRejected})</span>
           {/if}
-        </button>
-
-        <button
-          type="button"
-          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer {activeTab === 'all' ? 'bg-card text-main shadow-2xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handleTabChange('all')}
-        >
-          <span>Semua</span>
         </button>
       </div>
     </div>

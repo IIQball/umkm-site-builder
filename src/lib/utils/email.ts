@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { WorkerMailer } from 'worker-mailer';
 import { config } from '@/lib/config/app';
 import { logger } from './logger';
 
@@ -9,6 +9,9 @@ interface SendEmailOptions {
   html?: string;
 }
 
+// nodemailer's SMTP transport needs node:net/node:tls sockets, which Cloudflare Workers do not
+// provide, so the connection hangs until the request times out. worker-mailer speaks SMTP over
+// cloudflare:sockets instead. Port 465 is implicit TLS, 587 is plaintext upgraded via STARTTLS.
 export async function sendEmail(options: SendEmailOptions) {
   const { host, port, user, pass } = config.email;
 
@@ -17,22 +20,25 @@ export async function sendEmail(options: SendEmailOptions) {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
+    await WorkerMailer.send(
+      {
+        host,
+        port,
+        secure: port === 465,
+        startTls: port !== 465,
+        credentials: { username: user, password: pass },
+        authType: 'plain',
+      },
+      {
+        from: { name: 'UMKM Site Builder', email: user },
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      },
+    );
 
-    const info = await transporter.sendMail({
-      from: `"UMKM Site Builder" <${user}>`,
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-      html: options.html,
-    });
-
-    logger.info(`Email terkirim (Nodemailer): ${info.messageId}`);
+    logger.info(`Email terkirim (worker-mailer) ke ${options.to}`);
     return true;
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));

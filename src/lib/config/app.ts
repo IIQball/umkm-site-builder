@@ -42,6 +42,13 @@ export const config = {
     xenditWebhookSecret: env('XENDIT_WEBHOOK_SECRET'),
   },
 
+  email: {
+    host: env('SMTP_HOST'),
+    port: Number(env('SMTP_PORT')) || 465,
+    user: env('SMTP_USER'),
+    pass: env('SMTP_PASS'),
+  },
+
   media: {
     cloudinaryName: env('CLOUDINARY_NAME'),
     cloudinaryApiKey: env('CLOUDINARY_API_KEY'),

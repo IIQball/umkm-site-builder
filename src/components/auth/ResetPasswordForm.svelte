@@ -5,11 +5,13 @@
   import Input from "@/components/ui/Input.svelte";
   import { Eye, EyeOff } from "lucide-svelte";
   import { authClient } from "@/lib/auth-client";
+  import { toast } from "@/lib/toast";
 
   let token = "";
   let password = "";
   let confirmPassword = "";
-  let error = "";
+  let name = "";
+  let uid = "";
   let successMessage = "";
   let loading = false;
   let isTokenValid = true;
@@ -25,11 +27,17 @@
   };
 
   onMount(() => {
-    // Read the token from URL search params
+    // Read the token, uid, and name from URL search params
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get("token");
+    const nameParam = urlParams.get("name");
+    const uidParam = urlParams.get("uid");
+    
+    if (nameParam) name = nameParam;
+    if (uidParam) uid = uidParam;
+
     if (!tokenParam) {
-      error = "Token verifikasi tidak ditemukan di URL. Silakan minta tautan reset password yang baru.";
+      toast.error("Token verifikasi tidak ditemukan di URL. Silakan minta tautan reset password yang baru.");
       isTokenValid = false;
     } else {
       token = tokenParam;
@@ -39,6 +47,7 @@
   const passwordSchema = z.object({
     password: z.string().min(8, "Kata sandi minimal 8 karakter"),
     confirmPassword: z.string(),
+    name: z.string().min(3, "Nama minimal 3 karakter"),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Konfirmasi kata sandi tidak cocok",
     path: ["confirmPassword"],
@@ -46,14 +55,13 @@
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    error = "";
     successMessage = "";
 
     if (!isTokenValid) return;
 
-    const validationResult = passwordSchema.safeParse({ password, confirmPassword });
+    const validationResult = passwordSchema.safeParse({ password, confirmPassword, name });
     if (!validationResult.success) {
-      error = validationResult.error.errors[0].message;
+      toast.error(validationResult.error.errors[0].message);
       return;
     }
 
@@ -68,21 +76,24 @@
         body: JSON.stringify({
           token,
           password,
+          uid,
+          name
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        error = data.error || "Gagal mengatur ulang kata sandi";
+        toast.error(data.error || "Gagal mengatur ulang kata sandi");
       } else {
         await authClient.signOut(); // Pastikan otomatis logout
+        toast.success("Kata sandi berhasil diatur ulang! Anda sekarang dapat masuk dengan sandi baru.");
         successMessage = "Kata sandi berhasil diatur ulang! Anda sekarang dapat masuk dengan sandi baru.";
         password = "";
         confirmPassword = "";
       }
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : "Terjadi kesalahan sistem";
+      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
     } finally {
       loading = false;
     }
@@ -90,12 +101,6 @@
 </script>
 
 <form novalidate on:submit={handleSubmit} class="space-y-5 w-full">
-  {#if error}
-    <div class="p-4 rounded-2xl bg-error/10 text-error text-body-sm font-medium border border-error/20 text-center w-full animate-fade-in-up">
-      {error}
-    </div>
-  {/if}
-
   {#if successMessage}
     <div class="p-4 rounded-2xl bg-success/10 text-success text-body-sm font-medium border border-success/20 text-center w-full space-y-4 animate-fade-in-up">
       <p>{successMessage}</p>
@@ -105,6 +110,18 @@
     </div>
   {:else}
     <div class="space-y-4">
+      {#if uid}
+      <Input
+        label="Nama Lengkap"
+        id="name"
+        type="text"
+        bind:value={name}
+        placeholder="Nama Lengkap"
+        disabled={loading || !isTokenValid}
+        size="md"
+      />
+      {/if}
+
       <Input
         label="Kata Sandi Baru"
         id="password"

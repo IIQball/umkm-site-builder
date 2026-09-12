@@ -98,12 +98,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     { prefix: '/admin/template-categories', roles: ['superadmin'] },
     { prefix: '/admin/templates', roles: ['superadmin'] },
     { prefix: '/admin/whitelist', roles: ['superadmin'] },
-    { prefix: '/admin/users', roles: ['superadmin'] },
+    { prefix: '/admin/users', roles: ['superadmin', 'admin'] },
     { prefix: '/api/admin/settings', roles: ['superadmin'] },
     { prefix: '/api/admin/template-categories', roles: ['superadmin'] },
     { prefix: '/api/admin/templates', roles: ['superadmin'] },
     { prefix: '/api/admin/whitelist', roles: ['superadmin'] },
-    { prefix: '/api/admin/users', roles: ['superadmin'] },
+    { prefix: '/api/admin/users', roles: ['superadmin', 'admin'] },
 
     // Admin & Superadmin general access
     { prefix: '/admin', roles: ['admin', 'superadmin'] },

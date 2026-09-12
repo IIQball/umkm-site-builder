@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Card, Button, Input } from '@/components/ui';
   import { Store, ExternalLink, Settings, Package, ShoppingBag, Search } from 'lucide-svelte';
+  import AdminUserAddModal from './AdminUserAddModal.svelte';
 
   interface AssistedStoreItem {
     id: string;
@@ -24,8 +25,10 @@
   }
 
   export let stores: AssistedStoreItem[] = [];
+  export let currentUser: any = null;
 
   let searchQuery = '';
+  let isAddModalOpen = false;
 
   $: filteredStores = stores.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -64,20 +67,31 @@
         </div>
       </div>
 
-      {#if stores.length > 0}
-        <div class="w-full sm:w-64">
-          <Input
-            id="search-stores"
-            placeholder="Cari toko / tenant..."
-            bind:value={searchQuery}
-            className="text-xs"
-          >
-            <span slot="prefix" class="text-muted">
-              <Search size={14} />
-            </span>
-          </Input>
-        </div>
-      {/if}
+      <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+        {#if stores.length > 0}
+          <div class="w-full sm:w-64">
+            <Input
+              id="search-stores"
+              placeholder="Cari toko / tenant..."
+              bind:value={searchQuery}
+              className="text-xs"
+            >
+              <span slot="prefix" class="text-muted">
+                <Search size={14} />
+              </span>
+            </Input>
+          </div>
+        {/if}
+        <Button
+          variant="primary"
+          size="md"
+          on:click={() => isAddModalOpen = true}
+          class="font-bold whitespace-nowrap w-full sm:w-auto"
+        >
+          <span class="material-symbols-outlined text-white text-base">person_add</span>
+          <span>Tambah Merchant</span>
+        </Button>
+      </div>
     </div>
 
     <!-- Content -->
@@ -202,3 +216,13 @@
     {/if}
   </Card>
 </div>
+
+<AdminUserAddModal 
+  isOpen={isAddModalOpen} 
+  currentUser={currentUser}
+  on:close={() => isAddModalOpen = false} 
+  on:success={() => {
+    isAddModalOpen = false;
+    window.location.reload();
+  }} 
+/>

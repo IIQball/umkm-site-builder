@@ -17,7 +17,7 @@ import { relations, sql } from 'drizzle-orm';
 // 1. ENUMS
 // ==========================================
 export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'designer', 'tenant']);
-export const genericStatusEnum = pgEnum('generic_status', ['active', 'suspended']);
+export const genericStatusEnum = pgEnum('generic_status', ['active', 'suspended', 'pending']);
 export const templateStatusEnum = pgEnum('template_status', ['draft', 'pending', 'approved', 'rejected']);
 export const storeStatusEnum = pgEnum('store_status', ['pending', 'active', 'inactive', 'suspended']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchase']);
@@ -43,6 +43,7 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
+  registeredBy: text('registered_by'),
 });
 
 export const tenantInvitations = pgTable('tenant_invitations', {

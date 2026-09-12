@@ -17,14 +17,6 @@ if (!subdomain) {
   return new Response(null, { status: 404, statusText: "Not Found" });
 }
 
-// 1. Isolasi Akses Langsung: Jika diakses langsung via domain utama (bukan dari rewrite subdomain), redirect ke subdomain URL
-const isDirectAccess = !Astro.locals.subdomain || Astro.locals.subdomain !== subdomain;
-if (isDirectAccess) {
-  const mainDomain = import.meta.env.PUBLIC_MAIN_DOMAIN || "localhost:4321";
-  const cleanMainDomain = mainDomain.replace(/^www\./, "");
-  return Astro.redirect(`${Astro.url.protocol || "http:"}//${subdomain}.${cleanMainDomain}/`, 301);
-}
-
 // 2. Data Fetching: Ambil store dengan relasi template, templateCategory, dan businessCategory
 const store = await db.query.stores.findFirst({
   where: and(

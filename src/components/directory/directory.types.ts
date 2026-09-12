@@ -37,8 +37,5 @@ export interface DirectoryMeta {
 }
 
 export function getStoreUrl(subdomain: string): string {
-  if (typeof window === 'undefined') return '#';
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const baseHost = isLocal ? 'localhost:4321' : window.location.host.replace(/^www\./, '');
-  return `${window.location.protocol}//${subdomain}.${baseHost}`;
+  return `/storefront/${subdomain}`;
 }

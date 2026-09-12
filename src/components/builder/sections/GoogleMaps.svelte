@@ -29,15 +29,26 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
   export let layoutPreset: string = 'fullwidth_map';
-  export let store: { googleMapsUrl?: string; waNumber?: string; name?: string; address?: string } | null = null;
+  export let store: {
+    googleMapsUrl?: string;
+    googleMapsEmbedUrl?: string;
+    waNumber?: string;
+    name?: string;
+    address?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+  } | null = null;
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'fullwidth_map';
 
   // Dual-mode data: Tenant DB vs Designer props
   $: rawAddress = store?.address || props?.address || DEFAULT_MAP_ADDRESS;
   $: rawGoogleMapsUrl = store?.googleMapsUrl || props?.googleMapsUrl || '';
+  $: rawGoogleMapsEmbedUrl = store?.googleMapsEmbedUrl || (props?.googleMapsEmbedUrl as string) || '';
   $: rawWaNumber = store?.waNumber || props?.whatsappNumber || '';
-  $: storeName = store?.name || (props?.markerTitle as string) || DEFAULT_STORE_NAME;
+  $: storeName = store?.name || (props?.markerTitle as string) || (props?.storeName as string) || DEFAULT_STORE_NAME;
+  $: lat = store?.latitude ?? (typeof props?.latitude === 'number' ? props.latitude : null);
+  $: lng = store?.longitude ?? (typeof props?.longitude === 'number' ? props.longitude : null);
 
   $: badge = (props?.badge as string) ?? 'Lokasi Gerai Fisik';
   $: title = (props?.title as string) || DEFAULT_MAP_TITLE;
@@ -48,14 +59,22 @@
   $: directionsLandmark = (props?.directionsLandmark as string) || '100 meter ke arah timur dari bundaran kota, toko berada di sisi kiri jalan.';
   $: directionsParking = (props?.directionsParking as string) || 'Lahan parkir aman memuat mobil dan motor dengan pengawasan juru parkir resmi.';
   $: mapHeight = (props?.mapHeight as string) || '380px';
-  $: zoom = typeof props?.zoom === 'number' ? props.zoom : 14;
+  $: zoom = typeof props?.zoom === 'number' ? props.zoom : 15;
 
   $: branches = (Array.isArray(props?.branches) && props.branches.length > 0
     ? props.branches
     : DEFAULT_BRANCHES) as MapBranchItem[];
 
-  $: mapEmbedUrl = buildMapEmbedUrl(rawGoogleMapsUrl || rawAddress, zoom);
-  $: directMapsUrl = buildDirectMapsUrl(rawGoogleMapsUrl || rawAddress);
+  // Priority hierarchy for embed URL:
+  // 1. Direct embed URL provided
+  // 2. buildMapEmbedUrl using coordinates (lat, lng), URL, or clean address
+  $: mapEmbedUrl = (() => {
+    if (rawGoogleMapsEmbedUrl && rawGoogleMapsEmbedUrl.includes('output=embed')) {
+      return rawGoogleMapsEmbedUrl;
+    }
+    return buildMapEmbedUrl(rawGoogleMapsUrl || rawAddress, zoom, lat, lng, storeName, rawAddress);
+  })();
+  $: directMapsUrl = buildDirectMapsUrl(rawGoogleMapsUrl || rawAddress, lat, lng);
   $: whatsappUrl = buildWhatsAppHelpLink(rawWaNumber);
 
   // Preset 3 and 8 handle their own minimal titles
@@ -70,10 +89,7 @@
   }`}
   style="container-type: inline-size; container-name: mapscard;"
 >
-  <div
-    class="builder-safe-container"
-    style="max-width: var(--active-max-width, var(--theme-max-width, 1200px)); margin: 0 auto; padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
-  >
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     {#if showHeader}
       <MapsHeader {sectionId} {badge} {title} {subtitle} />
     {/if}

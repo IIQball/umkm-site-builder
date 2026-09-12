@@ -2,7 +2,7 @@
   import type { AuthenticatedUser } from "@/lib/auth";
   import { getRoleConfig, type NavGroup } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
-  import SidebarUserProfile from "./SidebarUserProfile.svelte";
+  import TenantQuota from "./TenantQuota.svelte";
 
   export let user: AuthenticatedUser;
   export let navGroups: NavGroup[] = [];
@@ -14,7 +14,6 @@
     signOut: void;
   }>();
 
-  $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
   $: roleCfg = getRoleConfig(user.role);
   $: sidebarWidth = collapsed ? "76px" : "260px";
 
@@ -186,11 +185,7 @@
   </nav>
 
   <!-- Bottom User Profile & Sign Out -->
-  <SidebarUserProfile
-    {user}
-    {userInitial}
-    {roleCfg}
-    {collapsed}
-    onSignOut={() => dispatch("signOut")}
-  />
+  {#if user.role === 'tenant'}
+    <TenantQuota {collapsed} />
+  {/if}
 </aside>

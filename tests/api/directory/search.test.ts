@@ -41,6 +41,18 @@ describe('Directory Search API', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
+  it('should reject invalid latitude/longitude', async () => {
+    const res = (await GET({
+      request: new Request('http://localhost:4321/api/directory/search?lat=95&lng=114'),
+      params: {},
+    } as unknown as Parameters<typeof GET>[0])) as Response;
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
   it('should return successfully when valid parameters are provided', async () => {
     const res = (await GET({
       request: new Request('http://localhost:4321/api/directory/search?page=1&limit=10'),
@@ -63,5 +75,28 @@ describe('Directory Search API', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
+  });
+
+  it('should support categoryId and keyword filter', async () => {
+    const res = (await GET({
+      request: new Request('http://localhost:4321/api/directory/search?categoryId=cat-123&keyword=batik'),
+      params: {},
+    } as unknown as Parameters<typeof GET>[0])) as Response;
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+  });
+
+  it('should support geolocation coordinates and radius filter', async () => {
+    const res = (await GET({
+      request: new Request('http://localhost:4321/api/directory/search?lat=-8.2192&lng=114.3692&radius=15'),
+      params: {},
+    } as unknown as Parameters<typeof GET>[0])) as Response;
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.data).toBeInstanceOf(Array);
   });
 });

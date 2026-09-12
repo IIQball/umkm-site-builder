@@ -5,12 +5,14 @@ import * as authLib from '@/lib/auth';
 import { xenditClient } from '@/lib/finance/xendit';
 
 vi.mock('@/lib/db/client', () => {
+  const limitFn = vi.fn().mockResolvedValue([{ id: 'user_1', email: 'user@example.com', adminServiceFee: 5000 }]);
   const mockDb = {
     select: vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: 'user_1', email: 'user@example.com' }]),
+          limit: limitFn,
         }),
+        limit: limitFn,
       }),
     }),
     query: {
@@ -265,5 +267,71 @@ describe('POST /api/transactions/template-purchase', () => {
       })
     );
     expect(mockInsert).toHaveBeenCalled();
+  });
+
+  it('should include adminServiceFee and assistedBy when initiated by admin for tenant', async () => {
+    mockGetAuthUser.mockResolvedValue({
+      id: 'admin_1',
+      name: 'Admin Pendamping',
+      email: 'admin@example.com',
+      role: 'admin',
+      status: 'active',
+    });
+    mockFindTemplate.mockResolvedValue({
+      id: 'tpl_paid',
+      name: 'Paid Template',
+      price: 50000,
+      status: 'approved',
+    });
+    mockFindUserTemplate.mockResolvedValue(null);
+
+    mockCreateInvoice.mockResolvedValue({
+      id: 'invoice_xendit_assisted',
+      invoiceNum: 'INV-tenant_1-12345678',
+      invoiceUrl: 'https://checkout.xendit.co/web/invoice_xendit_assisted',
+    });
+
+    let insertedTransaction: Record<string, unknown> = {};
+    mockInsert.mockReturnValue({
+      values: vi.fn().mockImplementation((val) => {
+        insertedTransaction = val;
+        return Promise.resolve(undefined);
+      }),
+    });
+
+    const request = new Request('http://localhost:4321/api/transactions/template-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        templateId: 'tpl_paid',
+        tenantId: 'tenant_1',
+      }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+
+    // Total amount should be template.price (50000) + adminServiceFee (5000) = 55000
+    expect(mockCreateInvoice).toHaveBeenCalledWith(
+      expect.objectContaining({
+        amount: 55000,
+        metadata: expect.objectContaining({
+          assistedBy: 'admin_1',
+          adminFee: 5000,
+        }),
+      })
+    );
+
+    // Transaction inserted should have total amount 55000, adminFee 5000, assistedBy 'admin_1'
+    expect(insertedTransaction.amount).toBe(55000);
+    expect(insertedTransaction.adminFee).toBe(5000);
+    expect(insertedTransaction.assistedBy).toBe('admin_1');
+    expect(insertedTransaction.userId).toBe('tenant_1');
   });
 });

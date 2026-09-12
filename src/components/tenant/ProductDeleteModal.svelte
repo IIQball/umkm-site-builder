@@ -20,6 +20,7 @@
       const data = await res.json();
       if (data.ok) {
         closeModal();
+        window.dispatchEvent(new CustomEvent('quota-updated'));
         dispatch('success');
       } else {
         alert('Gagal menghapus: ' + data.error.message);

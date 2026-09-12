@@ -6,7 +6,6 @@
   import Button from '../../../ui/Button.svelte';
   import Input from '../../../ui/Input.svelte';
   import Textarea from '../../../ui/Textarea.svelte';
-  import Select from '../../../ui/Select.svelte';
   import Card from '../../../ui/Card.svelte';
   import Badge from '../../../ui/Badge.svelte';
   import { formatIDR } from '@/lib/currency';
@@ -37,7 +36,6 @@
     name: "",
     phone: "",
     address: "",
-    delivery: "Kurir Toko / Standar",
     notes: ""
   };
 
@@ -90,7 +88,7 @@
       .map((opt: Record<string, unknown>) => opt.name)
       .join(", ") || "Standar";
 
-    const message = `Halo, saya ingin memesan produk berikut secara langsung:\n\n*${product?.name}*\nJumlah: ${qty}\nVarian: ${selectionsText}\nSubtotal: ${formatIDR(totalPrice)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nPengiriman: ${form.delivery}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    const message = `Halo, saya ingin memesan produk berikut secara langsung:\n\n*${product?.name}*\nJumlah: ${qty}\nVarian: ${selectionsText}\nSubtotal: ${formatIDR(totalPrice)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     
     const waUrl = generateWhatsAppLink(storeWaNumber || '6281234567890', message);
     window.open(waUrl, "_blank");
@@ -241,18 +239,7 @@
             <Textarea id="form-address" label="Alamat Lengkap" required={true} bind:value={form.address} placeholder="Jalan, No Rumah, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten, Kodepos" rows={3} />
           </div>
 
-          <div>
-            <Select
-              id="form-delivery"
-              label="Opsi Pengantaran"
-              required={true}
-              bind:value={form.delivery}
-              options={[
-                { value: 'Reguler', label: 'Reguler (Estimasi 2-3 Hari)' },
-                { value: 'Instan', label: 'Instan (Gojek/Grab)' }
-              ]}
-            />
-          </div>
+
 
           <div class="mb-8">
             <Input

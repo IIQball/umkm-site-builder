@@ -25,3 +25,19 @@ export const subdomainField = z
   .refine((val) => !SUBDOMAIN_BLACKLIST.has(val.toLowerCase()), {
     message: 'Subdomain tidak tersedia (kata terlarang)',
   });
+
+export function validateSubdomainLocally(input: string): string | null {
+  if (!input) return null;
+  if (input.length < 3) return 'Subdomain minimal 3 karakter';
+  if (input.length > 63) return 'Subdomain maksimal 63 karakter';
+  if (!SUBDOMAIN_PATTERN.test(input)) {
+    return 'Subdomain hanya boleh huruf kecil, angka, dan tanda hubung';
+  }
+  if (input.startsWith('-') || input.endsWith('-')) {
+    return 'Subdomain tidak boleh diawali atau diakhiri tanda hubung';
+  }
+  if (SUBDOMAIN_BLACKLIST.has(input.toLowerCase())) {
+    return 'Subdomain tidak tersedia (kata terlarang)';
+  }
+  return null;
+}

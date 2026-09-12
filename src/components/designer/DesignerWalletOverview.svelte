@@ -64,19 +64,19 @@
 </script>
 
 <div class="space-y-8 md:space-y-10">
-  <!-- Stat Cards -->
+  <!-- Row 1: Saldo Status Cards -->
   <DesignerStatCards
     balance={walletSummary.balance}
     availableBalance={walletSummary.availableBalance}
-    {totalNetIncome}
-    {totalTemplatesSold}
     {settlementDelayDays}
   />
 
-  <!-- Authentic Bank Card with Integrated Payout Action & History -->
+  <!-- Row 2: Performance Stats stacked 1-col beside Bank Card & Full Width Payout History -->
   <DesignerBankWithdraw
     bind:balance={walletSummary.balance}
     bind:availableBalance={walletSummary.availableBalance}
+    {totalNetIncome}
+    {totalTemplatesSold}
     {settlementDelayDays}
   />
 

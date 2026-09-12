@@ -2,6 +2,8 @@
   import { Building2, Pencil } from 'lucide-svelte';
   import { formatIDR } from '@/lib/utils/format';
   import { Button } from '@/components/ui';
+  import { getBankBrandConfig } from './bankBranding.helpers';
+  import BankCardOrnament from './BankCardOrnament.svelte';
   import type { BankAccount } from '@/types';
 
   export let bankAccount: BankAccount | null = null;
@@ -20,89 +22,105 @@
     (bankAccount as any)?.userName ||
     'Belum Diatur'
   ).toUpperCase();
+
+  $: brandConfig = getBankBrandConfig(bankAccount?.bankName || (bankAccount as any)?.bankCode);
+
+  $: lastFourDigits = bankAccount?.accountNumber && bankAccount.accountNumber.length > 4
+    ? bankAccount.accountNumber.slice(-4)
+    : bankAccount?.accountNumber || '••••';
 </script>
 
-<div class="mb-6">
+<div class="h-full">
   {#if isLoading && !bankAccount}
-    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-8 text-center animate-pulse space-y-4 shadow-xl">
+    <div class="h-full bg-slate-950 border border-slate-800 rounded-3xl p-8 text-center animate-pulse space-y-4 shadow-xl flex flex-col justify-center">
       <div class="h-8 bg-slate-900 rounded-xl w-1/4 mx-auto"></div>
       <div class="h-6 bg-slate-900 rounded-lg w-1/2 mx-auto"></div>
       <div class="h-12 bg-slate-900 rounded-2xl w-1/3 mx-auto mt-4"></div>
     </div>
   {:else if bankAccount}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-orange/30 p-6 sm:p-8 text-white shadow-2xl shadow-black/30 group hover:border-orange/50 transition-all duration-300">
-      <div class="absolute -right-16 -top-16 w-60 h-60 rounded-full bg-orange/20 blur-3xl pointer-events-none"></div>
-      <div class="absolute -left-12 -bottom-12 w-52 h-52 rounded-full bg-orange/10 blur-2xl pointer-events-none"></div>
-      <div class="absolute inset-0 bg-[radial-gradient(theme(colors.orange.DEFAULT)_1px,transparent_1px)] [background-size:18px_18px] opacity-10 pointer-events-none"></div>
+    <div class="relative h-full min-h-[290px] flex flex-col justify-between overflow-hidden rounded-3xl {brandConfig.gradientClass} border {brandConfig.borderClass} p-6 sm:p-8 text-white shadow-2xl shadow-black/40 group transition-all duration-300">
+      <!-- Dynamic Ambient Glows using bank tokens -->
+      <div class="absolute -right-16 -top-16 w-60 h-60 rounded-full {brandConfig.glowClass} blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-52 h-52 rounded-full {brandConfig.glowClass} blur-2xl pointer-events-none opacity-60"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:18px_18px] opacity-20 pointer-events-none"></div>
 
-      <div class="relative z-10">
-        <!-- Top Row -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-8 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-0.5 border border-amber-300/60 shadow-sm relative overflow-hidden flex items-center justify-center flex-shrink-0">
-              <div class="w-full h-full border border-amber-900/30 rounded-[3px] grid grid-cols-2 gap-0.5 opacity-70">
-                <div class="border-r border-b border-amber-900/40"></div>
-                <div class="border-b border-amber-900/40"></div>
-                <div class="border-r border-amber-900/40"></div>
-                <div></div>
+      <!-- Authentic Bank Decorative Graphic Ornament Vector Layer -->
+      <BankCardOrnament bankCode={bankAccount?.bankName || (bankAccount as any)?.bankCode} />
+
+      <div class="relative z-10 flex flex-col justify-between h-full">
+        <div>
+          <!-- Top Row: Chip + Bank Local Vector Logo & Action -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div class="flex items-center gap-3">
+              <!-- Smart Chip Visual -->
+              <div class="w-12 h-9 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-0.5 border border-amber-300/60 shadow-sm relative overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div class="w-full h-full border border-amber-900/30 rounded-[3px] grid grid-cols-2 gap-0.5 opacity-70">
+                  <div class="border-r border-b border-amber-900/40"></div>
+                  <div class="border-b border-amber-900/40"></div>
+                  <div class="border-r border-amber-900/40"></div>
+                  <div></div>
+                </div>
               </div>
+
+              <!-- Contactless Symbol -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/70">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1.5-2.5" />
+                <path d="M5.5 17.5A6.5 6.5 0 0 0 12 11c0-3.59-1.5-5.5-4-6.5" />
+                <path d="M2.5 20.5A10.5 10.5 0 0 0 13 10c0-5.8-2.5-9-6.5-10.5" />
+              </svg>
             </div>
 
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/60">
-              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1.5-2.5" />
-              <path d="M5.5 17.5A6.5 6.5 0 0 0 12 11c0-3.59-1.5-5.5-4-6.5" />
-              <path d="M2.5 20.5A10.5 10.5 0 0 0 13 10c0-5.8-2.5-9-6.5-10.5" />
-            </svg>
-          </div>
+            <div class="flex items-center gap-3">
+              <!-- Local Official Bank Vector Logo & Badge -->
+              <div class="flex items-center gap-2">
+                {#if brandConfig.logoPath}
+                  <img
+                    src={brandConfig.logoPath}
+                    alt={brandConfig.name}
+                    class="h-11 sm:h-16 w-auto max-w-[130px] sm:max-w-[170px] object-contain rounded-xl shadow-md drop-shadow-sm hover:scale-105 transition-transform flex-shrink-0"
+                  />
+                {:else}
+                  <div class="inline-flex items-center gap-1.5 {brandConfig.badgeClass} border px-3 py-1.5 rounded-full text-xs font-black font-mono uppercase tracking-wider backdrop-blur-md">
+                    <span>{brandConfig.name || bankAccount.bankName}</span>
+                  </div>
+                {/if}
+              </div>
 
-          <div class="flex items-center gap-2.5">
-            <div class="inline-flex items-center gap-1.5 bg-orange/20 border border-orange/35 text-white px-3.5 py-1.5 rounded-full text-xs font-black font-mono uppercase tracking-wider backdrop-blur-md">
-              <span class="w-2 h-2 rounded-full bg-orange animate-pulse"></span>
-              <span>{bankAccount.bankName}</span>
+              <button
+                type="button"
+                class="px-3.5 py-1.5 rounded-full text-xs font-semibold text-white border border-white/40 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                title="Ganti Rekening Bank"
+                on:click={onOpenBankModal}
+              >
+                <Pencil size={12} class="text-white" />
+                <span>Ganti</span>
+              </button>
             </div>
-
-            <button
-              type="button"
-              class="px-3 py-1.5 rounded-full text-xs font-semibold text-white border border-white/40 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-              title="Ganti Rekening Bank"
-              on:click={onOpenBankModal}
-            >
-              <Pencil size={12} class="text-white" />
-              <span>Ganti Rekening</span>
-            </button>
           </div>
-        </div>
 
-        <!-- Middle Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end mb-8">
-          <div>
+          <!-- Middle Row: Account Number (Full Width, Never Wraps) -->
+          <div class="w-full my-4 sm:my-5">
             <span class="text-[10px] text-white/50 font-bold uppercase tracking-widest font-heading block mb-1">
               Nomor Rekening Terdaftar
             </span>
-            <p class="font-mono text-xl sm:text-2xl font-black tracking-widest text-white drop-shadow-sm">
-              •••• &nbsp;•••• &nbsp;•••• &nbsp;<span class="text-orange-light font-black">{bankAccount.accountNumber.length > 4 ? bankAccount.accountNumber.slice(-4) : bankAccount.accountNumber}</span>
+            <p class="whitespace-nowrap font-mono tracking-widest text-lg sm:text-xl font-black text-white drop-shadow-sm">
+              •••• &nbsp;•••• &nbsp;•••• &nbsp;<span class="{brandConfig.accentTextClass} font-black">{lastFourDigits}</span>
             </p>
           </div>
 
-          <div class="flex items-end justify-between sm:justify-end gap-4">
-            <div class="space-y-0.5 min-w-0 sm:text-right">
-              <span class="text-[10px] text-white/50 uppercase tracking-widest font-bold font-heading block">
-                Pemilik Rekening
-              </span>
-              <p class="text-xs sm:text-sm font-bold text-white uppercase truncate font-mono tracking-wide">
-                {resolvedHolderName}
-              </p>
-            </div>
-
-            <div class="flex items-center -space-x-2.5 opacity-90 flex-shrink-0">
-              <div class="w-7 h-7 rounded-full bg-orange shadow-xs"></div>
-              <div class="w-7 h-7 rounded-full bg-amber-400/90 backdrop-blur-xs shadow-xs"></div>
-            </div>
+          <!-- Cardholder Details: Positioned Below Account Number, Above Lower Tray -->
+          <div class="mb-5 sm:mb-6">
+            <span class="text-[10px] text-white/50 uppercase tracking-widest font-bold font-heading block">
+              Pemilik Rekening
+            </span>
+            <p class="text-xs sm:text-sm font-bold text-white uppercase truncate font-mono tracking-wide mt-0.5 drop-shadow-xs">
+              {resolvedHolderName}
+            </p>
           </div>
         </div>
 
         <!-- Lower Tray -->
-        <div class="pt-5 border-t border-white/15 flex flex-col md:flex-row md:items-center justify-between gap-5 bg-black/40 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-5 sm:p-7 rounded-b-3xl backdrop-blur-md">
+        <div class="pt-5 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/40 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-5 sm:p-6 rounded-b-3xl backdrop-blur-md mt-auto">
           <div class="space-y-1">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold uppercase tracking-wider text-white/80 font-heading">
@@ -117,7 +135,7 @@
               {formatIDR(availableBalance)}
             </p>
 
-            <p class="text-2xs text-white/60 font-sans mt-1">
+            <p class="text-2xs text-white/60 font-sans mt-0.5">
               {#if availableBalance >= minPayoutLimit}
                 Saldo memenuhi batas penarikan dan siap ditransfer
               {:else if availableBalance > 0}
@@ -147,7 +165,7 @@
                 {#if availableBalance >= minPayoutLimit}
                   Tarik {formatIDR(availableBalance)}
                 {:else}
-                  Tarik Dana ke Bank
+                  Tarik Dana
                 {/if}
               </span>
             </Button>
@@ -156,7 +174,7 @@
       </div>
     </div>
   {:else}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-2 border-dashed border-orange/35 p-8 text-center text-white shadow-xl flex flex-col items-center justify-center">
+    <div class="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-2 border-dashed border-orange/35 p-8 text-center text-white shadow-xl flex flex-col items-center justify-center">
       <div class="w-14 h-14 rounded-2xl bg-orange/15 border border-orange/30 text-orange flex items-center justify-center mb-3 shadow-xs">
         <Building2 size={26} />
       </div>

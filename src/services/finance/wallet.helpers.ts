@@ -18,7 +18,7 @@ export async function getOrCreateWallet(designerId: string, client: DbExecutor) 
   const existingWallets = await client
     .select()
     .from(wallets)
-    .where(eq(wallets.designerId, designerId))
+    .where(eq(wallets.userId, designerId))
     .limit(1);
 
   if (existingWallets && existingWallets.length > 0) {
@@ -28,7 +28,7 @@ export async function getOrCreateWallet(designerId: string, client: DbExecutor) 
   const walletId = `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const insertOp = client.insert(wallets).values({
     id: walletId,
-    designerId,
+    userId: designerId,
     balance: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -40,7 +40,7 @@ export async function getOrCreateWallet(designerId: string, client: DbExecutor) 
     return newWallet;
   }
   await insertOp;
-  return { id: walletId, designerId, balance: 0 };
+  return { id: walletId, userId: designerId, balance: 0 };
 }
 
 /**
@@ -69,7 +69,7 @@ export async function calculateEligibleBalance(designerId: string, client: DbExe
     .from(payoutRequests)
     .where(
       and(
-        eq(payoutRequests.designerId, designerId),
+        eq(payoutRequests.userId, designerId),
         inArray(payoutRequests.status, ['processing', 'completed'])
       )
     );

@@ -3,7 +3,7 @@ import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { StoreStatusInput } from '@/lib/stores/schemas';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 
@@ -14,16 +14,20 @@ export const POST: APIRoute = async (context) => {
       return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
     }
 
-    if (user.role !== 'tenant') {
-      return jsonError('Forbidden', 403, undefined, 'FORBIDDEN');
-    }
-
     const body = await context.request.json();
     const data = StoreStatusInput.parse(body);
 
-    const [store] = await db.select().from(stores).where(eq(stores.userId, user.id));
+    const storeId = context.url.searchParams.get('storeId') || (body as { storeId?: string }).storeId;
+    const [store] = storeId 
+      ? await db.select().from(stores).where(eq(stores.id, storeId)).limit(1)
+      : await db.select().from(stores).where(eq(stores.userId, user.id)).limit(1);
+
     if (!store) {
       return jsonError('Store not found', 404, undefined, 'NOT_FOUND');
+    }
+
+    if (!canManageStore(user, store)) {
+      return jsonError('Forbidden', 403, undefined, 'FORBIDDEN');
     }
 
     const customization = (store.customization as Record<string, unknown>) || {};
@@ -32,6 +36,7 @@ export const POST: APIRoute = async (context) => {
     await db.update(stores)
       .set({
         customization,
+        lastEditedBy: user.id,
         updatedAt: new Date(),
       })
       .where(eq(stores.id, store.id));
@@ -54,15 +59,32 @@ export const GET: APIRoute = async (context) => {
       return jsonError('Subdomain required', 400);
     }
 
-    const [store] = await db.select().from(stores).where(eq(stores.subdomain, subdomain));
+    const store = await db.query.stores.findFirst({
+      where: eq(stores.subdomain, subdomain),
+      with: {
+        registrar: {
+          columns: { name: true },
+        },
+      },
+    });
+
     if (!store) {
       return jsonError('Store not found', 404, undefined);
     }
 
     const customization = (store.customization as Record<string, unknown>) || {};
     const isOpen = customization.isOpen !== false;
+    const managedByAdmin = store.registeredBy && store.registrar?.name
+      ? { name: store.registrar.name }
+      : null;
 
-    return jsonSuccess({ storeId: store.id, isOpen }, 200);
+    return jsonSuccess({
+      storeId: store.id,
+      name: store.name,
+      subdomain: store.subdomain,
+      isOpen,
+      managedByAdmin,
+    }, 200);
   } catch (error) {
     console.error('Store status fetch error:', error);
     return jsonError('Internal Server Error', 500);

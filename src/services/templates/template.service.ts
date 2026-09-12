@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
 import { eq, isNull, desc, and, inArray } from 'drizzle-orm';
-import { AppError, validate } from '@/lib/utils';
+import { AppError, validate, generateSlug, slugify } from '@/lib/utils';
 import {
   TemplateConfigSchema,
   DEFAULT_TEMPLATE_SECTIONS,
@@ -84,16 +84,23 @@ export async function createTemplateDraft(
     thumbnailUrl?: string | null;
     price?: number;
     categoryId?: string | null;
+    slug?: string;
   },
   designerId: string
 ) {
   const templateId = `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const baseSlug = data.slug ? slugify(data.slug) : slugify(data.name);
+  const existing = await db.query.templates.findFirst({
+    where: eq(templates.slug, baseSlug),
+  });
+  const slug = existing ? generateSlug(baseSlug, true) : (baseSlug || generateSlug('template', true));
 
   const [newTemplate] = await db
     .insert(templates)
     .values({
       id: templateId,
       name: data.name,
+      slug,
       description: data.description,
       thumbnailUrl: data.thumbnailUrl,
       price: data.price ?? 0,

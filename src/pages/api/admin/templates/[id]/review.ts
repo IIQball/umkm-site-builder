@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { reviewTemplateSchema } from '@/schemas';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import { reviewTemplate } from '@/services/templates';
 
@@ -10,8 +10,8 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
     if (!user) {
       throw new AppError('Authentication required', 401);
     }
-    if (!isAuthorizedAdmin(user)) {
-      throw new AppError('Admin access required', 403);
+    if (!isAuthorizedSuperAdmin(user)) {
+      throw new AppError('Superadmin access required', 403);
     }
 
     const templateId = context.params.id;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
-  import { ShoppingBag, Flame, Plus, Minus } from 'lucide-svelte';
+  import { ShoppingBag, Flame, Plus, Minus, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import { formatRupiah, buildWhatsAppOrderLink } from '../productCatalog.helpers';
 
@@ -52,8 +52,14 @@
   }
 
   function handleWaDirectBuy(product: ProductItem, idx: number) {
+    if (product.variants && product.variants.length > 0) {
+      onBuyNow(product, {});
+      return;
+    }
     const qty = getQty(idx);
-    const itemPrice = typeof product.price === 'number' ? product.price : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, '')) || 0;
+    const itemPrice = typeof (product.basePrice ?? product.price) === 'number'
+      ? Number(product.basePrice ?? product.price)
+      : parseFloat(String(product.basePrice ?? product.price ?? 0).replace(/[^0-9.-]+/g, '')) || 0;
     const totalPrice = itemPrice * qty;
     const orderText = qty > 1 ? `${product.name} (x${qty})` : product.name;
     const link = buildWhatsAppOrderLink(waNumber, orderText, totalPrice);
@@ -89,6 +95,7 @@
   {#each filteredProducts as product, index (product.id || product.name + index)}
     {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
+    {@const displayImg = product.image || product.imageUrl || product.imageUrls?.[0]}
     
     <div
       role="button"
@@ -112,9 +119,9 @@
             isImgActive ? 'ring-2 ring-blue-500' : ''
           }`}
         >
-          {#if product.imageUrl}
+          {#if displayImg}
             <img
-              src={product.imageUrl}
+              src={displayImg}
               alt={product.name}
               class="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
               loading="lazy"
@@ -125,14 +132,18 @@
             </div>
           {/if}
 
-          {#if product.badge}
-            <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+          {#if product.categoryName || product.category?.name}
+            <span class="absolute top-2 left-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-slate-700 dark:text-slate-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10">
+              {product.categoryName || product.category?.name}
+            </span>
+          {:else if product.badge}
+            <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10">
               {product.badge}
             </span>
           {/if}
 
           {#if activePreset === 'badge_stock_scarcity'}
-            <div class="absolute bottom-2 left-2 bg-amber-500 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
+            <div class="absolute bottom-2 left-2 bg-amber-500 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs z-10">
               <Flame size={11} class="text-rose-600" />
               <span>Sisa {((index + 1) * 3)} slot!</span>
             </div>
@@ -143,7 +154,7 @@
           {product.name}
         </h3>
         
-        {#if product.description && activePreset !== 'compact_mini_cards'}
+        {#if product.description}
           <p class="text-[11px] text-secondary line-clamp-2 mt-1 leading-relaxed">
             {product.description}
           </p>
@@ -152,7 +163,7 @@
 
       <div class="mt-3 pt-3 border-t border-light/60">
         <p class="font-heading font-black text-xs sm:text-sm text-primary mb-2">
-          {formatRupiah(product.price)}
+          {formatRupiah(product.basePrice ?? product.price ?? 0)}
         </p>
 
         {#if activePreset === 'quick_buy_whatsapp_direct'}
@@ -187,16 +198,17 @@
             <button
               type="button"
               on:click|stopPropagation={() => onAddToCart(product, {})}
-              class="flex-1 h-8 rounded-xl bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-xs font-semibold transition-all"
+              class="flex-1 h-8 rounded-xl bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
-              Keranjang
+              <ShoppingCart size={13} />
+              <span>+ Keranjang</span>
             </button>
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
-              class="flex-1 h-8 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white text-xs font-bold transition-all"
+              class="flex-1 h-8 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white text-xs font-bold flex items-center justify-center transition-all cursor-pointer"
             >
-              Beli
+              <span>Beli</span>
             </button>
           </div>
         {/if}

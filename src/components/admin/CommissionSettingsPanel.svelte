@@ -1,15 +1,18 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import StatCard from '../ui/StatCard.svelte';
-  import { Card, Input, Button } from '@/components/ui';
+  import { Card, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import CommissionSimulationCard from './commission/CommissionSimulationCard.svelte';
+  import CommissionSettingsInputs from './commission/CommissionSettingsInputs.svelte';
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;
+  export let initialAdminServiceFee: number = 5000;
 
   let platformFeePercentage: number = initialFeePercentage;
   let settlementDelayDays: number = initialSettlementDelayDays;
+  let adminServiceFee: number = initialAdminServiceFee;
   let isLoading = false;
 
   onMount(async () => {
@@ -22,6 +25,9 @@
         }
         if (result.data.settlementDelayDays !== undefined) {
           settlementDelayDays = Number(result.data.settlementDelayDays);
+        }
+        if (result.data.adminServiceFee !== undefined) {
+          adminServiceFee = Number(result.data.adminServiceFee);
         }
       }
     } catch {
@@ -44,6 +50,13 @@
       });
       return;
     }
+    if (adminServiceFee < 0) {
+      addToast({
+        type: 'error',
+        message: 'Biaya jasa pendampingan admin tidak boleh negatif',
+      });
+      return;
+    }
 
     isLoading = true;
 
@@ -54,6 +67,7 @@
         body: JSON.stringify({
           platformFeePercentage: Number(platformFeePercentage),
           settlementDelayDays: Number(settlementDelayDays),
+          adminServiceFee: Number(adminServiceFee),
         }),
       });
       const result = await res.json();
@@ -61,7 +75,7 @@
       if (res.ok && (result.ok)) {
         addToast({
           type: 'success',
-          message: 'Pengaturan komisi & settlement platform berhasil disimpan!',
+          message: 'Pengaturan komisi, fee admin & settlement berhasil disimpan!',
         });
       } else {
         addToast({
@@ -111,7 +125,7 @@
   </div>
 
   <!-- Stat Cards Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
     <StatCard
       label="Fee Platform"
       value="{platformFeePercentage}%"
@@ -133,14 +147,24 @@
       delayClass="delay-150"
     />
     <StatCard
+      label="Fee Pendampingan Admin"
+      value="Rp {Number(adminServiceFee || 0).toLocaleString('id-ID')}"
+      rawValue={adminServiceFee}
+      icon="support_agent"
+      cardTheme="blue"
+      badge="Jasa Pendamping"
+      footerText="Biaya bantuan transaksi tenant"
+      delayClass="delay-200"
+    />
+    <StatCard
       label="Penahanan Settlement"
       value="{settlementDelayDays} Hari"
       rawValue={settlementDelayDays}
       icon="hourglass_top"
       cardTheme="orange"
       badge="Proteksi Fraud"
-      footerText="Jeda saldo sebelum dapat ditarik"
-      delayClass="delay-200"
+      footerText="Jeda saldo sebelum withdrawal"
+      delayClass="delay-250"
     />
   </div>
 
@@ -157,7 +181,7 @@
               Parameter Finansial & Bagi Hasil
             </h3>
             <p class="text-body-sm text-secondary mt-0.5 font-sans">
-              Konfigurasi nilai persentase potongan transaksi dan kebijakan penahanan dana
+              Konfigurasi nilai persentase potongan transaksi, fee pendampingan, dan penahanan dana
             </p>
           </div>
         </div>
@@ -175,91 +199,12 @@
           />
 
           <!-- Input Fields Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Platform Fee Input -->
-            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <span class="material-symbols-outlined text-sm">percent</span>
-                </div>
-                <span class="text-xs font-bold text-main font-heading">Potongan Fee Platform</span>
-              </div>
-
-              <Input
-                id="platformFeePercentage"
-                type="number"
-                min="0"
-                max="100"
-                step="1"
-                placeholder="30"
-                bind:value={platformFeePercentage}
-                disabled={isLoading}
-                className="font-bold text-sm"
-                helper="Persentase potongan kas SaaS dari setiap penjualan."
-              >
-                <span slot="suffix" class="font-bold text-sm text-muted select-none">%</span>
-              </Input>
-
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                bind:value={platformFeePercentage}
-                disabled={isLoading}
-                class="w-full accent-primary cursor-pointer h-2 bg-nested rounded-lg"
-              />
-            </div>
-
-            <!-- Settlement Delay Input -->
-            <div class="p-6 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg bg-orange/15 text-orange flex items-center justify-center">
-                    <span class="material-symbols-outlined text-sm">hourglass_top</span>
-                  </div>
-                  <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
-                </div>
-                <div class="flex items-center gap-1">
-                  <button
-                    type="button"
-                    on:click={() => (settlementDelayDays = 3)}
-                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 3 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
-                  >
-                    3H
-                  </button>
-                  <button
-                    type="button"
-                    on:click={() => (settlementDelayDays = 7)}
-                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 7 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
-                  >
-                    7H
-                  </button>
-                  <button
-                    type="button"
-                    on:click={() => (settlementDelayDays = 14)}
-                    class="px-2.5 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 14 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
-                  >
-                    14H
-                  </button>
-                </div>
-              </div>
-
-              <Input
-                id="settlementDelayDays"
-                type="number"
-                min="0"
-                step="1"
-                placeholder="7"
-                bind:value={settlementDelayDays}
-                disabled={isLoading}
-                className="font-bold text-sm"
-                helper="Durasi penahanan saldo sebelum dapat di-withdraw."
-              >
-                <span slot="suffix" class="font-bold text-xs text-muted select-none">Hari</span>
-              </Input>
-            </div>
-          </div>
+          <CommissionSettingsInputs
+            bind:platformFeePercentage
+            bind:adminServiceFee
+            bind:settlementDelayDays
+            {isLoading}
+          />
 
           <div class="pt-4 border-t border-light flex items-center justify-end gap-3">
             <Button

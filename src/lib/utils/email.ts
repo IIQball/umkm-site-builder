@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+import { config } from '@/lib/config/app';
 import { logger } from './logger';
 
 interface SendEmailOptions {
@@ -8,40 +10,33 @@ interface SendEmailOptions {
 }
 
 export async function sendEmail(options: SendEmailOptions) {
-  try {
-    const resendApiKey = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
-    
-    if (!resendApiKey) {
-      logger.error('RESEND_API_KEY tidak ditemukan di environment variables.');
-      return false;
-    }
+  const { host, port, user, pass } = config.email;
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        // Domain onboarding@resend.dev hanya bisa mengirim ke email akun Resend Anda
-        from: 'onboarding@resend.dev', 
-        to: options.to,
-        subject: 'Reset Password Akun UMKM Site Builder',
-        html: options.html,
-      })
+  if (!host || !user || !pass) {
+    throw new Error('SMTP_HOST, SMTP_USER, atau SMTP_PASS tidak ditemukan di environment variables.');
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      logger.error('Gagal mengirim email (Resend):', errorData);
-      return false;
-    }
+    const info = await transporter.sendMail({
+      from: `"UMKM Site Builder" <${user}>`,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    });
 
-    const data = await response.json();
-    logger.info(`Email terkirim (Resend): ${data.id}`);
+    logger.info(`Email terkirim (Nodemailer): ${info.messageId}`);
     return true;
   } catch (error) {
-    logger.error('Terjadi kesalahan saat mengirim email:', error);
-    return false;
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error('Terjadi kesalahan saat mengirim email:', err);
+    throw err;
   }
 }

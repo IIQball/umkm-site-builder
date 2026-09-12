@@ -15,6 +15,7 @@ import {
   queryTenantOrders,
   queryDesignerIncomingOrders,
 } from './transaction.helpers';
+import { getAdminServiceFee } from './commission.service';
 
 export * from './transaction.helpers';
 
@@ -35,18 +36,30 @@ export class TransactionService {
       throw new AppError('Payment already in progress', 400);
     }
 
+    const adminFee = input.assistedBy
+      ? (input.adminFee !== undefined ? input.adminFee : await getAdminServiceFee())
+      : 0;
+    const totalAmount = input.adminFee !== undefined ? input.amount : input.amount + adminFee;
+
     const invoiceNum = `INV-${userId}-${Date.now()}`;
     const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const xenditInvoice = await xenditClient.createInvoice({
       invoiceNum,
-      amount: input.amount,
+      amount: totalAmount,
       payerEmail: user[0].email,
       description: 'Payment for Template Purchase',
       expiryDate,
       successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
       failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
-      metadata: { userId, type: input.type, storeId: input.storeId || null, templateId: input.templateId || null },
+      metadata: {
+        userId,
+        type: input.type,
+        storeId: input.storeId || null,
+        templateId: input.templateId || null,
+        assistedBy: input.assistedBy || null,
+        adminFee,
+      },
     });
 
     const transactionId = `txn_${Date.now()}`;
@@ -55,7 +68,9 @@ export class TransactionService {
       id: transactionId,
       userId,
       type: input.type as TransactionType,
-      amount: input.amount,
+      amount: totalAmount,
+      adminFee,
+      assistedBy: input.assistedBy || null,
       status: 'pending' as PaymentStatus,
       storeId: input.storeId || null,
       templateId: input.templateId || null,
@@ -75,7 +90,8 @@ export class TransactionService {
   async purchaseTemplate(
     userId: string,
     templateId: string,
-    baseUrl: string
+    baseUrl: string,
+    assistedBy?: string | null
   ): Promise<{ isFree: boolean; message?: string; data?: { invoiceUrl: string; invoiceId: string; externalId: string } }> {
     const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     if (!user.length) throw new AppError('Authentication required', 401);
@@ -109,12 +125,16 @@ export class TransactionService {
       return { isFree: true, message: 'Free template added to your account successfully' };
     }
 
+    // Admin fee calculation if assisted by admin
+    const adminFee = assistedBy ? await getAdminServiceFee() : 0;
+    const totalAmount = template.price + adminFee;
+
     // Paid template case
     const invoiceNum = `INV-${userId}-${Date.now()}`;
 
     const xenditInvoice = await xenditClient.createInvoice({
       invoiceNum,
-      amount: template.price,
+      amount: totalAmount,
       payerEmail: user[0].email,
       description: `Pembelian Template: ${template.name}`,
       expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -124,6 +144,8 @@ export class TransactionService {
         userId,
         type: 'template_purchase',
         templateId: template.id,
+        assistedBy: assistedBy || null,
+        adminFee,
       },
     });
 
@@ -132,7 +154,9 @@ export class TransactionService {
       id: transactionId,
       userId,
       type: 'template_purchase',
-      amount: template.price,
+      amount: totalAmount,
+      adminFee,
+      assistedBy: assistedBy || null,
       status: 'pending',
       templateId: template.id,
       externalId: invoiceNum,

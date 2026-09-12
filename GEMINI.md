@@ -170,18 +170,30 @@ umkm-site-builder/
 │   │   │   │   ├── nodeContent.constants.ts    # [143 baris] Konstanta label & deskripsi sub-node
 │   │   │   │   ├── NodeContentForm.svelte      # [70 baris] Form input konten dinamis tiap block
 │   │   │   │   ├── nodeStyles.constants.ts     # [62 baris] Konstanta default style CSS node block
-│   │   │   │   ├── SectionAppearancePanel.svelte # [129 baris] Panel background & border-radius section
-│   │   │   │   ├── SectionLayoutPanel.svelte   # [36 baris] Panel layout flex/grid section
-│   │   │   │   ├── SectionPresetSelector.svelte # [166 baris] Panel pemilihan preset section siap pakai
-│   │   │   │   ├── SectionSlotReorder.svelte   # [73 baris] Panel drag-and-drop slots section
-│   │   │   │   ├── SectionSpacingControls.svelte # [150 baris] Kontrol padding & margin interaktif
-│   │   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
+│   │   │   │   ├── schematics/ # Helper visual wireframe SVG preset per section
+│   │   │   │   │   ├── catalogSchematics.ts    # [172 baris] SVG schematic preset layout katalog produk
+│   │   │   │   │   ├── faqSchematics.ts        # [172 baris] SVG schematic preset layout FAQ
+│   │   │   │   │   ├── featuresSchematics.ts   # [172 baris] SVG schematic preset layout features
+│   │   │   │   │   ├── footerSchematics.ts     # [130 baris] SVG schematic preset layout footer
+│   │   │   │   │   ├── headerSchematics.ts     # [144 baris] SVG schematic preset layout header
+│   │   │   │   │   ├── heroSchematics.ts       # [215 baris] SVG schematic preset layout hero
+│   │   │   │   │   ├── mapsSchematics.ts       # [93 baris] SVG schematic preset layout Google Maps
+│   │   │   │   │   └── testimonialsSchematics.ts # [144 baris] SVG schematic preset layout testimonials
+│   │   │   ├── SectionAppearancePanel.svelte # [129 baris] Panel background & border-radius section
+│   │   │   ├── SectionLayoutPanel.svelte   # [36 baris] Panel layout flex/grid section
+│   │   │   ├── layoutPresets.data.ts       # [134 baris] Data master daftar preset layout & label seksi
+│   │   │   ├── layoutSchematics.helpers.ts # [33 baris] Dispatcher sentral visual schematic wireframe layout preset
+│   │   │   ├── LayoutSelectorModal.svelte  # [177 baris] Modal popup pemilihan layout hampir fullscreen ala Dribbble
+│   │   │   ├── SectionPresetSelector.svelte # [87 baris] Panel ringkasan & trigger modal galeri layout
+│   │   │   ├── SectionSlotReorder.svelte   # [73 baris] Panel drag-and-drop slots section
+│   │   │   ├── SectionSpacingControls.svelte # [150 baris] Kontrol padding & margin interaktif
+│   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
 │   │   │   ├── layer/ # Komponen pohon layer section & sub-node
 │   │   │   │   ├── AddNodeDropdown.svelte      # [45 baris] Tombol nambah block section baru
 │   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 291 baris] Helper manipulasi susunan layer adaptif
 │   │   │   │   └── LayerSectionItem.svelte     # [191 baris] Komponen item baris layer section
 │   │   │   ├── registry/ # Registri sentral modularisasi section builder
-│   │   │   │   ├── index.ts                    # [⚠️ mepet 300 baris - 259 baris] Registri sentral modularisasi modul section builder
+│   │   │   │   ├── index.ts                    # [⚠️ mepet 300 baris - 257 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   └── registry.types.ts           # [17 baris] Definisi tipe registry map section
 │   │   │   ├── sections/ # Kumpulan varian preset layout per section
 │   │   │   │   ├── catalog/ # Preset layout katalog produk (20 preset)
@@ -360,6 +372,7 @@ umkm-site-builder/
 │   │   │   ├── PaymentModal.svelte             # [65 baris] Modal pembayaran invoice Xendit
 │   │   │   └── TransactionStatus.svelte        # [81 baris] Status tagihan invoice (polling & status badge)
 │   │   ├── common/ # Komponen navigasi & shell layout umum
+│   │   │   ├── GlobalZoomControl.svelte        # [89 baris] Kontrol interaktif floating pill zoom-in & zoom-out (25%-200%)
 │   │   │   ├── Navbar.astro                    # [23 baris] Navigasi utama header base layout
 │   │   │   ├── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
 │   │   │   └── ThemeToggle.astro               # [37 baris] Tombol pengubah dark mode / light mode
@@ -378,7 +391,7 @@ umkm-site-builder/
 │   │   │   │   └── SidebarUserProfile.svelte   # [89 baris] Mini profil & badge status tenant
 │   │   │   ├── CategoryManager.svelte          # [⚠️ mepet 300 baris - 258 baris] Pengelola CRUD kategori produk tenant
 │   │   │   ├── ConfirmTemplateModal.svelte     # [82 baris] Modal konfirmasi penerapan template toko
-│   │   │   ├── DashboardNavbar.svelte          # [176 baris] Navigasi panel dashboard tenant
+│   │   │   ├── DashboardNavbar.svelte          # [176 baris] Navigasi panel dashboard tenant & profil aksi
 │   │   │   ├── IncompleteDataWarning.svelte    # [11 baris] Banner peringatan kelengkapan data profil toko
 │   │   │   ├── OrderHistoryTable.svelte        # [228 baris] Tabel riwayat pesanan/transaksi tenant
 │   │   │   ├── Sidebar.svelte                  # [57 baris] Menu navigasi sidebar panel tenant
@@ -394,17 +407,18 @@ umkm-site-builder/
 │   │   │   │   └── DesignerTemplateRow.svelte  # [164 baris] Baris data tabel kelola template desainer
 │   │   │   ├── wallet/ # Komponen dompet & mutasi saldo desainer
 │   │   │   │   ├── DesignerWeeklyChart.svelte  # [123 baris] Grafik tren pendapatan mingguan desainer
-│   │   │   │   └── wallet.helpers.ts           # [44 baris] Helper kalkulasi saldo & mutasi dompet
-│   │   │   ├── DesignerBankCard.svelte         # [181 baris] Kartu info rekening bank terhubung desainer
+│   │   │   │   └── wallet.helpers.ts           # [221 baris] Helper kalkulasi saldo, tren pertumbuhan bulanan, sparkline, & mutasi dompet
+│   │   │   ├── bankBranding.helpers.ts         # [127 baris] Helper brand bank resmi, logo SVG vektor, & aksen tema
+│   │   │   ├── DesignerBankCard.svelte         # [185 baris] Kartu rekening bank desainer dinamis & logo resmi
 │   │   │   ├── DesignerBankModal.svelte        # [107 baris] Modal data rekening bank desainer
-│   │   │   ├── DesignerBankWithdraw.svelte     # [⚠️ mepet 300 baris - 284 baris] Form rekening bank & modal payout desainer
+│   │   │   ├── DesignerBankWithdraw.svelte     # [⚠️ mepet 300 baris - 287 baris] Grid pendapatan bersih & bank card, modal payout, serta riwayat penarikan dana
 │   │   │   ├── DesignerMutationTable.svelte    # [214 baris] Tabel daftar mutasi keuangan desainer
 │   │   │   ├── DesignerOrdersTable.svelte      # [236 baris] Tabel pesanan masuk dari tenant untuk desainer
 │   │   │   ├── DesignerPayoutHistoryTable.svelte # [224 baris] Tabel riwayat payout desainer
-│   │   │   ├── DesignerStatCards.svelte        # [94 baris] Ringkasan balance, komisi, & template terjual
+│   │   │   ├── DesignerStatCards.svelte        # [154 baris] Grid 12 kolom statcard dompet, hero card, 3 kartu compact, & sparkline
 │   │   │   ├── DesignerTemplateCard.svelte     # [213 baris] Kartu template buatan desainer (status review)
 │   │   │   ├── DesignerTemplateTable.svelte    # [⚠️ >300 baris - 410 baris] Tabel kelola template desainer
-│   │   │   ├── DesignerWalletOverview.svelte   # [94 baris] Ringkasan dompet desainer & tombol withdraw
+│   │   │   ├── DesignerWalletOverview.svelte   # [107 baris] Orkestrasi grid dompet desainer 12 kolom, bank card, & riwayat penuh
 │   │   │   └── DesignerWithdrawModal.svelte    # [174 baris] Modal konfirmasi withdraw desainer
 │   │   ├── onboarding/ # Komponen wizard onboarding toko tenant
 │   │   │   ├── wizard/ # Step form wizard pendaftaran toko baru
@@ -458,7 +472,8 @@ umkm-site-builder/
 │   │       ├── Pagination.svelte               # [103 baris] Komponen paginasi kontrol halaman data
 │   │       ├── RateLimitAlert.svelte           # [33 baris] Alert notifikasi pembatasan laju request (rate limit)
 │   │       ├── Select.svelte                   # [126 baris] Komponen dropdown select pilihan
-│   │       ├── StatCard.svelte                 # [118 baris] Komponen card ringkasan statistik modular
+│   │       ├── statCard.helpers.ts             # [113 baris] Helper animasi count-up & kurva sparkline SVG StatCard
+│   │       ├── StatCard.svelte                 # [277 baris] Komponen card statistik modular (hero, compact, sparkline & tren)
 │   │       ├── Table.svelte                    # [57 baris] Komponen tabel tabular modular
 │   │       ├── Textarea.svelte                 # [106 baris] Komponen kolom input text area
 │   │       ├── ToastContainer.svelte           # [123 baris] Kontainer notifikasi toast mengambang
@@ -468,9 +483,9 @@ umkm-site-builder/
 │   │   ├── schema.ts                           # [⚠️ >300 baris - 440 baris] Skema relasi database & tabel SaaS Drizzle
 │   │   └── seed.ts                             # [127 baris] Script seeding data demo database
 │   ├── layouts/ # Layout dasar pembungkus halaman Astro
-│   │   ├── BaseLayout.astro                    # [51 baris] Layout dasar halaman publik web
-│   │   ├── DashboardLayout.astro               # [63 baris] Layout terproteksi admin/tenant/designer
-│   │   └── StorefrontLayout.astro              # [38 baris] Layout storefront khusus tenant (subdomain)
+│   │   ├── BaseLayout.astro                    # [55 baris] Layout dasar halaman publik web & kontrol zoom
+│   │   ├── DashboardLayout.astro               # [70 baris] Layout terproteksi admin/tenant/designer, centered container, & zoom
+│   │   └── StorefrontLayout.astro              # [44 baris] Layout storefront khusus tenant (subdomain) & zoom
 │   ├── lib/ # Pustaka fungsi utilitas, auth, & integrasi pihak ke-3
 │   │   ├── config/ # Konstanta konfigurasi aplikasi SaaS
 │   │   │   └── app.ts                          # [61 baris] Konfigurasi konstanta platform & branding
@@ -482,7 +497,8 @@ umkm-site-builder/
 │   │   ├── routing/ # Utilitas routing & multitenancy subdomain
 │   │   │   └── subdomain.ts                    # [29 baris] Utilitas parsing & ekstraksi subdomain multitenancy
 │   │   ├── stores/ # Store state Svelte manajemen editor builder
-│   │   │   └── schemas.ts                      # [34 baris] Skema validasi state svelte store
+│   │   │   ├── schemas.ts                      # [34 baris] Skema validasi state svelte store
+│   │   │   └── zoomStore.ts                    # [90 baris] Svelte store kontrol zoom global (25%-200%)
 │   │   ├── templates/ # Komponen manajemen template desainer
 │   │   │   ├── index.ts                        # [5 baris] Registri sentral modularisasi modul section builder
 │   │   │   └── migration.ts                    # [202 baris] Logika pipeline migrasi skema template
@@ -785,7 +801,8 @@ umkm-site-builder/
 │   │   ├── template-purchase-flow.test.ts      # [⚠️ mepet 300 baris - 270 baris] Uji pengujian unit / integrasi Vitest
 │   │   └── wallet-and-fulfillment.test.ts      # [199 baris] Uji pengujian unit / integrasi Vitest
 │   ├── ui/ # Komponen design system dasar modular
-│   │   └── design-system.test.ts               # [119 baris] Uji pengujian unit / integrasi Vitest
+│   │   ├── design-system.test.ts               # [119 baris] Uji pengujian unit / integrasi Vitest
+│   │   └── global-enhancements.test.ts         # [121 baris] Uji unit zoom controls, bank branding, & layout schematics
 │   └── utils/ # Kumpulan fungsi pembantu (helper utilities)
 │       ├── api-handler.test.ts                 # [133 baris] Uji pengujian unit / integrasi Vitest
 │       ├── design-math.test.ts                 # [78 baris] Uji pengujian unit / integrasi Vitest

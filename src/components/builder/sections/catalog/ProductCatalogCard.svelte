@@ -48,9 +48,11 @@
   };
 
   $: computedPrice = (() => {
-    let base = typeof product.price === 'number'
+    let base = typeof product.basePrice === 'number'
+      ? product.basePrice
+      : typeof product.price === 'number'
       ? product.price
-      : parseFloat(String(product.price || 0).replace(/[^0-9.-]+/g, '')) || 0;
+      : parseFloat(String(product.basePrice ?? product.price ?? 0).replace(/[^0-9.-]+/g, '')) || 0;
     if (product?.variants && Array.isArray(product.variants)) {
       for (const group of product.variants) {
         if (!group) continue;
@@ -66,6 +68,14 @@
     return base;
   })();
 
+  // Multi-field image fallback
+  $: displayImage = product.image
+    || product.imageUrl
+    || product.imageUrls?.[0]
+    || null;
+
+  // Category badge
+  $: categoryLabel = product.categoryName || product.category?.name || null;
 </script>
 
 <div
@@ -88,9 +98,9 @@
     data-node="product_image"
     class="relative overflow-hidden bg-slate-100 dark:bg-slate-800 {isHorizontalLayout || activePreset === 'list_compact' ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}"
   >
-    {#if product.imageUrl}
+    {#if displayImage}
       <ImageFallback
-        src={product.imageUrl}
+        src={displayImage}
         alt={product.name || 'Produk'}
         className="{imageAspectClass} transition-transform duration-300 hover:scale-105"
         loading="lazy"
@@ -116,6 +126,9 @@
   <!-- Details -->
   <div class="p-4 flex-1 flex flex-col justify-between {isHorizontalLayout || activePreset === 'list_compact' ? 'min-w-0' : ''}">
     <div>
+      {#if categoryLabel}
+        <span class="inline-block mb-1.5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">{categoryLabel}</span>
+      {/if}
       <h3
         data-node="product_title"
         class="mb-1 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 {nameSizeClass} {nameWeightClass}"

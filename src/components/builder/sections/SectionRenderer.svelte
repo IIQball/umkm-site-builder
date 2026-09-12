@@ -6,6 +6,8 @@
   export let section: TemplateSection;
   export let isActive: boolean = false;
   export let storeId: string | null = null;
+  export let store: any = null;
+  export let isLiveStorefront: boolean = false;
 
   const isDarkColor = (color?: unknown): boolean => {
     if (typeof color !== 'string' || !color || color === 'transparent') return false;
@@ -70,14 +72,29 @@
   $: sectionDef = getSectionDefinition(section?.type);
   $: isFullBleed = sectionDef?.isFullBleed ?? (section?.type === 'header_announcement' || section?.type === 'hero');
   $: sectionProps = section?.type === 'product_catalog'
-    ? { ...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined) }
+    ? { ...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined), isLiveStorefront }
+    : section?.type === 'hero'
+    ? { ...(section.props || {}), ...(isLiveStorefront ? { selectNode: () => {}, selectNodeKey: () => {}, activeNodeId: null } : {}) }
     : (section?.props || {});
+
+  // Semantic anchor IDs — match navbar href targets (#beranda, #produk, etc.)
+  const SECTION_TYPE_TO_ANCHOR: Record<string, string> = {
+    hero: 'beranda',
+    header_announcement: 'header',
+    product_catalog: 'produk',
+    features: 'tentang',
+    testimonials: 'ulasan',
+    faq: 'faq',
+    google_maps: 'lokasi',
+    footer: 'kontak',
+  };
+  $: anchorId = SECTION_TYPE_TO_ANCHOR[section?.type] || (section?.id ? `section-${section.id}` : undefined);
 </script>
 
 <section
-  id={section.id}
+  id={anchorId}
   style={inlineStyle}
-  class={`relative box-border w-full max-w-full min-w-0 font-[family-name:var(--theme-font-body)] ${
+  class={`relative box-border w-full max-w-full min-w-0 scroll-mt-20 font-[family-name:var(--theme-font-body)] ${
     section?.type === 'header_announcement' ? 'overflow-visible z-30' : 'overflow-x-hidden'
   }`}
 >
@@ -91,6 +108,8 @@
         {isActive}
         layoutPreset={section.layoutPreset}
         {storeId}
+        {store}
+        {isLiveStorefront}
       />
     {:else}
       <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); {containerStyle}">
@@ -102,6 +121,8 @@
           {isActive}
           layoutPreset={section.layoutPreset}
           {storeId}
+          {store}
+          {isLiveStorefront}
         />
       </div>
     {/if}

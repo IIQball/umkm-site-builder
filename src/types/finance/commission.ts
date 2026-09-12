@@ -11,6 +11,7 @@ export interface CommissionCalculation {
 export interface PlatformSettings {
   id: string;
   platformFeePercentage: number;
+  adminServiceFee: number;
   payoutMinimumBalance: number;
   settlementDelayDays: number;
   updatedAt: Date;

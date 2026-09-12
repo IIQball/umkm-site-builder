@@ -64,24 +64,17 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
   if (role === 'admin') {
     return [
       {
-        title: 'Ringkasan',
+        title: 'Pendampingan UMKM',
         items: [
-          { label: 'Dashboard', href: '/admin', icon: 'monitoring', group: 'Ringkasan' },
-          { label: 'Mutasi Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Ringkasan' },
+          { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Pendampingan UMKM' },
+          { label: 'Merchant Anda', href: '/admin/merchants', icon: 'storefront', group: 'Pendampingan UMKM' },
         ],
       },
       {
-        title: 'Template & Kurasi',
+        title: 'Transaksi & Layanan',
         items: [
-          { label: 'Kurasi Template', href: '/admin/templates', icon: 'palette', group: 'Template & Kurasi' },
-          { label: 'Kategori Template', href: '/admin/template-categories', icon: 'category', group: 'Template & Kurasi' },
-        ],
-      },
-      {
-        title: 'Sistem & Pengguna',
-        items: [
-          { label: 'Pengaturan Komisi', href: '/admin/settings', icon: 'tune', group: 'Sistem & Pengguna' },
-          { label: 'Manajemen Pengguna', href: '/admin/users', icon: 'group', group: 'Sistem & Pengguna' },
+          { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Layanan' },
+          { label: 'Marketplace Template', href: '/templates', icon: 'palette', group: 'Transaksi & Layanan' },
         ],
       },
     ];
@@ -90,10 +83,25 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
   if (role === 'superadmin') {
     return [
       {
-        title: 'Administrasi Utama',
+        title: 'Platform & Pengguna',
         items: [
-          { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: 'admin_panel_settings', group: 'Administrasi Utama' },
-          { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Administrasi Utama' },
+          { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Platform & Pengguna' },
+          { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: 'admin_panel_settings', group: 'Platform & Pengguna' },
+          { label: 'Manajemen Pengguna', href: '/admin/users', icon: 'group', group: 'Platform & Pengguna' },
+        ],
+      },
+      {
+        title: 'Katalog & Template',
+        items: [
+          { label: 'Kurasi Template', href: '/admin/templates', icon: 'palette', group: 'Katalog & Template' },
+          { label: 'Kategori Bisnis', href: '/admin/template-categories', icon: 'category', group: 'Katalog & Template' },
+        ],
+      },
+      {
+        title: 'Transaksi & Pengaturan',
+        items: [
+          { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Pengaturan' },
+          { label: 'Pengaturan Platform', href: '/admin/settings', icon: 'tune', group: 'Transaksi & Pengaturan' },
         ],
       },
     ];

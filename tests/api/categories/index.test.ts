@@ -16,9 +16,28 @@ vi.mock('../../../src/db', () => ({
   },
 }));
 
+vi.mock('../../../src/lib/auth', () => ({
+  getAuthenticatedUser: vi.fn().mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' }),
+  canManageStore: (
+    user: { id?: string; role?: string; status?: string } | null,
+    store: { userId?: string; registeredBy?: string | null } | null
+  ) => {
+    if (!user || user.status !== 'active') return false;
+    if (user.role === 'superadmin') return true;
+    if (user.role === 'tenant') return store?.userId === user.id;
+    if (user.role === 'admin') return store?.registeredBy === user.id;
+    return false;
+  },
+}));
+
 describe('Categories API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (db.update as unknown as Mock).mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue({}),
+      }),
+    });
   });
 
   it('GET returns categories for store', async () => {
@@ -39,6 +58,22 @@ describe('Categories API', () => {
   });
 
   it('POST creates a category', async () => {
+    (db.select as unknown as Mock).mockImplementation((opts) => {
+      if (opts && opts.count) {
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 0 }]),
+          }),
+        };
+      }
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+          }),
+        }),
+      };
+    });
     // No existing slug conflict
     (db.query.storeCategories.findFirst as unknown as Mock).mockResolvedValue(null);
     (db.insert as unknown as Mock).mockReturnValue({
@@ -56,6 +91,13 @@ describe('Categories API', () => {
   });
 
   it('PATCH updates a category', async () => {
+    (db.select as unknown as Mock).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+        }),
+      }),
+    });
     // findFirst for current category
     (db.query.storeCategories.findFirst as unknown as Mock)
       .mockResolvedValueOnce({ id: '1', storeId: 's1', slug: 'old' }) // current cat
@@ -78,9 +120,17 @@ describe('Categories API', () => {
   });
 
   it('DELETE soft deletes a category', async () => {
+    (db.select as unknown as Mock).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+        }),
+      }),
+    });
     // findFirst returns the category to delete
     (db.query.storeCategories.findFirst as unknown as Mock).mockResolvedValue({
       id: '1',
+      storeId: 's1',
       slug: 'test-slug',
     });
 

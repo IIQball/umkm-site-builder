@@ -8,6 +8,7 @@
   export let isOwned: boolean = false;
   export let isPurchasing: boolean = false;
   export let isTenantOrGuest: boolean = true;
+  export let userRole: string | null = null;
   export let onPurchase: (tpl: PublicTemplate) => void;
 </script>
 
@@ -97,7 +98,7 @@
             <CheckCircle2 size={13} />
             <span>Dimiliki</span>
           </span>
-        {:else if isTenantOrGuest}
+        {:else if isTenantOrGuest || userRole === 'admin'}
           <Button
             variant={tpl.price === 0 ? 'secondary' : 'primary'}
             size="xs"
@@ -109,7 +110,7 @@
             {#if !isPurchasing}
               <ShoppingCart size={13} />
             {/if}
-            <span>{tpl.price === 0 ? 'Gunakan' : 'Beli'}</span>
+            <span>{userRole === 'admin' ? (tpl.price === 0 ? 'Pasang ke Tenant' : 'Beli untuk Tenant') : (tpl.price === 0 ? 'Gunakan' : 'Beli')}</span>
           </Button>
         {/if}
       </div>

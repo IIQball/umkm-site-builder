@@ -2,8 +2,7 @@
   import { firstProductImageUrl } from '@/lib/products/image';
   import type { InferSelectModel } from 'drizzle-orm';
   import type { products, storeCategories } from '@/db/schema';
-  import { formatCurrency } from '@/lib/utils/format';
-  import { formatIDR } from '@/lib/currency';
+  import { formatCurrency, formatIDR } from '@/lib/utils/format';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
   import { ShoppingCart } from 'lucide-svelte';
   import { fly } from 'svelte/transition';
@@ -30,10 +29,12 @@
   interface StoreProduct {
     id: string;
     name: string;
+    price: number;
     basePrice: number;
-    imageUrls?: unknown;
-    imageUrl?: string;
-    category?: { name: string };
+    imageUrls?: string[];
+    imageUrl?: string | null;
+    image?: string | null;
+    category?: { id: string; name: string; slug: string } | null;
     description?: string;
     variants?: Record<string, unknown>[];
   }
@@ -234,7 +235,7 @@
   {:else if currentView === 'checkout'}
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
       <CatalogCheckoutModal
-        {detailedCart}
+        detailedCart={detailedCart as any}
         {cartTotal}
         bind:form
         onBackToCatalog={() => (currentView = "catalog")}
@@ -246,10 +247,10 @@
   {:else if (currentView === 'quick-checkout' || currentView === 'add-to-cart') && selectedProductForCheckout}
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
       <ProductQuickCheckoutModal 
-        product={selectedProductForCheckout} 
+        product={selectedProductForCheckout as any} 
         storeWaNumber={storeWaNumber}
         mode={currentView === "add-to-cart" ? "add_to_cart" : "buy_now"}
-        onAddToCart={handleConfirmAddToCart}
+        onAddToCart={handleConfirmAddToCart as any}
         onBack={() => {
           currentView = "catalog";
           selectedProductForCheckout = null;

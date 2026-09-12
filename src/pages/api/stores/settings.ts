@@ -3,7 +3,7 @@ import { db } from '../../../db';
 import { stores } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { StoreSettingsInput } from '../../../lib/stores/schemas';
-import { getAuthenticatedUser } from '../../../lib/auth';
+import { getAuthenticatedUser, canManageStore } from '../../../lib/auth';
 import { ZodError } from 'zod';
 
 export const PUT: APIRoute = async (context) => {
@@ -16,20 +16,24 @@ export const PUT: APIRoute = async (context) => {
       });
     }
 
-    if (user.role !== 'tenant') {
-      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
-        status: 403,
+    const body = await context.request.json();
+    const data = StoreSettingsInput.parse(body);
+
+    const storeId = context.url.searchParams.get('storeId') || (body as { storeId?: string }).storeId;
+    const [existingStore] = storeId 
+      ? await db.select().from(stores).where(eq(stores.id, storeId)).limit(1)
+      : await db.select().from(stores).where(eq(stores.userId, user.id)).limit(1);
+
+    if (!existingStore) {
+      return new Response(JSON.stringify({ success: false, error: 'Store not found' }), {
+        status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const body = await context.request.json();
-    const data = StoreSettingsInput.parse(body);
-
-    const [existingStore] = await db.select().from(stores).where(eq(stores.userId, user.id));
-    if (!existingStore) {
-      return new Response(JSON.stringify({ success: false, error: 'Store not found' }), {
-        status: 404,
+    if (!canManageStore(user, existingStore)) {
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+        status: 403,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -38,7 +42,10 @@ export const PUT: APIRoute = async (context) => {
       .set({
         name: data.name,
         waNumber: data.waNumber,
-        googleMapsUrl: data.googleMapsUrl || null,
+        googleMapsUrl: data.googleMapsUrl || undefined,
+        ...(data.address !== undefined ? { address: data.address } : {}),
+        ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
+        lastEditedBy: user.id,
         updatedAt: new Date(),
       })
       .where(eq(stores.id, existingStore.id));

@@ -2,7 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PublicTemplateMarketplace from '@/components/public/PublicTemplateMarketplace.svelte';
 import { db } from '@/lib/db/client';
-import { templates, templateCategories, userTemplates, designers, users } from '@/db/schema';
+import { templates, templateCategories, userTemplates, designers, users, stores } from '@/db/schema';
 import { eq, and, isNull, desc, asc } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 
@@ -54,6 +54,32 @@ if (currentUser) {
     .where(eq(userTemplates.userId, currentUser.id));
   ownedTemplateIds = owned.map((o) => o.templateId);
 }
+
+// Fetch assisted tenants if admin
+let assistedTenants: Array<{ id: string; name: string; storeName: string; storeId: string }> = [];
+if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+  const adminStores = await db.query.stores.findMany({
+    where: and(
+      currentUser.role === 'admin' ? eq(stores.registeredBy, currentUser.id) : undefined,
+      isNull(stores.deletedAt)
+    ),
+    with: {
+      owner: {
+        columns: { id: true, name: true, email: true },
+      },
+    },
+    orderBy: [desc(stores.createdAt)],
+  });
+
+  assistedTenants = adminStores.map((s) => ({
+    id: s.userId,
+    name: s.owner?.name || s.owner?.email || 'Tenant',
+    storeName: s.name,
+    storeId: s.id,
+  }));
+}
+
+const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
 ---
 
 <BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko">
@@ -83,6 +109,9 @@ if (currentUser) {
         initialTemplates={rawTemplates}
         {categories}
         {ownedTemplateIds}
+        {assistedTenants}
+        {initialTenantId}
+        currentUserId={currentUser?.id || null}
         isLoggedIn={!!currentUser}
         userRole={currentUser?.role || null}
       />

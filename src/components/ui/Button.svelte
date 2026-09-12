@@ -21,21 +21,21 @@
 
   const variantStyles = {
     primary:
-      'bg-primary text-white hover:bg-primary-dark active:scale-[0.98] border border-transparent shadow-xs',
+      'bg-primary text-white hover:text-white hover:bg-primary/90 active:scale-[0.98] border border-transparent shadow-xs',
     dark:
-      'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-[0.98] border border-slate-800 shadow-xs',
+      'bg-slate-900 text-white hover:text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white active:scale-[0.98] border border-slate-800 shadow-xs',
     orange:
-      'bg-orange text-white hover:bg-orange-dark active:scale-[0.98] border border-transparent shadow-xs',
+      'bg-orange text-white hover:text-white hover:bg-orange/90 active:scale-[0.98] border border-transparent shadow-xs',
     secondary:
-      'bg-transparent text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
+      'bg-transparent text-main hover:text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
     tertiary:
       'bg-transparent text-slate-700 dark:text-slate-300 hover:text-main underline underline-offset-4 border-transparent p-0 h-auto min-h-0 active:opacity-80 shadow-none',
     outline:
-      'bg-transparent text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
+      'bg-transparent text-main hover:text-main hover:bg-nested/60 border border-slate-300 dark:border-slate-700 active:scale-[0.98] shadow-2xs',
     ghost:
       'bg-transparent text-secondary hover:text-main hover:bg-nested active:scale-[0.98] border border-transparent',
     destructive:
-      'bg-rose-600 text-white hover:bg-rose-700 active:scale-[0.98] border border-transparent shadow-xs',
+      'bg-rose-600 text-white hover:text-white hover:bg-rose-700 active:scale-[0.98] border border-transparent shadow-xs',
   };
 
   const sizeStyles = {
@@ -51,6 +51,7 @@
     'inline-flex items-center justify-center font-heading font-semibold transition-all duration-150 cursor-pointer select-none',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1',
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100',
+    '[&_svg]:text-current [&_svg]:shrink-0 [&_.material-symbols-outlined]:text-current',
     variantStyles[variant] || variantStyles.primary,
     variant === 'tertiary' ? 'text-xs sm:text-sm font-medium gap-1' : (sizeStyles[size] || sizeStyles.md),
     fullWidth ? 'w-full flex' : '',

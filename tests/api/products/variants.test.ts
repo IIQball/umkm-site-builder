@@ -122,6 +122,23 @@ describe('Variants API', () => {
     });
 
     it('returns 403 for non-tenant role', async () => {
+      let callCount = 0;
+      (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return {
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([mockProduct]),
+            }),
+          };
+        }
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([mockStore]),
+          }),
+        };
+      });
+
       const request = new Request('http://localhost/api/products/prod-1/variants', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -131,7 +148,7 @@ describe('Variants API', () => {
       const context = {
         request,
         params: { id: 'prod-1' },
-        locals: { user: { id: 'user-1', role: 'designer' } },
+        locals: { user: { id: 'user-1', role: 'designer', status: 'active' } },
       } as unknown as APIContext;
 
       const response = (await PUT(context)) as Response;
@@ -167,7 +184,7 @@ describe('Variants API', () => {
       const context = {
         request,
         params: { id: 'prod-1' },
-        locals: { user: { id: 'user-1', role: 'tenant' } },
+        locals: { user: { id: 'user-1', role: 'tenant', status: 'active' } },
       } as unknown as APIContext;
 
       const response = (await PUT(context)) as Response;
@@ -206,14 +223,25 @@ describe('Variants API', () => {
         };
       });
 
-      (db.update as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([
-              { ...mockProduct, variants: newVariants },
-            ]),
+      let updateCount = 0;
+      (db.update as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        updateCount++;
+        if (updateCount === 1) {
+          return {
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                returning: vi.fn().mockResolvedValue([
+                  { ...mockProduct, variants: newVariants },
+                ]),
+              }),
+            }),
+          };
+        }
+        return {
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue({}),
           }),
-        }),
+        };
       });
 
       const request = new Request('http://localhost/api/products/prod-1/variants', {
@@ -225,7 +253,7 @@ describe('Variants API', () => {
       const context = {
         request,
         params: { id: 'prod-1' },
-        locals: { user: { id: 'user-1', role: 'tenant' } },
+        locals: { user: { id: 'user-1', role: 'tenant', status: 'active' } },
       } as unknown as APIContext;
 
       const response = (await PUT(context)) as Response;
@@ -263,7 +291,7 @@ describe('Variants API', () => {
       const context = {
         request,
         params: { id: 'prod-1' },
-        locals: { user: { id: 'user-1', role: 'tenant' } },
+        locals: { user: { id: 'user-1', role: 'tenant', status: 'active' } },
       } as unknown as APIContext;
 
       const response = (await PUT(context)) as Response;

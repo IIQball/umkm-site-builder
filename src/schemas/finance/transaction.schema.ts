@@ -10,6 +10,8 @@ export const TransactionInitiateInputSchema = z.object({
   type: z.literal('template_purchase'),
   storeId: z.string().optional(),
   templateId: z.string().optional(),
+  assistedBy: z.string().optional().nullable(),
+  adminFee: z.number().optional(),
 });
 
 export type TransactionInitiateInput = z.infer<typeof TransactionInitiateInputSchema>;
@@ -37,6 +39,8 @@ export type XenditWebhookPayload = z.infer<typeof XenditWebhookPayloadSchema>;
 
 export const TemplatePurchaseInputSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),
+  tenantId: z.string().optional(),
+  assistedBy: z.string().optional().nullable(),
 });
 
 export type TemplatePurchaseInput = z.infer<typeof TemplatePurchaseInputSchema>;

@@ -46,21 +46,53 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
+    resetPasswordTokenExpiresIn: 60 * 60 * 24, // 24 jam kadaluarsa
     sendResetPassword: async ({ user, url }) => {
+      const isAdmin = user.role === 'admin' || user.role === 'superadmin';
+      const subject = isAdmin ? 'Aktivasi / Reset Password Akun Admin UMKM Site Builder' : 'Reset Password Akun UMKM Site Builder';
+      const titleText = isAdmin ? 'Aktivasi atau Reset Kata Sandi' : 'Reset Kata Sandi';
+      const bodyText = isAdmin 
+        ? 'Akun admin Anda telah didaftarkan atau Anda meminta pengaturan ulang kata sandi.'
+        : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+      
+      // For admins, we might want to direct them to an activation-looking URL, but since BetterAuth handles it, 
+      // the URL will go to whatever redirectTo we specify. Wait, if we use authClient.requestPasswordReset in the frontend, 
+      // it specifies redirectTo. If we call it from backend, we need to pass redirectTo? 
+      // We can just use the provided url.
+
       await sendEmail({
         to: user.email,
-        subject: 'Reset Password Akun UMKM Site Builder',
+        subject,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
             <h2 style="color: #0f172a;">Halo ${user.name},</h2>
-            <p>Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.</p>
+            <p>${bodyText}</p>
             <p>Klik tombol di bawah ini untuk membuat kata sandi baru:</p>
             <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Atur Ulang Kata Sandi</a>
-            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika Anda tidak meminta reset password, abaikan saja email ini.</p>
+            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika Anda tidak merasa melakukan tindakan ini, abaikan saja email ini.</p>
           </div>
         `
       });
     },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url, token }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'Verifikasi Email UMKM Site Builder',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            <h2 style="color: #0f172a;">Halo ${user.name},</h2>
+            <p>Terima kasih telah mendaftar di UMKM Site Builder. Silakan verifikasi email Anda untuk melanjutkan.</p>
+            <p>Klik tombol di bawah ini untuk memverifikasi akun Anda:</p>
+            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Verifikasi Email</a>
+            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika tautan tidak berfungsi, Anda juga dapat menggunakan kode OTP ini: <strong>${token}</strong> (jika aplikasi memintanya).</p>
+          </div>
+        `
+      });
+    }
   },
   socialProviders: {
     ...(process.env.GOOGLE_CLIENT_ID || import.meta.env?.GOOGLE_CLIENT_ID ? {
@@ -102,6 +134,11 @@ export const auth = betterAuth({
         defaultValue: "active",
         input: false,
       },
+      registeredBy: {
+        type: "string",
+        required: false,
+        input: true,
+      }
     },
   },
   onAPIError: {
@@ -134,6 +171,7 @@ export const auth = betterAuth({
             data: {
               ...user,
               emailVerified: true,
+              status: user.registeredBy ? 'pending' : 'active',
             },
           };
         },
@@ -146,7 +184,7 @@ export const auth = betterAuth({
 
             await db.insert(wallets).values({
               id: `wal_${crypto.randomUUID()}`,
-              designerId: user.id,
+              userId: user.id,
               balance: 0,
             }).onConflictDoNothing();
           }
@@ -164,6 +202,11 @@ export const auth = betterAuth({
             throw new APIError("UNAUTHORIZED", {
               message: "ACCOUNT_SUSPENDED",
             });
+          }
+
+          // Otomatis aktifkan akun saat pengguna berhasil login pertama kali
+          if (user?.status === 'pending') {
+            await db.update(users).set({ status: 'active' }).where(eq(users.id, user.id));
           }
 
           return {
@@ -259,6 +302,17 @@ export function isSuperAdmin(user: AuthenticatedUser | null): boolean {
 
 export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): boolean {
   return isActive(user) && isSuperAdmin(user);
+}
+
+export function canManageStore(
+  user: AuthenticatedUser | null,
+  store: { userId: string; registeredBy?: string | null }
+): boolean {
+  if (!user || !isActive(user)) return false;
+  if (user.role === 'superadmin') return true;
+  if (user.role === 'tenant') return store.userId === user.id;
+  if (user.role === 'admin') return store.registeredBy === user.id;
+  return false;
 }
 
 export function getRedirectUrlForRole(role?: string | null): string {

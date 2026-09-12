@@ -58,6 +58,7 @@
     {#each products as product, index (product.id || product.name + index)}
       {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
       {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
+      {@const displayImg = product.image || product.imageUrl || product.imageUrls?.[0]}
 
       <div
         role="button"
@@ -80,9 +81,9 @@
               isImgActive ? 'ring-2 ring-blue-500' : ''
             }`}
           >
-            {#if product.imageUrl}
+            {#if displayImg}
               <img
-                src={product.imageUrl}
+                src={displayImg}
                 alt={product.name}
                 class="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
                 loading="lazy"
@@ -93,8 +94,12 @@
               </div>
             {/if}
 
-            {#if product.badge}
-              <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+            {#if product.categoryName || product.category?.name}
+              <span class="absolute top-2 left-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-slate-700 dark:text-slate-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10">
+                {product.categoryName || product.category?.name}
+              </span>
+            {:else if product.badge}
+              <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10">
                 {product.badge}
               </span>
             {/if}
@@ -113,7 +118,7 @@
 
         <div class="mt-3 pt-3 border-t border-light/60">
           <p class="font-heading font-black text-xs sm:text-sm text-primary mb-2">
-            {formatRupiah(product.price)}
+            {formatRupiah(product.basePrice ?? product.price ?? 0)}
           </p>
 
           <div class="flex gap-2">

@@ -36,4 +36,22 @@ export function formatDate(
   return new Intl.DateTimeFormat('id-ID', options ?? defaultOptions).format(d);
 }
 
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function generateSlug(text: string, withSuffix = false): string {
+  const base = slugify(text) || 'template';
+  if (withSuffix) {
+    const suffix = Math.random().toString(36).substring(2, 7);
+    return `${base}-${suffix}`;
+  }
+  return base;
+}
+
 

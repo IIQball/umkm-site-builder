@@ -29,6 +29,7 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
   export let layoutPreset: string = 'split_left_text';
+  export let isLiveStorefront: boolean = false;
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'split_left_text';
   $: isFullBannerPreset = activePreset === 'full_banner_overlay' || activePreset === 'video_background_loop';
@@ -74,19 +75,25 @@
   $: customBgStyle = customBgColor ? `background-color: ${customBgColor};` : '';
   $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--color-text-main,#0f172a)]';
 
-  const selectNode = (e: MouseEvent, key: string) => {
-    e.stopPropagation();
-    editorStore.selectSection(sectionId);
-    editorStore.selectNode(sectionId, key);
-  };
+  const selectNode = isLiveStorefront
+    ? (_e: MouseEvent, _key: string) => {}
+    : (e: MouseEvent, key: string) => {
+        e.stopPropagation();
+        editorStore.selectSection(sectionId);
+        editorStore.selectNode(sectionId, key);
+      };
 
-  const selectNodeKey = (e: KeyboardEvent, key: string) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.stopPropagation();
-      editorStore.selectSection(sectionId);
-      editorStore.selectNode(sectionId, key);
-    }
-  };
+  const selectNodeKey = isLiveStorefront
+    ? (_e: KeyboardEvent, _key: string) => {}
+    : (e: KeyboardEvent, key: string) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.stopPropagation();
+          editorStore.selectSection(sectionId);
+          editorStore.selectNode(sectionId, key);
+        }
+      };
+
+  $: liveActiveNodeId = isLiveStorefront ? null : $activeNodeId;
 </script>
 
 <section
@@ -136,7 +143,7 @@
         {ctaText}
         {ctaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -152,7 +159,7 @@
         {secondaryCtaLink}
         {waNumber}
         {imageUrl}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -167,7 +174,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -182,7 +189,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -198,7 +205,7 @@
         {secondaryCtaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -209,7 +216,7 @@
         {title}
         {subtitle}
         {imageUrl}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -225,7 +232,7 @@
         {secondaryCtaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -241,7 +248,7 @@
         {secondaryCtaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -256,7 +263,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -270,7 +277,7 @@
         {ctaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -295,7 +302,7 @@
         {subtitle}
         {ctaText}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -310,7 +317,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -326,7 +333,7 @@
         {secondaryCtaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -338,7 +345,7 @@
         {subtitle}
         {ctaText}
         {ctaLink}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -353,7 +360,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -368,7 +375,7 @@
         {secondaryCtaText}
         {secondaryCtaLink}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -380,7 +387,7 @@
         {subtitle}
         {ctaText}
         {ctaLink}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -392,7 +399,7 @@
         {subtitle}
         {ctaText}
         {ctaLink}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />
@@ -409,7 +416,7 @@
         {secondaryCtaLink}
         {imageUrl}
         {waNumber}
-        activeNodeId={$activeNodeId}
+        activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
       />

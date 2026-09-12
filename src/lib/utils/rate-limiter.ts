@@ -71,6 +71,17 @@ export class InMemoryRateLimiter {
     return true;
   }
 
+  /**
+   * Reset rate limit state for a key or clear all keys
+   */
+  public reset(key?: string): void {
+    if (key) {
+      this.store.delete(key);
+    } else {
+      this.store.clear();
+    }
+  }
+
   private cleanup(now: number) {
     for (const [key, info] of this.store.entries()) {
       if (now > info.resetTime) {

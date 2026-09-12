@@ -4,6 +4,7 @@ import { storeCategories, stores } from '../../../db/schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 import { getAuthenticatedUser, canManageStore } from '../../../lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
@@ -171,7 +172,8 @@ export const DELETE: APIRoute = async ({ request }) => {
     }
 
     return jsonSuccess({ success: true }, 200);
-  } catch {
+  } catch (error) {
+    logger.error('categories-delete', error);
     return jsonError('Gagal menghapus kategori', 500);
   }
 };

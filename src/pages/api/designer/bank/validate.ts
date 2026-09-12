@@ -3,6 +3,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { bankValidateSchema } from '@/schemas/designer/bank-validate.schema';
 import { xenditClient } from '@/lib/finance/xendit';
 import { InMemoryRateLimiter } from '@/lib/utils/rate-limiter';
+import { logger } from '@/lib/utils/logger';
 
 // Rate Limiter: Maximum 5 attempts per designer within 1 hour
 export const bankValidateLimiter = new InMemoryRateLimiter(5, 60 * 60 * 1000);
@@ -135,7 +136,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       },
       { status: 200 }
     );
-  } catch {
+  } catch (error) {
+    logger.error('bank-validate', error);
     return Response.json(
       {
         success: false,

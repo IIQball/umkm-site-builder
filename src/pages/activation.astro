@@ -1,20 +1,29 @@
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import ResetPasswordForm from '@/components/auth/ResetPasswordForm.svelte';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm.svelte";
+import Card from "@/components/ui/Card.svelte";
 
 const title = "Aktivasi Akun";
 const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktifkan akun Anda.";
 
-// We reuse the ResetPasswordForm because it already handles token validation and password reset logic
+// Reuses ResetPasswordForm: it already handles token validation and password reset.
 ---
 
-<AuthLayout {title} {description}>
-  <div class="mb-8 animate-fade-in-up">
-    <h1 class="text-2xl font-bold text-main mb-2 tracking-tight">{title}</h1>
-    <p class="text-sm text-secondary leading-relaxed">
-      {description}
-    </p>
-  </div>
-  
-  <ResetPasswordForm client:load />
-</AuthLayout>
+<BaseLayout title={`${title} - UMKM Site Builder`} description={description} hideNavbar={true}>
+  <main class="min-h-screen w-full flex items-center justify-center p-4 bg-canvas relative overflow-hidden">
+    <div class="w-full max-w-md relative z-10 animate-fade-in-up">
+      <Card variant="elevated" padding="xl" radius="3xl">
+        <div class="text-center mb-8">
+          <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mx-auto mb-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl">
+            <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-heading font-bold text-sm shadow-sm">U</div>
+            <span class="text-heading-md text-main tracking-tight">UMKM Builder</span>
+          </a>
+          <h1 class="text-heading-lg text-main">{title}</h1>
+          <p class="text-body-base text-secondary mt-2">{description}</p>
+        </div>
+
+        <ResetPasswordForm client:load />
+      </Card>
+    </div>
+  </main>
+</BaseLayout>

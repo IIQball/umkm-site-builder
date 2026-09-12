@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import type { APIRoute } from 'astro';
+import { logger } from '@/lib/utils/logger';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -20,7 +21,8 @@ export const POST: APIRoute = async ({ request }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch {
+  } catch (error) {
+    logger.error('check-email', error);
     return new Response(JSON.stringify({ exists: false, error: "Internal server error" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -14,8 +14,9 @@ export const GET: APIRoute = async ({ request }) => {
 
     const [store] = await db.select().from(stores).where(eq(stores.userId, user.id)).limit(1);
     
+    // Tenant yang belum onboarding belum punya toko: kuota terpakai 0, bukan error
     if (!store) {
-      return jsonError('Toko tidak ditemukan', 404);
+      return jsonSuccess({ products: 0, categories: 0 }, 200);
     }
 
     const [productCount] = await db.select({ count: sql`count(*)` })

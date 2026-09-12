@@ -17,12 +17,13 @@ export function extractSubdomain(
     return null;
   }
 
-  const hostParts = trimmedHost.split('.');
-  const mainDomainParts = trimmedMainDomain.split('.');
-
-  if (hostParts.length > mainDomainParts.length) {
-    return hostParts[0];
+  // Hanya host yang benar-benar berada di bawah mainDomain yang dianggap subdomain tenant
+  if (!trimmedHost.endsWith(`.${trimmedMainDomain}`)) {
+    return null;
   }
 
-  return null;
+  const subdomain = trimmedHost.slice(0, -(trimmedMainDomain.length + 1));
+
+  // Tolak subdomain bertingkat (a.b.mainDomain)
+  return subdomain.includes('.') ? null : subdomain;
 }

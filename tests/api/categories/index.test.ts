@@ -58,12 +58,21 @@ describe('Categories API', () => {
   });
 
   it('POST creates a category', async () => {
-    (db.select as unknown as Mock).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+    (db.select as unknown as Mock).mockImplementation((opts) => {
+      if (opts && opts.count) {
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 0 }]),
+          }),
+        };
+      }
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1' }]),
+          }),
         }),
-      }),
+      };
     });
     // No existing slug conflict
     (db.query.storeCategories.findFirst as unknown as Mock).mockResolvedValue(null);

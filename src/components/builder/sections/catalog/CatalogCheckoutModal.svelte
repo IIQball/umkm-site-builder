@@ -6,7 +6,6 @@
   import Button from '../../../ui/Button.svelte';
   import Input from '../../../ui/Input.svelte';
   import Textarea from '../../../ui/Textarea.svelte';
-  import Select from '../../../ui/Select.svelte';
   import Card from '../../../ui/Card.svelte';
   import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
@@ -25,7 +24,6 @@
     name: '',
     phone: '',
     address: '',
-    delivery: 'Reguler',
     notes: '',
   };
   export let onBackToCatalog: () => void;
@@ -211,18 +209,7 @@
             />
           </div>
 
-          <div>
-            <Select
-              id="form-delivery"
-              label="Opsi Pengantaran"
-              required={true}
-              bind:value={form.delivery}
-              options={[
-                { value: 'Reguler', label: 'Reguler (Estimasi 2-3 Hari)' },
-                { value: 'Instan', label: 'Instan (Gojek/Grab)' }
-              ]}
-            />
-          </div>
+
 
           <div class="mb-8">
             <Input

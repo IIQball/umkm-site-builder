@@ -133,6 +133,7 @@
 
       if (data.ok) {
         closeModal();
+        window.dispatchEvent(new CustomEvent('quota-updated'));
         dispatch("success");
       } else {
         let errorMsg = data.error.message;

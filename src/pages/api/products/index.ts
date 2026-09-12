@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { db } from '../../../lib/db/client';
 import { products, stores } from '../../../db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
@@ -64,6 +64,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (!canManageStore(locals.user as AuthenticatedUser, store)) {
       return jsonError('Anda tidak memiliki izin mengelola produk toko ini', 403, undefined, 'FORBIDDEN');
+    }
+
+    const [productCount] = await db.select({ count: sql`count(*)` })
+      .from(products)
+      .where(and(eq(products.storeId, result.data.storeId), isNull(products.deletedAt)));
+
+    if (Number(productCount.count) >= 10) {
+      return jsonError('Maksimal 10 produk. Tambah lebih banyak fitur berbayar.', 402, undefined, 'PAYMENT_REQUIRED');
     }
 
     // 4. Insert product with pre-uploaded image URLs

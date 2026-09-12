@@ -26,6 +26,5 @@ declare namespace App {
   interface Locals {
     user: User | null;
     session: Session | null;
-    subdomain: string | null;
   }
 }

@@ -149,6 +149,7 @@
   const statusOptions = [
     { value: 'all', label: 'Semua Status' },
     { value: 'active', label: 'Aktif' },
+    { value: 'pending', label: 'Menunggu Aktivasi' },
     { value: 'suspended', label: 'Ditangguhkan' }
   ];
 </script>
@@ -184,9 +185,10 @@
 
 
   <!-- User Stats Summary -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-100" />
     <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-150" />
+    <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="orange" icon="pending_actions" delayClass="delay-175" />
     <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="orange" icon="block" delayClass="delay-200" />
   </div>
 

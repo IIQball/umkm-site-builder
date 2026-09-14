@@ -3,6 +3,7 @@
   import { RegisterSchema } from "@/schemas/auth.schema";
   import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft, ArrowRight, KeyRound } from "lucide-svelte";
   import Input from "@/components/ui/Input.svelte";
+  import OtpInput from "./OtpInput.svelte";
   import Button from "@/components/ui/Button.svelte";
   import { fade, fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
@@ -50,7 +51,10 @@
       return;
     }
 
+    // Optimistic UI: Pindah langsung ke halaman verifikasi agar terasa cepat
+    step = 3;
     loading = true;
+
     try {
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
@@ -61,12 +65,13 @@
       
       if (res.ok && data.ok) {
         toast.success("Kode OTP telah dikirim ke email Anda.");
-        step = 3;
       } else {
         toast.error(data.error || "Gagal mengirim OTP.");
+        step = 2; // Kembalikan ke step 2 jika gagal
       }
     } catch (err: any) {
       toast.error(err.message || "Kesalahan sistem.");
+      step = 2; // Kembalikan ke step 2 jika gagal
     } finally {
       loading = false;
     }
@@ -317,15 +322,7 @@
       </div>
 
       <div class="flex justify-center my-6">
-        <Input
-          type="text"
-          id="otp"
-          bind:value={otp}
-          placeholder="XXXXXX"
-          size="lg"
-          maxlength="6"
-          class="text-center text-xl tracking-widest font-bold"
-        />
+        <OtpInput bind:value={otp} disabled={loading} />
       </div>
 
       <div class="pt-2 flex items-center gap-3 w-full">

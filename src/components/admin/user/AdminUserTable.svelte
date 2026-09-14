@@ -50,6 +50,11 @@
               <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
               Aktif
             </Badge>
+          {:else if item.status === 'pending'}
+            <Badge variant="amber" size="sm">
+              <AlertCircle size={12} strokeWidth={3} class="mr-1 inline" />
+              Menunggu Aktivasi
+            </Badge>
           {:else}
             <Badge variant="rose" size="sm">
               <Ban size={12} strokeWidth={3} class="mr-1 inline" />
@@ -69,7 +74,7 @@
                 <AlertCircle size={13} class="mr-1" />
                 <span>Tangguhkan</span>
               </Button>
-            {:else}
+            {:else if item.status === 'suspended'}
               {#if item.suspendReason}
                 <Button 
                   size="xs"

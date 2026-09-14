@@ -44,8 +44,10 @@
       const role = data?.user?.role;
       if (role === 'designer') {
         window.location.href = '/designer/wallet';
-      } else if (role === 'superadmin' || role === 'admin') {
-        window.location.href = '/admin/users'; // or wherever they should go
+      } else if (role === 'superadmin') {
+        window.location.href = '/admin';
+      } else if (role === 'admin') {
+        window.location.href = '/admin/merchants';
       } else {
         window.location.href = '/dashboard';
       }

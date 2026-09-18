@@ -23,9 +23,9 @@ export default {
         'muted-foreground': 'var(--color-text-muted, #64748b)',
         foreground: 'var(--color-text-main, #0f172a)',
         // Theme semantic tokens — usable as bg-*, text-*, border-*, divide-*
-        canvas: 'var(--color-bg-base)',
-        card: 'var(--color-card-base)',
-        nested: 'var(--color-nested-base)',
+        canvas: 'rgb(var(--color-bg-base-rgb, 248 250 252) / <alpha-value>)',
+        card: 'rgb(var(--color-card-rgb, 255 255 255) / <alpha-value>)',
+        nested: 'rgb(var(--color-nested-rgb, 241 245 249) / <alpha-value>)',
         main: 'var(--color-text-main)',
         secondary: 'var(--color-text-secondary)',
         muted: 'var(--color-text-muted)',

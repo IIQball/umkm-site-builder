@@ -7,7 +7,6 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
-  fetchFile: null,
   integrations: [
     svelte(),
   ],
@@ -15,8 +14,14 @@ export default defineConfig({
     server: {
       allowedHosts: true,
     },
+    optimizeDeps: {
+      exclude: ['@astrojs/svelte', 'worker-mailer'],
+    },
+    ssr: {
+      noExternal: ['worker-mailer'],
+    },
     build: {
-      chunkSizeWarningLimit: 2000, // Menghilangkan warning chunk > 500kb
+      chunkSizeWarningLimit: 2000,
     },
   },
 });

@@ -1,99 +1,165 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PublicNavbar from "@/components/common/PublicNavbar.svelte";
+import HeroScrollSequence from "@/components/landing/HeroScrollSequence.svelte";
+import TextRevealSection from "@/components/landing/TextRevealSection.svelte";
+import SynergySection from "@/components/landing/SynergySection.svelte";
+import ValueMatrixSection from "@/components/landing/ValueMatrixSection.svelte";
+import TestimonialsSection from "@/components/landing/TestimonialsSection.svelte";
+import FaqSection from "@/components/landing/FaqSection.svelte";
+import LandingFooter from "@/components/landing/LandingFooter.svelte";
+import Button from "@/components/ui/Button.svelte";
+
+const user = Astro.locals.user;
+const currentPath = Astro.url.pathname;
 ---
 
-<BaseLayout title="UMKM Site Builder - Platform Website No-Code Toko Online UMKM" description="Buat website toko online profesional untuk UMKM Indonesia dalam hitungan menit tanpa koding.">
-  <main class="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
-    <div class="text-center space-y-6">
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-800/60 shadow-sm">
-        <span>Platform Website Toko Online UMKM</span>
-      </div>
-
-      <!-- Headline -->
-      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 leading-tight">
-        Bangun Toko Online UMKM Siap Jualan <br class="hidden sm:inline" />
-        <span class="text-blue-600 dark:text-blue-400">
-          Cepat dan Tanpa Koding
-        </span>
-      </h1>
-
-      <!-- Subtitle -->
-      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
-        Katalog produk WhatsApp, subdomain instan, dan pembayaran otomatis yang dirancang khusus untuk pertumbuhan bisnis lokal.
-      </p>
-
-      <!-- CTAs -->
-      <div class="flex flex-wrap items-center justify-center gap-3.5 pt-2">
-        <a
-          href="/templates"
-          class="btn btn-primary px-7 py-3 text-sm font-bold shadow-lg shadow-blue-600/20 rounded-xl flex items-center gap-2 transition-all active:scale-[0.98]"
-        >
-          <span>Jelajahi Template</span>
-          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </a>
-
-        <a
-          href="/auth/login?mode=register"
-          class="btn btn-outline border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all active:scale-[0.98]"
-        >
-          <span class="material-symbols-outlined text-[18px]">person_add</span>
-          <span>Daftar Gratis</span>
-        </a>
-      </div>
-
-      <!-- Feature Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 pt-12 text-left">
-        <!-- Prominent Visual Builder Feature -->
-        <div class="md:col-span-7 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50">
-              <span class="material-symbols-outlined text-xl">layers</span>
-            </div>
-            <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100 mb-2">
-              Visual Editor 3-Kolom Presisi
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-md">
-              Kustomisasi tata letak, warna, dan tipografi secara instan dengan preview responsif perangkat Desktop, Tablet, hingga Ponsel.
-            </p>
-          </div>
-
-          <div class="mt-6 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono text-slate-600 dark:text-slate-400">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <span class="font-semibold text-slate-800 dark:text-slate-200">Layer Tree</span>
-            </div>
-            <span class="text-[11px] text-slate-400">7 Section Terverifikasi</span>
-          </div>
-        </div>
-
-        <!-- Secondary Stack -->
-        <div class="md:col-span-5 flex flex-col gap-5">
-          <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex-1">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 border border-emerald-100 dark:border-emerald-900/50">
-              <span class="material-symbols-outlined text-xl">chat</span>
-            </div>
-            <h3 class="font-bold text-base text-slate-900 dark:text-slate-100 mb-1.5">
-              Pesanan Langsung WhatsApp
-            </h3>
-            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Format pemesanan otomatis memudahkan calon pembeli mengirim detail produk ke nomor WhatsApp bisnis Anda.
-            </p>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex-1">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 border border-blue-100 dark:border-blue-900/50">
-              <span class="material-symbols-outlined text-xl">qr_code_2</span>
-            </div>
-            <h3 class="font-bold text-base text-slate-900 dark:text-slate-100 mb-1.5">
-              Pembayaran Digital Otomatis
-            </h3>
-            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Dukungan gateway QRIS dan transfer bank terverifikasi otomatis untuk aktivasi dan pembelian template.
-            </p>
-          </div>
-        </div>
-      </div>
+<BaseLayout
+  title="Pinoka - Platform Digitalisasi Visual Produk Lokal Banyuwangi"
+  description="Platform Kolaborasi Potensi Lokal Modern yang mendedikasikan diri untuk mendigitalisasi visual produk lokal terbaik dari Banyuwangi."
+  hideNavbar={true}
+>
+  <div
+    class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
+  >
+    <!-- Fixed Global Architectural Capsule Navbar -->
+    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none">
+      <PublicNavbar
+        client:load
+        user={user
+          ? {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              image: user.image,
+            }
+          : null}
+        currentPath={currentPath}
+      />
     </div>
-  </main>
+
+    <!-- Cinematic Scroll-Linked HTML5 Canvas Hero -->
+    <HeroScrollSequence client:load>
+      <!-- Hero Content (Framing the anime canvas with zero background block) -->
+      <div
+        slot="hero"
+        class="w-full h-full flex flex-col justify-between pt-20 md:pt-24"
+      >
+        <!-- Cinematic Atmospheric Lighting Scrim (Seamless high-contrast pools for typography, 100% open center) -->
+        <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <!-- Subtle warm brand radiance -->
+          <div
+            class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange/[0.03] rounded-full blur-[140px]"
+          >
+          </div>
+
+          <!-- Directional Studio Scrim: Soft luminous wash behind left/right text, keeping center clear -->
+          <div
+            class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.88)_0%,rgba(255,255,255,0.65)_28%,rgba(255,255,255,0.12)_45%,rgba(255,255,255,0.12)_55%,rgba(255,255,255,0.65)_72%,rgba(255,255,255,0.88)_100%)] dark:bg-[linear-gradient(to_right,rgba(11,15,25,0.92)_0%,rgba(11,15,25,0.72)_28%,rgba(11,15,25,0.15)_45%,rgba(11,15,25,0.15)_55%,rgba(11,15,25,0.72)_72%,rgba(11,15,25,0.92)_100%)] transition-colors duration-300"
+          >
+          </div>
+
+          <!-- Vertical soft blend: gives mobile stacked text clear contrast while staying light on desktop -->
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/10 lg:from-white/30 lg:via-transparent lg:to-white/40 dark:from-[#0b0f19]/75 dark:via-[#0b0f19]/55 dark:to-transparent lg:dark:from-[#0b0f19]/40 lg:dark:via-transparent lg:dark:to-[#0b0f19]/60 transition-colors duration-300"
+          >
+          </div>
+        </div>
+
+        <!-- Center Stage Composition: Open stage showing anime frames clearly -->
+        <main
+          class="relative z-20 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-12 py-4"
+        >
+          <div
+            class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+          >
+            <!-- Left Column: Multi-line Headline -->
+            <div class="lg:col-span-5 flex flex-col items-start z-20">
+              <h1
+                class="font-sans font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] tracking-tight leading-[1.08] text-main transition-colors duration-200"
+              >
+                Platform Digitalisasi<br />
+                Visual Produk Lokal<br />
+                Banyuwangi
+              </h1>
+            </div>
+
+            <!-- Center Open Zone -->
+            <div class="hidden lg:block lg:col-span-2 pointer-events-none">
+            </div>
+
+            <!-- Right Column: Bio Paragraph & CTA Button -->
+            <div
+              class="lg:col-span-5 flex flex-col items-start lg:items-end z-20"
+            >
+              <div class="w-full max-w-md space-y-6 lg:text-left">
+                <p
+                  class="font-sans text-xs sm:text-[13.5px] md:text-sm text-secondary font-medium leading-relaxed transition-colors duration-200"
+                >
+                  Platform Kolaborasi Potensi Lokal Modern yang mendedikasikan
+                  diri untuk mendigitalisasi visual produk lokal terbaik dari
+                  Banyuwangi, Kami menghubungkan designer, pelaku UMKM, dan para
+                  konsumen untuk menciptakan pengalaman digital yang relevan dan
+                  menarik.
+                </p>
+
+                <!-- CTA Pill Button with Arrow Circle -->
+                <Button
+                  href="/auth/login?mode=register"
+                  variant="orange"
+                  size="md"
+                  class="!rounded-full !pl-2.5 !pr-6 !py-2.5 !gap-3.5 !bg-orange hover:!bg-orange-dark text-white font-sans font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-[0.98] shadow-xl shadow-orange/35 group cursor-pointer"
+                >
+                  <span
+                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white text-orange flex items-center justify-center shrink-0 shadow-md transition-transform duration-200 group-hover:translate-x-0.5"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
+                  <span class="tracking-wide">Mulai Kolaborasi</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Bottom Display Typography: Refined architectural watermark -->
+        <div
+          class="relative z-20 w-full overflow-hidden select-none pointer-events-none pb-3 sm:pb-5"
+        >
+          <div
+            class="text-center font-sans font-black text-[18vw] leading-[0.8] tracking-tight text-neutral-900/15 dark:text-white/20 transition-colors duration-200"
+          >
+            Pinoka
+          </div>
+        </div>
+      </div>
+    </HeroScrollSequence>
+
+    <!-- Theme-Responsive Architectural Post-Hero Sections -->
+    <div
+      class="relative w-full z-20 bg-neutral-950 text-white transition-colors duration-200"
+    >
+      <TextRevealSection client:load />
+      <SynergySection client:load />
+      <ValueMatrixSection client:load />
+      <TestimonialsSection client:load />
+      <FaqSection client:load />
+      <LandingFooter client:load />
+    </div>
+  </div>
 </BaseLayout>

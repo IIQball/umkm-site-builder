@@ -3,53 +3,84 @@
 </script>
 
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { signOut } from '@/lib/auth-client';
-  import {
-    Sun,
-    Moon,
-    LogOut,
-    Menu,
-    X,
-    ChevronDown,
-    Sparkles,
-  } from 'lucide-svelte';
-  import {
-    type NavUser,
-    getRoleBadge,
-    getRoleNavLinks,
-  } from './navbar.helpers';
+  import { Sun, Moon, Menu, X } from 'lucide-svelte';
+  import type { NavUser } from './navbar.helpers';
+  import NavbarUserMenu from './NavbarUserMenu.svelte';
+  import NavbarMobileDrawer from './NavbarMobileDrawer.svelte';
+  import Button from '@/components/ui/Button.svelte'
 
   export let user: NavUser | null = null;
   export let currentPath: string = '';
 
-  let isDark = false;
-  let isUserMenuOpen = false;
+  let isDark = true;
   let isMobileMenuOpen = false;
   let isLoggingOut = false;
+  let navMode: 'transparent' | 'hidden' | 'normal' = currentPath === '/' ? 'transparent' : 'normal';
+  let ticking = false;
 
-  let menuContainer: HTMLDivElement;
+  const navItems = [
+    { label: 'BERANDA', href: '/' },
+    { label: 'TENTANG', href: '/#about' },
+    { label: 'TEMPLATES', href: '/templates' },
+    { label: 'UMKM', href: '/umkm' },
+    { label: 'HARGA', href: '/#pricing' },
+  ];
+
+  const updateNavMode = () => {
+    const heroTrack = document.getElementById('hero-scroll-track');
+    if (!heroTrack) {
+      navMode = 'normal';
+      return;
+    }
+    const rect = heroTrack.getBoundingClientRect();
+    const maxScroll = rect.height - window.innerHeight;
+
+    // 1. Initial entrance or at hero top (where hero texts are visible)
+    if (window.scrollY <= 40 || -rect.top <= 40) {
+      navMode = 'transparent';
+    }
+    // 2. Scrolling within hero section: navbar disappears completely
+    else if (rect.bottom > 80 && -rect.top < maxScroll) {
+      navMode = 'hidden';
+    }
+    // 3. Post-hero sections: normal & always visible
+    else {
+      navMode = 'normal';
+    }
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateNavMode();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
 
   onMount(() => {
-    // Detect theme
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
     applyTheme(isDark);
 
     if (!currentPath && typeof window !== 'undefined') {
       currentPath = window.location.pathname;
     }
 
-    // Click outside listener for user dropdown
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuContainer && !menuContainer.contains(event.target as Node)) {
-        isUserMenuOpen = false;
-      }
-    };
+    updateNavMode();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+  });
 
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
+  onDestroy(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    }
   });
 
   const toggleTheme = () => {
@@ -78,290 +109,126 @@
     }
   };
 
-  $: userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U');
-  $: roleMeta = getRoleBadge(user?.role);
-  $: roleNavLinks = getRoleNavLinks(user?.role);
+  $: headerClasses = navMode === 'transparent'
+    ? 'translate-y-0 opacity-100 pointer-events-auto bg-transparent border-b border-transparent shadow-none backdrop-blur-none'
+    : navMode === 'hidden'
+      ? '-translate-y-full opacity-0 pointer-events-none border-b border-transparent shadow-none'
+      : 'translate-y-0 opacity-100 pointer-events-auto navbar-glass-surface border-b border-border/80 dark:border-white/10 shadow-sm backdrop-blur-md';
 </script>
 
-<nav class="sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-light transition-colors shadow-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 sm:h-18">
-      <!-- Left: Brand Logo & Public Nav Links -->
-      <div class="flex items-center gap-8">
-        <!-- Logo Emblem -->
-        <a href="/" class="flex items-center gap-2.5 group cursor-pointer">
-          <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-primary via-indigo-600 to-violet-500 text-white flex items-center justify-center font-black text-base shadow-md shadow-primary/20 group-hover:scale-105 group-hover:shadow-primary/35 transition-all duration-300">
-            <Sparkles size={18} class="stroke-[2.5]" />
-          </div>
-          <div class="flex flex-col">
-            <div class="flex items-center gap-1.5">
-              <span class="font-bold text-base sm:text-lg tracking-tight text-main group-hover:text-primary transition-colors">
-                UMKM Builder
-              </span>
-              <span class="bg-primary/10 text-primary border border-primary/20 text-3xs font-extrabold px-1.5 py-0.2 rounded-md uppercase tracking-wider">
-                SaaS
-              </span>
-            </div>
-          </div>
-        </a>
-
-        <!-- Desktop Navigation Links -->
-        <div class="hidden md:flex items-center gap-1">
-          <a
-            href="/"
-            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {currentPath === '/'
-              ? 'bg-primary/10 text-primary font-extrabold'
-              : 'text-secondary hover:text-main hover:bg-nested'}"
-          >
-            Beranda
-          </a>
-          <a
-            href="/templates"
-            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {currentPath.startsWith('/templates')
-              ? 'bg-primary/10 text-primary font-extrabold'
-              : 'text-secondary hover:text-main hover:bg-nested'}"
-          >
-            Katalog Template
-          </a>
-          <a
-            href="/umkm"
-            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {currentPath.startsWith('/umkm')
-              ? 'bg-primary/10 text-primary font-extrabold'
-              : 'text-secondary hover:text-main hover:bg-nested'}"
-          >
-            Direktori UMKM
-          </a>
-        </div>
-      </div>
-
-      <!-- Right: Theme Toggle -> Divider -> Auth Buttons / User Profile Dropdown -->
-      <div class="flex items-center gap-3">
-        <!-- 1. Theme Toggle (Sun/Moon switch before auth buttons) -->
-        <button
-          type="button"
-          on:click={toggleTheme}
-          aria-label="Ubah tema"
-          class="w-9 h-9 rounded-2xl bg-nested hover:bg-nested/80 border border-light text-secondary hover:text-main flex items-center justify-center transition-all shadow-2xs hover:shadow-xs cursor-pointer"
-          title={isDark ? 'Beralih ke mode terang' : 'Beralih ke mode gelap'}
+<header class="sticky top-0 z-50 w-full box-border transition-all duration-300 ease-out {headerClasses}">
+  <div class="w-full h-16 md:h-20 min-h-[64px] md:min-h-[80px] max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between gap-3 sm:gap-4 box-border">
+    
+    <!-- 1. Left: Architectural Pill Navigation Capsules (Desktop only) -->
+    <div class="hidden md:flex items-center gap-1.5 lg:gap-2 shrink-0">
+      {#each navItems as item}
+        {@const isActive = item.href === '/' ? currentPath === '/' : currentPath.startsWith(item.href)}
+        <a
+          href={item.href}
+          class={isActive
+            ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 font-bold text-[11px] lg:text-xs tracking-wider uppercase shadow-sm transition-all duration-200 shrink-0'
+            : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white font-medium text-[11px] lg:text-xs tracking-wider uppercase border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
         >
-          {#if isDark}
-            <Sun size={17} class="text-amber-400 animate-fade-in" />
-          {:else}
-            <Moon size={17} class="text-slate-700 animate-fade-in" />
-          {/if}
-        </button>
+          {item.label}
+        </a>
+      {/each}
+    </div>
 
-        <!-- Vertical Subtle Divider -->
-        <div class="w-[1px] h-6 bg-light hidden sm:block"></div>
-
-        <!-- 2. Auth Actions or User Profile Dropdown -->
-        {#if user}
-          <!-- User Dropdown Menu Container -->
-          <div class="relative" bind:this={menuContainer}>
-            <button
-              type="button"
-              on:click|stopPropagation={() => (isUserMenuOpen = !isUserMenuOpen)}
-              class="flex items-center gap-2.5 p-1 sm:pl-2.5 sm:pr-3 py-1.5 rounded-2xl bg-nested/80 hover:bg-card border border-light text-main transition-all shadow-2xs hover:shadow-sm cursor-pointer group"
-            >
-              <!-- Avatar Circle with Initial / Image -->
-              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                {#if user.image}
-                  <img src={user.image} alt={user.name || 'User'} class="w-full h-full object-cover rounded-xl" />
-                {:else}
-                  <span>{userInitial}</span>
-                {/if}
-              </div>
-
-              <!-- User Name & Role (Desktop) -->
-              <div class="hidden sm:flex flex-col text-left min-w-0 max-w-[120px]">
-                <span class="text-xs font-bold text-main truncate leading-tight">
-                  {user.name || 'Pengguna'}
-                </span>
-                <span class="text-3xs text-secondary truncate font-medium">
-                  {roleMeta.label}
-                </span>
-              </div>
-
-              <!-- Dropdown Chevron -->
-              <ChevronDown
-                size={14}
-                class="text-muted transition-transform duration-200 {isUserMenuOpen ? 'rotate-180 text-primary' : ''}"
-              />
-            </button>
-
-            <!-- Dropdown Popover Card -->
-            {#if isUserMenuOpen}
-              <div
-                class="absolute right-0 mt-2 w-64 rounded-3xl bg-card border border-light shadow-xl shadow-indigo-500/10 p-2 space-y-1.5 z-50 animate-fade-in-up"
-              >
-                <!-- Profile Header -->
-                <div class="p-3 bg-nested/70 rounded-2xl border border-light/60 flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-xs flex-shrink-0">
-                    {#if user.image}
-                      <img src={user.image} alt={user.name || 'User'} class="w-full h-full object-cover rounded-2xl" />
-                    {:else}
-                      <span>{userInitial}</span>
-                    {/if}
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <p class="text-xs font-bold text-main truncate leading-snug">
-                      {user.name || 'Pengguna'}
-                    </p>
-                    <p class="text-3xs text-secondary truncate font-sans">
-                      {user.email || '-'}
-                    </p>
-                    <div class="mt-1">
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-4xs font-bold border {roleMeta.color}">
-                        {roleMeta.label}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="py-1 space-y-0.5 text-xs font-semibold text-secondary">
-                  {#each roleNavLinks as link}
-                    <a
-                      href={link.href}
-                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-main hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer group"
-                    >
-                      <svelte:component this={link.icon} size={15} class="text-secondary group-hover:text-primary transition-colors shrink-0" />
-                      <span>{link.label}</span>
-                    </a>
-                  {/each}
-                </div>
-
-                <div class="border-t border-light my-1"></div>
-
-                <!-- Logout Button -->
-                <button
-                  type="button"
-                  on:click={handleSignOut}
-                  disabled={isLoggingOut}
-                  class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {#if isLoggingOut}
-                    <span class="material-symbols-outlined text-sm animate-spin">refresh</span>
-                    <span>Keluar...</span>
-                  {:else}
-                    <LogOut size={15} />
-                    <span>Keluar dari Akun</span>
-                  {/if}
-                </button>
-              </div>
-            {/if}
-          </div>
-        {:else}
-          <!-- Guest Auth Actions -->
-          <div class="hidden sm:flex items-center gap-2">
-            <a
-              href="/auth/login"
-              class="px-4 py-2 rounded-2xl text-xs font-bold text-secondary hover:text-main hover:bg-nested transition-all cursor-pointer"
-            >
-              Masuk
-            </a>
-            <a
-              href="/auth/login?mode=register"
-              class="px-4 py-2 rounded-2xl bg-gradient-to-r from-primary via-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-500 text-white text-xs font-bold shadow-sm hover:shadow-md hover:shadow-primary/20 transition-all cursor-pointer"
-            >
-              Daftar Gratis
-            </a>
-          </div>
-        {/if}
-
-        <!-- Mobile Hamburger Button -->
-        <div class="md:hidden">
-          <button
-            type="button"
-            on:click={() => (isMobileMenuOpen = !isMobileMenuOpen)}
-            class="w-9 h-9 rounded-2xl bg-nested border border-light text-secondary hover:text-main flex items-center justify-center transition-all cursor-pointer"
-            aria-label="Toggle Navigation Menu"
-          >
-            {#if isMobileMenuOpen}
-              <X size={18} />
-            {:else}
-              <Menu size={18} />
-            {/if}
-          </button>
+    <!-- Mobile Left Brand Indicator (Mobile only) -->
+    <div class="md:hidden flex items-center shrink-0">
+      <a href="/" class="flex items-center gap-2 shrink-0 select-none">
+        <div class="grid grid-cols-3 gap-0.5 w-5 h-5 shrink-0 items-center justify-center">
+          {#each Array(9) as _}
+            <span class="w-1.5 h-1.5 rounded-[1px] bg-main dark:bg-white"></span>
+          {/each}
         </div>
+        <span class="font-sans font-bold text-base sm:text-lg tracking-wider uppercase leading-none select-none text-main dark:text-white">PINOKA</span>
+      </a>
+    </div>
+
+    <!-- 2. Center: Matrix Dot Grid & Brand Logo (Desktop only) -->
+    <a href="/" class="hidden md:flex items-center gap-2.5 shrink-0 group cursor-pointer transition-transform duration-200 hover:scale-[1.02] select-none">
+      <div class="grid grid-cols-3 gap-0.5 w-5 h-5 shrink-0 items-center justify-center">
+        {#each Array(9) as _}
+          <span class="w-1.5 h-1.5 rounded-[1px] bg-main dark:bg-white transition-colors group-hover:bg-orange"></span>
+        {/each}
+      </div>
+      <div class="flex flex-col leading-tight text-left">
+        <span class="font-sans font-bold text-sm lg:text-base tracking-wider uppercase text-main dark:text-white group-hover:text-orange transition-colors leading-none">
+          PINOKA
+        </span>
+        <span class="font-sans text-[9px] tracking-widest text-muted dark:text-slate-400 uppercase mt-0.5">
+          banyuwangi
+        </span>
+      </div>
+    </a>
+
+    <!-- 3. Right: Action Buttons, Theme Toggle, Auth / CTA -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <a
+        href="/#contact"
+        class="hidden sm:inline-block text-[11px] lg:text-xs uppercase tracking-wider text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white font-medium transition-colors shrink-0"
+      >
+        KONTAK
+      </a>
+
+      {#if !user}
+        <Button
+          href="/auth/login"
+          variant="primary"
+          class="hidden sm:inline-flex !rounded-full !h-10 px-5 text-xs font-semibold tracking-wider uppercase shadow-xs shrink-0"
+        >
+          Masuk
+        </Button>
+      {/if}
+
+      <!-- Circular Theme Toggle Button -->
+      <Button
+        id="theme-toggle-btn"
+        variant="ghost"
+        on:click={toggleTheme}
+        aria-label="Ubah tema"
+        title={isDark ? 'Mode Terang' : 'Mode Gelap'}
+        class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-neutral-200 dark:border-neutral-800 dark:bg-white/5 dark:hover:bg-white/10 text-main dark:text-white shadow-sm shrink-0"
+      >
+        {#if isDark}
+          <Sun size={18} class="text-amber-400 shrink-0" />
+        {:else}
+          <Moon size={18} class="text-slate-700 dark:text-white shrink-0" />
+        {/if}
+      </Button>
+
+      <!-- User Profile Dropdown or Mobile Auth Button -->
+      {#if user}
+        <NavbarUserMenu {user} onSignOut={handleSignOut} {isLoggingOut} />
+      {:else}
+        <Button
+          href="/auth/login"
+          variant="primary"
+          class="sm:hidden !rounded-full !h-10 px-4 text-xs font-semibold whitespace-nowrap shadow-xs shrink-0"
+        >
+          Masuk
+        </Button>
+      {/if}
+
+      <!-- Circular Mobile Menu Toggle Button -->
+      <div class="md:hidden shrink-0">
+        <Button
+          variant="ghost"
+          on:click={() => (isMobileMenuOpen = !isMobileMenuOpen)}
+          aria-label="Toggle Navigation Menu"
+          class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-neutral-200 dark:border-neutral-800 text-main dark:bg-white/5 dark:text-white shadow-sm shrink-0"
+        >
+          {#if isMobileMenuOpen}
+            <X size={18} class="shrink-0" />
+          {:else}
+            <Menu size={18} class="shrink-0" />
+          {/if}
+        </Button>
       </div>
     </div>
   </div>
 
-  <!-- Mobile Drawer / Menu Dropdown -->
-  {#if isMobileMenuOpen}
-    <div class="md:hidden border-t border-light bg-card p-4 space-y-4 shadow-lg animate-fade-in">
-      <!-- Mobile Links -->
-      <div class="flex flex-col space-y-1">
-        <a
-          href="/"
-          class="px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {currentPath === '/'
-            ? 'bg-primary/10 text-primary'
-            : 'text-secondary hover:bg-nested'}"
-        >
-          Beranda
-        </a>
-        <a
-          href="/templates"
-          class="px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {currentPath.startsWith('/templates')
-            ? 'bg-primary/10 text-primary'
-            : 'text-secondary hover:bg-nested'}"
-        >
-          Katalog Template
-        </a>
-        <a
-          href="/umkm"
-          class="px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {currentPath.startsWith('/umkm')
-            ? 'bg-primary/10 text-primary'
-            : 'text-secondary hover:bg-nested'}"
-        >
-          Direktori UMKM
-        </a>
-      </div>
-
-      <div class="border-t border-light pt-3">
-        {#if user}
-          <div class="space-y-1">
-            <div class="px-3.5 py-1 text-4xs font-bold uppercase tracking-wider text-muted font-mono">
-              Menu {roleMeta.label}
-            </div>
-            {#each roleNavLinks as link}
-              <a
-                href={link.href}
-                class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-main hover:bg-nested transition-colors group"
-              >
-                <svelte:component this={link.icon} size={15} class="text-secondary group-hover:text-primary transition-colors shrink-0" />
-                <span>{link.label}</span>
-              </a>
-            {/each}
-            <div class="pt-2 border-t border-light">
-              <button
-                type="button"
-                on:click={handleSignOut}
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-500/10 text-rose-600 font-bold text-xs cursor-pointer hover:bg-rose-500/20 transition-colors"
-              >
-                <LogOut size={15} />
-                <span>Keluar dari Akun</span>
-              </button>
-            </div>
-          </div>
-        {:else}
-          <div class="grid grid-cols-2 gap-2">
-            <a
-              href="/auth/login"
-              class="flex items-center justify-center px-4 py-2.5 rounded-2xl bg-nested text-main font-bold text-xs border border-light"
-            >
-              Masuk
-            </a>
-            <a
-              href="/auth/login?mode=register"
-              class="flex items-center justify-center px-4 py-2.5 rounded-2xl bg-primary text-white font-bold text-xs shadow-sm"
-            >
-              Daftar Gratis
-            </a>
-          </div>
-        {/if}
-      </div>
-    </div>
-  {/if}
-</nav>
+  <!-- Mobile Drawer Menu -->
+  <NavbarMobileDrawer isOpen={isMobileMenuOpen} {navItems} {currentPath} />
+</header>

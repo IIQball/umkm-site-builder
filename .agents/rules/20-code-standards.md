@@ -127,3 +127,27 @@ Rules:
 :global(.my-class) { color: red; }
 ```
 
+## 13. Verifikasi Prop Interface Sebelum Refactor Komponen Custom
+
+Sebelum mengubah nama atau nilai prop pada komponen Svelte/React custom lokal
+(bukan HTML native), **selalu baca definisi prop-nya terlebih dahulu**:
+
+- Svelte: cek `export let propName` di blok `<script>` komponen target.
+- React/TSX: cek interface Props atau parameter destructuring komponen.
+
+Jangan asumsikan konvensi (`class` vs `className`, `onClick` vs `on:click`)
+tanpa verifikasi. Komponen lokal boleh mengexpose prop dengan nama non-standar.
+
+Contoh:
+
+```svelte
+<!-- WhatsAppIcon.svelte mengexpose `className`, bukan `class` -->
+export let className: string = ""
+export { className as class, className }
+
+<!-- Penggunaan BENAR -->
+<WhatsAppIcon size={14} className="shrink-0" />
+
+<!-- Penggunaan SALAH: tidak ada prop 'class' di interface-nya -->
+<WhatsAppIcon size={14} class="shrink-0" />
+```

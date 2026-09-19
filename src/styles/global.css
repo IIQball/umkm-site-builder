@@ -117,14 +117,25 @@ html[data-theme="dark"],
     font-family: var(--font-family);
     font-size: 1rem;
     line-height: 1.5;
-    scroll-behavior: smooth;
     background-color: var(--color-bg-base);
     color: var(--color-text-main);
     transition: background-color var(--transition-base);
+    overflow-x: clip;
   }
 
   body {
     min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  html, body {
+    scrollbar-width: none
+  }
+  html, body {
+    -ms-overflow-style: none
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -399,3 +410,23 @@ html[data-theme="dark"] .navbar-glass-surface,
 .builder-canvas-viewport h6 {
   font-family: var(--font-heading, var(--theme-font-heading, inherit));
 }
+
+/* Layout transition neutralizer - enforce composite-only transforms (craft floor) */
+details summary:after,
+.dropdown summary:after,
+[class*="dropdown"] summary:after {
+  transition-property: transform !important;
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none
+  }
+}
+ 

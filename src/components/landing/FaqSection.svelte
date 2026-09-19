@@ -54,8 +54,10 @@
             scrollTrigger: {
               trigger: containerEl,
               start: 'top 85%',
-              end: 'bottom 15%',
-              toggleActions: 'play reverse play reverse',
+              once: true,
+            },
+            onComplete: () => {
+              gsap.set(leftColEl, { clearProps: 'all' });
             },
           }
         );
@@ -76,8 +78,10 @@
             scrollTrigger: {
               trigger: rightColEl,
               start: 'top 85%',
-              end: 'bottom 15%',
-              toggleActions: 'play reverse play reverse',
+              once: true,
+            },
+            onComplete: () => {
+              gsap.set(items, { clearProps: 'all' });
             },
           }
         );
@@ -99,15 +103,12 @@
 <section
   id="faq"
   bind:this={containerEl}
-  class="w-full bg-canvas text-main py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-12 border-t border-border relative select-none transition-colors duration-200"
+  class="w-full bg-canvas text-main py-16 sm:py-20 md:py-24 px-6 sm:px-8 md:px-12 border-t border-border relative select-none transition-colors duration-200"
 >
   <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
       <!-- Left Column: Headline & Subtext (col-span-5) -->
-      <div bind:this={leftColEl} class="lg:col-span-5 flex flex-col will-change-transform">
-        <span class="text-xs font-mono text-orange tracking-widest uppercase mb-3 block font-semibold">
-          Tanya Jawab
-        </span>
+      <div bind:this={leftColEl} class="lg:col-span-5 flex flex-col">
         <h2 class="text-3xl sm:text-5xl font-bold tracking-tight text-neutral-950 dark:text-white leading-[1.12] mb-5">
           Hal yang Sering Ditanyakan.
         </h2>
@@ -115,16 +116,13 @@
           Semua jawaban mendasar seputar alur kerja, biaya, dan kolaborasi di ekosistem Pinoka.
         </p>
 
-        <!-- Interactive Direct Support Callout Card -->
-        <div class="mt-8 p-5 rounded-2xl bg-nested/80 border border-border flex items-center justify-between gap-4 transition-all duration-300 hover:border-orange/40 hover:shadow-lg dark:hover:shadow-2xl group">
-          <div class="flex items-center gap-3">
-            <span class="relative flex h-3 w-3">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
+        <!-- Direct Support Callout (Clean inline layout, no nested card box) -->
+        <div class="mt-8 pt-6 border-t border-border/80 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 shrink-0"></span>
             <div>
               <p class="text-xs font-semibold text-main">Butuh bantuan langsung?</p>
-              <p class="text-2xs font-mono text-muted">Tim kami siap via WhatsApp</p>
+              <p class="text-xs text-secondary mt-0.5">Tim kami siap via WhatsApp</p>
             </div>
           </div>
           <Button
@@ -142,9 +140,9 @@
       </div>
 
       <!-- Right Column: Interactive Hairline Accordion (col-span-7) -->
-      <div bind:this={rightColEl} class="lg:col-span-7 border-t border-border will-change-transform">
+      <div bind:this={rightColEl} class="lg:col-span-7 border-t border-border">
         {#each FAQS as faq, index}
-          <div class="faq-item border-b border-border px-4 -mx-4 rounded-xl transition-all duration-300 {openIndex === index ? 'bg-neutral-50/80 dark:bg-neutral-900/50' : 'hover:bg-neutral-50/40 dark:hover:bg-neutral-900/30'}">
+          <div class="faq-item border-b border-border transition-colors duration-200">
             <button
               type="button"
               on:click={() => toggleFaq(index)}

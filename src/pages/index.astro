@@ -23,7 +23,7 @@ const currentPath = Astro.url.pathname;
     class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
   >
     <!-- Fixed Global Architectural Capsule Navbar -->
-    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none">
+    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none hero-enter-nav">
       <PublicNavbar
         client:load
         user={user
@@ -69,13 +69,13 @@ const currentPath = Astro.url.pathname;
 
         <!-- Center Stage Composition: Open stage showing anime frames clearly -->
         <main
-          class="relative z-20 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-12 py-4"
+          class="relative z-20 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-12 py-4 overflow-x-clip"
         >
           <div
             class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
             <!-- Left Column: Multi-line Headline -->
-            <div class="lg:col-span-5 flex flex-col items-start z-20">
+            <div class="lg:col-span-5 flex flex-col items-start z-20 hero-enter-left">
               <h1
                 class="font-sans font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] tracking-tight leading-[1.08] text-main transition-colors duration-200"
               >
@@ -91,7 +91,7 @@ const currentPath = Astro.url.pathname;
 
             <!-- Right Column: Bio Paragraph & CTA Button -->
             <div
-              class="lg:col-span-5 flex flex-col items-start lg:items-end z-20"
+              class="lg:col-span-5 flex flex-col items-start lg:items-end z-20 hero-enter-right"
             >
               <div class="w-full max-w-md space-y-6 lg:text-left">
                 <p
@@ -104,33 +104,30 @@ const currentPath = Astro.url.pathname;
                   menarik.
                 </p>
 
-                <!-- CTA Pill Button with Arrow Circle -->
+                <!-- CTA Pill Button -->
                 <Button
                   href="/auth/login?mode=register"
                   variant="orange"
                   size="md"
-                  class="!rounded-full !pl-2.5 !pr-6 !py-2.5 !gap-3.5 !bg-orange hover:!bg-orange-dark text-white font-sans font-semibold text-xs sm:text-sm transition-all duration-200 active:scale-[0.98] shadow-xl shadow-orange/35 group cursor-pointer"
+                  class="!rounded-full !px-5 sm:!px-6 shadow-xl shadow-orange/30 group cursor-pointer"
                 >
-                  <span
-                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white text-orange flex items-center justify-center shrink-0 shadow-md transition-transform duration-200 group-hover:translate-x-0.5"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </span>
                   <span class="tracking-wide">Mulai Kolaborasi</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="transition-transform duration-200 group-hover:translate-x-1"
+                    aria-hidden="true"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
                 </Button>
               </div>
             </div>
@@ -139,7 +136,7 @@ const currentPath = Astro.url.pathname;
 
         <!-- Bottom Display Typography: Refined architectural watermark -->
         <div
-          class="relative z-20 w-full overflow-hidden select-none pointer-events-none pb-3 sm:pb-5"
+          class="relative z-20 w-full overflow-hidden select-none pointer-events-none pb-3 sm:pb-5 hero-enter-bottom"
         >
           <div
             class="text-center font-sans font-black text-[18vw] leading-[0.8] tracking-tight text-neutral-900/15 dark:text-white/20 transition-colors duration-200"
@@ -152,7 +149,7 @@ const currentPath = Astro.url.pathname;
 
     <!-- Theme-Responsive Architectural Post-Hero Sections -->
     <div
-      class="relative w-full z-20 bg-neutral-950 text-white transition-colors duration-200"
+      class="relative w-full z-20 transition-colors duration-300"
     >
       <TextRevealSection client:load />
       <SynergySection client:load />
@@ -163,3 +160,24 @@ const currentPath = Astro.url.pathname;
     </div>
   </div>
 </BaseLayout>
+
+<style>
+  /* Initial state: Hidden before smooth GSAP entrance animation */
+  .hero-enter-nav,
+  .hero-enter-left,
+  .hero-enter-right,
+  .hero-enter-bottom {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-enter-nav,
+    .hero-enter-left,
+    .hero-enter-right,
+    .hero-enter-bottom {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>

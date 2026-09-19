@@ -14,6 +14,7 @@
   let canvasEl: HTMLCanvasElement
   let ctx2d: CanvasRenderingContext2D | null = null
   let ctx: gsap.Context | null = null
+  let enterTl: gsap.core.Timeline | null = null
 
   const images: HTMLImageElement[] = new Array(TOTAL_FRAMES)
   const playhead = { frame: 1 }
@@ -186,12 +187,29 @@
       ScrollTrigger.refresh()
     }, 200)
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) {
+      gsap.set(['.hero-enter-nav', '.hero-enter-left', '.hero-enter-right', '.hero-enter-bottom'], {
+        opacity: 1,
+        x: 0,
+        y: 0
+      })
+    } else {
+      enterTl = gsap.timeline({ delay: 0.05 })
+      enterTl
+        .fromTo('.hero-enter-nav', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', clearProps: 'transform' }, 0)
+        .fromTo('.hero-enter-left', { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.95, ease: 'power3.out', clearProps: 'transform' }, 0.12)
+        .fromTo('.hero-enter-right', { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.95, ease: 'power3.out', clearProps: 'transform' }, 0.22)
+        .fromTo('.hero-enter-bottom', { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: 1.05, ease: 'power3.out', clearProps: 'transform' }, 0.32)
+    }
+
     window.addEventListener('resize', handleResize, { passive: true })
     window.addEventListener('scroll', handleTopScroll, { passive: true })
   })
 
   onDestroy(() => {
     isDestroyed = true
+    if (enterTl) enterTl.kill()
     ctx?.revert()
     if (typeof window !== 'undefined') {
       window.removeEventListener('resize', handleResize)

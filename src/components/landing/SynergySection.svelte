@@ -1,233 +1,354 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { onMount, onDestroy } from 'svelte'
+  import * as THREE from 'three'
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+  import { MODEL_PATH, STAGES, BEFORE_STAGE } from './synergy.data'
+  import SynergyOverlay from './SynergyOverlay.svelte'
 
-  const ROLES_DATA = [
-    {
-      id: 'desainer',
-      tagline: 'Desainer',
-      subtext: 'Rancang identitas visual produk lokal dan hasilkan royalti transparan dari bisnis riil.',
-      image: '/images/showcase-designer.jpg',
-      alt: 'Kolaborasi desainer visual dengan perajin lokal di Banyuwangi',
-    },
-    {
-      id: 'umkm',
-      tagline: 'Pelaku Usaha UMKM',
-      subtext: 'Naikkan kelas produk ke standar nasional dengan etalase mandiri dan pesanan WhatsApp otomatis.',
-      image: '/images/showcase-umkm.jpg',
-      alt: 'Produk kopi otentik lereng Ijen siap dipasarkan dengan standar visual premium',
-    },
-    {
-      id: 'konsumen',
-      tagline: 'Konsumen',
-      subtext: 'Jelajahi kurasi kriya otentik Banyuwangi dan belanja produk asli langsung dari perajinnya.',
-      image: '/images/showcase-consumer.jpg',
-      alt: 'Konsumen menikmati pengalaman belanja produk lokal di gerai Banyuwangi',
-    },
-  ];
+  let containerElement: HTMLElement
+  let canvasElement: HTMLCanvasElement
+  let activeStage = 0
+  let isLoaded = false
 
-  let trackElement: HTMLElement;
-  let stageElement: HTMLElement;
-  let parallaxTextElement: HTMLElement;
-  let activeIndex = 0;
-  let ctx: gsap.Context | null = null;
+  let renderer: THREE.WebGLRenderer | null = null
+  let scene: THREE.Scene | null = null
+  let camera: THREE.PerspectiveCamera | null = null
+  let animId = 0
+  let tl: gsap.core.Timeline | null = null
+  let observer: IntersectionObserver | null = null
+
+  const pinNodes: Record<string, THREE.Object3D | null> = {
+    Pin_Kopi: null,
+    Pin_Batik: null,
+    Pin_Anyaman: null
+  }
+
+  const cameraState = {
+    x: BEFORE_STAGE.camera.x,
+    y: BEFORE_STAGE.camera.y,
+    z: BEFORE_STAGE.camera.z,
+    lookX: BEFORE_STAGE.lookAt.x,
+    lookY: BEFORE_STAGE.lookAt.y,
+    lookZ: BEFORE_STAGE.lookAt.z
+  }
+
+  let mouseX = 0
+  let mouseY = 0
+  let targetMouseX = 0
+  let targetMouseY = 0
+
+  function handleMouseMove(e: MouseEvent) {
+    const halfW = window.innerWidth / 2
+    const halfH = window.innerHeight / 2
+    targetMouseX = (e.clientX - halfW) / halfW
+    targetMouseY = (e.clientY - halfH) / halfH
+  }
+
+  function handleMouseLeave() {
+    targetMouseX = 0
+    targetMouseY = 0
+  }
+
+  function handleResize() {
+    if (!containerElement || !renderer || !camera) return
+    const width = containerElement.clientWidth
+    const height = containerElement.clientHeight
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  }
 
   onMount(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger)
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!trackElement || !stageElement) return;
+    const width = containerElement.clientWidth || window.innerWidth
+    const height = containerElement.clientHeight || window.innerHeight
 
-    ctx = gsap.context(() => {
-      if (prefersReducedMotion) return;
+    scene = new THREE.Scene()
 
-      if (parallaxTextElement) {
-        gsap.fromTo(
-          parallaxTextElement,
-          { xPercent: 5, yPercent: -20 },
-          {
-            xPercent: -25,
-            yPercent: 35,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: trackElement,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.2,
-            },
+    camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 100)
+    camera.position.set(cameraState.x, cameraState.y, cameraState.z)
+    camera.lookAt(cameraState.lookX, cameraState.lookY, cameraState.lookZ)
+
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvasElement,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance'
+    })
+    renderer.setClearColor(0x000000, 0)
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.3
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8)
+    scene.add(ambientLight)
+
+    const rimLight = new THREE.DirectionalLight(0x94a3b8, 3.5)
+    rimLight.position.set(-0.05, 0.05, 0.04)
+    scene.add(rimLight)
+
+    const frontLight = new THREE.DirectionalLight(0xffffff, 2.0)
+    frontLight.position.set(0.05, -0.05, 0.06)
+    scene.add(frontLight)
+
+    const loader = new GLTFLoader()
+    loader.load(
+      MODEL_PATH,
+      (gltf) => {
+        if (!scene) return
+        scene.add(gltf.scene)
+
+        gltf.scene.traverse((child) => {
+          if (child.name === 'Banyuwangi_Map' && child instanceof THREE.Mesh) {
+            const mat = Array.isArray(child.material) ? child.material[0] : child.material
+            if (mat && 'color' in mat) {
+              mat.color.setHex(0x16181d)
+              mat.roughness = 0.4
+              mat.metalness = 0.3
+              mat.needsUpdate = true
+            }
+
+            const edgesGeom = new THREE.EdgesGeometry(child.geometry, 25)
+            const edgeMat = new THREE.LineBasicMaterial({
+              color: 0xff5722,
+              transparent: true,
+              opacity: 0.65
+            })
+            const edgeLines = new THREE.LineSegments(edgesGeom, edgeMat)
+            edgeLines.position.y += 0.00005
+            child.add(edgeLines)
           }
-        );
+        })
+
+        const pinNames = ['Pin_Kopi', 'Pin_Batik', 'Pin_Anyaman']
+        pinNames.forEach((name) => {
+          const pin = gltf.scene.getObjectByName(name)
+          if (pin) {
+            pinNodes[name] = pin
+            pin.scale.set(0.65, 0.65, 0.65)
+            const pinLight = new THREE.PointLight(0xff5722, 2.0, 0.03)
+            pinLight.position.set(0, 0.004, 0)
+            pin.add(pinLight)
+          }
+        })
+
+        isLoaded = true
+        handleResize()
+        ScrollTrigger.refresh()
+      },
+      undefined,
+      (err) => {
+        console.error('Failed to load 3D model', err)
+      }
+    )
+
+    tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerElement,
+        start: 'top top',
+        end: '+=4000',
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.8,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const p = self.progress
+          if (p < 0.20) {
+            activeStage = 0
+          } else if (p < 0.40) {
+            activeStage = 1
+          } else if (p < 0.60) {
+            activeStage = 2
+          } else {
+            activeStage = 3
+          }
+        }
+      }
+    })
+
+    tl.to(cameraState, {
+      x: STAGES[0].camera.x,
+      y: STAGES[0].camera.y,
+      z: STAGES[0].camera.z,
+      lookX: STAGES[0].lookAt.x,
+      lookY: STAGES[0].lookAt.y,
+      lookZ: STAGES[0].lookAt.z,
+      duration: 0.10,
+      ease: 'power2.out'
+    }, 0.0)
+
+    tl.to(cameraState, {
+      x: STAGES[1].camera.x,
+      y: STAGES[1].camera.y,
+      z: STAGES[1].camera.z,
+      lookX: STAGES[1].lookAt.x,
+      lookY: STAGES[1].lookAt.y,
+      lookZ: STAGES[1].lookAt.z,
+      duration: 0.12,
+      ease: 'power2.inOut'
+    }, 0.18)
+
+    tl.to(cameraState, {
+      x: STAGES[2].camera.x,
+      y: STAGES[2].camera.y,
+      z: STAGES[2].camera.z,
+      lookX: STAGES[2].lookAt.x,
+      lookY: STAGES[2].lookAt.y,
+      lookZ: STAGES[2].lookAt.z,
+      duration: 0.12,
+      ease: 'power2.inOut'
+    }, 0.38)
+
+    tl.to(cameraState, {
+      x: STAGES[3].camera.x,
+      y: STAGES[3].camera.y,
+      z: STAGES[3].camera.z,
+      lookX: STAGES[3].lookAt.x,
+      lookY: STAGES[3].lookAt.y,
+      lookZ: STAGES[3].lookAt.z,
+      duration: 0.12,
+      ease: 'power2.inOut'
+    }, 0.58)
+
+    // Putar kembali kamera ke posisi P0 saat scroll menuju Value Matrix (konten tetap P3)
+    tl.to(cameraState, {
+      x: STAGES[0].camera.x,
+      y: STAGES[0].camera.y,
+      z: STAGES[0].camera.z,
+      lookX: STAGES[0].lookAt.x,
+      lookY: STAGES[0].lookAt.y,
+      lookZ: STAGES[0].lookAt.z,
+      duration: 0.18,
+      ease: 'power2.inOut'
+    }, 0.80)
+
+    tl.to({}, { duration: 0.02 }, 0.98)
+
+    const clock = new THREE.Clock()
+
+    let isVisible = true
+
+    if (typeof IntersectionObserver !== 'undefined' && containerElement) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting
+        },
+        { rootMargin: '400px 0px' }
+      )
+      observer.observe(containerElement)
+    }
+
+    function animate() {
+      animId = requestAnimationFrame(animate)
+      if (!isVisible || !renderer || !scene || !camera) return
+
+      const elapsed = clock.getElapsedTime()
+
+      mouseX += (targetMouseX - mouseX) * 0.05
+      mouseY += (targetMouseY - mouseY) * 0.05
+
+      const floatY = Math.sin(elapsed * 1.6) * 0.0004
+      const floatX = Math.cos(elapsed * 1.2) * 0.0003
+
+      const offsetX = mouseX * 0.0032 + floatX
+      const offsetY = mouseY * 0.0022 + floatY
+
+      camera.position.set(
+        cameraState.x + offsetX,
+        cameraState.y - offsetY,
+        cameraState.z
+      )
+      camera.lookAt(
+        cameraState.lookX + offsetX * 0.25,
+        cameraState.lookY - offsetY * 0.25,
+        cameraState.lookZ
+      )
+
+      const activePinName = STAGES[activeStage]?.targetPin
+
+      for (const [name, pin] of Object.entries(pinNodes)) {
+        if (!pin) continue
+        const isActive = activeStage === 0 || name === activePinName
+        const pulseBase = activeStage === 0 ? 0.72 : 0.82
+        const pulseSpeed = activeStage === 0 ? 3 : 4
+        const targetScale = isActive ? pulseBase + Math.sin(elapsed * pulseSpeed) * 0.04 : 0.65
+        const currentScale = pin.scale.x
+        const nextScale = currentScale + (targetScale - currentScale) * 0.1
+        pin.scale.set(nextScale, nextScale, nextScale)
       }
 
-      ScrollTrigger.create({
-        trigger: trackElement,
-        start: 'top top',
-        end: 'bottom bottom',
-        pin: stageElement,
-        pinSpacing: true,
-        scrub: 1,
-        onUpdate: (self) => {
-          const p = self.progress;
-          // Smooth hysteresis buffer: deliberate scrolling required to change active role,
-          // preventing startling, abrupt jumps on a single scroll wheel tick.
-          if (p < 0.38 && activeIndex !== 0) {
-            activeIndex = 0;
-          } else if (p >= 0.42 && p < 0.72 && activeIndex !== 1) {
-            activeIndex = 1;
-          } else if (p >= 0.76 && activeIndex !== 2) {
-            activeIndex = 2;
-          }
-        },
-      });
-    }, trackElement);
-  });
+      renderer.render(scene, camera)
+    }
+
+    animate()
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
+  })
 
   onDestroy(() => {
-    ctx?.revert();
-  });
+    if (observer) {
+      observer.disconnect()
+      observer = null
+    }
 
-  $: isSwapped = activeIndex === 1;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseleave', handleMouseLeave)
+    }
+
+    if (animId) {
+      cancelAnimationFrame(animId)
+    }
+
+    if (tl) {
+      tl.scrollTrigger?.kill()
+      tl.kill()
+    }
+
+    if (scene) {
+      scene.traverse((child) => {
+        if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+          child.geometry?.dispose()
+          const mats = Array.isArray(child.material) ? child.material : [child.material]
+          mats.forEach((m) => m?.dispose())
+        }
+      })
+    }
+
+    if (renderer) {
+      renderer.dispose()
+      renderer.forceContextLoss()
+    }
+  })
 </script>
 
 <section
   id="synergy"
-  bind:this={trackElement}
-  class="relative w-full h-[320vh] bg-canvas text-main border-t border-border select-none transition-colors duration-200"
+  bind:this={containerElement}
+  class="relative overflow-hidden w-full h-screen bg-base-100 text-base-content transition-colors duration-300 select-none"
 >
-  <!-- Sticky Stage with GSAP Pinning -->
-  <div
-    bind:this={stageElement}
-    class="w-full h-screen bg-canvas flex flex-col justify-center items-center px-2 sm:px-4 md:px-6 pt-16 md:pt-20 pb-2 sm:pb-3 overflow-hidden"
-  >
-    <div class="w-full h-full max-w-[1440px] flex flex-col justify-center items-center relative">
+  <canvas
+    bind:this={canvasElement}
+    class="absolute inset-0 z-0 w-full h-full block transition-opacity duration-700 pointer-events-none {isLoaded ? 'opacity-100' : 'opacity-0'}"
+  ></canvas>
 
-      <!-- Parallax Drifting Text Ribbon (Layer Z-0) -->
-      <div class="w-full flex justify-center items-center pointer-events-none select-none relative z-0 -mb-6 md:-mb-10 overflow-visible" aria-hidden="true">
-        <div
-          bind:this={parallaxTextElement}
-          class="flex whitespace-nowrap will-change-transform"
-        >
-          <span class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tighter text-neutral-950/15 dark:text-white/20 px-4 leading-none select-none">
-            Kenapa Pinoka? * Sinergi Tiga Sisi * Kenapa Pinoka? * Sinergi Tiga Sisi *
-          </span>
-          <span class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tighter text-neutral-950/15 dark:text-white/20 px-4 leading-none select-none">
-            Kenapa Pinoka? * Sinergi Tiga Sisi * Kenapa Pinoka? * Sinergi Tiga Sisi *
-          </span>
-        </div>
+  {#if !isLoaded}
+    <div class="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+      <div class="flex items-center gap-3 px-4 py-2 rounded-full bg-base-200/90 border border-base-content/10 shadow-lg backdrop-blur-md">
+        <span class="w-2.5 h-2.5 rounded-full bg-orange animate-ping"></span>
+        <span class="text-xs font-mono text-base-content/80">Memuat Model 3D Peta...</span>
       </div>
-
-      <!-- Twin Cards Container with Ultra-Thin Middle Gap -->
-      <div
-        class="w-full h-full max-h-[calc(100vh-4.5rem)] md:max-h-[calc(100vh-5.5rem)] grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 gap-2 relative z-10"
-        style="--card-gap: 0.5rem;"
-      >
-        <!-- Card 1: Gambar -->
-        <div
-          class="card-slot w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden relative z-20 border border-border bg-neutral-100 dark:bg-neutral-900 shadow-xl dark:shadow-2xl group transition-all duration-300 hover:border-neutral-300 dark:hover:border-neutral-700 {isSwapped
-            ? 'swap-img'
-            : ''}"
-        >
-          {#each ROLES_DATA as role, idx}
-            <img
-              src={role.image}
-              alt={role.alt}
-              class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-out group-hover:scale-[1.02] {activeIndex === idx
-                ? 'opacity-100 scale-100'
-                : 'opacity-0 scale-105 pointer-events-none'}"
-              loading="lazy"
-            />
-          {/each}
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-        </div>
-
-        <!-- Card 2: Teks Deskripsi -->
-        <div
-          class="card-slot w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden relative z-10 p-5 sm:p-7 md:p-8 lg:p-9 flex flex-col justify-between border border-border bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md shadow-xl dark:shadow-2xl transition-all duration-300 hover:border-neutral-300 dark:hover:border-neutral-700 {isSwapped
-            ? 'swap-text'
-            : ''}"
-        >
-          <!-- Top Area: Subtext positioned towards outer edge with compact size and tight leading -->
-          <div class="w-full flex {isSwapped ? 'justify-start' : 'justify-end'} relative min-h-[100px] sm:min-h-[120px] md:min-h-[140px]">
-            {#each ROLES_DATA as role, idx}
-              <div
-                class="absolute top-0 {idx === 1 ? 'left-0 items-start text-left' : 'right-0 items-end text-right'} max-w-md lg:max-w-lg w-full flex flex-col transition-all duration-500 ease-out {activeIndex === idx
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 translate-y-3 pointer-events-none'}"
-              >
-                <h3 class="font-heading font-medium text-lg sm:text-xl md:text-2xl lg:text-[1.85rem] text-neutral-950 dark:text-white tracking-tight leading-[1.16] {idx === 1 ? 'text-left' : 'text-right'}">
-                  {role.subtext}
-                </h3>
-              </div>
-            {/each}
-          </div>
-
-          <!-- Bottom Row: Indicator & Tagline mirroring position based on isSwapped -->
-          <div class="w-full flex items-center justify-between gap-4 pt-3.5 sm:pt-4 border-t border-border {isSwapped ? 'flex-row-reverse' : 'flex-row'}">
-            <!-- Step Indicator Pill -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200/80 dark:border-white/10 shadow-xs select-none transition-transform duration-200 hover:scale-[1.02]">
-              <div class="flex items-center gap-1">
-                {#each [0, 1, 2] as i}
-                  <span
-                    class="h-1 rounded-full transition-all duration-500 ease-out {activeIndex === i
-                      ? 'w-4 bg-orange shadow-[0_0_8px_rgba(249,115,22,0.6)]'
-                      : 'w-1.5 bg-neutral-300 dark:bg-neutral-700'}"
-                  ></span>
-                {/each}
-              </div>
-              <span class="font-mono text-xs font-bold tracking-wider text-neutral-900 dark:text-white ml-0.5">
-                0{activeIndex + 1}
-              </span>
-              <span class="text-[10px] font-mono font-medium tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-                DARI 03
-              </span>
-            </div>
-
-            <!-- Tagline aligned to outer edge -->
-            <div class="relative h-6 flex items-center {isSwapped ? 'justify-start text-left' : 'justify-end text-right'}">
-              {#each ROLES_DATA as role, idx}
-                <span
-                  class="absolute {isSwapped ? 'left-0' : 'right-0'} font-sans text-xs sm:text-sm font-semibold tracking-wide text-orange transition-all duration-500 ease-out whitespace-nowrap {activeIndex === idx
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-2 pointer-events-none'}"
-                >
-                  {role.tagline}
-                </span>
-              {/each}
-            </div>
-          </div>
-        </div>
-
-      </div>
-
     </div>
-  </div>
-</section>
+  {/if}
 
-<style>
-  .card-slot {
-    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
-  }
-  @media (min-width: 768px) {
-    .swap-img {
-      transform: translateX(calc(100% + var(--card-gap, 0.5rem)));
-    }
-    .swap-text {
-      transform: translateX(calc(-100% - var(--card-gap, 0.5rem)));
-    }
-  }
-  @media (max-width: 767px) {
-    .swap-img {
-      transform: translateY(calc(100% + var(--card-gap, 0.5rem)));
-    }
-    .swap-text {
-      transform: translateY(calc(-100% - var(--card-gap, 0.5rem)));
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .card-slot {
-      transition: none;
-    }
-  }
-</style>
+  <SynergyOverlay {activeStage} />
+</section>

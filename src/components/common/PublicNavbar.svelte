@@ -6,10 +6,15 @@
   import { onMount, onDestroy } from 'svelte';
   import { signOut } from '@/lib/auth-client';
   import { Sun, Moon, Menu, X } from 'lucide-svelte';
-  import type { NavUser } from './navbar.helpers';
+  import {
+    type NavUser,
+    berandaItems,
+    helpCenterItems,
+  } from './navbar.helpers';
   import NavbarUserMenu from './NavbarUserMenu.svelte';
   import NavbarMobileDrawer from './NavbarMobileDrawer.svelte';
-  import Button from '@/components/ui/Button.svelte'
+  import Button from '@/components/ui/Button.svelte';
+  import NavbarDropdown from './NavbarDropdown.svelte';
 
   export let user: NavUser | null = null;
   export let currentPath: string = '';
@@ -19,16 +24,18 @@
   let isLoggingOut = false;
   let navMode: 'transparent' | 'hidden' | 'normal' = currentPath === '/' ? 'transparent' : 'normal';
   let ticking = false;
+  let openDropdown: 'beranda' | 'help' | null = null;
 
-  const navItems = [
-    { label: 'BERANDA', href: '/' },
-    { label: 'TENTANG', href: '/#about' },
-    { label: 'TEMPLATES', href: '/templates' },
-    { label: 'UMKM', href: '/umkm' },
-    { label: 'HARGA', href: '/#pricing' },
-  ];
+  const toggleDropdown = (name: 'beranda' | 'help') => {
+    openDropdown = openDropdown === name ? null : name;
+  };
+
+  const closeDropdowns = () => {
+    openDropdown = null;
+  };
 
   const updateNavMode = () => {
+    if (window.scrollY > 5500 && navMode === 'normal') return;
     const heroTrack = document.getElementById('hero-scroll-track');
     if (!heroTrack) {
       navMode = 'normal';
@@ -61,6 +68,19 @@
     }
   };
 
+  const handleClickOutside = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.nav-dropdown-container')) {
+      closeDropdowns();
+    }
+  };
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeDropdowns();
+    }
+  };
+
   onMount(() => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -74,12 +94,16 @@
     updateNavMode();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+    window.addEventListener('click', handleClickOutside);
+    window.addEventListener('keydown', handleKeydown);
   });
 
   onDestroy(() => {
     if (typeof window !== 'undefined') {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('keydown', handleKeydown);
     }
   });
 
@@ -101,19 +125,18 @@
 
   const handleSignOut = async () => {
     isLoggingOut = true;
-    try {
-      await signOut();
-      window.location.href = '/auth/login';
-    } catch {
-      window.location.href = '/auth/login';
-    }
+    try { await signOut(); } finally { window.location.href = '/auth/login'; }
   };
 
-  $: headerClasses = navMode === 'transparent'
-    ? 'translate-y-0 opacity-100 pointer-events-auto bg-transparent border-b border-transparent shadow-none backdrop-blur-none'
-    : navMode === 'hidden'
-      ? '-translate-y-full opacity-0 pointer-events-none border-b border-transparent shadow-none'
-      : 'translate-y-0 opacity-100 pointer-events-auto navbar-glass-surface border-b border-border/80 dark:border-white/10 shadow-sm backdrop-blur-md';
+  $: isSolidBackground = isMobileMenuOpen || openDropdown !== null;
+
+  $: headerClasses = isSolidBackground
+    ? 'translate-y-0 opacity-100 pointer-events-auto bg-card dark:bg-slate-950 border-b border-border/80 dark:border-white/10 shadow-md backdrop-blur-none'
+    : navMode === 'transparent'
+      ? 'translate-y-0 opacity-100 pointer-events-auto bg-transparent border-b border-transparent shadow-none backdrop-blur-none'
+      : navMode === 'hidden'
+        ? '-translate-y-full opacity-0 pointer-events-none border-b border-transparent shadow-none'
+        : 'translate-y-0 opacity-100 pointer-events-auto navbar-glass-surface border-b border-border/80 dark:border-white/10 shadow-sm backdrop-blur-md';
 </script>
 
 <header class="sticky top-0 z-50 w-full box-border transition-all duration-300 ease-out {headerClasses}">
@@ -121,17 +144,45 @@
     
     <!-- 1. Left: Architectural Pill Navigation Capsules (Desktop only) -->
     <div class="hidden md:flex items-center gap-1.5 lg:gap-2 shrink-0">
-      {#each navItems as item}
-        {@const isActive = item.href === '/' ? currentPath === '/' : currentPath.startsWith(item.href)}
-        <a
-          href={item.href}
-          class={isActive
-            ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 font-bold text-[11px] lg:text-xs tracking-wider uppercase shadow-sm transition-all duration-200 shrink-0'
-            : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white font-medium text-[11px] lg:text-xs tracking-wider uppercase border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
-        >
-          {item.label}
-        </a>
-      {/each}
+      <!-- Dropdown: Beranda (Semua menu landing page) -->
+      <NavbarDropdown
+        label="BERANDA"
+        items={berandaItems}
+        isOpen={openDropdown === 'beranda'}
+        isActive={currentPath === '/'}
+        onToggle={() => toggleDropdown('beranda')}
+        onClose={closeDropdowns}
+      />
+
+      <!-- Dropdown: Help Center (Syarat & Ketentuan, Pusat Bantuan, Kebijakan Privasi) -->
+      <NavbarDropdown
+        label="HELP CENTER"
+        items={helpCenterItems}
+        isOpen={openDropdown === 'help'}
+        isActive={currentPath === '/terms' || currentPath === '/privacy'}
+        onToggle={() => toggleDropdown('help')}
+        onClose={closeDropdowns}
+      />
+
+      <!-- Direct Link: UMKM -->
+      <a
+        href="/umkm"
+        class={currentPath.startsWith('/umkm')
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 font-bold text-[11px] lg:text-xs tracking-wider uppercase shadow-sm transition-all duration-200 shrink-0'
+          : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white font-medium text-[11px] lg:text-xs tracking-wider uppercase border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
+      >
+        UMKM
+      </a>
+
+      <!-- Direct Link: Template -->
+      <a
+        href="/templates"
+        class={currentPath.startsWith('/templates')
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 font-bold text-[11px] lg:text-xs tracking-wider uppercase shadow-sm transition-all duration-200 shrink-0'
+          : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white font-medium text-[11px] lg:text-xs tracking-wider uppercase border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
+      >
+        Template
+      </a>
     </div>
 
     <!-- Mobile Left Brand Indicator (Mobile only) -->
@@ -157,7 +208,7 @@
         <span class="font-sans font-bold text-sm lg:text-base tracking-wider uppercase text-main dark:text-white group-hover:text-orange transition-colors leading-none">
           PINOKA
         </span>
-        <span class="font-sans text-[9px] tracking-widest text-muted dark:text-slate-400 uppercase mt-0.5">
+        <span class="font-sans text-[11px] font-medium tracking-widest text-muted dark:text-slate-400 uppercase mt-0.5">
           banyuwangi
         </span>
       </div>
@@ -230,5 +281,11 @@
   </div>
 
   <!-- Mobile Drawer Menu -->
-  <NavbarMobileDrawer isOpen={isMobileMenuOpen} {navItems} {currentPath} />
+  <NavbarMobileDrawer
+    isOpen={isMobileMenuOpen}
+    {berandaItems}
+    {helpCenterItems}
+    {currentPath}
+    onClose={() => (isMobileMenuOpen = false)}
+  />
 </header>

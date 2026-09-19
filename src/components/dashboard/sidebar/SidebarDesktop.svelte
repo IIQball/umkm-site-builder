@@ -31,7 +31,7 @@
 </script>
 
 <aside
-  class="hidden md:flex flex-col bg-card border-r border-light transition-[width] duration-300 ease-in-out flex-shrink-0 relative z-40 shadow-sm select-none"
+  class="hidden md:flex flex-col bg-card border-r border-light transition-all duration-300 ease-in-out flex-shrink-0 relative z-40 shadow-sm select-none"
   style="width: {sidebarWidth}"
   aria-label="Navigasi Dashboard"
 >
@@ -185,7 +185,7 @@
   </nav>
 
   <!-- Bottom User Profile & Sign Out -->
-  {#if user.role === 'tenant'}
+  {#if user.role === "tenant"}
     <TenantQuota {collapsed} />
   {/if}
 </aside>

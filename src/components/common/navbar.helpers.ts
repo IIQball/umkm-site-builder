@@ -9,6 +9,12 @@ import {
   ShoppingBag,
   Wallet,
   LayoutDashboard,
+  Home,
+  Compass,
+  MessageSquare,
+  HelpCircle,
+  PhoneCall,
+  FileText,
 } from 'lucide-svelte';
 
 import type { ComponentType } from 'svelte';
@@ -107,3 +113,19 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
       ];
   }
 };
+
+export const berandaItems = [
+  { label: 'Beranda Utama', href: '/#hero-scroll-track', desc: 'Kembali ke tampilan awal hero anime', icon: Home },
+  { label: 'Visi & Manifesto', href: '/#manifesto-reveal', desc: 'Misi digitalisasi potensi Banyuwangi', icon: Compass },
+  { label: 'Sinergi 3 Pilar', href: '/#synergy', desc: 'Kolaborasi Desainer, UMKM, dan Konsumen', icon: Users },
+  { label: 'Alur Kerja (Value Matrix)', href: '/#value-matrix', desc: '3 langkah praktis operasional platform', icon: Layers },
+  { label: 'Ulasan & Testimoni', href: '/#testimonials', desc: 'Cerita sukses mitra perajin & UMKM', icon: MessageSquare },
+  { label: 'Tanya Jawab (FAQ)', href: '/#faq', desc: 'Jawaban pertanyaan umum seputar platform', icon: HelpCircle },
+  { label: 'Kontak & Gabung', href: '/#contact', desc: 'Konsultasi langsung dengan tim Pinoka', icon: PhoneCall },
+];
+
+export const helpCenterItems = [
+  { label: 'Pusat Bantuan', href: '/#faq', desc: 'Tanya jawab & kontak tim via WhatsApp', icon: HelpCircle },
+  { label: 'Syarat & Ketentuan', href: '/terms', desc: 'Aturan layanan & hak kekayaan intelektual', icon: FileText },
+  { label: 'Kebijakan Privasi', href: '/privacy', desc: 'Perlindungan data pribadi & keamanan', icon: Shield },
+];

@@ -3,6 +3,7 @@ import '@/styles/global.css';
 import Navbar from '@/components/common/Navbar.astro';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
 import RateLimitAlert from '@/components/ui/RateLimitAlert.svelte';
+import SmoothScroll from '@/components/common/SmoothScroll.svelte';
 
 interface Props {
   title?: string;
@@ -38,7 +39,8 @@ const {
       }
     </script>
   </head>
-  <body class="overflow-x-hidden">
+  <body class="overflow-x-clip">
+    <SmoothScroll client:load />
     <ToastContainer client:load />
     <RateLimitAlert client:load />
     {!hideNavbar && <Navbar />}
@@ -51,7 +53,7 @@ const {
 <style is:global>
   html,
   body {
-    height: 100%;
+    min-height: 100%;
     width: 100%;
   }
 </style>

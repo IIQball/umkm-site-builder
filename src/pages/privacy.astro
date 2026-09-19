@@ -1,0 +1,166 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+export const prerender = false;
+---
+
+<BaseLayout
+  title="Kebijakan Privasi | Pinoka"
+  description="Kebijakan Privasi dan komitmen perlindungan data pengguna platform Pinoka."
+  hideNavbar={true}
+>
+  <main class="min-h-screen bg-canvas py-8 sm:py-12 md:py-16 px-4 sm:px-6">
+    <article class="max-w-3xl mx-auto bg-card border border-border rounded-3xl p-6 sm:p-10 md:p-12 shadow-xs">
+      <header class="border-b border-border pb-6 mb-8 text-center space-y-2">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-main font-heading">
+          Kebijakan Privasi Pinoka
+        </h1>
+        <p class="text-xs sm:text-sm font-medium text-secondary font-sans">
+          Terakhir diperbarui: 19 September 2026
+        </p>
+      </header>
+
+      <div class="space-y-8 text-sm sm:text-base leading-relaxed text-secondary font-sans text-justify [hyphens:auto] [-webkit-hyphens:auto] [&_*]:[hyphens:auto] [&_*]:[-webkit-hyphens:auto] legal-article-content">
+        <p>
+          Pinoka menghargai dan berkomitmen penuh untuk melindungi privasi serta data pribadi seluruh pengguna, mencakup pelaku UMKM (Tenant), Desainer visual, dan pengunjung etalase toko. Dokumen ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, serta menjaga kerahasiaan informasi Anda saat menggunakan ekosistem platform kami.
+        </p>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            1. Informasi yang Dikumpulkan
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.1</span>
+              <span><strong>Data Registrasi Akun:</strong> Alamat email, nama lengkap, kata sandi terenkripsi, foto profil, dan kredensial autentikasi OAuth Google.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.2</span>
+              <span><strong>Data Usaha UMKM:</strong> Nama toko, subdomain pilihan, nomor WhatsApp layanan pelanggan, deskripsi profil usaha, kategori bisnis, dan alamat fisik toko atau titik koordinat peta.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.3</span>
+              <span><strong>Katalog dan Media:</strong> Gambar produk, label harga, deskripsi barang, dan aset visual yang diunggah ke server penyimpanan media cloud.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.4</span>
+              <span><strong>Data Keuangan Desainer:</strong> Nomor rekening bank, nama pemilik rekening terverifikasi, dan riwayat mutasi komisi untuk kebutuhan pencairan dana (payout).</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            2. Pemanfaatan dan Pengolahan Informasi
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.1</span>
+              <span>Menerbitkan dan mengoperasikan storefront situs online mandiri di subdomain Pinoka agar dapat diakses oleh publik luas.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.2</span>
+              <span>Menyediakan fitur checkout instan dengan mengarahkan rincian keranjang belanja langsung ke nomor WhatsApp merchant tanpa memungut komisi per transaksi pesanan pembeli.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.3</span>
+              <span>Memvalidasi transaksi template marketplace, menghitung royalti kreator, dan mengirimkan bukti pembayaran resmi secara transparan.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.4</span>
+              <span>Menjamin keamanan sistem melalui pencegahan akses ilegal, spam transaksi, atau peretasan data multi-tenant.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            3. Data Pembeli dan Pengunjung Etalase Toko
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.1</span>
+              <span>Pinoka tidak menyimpan nomor kartu kredit atau detail perbankan milik pembeli umum yang mengunjungi storefront Tenant.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.2</span>
+              <span>Data pesanan yang dimasukkan pada modal checkout instan hanya diformat ke dalam pesan teks WhatsApp dan dikirimkan langsung ke aplikasi percakapan Tenant.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            4. Penyimpanan dan Keamanan Informasi
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.1</span>
+              <span>Seluruh transmisi data antara peramban pengguna dan server dienkripsi menggunakan protokol aman TLS/HTTPS berstandar industri.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.2</span>
+              <span>Basis data sistem tersimpan pada infrastruktur cloud terisolasi dengan pembatasan hak akses berjenjang berbasis peran (Superadmin, Admin, Desainer, Tenant).</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.3</span>
+              <span>Kata sandi disimpan dalam bentuk hash kriptografi (bcrypt) dan tidak pernah dicatat atau dibaca dalam format teks terbuka oleh staf mana pun.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            5. Kuki (Cookies) dan Penyimpanan Lokal
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.1</span>
+              <span>Kami menggunakan kuki sesi yang aman dan penyimpanan lokal peramban (localStorage) semata-mata untuk memelihara status login dan menyimpan preferensi tema (gelap atau terang).</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.2</span>
+              <span>Kami tidak menggunakan kuki pelacak pihak ketiga yang bertujuan menjual data aktivitas penjelajahan Anda kepada pihak pengiklan luar.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            6. Hak Pengguna dan Penghapusan Data
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.1</span>
+              <span>Anda memiliki hak mutlak untuk memperbarui informasi profil, mengedit daftar produk, atau menghapus item katalog kapan saja melalui dasbor toko.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.2</span>
+              <span>Pengguna dapat mengajukan permohonan penghapusan akun permanen beserta seluruh data toko melalui tim dukungan resmi pengelola platform.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            7. Kontak dan Pembaruan Kebijakan
+          </h2>
+          <p>
+            Kebijakan Privasi ini dapat diperbarui sewaktu-waktu seiring perkembangan fitur dan kepatuhan hukum yang berlaku. Apabila Anda memiliki pertanyaan mengenai perlindungan data dan privasi di Pinoka, silakan hubungi saluran komunikasi resmi kami.
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-article-content,
+  .legal-article-content * {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .legal-article-content h2 {
+    text-align: left;
+  }
+</style>

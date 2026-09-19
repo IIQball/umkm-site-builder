@@ -39,7 +39,7 @@
   };
 
   const sizeStyles = {
-    xs: 'text-2xs px-2.5 py-1 rounded-xl gap-1 h-7 min-h-[28px]',
+    xs: 'text-[11px] px-2.5 py-1 rounded-xl gap-1 h-7 min-h-[28px]',
     sm: 'text-xs px-3.5 py-1.5 rounded-xl gap-1.5 h-8 min-h-[32px]',
     md: 'text-sm px-4 py-2.5 rounded-2xl gap-2 h-10 min-h-[40px]',
     lg: 'text-base px-5 py-3 rounded-2xl gap-2.5 h-12 min-h-[48px]',

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Palette, RotateCcw } from 'lucide-svelte';
-  import { Pagination } from '@/components/ui';
+  import { Pagination, Button, Select } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import type { PublicTemplate, CategoryItem } from './marketplace.types';
   import MarketplaceFilterBar from './marketplace/MarketplaceFilterBar.svelte';
@@ -130,10 +130,10 @@
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h3 class="text-xs font-bold text-indigo-950 dark:text-indigo-100 uppercase tracking-wider">
+            <span class="text-xs font-bold text-indigo-950 dark:text-indigo-100">
               Beli untuk Tenant Binaan
-            </h3>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300">
+            </span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300">
               Jasa Pendamping
             </span>
           </div>
@@ -144,18 +144,14 @@
       </div>
 
       <div class="flex items-center gap-3 flex-shrink-0">
-        <select
+        <Select
           id="assisted-tenant-select"
           bind:value={selectedTenantId}
-          class="px-3.5 py-2.5 rounded-2xl bg-card border border-indigo-300 dark:border-indigo-700 text-xs font-bold text-main focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs cursor-pointer min-w-[220px]"
-        >
-          <option value="">-- Pilih Tenant Binaan --</option>
-          {#each assistedTenants as tenant (tenant.id)}
-            <option value={tenant.id}>
-              {tenant.storeName} ({tenant.name})
-            </option>
-          {/each}
-        </select>
+          placeholder="-- Pilih Tenant Binaan --"
+          options={[...assistedTenants.map((t) => ({ value: t.id, label: `${t.storeName} (${t.name})` }))]}
+          size="sm"
+          class="min-w-[220px]"
+        />
       </div>
     </div>
   {/if}
@@ -198,19 +194,15 @@
       <div class="w-16 h-16 rounded-3xl bg-nested border border-light flex items-center justify-center text-muted mx-auto shadow-2xs">
         <Palette size={32} />
       </div>
-      <h3 class="text-heading-md font-bold text-main">Tidak Ada Template yang Cocok</h3>
+      <h2 class="text-heading-md font-bold text-main">Tidak Ada Template yang Cocok</h2>
       <p class="text-body-sm text-secondary max-w-md mx-auto leading-relaxed">
         Kami tidak menemukan template yang sesuai dengan filter atau kata kunci pencarian Anda. Coba reset filter untuk melihat seluruh koleksi.
       </p>
       <div class="pt-2">
-        <button
-          type="button"
-          on:click={resetFilters}
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary hover:bg-primary-dark text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
-        >
+        <Button variant="primary" size="sm" on:click={resetFilters}>
           <RotateCcw size={14} />
-          <span>Reset Semua Filter</span>
-        </button>
+          Reset Semua Filter
+        </Button>
       </div>
     </div>
   {:else}

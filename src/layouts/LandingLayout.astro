@@ -1,0 +1,51 @@
+---
+// src/layouts/LandingLayout.astro
+import '@/styles/global.css';
+import ToastContainer from '@/components/ui/ToastContainer.svelte';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'UMKM Site Builder Banyuwangi',
+  description = 'Platform digitalisasi UMKM Banyuwangi untuk membuat website usaha tanpa koding.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script is:inline>
+      document.documentElement.setAttribute('data-theme', 'dark');
+    </script>
+  </head>
+
+  <body class="landing-page overflow-x-hidden">
+    <ToastContainer client:load />
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  .landing-page,
+  .landing-page body {
+    min-height: 100vh;
+    width: 100%;
+  }
+</style>

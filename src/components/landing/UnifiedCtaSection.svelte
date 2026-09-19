@@ -136,7 +136,7 @@
       <div class="flex flex-col items-center gap-6">
         <a
           href="/auth/register"
-          class="inline-flex items-center gap-3.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-orange hover:bg-orange-dark text-white font-semibold text-sm sm:text-base tracking-wide shadow-xl shadow-orange/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.97] group cursor-pointer"
+          class="inline-flex items-center gap-3.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-orange hover:bg-orange-dark text-white font-semibold text-sm sm:text-base tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.97] group cursor-pointer"
         >
           <span class="tracking-wide font-medium">Mulai Sekarang</span>
           <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1">

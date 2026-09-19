@@ -70,9 +70,9 @@
     {#if store.sampleProducts && store.sampleProducts.length > 0}
       <div class="flex flex-wrap gap-1.5 pt-1">
         {#each store.sampleProducts as prod (prod.id)}
-          <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-nested/60 border border-border/80 text-secondary">
-            <span class="truncate max-w-[110px]">{prod.name}</span>
-            <span class="text-orange font-semibold">{formatIDR(prod.price)}</span>
+          <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-nested/60 border border-border/80 text-secondary max-w-full">
+            <span class="inline-block truncate max-w-[100px] align-middle">{prod.name}</span>
+            <span class="text-orange font-semibold shrink-0">{formatIDR(prod.price)}</span>
           </span>
         {/each}
       </div>

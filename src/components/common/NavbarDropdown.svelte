@@ -10,6 +10,7 @@
     label: string;
     href: string;
     desc?: string;
+    icon?: any;
   }[] = [];
 
   const handleItemClick = (href: string, e: MouseEvent) => {
@@ -38,7 +39,11 @@
     <span>{label}</span>
     <ChevronDown
       size={13}
-      class="transition-transform duration-200 shrink-0 {isOpen ? 'rotate-180 text-orange' : 'text-muted dark:text-white/60'}"
+      class="transition-transform duration-200 shrink-0 {isOpen
+        ? 'rotate-180 text-orange'
+        : isActive
+          ? 'text-canvas/80 dark:text-slate-950/80'
+          : 'text-muted dark:text-white/80'}"
     />
   </button>
 
@@ -54,12 +59,19 @@
             class="block px-4 py-3 sm:py-3.5 border-b border-border/60 dark:border-white/10 last:border-b-0 hover:bg-nested/60 dark:hover:bg-white/[0.05] transition-colors duration-150 group cursor-pointer"
           >
             <div class="flex items-center justify-between gap-3">
-              <span class="text-xs sm:text-[13px] font-semibold text-main dark:text-neutral-100 group-hover:text-orange transition-colors">
-                {item.label}
-              </span>
+              <div class="flex items-center gap-2.5 min-w-0">
+                {#if item.icon}
+                  <div class="w-6 h-6 rounded-lg bg-orange/10 dark:bg-orange/20 text-orange flex items-center justify-center shrink-0">
+                    <svelte:component this={item.icon} size={13} />
+                  </div>
+                {/if}
+                <span class="text-xs sm:text-[13px] font-semibold text-main dark:text-neutral-100 group-hover:text-orange transition-colors truncate">
+                  {item.label}
+                </span>
+              </div>
               <ArrowUpRight
                 size={14}
-                class="text-muted dark:text-neutral-400 group-hover:text-main dark:group-hover:text-white transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0"
+                class="text-muted dark:text-white/60 group-hover:text-main dark:group-hover:text-white transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0"
               />
             </div>
             {#if item.desc}

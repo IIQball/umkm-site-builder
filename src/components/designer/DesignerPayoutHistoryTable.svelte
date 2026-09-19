@@ -187,7 +187,7 @@
                 class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                 title="Salin Payout Reference"
               >
-                <span class="truncate max-w-[110px]">{refText}</span>
+                <span class="inline-block truncate max-w-[110px] align-middle">{refText}</span>
                 <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === refText ? 'text-emerald-500' : ''}">
                   {copiedId === refText ? 'check' : 'content_copy'}
                 </span>

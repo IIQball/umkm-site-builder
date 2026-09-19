@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ArrowRight } from 'lucide-svelte'
   import { STAGES } from './synergy.data'
 
   export let activeStage = 0
@@ -61,9 +62,10 @@
             </div>
             <a
               href="#contact"
-              class="btn btn-sm btn-neutral rounded-full mt-4 font-sans w-fit normal-case text-xs transition-transform hover:scale-105"
+              class="btn btn-sm btn-neutral rounded-full mt-4 font-sans w-fit normal-case text-xs transition-transform hover:scale-105 inline-flex items-center gap-1.5 group"
             >
-              Eksplorasi ->
+              <span>Eksplorasi</span>
+              <ArrowRight size={13} class="transition-transform duration-200 group-hover:translate-x-0.5" />
             </a>
           </div>
         {/each}

@@ -141,7 +141,7 @@
         {#each COL_1 as card}
           <div
             class="feedback-card group {card.flexClass} flex flex-col justify-between relative overflow-hidden rounded-2xl p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-neutral-300 dark:hover:border-neutral-700 {card.theme === 'orange'
-              ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 border border-orange/40 shadow-xl shadow-orange/10'
+              ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 border border-neutral-800 dark:border-neutral-200 shadow-md'
               : 'bg-neutral-50 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border'}"
           >
             {#if card.isPattern}
@@ -152,15 +152,15 @@
               &ldquo;{card.quote}&rdquo;
             </p>
 
-            <div class="flex items-center gap-3 relative z-10 pt-4 border-t {card.theme === 'orange' ? 'border-orange/20 dark:border-neutral-200' : 'border-border'}">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-mono text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-110 {card.theme === 'orange' ? 'bg-white text-neutral-950 font-bold ring-2 ring-orange/60 shadow-xs' : 'bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'}">
+            <div class="flex items-center gap-3 relative z-10 pt-4 border-t {card.theme === 'orange' ? 'border-neutral-800 dark:border-neutral-200' : 'border-border'}">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-mono text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-110 {card.theme === 'orange' ? 'bg-white text-neutral-950 font-bold shadow-xs' : 'bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'}">
                 {card.initials}
               </div>
               <div>
-                <h3 class="font-heading font-semibold text-sm leading-tight {card.theme === 'orange' ? 'text-white dark:text-neutral-950' : 'text-neutral-950 dark:text-white'}">
+                <p class="font-heading font-semibold text-sm leading-tight {card.theme === 'orange' ? 'text-white dark:text-neutral-950' : 'text-neutral-950 dark:text-white'}">
                   {card.author}
-                </h3>
-                <p class="text-xs font-mono font-medium mt-0.5 {card.theme === 'orange' ? 'text-orange-400 dark:text-orange-600' : 'text-neutral-500 dark:text-neutral-400'}">
+                </p>
+                <p class="text-xs font-mono font-medium mt-0.5 {card.theme === 'orange' ? 'text-orange-300 dark:text-orange-800' : 'text-neutral-500 dark:text-neutral-400'}">
                   {card.role}
                 </p>
               </div>
@@ -184,9 +184,9 @@
                 {card.initials}
               </div>
               <div>
-                <h3 class="font-heading font-semibold text-xs leading-tight text-neutral-950 dark:text-white">
+                <p class="font-heading font-semibold text-xs leading-tight text-neutral-950 dark:text-white">
                   {card.author}
-                </h3>
+                </p>
                 <p class="text-xs font-mono font-medium text-neutral-500 dark:text-neutral-400 mt-0.5">
                   {card.role}
                 </p>
@@ -217,9 +217,9 @@
                 {card.initials}
               </div>
               <div>
-                <h3 class="font-heading font-semibold text-sm leading-tight {card.theme === 'dark' ? 'text-white' : 'text-neutral-950 dark:text-white'}">
+                <p class="font-heading font-semibold text-sm leading-tight {card.theme === 'dark' ? 'text-white' : 'text-neutral-950 dark:text-white'}">
                   {card.author}
-                </h3>
+                </p>
                 <p class="text-xs font-mono font-medium mt-0.5 {card.theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}">
                   {card.role}
                 </p>

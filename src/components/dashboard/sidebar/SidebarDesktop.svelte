@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { getRoleConfig, type NavGroup } from "./sidebar.helpers";
+  import type { NavGroup } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -14,8 +14,13 @@
     signOut: void;
   }>();
 
-  $: roleCfg = getRoleConfig(user.role);
   $: sidebarWidth = collapsed ? "76px" : "260px";
+  $: homePath =
+    user?.role === "designer"
+      ? "/designer/wallet"
+      : user?.role === "admin" || user?.role === "superadmin"
+        ? "/admin"
+        : "/dashboard";
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;
@@ -56,58 +61,44 @@
   <div
     class="flex items-center h-16 border-b border-light flex-shrink-0 transition-all duration-200 {collapsed
       ? 'justify-center px-2'
-      : 'px-4 gap-3'}"
+      : 'px-4 justify-between gap-3'}"
   >
-    <a
-      href="/dashboard"
-      class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-blue-600 flex items-center justify-center font-bold shadow-xs flex-shrink-0 group transition-all hover:scale-105"
-      title="UMKM Builder"
-    >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        class="text-white"
+    {#if collapsed}
+      <a
+        href={homePath}
+        class="w-10 h-10 flex items-center justify-center rounded-xl hover:opacity-90 transition-all select-none group"
+        title="Pinoka"
+        aria-label="Pinoka"
       >
-        <path
-          d="M4 7C7 4.5 11 4.5 14 7C17 9.5 21 9.5 24 7"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
+        <img
+          src="/assets/logo/logo-pin.webp"
+          alt="Pinoka"
+          class="h-8 w-auto max-w-[32px] object-contain transition-transform duration-200 group-hover:scale-105"
+          width="26"
+          height="32"
+          loading="eager"
         />
-        <path
-          d="M0 12C3 9.5 7 9.5 10 12C13 14.5 17 14.5 20 12"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
+      </a>
+    {:else}
+      <a
+        href={homePath}
+        class="flex items-center min-w-0 hover:opacity-90 transition-opacity select-none"
+        title="Pinoka"
+      >
+        <img
+          src="/assets/logo/logo.webp"
+          alt="Pinoka"
+          class="h-9 w-auto max-w-[145px] object-contain"
+          width="117"
+          height="36"
+          loading="eager"
         />
-        <path
-          d="M4 17C7 14.5 11 14.5 14 17C17 19.5 21 19.5 24 17"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-        />
-      </svg>
-    </a>
-
-    {#if !collapsed}
-      <div class="flex-1 min-w-0 animate-fade-in">
-        <span
-          class="font-heading font-extrabold text-sm text-main tracking-tight truncate block leading-tight"
-        >
-          UMKM Builder
-        </span>
-        <span class="text-3xs text-secondary font-mono truncate block mt-0.5">
-          {roleCfg.label}
-        </span>
-      </div>
+      </a>
 
       <button
         type="button"
         on:click={() => dispatch("toggleCollapse")}
-        class="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-nested transition-colors cursor-pointer"
+        class="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-nested transition-colors cursor-pointer shrink-0"
         title="Ciutkan sidebar"
         aria-label="Ciutkan sidebar"
       >

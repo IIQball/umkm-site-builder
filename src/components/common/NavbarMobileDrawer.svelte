@@ -63,7 +63,7 @@
           <Sparkles size={14} class="text-orange" />
           <span>Menu Beranda (Landing)</span>
         </span>
-        <ChevronDown size={14} class="text-muted transition-transform duration-200 {expandedSection === 'beranda' ? 'rotate-180 text-orange' : ''}" />
+        <ChevronDown size={14} class="text-muted dark:text-white/80 transition-transform duration-200 {expandedSection === 'beranda' ? 'rotate-180 text-orange' : ''}" />
       </button>
 
       {#if expandedSection === 'beranda'}
@@ -92,7 +92,7 @@
         <span class="text-xs font-bold uppercase tracking-wider text-main dark:text-white flex items-center gap-1.5">
           <span>Help Center</span>
         </span>
-        <ChevronDown size={14} class="text-muted transition-transform duration-200 {expandedSection === 'help' ? 'rotate-180 text-orange' : ''}" />
+        <ChevronDown size={14} class="text-muted dark:text-white/80 transition-transform duration-200 {expandedSection === 'help' ? 'rotate-180 text-orange' : ''}" />
       </button>
 
       {#if expandedSection === 'help'}

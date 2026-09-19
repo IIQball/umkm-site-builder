@@ -35,7 +35,11 @@
   };
 
   const updateNavMode = () => {
-    if (window.scrollY > 5500 && navMode === 'normal') return;
+    const footer = document.getElementById('contact') || document.querySelector('footer');
+    if (footer && footer.getBoundingClientRect().top <= 100) {
+      navMode = 'hidden';
+      return;
+    }
     const heroTrack = document.getElementById('hero-scroll-track');
     if (!heroTrack) {
       navMode = 'normal';
@@ -44,16 +48,11 @@
     const rect = heroTrack.getBoundingClientRect();
     const maxScroll = rect.height - window.innerHeight;
 
-    // 1. Initial entrance or at hero top (where hero texts are visible)
     if (window.scrollY <= 40 || -rect.top <= 40) {
       navMode = 'transparent';
-    }
-    // 2. Scrolling within hero section: navbar disappears completely
-    else if (rect.bottom > 80 && -rect.top < maxScroll) {
+    } else if (rect.bottom > 80 && -rect.top < maxScroll) {
       navMode = 'hidden';
-    }
-    // 3. Post-hero sections: normal & always visible
-    else {
+    } else {
       navMode = 'normal';
     }
   };
@@ -156,7 +155,7 @@
 
       <!-- Dropdown: Help Center (Syarat & Ketentuan, Pusat Bantuan, Kebijakan Privasi) -->
       <NavbarDropdown
-        label="HELP CENTER"
+        label="PUSAT BANTUAN"
         items={helpCenterItems}
         isOpen={openDropdown === 'help'}
         isActive={currentPath === '/terms' || currentPath === '/privacy'}
@@ -187,31 +186,32 @@
 
     <!-- Mobile Left Brand Indicator (Mobile only) -->
     <div class="md:hidden flex items-center shrink-0">
-      <a href="/" class="flex items-center gap-2 shrink-0 select-none">
-        <div class="grid grid-cols-3 gap-0.5 w-5 h-5 shrink-0 items-center justify-center">
-          {#each Array(9) as _}
-            <span class="w-1.5 h-1.5 rounded-[1px] bg-main dark:bg-white"></span>
-          {/each}
-        </div>
-        <span class="font-sans font-bold text-base sm:text-lg tracking-wider uppercase leading-none select-none text-main dark:text-white">PINOKA</span>
+      <a href="/" class="flex items-center shrink-0 select-none" aria-label="Pinoka Home">
+        <img
+          src="/assets/logo/logo.webp"
+          alt="Pinoka"
+          class="h-7 sm:h-8 w-auto object-contain"
+          width="98"
+          height="30"
+          loading="eager"
+        />
       </a>
     </div>
 
-    <!-- 2. Center: Matrix Dot Grid & Brand Logo (Desktop only) -->
-    <a href="/" class="hidden md:flex items-center gap-2.5 shrink-0 group cursor-pointer transition-transform duration-200 hover:scale-[1.02] select-none">
-      <div class="grid grid-cols-3 gap-0.5 w-5 h-5 shrink-0 items-center justify-center">
-        {#each Array(9) as _}
-          <span class="w-1.5 h-1.5 rounded-[1px] bg-main dark:bg-white transition-colors group-hover:bg-orange"></span>
-        {/each}
-      </div>
-      <div class="flex flex-col leading-tight text-left">
-        <span class="font-sans font-bold text-sm lg:text-base tracking-wider uppercase text-main dark:text-white group-hover:text-orange transition-colors leading-none">
-          PINOKA
-        </span>
-        <span class="font-sans text-[11px] font-medium tracking-widest text-muted dark:text-slate-400 uppercase mt-0.5">
-          banyuwangi
-        </span>
-      </div>
+    <!-- 2. Center: Brand Logo (Desktop only) -->
+    <a
+      href="/"
+      class="hidden md:flex items-center shrink-0 group cursor-pointer transition-transform duration-200 hover:scale-[1.02] select-none"
+      aria-label="Pinoka Home"
+    >
+      <img
+        src="/assets/logo/logo.webp"
+        alt="Pinoka"
+        class="h-8 lg:h-9 w-auto object-contain"
+        width="117"
+        height="36"
+        loading="eager"
+      />
     </a>
 
     <!-- 3. Right: Action Buttons, Theme Toggle, Auth / CTA -->

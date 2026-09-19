@@ -117,9 +117,9 @@
           <h2 class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 !leading-[1.35] select-none" style="line-height: 1.35;">
             Kenapa Pinoka? * Nilai Keunggulan Platform * Kenapa Pinoka? * Nilai Keunggulan Platform *
           </h2>
-          <h2 class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 !leading-[1.35] select-none" style="line-height: 1.35;">
+          <span aria-hidden="true" class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 !leading-[1.35] select-none" style="line-height: 1.35;">
             Kenapa Pinoka? * Nilai Keunggulan Platform * Kenapa Pinoka? * Nilai Keunggulan Platform *
-          </h2>
+          </span>
         </div>
       </div>
 
@@ -157,7 +157,7 @@
                   ? 'opacity-100 translate-y-0 pointer-events-auto'
                   : 'opacity-0 translate-y-3 pointer-events-none'}"
               >
-                <h3 class="font-heading font-medium text-lg sm:text-xl md:text-2xl lg:text-[1.85rem] text-neutral-950 dark:text-white tracking-tight leading-[1.16] {idx === 1 ? 'text-left' : 'text-right'}">
+                <h3 class="font-heading font-medium text-xl sm:text-2xl md:text-3xl lg:text-[2rem] text-neutral-950 dark:text-white tracking-tight leading-[1.16] {idx === 1 ? 'text-left' : 'text-right'}">
                   {item.subtext}
                 </h3>
               </div>

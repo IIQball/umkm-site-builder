@@ -17,6 +17,12 @@
 
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
   $: roleCfg = getRoleConfig(user.role);
+  $: homePath =
+    user?.role === "designer"
+      ? "/designer/wallet"
+      : user?.role === "admin" || user?.role === "superadmin"
+        ? "/admin"
+        : "/dashboard";
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;
@@ -62,16 +68,20 @@
   <div
     class="flex items-center justify-between h-16 px-4 border-b border-light"
   >
-    <div class="flex items-center gap-2.5">
-      <div
-        class="w-9 h-9 rounded-xl bg-slate-900 text-white dark:bg-blue-600 flex items-center justify-center font-black text-sm shadow-sm"
-      >
-        <span class="material-symbols-outlined icon-filled text-sm"
-          >storefront</span
-        >
-      </div>
-      <span class="font-bold text-sm text-main">UMKM Builder</span>
-    </div>
+    <a
+      href={homePath}
+      class="flex items-center min-w-0 hover:opacity-90 transition-opacity select-none"
+      title="Pinoka"
+    >
+      <img
+        src="/assets/logo/logo.webp"
+        alt="Pinoka"
+        class="h-9 w-auto max-w-[145px] object-contain"
+        width="117"
+        height="36"
+        loading="eager"
+      />
+    </a>
     <button
       type="button"
       on:click={() => dispatch("closeDrawer")}

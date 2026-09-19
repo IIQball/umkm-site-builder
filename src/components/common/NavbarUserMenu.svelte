@@ -42,7 +42,7 @@
         <span>{userInitial}</span>
       {/if}
     </div>
-    <ChevronDown size={14} class="text-muted dark:text-white/60 transition-transform duration-200 {isOpen ? 'rotate-180' : ''} shrink-0" />
+    <ChevronDown size={14} class="text-muted dark:text-white/80 transition-transform duration-200 {isOpen ? 'rotate-180 text-orange' : ''} shrink-0" />
   </button>
 
   {#if isOpen}

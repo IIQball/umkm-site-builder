@@ -68,9 +68,17 @@
       <div class="lg:col-span-4 space-y-3">
         <a
           href="/"
-          class="font-heading font-black text-4xl sm:text-5xl md:text-6xl text-main hover:opacity-90 transition-opacity tracking-tight inline-block leading-none"
+          class="inline-block hover:opacity-90 transition-opacity select-none"
+          aria-label="Pinoka Home"
         >
-          Pinoka<span class="text-primary font-serif">"</span>
+          <img
+            src="/assets/logo/logo.webp"
+            alt="Pinoka"
+            class="h-10 sm:h-12 w-auto object-contain"
+            width="156"
+            height="48"
+            loading="lazy"
+          />
         </a>
         <p class="text-xs sm:text-sm text-secondary max-w-xs leading-relaxed font-sans">
           Platform digitalisasi visual dan storefront mandiri untuk perajin UMKM lokal Banyuwangi.
@@ -81,9 +89,9 @@
       <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
         {#each navColumns as col}
           <div class="space-y-4">
-            <h2 class="text-sm font-bold text-main font-heading tracking-tight">
+            <p class="text-xs font-bold uppercase tracking-wider text-main font-heading">
               {col.title}
-            </h2>
+            </p>
             <ul class="space-y-2.5 list-none pl-0">
               {#each col.links as link}
                 <li>
@@ -204,9 +212,9 @@
 
       <!-- Right: Prominent Newsletter Subscription Form -->
       <div class="lg:col-span-7 space-y-3">
-        <h3 class="text-base sm:text-lg font-bold text-main font-heading">
+        <h2 class="text-xl sm:text-2xl font-bold text-main font-heading">
           Dapatkan info & pembaruan terkini
-        </h3>
+        </h2>
 
         <form on:submit|preventDefault={handleSubscribe} class="relative w-full">
           <input
@@ -224,7 +232,7 @@
           </button>
         </form>
 
-        <p class="text-xs text-secondary leading-relaxed font-sans">
+        <p class="text-xs text-secondary leading-relaxed font-sans max-w-md">
           Dengan berlangganan, Anda menyetujui pembaruan berkala ekosistem Pinoka. Batal berlangganan kapan saja. <a href="/privacy" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Kebijakan Privasi</a>.
         </p>
       </div>

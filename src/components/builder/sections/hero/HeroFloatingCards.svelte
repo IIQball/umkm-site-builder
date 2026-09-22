@@ -33,20 +33,20 @@
   />
 
   <div class="w-full grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl">
-    <div class="p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-xl rotate-0 sm:-rotate-2 transition-transform hover:rotate-0 flex flex-col text-left gap-2">
+    <div class="p-6 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-xl rotate-0 sm:-rotate-2 transition-transform hover:rotate-0 flex flex-col text-left gap-2">
       <span class="text-2xl">✨</span>
-      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main,#0f172a)]">Produk Terkurasi</h3>
-      <p class="text-xs text-[var(--color-text-secondary,#334155)] font-sans">Kualitas bahan terbaik standar nasional.</p>
+      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)]">Produk Terkurasi</h3>
+      <p class="text-xs text-[var(--color-text-secondary)] font-sans">Kualitas bahan terbaik standar nasional.</p>
     </div>
-    <div class="p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-2xl scale-105 z-10 flex flex-col text-left gap-2">
+    <div class="p-6 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-2xl scale-105 z-10 flex flex-col text-left gap-2">
       <span class="text-2xl">⚡</span>
-      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main,#0f172a)]">Pesan Instan</h3>
-      <p class="text-xs text-[var(--color-text-secondary,#334155)] font-sans">Klik tombol WA langsung terhubung ke admin.</p>
+      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)]">Pesan Instan</h3>
+      <p class="text-xs text-[var(--color-text-secondary)] font-sans">Klik tombol WA langsung terhubung ke admin.</p>
     </div>
-    <div class="p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-xl rotate-0 sm:rotate-2 transition-transform hover:rotate-0 flex flex-col text-left gap-2">
+    <div class="p-6 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-xl rotate-0 sm:rotate-2 transition-transform hover:rotate-0 flex flex-col text-left gap-2">
       <span class="text-2xl">🛡️</span>
-      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main,#0f172a)]">Garansi 100%</h3>
-      <p class="text-xs text-[var(--color-text-secondary,#334155)] font-sans">Barang rusak langsung kami ganti baru.</p>
+      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)]">Garansi 100%</h3>
+      <p class="text-xs text-[var(--color-text-secondary)] font-sans">Barang rusak langsung kami ganti baru.</p>
     </div>
   </div>
 </div>

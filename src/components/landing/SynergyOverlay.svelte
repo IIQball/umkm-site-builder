@@ -20,10 +20,10 @@
               class="absolute -inset-10 -z-10 bg-gradient-to-tr from-white/90 via-white/50 to-transparent dark:from-black/95 dark:via-black/60 dark:to-transparent blur-2xl rounded-3xl pointer-events-none"
             ></div>
 
-            <h2 class="font-heading font-black text-4xl sm:text-5xl text-base-content tracking-tight leading-none drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+            <h2 class="heading-section text-base-content drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
               {stage.headline}
             </h2>
-            <p class="text-sm text-base-content/80 font-sans mt-3 drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            <p class="desc-section text-base-content/80 mt-3 drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               {stage.subtitle}
             </p>
           </div>
@@ -43,7 +43,7 @@
           >
             <div>
               <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-base-content/10">
-                <span class="text-[11px] font-mono tracking-wider text-base-content/50 uppercase">
+                <span class="label-caps text-base-content/50">
                   {stage.roleLabel}
                 </span>
                 <div class="flex items-center gap-1">
@@ -56,13 +56,13 @@
                   {/each}
                 </div>
               </div>
-              <p class="text-xs sm:text-sm text-base-content/80 leading-relaxed font-sans">
+              <p class="body-sm text-base-content/80">
                 {stage.cardDesc}
               </p>
             </div>
             <a
               href="#contact"
-              class="btn btn-sm btn-neutral rounded-full mt-4 font-sans w-fit normal-case text-xs transition-transform hover:scale-105 inline-flex items-center gap-1.5 group"
+              class="btn btn-sm btn-neutral rounded-full mt-4 font-heading font-medium text-xs-dense w-fit normal-case transition-transform hover:scale-105 inline-flex items-center gap-1.5 group"
             >
               <span>Eksplorasi</span>
               <ArrowRight size={13} class="transition-transform duration-200 group-hover:translate-x-0.5" />

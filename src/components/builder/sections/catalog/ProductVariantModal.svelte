@@ -155,7 +155,7 @@
                 {product.description}
               </p>
             {/if}
-            <p class="text-sm font-extrabold font-mono text-[var(--theme-primary,#2563eb)] mt-1.5">
+            <p class="text-sm font-extrabold font-mono text-[var(--theme-primary, var(--color-primary))] mt-1.5">
               {formatIDR(unitPrice)}
             </p>
           </div>
@@ -179,7 +179,7 @@
                         on:click={() => handleSelectOption(group.groupName, opt)}
                         class="px-3.5 py-1.5 text-xs font-semibold rounded-xl border transition-all {
                           isSelected
-                            ? 'bg-[var(--theme-primary,#2563eb)] border-[var(--theme-primary,#2563eb)] text-white shadow-sm ring-2 ring-[var(--theme-primary,#2563eb)]/20'
+                            ? 'bg-[var(--theme-primary, var(--color-primary))] border-[var(--theme-primary, var(--color-primary))] text-white shadow-sm ring-2 ring-[var(--theme-primary, var(--color-primary))]/20'
                             : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
                         } disabled:opacity-40 disabled:cursor-not-allowed"
                       >
@@ -233,7 +233,7 @@
       <div class="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
         <div class="flex items-center justify-between text-sm">
           <span class="text-slate-500 dark:text-slate-400 font-medium">Total Pembayaran</span>
-          <span class="text-lg font-black font-mono text-[var(--theme-primary,#2563eb)]">
+          <span class="text-lg font-black font-mono text-[var(--theme-primary, var(--color-primary))]">
             {formatIDR(totalPrice)}
           </span>
         </div>
@@ -242,7 +242,7 @@
           <button
             type="button"
             on:click={handleConfirmBuyNow}
-            class="w-full py-3.5 px-4 rounded-xl bg-[var(--theme-primary,#2563eb)] hover:brightness-110 active:scale-[0.98] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            class="w-full py-3.5 px-4 rounded-xl bg-[var(--theme-primary, var(--color-primary))] hover:brightness-110 active:scale-[0.98] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <span>Beli Sekarang</span>
           </button>

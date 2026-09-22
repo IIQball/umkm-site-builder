@@ -45,23 +45,23 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_stat_counter')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_stat_counter')}
-        class={`cq-stat-container pt-6 border-t border-[var(--color-border,rgba(15,23,42,0.08))] rounded-2xl p-2 transition-all cursor-pointer ${
+        class={`cq-stat-container pt-6 border-t border-[var(--color-border)] rounded-2xl p-2 transition-all cursor-pointer ${
           isStatActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-            : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
         <div>
-          <p class="text-2xl font-heading font-black text-[var(--color-text-main,#0f172a)]">25.000+</p>
-          <p class="text-xs text-[var(--color-text-secondary,#334155)] font-medium font-sans">Porsi Terkirim</p>
+          <p class="text-2xl font-heading font-black text-[var(--color-text-main)]">25.000+</p>
+          <p class="text-xs text-[var(--color-text-secondary)] font-medium font-sans">Porsi Terkirim</p>
         </div>
         <div>
-          <p class="text-2xl font-heading font-black text-[var(--color-text-main,#0f172a)]">4.9 / 5.0</p>
-          <p class="text-xs text-[var(--color-text-secondary,#334155)] font-medium font-sans">Kepuasan Konsumen</p>
+          <p class="text-2xl font-heading font-black text-[var(--color-text-main)]">4.9 / 5.0</p>
+          <p class="text-xs text-[var(--color-text-secondary)] font-medium font-sans">Kepuasan Konsumen</p>
         </div>
         <div>
-          <p class="text-2xl font-heading font-black text-[var(--color-text-main,#0f172a)]">100%</p>
-          <p class="text-xs text-[var(--color-text-secondary,#334155)] font-medium font-sans">Higienis & Halal</p>
+          <p class="text-2xl font-heading font-black text-[var(--color-text-main)]">100%</p>
+          <p class="text-xs text-[var(--color-text-secondary)] font-medium font-sans">Higienis & Halal</p>
         </div>
       </div>
     </div>
@@ -75,8 +75,8 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_image')}
       class={`relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-slate-100 dark:bg-slate-800 transition-all cursor-pointer p-1 ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img src={imageUrl} alt={title} class="w-full h-full object-cover rounded-xl" />

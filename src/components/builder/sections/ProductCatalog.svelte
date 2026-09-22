@@ -260,7 +260,7 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
             currentView = 'checkout';
             scrollToCatalog();
           }}
-          class="bg-slate-900 text-white dark:bg-primary dark:text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
+          class="bg-main text-canvas dark:bg-primary dark:text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
         >
           <div class="relative">
             <ShoppingCart size={18} />

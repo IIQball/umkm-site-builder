@@ -43,7 +43,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`bg-card border border-light/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -55,7 +55,7 @@
             tabindex="0"
             on:click={(e) => selectImage(e, index)}
             on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
-            class={`grid grid-cols-2 gap-2 mb-3 cursor-pointer ${isImgActive ? 'ring-2 ring-blue-500 rounded-2xl p-1' : ''}`}
+            class={`grid grid-cols-2 gap-2 mb-3 cursor-pointer ${isImgActive ? 'ring-2 ring-primary rounded-2xl p-1' : ''}`}
           >
             <div class="relative rounded-xl overflow-hidden aspect-square bg-nested">
               <img src={product.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'} alt="Sebelum" class="w-full h-full object-cover grayscale" />
@@ -83,7 +83,7 @@
             on:click={(e) => selectImage(e, index)}
             on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
             class={`aspect-video rounded-2xl bg-nested overflow-hidden mb-3 relative group/img cursor-pointer ${
-              isImgActive ? 'ring-2 ring-blue-500' : ''
+              isImgActive ? 'ring-2 ring-primary' : ''
             }`}
           >
             {#if product.imageUrl}

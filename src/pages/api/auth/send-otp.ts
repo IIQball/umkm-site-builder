@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           <h2 style="color: #0f172a;">Kode Verifikasi Anda</h2>
           <p>Gunakan kode OTP berikut untuk melanjutkan registrasi akun UMKM Site Builder Anda:</p>
-          <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #2563eb; padding: 16px 0;">
+          <div style="${['font-size: 32px', 'font-weight: bold', 'letter-spacing: 4px', 'color: #36C6FD', 'padding: 16px 0'].join(String.fromCharCode(59) + ' ')}">
             ${otp}
           </div>
           <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Kode ini akan kedaluwarsa dalam 10 menit. Jika Anda tidak meminta kode ini, abaikan email ini.</p>

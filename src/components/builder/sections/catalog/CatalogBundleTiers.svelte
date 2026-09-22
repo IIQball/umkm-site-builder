@@ -55,7 +55,7 @@
   on:click={selectTiers}
   on:keydown={(e) => { if (e.key === 'Enter') selectTiers(e); }}
   class={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left cursor-pointer transition-all ${
-    $canvasStore.selectedNodeId === 'catalog_bundle_tier' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
+    $canvasStore.selectedNodeId === 'catalog_bundle_tier' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
   }`}
 >
   {#each tiers as tier, idx (tier.name + idx)}
@@ -71,7 +71,7 @@
         isPopular
           ? 'bg-blue-50/60 dark:bg-blue-950/40 border-2 border-primary shadow-lg'
           : 'bg-card border border-light/80 shadow-xs hover:shadow-md'
-      } ${isCardActive ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : ''}`}
+      } ${isCardActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : ''}`}
     >
       {#if isPopular}
         <span class="absolute -top-3 right-6 bg-primary text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">

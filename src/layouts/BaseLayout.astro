@@ -1,21 +1,21 @@
 ---
-import '@/styles/global.css';
-import Navbar from '@/components/common/Navbar.astro';
-import ToastContainer from '@/components/ui/ToastContainer.svelte';
-import RateLimitAlert from '@/components/ui/RateLimitAlert.svelte';
-import SmoothScroll from '@/components/common/SmoothScroll.svelte';
+import '@/styles/global.css'
+import Navbar from '@/components/common/Navbar.astro'
+import ToastContainer from '@/components/ui/ToastContainer.svelte'
+import RateLimitAlert from '@/components/ui/RateLimitAlert.svelte'
+import SmoothScroll from '@/components/common/SmoothScroll.svelte'
 
 interface Props {
-  title?: string;
-  description?: string;
-  hideNavbar?: boolean;
+  title?: string
+  description?: string
+  hideNavbar?: boolean
 }
 
 const {
   title = 'UMKM Site Builder',
   description = 'No-code SaaS for Indonesian micro-enterprises',
-  hideNavbar = false,
-} = Astro.props;
+  hideNavbar = false
+} = Astro.props
 ---
 
 <!doctype html>
@@ -26,23 +26,36 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, 'https://pinoka.id').href} />
+
+    <!-- Preconnect to Google Fonts CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@700..800&family=Poppins:wght@400..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@700..800&family=Poppins:wght@400..600&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    </noscript>
+
+    <!-- Preload Hero Sequence Frame 1 -->
+    <link rel="preload" as="image" href="/frames/frame_0001.webp" fetchpriority="high" type="image/webp" />
     
     <!-- Anti-flicker theme script - runs before DOM renders -->
     <script is:inline>
-      const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
+      const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      document.documentElement.setAttribute('data-theme', theme)
       if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('dark')
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove('dark')
       }
     </script>
   </head>
   <body class="overflow-x-clip">
-    <SmoothScroll client:load />
-    <ToastContainer client:load />
-    <RateLimitAlert client:load />
+    <SmoothScroll client:idle />
+    <ToastContainer client:idle />
+    <RateLimitAlert client:idle />
     {!hideNavbar && <Navbar />}
     <div id="base-content-container">
       <slot />
@@ -53,7 +66,10 @@ const {
 <style is:global>
   html,
   body {
-    min-height: 100%;
-    width: 100%;
+    min-height: 100%
+  }
+  html,
+  body {
+    width: 100%
   }
 </style>

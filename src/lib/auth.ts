@@ -68,7 +68,7 @@ export const auth = betterAuth({
             <h2 style="color: #0f172a;">Halo ${user.name},</h2>
             <p>${bodyText}</p>
             <p>Klik tombol di bawah ini untuk membuat kata sandi baru:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Atur Ulang Kata Sandi</a>
+            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Atur Ulang Kata Sandi</a>
             <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika Anda tidak merasa melakukan tindakan ini, abaikan saja email ini.</p>
           </div>
         `
@@ -87,7 +87,7 @@ export const auth = betterAuth({
             <h2 style="color: #0f172a;">Halo ${user.name},</h2>
             <p>Terima kasih telah mendaftar di UMKM Site Builder. Silakan verifikasi email Anda untuk melanjutkan.</p>
             <p>Klik tombol di bawah ini untuk memverifikasi akun Anda:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Verifikasi Email</a>
+            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Verifikasi Email</a>
             <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika tautan tidak berfungsi, Anda juga dapat menggunakan kode OTP ini: <strong>${token}</strong> (jika aplikasi memintanya).</p>
           </div>
         `

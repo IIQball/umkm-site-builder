@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte'
 
-  export let variant: 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'dark' | 'orange' | 'outline' | 'ghost' = 'primary';
-  export let size: 'xs' | 'sm' | 'md' | 'lg' | 'icon' = 'md';
-  export let type: 'button' | 'submit' | 'reset' = 'button';
-  export let disabled: boolean = false;
-  export let loading: boolean = false;
-  export let fullWidth: boolean = false;
-  export let href: string = '';
-  export let title: string = '';
-  export let id: string = '';
-  let className: string = '';
-  export { className as class };
+  export let variant: 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'dark' | 'orange' | 'outline' | 'ghost' = 'primary'
+  export let size: 'xs' | 'sm' | 'md' | 'lg' | 'icon' = 'md'
+  export let type: 'button' | 'submit' | 'reset' = 'button'
+  export let disabled: boolean = false
+  export let loading: boolean = false
+  export let fullWidth: boolean = false
+  export let href: string = ''
+  export let title: string = ''
+  export let id: string = ''
+  let className: string = ''
+  export { className as class }
 
   const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-    focus: FocusEvent;
-    blur: FocusEvent;
-  }>();
+    click: MouseEvent
+    focus: FocusEvent
+    blur: FocusEvent
+  }>()
 
   const variantStyles = {
     primary:
-      'bg-primary text-white hover:text-white hover:bg-primary/90 active:scale-[0.98] border border-transparent shadow-xs',
+      'bg-primary text-slate-950 font-bold hover:text-slate-950 hover:bg-primary/90 active:scale-[0.98] border border-transparent shadow-xs',
     dark:
       'bg-slate-900 text-white hover:text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white active:scale-[0.98] border border-slate-800 shadow-xs',
     orange:
@@ -35,18 +35,18 @@
     ghost:
       'bg-transparent text-secondary hover:text-main hover:bg-nested active:scale-[0.98] border border-transparent',
     destructive:
-      'bg-rose-600 text-white hover:text-white hover:bg-rose-700 active:scale-[0.98] border border-transparent shadow-xs',
-  };
+      'bg-rose-600 text-white hover:text-white hover:bg-rose-700 active:scale-[0.98] border border-transparent shadow-xs'
+  }
 
   const sizeStyles = {
     xs: 'text-[11px] px-2.5 py-1 rounded-xl gap-1 h-7 min-h-[28px]',
     sm: 'text-xs px-3.5 py-1.5 rounded-xl gap-1.5 h-8 min-h-[32px]',
     md: 'text-sm px-4 py-2.5 rounded-2xl gap-2 h-10 min-h-[40px]',
     lg: 'text-base px-5 py-3 rounded-2xl gap-2.5 h-12 min-h-[48px]',
-    icon: 'p-1.5 rounded-xl h-8 w-8 min-h-[32px] min-w-[32px] justify-center items-center',
-  };
+    icon: 'p-1.5 rounded-xl h-8 w-8 min-h-[32px] min-w-[32px] justify-center items-center'
+  }
 
-  $: isDisabled = disabled || loading;
+  $: isDisabled = disabled || loading
   $: baseClasses = [
     'inline-flex items-center justify-center font-heading font-semibold transition-all duration-150 cursor-pointer select-none',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1',
@@ -55,10 +55,10 @@
     variantStyles[variant] || variantStyles.primary,
     variant === 'tertiary' ? 'text-xs sm:text-sm font-medium gap-1' : (sizeStyles[size] || sizeStyles.md),
     fullWidth ? 'w-full flex' : '',
-    className,
+    className
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(' ')
 </script>
 
 {#if href && !isDisabled}

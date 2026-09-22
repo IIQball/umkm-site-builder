@@ -33,12 +33,12 @@
       on:keydown={(e) => selectNodeKey(e, 'hero_image')}
       class={`w-full transition-all cursor-pointer rounded-2xl p-1.5 ${isSmallScreen ? 'order-2' : 'col-span-6 order-1'} ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       {#if imageUrl}
-        <div class="p-2 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-md overflow-hidden">
+        <div class="p-2 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-md overflow-hidden">
           <img
             src={imageUrl}
             alt="Hero Preview"
@@ -95,12 +95,12 @@
       on:keydown={(e) => selectNodeKey(e, 'hero_image')}
       class={`w-full transition-all cursor-pointer rounded-2xl p-1.5 ${isSmallScreen ? 'col-span-1' : 'col-span-6'} ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       {#if imageUrl}
-        <div class="p-2 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-md overflow-hidden">
+        <div class="p-2 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-md overflow-hidden">
           <img
             src={imageUrl}
             alt="Hero Preview"

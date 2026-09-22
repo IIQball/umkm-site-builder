@@ -29,7 +29,7 @@
   on:click={selectRows}
   on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
   class={`w-full overflow-x-auto rounded-3xl border border-light/80 shadow-xs bg-card text-left transition-all duration-200 cursor-pointer ${
-    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : ''
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : ''
   }`}
 >
   <table class="w-full text-xs text-left">

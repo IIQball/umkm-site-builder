@@ -32,8 +32,8 @@
       align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center'
     } ${
       isHeaderSelected
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-blue-400/60'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/60'
     }`}
   >
     {#if badgeText}

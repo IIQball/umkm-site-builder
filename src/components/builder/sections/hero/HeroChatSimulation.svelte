@@ -41,13 +41,13 @@
     tabindex="0"
     on:click={(e) => selectNode && selectNode(e, 'hero_chat_simulation')}
     on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_chat_simulation')}
-    class={`bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] p-4 rounded-2xl max-w-md mx-auto my-6 text-left space-y-3 shadow-sm transition-all cursor-pointer ${
+    class={`bg-[var(--color-card-base)] border border-[var(--color-border)] p-4 rounded-2xl max-w-md mx-auto my-6 text-left space-y-3 shadow-sm transition-all cursor-pointer ${
       isChatActive
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
-    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl rounded-tl-xs shadow-xs border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main,#0f172a)] max-w-[85%] font-sans">
+    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl rounded-tl-xs shadow-xs border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main)] max-w-[85%] font-sans">
       Halo Kak! Mau pesan Paket Favorit untuk makan siang ya?
       <span class="block text-[9px] text-slate-400 text-right mt-1">11.15</span>
     </div>

@@ -89,7 +89,7 @@
     >
       <a
         href={effectiveLink}
-        class="inline-flex items-center justify-center h-10 min-h-[40px] px-8 rounded-2xl bg-[var(--color-primary,#2563eb)] text-white font-heading font-semibold text-sm shadow-lg hover:bg-primary-dark active:scale-[0.98] transition-all duration-150"
+        class="inline-flex items-center justify-center h-10 min-h-[40px] px-8 rounded-2xl bg-[var(--color-primary)] text-white font-heading font-semibold text-sm shadow-lg hover:bg-primary-dark active:scale-[0.98] transition-all duration-150"
       >
         <span>{ctaText}</span>
         <ArrowRight size={16} class="ml-2" />

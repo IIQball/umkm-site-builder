@@ -1,52 +1,49 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { onMount, onDestroy } from 'svelte'
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
   const VALUES_DATA = [
     {
       id: 'langkah-01',
       tagline: 'LANGKAH 01',
-      title: 'Pilih Template Kurasi Desainer',
-      description: 'Eksplorasi ragam etalase visual rancangan perancang profesional. Pilih tata letak yang paling mewakili karakter brand produk Anda tanpa perlu menyusun desain dari nol.',
-      subtext: 'Pilih Template Kurasi Desainer. Eksplorasi ragam etalase visual rancangan perancang profesional. Pilih tata letak yang paling mewakili karakter brand produk Anda tanpa perlu menyusun desain dari nol.',
+      title: 'Pilih Desain Siap Pakai',
+      description: 'Tentukan tampilan katalog buatan desainer profesional yang sesuai dengan produk Anda tanpa perlu merancang dari awal.',
       image: '/images/showcase-umkm.jpg',
-      alt: 'Pilih template kurasi desainer'
+      alt: 'Pilih desain siap pakai'
     },
     {
       id: 'langkah-02',
       tagline: 'LANGKAH 02',
       title: 'Unggah Produk dan Nomor WhatsApp',
-      description: 'Masukkan foto katalog, tentukan harga, dan tautkan nomor kontak bisnis Anda. Formulir pengisian dirancang ringkas seperti mengisi profil media sosial biasa.',
-      subtext: 'Unggah Produk dan Nomor WhatsApp. Masukkan foto katalog, tentukan harga, dan tautkan nomor kontak bisnis Anda. Formulir pengisian dirancang ringkas seperti mengisi profil media sosial biasa.',
+      description: 'Masukkan foto barang, tentukan harga, dan tautkan nomor WhatsApp usaha Anda melalui formulir yang praktis.',
       image: '/images/showcase-consumer.jpg',
       alt: 'Unggah produk dan nomor WhatsApp'
     },
     {
       id: 'langkah-03',
       tagline: 'LANGKAH 03',
-      title: 'Toko Aktif Instan Tanpa Hosting',
-      description: 'Website katalog langsung mengudara dalam hitungan menit lengkap dengan subdomain mandiri. Format pesanan terkirim rapi ke WhatsApp dengan margin 100% tanpa potongan komisi.',
-      subtext: 'Toko Aktif Instan Tanpa Hosting. Website katalog langsung mengudara dalam hitungan menit lengkap dengan subdomain mandiri. Format pesanan terkirim rapi ke WhatsApp dengan margin 100% tanpa potongan komisi.',
+      title: 'Terima Pesanan Tanpa Biaya Komisi',
+      description: 'Website toko langsung aktif seketika dan setiap pesanan pembeli terkirim utuh ke WhatsApp dengan keuntungan penuh 100%.',
       image: '/images/showcase-designer.jpg',
-      alt: 'Toko aktif instan tanpa hosting'
+      alt: 'Terima pesanan tanpa biaya komisi'
     }
   ]
 
-  let trackElement: HTMLElement;
-  let stageElement: HTMLElement;
-  let parallaxTextElement: HTMLElement;
-  let activeIndex = 0;
-  let ctx: gsap.Context | null = null;
+  let trackElement: HTMLElement
+  let stageElement: HTMLElement
+  let parallaxTextElement: HTMLElement
+  let activeIndex = 0
+  let ctx: gsap.Context | null = null
 
   onMount(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger)
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!trackElement || !stageElement) return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!trackElement || !stageElement) return
 
     ctx = gsap.context(() => {
-      if (prefersReducedMotion) return;
+      if (prefersReducedMotion) return
 
       if (parallaxTextElement) {
         gsap.fromTo(
@@ -60,10 +57,10 @@
               trigger: trackElement,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: 1.2,
-            },
+              scrub: 1.2
+            }
           }
-        );
+        )
       }
 
       ScrollTrigger.create({
@@ -74,26 +71,24 @@
         pinSpacing: true,
         scrub: 1,
         onUpdate: (self) => {
-          const p = self.progress;
-          // Smooth hysteresis buffer: deliberate scrolling required to change active role,
-          // preventing startling, abrupt jumps on a single scroll wheel tick.
+          const p = self.progress
           if (p < 0.38 && activeIndex !== 0) {
-            activeIndex = 0;
+            activeIndex = 0
           } else if (p >= 0.42 && p < 0.72 && activeIndex !== 1) {
-            activeIndex = 1;
+            activeIndex = 1
           } else if (p >= 0.76 && activeIndex !== 2) {
-            activeIndex = 2;
+            activeIndex = 2
           }
-        },
-      });
-    }, trackElement);
-  });
+        }
+      })
+    }, trackElement)
+  })
 
   onDestroy(() => {
-    ctx?.revert();
-  });
+    ctx?.revert()
+  })
 
-  $: isSwapped = activeIndex === 1;
+  $: isSwapped = activeIndex === 1
 </script>
 
 <section
@@ -114,10 +109,15 @@
           bind:this={parallaxTextElement}
           class="flex whitespace-nowrap will-change-transform"
         >
-          <h2 class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 !leading-[1.35] select-none" style="line-height: 1.35;">
+          <h2
+            class="marquee-heading inline-block font-heading text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 leading-normal select-none"
+          >
             Kenapa Pinoka? * Nilai Keunggulan Platform * Kenapa Pinoka? * Nilai Keunggulan Platform *
           </h2>
-          <span aria-hidden="true" class="text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 !leading-[1.35] select-none" style="line-height: 1.35;">
+          <span
+            aria-hidden="true"
+            class="marquee-heading inline-block font-heading text-6xl sm:text-8xl md:text-[10vw] font-black tracking-tight text-neutral-950/15 dark:text-white/20 px-4 leading-normal select-none"
+          >
             Kenapa Pinoka? * Nilai Keunggulan Platform * Kenapa Pinoka? * Nilai Keunggulan Platform *
           </span>
         </div>
@@ -126,7 +126,7 @@
       <!-- Twin Cards Container with Ultra-Thin Middle Gap -->
       <div
         class="w-full h-full max-h-[calc(100vh-4.5rem)] md:max-h-[calc(100vh-5.5rem)] grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 gap-2 relative z-10"
-        style="--card-gap: 0.5rem;"
+        style="--card-gap: 0.5rem"
       >
         <!-- Card 1: Gambar -->
         <div
@@ -149,7 +149,7 @@
             ? 'swap-text'
             : ''}"
         >
-          <!-- Top Area: Subtext positioned towards outer edge with compact size and tight leading -->
+          <!-- Top Area: Heading dan Deskripsi langkah -->
           <div class="w-full flex {isSwapped ? 'justify-start' : 'justify-end'} relative min-h-[100px] sm:min-h-[120px] md:min-h-[140px]">
             {#each VALUES_DATA as item, idx}
               <div
@@ -157,9 +157,12 @@
                   ? 'opacity-100 translate-y-0 pointer-events-auto'
                   : 'opacity-0 translate-y-3 pointer-events-none'}"
               >
-                <h3 class="font-heading font-medium text-xl sm:text-2xl md:text-3xl lg:text-[2rem] text-neutral-950 dark:text-white tracking-tight leading-[1.16] {idx === 1 ? 'text-left' : 'text-right'}">
-                  {item.subtext}
+                <h3 class="heading-3 text-neutral-950 dark:text-white {idx === 1 ? 'text-left' : 'text-right'}">
+                  {item.title}
                 </h3>
+                <p class="desc-section text-neutral-600 dark:text-neutral-300 mt-2.5 sm:mt-3 {idx === 1 ? 'text-left' : 'text-right'}">
+                  {item.description}
+                </p>
               </div>
             {/each}
           </div>
@@ -177,10 +180,10 @@
                   ></span>
                 {/each}
               </div>
-              <span class="font-mono text-xs font-bold tracking-wider text-neutral-900 dark:text-white ml-0.5">
+              <span class="label-caps text-neutral-900 dark:text-white ml-0.5">
                 0{activeIndex + 1}
               </span>
-              <span class="text-xs font-mono font-medium tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
+              <span class="label-caps text-neutral-500 dark:text-neutral-400">
                 DARI 03
               </span>
             </div>
@@ -189,7 +192,7 @@
             <div class="relative h-6 flex items-center {isSwapped ? 'justify-start text-left' : 'justify-end text-right'}">
               {#each VALUES_DATA as item, idx}
                 <span
-                  class="absolute {isSwapped ? 'left-0' : 'right-0'} font-sans text-xs sm:text-sm font-semibold tracking-wide text-orange transition-all duration-500 ease-out whitespace-nowrap {activeIndex === idx
+                  class="absolute {isSwapped ? 'left-0' : 'right-0'} label-caps text-orange dark:text-orange-light font-bold transition-all duration-500 ease-out whitespace-nowrap {activeIndex === idx
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-2 pointer-events-none'}"
                 >
@@ -207,29 +210,34 @@
 </section>
 
 <style>
+  .marquee-heading {
+    line-height: 1.4 !important
+  }
   .card-slot {
-    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
+    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1)
+  }
+  .card-slot {
+    will-change: transform
   }
   @media (min-width: 768px) {
     .swap-img {
-      transform: translateX(calc(100% + var(--card-gap, 0.5rem)));
+      transform: translateX(calc(100% + var(--card-gap, 0.5rem)))
     }
     .swap-text {
-      transform: translateX(calc(-100% - var(--card-gap, 0.5rem)));
+      transform: translateX(calc(-100% - var(--card-gap, 0.5rem)))
     }
   }
   @media (max-width: 767px) {
     .swap-img {
-      transform: translateY(calc(100% + var(--card-gap, 0.5rem)));
+      transform: translateY(calc(100% + var(--card-gap, 0.5rem)))
     }
     .swap-text {
-      transform: translateY(calc(-100% - var(--card-gap, 0.5rem)));
+      transform: translateY(calc(-100% - var(--card-gap, 0.5rem)))
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .card-slot {
-      transition: none;
+      transition: none
     }
   }
 </style>

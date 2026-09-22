@@ -132,7 +132,7 @@
               class="group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 {collapsed
                 ? 'justify-center'
                 : ''} {active
-                ? 'bg-slate-900 text-white dark:bg-slate-800 shadow-xs'
+                ? 'bg-main text-canvas dark:bg-nested shadow-xs'
                 : 'text-secondary hover:bg-nested hover:text-main'}"
             >
               <span

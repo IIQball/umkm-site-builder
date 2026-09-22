@@ -37,7 +37,7 @@
 {#if elementOrder.length > 1}
   <div class="space-y-3">
     <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Layers size={13} class="text-[var(--theme-primary,#2563eb)]" />
+      <Layers size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
       <span>Urutan Slot Elemen</span>
     </div>
 

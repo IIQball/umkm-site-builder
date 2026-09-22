@@ -51,10 +51,10 @@
   data-node="header_container"
   class={`w-full flex flex-col box-border select-none transition-colors relative z-30 overflow-visible ${
     activePreset === 'transparent_glass_header'
-      ? 'backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/50 dark:border-slate-800/50 text-[var(--theme-text-primary,#0f172a)]'
+      ? 'backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/50 dark:border-slate-800/50 text-[var(--theme-text-primary, var(--color-text-main))]'
       : hasCustomBg
       ? ''
-      : 'bg-[var(--theme-surface,white)] text-[var(--theme-text-primary,#0f172a)]'
+      : 'bg-[var(--theme-surface,white)] text-[var(--theme-text-primary, var(--color-text-main))]'
   }`}
 >
   <!-- Top Announcement / Contact Bar -->
@@ -135,7 +135,7 @@
       {#if isDesktop}
         <div class="flex-1 flex items-center justify-start gap-6 text-xs font-semibold">
           {#each navLinks.slice(0, Math.ceil(navLinks.length / 2)) as link}
-            <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">
+            <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary, var(--color-primary))] transition-colors">
               {link}
             </a>
           {/each}
@@ -152,7 +152,7 @@
         {#if isDesktop}
           <div class="flex items-center gap-6 mr-3">
             {#each navLinks.slice(Math.ceil(navLinks.length / 2)) as link}
-              <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary,#2563eb)] transition-colors">
+              <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary, var(--color-primary))] transition-colors">
                 {link}
               </a>
             {/each}
@@ -164,7 +164,7 @@
             href={waUrl}
             target="_blank"
             rel="noreferrer"
-            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
             class="inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm"
           >
             <span>{ctaText}</span>
@@ -236,7 +236,7 @@
               href={waUrl}
               target="_blank"
               rel="noreferrer"
-              style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+              style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
               class="inline-flex items-center justify-center px-3 font-bold text-xs shadow-sm"
             >
               <span>{ctaText}</span>
@@ -283,7 +283,7 @@
             href={waUrl}
             target="_blank"
             rel="noreferrer"
-            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
             class="inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-transform"
           >
             <MessageCircle size={15} class="mr-1.5" />

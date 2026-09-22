@@ -33,7 +33,7 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectStats(e); }}
     class={`bg-card p-6 rounded-3xl border border-light/80 shadow-xs space-y-3 cursor-pointer transition-all ${
       $canvasStore.selectedNodeId === 'testi_stats'
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
         : 'hover:border-slate-300 dark:hover:border-slate-700'
     }`}
   >
@@ -91,7 +91,7 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
         class={`p-4 rounded-2xl border border-light/80 bg-card shadow-xs space-y-1.5 transition-all duration-200 cursor-pointer ${
           isCardActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
             : 'hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >

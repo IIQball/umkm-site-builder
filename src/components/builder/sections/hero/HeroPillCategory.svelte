@@ -38,8 +38,8 @@
     on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_pill_category')}
     class={`flex flex-wrap items-center justify-center gap-2 pt-4 mb-4 p-2 rounded-2xl transition-all cursor-pointer ${
       isPillActive
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     {#each categories as cat}
@@ -48,8 +48,8 @@
         on:click|stopPropagation={() => (activeCategory = cat)}
         class={`h-9 px-4 rounded-full text-xs font-heading font-semibold transition-all cursor-pointer active:scale-[0.98] ${
           activeCategory === cat
-            ? 'bg-[var(--color-primary,#2563eb)] text-white shadow-xs'
-            : 'bg-slate-100 dark:bg-slate-800 text-[var(--color-text-secondary,#334155)] hover:bg-slate-200 dark:hover:bg-slate-700'
+            ? 'bg-[var(--color-primary)] text-white shadow-xs'
+            : 'bg-slate-100 dark:bg-slate-800 text-[var(--color-text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'
         }`}
       >
         {cat}
@@ -64,10 +64,10 @@
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'hero_image')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_image')}
-      class={`w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-lg border border-[var(--color-border,rgba(15,23,42,0.08))] transition-all cursor-pointer ${
+      class={`w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-lg border border-[var(--color-border)] transition-all cursor-pointer ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img src={imageUrl} alt={title} class="w-full h-full object-cover" />

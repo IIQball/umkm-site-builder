@@ -38,7 +38,7 @@
       on:click={(e) => selectCard(e, 0, mainProduct)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, 0, mainProduct); }}
       class={`cq-bento-primary bg-slate-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col justify-between relative transition-all duration-200 cursor-pointer ${
-        isMainActive ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-2xl' : 'hover:shadow-xl'
+        isMainActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-2xl' : 'hover:shadow-xl'
       }`}
     >
       <div class="flex flex-col sm:flex-row gap-6 items-start">
@@ -48,7 +48,7 @@
           on:click={(e) => selectImage(e, 0)}
           on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, 0); }}
           class={`w-full sm:w-1/2 aspect-square rounded-2xl overflow-hidden bg-slate-800 shrink-0 relative group/img cursor-pointer ${
-            isMainImgActive ? 'ring-2 ring-blue-500' : ''
+            isMainImgActive ? 'ring-2 ring-primary' : ''
           }`}
         >
           {#if mainProduct.imageUrl}
@@ -120,7 +120,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, realIdx, product); }}
       class={`cq-bento-secondary bg-card border border-light/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
         isSecActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -131,7 +131,7 @@
           on:click={(e) => selectImage(e, realIdx)}
           on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, realIdx); }}
           class={`aspect-square rounded-2xl overflow-hidden bg-nested mb-3 relative group/img cursor-pointer ${
-            isSecImgActive ? 'ring-2 ring-blue-500' : ''
+            isSecImgActive ? 'ring-2 ring-primary' : ''
           }`}
         >
           {#if product.imageUrl}

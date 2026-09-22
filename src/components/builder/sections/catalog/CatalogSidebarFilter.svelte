@@ -56,7 +56,7 @@
     on:click={selectSidebar}
     on:keydown={(e) => { if (e.key === 'Enter') selectSidebar(e); }}
     class={`bg-card p-5 rounded-3xl border border-light/80 shadow-xs self-start w-full cursor-pointer transition-all duration-200 ${
-      $canvasStore.selectedNodeId === 'catalog_sidebar' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : 'hover:border-slate-300 dark:hover:border-slate-700'
+      $canvasStore.selectedNodeId === 'catalog_sidebar' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : 'hover:border-slate-300 dark:hover:border-slate-700'
     }`}
   >
     <h3 class="font-heading font-bold text-xs text-main uppercase tracking-wider mb-3 px-1">
@@ -90,7 +90,7 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
         class={`bg-card p-4 rounded-2xl border border-light/80 shadow-xs flex flex-col justify-between transition-all duration-200 cursor-pointer ${
           isCardActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
             : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
@@ -101,7 +101,7 @@
             on:click={(e) => selectImage(e, index)}
             on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
             class={`aspect-square rounded-xl overflow-hidden bg-nested mb-3 relative group/img cursor-pointer ${
-              isImgActive ? 'ring-2 ring-blue-500' : ''
+              isImgActive ? 'ring-2 ring-primary' : ''
             }`}
           >
             {#if product.imageUrl}

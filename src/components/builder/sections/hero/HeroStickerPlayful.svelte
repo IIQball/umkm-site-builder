@@ -34,7 +34,7 @@
           on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
           on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
           class={`inline-block bg-rose-500 text-white font-black text-xs px-3 py-1 rounded-md -rotate-3 mb-4 shadow-xs transition-all cursor-pointer ${
-            isBadgeActive ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+            isBadgeActive ? 'ring-2 ring-primary ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
         >
           {badgeText}
@@ -49,7 +49,7 @@
         on:click={(e) => selectNode && selectNode(e, 'hero_title')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
         class={`text-heading-xl font-heading font-black text-slate-950 dark:text-amber-100 uppercase tracking-tight mb-4 transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 ${
-          isTitleActive ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          isTitleActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
         {title}
@@ -63,7 +63,7 @@
           on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
           on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
           class={`cursor-pointer mb-4 rounded-xl p-1.5 -ml-1.5 transition-all ${
-            isSubtitleActive ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+            isSubtitleActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
         >
           <p class="text-body-base text-slate-700 dark:text-amber-200/80 leading-relaxed font-sans">
@@ -79,7 +79,7 @@
         on:click={(e) => selectNode && selectNode(e, 'hero_cta')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
         class={`cq-btn-group pt-4 rounded-xl p-1.5 -ml-1.5 transition-all cursor-pointer ${
-          isCtaActive ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          isCtaActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
         <a
@@ -100,7 +100,7 @@
       on:click={(e) => selectNode && selectNode(e, 'hero_image')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_image')}
       class={`relative w-full aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl border-4 border-white rotate-2 bg-white dark:border-slate-800 transition-all cursor-pointer ${
-        isImageActive ? 'ring-4 ring-blue-500' : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        isImageActive ? 'ring-4 ring-primary' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img src={imageUrl} alt={title} class="w-full h-full object-cover" />

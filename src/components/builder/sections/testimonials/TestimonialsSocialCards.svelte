@@ -34,7 +34,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
       class={`p-5 rounded-3xl border border-light/80 bg-card shadow-xs flex flex-col justify-between space-y-3 transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -46,7 +46,7 @@
             on:click={(e) => selectAvatar(e, index)}
             on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
             class={`w-9 h-9 rounded-full overflow-hidden bg-nested shrink-0 cursor-pointer ${
-              isAvatarActive ? 'ring-2 ring-blue-500' : ''
+              isAvatarActive ? 'ring-2 ring-primary' : ''
             }`}
           >
             {#if item.avatar}

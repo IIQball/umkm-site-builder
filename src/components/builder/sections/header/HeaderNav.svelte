@@ -13,8 +13,8 @@
   $: navGap = props.navGap || '16px';
   $: navTypographyToken = (props.navTypographyToken as string) || 'body';
   $: navTextTransform = props.navTextTransform || 'none';
-  $: navColor = (props.navColor as string) || 'var(--theme-text-muted, #64748b)';
-  $: navHoverColor = (props.navHoverColor as string) || 'var(--theme-primary, #2563eb)';
+  $: navColor = (props.navColor as string) || 'var(--theme-text-muted, var(--color-text-muted))';
+  $: navHoverColor = (props.navHoverColor as string) || 'var(--theme-primary, var(--color-primary))';
   $: ctaText = props.ctaText || '';
   $: ctaLink = props.ctaLink || '#';
 
@@ -107,7 +107,7 @@
   on:keydown={handleNavContainerKeyDown}
   class={`relative flex items-center justify-end rounded-lg transition-all cursor-pointer ${
     isNodeActive
-      ? 'ring-2 ring-blue-500 bg-blue-50/20 dark:bg-blue-950/20'
+      ? 'ring-2 ring-primary bg-primary/10'
       : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/40'
   }`}
 >

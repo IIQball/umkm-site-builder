@@ -54,7 +54,7 @@
         <button
           type="button"
           on:click={() => (showMegaMenu = !showMegaMenu)}
-          class="flex items-center gap-1 hover:text-[var(--theme-primary,#2563eb)] cursor-pointer text-slate-700 dark:text-slate-200 py-2"
+          class="flex items-center gap-1 hover:text-[var(--theme-primary, var(--color-primary))] cursor-pointer text-slate-700 dark:text-slate-200 py-2"
         >
           <span>Kategori Produk</span>
           <ChevronDown size={14} class={`transition-transform duration-150 ${showMegaMenu ? 'rotate-180 text-blue-600' : ''}`} />
@@ -86,7 +86,7 @@
       {#each navLinks as link}
         <a
           href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
-          class="text-slate-700 dark:text-slate-200 hover:text-[var(--theme-primary,#2563eb)] transition-colors"
+          class="text-slate-700 dark:text-slate-200 hover:text-[var(--theme-primary, var(--color-primary))] transition-colors"
         >
           {link}
         </a>
@@ -101,7 +101,7 @@
         href={waUrl}
         target="_blank"
         rel="noreferrer"
-        style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+        style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
         class="inline-flex items-center justify-center px-4 text-xs font-bold transition-transform active:scale-95 shadow-sm"
       >
         <MessageCircle size={14} class="mr-1.5" />

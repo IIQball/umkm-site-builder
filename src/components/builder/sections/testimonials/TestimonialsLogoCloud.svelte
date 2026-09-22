@@ -29,7 +29,7 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectLogo(e, index); }}
         class={`h-12 px-3 rounded-xl bg-card border border-light/80 flex items-center justify-center text-xs font-black text-secondary grayscale hover:grayscale-0 hover:text-main hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer ${
           isLogoActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md grayscale-0 text-main'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md grayscale-0 text-main'
             : ''
         }`}
       >

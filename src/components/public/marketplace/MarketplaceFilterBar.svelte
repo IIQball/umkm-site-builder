@@ -106,7 +106,7 @@
       type="button"
       on:click={() => (selectedCategorySlug = 'all')}
       class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
-        ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
+        ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
         : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
     >
       <span class="material-symbols-outlined text-sm">grid_view</span>
@@ -122,7 +122,7 @@
         type="button"
         on:click={() => (selectedCategorySlug = cat.slug)}
         class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
-          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
+          ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
           : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
       >
         <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>

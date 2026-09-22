@@ -11,7 +11,7 @@ export interface SceneCaption {
 export const HERO_SCENES: readonly SceneCaption[] = [
   {
     id: 'collaboration',
-    headline: 'Kolaborasi Nyata di Titik Temu',
+    headline: 'Kolaborasi Nyata<br />di Titik Temu',
     subtext: 'Menyatukan desainer digital dengan wirausaha lokal untuk membangun nilai baru.',
     frameStart: 125,
     fadeInEnd: 145,
@@ -20,7 +20,7 @@ export const HERO_SCENES: readonly SceneCaption[] = [
   },
   {
     id: 'decision',
-    headline: 'Satu Aksi Menuju Ruang Baru',
+    headline: 'Satu Aksi<br />Menuju Ruang Baru',
     subtext: 'Langkah awal membawa produk tradisional melampaui batasan fisik.',
     frameStart: 250,
     fadeInEnd: 275,
@@ -29,7 +29,7 @@ export const HERO_SCENES: readonly SceneCaption[] = [
   },
   {
     id: 'breakthrough',
-    headline: 'Menembus Batas Tradisional',
+    headline: 'Menembus Batas<br />Tradisional',
     subtext: 'Membuka cakrawala baru ketika teknologi modern dan kearifan lokal berpadu.',
     frameStart: 445,
     fadeInEnd: 475,
@@ -38,7 +38,7 @@ export const HERO_SCENES: readonly SceneCaption[] = [
   },
   {
     id: 'showcase',
-    headline: 'Etalase Digital Berkualitas Tinggi',
+    headline: 'Etalase Digital<br />Berkualitas Tinggi',
     subtext: 'Identitas visual modern yang mengangkat daya tawar karya otentik.',
     frameStart: 625,
     fadeInEnd: 650,
@@ -47,7 +47,7 @@ export const HERO_SCENES: readonly SceneCaption[] = [
   },
   {
     id: 'map',
-    headline: 'Ekosistem yang Terus Bertumbuh',
+    headline: 'Ekosistem yang<br />Terus Bertumbuh',
     subtext: 'Terhubung ke seluruh sentra wirausaha potensial di Banyuwangi.',
     frameStart: 770,
     fadeInEnd: 790,
@@ -73,14 +73,4 @@ export function calculateSceneOpacity(frame: number, scene: SceneCaption): numbe
   const raw = (scene.frameEnd - frame) / (scene.frameEnd - scene.fadeOutStart)
   const t = Math.max(0, Math.min(1, raw))
   return t * t * (3 - 2 * t)
-}
-
-export function getActiveScene(frame: number): { scene: SceneCaption; opacity: number } | null {
-  for (const scene of HERO_SCENES) {
-    const opacity = calculateSceneOpacity(frame, scene)
-    if (opacity > 0.001) {
-      return { scene, opacity }
-    }
-  }
-  return null
 }

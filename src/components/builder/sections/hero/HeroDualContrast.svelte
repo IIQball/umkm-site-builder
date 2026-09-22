@@ -15,10 +15,10 @@
   export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
 </script>
 
-<div class="rounded-3xl shadow-sm border border-[var(--color-border,rgba(15,23,42,0.08))] overflow-hidden my-4">
+<div class="rounded-3xl shadow-sm border border-[var(--color-border)] overflow-hidden my-4">
   <div class="cq-grid-dual-contrast">
     <!-- Light Side -->
-    <div class="bg-[var(--color-card-base,#ffffff)] p-6 sm:p-10 flex flex-col justify-center text-left">
+    <div class="bg-[var(--color-card-base)] p-6 sm:p-10 flex flex-col justify-center text-left">
       <HeroHeaderContent
         {badgeText}
         {tagName}

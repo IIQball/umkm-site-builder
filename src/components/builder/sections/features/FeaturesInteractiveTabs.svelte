@@ -65,24 +65,24 @@
     on:keydown={handleHeadingKeydown}
     class={`max-w-2xl mx-auto mb-6 p-3 rounded-2xl transition-all cursor-pointer ${
       isHeadingActive
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     {#if badgeText}
       <span
         data-node="badge"
-        class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary,#2563eb)] mb-4 shadow-2xs"
+        class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-4 shadow-2xs"
       >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary,#2563eb)]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
         {badgeText}
       </span>
     {/if}
-    <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main,#0f172a)] tracking-tight mb-3">
+    <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-3">
       {title}
     </h2>
     {#if subtitle}
-      <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary,#334155)] mb-2 font-sans">
+      <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] mb-2 font-sans">
         {subtitle}
       </p>
     {/if}
@@ -97,8 +97,8 @@
           on:click={(e) => handleTabClick(e, idx)}
           class={`h-10 min-h-[40px] px-5 rounded-2xl text-xs font-heading font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] ${
             activeTabIdx === idx
-              ? 'bg-[var(--color-primary,#2563eb)] text-white shadow-xs'
-              : 'bg-[var(--color-nested-base,#f1f5f9)] text-[var(--color-text-secondary,#334155)] hover:bg-slate-200 dark:hover:bg-slate-700'
+              ? 'bg-[var(--color-primary)] text-white shadow-xs'
+              : 'bg-[var(--color-nested-base)] text-[var(--color-text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
           {item.title}
@@ -115,23 +115,23 @@
       tabindex="0"
       on:click={handleActiveItemClick}
       on:keydown={handleActiveItemKeydown}
-      class={`space-y-4 p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] transition-all duration-150 cursor-pointer ${
+      class={`space-y-4 p-6 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] transition-all duration-150 cursor-pointer ${
         isItemActive
-          ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/10 dark:bg-blue-950/10'
-          : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/10 dark:bg-blue-950/10'
+          : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
-      <span class="text-xs font-heading font-bold text-[var(--color-primary,#2563eb)] uppercase tracking-wider block">
+      <span class="text-xs font-heading font-bold text-[var(--color-primary)] uppercase tracking-wider block">
         {activeItem.badge || 'Pilihan Unggulan'}
       </span>
-      <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main,#0f172a)]">
+      <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main)]">
         {activeItem.title}
       </h3>
-      <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed font-sans">
+      <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
         {activeItem.description}
       </p>
       {#if activeItem.linkUrl || activeItem.statLabel}
-        <span class="inline-flex items-center justify-center h-10 min-h-[40px] px-6 rounded-2xl bg-[var(--color-primary,#2563eb)] text-white text-xs font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] shadow-xs">
+        <span class="inline-flex items-center justify-center h-10 min-h-[40px] px-6 rounded-2xl bg-[var(--color-primary)] text-white text-xs font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] shadow-xs">
           {activeItem.statLabel || 'Pesan Varian Ini'}
         </span>
       {/if}
@@ -142,9 +142,9 @@
       tabindex="0"
       on:click={handleImageClick}
       on:keydown={handleImageKeydown}
-      class={`w-full aspect-video rounded-2xl overflow-hidden shadow-lg bg-[var(--color-nested-base,#f1f5f9)] transition-all cursor-pointer ${
+      class={`w-full aspect-video rounded-2xl overflow-hidden shadow-lg bg-[var(--color-nested-base)] transition-all cursor-pointer ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
           : 'hover:opacity-95'
       }`}
     >

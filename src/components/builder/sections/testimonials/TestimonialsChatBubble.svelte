@@ -25,7 +25,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectBubble(e, index, item); }}
       class={`bg-card p-4 rounded-2xl rounded-tl-xs shadow-xs border border-light/80 space-y-2 max-w-[92%] transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
           : 'hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >

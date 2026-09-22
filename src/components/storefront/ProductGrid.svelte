@@ -147,7 +147,7 @@
   {#if currentView === 'catalog'}
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
-      <h2 class="text-3xl font-bold text-slate-900">Katalog Produk</h2>
+      <h2 class="text-3xl font-bold text-main">Katalog Produk</h2>
       
       <!-- Category Tabs -->
       {#if categories.length > 0}
@@ -176,19 +176,19 @@
 
     <!-- Product Grid -->
     {#if filteredProducts.length === 0}
-      <div class="text-center py-20 bg-slate-50 rounded-2xl border border-slate-100">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-200 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      <div class="text-center py-20 bg-nested rounded-2xl border border-border">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-card border border-border mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900 mb-2">Belum ada produk</h3>
-        <p class="text-slate-500 max-w-sm mx-auto">Kategori ini belum memiliki produk aktif yang tersedia.</p>
+        <h3 class="text-lg font-semibold text-main mb-2">Belum ada produk</h3>
+        <p class="text-muted max-w-sm mx-auto">Kategori ini belum memiliki produk aktif yang tersedia.</p>
       </div>
     {:else}
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {#each filteredProducts as product (product.id)}
           <Card variant="elevated" padding="none" class="group flex flex-col h-full">
             <!-- Image Container -->
-            <div class="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-slate-50 flex-shrink-0">
+            <div class="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-nested flex-shrink-0">
               {#if firstProductImageUrl(product.imageUrls)}
                 <img 
                   src={firstProductImageUrl(product.imageUrls)} 
@@ -197,14 +197,14 @@
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               {:else}
-                <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                <div class="w-full h-full flex items-center justify-center bg-nested text-muted">
                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                 </div>
               {/if}
               
               <!-- Badges -->
               <div class="absolute top-3 left-3 flex gap-1 z-10">
-                <Badge size="sm" dot={false} uppercase={true} class="bg-white/90 backdrop-blur-sm shadow-sm text-slate-700">
+                <Badge size="sm" dot={false} uppercase={true} class="bg-card/90 backdrop-blur-sm shadow-sm text-secondary">
                   {product.category.name}
                 </Badge>
               </div>
@@ -212,12 +212,12 @@
             
             <!-- Content -->
             <div class="p-4 flex flex-col flex-1">
-              <h3 class="font-bold text-slate-900 mb-1 line-clamp-2" title={product.name}>{product.name}</h3>
+              <h3 class="font-bold text-main mb-1 line-clamp-2" title={product.name}>{product.name}</h3>
               
               <div class="mt-auto pt-3 flex flex-col gap-3">
-                <p class="text-lg text-[var(--theme-primary,#2563eb)] font-black font-mono tracking-tight">{formatCurrency(product.basePrice)}</p>
+                <p class="text-lg text-[var(--theme-primary,var(--color-primary))] font-black font-mono tracking-tight">{formatCurrency(product.basePrice)}</p>
                 <div class="flex flex-col xl:grid xl:grid-cols-[auto_1fr] gap-1.5 sm:gap-2 w-full">
-                  <Button variant="secondary" class="rounded-xl border-slate-200 text-slate-600 w-full xl:w-12 h-10 flex items-center justify-center shadow-none hover:bg-slate-100" on:click={() => handleAddToCart(product)}>
+                  <Button variant="secondary" class="rounded-xl border-border text-secondary w-full xl:w-12 h-10 flex items-center justify-center shadow-none hover:bg-nested" on:click={() => handleAddToCart(product)}>
                     <ShoppingCart size={18} />
                     <span class="xl:hidden ml-2 font-bold text-sm">Keranjang</span>
                   </Button>

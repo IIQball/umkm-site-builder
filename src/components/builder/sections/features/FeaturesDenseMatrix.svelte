@@ -40,24 +40,24 @@
         tabindex="0"
         on:click={(e) => handleItemClick(e, index)}
         on:keydown={(e) => handleItemKeydown(e, index)}
-        class={`p-4 sm:p-5 rounded-2xl border bg-[var(--color-card-base,#ffffff)] flex items-start gap-3.5 shadow-xs transition-all duration-150 cursor-pointer ${
+        class={`p-4 sm:p-5 rounded-2xl border bg-[var(--color-card-base)] flex items-start gap-3.5 shadow-xs transition-all duration-150 cursor-pointer ${
           isActiveNode
-            ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-            : 'border-[var(--color-border,rgba(15,23,42,0.08))] hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+            ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+            : 'border-[var(--color-border)] hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
         <div
           data-node="feature_icon"
-          class="w-11 h-11 rounded-xl bg-[var(--color-primary,#2563eb)]/10 text-[var(--color-primary,#2563eb)] flex items-center justify-center shrink-0 border border-[var(--color-primary,#2563eb)]/20 mt-0.5"
+          class="w-11 h-11 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20 mt-0.5"
         >
           <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={20} />
         </div>
         <div class="min-w-0 flex-1">
-          <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main,#0f172a)] text-sm sm:text-base leading-snug">
+          <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)] text-sm sm:text-base leading-snug">
             {item.title}
           </h3>
           {#if item.description}
-            <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed mt-1 font-sans">
+            <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed mt-1 font-sans">
               {item.description}
             </p>
           {/if}

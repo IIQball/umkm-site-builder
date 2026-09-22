@@ -43,31 +43,31 @@
       on:keydown={handleHeadingKeydown}
       class={`text-left asym-sticky-left self-start p-3 rounded-2xl transition-all cursor-pointer ${
         isHeadingActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       {#if badgeText}
         <span
           data-node="badge"
-          class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary,#2563eb)] mb-4 shadow-2xs"
+          class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-4 shadow-2xs"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary,#2563eb)]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
           {badgeText}
         </span>
       {/if}
-      <h2 data-node="title" class="title-heading text-heading-lg font-heading font-black text-[var(--color-text-main,#0f172a)] tracking-tight mb-4">
+      <h2 data-node="title" class="title-heading text-heading-lg font-heading font-black text-[var(--color-text-main)] tracking-tight mb-4">
         {title}
       </h2>
       {#if subtitle}
-        <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary,#334155)] leading-relaxed mb-6 font-sans">
+        <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] leading-relaxed mb-6 font-sans">
           {subtitle}
         </p>
       {/if}
       {#if ctaText}
         <a
           href={ctaLink || '#'}
-          class="inline-flex items-center justify-center h-10 min-h-[40px] px-5 py-2.5 rounded-2xl bg-[var(--color-primary,#2563eb)] text-white text-sm font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] transition-all duration-150 cursor-pointer shadow-xs"
+          class="inline-flex items-center justify-center h-10 min-h-[40px] px-5 py-2.5 rounded-2xl bg-[var(--color-primary)] text-white text-sm font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] transition-all duration-150 cursor-pointer shadow-xs"
         >
           {ctaText}
         </a>
@@ -84,19 +84,19 @@
           tabindex="0"
           on:click={(e) => handleItemClick(e, idx)}
           on:keydown={(e) => handleItemKeydown(e, idx)}
-          class={`bg-[var(--color-card-base,#ffffff)] p-6 rounded-2xl shadow-xs border border-[var(--color-border,rgba(15,23,42,0.08))] transition-all duration-150 cursor-pointer ${
+          class={`bg-[var(--color-card-base)] p-6 rounded-2xl shadow-xs border border-[var(--color-border)] transition-all duration-150 cursor-pointer ${
             isItemActive
-              ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+              ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
         >
-          <span class="text-xs font-mono font-bold text-[var(--color-primary,#2563eb)] block">
+          <span class="text-xs font-mono font-bold text-[var(--color-primary)] block">
             {item.badge || `0${idx + 1} / BENEFIT`}
           </span>
-          <h3 data-node="feature_title" class="text-heading-md font-heading font-bold text-[var(--color-text-main,#0f172a)] mt-1 mb-2">
+          <h3 data-node="feature_title" class="text-heading-md font-heading font-bold text-[var(--color-text-main)] mt-1 mb-2">
             {item.title}
           </h3>
-          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed font-sans">
+          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
             {item.description}
           </p>
         </div>

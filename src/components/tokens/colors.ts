@@ -4,13 +4,13 @@
  */
 
 export const DEFAULT_THEME_COLOR_FIELDS = [
-  { key: 'primary', label: 'Primary Brand Color', defaultVal: '#2563eb' },
-  { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#64748b' },
+  { key: 'primary', label: 'Primary Brand Color', defaultVal: '#36C6FD' },
+  { key: 'secondary', label: 'Secondary / Accent Color', defaultVal: '#FC018B' },
   { key: 'background', label: 'Background Kanvas', defaultVal: '#ffffff' },
   { key: 'surface', label: 'Surface / Card Background', defaultVal: '#f8fafc' },
   { key: 'textPrimary', label: 'Teks Utama (Primary)', defaultVal: '#0f172a' },
-  { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' },
-] as const;
+  { key: 'textMuted', label: 'Teks Redup (Muted)', defaultVal: '#64748b' }
+] as const
 
 export const COLOR_TOKENS = [
   'primary',
@@ -22,24 +22,24 @@ export const COLOR_TOKENS = [
   'text_muted',
   'textPrimary',
   'textMuted',
-  'transparent',
-] as const;
-export type ColorToken = (typeof COLOR_TOKENS)[number];
+  'transparent'
+] as const
+export type ColorToken = (typeof COLOR_TOKENS)[number]
 
 export const colors = {
   primary: {
-    DEFAULT: '#2563eb',
-    dark: '#1d4ed8',
-    light: '#3b82f6',
-    rgb: '37, 99, 235',
-    hsl: '221, 83%, 53%',
+    DEFAULT: '#36C6FD',
+    dark: '#00A3EF',
+    light: '#7dd3fc',
+    rgb: '54, 198, 253',
+    hsl: '196, 98%, 60%'
   },
   secondary: {
-    DEFAULT: '#334155',
-    dark: '#1e293b',
-    light: '#475569',
-    rgb: '51, 65, 85',
-    hsl: '215, 25%, 27%',
+    DEFAULT: '#FC018B',
+    dark: '#B90162',
+    light: '#fd3da5',
+    rgb: '252, 1, 139',
+    hsl: '327, 99%, 50%'
   },
   semantic: {
     success: {
@@ -47,68 +47,75 @@ export const colors = {
       dark: '#059669',
       light: '#34d399',
       bg: 'rgba(16, 185, 129, 0.1)',
-      border: 'rgba(16, 185, 129, 0.2)',
+      border: 'rgba(16, 185, 129, 0.2)'
     },
     error: {
       DEFAULT: '#ef4444',
       dark: '#dc2626',
       light: '#f87171',
       bg: 'rgba(239, 68, 68, 0.1)',
-      border: 'rgba(239, 68, 68, 0.2)',
+      border: 'rgba(239, 68, 68, 0.2)'
     },
     warning: {
-      DEFAULT: '#f59e0b',
-      dark: '#d97706',
-      light: '#fbbf24',
-      bg: 'rgba(245, 158, 11, 0.1)',
-      border: 'rgba(245, 158, 11, 0.2)',
+      DEFAULT: '#FECF02',
+      dark: '#FDA201',
+      light: '#fee159',
+      bg: 'rgba(254, 207, 2, 0.1)',
+      border: 'rgba(254, 207, 2, 0.2)'
     },
     info: {
-      DEFAULT: '#3b82f6',
-      dark: '#2563eb',
-      light: '#60a5fa',
-      bg: 'rgba(59, 130, 246, 0.1)',
-      border: 'rgba(59, 130, 246, 0.2)',
+      DEFAULT: '#0284C7',
+      dark: '#0369A1',
+      light: '#38BDF8',
+      bg: 'rgba(2, 132, 199, 0.1)',
+      border: 'rgba(2, 132, 199, 0.2)'
     },
     violet: {
-      DEFAULT: '#8b5cf6',
-      dark: '#7c3aed',
-      light: '#a78bfa',
-      bg: 'rgba(139, 92, 246, 0.1)',
-      border: 'rgba(139, 92, 246, 0.2)',
+      DEFAULT: '#9A00DD',
+      dark: '#6F00A0',
+      light: '#b635ee',
+      bg: 'rgba(154, 0, 221, 0.1)',
+      border: 'rgba(154, 0, 221, 0.2)'
+    },
+    accent: {
+      DEFAULT: '#9A00DD',
+      dark: '#6F00A0',
+      light: '#b635ee',
+      bg: 'rgba(154, 0, 221, 0.1)',
+      border: 'rgba(154, 0, 221, 0.2)'
     },
     sky: {
-      DEFAULT: '#0ea5e9',
-      dark: '#0284c7',
-      light: '#38bdf8',
-      bg: 'rgba(14, 165, 233, 0.1)',
-      border: 'rgba(14, 165, 233, 0.2)',
+      DEFAULT: '#36C6FD',
+      dark: '#00A3EF',
+      light: '#7dd3fc',
+      bg: 'rgba(54, 198, 253, 0.1)',
+      border: 'rgba(54, 198, 253, 0.2)'
     },
     rose: {
       DEFAULT: '#f43f5e',
       dark: '#e11d48',
       light: '#fb7185',
       bg: 'rgba(244, 63, 94, 0.1)',
-      border: 'rgba(244, 63, 94, 0.2)',
+      border: 'rgba(244, 63, 94, 0.2)'
     },
     orange: {
-      DEFAULT: '#ff5b35',
-      dark: '#ea4a24',
-      light: '#ff7b5c',
-      bg: 'rgba(255, 91, 53, 0.1)',
-      border: 'rgba(255, 91, 53, 0.2)',
+      DEFAULT: '#FC018B',
+      dark: '#B90162',
+      light: '#fd3da5',
+      bg: 'rgba(252, 1, 139, 0.1)',
+      border: 'rgba(252, 1, 139, 0.2)'
     },
     amber: {
-      DEFAULT: '#f59e0b',
-      dark: '#d97706',
-      light: '#fbbf24',
-      bg: 'rgba(245, 158, 11, 0.1)',
-      border: 'rgba(245, 158, 11, 0.2)',
-    },
+      DEFAULT: '#FECF02',
+      dark: '#FDA201',
+      light: '#fee159',
+      bg: 'rgba(254, 207, 2, 0.1)',
+      border: 'rgba(254, 207, 2, 0.2)'
+    }
   },
   neutrals: {
     light: {
-      bgBase: '#f4f6fa',
+      bgBase: '#f8fafc',
       cardBase: '#ffffff',
       nestedBase: '#f1f5f9',
       textMain: '#0f172a',
@@ -116,7 +123,7 @@ export const colors = {
       textMuted: '#64748b',
       textLight: '#94a3b8',
       border: 'rgba(15, 23, 42, 0.08)',
-      borderLight: 'rgba(15, 23, 42, 0.05)',
+      borderLight: 'rgba(15, 23, 42, 0.05)'
     },
     dark: {
       bgBase: '#0b0f19',
@@ -127,12 +134,12 @@ export const colors = {
       textMuted: '#94a3b8',
       textLight: '#64748b',
       border: 'rgba(248, 250, 252, 0.07)',
-      borderLight: 'rgba(248, 250, 252, 0.04)',
-    },
-  },
-} as const;
+      borderLight: 'rgba(248, 250, 252, 0.04)'
+    }
+  }
+} as const
 
-export type ColorTheme = 'indigo' | 'emerald' | 'amber' | 'violet' | 'sky' | 'rose' | 'orange';
+export type ColorTheme = 'indigo' | 'emerald' | 'amber' | 'violet' | 'sky' | 'rose' | 'orange'
 export type BadgeVariant =
   | 'primary'
   | 'secondary'
@@ -147,4 +154,4 @@ export type BadgeVariant =
   | 'indigo'
   | 'amber'
   | 'rose'
-  | 'orange';
+  | 'orange'

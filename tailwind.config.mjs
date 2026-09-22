@@ -1,4 +1,4 @@
-import daisyui from "daisyui";
+import daisyui from "daisyui"
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,7 +9,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-family, 'Poppins')", 'sans-serif'],
-        heading: ["var(--font-heading, 'League Spartan')", 'sans-serif'],
+        heading: ["var(--font-heading, 'Host Grotesk')", 'sans-serif'],
         mono: ['var(--font-geist-mono, monospace)'],
       },
       fontSize: {
@@ -23,41 +23,45 @@ export default {
       colors: {
         'muted-foreground': 'var(--color-text-muted, #64748b)',
         foreground: 'var(--color-text-main, #0f172a)',
-        // Theme semantic tokens — usable as bg-*, text-*, border-*, divide-*
         canvas: 'rgb(var(--color-bg-base-rgb, 248 250 252) / <alpha-value>)',
         card: 'rgb(var(--color-card-rgb, 255 255 255) / <alpha-value>)',
         nested: 'rgb(var(--color-nested-rgb, 241 245 249) / <alpha-value>)',
-        main: 'var(--color-text-main)',
+        main: 'rgb(var(--color-text-main-rgb, 15 23 42) / <alpha-value>)',
         secondary: 'var(--color-text-secondary)',
+        accent: {
+          DEFAULT: 'rgb(var(--color-accent-rgb, 154 0 221) / <alpha-value>)',
+          dark: 'var(--color-accent-dark, #6F00A0)',
+          light: 'var(--color-accent-light, #9A00DD)'
+        },
         muted: 'var(--color-text-muted)',
         light: 'var(--color-border-light)',
         border: 'var(--color-border)',
         primary: {
-          DEFAULT: 'rgb(var(--color-primary-rgb, 37 99 235) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--color-primary-rgb, 54 198 253) / <alpha-value>)',
           dark: 'var(--color-primary-dark)',
-          light: 'var(--color-primary-light)',
+          light: 'var(--color-primary-light)'
         },
         orange: {
-          DEFAULT: 'rgb(var(--color-orange-rgb, 255 91 53) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--color-orange-rgb, 252 1 139) / <alpha-value>)',
           dark: 'var(--color-orange-dark)',
-          light: 'var(--color-orange-light)',
+          light: 'var(--color-orange-light)'
         },
         success: 'rgb(var(--color-success-rgb, 16 185 129) / <alpha-value>)',
         error: 'rgb(var(--color-error-rgb, 239 68 68) / <alpha-value>)',
-        warning: 'rgb(var(--color-warning-rgb, 245 158 11) / <alpha-value>)',
-        info: 'rgb(var(--color-primary-rgb, 37 99 235) / <alpha-value>)',
-      },
-    },
+        warning: 'rgb(var(--color-warning-rgb, 254 207 2) / <alpha-value>)',
+        info: 'rgb(var(--color-info-rgb, 2 132 199) / <alpha-value>)'
+      }
+    }
   },
   plugins: [daisyui],
   daisyui: {
     themes: [
       {
         light: {
-          primary: '#4f46e5',
+          primary: '#36C6FD',
           'primary-content': '#ffffff',
-          secondary: '#7c3aed',
-          accent: '#06b6d4',
+          secondary: '#FC018B',
+          accent: '#9A00DD',
           neutral: '#3f3f46',
           'base-100': '#ffffff',
           'base-200': '#f8fafc',
@@ -65,29 +69,29 @@ export default {
           'base-content': '#0f172a',
           success: '#10b981',
           error: '#ef4444',
-          warning: '#f59e0b',
-          info: '#3b82f6',
+          warning: '#FECF02',
+          info: '#0284C7'
         },
         dark: {
-          primary: '#4f46e5',
+          primary: '#00A3EF',
           'primary-content': '#ffffff',
-          secondary: '#7c3aed',
-          accent: '#06b6d4',
+          secondary: '#B90162',
+          accent: '#6F00A0',
           neutral: '#e4e4e7',
-          'base-100': '#161e31',
-          'base-200': '#0a0f1e',
-          'base-300': '#1c263c',
+          'base-100': '#111827',
+          'base-200': '#0B0F19',
+          'base-300': '#1F2937',
           'base-content': '#ffffff',
           success: '#10b981',
           error: '#ef4444',
-          warning: '#f59e0b',
-          info: '#3b82f6',
-        },
-      },
+          warning: '#FDA201',
+          info: '#38BDF8'
+        }
+      }
     ],
     darkTheme: 'dark',
     base: true,
     styled: true,
-    utils: true,
-  },
-};
+    utils: true
+  }
+}

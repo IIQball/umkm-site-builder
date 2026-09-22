@@ -29,8 +29,8 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_founder_photo')}
       class={`relative w-full aspect-[4/5] max-w-sm mx-auto rounded-2xl overflow-hidden shadow-xl bg-slate-100 dark:bg-slate-800 transition-all cursor-pointer ${
         isPhotoActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img src={imageUrl} alt={title} class="w-full h-full object-cover" />

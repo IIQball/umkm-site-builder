@@ -171,7 +171,7 @@
           type="button"
           on:click={() => handleTabChange('all')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeTab === 'all'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           Semua ({templates.length})
@@ -181,7 +181,7 @@
           type="button"
           on:click={() => handleTabChange('pending')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'pending'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
@@ -195,7 +195,7 @@
           type="button"
           on:click={() => handleTabChange('approved')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'approved'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -209,7 +209,7 @@
           type="button"
           on:click={() => handleTabChange('rejected')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'rejected'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>

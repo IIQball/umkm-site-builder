@@ -4,28 +4,149 @@
   export let currentFrame = 1
 </script>
 
-<div class="absolute inset-0 pointer-events-none z-20 flex items-end justify-start p-6 sm:p-12 md:p-16">
-  <div class="max-w-lg w-full grid grid-cols-1 items-end relative">
+<div class="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+  <div class="w-full h-full max-w-7xl mx-auto px-6 sm:px-12 pt-16 md:pt-20 pb-6 sm:pb-8 md:pb-10 relative">
     {#each HERO_SCENES as scene (scene.id)}
       {@const opacity = calculateSceneOpacity(currentFrame, scene)}
       {#if opacity > 0.005}
-        <div
-          class="col-start-1 row-start-1 p-2 sm:p-4 will-change-[opacity,transform] pointer-events-none select-none"
-          style:opacity="{opacity.toFixed(3)}"
-          style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
-        >
-          <!-- Bayang-bayang / Scrim Atmosferik Lembut (Tanpa Kotak/Border) -->
-          <div
-            class="absolute -inset-10 -z-10 bg-gradient-to-tr from-white/90 via-white/50 to-transparent dark:from-black/95 dark:via-black/60 dark:to-transparent blur-2xl rounded-3xl pointer-events-none"
-          ></div>
+        {#if scene.id === 'collaboration'}
+          <!-- Scene 1: Layout Asimetris (Kiri Atas & Kanan Tengah) -->
+          <div class="relative w-full h-full">
+            <!-- Headline Kiri Atas -->
+            <div
+              class="absolute top-2 sm:top-4 left-0 max-w-xl will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div
+                class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"
+              ></div>
+              <h2 class="heading-section text-main text-left">
+                {@html scene.headline}
+              </h2>
+            </div>
 
-          <h2 class="font-heading font-semibold text-2xl sm:text-3xl md:text-4xl text-neutral-950 dark:text-white tracking-tight leading-tight drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            {scene.headline}
-          </h2>
-          <p class="font-sans text-xs sm:text-sm md:text-base text-neutral-800 dark:text-neutral-200 font-medium leading-relaxed mt-2.5 max-w-md drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            {scene.subtext}
-          </p>
-        </div>
+            <!-- Subtext Kanan Tengah dengan Asap Difusi Halus -->
+            <div
+              class="absolute right-0 top-[52%] -translate-y-1/2 max-w-xs sm:max-w-sm md:max-w-[360px] will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div class="relative">
+                <div
+                  class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"
+                ></div>
+                <p class="desc-section text-main dark:text-white text-left font-semibold drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  {scene.subtext}
+                </p>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {#if scene.id === 'decision'}
+          <!-- Scene 2: Layout Kiri Atas Bertumpuk -->
+          <div class="relative w-full h-full">
+            <div
+              class="absolute top-2 sm:top-4 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div
+                class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"
+              ></div>
+              <h2 class="heading-section text-main text-left">
+                {@html scene.headline}
+              </h2>
+              <div class="relative mt-4 sm:mt-5 max-w-xs sm:max-w-sm md:max-w-[360px]">
+                <div
+                  class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"
+                ></div>
+                <p class="desc-section text-main dark:text-white text-left font-semibold drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  {scene.subtext}
+                </p>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {#if scene.id === 'breakthrough'}
+          <!-- Scene 3: Layout Kiri Bawah -->
+          <div class="relative w-full h-full">
+            <div
+              class="absolute bottom-2 sm:bottom-4 left-0 max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div
+                class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"
+              ></div>
+              <h2 class="heading-section text-main text-left">
+                {@html scene.headline}
+              </h2>
+              <div class="relative mt-4 sm:mt-5 max-w-xs sm:max-w-sm md:max-w-[360px]">
+                <div
+                  class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"
+                ></div>
+                <p class="desc-section text-main dark:text-white text-left font-semibold drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  {scene.subtext}
+                </p>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {#if scene.id === 'showcase'}
+          <!-- Scene 4: Layout Kanan Atas -->
+          <div class="relative w-full h-full">
+            <div
+              class="absolute top-2 sm:top-4 right-0 max-w-lg text-left sm:text-right flex flex-col items-start sm:items-end will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div
+                class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"
+              ></div>
+              <h2 class="heading-section text-main text-left sm:text-right">
+                {@html scene.headline}
+              </h2>
+              <div class="relative mt-4 sm:mt-5 max-w-xs sm:max-w-sm md:max-w-[360px]">
+                <div
+                  class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"
+                ></div>
+                <p class="desc-section text-main dark:text-white text-left font-semibold drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  {scene.subtext}
+                </p>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {#if scene.id === 'map'}
+          <!-- Scene 5: Layout Kiri Atas -->
+          <div class="relative w-full h-full">
+            <div
+              class="absolute top-2 sm:top-4 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
+              style:opacity="{opacity.toFixed(3)}"
+              style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
+            >
+              <div
+                class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"
+              ></div>
+              <h2 class="heading-section text-main text-left">
+                {@html scene.headline}
+              </h2>
+              <div class="relative mt-4 sm:mt-5 max-w-xs sm:max-w-sm md:max-w-[360px]">
+                <div
+                  class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"
+                ></div>
+                <p class="desc-section text-main dark:text-white text-left font-semibold drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  {scene.subtext}
+                </p>
+              </div>
+            </div>
+          </div>
+        {/if}
       {/if}
     {/each}
   </div>

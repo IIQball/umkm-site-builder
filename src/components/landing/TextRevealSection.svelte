@@ -1,78 +1,99 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { onMount, onDestroy } from 'svelte'
+  import gsap from 'gsap'
 
-  const STATEMENT =
-    'Kualitas Otentik Tidak Boleh Terhenti di Kemasan Usang. PINOKA Menghubungkan UMKM Banyuwangi dengan Desainer Digital untuk Mendominasi Pasar Masa Kini.';
-
-  const words = STATEMENT.split(' ');
-
-  let containerRef: HTMLElement;
-  let textRef: HTMLElement;
-  let ctx: gsap.Context | null = null;
+  let containerRef: HTMLElement
+  let tl: gsap.core.Timeline | null = null
+  let observer: IntersectionObserver | null = null
 
   onMount(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const wordElements = textRef?.querySelectorAll('.reveal-word');
-
-    if (!wordElements || !wordElements.length || !containerRef) return;
+    if (!containerRef) return
 
     if (prefersReducedMotion) {
-      gsap.set(wordElements, { opacity: 1, color: '#ffffff' });
-      return;
+      gsap.set(['.line-inner', '.desc-col'], { yPercent: 0, opacity: 1 })
+      return
     }
 
-    ctx = gsap.context(() => {
-      gsap.fromTo(
-        wordElements,
-        {
-          opacity: 0.15,
-          color: 'var(--color-text-muted)',
-        },
-        {
-          opacity: 1,
-          color: '#ffffff',
-          stagger: 0.1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: containerRef,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 0.8,
-          },
-        }
-      );
-      ScrollTrigger.sort();
-      ScrollTrigger.refresh();
-    }, containerRef);
-  });
+    tl = gsap.timeline({ paused: true })
+
+    tl.fromTo(
+      '.line-inner',
+      { yPercent: 125, opacity: 0 },
+      {
+        yPercent: 0,
+        opacity: 1,
+        duration: 1.0,
+        ease: 'power4.out',
+        stagger: 0.12
+      }
+    )
+    .fromTo(
+      '.desc-col',
+      { y: 24, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.7,
+        ease: 'power3.out',
+        stagger: 0.1
+      },
+      '-=0.45'
+    )
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            tl?.restart()
+          } else {
+            tl?.pause(0)
+          }
+        })
+      },
+      {
+        threshold: 0.15
+      }
+    )
+
+    observer.observe(containerRef)
+  })
 
   onDestroy(() => {
-    if (ctx) ctx.revert();
-  });
+    if (observer) observer.disconnect()
+    if (tl) tl.kill()
+  })
 </script>
 
 <section
   bind:this={containerRef}
-  id="manifesto-reveal"
-  class="relative z-10 w-full min-h-[140vh] md:min-h-[180vh] bg-neutral-950 text-white border-b border-white/10 select-none"
+  id="manifesto-statement"
+  class="relative z-20 w-full py-28 sm:py-36 md:py-44 bg-canvas text-main border-y border-border/40 select-none overflow-hidden transition-colors duration-300"
 >
-  <!-- Sticky Pinning Stage for Continuous Scrubbing -->
-  <div class="sticky top-0 h-screen w-full flex items-center justify-center pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-8 md:px-16 overflow-hidden">
-    <div class="max-w-5xl mx-auto w-full text-center px-4">
-      <h2
-        bind:this={textRef}
-        class="text-[clamp(1.5rem,3vw,2.25rem)] md:text-[clamp(2rem,3.2vw,2.75rem)] lg:text-[clamp(2.5rem,3.5vw,3.25rem)] font-heading font-medium tracking-tighter leading-[0.9] sm:leading-[0.88] text-center m-0"
-      >
-        {#each words as word}
-          <span class="reveal-word inline-block mr-[0.24em] transition-colors duration-100 opacity-15 text-neutral-600">
-            {word}
-          </span>
-        {/each}
-      </h2>
+  <div class="max-w-6xl mx-auto px-6 sm:px-12 flex flex-col items-center text-center">
+    <!-- Judul 2 Baris Masked Reveal (Host Grotesk, Rapat, Ekstra Tebal) -->
+    <h2 class="heading-statement text-main mb-12 sm:mb-16">
+      <div class="overflow-hidden py-1">
+        <span class="line-inner block">Kualitas Otentik</span>
+      </div>
+      <div class="overflow-hidden py-1">
+        <span class="line-inner block">& Desain Berkelas</span>
+      </div>
+    </h2>
+
+    <!-- Dua Kolom Deskripsi Editorial di Bawah Judul -->
+    <div class="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14 text-left">
+      <div class="desc-col space-y-2">
+        <p class="desc-statement text-secondary">
+          Mendongkrak daya saing visual produk lokal Banyuwangi. Menghadirkan etalase digital siap pakai yang setara dengan jenama nasional tanpa mengorbankan akar tradisi.
+        </p>
+      </div>
+      <div class="desc-col space-y-2">
+        <p class="desc-statement text-secondary">
+          Menjembatani pelaku UMKM daerah dengan sentuhan kurasi desainer profesional untuk menciptakan pertumbuhan usaha mandiri yang berkelanjutan.
+        </p>
+      </div>
     </div>
   </div>
 </section>

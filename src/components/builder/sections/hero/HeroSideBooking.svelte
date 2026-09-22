@@ -39,7 +39,7 @@
         align="left"
       />
 
-      <div class="flex items-center gap-4 text-xs text-[var(--color-text-secondary,#334155)] font-medium pt-2">
+      <div class="flex items-center gap-4 text-xs text-[var(--color-text-secondary)] font-medium pt-2">
         <span>📍 Lokasi Strategis</span>
         <span>☕ Free Wi-Fi & Lounge</span>
       </div>
@@ -52,19 +52,19 @@
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'hero_booking_card')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_booking_card')}
-      class={`bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] p-6 rounded-2xl shadow-lg text-left space-y-4 w-full transition-all cursor-pointer ${
+      class={`bg-[var(--color-card-base)] border border-[var(--color-border)] p-6 rounded-2xl shadow-lg text-left space-y-4 w-full transition-all cursor-pointer ${
         isBookingActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
-      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main,#0f172a)]">Jadwalkan Kunjungan</h3>
+      <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)]">Jadwalkan Kunjungan</h3>
       <div>
-        <label for="service-select" class="block text-[11px] font-semibold text-[var(--color-text-secondary,#334155)] mb-1">Pilih Layanan</label>
+        <label for="service-select" class="block text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1">Pilih Layanan</label>
         <select
           id="service-select"
           bind:value={selectedService}
-          class="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main,#0f172a)] outline-none"
+          class="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main)] outline-none"
         >
           <option>Haircut + Wash + Pomade (Rp 50.000)</option>
           <option>Shaving & Hot Towel (Rp 35.000)</option>
@@ -72,19 +72,19 @@
         </select>
       </div>
       <div>
-        <label for="phone-input" class="block text-[11px] font-semibold text-[var(--color-text-secondary,#334155)] mb-1">Nomor WhatsApp Anda</label>
+        <label for="phone-input" class="block text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1">Nomor WhatsApp Anda</label>
         <input
           id="phone-input"
           type="text"
           bind:value={userPhone}
           placeholder="0812xxxxxxx"
-          class="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main,#0f172a)] outline-none"
+          class="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-[var(--color-text-main)] outline-none"
         />
       </div>
       <button
         type="button"
         on:click={handleBooking}
-        class="w-full h-10 rounded-2xl bg-[var(--color-primary,#2563eb)] text-white text-xs font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] transition-all shadow-xs"
+        class="w-full h-10 rounded-2xl bg-[var(--color-primary)] text-white text-xs font-heading font-semibold hover:bg-primary-dark active:scale-[0.98] transition-all shadow-xs"
       >
         {ctaText || 'Konfirmasi Jadwal via WhatsApp'}
       </button>

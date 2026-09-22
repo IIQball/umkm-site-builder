@@ -149,7 +149,7 @@
 
         <div class="p-6 sm:p-8">
           <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-2">{product.name}</h3>
-          <p class="text-2xl font-black font-mono text-[var(--theme-primary,#2563eb)] tracking-tight mb-6">{formatIDR(unitPrice)}</p>
+          <p class="text-2xl font-black font-mono text-[var(--theme-primary, var(--color-primary))] tracking-tight mb-6">{formatIDR(unitPrice)}</p>
           
           {#if product.description}
             <div class="mb-8">

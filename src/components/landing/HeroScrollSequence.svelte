@@ -5,8 +5,8 @@
   import HeroCaptions from './HeroCaptions.svelte'
 
   const TOTAL_FRAMES = 839
-  const PRIORITY_FRAMES = 30
-  const CHUNK_SIZE = 25
+  const PRIORITY_FRAMES = 1
+  const BUFFER_AHEAD = 15
   const SOURCE_WIDTH = 1280
   const SOURCE_HEIGHT = 720
 
@@ -27,7 +27,6 @@
   let scrollTimeout: ReturnType<typeof setTimeout> | null = null
   let refreshTimeout: ReturnType<typeof setTimeout> | null = null
   let isDestroyed = false
-  let progressiveIndex = PRIORITY_FRAMES + 1
 
   const getFrameUrl = (index: number) => {
     const padded = String(index).padStart(4, '0')
@@ -81,15 +80,13 @@
     }
   }
 
-  const loadNextChunk = () => {
-    if (isDestroyed || progressiveIndex > TOTAL_FRAMES) return
-    const chunkEnd = Math.min(progressiveIndex + CHUNK_SIZE, TOTAL_FRAMES + 1)
-    for (let i = progressiveIndex; i < chunkEnd; i++) {
-      loadImage(i)
-    }
-    progressiveIndex = chunkEnd
-    if (progressiveIndex <= TOTAL_FRAMES) {
-      setTimeout(loadNextChunk, 50)
+  const bufferFramesAhead = (frameIndex: number) => {
+    if (isDestroyed) return
+    const max = Math.min(frameIndex + BUFFER_AHEAD, TOTAL_FRAMES)
+    for (let i = frameIndex; i <= max; i++) {
+      if (!images[i - 1]) {
+        loadImage(i)
+      }
     }
   }
 
@@ -99,6 +96,7 @@
     mistOpacity = Math.max(0, 1 - progress / 0.04)
 
     if (progress > 0) {
+      bufferFramesAhead(currentFrameIndex)
       isScrolling = true
       if (scrollTimeout) clearTimeout(scrollTimeout)
       scrollTimeout = setTimeout(() => {
@@ -153,8 +151,6 @@
       loadImage(i)
     }
 
-    loadNextChunk()
-
     ctx = gsap.context(() => {
       gsap.to(playhead, {
         frame: TOTAL_FRAMES,
@@ -189,7 +185,7 @@
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) {
-      gsap.set(['.hero-enter-nav', '.hero-enter-left', '.hero-enter-right', '.hero-enter-bottom'], {
+      gsap.set(['.hero-enter-nav', '.hero-enter-left', '.hero-enter-right'], {
         opacity: 1,
         x: 0,
         y: 0
@@ -197,10 +193,9 @@
     } else {
       enterTl = gsap.timeline({ delay: 0.05 })
       enterTl
-        .fromTo('.hero-enter-nav', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', clearProps: 'transform' }, 0)
-        .fromTo('.hero-enter-left', { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.95, ease: 'power3.out', clearProps: 'transform' }, 0.12)
-        .fromTo('.hero-enter-right', { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.95, ease: 'power3.out', clearProps: 'transform' }, 0.22)
-        .fromTo('.hero-enter-bottom', { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: 1.05, ease: 'power3.out', clearProps: 'transform' }, 0.32)
+        .fromTo('.hero-enter-nav', { y: -20 }, { y: 0, duration: 0.6, ease: 'power3.out', clearProps: 'all' }, 0)
+        .fromTo('.hero-enter-left', { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', clearProps: 'all' }, 0.08)
+        .fromTo('.hero-enter-right', { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', clearProps: 'all' }, 0.16)
     }
 
     window.addEventListener('resize', handleResize, { passive: true })
@@ -228,6 +223,16 @@
   id="hero-scroll-track"
   class="relative overflow-hidden w-full h-screen z-10 flex flex-col justify-between"
 >
+  <img
+    src="/frames/frame_0001.webp"
+    alt="Pinoka Visual Hero"
+    class="absolute inset-0 w-full h-full object-cover -z-30 pointer-events-none block"
+    fetchpriority="high"
+    loading="eager"
+    width="1280"
+    height="720"
+  />
+
   <canvas
     bind:this={canvasEl}
     class="absolute inset-0 w-full h-full -z-20 pointer-events-none block"

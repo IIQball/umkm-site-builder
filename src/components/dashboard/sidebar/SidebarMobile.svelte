@@ -110,7 +110,7 @@
               href={item.href}
               on:click={() => dispatch("closeDrawer")}
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active
-                ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold'
+                ? 'bg-main text-canvas dark:bg-primary dark:text-white font-bold'
                 : 'text-secondary hover:bg-nested hover:text-main'}"
             >
               <span

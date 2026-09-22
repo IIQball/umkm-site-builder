@@ -183,7 +183,7 @@
   <!-- Table Header & Controls -->
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
         <span class="material-symbols-outlined text-lg">dashboard</span>
       </div>
       <div>
@@ -214,7 +214,7 @@
           type="button"
           on:click={() => (activeFilter = 'all')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'all'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           Semua ({counts.all})
@@ -223,7 +223,7 @@
           type="button"
           on:click={() => (activeFilter = 'approved')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'approved'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -233,7 +233,7 @@
           type="button"
           on:click={() => (activeFilter = 'pending')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'pending'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
@@ -243,7 +243,7 @@
           type="button"
           on:click={() => (activeFilter = 'draft')}
           class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'draft'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>

@@ -16,7 +16,7 @@
   $: effectiveCtaLink = waNumber ? waUrl : ctaLink;
 </script>
 
-<div class="bg-[var(--color-nested-base,#f1f5f9)] rounded-3xl p-6 sm:p-12 border border-[var(--color-border,rgba(15,23,42,0.08))] text-center my-4">
+<div class="bg-[var(--color-nested-base)] rounded-3xl p-6 sm:p-12 border border-[var(--color-border)] text-center my-4">
   <div class="max-w-3xl mx-auto">
     {#if badgeText}
       <span
@@ -25,9 +25,9 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'badge')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'badge')}
-        class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary,#2563eb)] mb-6 cursor-pointer shadow-2xs"
+        class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-6 cursor-pointer shadow-2xs"
       >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary,#2563eb)]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
         {badgeText}
       </span>
     {/if}
@@ -39,7 +39,7 @@
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'title')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'title')}
-      class="text-heading-xl font-heading font-extrabold text-[var(--color-text-main,#0f172a)] tracking-tight mb-4 cursor-pointer"
+      class="text-heading-xl font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-4 cursor-pointer"
     >
       {title}
     </svelte:element>
@@ -52,7 +52,7 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'subtitle')}
       class="cursor-pointer mb-4"
     >
-      <p class="text-body-base text-[var(--color-text-secondary,#334155)] leading-relaxed max-w-xl mx-auto font-sans">
+      <p class="text-body-base text-[var(--color-text-secondary)] leading-relaxed max-w-xl mx-auto font-sans">
         {subtitle}
       </p>
     </div>
@@ -62,14 +62,14 @@
         href={effectiveCtaLink}
         target={waNumber ? '_blank' : '_self'}
         rel={waNumber ? 'noreferrer' : ''}
-        style="height: var(--theme-btn-height, 40px); border-radius: var(--theme-btn-radius, 16px); background-color: var(--color-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+        style="height: var(--theme-btn-height, 40px); border-radius: var(--theme-btn-radius, 16px); background-color: var(--color-primary); color: var(--theme-btn-primary-text, white);"
         class="inline-flex items-center justify-center px-7 text-sm font-heading font-semibold hover:opacity-90 active:scale-[0.98] transition-all duration-150 shadow-xs"
       >
         {ctaText || 'Eksplorasi Katalog'}
       </a>
     </div>
 
-    <div data-node="image" class="w-full aspect-[16/8] rounded-2xl overflow-hidden shadow-xl border border-[var(--color-border,rgba(15,23,42,0.08))]">
+    <div data-node="image" class="w-full aspect-[16/8] rounded-2xl overflow-hidden shadow-xl border border-[var(--color-border)]">
       <img src={imageUrl} alt={title} class="w-full h-full object-cover" />
     </div>
   </div>

@@ -13,7 +13,7 @@
   $: badgeColor = String(section?.props?.badgeColor ?? section?.styles?.badgeColor ?? 'rose');
   $: pricePlacement = String(section?.props?.pricePlacement ?? section?.styles?.pricePlacement ?? 'stacked');
   $: ctaWidth = String(section?.props?.ctaButtonWidth ?? section?.styles?.ctaButtonWidth ?? 'full');
-  $: ctaColor = String(section?.props?.ctaButtonColor ?? section?.styles?.ctaButtonColor ?? 'var(--theme-primary, #2563eb)');
+  $: ctaColor = String(section?.props?.ctaButtonColor ?? section?.styles?.ctaButtonColor ?? 'var(--theme-primary, var(--color-primary))');
   $: ctaRadius = String(section?.props?.ctaButtonRadius ?? section?.styles?.ctaButtonRadius ?? 'smooth');
   $: showWA = (section?.props?.showWhatsAppIcon ?? section?.styles?.showWhatsAppIcon) !== false;
 

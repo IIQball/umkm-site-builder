@@ -73,7 +73,7 @@
     ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
     : styles?.backgroundColor;
   $: customBgStyle = customBgColor ? `background-color: ${customBgColor};` : '';
-  $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--color-text-main,#0f172a)]';
+  $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--color-text-main)]';
 
   const selectNode = isLiveStorefront
     ? (_e: MouseEvent, _key: string) => {}
@@ -100,7 +100,7 @@
   id="hero-section"
   data-node="hero_container"
   class="relative w-full overflow-hidden select-none hero-card {sectionBgClass} {isActive ? 'relative z-10' : ''}"
-  style="background-color: var(--color-bg-base, #ffffff); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
+  style="background-color: var(--color-bg-base); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
@@ -125,7 +125,7 @@
     </div>
   {:else if activePreset === 'gradient_mesh_glow'}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-      <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--color-primary,#2563eb)] opacity-20 blur-3xl"></div>
+      <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--color-primary)] opacity-20 blur-3xl"></div>
       <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-purple-600 opacity-20 blur-3xl"></div>
     </div>
   {/if}

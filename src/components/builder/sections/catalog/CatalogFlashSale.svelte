@@ -40,7 +40,7 @@
     on:click={selectTimer}
     on:keydown={(e) => { if (e.key === 'Enter') selectTimer(e); }}
     class={`bg-rose-600 text-white p-4 sm:p-5 rounded-2xl flex flex-wrap items-center justify-between gap-3 mb-8 cursor-pointer transition-all duration-200 ${
-      $canvasStore.selectedNodeId === 'catalog_timer' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-xl' : 'hover:brightness-105'
+      $canvasStore.selectedNodeId === 'catalog_timer' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl' : 'hover:brightness-105'
     }`}
   >
     <div class="flex items-center gap-2">
@@ -75,7 +75,7 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
         class={`bg-card p-4 rounded-2xl border border-light/80 shadow-xs flex flex-col justify-between transition-all duration-200 cursor-pointer ${
           isCardActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
             : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
@@ -86,7 +86,7 @@
             on:click={(e) => selectImage(e, index)}
             on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
             class={`aspect-square rounded-xl overflow-hidden bg-nested mb-3 relative group/img cursor-pointer ${
-              isImgActive ? 'ring-2 ring-blue-500' : ''
+              isImgActive ? 'ring-2 ring-primary' : ''
             }`}
           >
             {#if product.imageUrl}

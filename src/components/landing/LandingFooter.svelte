@@ -1,21 +1,22 @@
 <script lang="ts">
-  import { toast } from '@/lib/toast';
+  import { toast } from '@/lib/toast'
+  import Button from '@/components/ui/Button.svelte'
 
-  let email = '';
-  let subscribed = false;
+  let email = ''
+  let subscribed = false
 
   const handleSubscribe = () => {
     if (!email || !email.includes('@')) {
-      toast.error('Masukkan alamat email yang valid');
-      return;
+      toast.error('Masukkan alamat email yang valid')
+      return
     }
-    subscribed = true;
-    toast.success('Terima kasih! Anda telah terdaftar untuk menerima pembaruan Pinoka.');
-    email = '';
+    subscribed = true
+    toast.success('Terima kasih! Anda telah terdaftar untuk menerima pembaruan Pinoka.')
+    email = ''
     setTimeout(() => {
-      subscribed = false;
-    }, 5000);
-  };
+      subscribed = false
+    }, 5000)
+  }
 
   const navColumns = [
     {
@@ -24,8 +25,8 @@
         { label: 'Katalog Toko', href: '/umkm' },
         { label: 'Template Visual', href: '/templates' },
         { label: 'WhatsApp Checkout', href: '/umkm' },
-        { label: 'Katalog Desain', href: '/templates' },
-      ],
+        { label: 'Katalog Desain', href: '/templates' }
+      ]
     },
     {
       title: 'Platform',
@@ -33,8 +34,8 @@
         { label: 'Tentang Pinoka', href: '/#why-us' },
         { label: 'Nilai Keunggulan', href: '/#features' },
         { label: 'Sinergi & Komisi', href: '/#synergy' },
-        { label: 'Cerita Tenant', href: '/#testimonials' },
-      ],
+        { label: 'Cerita Tenant', href: '/#testimonials' }
+      ]
     },
     {
       title: 'Bantuan',
@@ -42,8 +43,8 @@
         { label: 'Pusat Bantuan', href: '/#faq' },
         { label: 'Tanya Jawab FAQ', href: '/#faq' },
         { label: 'Panduan Tenant', href: '/#features' },
-        { label: 'Ajukan Fitur', href: 'mailto:halo@pinoka.id' },
-      ],
+        { label: 'Ajukan Fitur', href: 'mailto:halo@pinoka.id' }
+      ]
     },
     {
       title: 'Ekosistem',
@@ -51,10 +52,10 @@
         { label: 'UMKM Banyuwangi', href: '/umkm' },
         { label: 'Pasar Desainer', href: '/templates' },
         { label: 'Portal Usaha', href: '/auth/login' },
-        { label: 'Bina Tenant', href: '/auth/login' },
-      ],
-    },
-  ];
+        { label: 'Bina Tenant', href: '/auth/login' }
+      ]
+    }
+  ]
 </script>
 
 <footer
@@ -80,7 +81,7 @@
             loading="lazy"
           />
         </a>
-        <p class="text-xs sm:text-sm text-secondary max-w-xs leading-relaxed font-sans">
+        <p class="body-sm text-secondary max-w-xs">
           Platform digitalisasi visual dan storefront mandiri untuk perajin UMKM lokal Banyuwangi.
         </p>
       </div>
@@ -89,7 +90,7 @@
       <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
         {#each navColumns as col}
           <div class="space-y-4">
-            <p class="text-xs font-bold uppercase tracking-wider text-main font-heading">
+            <p class="label-caps text-main tracking-wider">
               {col.title}
             </p>
             <ul class="space-y-2.5 list-none pl-0">
@@ -97,7 +98,7 @@
                 <li>
                   <a
                     href={link.href}
-                    class="text-xs sm:text-sm text-secondary hover:text-main dark:hover:text-white transition-colors"
+                    class="body-sm text-secondary hover:text-main dark:hover:text-white transition-colors block"
                   >
                     {link.label}
                   </a>
@@ -212,7 +213,7 @@
 
       <!-- Right: Prominent Newsletter Subscription Form -->
       <div class="lg:col-span-7 space-y-3">
-        <h2 class="text-xl sm:text-2xl font-bold text-main font-heading">
+        <h2 class="heading-3 text-main">
           Dapatkan info & pembaruan terkini
         </h2>
 
@@ -222,38 +223,40 @@
             bind:value={email}
             placeholder="Masukkan alamat email Anda..."
             required
-            class="w-full bg-nested/80 hover:bg-nested border border-light focus:bg-card rounded-full pl-5 pr-32 py-3.5 sm:py-4 text-xs sm:text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary transition-all shadow-2xs font-sans"
+            class="w-full bg-nested/80 hover:bg-nested border border-light focus:bg-card rounded-full pl-5 pr-32 py-3.5 sm:py-4 body-sm text-main placeholder:text-muted focus:outline-none focus:border-primary transition-all shadow-2xs"
           />
-          <button
+          <Button
             type="submit"
-            class="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-slate-950 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer active:scale-95"
+            variant="primary"
+            size="sm"
+            class="absolute right-1.5 top-1/2 -translate-y-1/2 !rounded-full !px-5 sm:!px-6 !h-auto !py-2 sm:!py-2.5 !font-medium"
           >
             {subscribed ? 'Terdaftar ✓' : 'Subscribe'}
-          </button>
+          </Button>
         </form>
 
-        <p class="text-xs text-secondary leading-relaxed font-sans max-w-md">
-          Dengan berlangganan, Anda menyetujui pembaruan berkala ekosistem Pinoka. Batal berlangganan kapan saja. <a href="/privacy" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Kebijakan Privasi</a>.
+        <p class="body-sm text-secondary max-w-md">
+          Dengan berlangganan, Anda menyetujui pembaruan berkala ekosistem Pinoka. Batal berlangganan kapan saja. <a href="/privacy" class="text-main dark:text-white underline underline-offset-2 hover:text-orange transition-colors font-medium">Kebijakan Privasi</a>.
         </p>
       </div>
     </div>
 
     <!-- Bottom Row: Terms of Use & Privacy Policy + Built by info -->
-    <div class="pt-8 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-secondary">
+    <div class="pt-8 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 body-sm text-secondary">
       <div class="flex items-center gap-6">
-        <a href="/terms" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+        <a href="/terms" class="text-secondary hover:text-main dark:hover:text-white transition-colors">
           Syarat & Ketentuan
         </a>
-        <a href="/privacy" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+        <a href="/privacy" class="text-secondary hover:text-main dark:hover:text-white transition-colors">
           Kebijakan Privasi
         </a>
       </div>
 
-      <div class="text-center font-sans text-muted">
+      <div class="text-center text-muted">
         Dibangun untuk UMKM Banyuwangi
       </div>
 
-      <div class="text-xs text-muted font-sans">
+      <div class="text-muted">
         © 2026 Pinoka. Hak cipta dilindungi.
       </div>
     </div>

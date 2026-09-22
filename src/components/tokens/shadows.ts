@@ -10,22 +10,25 @@ export const shadowTokens = {
   lg: '0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
   glow: {
-    indigo: '0 10px 25px -5px rgba(85, 81, 255, 0.25)',
+    indigo: '0 10px 25px -5px rgba(54, 198, 253, 0.25)',
     emerald: '0 10px 25px -5px rgba(16, 185, 129, 0.25)',
-    amber: '0 10px 25px -5px rgba(245, 158, 11, 0.25)',
-    rose: '0 10px 25px -5px rgba(244, 63, 94, 0.25)',
-    violet: '0 10px 25px -5px rgba(139, 92, 246, 0.25)',
-    sky: '0 10px 25px -5px rgba(14, 165, 233, 0.25)',
-  },
-} as const;
+    amber: '0 10px 25px -5px rgba(254, 207, 2, 0.25)',
+    warning: '0 10px 25px -5px rgba(254, 207, 2, 0.25)',
+    rose: '0 10px 25px -5px rgba(252, 1, 139, 0.25)',
+    orange: '0 10px 25px -5px rgba(252, 1, 139, 0.25)',
+    violet: '0 10px 25px -5px rgba(154, 0, 221, 0.25)',
+    accent: '0 10px 25px -5px rgba(154, 0, 221, 0.25)',
+    sky: '0 10px 25px -5px rgba(54, 198, 253, 0.25)'
+  }
+} as const
 
-export type ShadowTokenKey = keyof typeof shadowTokens;
+export type ShadowTokenKey = keyof typeof shadowTokens
 
 export const SHADOW_PRESETS = [
   { label: 'Tanpa Shadow', value: shadowTokens.none },
   { label: 'Soft Shadow (sm)', value: shadowTokens.xs },
   { label: 'Medium Shadow (md)', value: shadowTokens.md },
-  { label: 'Large Shadow (lg)', value: shadowTokens.lg },
-] as const;
+  { label: 'Large Shadow (lg)', value: shadowTokens.lg }
+] as const
 
-export type ShadowPreset = (typeof SHADOW_PRESETS)[number];
+export type ShadowPreset = (typeof SHADOW_PRESETS)[number]

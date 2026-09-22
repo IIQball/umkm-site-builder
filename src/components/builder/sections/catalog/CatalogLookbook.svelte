@@ -35,7 +35,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`group relative rounded-3xl overflow-hidden aspect-[3/4] shadow-md transition-all duration-300 text-left cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
           : 'hover:shadow-xl'
       }`}
     >
@@ -44,7 +44,7 @@
         tabindex="0"
         on:click={(e) => selectImage(e, index)}
         on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
-        class={`absolute inset-0 bg-slate-900 cursor-pointer ${isImgActive ? 'ring-2 ring-blue-500' : ''}`}
+        class={`absolute inset-0 bg-slate-900 cursor-pointer ${isImgActive ? 'ring-2 ring-primary' : ''}`}
       >
         {#if product.imageUrl}
           <img

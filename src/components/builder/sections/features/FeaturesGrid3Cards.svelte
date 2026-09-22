@@ -82,28 +82,28 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
-        class={`p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)] border transition-all duration-150 space-y-3 shadow-xs cursor-pointer ${
+        class={`p-6 rounded-2xl bg-[var(--color-card-base)] border transition-all duration-150 space-y-3 shadow-xs cursor-pointer ${
           isItemActive
-            ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
+            ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
             : isActive
               ? 'cursor-grab active:cursor-grabbing hover:border-blue-400'
-              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         } ${
           dropTargetIdx === index
             ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg'
-            : 'border-[var(--color-border,rgba(15,23,42,0.08))]'
+            : 'border-[var(--color-border)]'
         } ${draggedIdx === index ? 'opacity-30' : ''}`}
       >
         <div
           data-node="feature_icon"
-          class="w-12 h-12 rounded-xl bg-[var(--color-primary,#2563eb)]/10 text-[var(--color-primary,#2563eb)] flex items-center justify-center border border-[var(--color-primary,#2563eb)]/20 shrink-0"
+          class="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center border border-[var(--color-primary)]/20 shrink-0"
         >
           <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
         </div>
-        <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main,#0f172a)]">
+        <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)]">
           {item.title}
         </h3>
-        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed font-sans">
+        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
           {item.description}
         </p>
       </div>

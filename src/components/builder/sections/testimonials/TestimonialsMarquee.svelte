@@ -27,7 +27,7 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, originalIdx, item); }}
         class={`w-72 p-4 rounded-2xl bg-card border border-light/80 shrink-0 space-y-2 shadow-xs transition-all duration-200 cursor-pointer ${
           isCardActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
             : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >

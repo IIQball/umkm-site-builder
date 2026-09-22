@@ -82,6 +82,7 @@ does not exist on Antigravity or other agents, so this file is the source of tru
 - Verify SSR usage for the chosen pack before adopting it.
 - **No emojis anywhere** — not in UI, code, comments, commits, PRs, or docs.
 - Use Lucide icons (`lucide-svelte`) for all UI-based icon needs. Do not use emoji characters (e.g. 🕒, 🚚, 💯) or raw symbol characters (e.g. ✓) as UI elements.
+- **Dropdown Nav Menus:** Never add leading icons or icon badge containers next to dropdown menu items (e.g. `NavbarDropdown`). Only a subtle trailing indicator (like `ArrowUpRight`) at the far right is allowed.
 
 ## 9. Motion
 

@@ -58,7 +58,7 @@
     </div>
 
     <div class="umkm-grid" id="umkmGrid">
-      {#each filteredUmkm as item (item.name)}
+      {#each filteredUmkm.slice(0, 6) as item (item.name)}
         <div class="umkm-card">
           <div class="umkm-card-top">
             <div class="umkm-icon">

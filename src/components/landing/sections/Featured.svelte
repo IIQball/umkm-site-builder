@@ -27,8 +27,8 @@
             <img
               src={
                 index % 2 === 0
-                  ? '/assets/cute building.png'
-                  : '/assets/Avatar Kucing.png'
+                  ? '/assets/shop1.png'
+                  : '/assets/shop2.png'
               }
               alt={item.name}
             />
@@ -141,7 +141,7 @@
   }
 
   .feat-thumb img {
-    width: 56%;
+    width: 75%;
     filter: drop-shadow(
       0 16px 20px rgba(0, 0, 0, 0.45)
     );

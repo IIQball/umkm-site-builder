@@ -3,6 +3,36 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function getResponsiveMapValues() {
+  const vw = window.innerWidth;
+  
+  if (vw < 768) {
+    return {
+      initialXPercent: -48,
+      initialYPercent: 20,
+      initialScale: 1.6,
+      scaleToMap: 2.9,
+      mapVisualX: 'clamp(-20vw, 25vw, 30vw)'
+    };
+  } else if (vw < 1024) {
+    return {
+      initialXPercent: -44,
+      initialYPercent: 15,
+      initialScale: 1.4,
+      scaleToMap: 2.8,
+      mapVisualX: 'clamp(-15vw, 28vw, 30vw)'
+    };
+  }
+  
+    return {
+    initialXPercent: -40,
+    initialYPercent: -40,
+    initialScale: 1.3,
+    scaleToMap: 2.7,
+    mapVisualX: '30vw'
+  };
+}
+
 export function setupHeroAnimations(
   nav: HTMLElement,
   heroWrap: HTMLElement,
@@ -41,11 +71,13 @@ export function setupHeroAnimations(
     yPercent: -180
   });
 
+  const mapVals = getResponsiveMapValues();
+  
   gsap.set(mapJatim, {
     opacity: 1,
-    xPercent: -40,
-    yPercent: 10,
-    scale: 1.3,
+    xPercent: mapVals.initialXPercent,
+    yPercent: mapVals.initialYPercent,
+    scale: mapVals.initialScale,
     transformOrigin: '94% 80%'
   });
 
@@ -120,7 +152,7 @@ export function setupHeroAnimations(
     .to(
       mapJatim,
       {
-        scale: 2.7,
+        scale: mapVals.scaleToMap,
         duration: 0.24,
         ease: 'none'
       },
@@ -192,7 +224,7 @@ export function setupHeroAnimations(
     .to(
       mapVisual,
       {
-        x: '30vw',
+        x: mapVals.mapVisualX,
         scale: 1.12,
         duration: 0.2,
         ease: 'none'
@@ -221,8 +253,8 @@ export function setupHeroAnimations(
     .to(
       themeToggleBtn,
       {
-        right: 280,
-        top: 22,
+        right: window.innerWidth < 768 ? '1rem' : window.innerWidth < 1024 ? '10rem' : '17.5rem',
+        top: '1.375rem',
         duration: 0.2,
         ease: 'power2.out'
       },
@@ -525,7 +557,9 @@ export function setupAboutScrollAnimation(
     aboutVideo.pause();
     try {
       aboutVideo.currentTime = 0;
-    } catch (e) {}
+    } catch {
+      // ignore error
+    }
   }
 
   gsap.set(aboutArtEl, { opacity: 0, scale: 0.94 });
@@ -533,7 +567,7 @@ export function setupAboutScrollAnimation(
   if (h2El) h2El.textContent = '';
   if (eyebrowCursorEl) eyebrowCursorEl.classList.remove('active');
   if (h2CursorEl) h2CursorEl.classList.remove('active');
-  gsap.set(fadeContentEl, { opacity: 0, y: 20 });
+  if (fadeContentEl) gsap.set(fadeContentEl, { opacity: 0, y: 20 });
 
   let fadeTriggered = false;
 

@@ -95,9 +95,10 @@
 
   .map-visual {
     position: absolute;
-    top: 53%;
+    top: 50%;
     left: 50%;
     width: min(72vw, 960px);
+    aspect-ratio: 1 / 1;
     z-index: 2;
     will-change: transform;
   }

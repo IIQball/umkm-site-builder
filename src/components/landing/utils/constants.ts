@@ -6,8 +6,7 @@ import {
   Cookie,
   Camera,
   Palette,
-  Globe,
-  MessageCircle
+  Globe
 } from 'lucide-svelte';
 import type {
   CategoryFilter,
@@ -27,7 +26,7 @@ export const categoryFilters: CategoryFilter[] = [
   { name: 'Makanan Ringan', icon: Cookie }
 ];
 
-export const categoryIconMap: Record<string, any> = {
+export const categoryIconMap: Record<string, typeof Utensils> = {
   Kuliner: Utensils,
   'Kopi & Minuman': Coffee,
   Fashion: Shirt,

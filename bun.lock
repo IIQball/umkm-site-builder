@@ -22,7 +22,7 @@
         "lucide-svelte": "0.577.0",
         "svelte": "^5.57.0",
         "ws": "^8.21.3",
-        "zod": "^3.22.0",
+        "zod": "^3.22.0"
       },
       "devDependencies": {
         "@astrojs/cloudflare": "^14.3.0",
@@ -47,12 +47,12 @@
         "tailwindcss": "3",
         "typescript": "^5.3.0",
         "vitest": "^5.0.0",
-        "wrangler": "^4.129.0",
-      },
-    },
+        "wrangler": "^4.129.0"
+      }
+    }
   },
   "patchedDependencies": {
-    "astro@7.3.1": "patches/astro@7.3.1.patch",
+    "astro@7.3.1": "patches/astro@7.3.1.patch"
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
@@ -1675,6 +1675,6 @@
 
     "miniflare/sharp/@img/sharp-webcontainers-wasm32/@img/sharp-wasm32": ["@img/sharp-wasm32@0.35.2", "", { "dependencies": { "@emnapi/runtime": "^1.11.1" } }, "sha512-Mrv4JQNYVQ94xH+jzZ9r+gowleN8mv2FTgKT+PI6bx5C0G8TdNYndu161pg2i7uoBwxy2ImPMHrJOM2LZef7Bw=="],
 
-    "tailwindcss/chokidar/readdirp/picomatch": ["picomatch@2.3.2", "", {}, "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA=="],
+    "tailwindcss/chokidar/readdirp/picomatch": ["picomatch@2.3.2", "", {}, "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA=="]
   }
 }

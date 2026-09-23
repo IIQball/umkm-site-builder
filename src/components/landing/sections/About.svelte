@@ -12,25 +12,11 @@
 <section class="about" bind:this={aboutSection}>
   <div class="wrap about-grid">
     <div class="about-art" bind:this={aboutArtEl}>
-      <video
-        bind:this={aboutVideo}
-        src="/assets/building-bundle.webm"
-        muted
-        playsinline
-        preload="auto"
-        onloadedmetadata={() => {
-          if (aboutVideo) {
-            aboutVideo.pause();
-            aboutVideo.currentTime = 0;
-          }
-        }}
-        oncanplay={() => {
-          if (aboutVideo) {
-            aboutVideo.pause();
-          }
-        }}
-        class="about-video"
-      ></video>
+      <img
+        src="/assets/store1.png"
+        alt="Toko UMKM Banyuwangi"
+        class="about-image"
+      />
     </div>
 
     <div class="about-copy">
@@ -109,7 +95,31 @@
     overflow: hidden;
   }
 
+  :global(.landing-page.light-theme) .about-art {
+    background: linear-gradient(
+      160deg,
+      #f5f0fb,
+      #ede5fc
+    );
+  }
+
+  :global(.landing-page.dark-theme) .about-art {
+    background: linear-gradient(
+      160deg,
+      #000000,
+      #050505
+    );
+  }
+
   .about-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    display: block;
+  }
+
+  .about-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -130,6 +140,7 @@
     margin: 0 0 20px;
     line-height: 1.22;
     min-height: 2.4em;
+    color: var(--ink-0);
   }
 
   .eyebrow {
@@ -140,6 +151,10 @@
     color: var(--coral);
     margin-bottom: 14px;
     display: block;
+  }
+
+  :global(.landing-page.light-theme) .eyebrow {
+    color: #ff6b3d;
   }
 
   .type-cursor {

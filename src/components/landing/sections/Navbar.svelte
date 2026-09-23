@@ -65,6 +65,11 @@
 
   :global(.landing-page.light-theme) .nav.scrolled {
     background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid rgba(23, 18, 31, 0.1);
+  }
+
+  :global(.landing-page.dark-theme) .nav.scrolled {
+    background: rgba(0, 0, 0, 0.88);
   }
 
   .brand {

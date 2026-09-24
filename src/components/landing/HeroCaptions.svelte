@@ -14,7 +14,7 @@
           <div class="relative w-full h-full">
             <!-- Headline Kiri Atas -->
             <div
-              class="absolute top-2 sm:top-4 left-0 max-w-xl will-change-[opacity,transform] pointer-events-none select-none"
+              class="absolute top-24 sm:top-28 md:top-32 left-0 max-w-xl will-change-[opacity,transform] pointer-events-none select-none"
               style:opacity="{opacity.toFixed(3)}"
               style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
             >
@@ -48,7 +48,7 @@
           <!-- Scene 2: Layout Kiri Atas Bertumpuk -->
           <div class="relative w-full h-full">
             <div
-              class="absolute top-2 sm:top-4 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
+              class="absolute top-24 sm:top-28 md:top-32 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
               style:opacity="{opacity.toFixed(3)}"
               style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
             >
@@ -100,7 +100,7 @@
           <!-- Scene 4: Layout Kanan Atas -->
           <div class="relative w-full h-full">
             <div
-              class="absolute top-2 sm:top-4 right-0 max-w-lg text-left sm:text-right flex flex-col items-start sm:items-end will-change-[opacity,transform] pointer-events-none select-none"
+              class="absolute top-24 sm:top-28 md:top-32 right-0 max-w-lg text-left sm:text-right flex flex-col items-start sm:items-end will-change-[opacity,transform] pointer-events-none select-none"
               style:opacity="{opacity.toFixed(3)}"
               style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
             >
@@ -126,7 +126,7 @@
           <!-- Scene 5: Layout Kiri Atas -->
           <div class="relative w-full h-full">
             <div
-              class="absolute top-2 sm:top-4 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
+              class="absolute top-24 sm:top-28 md:top-32 left-0 max-w-md sm:max-w-lg will-change-[opacity,transform] pointer-events-none select-none"
               style:opacity="{opacity.toFixed(3)}"
               style:transform="translateY({((1 - opacity) * 10).toFixed(1)}px)"
             >

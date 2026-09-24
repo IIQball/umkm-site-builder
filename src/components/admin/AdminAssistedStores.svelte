@@ -1,7 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { Card, Button, Input } from '@/components/ui';
   import { Store, ExternalLink, Settings, Package, ShoppingBag, Search } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
+  import { getStoreDirectUrl, getMainDomain } from '@/lib/domain';
+
+  let mainDomain = 'localhost:4321';
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 
   interface AssistedStoreItem {
     id: string;
@@ -24,8 +31,8 @@
     } | null;
   }
 
-  export let stores: AssistedStoreItem[] = [];
-  export let currentUser: any = null;
+  export let stores: AssistedStoreItem[] = []
+  export let currentUser: { id: string; role?: string } | null = null
 
   let searchQuery = '';
   let isAddModalOpen = false;
@@ -57,7 +64,7 @@
             <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
               Toko Binaan Saya
             </h3>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+            <span class="badge badge-primary badge-outline font-bold text-xs">
               {stores.length} Toko
             </span>
           </div>
@@ -113,7 +120,7 @@
       </div>
     {:else}
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="table table-sm w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-light/80 bg-nested/50 text-3xs uppercase tracking-wider font-bold text-secondary">
               <th class="py-3 px-5 sm:px-6">Toko & Subdomain</th>
@@ -132,12 +139,12 @@
                     {store.name}
                   </div>
                   <a
-                    href={`/storefront/${store.subdomain}`}
+                    href={getStoreDirectUrl(store.subdomain)}
                     target="_blank"
                     rel="noreferrer"
                     class="inline-flex items-center gap-1 text-3xs text-secondary hover:text-primary transition-colors font-mono mt-0.5"
                   >
-                    <span>{store.subdomain}.umkm.id</span>
+                    <span>{store.subdomain}.{mainDomain}</span>
                     <ExternalLink size={10} />
                   </a>
                 </td>
@@ -155,7 +162,7 @@
                 <!-- Category -->
                 <td class="py-4 px-4">
                   {#if store.category?.name}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-nested border border-light text-secondary">
+                    <span class="badge badge-ghost badge-sm text-3xs font-semibold">
                       {store.category.name}
                     </span>
                   {:else}
@@ -165,7 +172,7 @@
 
                 <!-- Status -->
                 <td class="py-4 px-4">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-3xs font-bold {store.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+                  <span class="badge {store.status === 'active' ? 'badge-success' : 'badge-warning'} badge-outline badge-sm text-3xs font-bold gap-1">
                     <span class="w-1.5 h-1.5 rounded-full {store.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
                     <span>{store.status === 'active' ? 'Aktif' : store.status}</span>
                   </span>

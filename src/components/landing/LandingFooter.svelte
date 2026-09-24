@@ -43,7 +43,7 @@
         { label: 'Pusat Bantuan', href: '/#faq' },
         { label: 'Tanya Jawab FAQ', href: '/#faq' },
         { label: 'Panduan Tenant', href: '/#features' },
-        { label: 'Ajukan Fitur', href: 'mailto:halo@pinoka.id' }
+        { label: 'Ajukan Fitur', href: 'mailto:halo@umkm-web-builder.iqdevmp.workers.dev' }
       ]
     },
     {

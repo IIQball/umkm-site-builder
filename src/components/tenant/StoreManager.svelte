@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { getMainDomain } from "@/lib/domain";
 
   export let initialData: {
     id: string;
@@ -19,8 +20,10 @@
   let subdomain = "";
   let waNumber = "";
   let googleMapsUrl = "";
+  let mainDomain = "localhost:4321";
 
   onMount(() => {
+    mainDomain = getMainDomain();
     if (initialData) {
       name = initialData.name;
       subdomain = initialData.subdomain;
@@ -82,25 +85,25 @@
 
   <div class="p-6">
     {#if !initialData && isEditing}
-      <div class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl border border-blue-100 dark:border-blue-800/50 flex gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-[20px]">storefront</span>
+      <div class="alert alert-info mb-8">
+        <span class="material-symbols-outlined text-[20px]">storefront</span>
         <div>
           <h3 class="font-semibold text-sm">Toko Belum Dibuat</h3>
-          <p class="text-xs mt-1 opacity-90">Lengkapi formulir di bawah ini untuk mengaktifkan toko Anda pertama kali.</p>
+          <p class="text-xs mt-0.5 opacity-90">Lengkapi formulir di bawah ini untuk mengaktifkan toko Anda pertama kali.</p>
         </div>
       </div>
     {/if}
 
     {#if error}
-      <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-xl border border-red-100 dark:border-red-800/50 flex gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-[20px]">error</span>
+      <div class="alert alert-error mb-6">
+        <span class="material-symbols-outlined text-[20px]">error</span>
         <p class="text-sm">{error}</p>
       </div>
     {/if}
 
     {#if success}
-      <div class="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 rounded-xl border border-emerald-100 dark:border-emerald-800/50 flex gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-[20px]">check_circle</span>
+      <div class="alert alert-success mb-6">
+        <span class="material-symbols-outlined text-[20px]">check_circle</span>
         <p class="text-sm">{success}</p>
       </div>
     {/if}
@@ -122,25 +125,25 @@
             />
           </div>
 
-           <div class="form-control">
-             <label class="label mb-1" for="subdomain">
-               <span class="label-text font-medium text-base-content">Subdomain</span>
-             </label>
-             <div class="relative flex items-center">
-               <input
-                 type="text"
-                 id="subdomain"
-                 value={subdomain}
-                 placeholder="kopikenangan"
-                 class="input input-bordered w-full bg-base-200 pr-[140px] focus:input-primary transition-colors"
-                 disabled
-               />
-               <span class="absolute right-4 text-base-content/50 text-sm select-none pointer-events-none">.mudapedia.com</span>
-             </div>
-             <div class="label mt-1">
-               <span class="label-text-alt text-base-content/50">Tidak dapat diubah setelah pembuatan toko</span>
-             </div>
-           </div>
+          <div class="form-control">
+            <label class="label mb-1" for="subdomain">
+              <span class="label-text font-medium text-base-content">Subdomain</span>
+            </label>
+            <div class="relative flex items-center">
+              <input
+                type="text"
+                id="subdomain"
+                value={subdomain}
+                placeholder="kopikenangan"
+                class="input input-bordered w-full bg-base-200 pr-[140px] focus:input-primary transition-colors"
+                disabled
+              />
+              <span class="absolute right-4 text-base-content/50 text-sm select-none pointer-events-none">.{mainDomain}</span>
+            </div>
+            <div class="label mt-1">
+              <span class="label-text-alt text-base-content/50">Tidak dapat diubah setelah pembuatan toko</span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -197,7 +200,7 @@
           {/if}
           <button 
             type="submit" 
-            class="btn bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 border-none shadow-sm shadow-zinc-900/10 active:scale-[0.98] transition-transform cursor-pointer"
+            class="btn btn-neutral shadow-sm active:scale-[0.98] transition-transform cursor-pointer"
             disabled={loading}
           >
             {#if loading}
@@ -219,7 +222,7 @@
         <div>
           <p class="text-xs text-base-content/50 uppercase tracking-wider font-semibold mb-1">Subdomain</p>
           <p class="text-base font-medium text-base-content">
-            {initialData.subdomain}<span class="text-base-content/40">.mudapedia.com</span>
+            {initialData.subdomain}<span class="text-base-content/40">.{mainDomain}</span>
           </p>
         </div>
         <div>
@@ -229,7 +232,7 @@
         <div>
           <p class="text-xs text-base-content/50 uppercase tracking-wider font-semibold mb-1">Google Maps</p>
           {#if initialData.googleMapsUrl}
-            <a href={initialData.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline inline-flex items-center gap-1">
+            <a href={initialData.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline inline-flex items-center gap-1">
               Lihat di Maps
               <span class="material-symbols-outlined text-[14px]">open_in_new</span>
             </a>

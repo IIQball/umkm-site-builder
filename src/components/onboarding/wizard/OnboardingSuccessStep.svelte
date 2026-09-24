@@ -1,10 +1,17 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { CheckCircle, ArrowRight } from 'lucide-svelte';
   import { Button } from '@/components/ui';
+  import { getMainDomain } from '@/lib/domain';
 
   export let subdomain: string = '';
   export let storeName: string = '';
   export let address: string = '';
+
+  let mainDomain = 'localhost:4321';
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 </script>
 
 <div class="flex flex-col items-center text-center gap-5 py-8 animate-fade-in">
@@ -24,7 +31,7 @@
   <div class="bg-nested p-5 rounded-2xl w-full text-left border border-light space-y-3.5 my-2">
     <div>
       <span class="block text-label-caps text-muted mb-0.5">Alamat Subdomain Toko:</span>
-      <p class="font-mono font-bold text-main text-sm">{subdomain}.umkm.site</p>
+      <p class="font-mono font-bold text-main text-sm">{subdomain}.{mainDomain}</p>
     </div>
     <div class="border-t border-light pt-3">
       <span class="block text-label-caps text-muted mb-0.5">Nama Toko:</span>

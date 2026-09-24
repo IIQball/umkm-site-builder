@@ -9,6 +9,7 @@ import TestimonialsSection from "@/components/landing/TestimonialsSection.svelte
 import FaqSection from "@/components/landing/FaqSection.svelte"
 import FinalCtaSection from "@/components/landing/FinalCtaSection.svelte"
 import LandingFooter from "@/components/landing/LandingFooter.svelte"
+import LandingMarquee from "@/components/landing/LandingMarquee.svelte"
 import Button from "@/components/ui/Button.svelte"
 
 const user = Astro.locals.user
@@ -23,8 +24,9 @@ const currentPath = Astro.url.pathname
   <div
     class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
   >
-    <!-- Fixed Global Architectural Capsule Navbar -->
-    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none hero-enter-nav">
+    <!-- Fixed Global Architectural Top Marquee & Capsule Navbar -->
+    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none hero-enter-nav flex flex-col">
+      <LandingMarquee client:load />
       <PublicNavbar
         client:idle
         user={user
@@ -45,7 +47,7 @@ const currentPath = Astro.url.pathname
       <!-- Hero Content -->
       <div
         slot="hero"
-        class="w-full h-full flex flex-col justify-between pt-16 md:pt-20"
+        class="w-full h-full flex flex-col justify-between pt-24 sm:pt-26 md:pt-28 pb-3 sm:pb-6 md:pb-8"
       >
         <!-- Atmospheric Scrim Layer: Lapisan asap difusi rata dan seimbang tanpa gumpalan sudut -->
         <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
@@ -70,7 +72,7 @@ const currentPath = Astro.url.pathname
 
         <!-- Stage Composition: H1 Kiri Atas & Deskripsi Kanan Bawah -->
         <main
-          class="relative z-20 flex-1 w-full max-w-7xl mx-auto px-6 sm:px-12 pt-2 sm:pt-4 md:pt-5 pb-6 sm:pb-8 md:pb-10 flex flex-col justify-between overflow-x-clip"
+          class="relative z-20 flex-1 w-full max-w-7xl mx-auto px-5 sm:px-8 md:px-12 pt-1 sm:pt-3 md:pt-5 pb-2 sm:pb-6 md:pb-8 flex flex-col justify-between overflow-x-clip"
         >
           <!-- Top-Left: H1 Masif 3 Baris Rapat Proporsional -->
           <div class="w-full flex justify-start items-start hero-enter-left">
@@ -88,12 +90,12 @@ const currentPath = Astro.url.pathname
             </div>
           </div>
 
-          <!-- Open Center Stage Spacer -->
-          <div class="flex-1 min-h-[30px] pointer-events-none"></div>
+          <!-- Open Center Stage Spacer: Terkendali di mobile agar button CTA tidak terpotong -->
+          <div class="flex-1 max-h-4 sm:max-h-12 md:max-h-none min-h-[6px] sm:min-h-[12px] md:min-h-[30px] pointer-events-none"></div>
 
           <!-- Bottom-Right: Deskripsi Padat 3 Baris & CTA -->
           <div class="w-full flex justify-end items-end hero-enter-right">
-            <div class="relative w-full max-w-[320px] sm:max-w-[350px] flex flex-col items-start space-y-5 text-left">
+            <div class="relative w-full max-w-[320px] sm:max-w-[350px] flex flex-col items-start space-y-3 sm:space-y-4 md:space-y-5 text-left">
               <!-- Bayangan difusi peredam lembut di belakang teks deskripsi -->
               <div class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"></div>
 
@@ -108,7 +110,7 @@ const currentPath = Astro.url.pathname
                 href="/auth/login?mode=register"
                 variant="orange"
                 size="md"
-                class="!rounded-full !px-6 !py-3 text-base shadow-md hover:shadow-lg transition-all group cursor-pointer"
+                class="!rounded-full !px-5 sm:!px-6 !py-2.5 sm:!py-3 text-sm sm:text-base shadow-md hover:shadow-lg transition-all group cursor-pointer"
               >
                 <span class="tracking-wide font-semibold">Buat Toko Gratis</span>
                 <svg
@@ -139,7 +141,7 @@ const currentPath = Astro.url.pathname
       class="relative w-full z-20 transition-colors duration-300"
     >
       <TextRevealSection client:visible />
-      <SynergySection client:visible />
+      <SynergySection client:idle />
       <ValueMatrixSection client:visible />
       <TestimonialsSection client:visible />
       <FaqSection client:visible />

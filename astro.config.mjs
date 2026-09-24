@@ -15,7 +15,7 @@ export default defineConfig({
       allowedHosts: true,
     },
     optimizeDeps: {
-      exclude: ['@astrojs/svelte', 'worker-mailer'],
+      exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js'],
     },
     ssr: {
       noExternal: ['worker-mailer'],

@@ -48,9 +48,9 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     resetPasswordTokenExpiresIn: 60 * 60 * 24, // 24 jam kadaluarsa
     sendResetPassword: async ({ user, url }) => {
-      const isAdmin = user.role === 'admin' || user.role === 'superadmin';
+      const role = (user as unknown as { role?: string }).role
+      const isAdmin = role === 'admin' || role === 'superadmin'
       const subject = isAdmin ? 'Aktivasi / Reset Password Akun Admin UMKM Site Builder' : 'Reset Password Akun UMKM Site Builder';
-      const titleText = isAdmin ? 'Aktivasi atau Reset Kata Sandi' : 'Reset Kata Sandi';
       const bodyText = isAdmin 
         ? 'Akun admin Anda telah didaftarkan atau Anda meminta pengaturan ulang kata sandi.'
         : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';

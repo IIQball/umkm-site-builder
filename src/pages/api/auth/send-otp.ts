@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { db, verifications } from '@/db';
 import { sendEmail } from '@/lib/utils/email';
-import { eq, and, gt, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -24,8 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
       expiresAt,
     });
 
-    // Send email
-    const emailSent = await sendEmail({
+    await sendEmail({
       to: email,
       subject: 'Kode Verifikasi (OTP) - UMKM Site Builder',
       html: `
@@ -38,10 +36,11 @@ export const POST: APIRoute = async ({ request }) => {
           <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Kode ini akan kedaluwarsa dalam 10 menit. Jika Anda tidak meminta kode ini, abaikan email ini.</p>
         </div>
       `,
-    });
+    })
 
-    return new Response(JSON.stringify({ ok: true, message: 'OTP terkirim' }), { status: 200 });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ ok: false, error: err.message || 'Kesalahan sistem' }), { status: 500 });
+    return new Response(JSON.stringify({ ok: true, message: 'OTP terkirim' }), { status: 200 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Kesalahan sistem'
+    return new Response(JSON.stringify({ ok: false, error: message }), { status: 500 })
   }
 };

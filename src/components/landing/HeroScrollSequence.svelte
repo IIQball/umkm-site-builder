@@ -221,7 +221,7 @@
 <div
   bind:this={heroContainerEl}
   id="hero-scroll-track"
-  class="relative overflow-hidden w-full h-screen z-10 flex flex-col justify-between"
+  class="relative overflow-hidden w-full h-[100dvh] min-h-[100dvh] z-10 flex flex-col justify-between"
 >
   <img
     src="/frames/frame_0001.webp"

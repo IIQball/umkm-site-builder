@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { auth } from "@/lib/auth";
 import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
+import { extractSubdomain } from "@/lib/domain";
 
 // Inisialisasi Rate Limiter untuk API:
 // 1. Read (GET): Longgar untuk memuat data (30 request / menit)
@@ -11,6 +12,24 @@ const apiWriteLimiter = new InMemoryRateLimiter(5, 60 * 1000);
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   
+  // --- SUBDOMAIN DIRECT ROUTING ---
+  // Akses toko langsung sub-domain.main-domain tanpa prefix /storefront/
+  const host = context.request.headers.get('host') || context.url.host;
+  const subdomain = extractSubdomain(host);
+
+  if (subdomain) {
+    const isFileOrAsset = pathname.includes('.') ||
+      pathname.startsWith('/_astro/') ||
+      pathname.startsWith('/@') ||
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/storefront/');
+
+    if (!isFileOrAsset) {
+      const targetPath = `/storefront/${subdomain}${pathname === '/' ? '' : pathname}`;
+      return context.rewrite(targetPath);
+    }
+  }
+
   // --- RATE LIMITING LOGIC ---
   if (pathname.startsWith('/api/')) {
     // Gunakan clientAddress dari Astro atau fallback ke header x-forwarded-for

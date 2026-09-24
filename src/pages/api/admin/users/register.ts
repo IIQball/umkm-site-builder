@@ -24,7 +24,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     // For all roles created by admin/superadmin, generate a secure random password
-    let finalPassword = crypto.randomUUID() + crypto.randomUUID();
+    const finalPassword = crypto.randomUUID() + crypto.randomUUID()
 
     // Create user via BetterAuth API so password is encrypted correctly
     let newUserId = '';

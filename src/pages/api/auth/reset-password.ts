@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
           const signinRes = await auth.api.signInEmail({
             body: { email: targetUser[0].email, password },
             headers: new Headers()
-          }) as unknown as { user?: any };
+          }) as unknown as { user?: { id: string } }
           
           if (signinRes && signinRes.user) {
             // Verification succeeded! Update the name

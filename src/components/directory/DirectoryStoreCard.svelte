@@ -1,8 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { type DirectoryStore, getStoreUrl } from './directory.types';
   import { formatIDR } from '@/lib/currency';
+  import { getMainDomain } from '@/lib/domain';
 
   export let store: DirectoryStore;
+
+  let mainDomain = 'localhost:4321';
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 </script>
 
 <a
@@ -45,7 +52,7 @@
 
     <p class="text-xs text-secondary line-clamp-1 flex items-center gap-1">
       <span class="material-symbols-outlined text-[13px] text-muted">link</span>
-      <span class="font-mono text-muted">{store.subdomain}.pinoka.id</span>
+      <span class="font-mono text-muted">{store.subdomain}.{mainDomain}</span>
     </p>
 
     {#if store.address}

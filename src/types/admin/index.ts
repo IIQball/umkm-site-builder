@@ -7,7 +7,7 @@ export interface AdminUserItem {
   name: string;
   email: string;
   role: 'tenant' | 'designer';
-  status: 'active' | 'suspended';
+  status: 'active' | 'suspended' | 'pending';
   suspendReason: string | null;
   createdAt: string;
 }

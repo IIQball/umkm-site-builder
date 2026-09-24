@@ -131,6 +131,7 @@ const googleFontsUrl = buildGoogleFontsUrl(fontNames);
 
 const customization = (store.customization as Record<string, unknown>) || {};
 const isOpen = customization.isOpen !== false;
+const storeLogo = (customization.logoUrl as string) || storeProducts[0]?.image || '/og-image.png';
 
 // Set cache headers
 Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
@@ -154,7 +155,11 @@ const safeStore = {
 };
 ---
 
-<StorefrontLayout title={`${store.name} — ${store.category?.name || "Toko Online"}`}>
+<StorefrontLayout
+  title={`${store.name} — ${store.category?.name || "Toko Online"}`}
+  description={`${store.name} — Toko online resmi di Banyuwangi. ${store.address ? store.address + '.' : ''} Pesan produk lokal terbaik langsung via WhatsApp.`}
+  image={storeLogo}
+>
   {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
   <style is:inline set:html={`:root { ${cssVars} }`} />
 

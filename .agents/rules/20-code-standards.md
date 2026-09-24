@@ -151,3 +151,9 @@ export { className as class, className }
 <!-- Penggunaan SALAH: tidak ada prop 'class' di interface-nya -->
 <WhatsAppIcon size={14} class="shrink-0" />
 ```
+
+## 14. Isolasi Runtime Cloudflare Workers
+
+- **Lazy Import Module Cloudflare:** Pustaka yang bergantung pada runtime khusus Cloudflare seperti `cloudflare:sockets` atau `cloudflare:workers` (contoh: `worker-mailer`) dilarang diimpor di level modul (top-level static import).
+- Gunakan dynamic import di dalam fungsi eksekutor (`const { WorkerMailer } = await import('worker-mailer')`) agar file utilitas tetap aman diimpor oleh modul auth, middleware, dan test runner (Bun/Vitest) tanpa memicu missing package error.
+

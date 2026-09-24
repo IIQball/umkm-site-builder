@@ -90,7 +90,7 @@ describe('Template Schema Versioning & Migration Pipeline', () => {
       expect(normalized.typography?.h2?.fontSize).toBe('26px');
       expect(normalized.typography?.h3?.fontSize).toBe('20px');
       expect(normalized.buttons?.borderRadius).toBe('8px');
-      expect(normalized.buttons?.primary?.backgroundColor).toBe('#3b82f6');
+      expect(normalized.buttons?.primary?.backgroundColor).toBe('#36C6FD');
       expect(normalized.layout?.maxWidth).toBe('1200px');
       expect(normalized.layout?.horizontalMarginDesktop).toBe('32px');
     });

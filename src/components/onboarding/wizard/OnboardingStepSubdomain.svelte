@@ -3,6 +3,9 @@
   import { Button } from '@/components/ui';
   import { slide } from 'svelte/transition';
 
+  import { onMount } from 'svelte';
+  import { getMainDomain } from '@/lib/domain';
+
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
 
   export let subdomain: string = '';
@@ -13,6 +16,11 @@
   export let onNext: () => void;
 
   const MAX_LENGTH = 63;
+  let mainDomain = 'localhost:4321';
+
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 </script>
 
 <div class="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -49,7 +57,7 @@
         on:input={onInput}
       />
       <span class="flex items-center bg-nested/90 px-4 py-2.5 text-sm font-mono font-semibold text-secondary border-l border-light select-none">
-        .umkm.site
+        .{mainDomain}
       </span>
     </div>
 

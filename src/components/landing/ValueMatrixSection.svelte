@@ -57,7 +57,7 @@
               trigger: trackElement,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: 1.2
+              scrub: 0.8
             }
           }
         )
@@ -70,6 +70,7 @@
         pin: stageElement,
         pinSpacing: true,
         scrub: 1,
+        anticipatePin: 1,
         onUpdate: (self) => {
           const p = self.progress
           if (p < 0.38 && activeIndex !== 0) {
@@ -99,7 +100,7 @@
   <!-- Sticky Stage with GSAP Pinning -->
   <div
     bind:this={stageElement}
-    class="w-full h-screen flex flex-col justify-center items-center px-2 sm:px-4 md:px-6 pt-16 md:pt-20 pb-2 sm:pb-3 overflow-hidden"
+    class="w-full h-screen flex flex-col justify-center items-center px-2 sm:px-4 md:px-6 pt-16 md:pt-20 pb-6 sm:pb-6 md:pb-4 overflow-hidden"
   >
     <div class="w-full h-full max-w-[1440px] flex flex-col justify-center items-center relative">
 
@@ -125,7 +126,7 @@
 
       <!-- Twin Cards Container with Ultra-Thin Middle Gap -->
       <div
-        class="w-full h-full max-h-[calc(100vh-4.5rem)] md:max-h-[calc(100vh-5.5rem)] grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 gap-2 relative z-10"
+        class="w-full h-full max-h-[calc(100vh-5.5rem)] grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 gap-2 relative z-10"
         style="--card-gap: 0.5rem"
       >
         <!-- Card 1: Gambar -->

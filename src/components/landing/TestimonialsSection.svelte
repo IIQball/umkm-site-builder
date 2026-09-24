@@ -42,16 +42,18 @@
 
       if (gridEl && col1El && col2El && col3El) {
         const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
-        const spreadX = isDesktop ? 90 : 25
-        const rotY = isDesktop ? 32 : 12
-        const rotZ = isDesktop ? 5 : 2
-        const rotX = isDesktop ? 15 : 6
+        const spreadX = isDesktop ? 90 : 0
+        const rotY = isDesktop ? 32 : 0
+        const rotZ = isDesktop ? 5 : 0
+        const rotX = isDesktop ? 15 : 3
+        const startY = isDesktop ? 140 : 20
+        const startY2 = isDesktop ? 180 : 30
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: gridEl,
-            start: 'top 95%',
-            end: 'center 48%',
+            start: isDesktop ? 'top 95%' : 'top 92%',
+            end: isDesktop ? 'center 48%' : 'top 70%',
             scrub: 0.6
           }
         })
@@ -60,13 +62,13 @@
           col1El,
           {
             x: -spreadX,
-            y: 140,
+            y: startY,
             rotateY: rotY,
             rotateZ: -rotZ,
             rotateX: rotX,
-            scale: 0.88,
-            opacity: 0.3,
-            transformOrigin: 'right center'
+            scale: isDesktop ? 0.88 : 0.97,
+            opacity: 0.4,
+            transformOrigin: 'center center'
           },
           { x: 0, y: 0, rotateY: 0, rotateZ: 0, rotateX: 0, scale: 1, opacity: 1, ease: 'none' },
           0
@@ -75,10 +77,10 @@
         tl.fromTo(
           col2El,
           {
-            y: 180,
+            y: startY2,
             rotateX: rotX * 1.5,
-            scale: 0.84,
-            opacity: 0.25,
+            scale: isDesktop ? 0.84 : 0.97,
+            opacity: 0.4,
             transformOrigin: 'center center'
           },
           { y: 0, rotateX: 0, scale: 1, opacity: 1, ease: 'none' },
@@ -89,13 +91,13 @@
           col3El,
           {
             x: spreadX,
-            y: 140,
+            y: startY,
             rotateY: -rotY,
             rotateZ: rotZ,
             rotateX: rotX,
-            scale: 0.88,
-            opacity: 0.3,
-            transformOrigin: 'left center'
+            scale: isDesktop ? 0.88 : 0.97,
+            opacity: 0.4,
+            transformOrigin: 'center center'
           },
           { x: 0, y: 0, rotateY: 0, rotateZ: 0, rotateX: 0, scale: 1, opacity: 1, ease: 'none' },
           0
@@ -118,15 +120,15 @@
 <section
   id="testimonials"
   bind:this={containerEl}
-  class="w-full text-main py-16 sm:py-24 px-6 sm:px-8 md:px-12 border-t border-border relative overflow-hidden select-none transition-colors duration-200"
+  class="w-full text-main pt-28 sm:pt-32 md:pt-28 pb-12 sm:pb-20 md:pb-24 px-5 sm:px-8 md:px-12 border-t border-border relative overflow-hidden select-none transition-colors duration-200 scroll-mt-24 sm:scroll-mt-28"
 >
   <div class="max-w-7xl mx-auto">
-    <!-- Header Section -->
-    <div bind:this={headerEl} class="max-w-2xl mx-auto text-center mb-12 sm:mb-16">
+    <!-- Header Section: Jarak rapat di mobile (mb-6) agar menyatu erat dengan card pertama -->
+    <div bind:this={headerEl} class="max-w-2xl mx-auto text-center mb-6 sm:mb-10 md:mb-14">
       <h2 class="heading-section text-neutral-950 dark:text-white text-center">
         Dipercaya Wirausaha & Desainer Lokal
       </h2>
-      <p class="desc-section text-neutral-600 dark:text-neutral-400 mt-3 text-center">
+      <p class="desc-section text-neutral-600 dark:text-neutral-400 mt-2 sm:mt-3 text-center">
         Cerita nyata mereka yang bertumbuh bersama ekosistem digital Pinoka.
       </p>
     </div>
@@ -141,7 +143,7 @@
         {#each COL_1 as card}
           <div
             class="feedback-card group {card.flexClass} flex flex-col justify-between relative overflow-hidden rounded-2xl p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl {card.theme === 'orange'
-              ? 'bg-[#0f1117] text-white border border-white/10 shadow-lg shadow-black/20'
+              ? 'bg-neutral-950 dark:bg-neutral-900 text-white border border-white/10 shadow-lg shadow-black/20'
               : 'bg-neutral-50/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border hover:border-neutral-300 dark:hover:border-neutral-700'}"
           >
             {#if card.isPattern}
@@ -201,7 +203,7 @@
         {#each COL_3 as card}
           <div
             class="feedback-card group {card.flexClass} flex flex-col justify-between relative overflow-hidden rounded-2xl p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl {card.theme === 'dark'
-              ? 'bg-[#0f1117] text-white border border-white/10 shadow-lg shadow-black/20'
+              ? 'bg-neutral-950 dark:bg-neutral-900 text-white border border-white/10 shadow-lg shadow-black/20'
               : 'bg-neutral-50/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border hover:border-neutral-300 dark:hover:border-neutral-700'}"
           >
             {#if card.isPattern}

@@ -92,7 +92,6 @@
     }
   }
   
-  let focusIndex = -1;
 
 </script>
 
@@ -100,7 +99,7 @@
   class="flex items-center justify-center gap-2 sm:gap-3 w-full"
   on:paste={handlePaste}
 >
-  {#each values as v, i}
+  {#each values as _v, i}
     <input
       bind:this={inputs[i]}
       type="text"
@@ -111,8 +110,6 @@
       bind:value={values[i]}
       on:input={(e) => handleInput(i, e)}
       on:keydown={(e) => handleKeyDown(i, e)}
-      on:focus={() => focusIndex = i}
-      on:blur={() => focusIndex = -1}
       class="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold bg-surface border-2 rounded-xl transition-all duration-300 ease-out focus:scale-105 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 {values[i] ? 'border-primary/50 text-main' : 'border-border text-muted'} {disabled ? 'opacity-50 cursor-not-allowed' : ''}"
     />
   {/each}

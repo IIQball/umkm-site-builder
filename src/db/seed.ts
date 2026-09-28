@@ -3,12 +3,12 @@
  * seed.ts
  * Run: bun run db:seed
  *
- * Creates a superadmin user directly in the DB and registers it in admin_whitelist.
+ * Creates default template and business categories, then a superadmin user registered in admin_whitelist.
  * Requires SEED_SUPERADMIN_EMAIL, SEED_SUPERADMIN_PASSWORD, and SEED_SUPERADMIN_NAME in .env.
  */
 import "dotenv/config";
 import { withTransaction } from "@/lib/db/transaction";
-import { users, accounts, adminWhitelist, templateCategories } from "@/db/schema";
+import { users, accounts, adminWhitelist, templateCategories, businessCategories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomBytes, scrypt } from "node:crypto";
 import { randomUUID } from "node:crypto";
@@ -56,6 +56,24 @@ async function seed() {
       if (!existingCat) {
         await tx.insert(templateCategories).values({
           id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          description: cat.description,
+          icon: cat.icon,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+
+    // 1b. Seed business categories with the same set, so onboarding has options to pick from
+    for (const cat of DEFAULT_CATEGORIES) {
+      const existingBiz = await tx.query.businessCategories.findFirst({
+        where: eq(businessCategories.slug, cat.slug),
+      });
+      if (!existingBiz) {
+        await tx.insert(businessCategories).values({
+          id: `biz-${cat.slug}`,
           name: cat.name,
           slug: cat.slug,
           description: cat.description,

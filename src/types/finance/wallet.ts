@@ -38,10 +38,14 @@ export interface WalletSummary {
 export interface BankAccount {
   id: string;
   bankName: string;
+  bankCode?: string;
   accountNumber: string;
   holderName?: string;
   accountHolder?: string;
   accountHolderName?: string;
+  isPrimary?: boolean;
+  isVerified?: boolean;
+  createdAt?: string | Date;
 }
 
 export interface PayoutHistoryItem {

@@ -15,6 +15,9 @@
   export let settlementDelayDays = 7;
 
   let bankAccount: BankAccount | null = null;
+  let bankAccounts: BankAccount[] = [];
+  let selectedAccountId = '';
+
   let showBankModal = false;
   let showWithdrawModal = false;
   let inputBankName = 'BCA';
@@ -83,45 +86,44 @@
   $: if (payoutHistory) checkAndStartPolling();
   onDestroy(() => stopPolling());
 
-  const fetchBankAccount = async () => {
+  const fetchBankAccounts = async () => {
     isLoading = true;
     apiError = '';
     try {
       const res = await fetch('/api/designer/bank-account');
       const result = await res.json();
       if (res.ok && result.ok && result.data) {
-        const data = result.data as BankAccount;
-        const resolvedName = data.accountHolder || data.holderName || (data as any).accountHolderName || '';
-        bankAccount = { ...data, holderName: resolvedName, accountHolder: resolvedName };
-        inputBankName = data.bankName;
-        inputAccountNumber = data.accountNumber;
-        inputHolderName = resolvedName;
+        const rawAccounts: BankAccount[] = result.data.accounts || [result.data];
+        bankAccounts = rawAccounts.map((a) => {
+          const resolvedName = a.accountHolder || a.holderName || (a as any).accountHolderName || '';
+          return { ...a, holderName: resolvedName, accountHolder: resolvedName };
+        });
+        const primary = bankAccounts.find((a) => a.isPrimary) || bankAccounts[0];
+        bankAccount = primary || null;
+        if (!selectedAccountId || !bankAccounts.some((a) => a.id === selectedAccountId)) {
+          selectedAccountId = primary?.id || '';
+        }
       } else {
+        bankAccounts = [];
         bankAccount = null;
+        selectedAccountId = '';
       }
     } catch (err) {
-      console.error('Failed to fetch bank account:', err);
+      console.error('Failed to fetch bank accounts:', err);
     } finally {
       isLoading = false;
     }
   };
 
   onMount(() => {
-    fetchBankAccount();
+    fetchBankAccounts();
     fetchPayoutHistory();
   });
 
   const openBankModal = () => {
-    if (bankAccount) {
-      const resolvedName = bankAccount.accountHolder || bankAccount.holderName || '';
-      inputBankName = bankAccount.bankName;
-      inputAccountNumber = bankAccount.accountNumber;
-      inputHolderName = resolvedName;
-    } else {
-      inputBankName = 'BCA';
-      inputAccountNumber = '';
-      inputHolderName = '';
-    }
+    inputBankName = 'BCA';
+    inputAccountNumber = '';
+    inputHolderName = '';
     apiError = '';
     showBankModal = true;
   };
@@ -149,10 +151,9 @@
 
       const result = await res.json();
       if (res.ok && result.ok) {
-        const saved = result.data;
-        const resolvedName = saved.accountHolder || saved.holderName || inputHolderName;
-        bankAccount = { ...saved, holderName: resolvedName, accountHolder: resolvedName };
         showBankModal = false;
+        await fetchBankAccounts();
+        if (result.data?.id) selectedAccountId = result.data.id;
       } else {
         apiError = result.error?.message || 'Gagal menyimpan rekening bank.';
       }
@@ -163,8 +164,34 @@
     }
   };
 
-  const handleWithdraw = async () => {
-    if (!bankAccount) return;
+  const handleSetPrimary = async (accountId: string) => {
+    try {
+      const res = await fetch('/api/designer/bank-account', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: accountId }),
+      });
+      if (res.ok) await fetchBankAccounts();
+    } catch (err) {
+      console.error('Failed to set primary account:', err);
+    }
+  };
+
+  const handleDeleteAccount = async (accountId: string) => {
+    try {
+      const res = await fetch(`/api/designer/bank-account?id=${accountId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) await fetchBankAccounts();
+    } catch (err) {
+      console.error('Failed to delete bank account:', err);
+    }
+  };
+
+  const handleWithdraw = async (targetBankAccountId: string) => {
+    const targetAccount = bankAccounts.find((a) => a.id === targetBankAccountId) || bankAccount;
+    if (!targetAccount) return;
+
     const amountNum = Number(withdrawAmount);
     if (isNaN(amountNum) || amountNum < minPayoutLimit) {
       withdrawError = `Jumlah penarikan minimal ${formatIDR(minPayoutLimit)}`;
@@ -181,7 +208,7 @@
       const res = await fetch('/api/designer/payout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountNum, bankAccountId: bankAccount.id }),
+        body: JSON.stringify({ amount: amountNum, bankAccountId: targetAccount.id }),
       });
 
       const result = await res.json();
@@ -196,7 +223,7 @@
           amount: amountNum,
           balanceAfter: balance,
           type: 'DEBIT' as const,
-          description: `Penarikan dana ke ${bankAccount.bankName} (${bankAccount.accountNumber})`,
+          description: `Penarikan dana ke ${targetAccount.bankName} (${targetAccount.accountNumber})`,
           referenceId: result.data.id,
           createdAt: result.data.createdAt,
         };
@@ -225,7 +252,7 @@
   };
 </script>
 
-<!-- Row 2: Performance Stats (Left 1 col vertical stack) & Bank Card (Right 2 cols) -->
+<!-- Row 2: Performance Stats & Multiple Bank Accounts Card -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch mb-6">
   <div class="lg:col-span-1 h-full">
     <DesignerPerformanceCards {totalNetIncome} {totalTemplatesSold} />
@@ -234,6 +261,8 @@
   <div class="lg:col-span-2 h-full">
     <DesignerBankCard
       {bankAccount}
+      {bankAccounts}
+      {selectedAccountId}
       {isLoading}
       {balance}
       {availableBalance}
@@ -241,6 +270,9 @@
       {settlementDelayDays}
       onOpenBankModal={openBankModal}
       onOpenWithdrawModal={() => (showWithdrawModal = true)}
+      onSetPrimary={handleSetPrimary}
+      onDeleteAccount={handleDeleteAccount}
+      onSelectAccount={(id) => (selectedAccountId = id)}
     />
   </div>
 </div>
@@ -262,6 +294,8 @@
   showModal={showWithdrawModal}
   {withdrawSuccess}
   {bankAccount}
+  {bankAccounts}
+  bind:selectedBankAccountId={selectedAccountId}
   {balance}
   {availableBalance}
   bind:withdrawAmount
@@ -272,5 +306,5 @@
   onClose={closeWithdrawModal}
 />
 
-<!-- Payout History Table (Full-Width Column) -->
+<!-- Payout History Table -->
 <DesignerPayoutHistoryTable {payoutHistory} isLoading={isLoadingPayouts} />

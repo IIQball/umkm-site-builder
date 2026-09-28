@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { bankAccountSchema } from '@/schemas/designer/bank-account.schema';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import {
@@ -12,8 +12,8 @@ import {
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan', 401);
+    if (!user || !isAuthorizedAdmin(user)) {
+      throw new AppError('Akses admin diperlukan', 401);
     }
 
     const accounts = await getUserBankAccounts(user.id);
@@ -33,8 +33,8 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan', 401);
+    if (!user || !isAuthorizedAdmin(user)) {
+      throw new AppError('Akses admin diperlukan', 401);
     }
 
     const body = await context.request.json().catch(() => ({}));
@@ -48,8 +48,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 export const DELETE: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan', 401);
+    if (!user || !isAuthorizedAdmin(user)) {
+      throw new AppError('Akses admin diperlukan', 401);
     }
 
     const url = new URL(context.request.url);
@@ -68,8 +68,8 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
 export const PATCH: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
-    if (!user || !isAuthorizedDesigner(user)) {
-      throw new AppError('Akses desainer diperlukan', 401);
+    if (!user || !isAuthorizedAdmin(user)) {
+      throw new AppError('Akses admin diperlukan', 401);
     }
 
     const body = await context.request.json().catch(() => ({}));

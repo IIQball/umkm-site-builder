@@ -98,10 +98,9 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         ],
       },
       {
-        title: 'Transaksi & Pengaturan',
+        title: 'Pengaturan Sistem',
         items: [
-          { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Pengaturan' },
-          { label: 'Pengaturan Platform', href: '/admin/settings', icon: 'tune', group: 'Transaksi & Pengaturan' },
+          { label: 'Pengaturan Platform', href: '/admin/settings', icon: 'tune', group: 'Pengaturan Sistem' },
         ],
       },
     ];

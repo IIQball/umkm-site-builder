@@ -14,7 +14,7 @@
 <div class="cq-footer-row-compact py-2">
   <!-- Status Indicator Node -->
   <div
-    class="flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_status_badge' ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_status_badge' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
     on:click={(e) => selectNode(e, 'footer_status_badge')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_status_badge')}
     role="button"
@@ -22,12 +22,12 @@
   >
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
     <span
-      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; color: var(--theme-text-primary, var(--color-text-main, #0f172a)); text-transform: uppercase;"
+      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; color: var(--theme-text-primary, var(--color-text-main)); text-transform: uppercase;"
     >
       {statusBadgeText}
     </span>
     <span
-      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 13px)); color: var(--theme-text-muted, var(--color-text-secondary, #64748b));"
+      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 13px)); color: var(--theme-text-muted, var(--color-text-muted));"
     >
       • {statusBadgeSubtext}
     </span>
@@ -35,14 +35,14 @@
 
   <!-- Info & Copyright Node -->
   <div
-    class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"
     tabindex="0"
   >
     <p
-      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-secondary, #64748b));"
+      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
     >
       {copyrightText} Jam: {storeHours}
     </p>
@@ -50,7 +50,7 @@
 
   <!-- Chat Button Node -->
   <div
-    class="p-1 rounded-xl transition-all cursor-pointer shrink-0 {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="p-1 rounded-xl transition-all cursor-pointer shrink-0 {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
     on:click={(e) => selectNode(e, 'footer_contact')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
     role="button"
@@ -60,7 +60,7 @@
       href={whatsappLink}
       target="_blank"
       rel="noreferrer"
-      style="border-radius: var(--theme-btn-radius, var(--btn-radius, 16px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, #ffffff)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px));"
+      style="border-radius: var(--theme-btn-radius, var(--btn-radius, 16px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px));"
       class="h-8 px-4 hover:opacity-90 font-semibold inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-[0.98] transition-all"
       on:click|stopPropagation
     >

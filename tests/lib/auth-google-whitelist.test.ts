@@ -183,6 +183,7 @@ describe("Google OAuth Whitelist & Database Hooks", () => {
         role: "tenant",
         status: "active",
         suspendReason: null,
+        registeredBy: null,
         image: null,
         createdAt: new Date(),
         updatedAt: new Date(),

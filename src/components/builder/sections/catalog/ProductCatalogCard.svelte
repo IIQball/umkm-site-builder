@@ -90,7 +90,7 @@
   class="relative overflow-hidden transition-all duration-200 {cardRadiusClass} {cardPresetClass} {
     activePreset === 'carousel_scroll' ? 'min-w-[260px] max-w-[280px] snap-start flex flex-col' : isHorizontalLayout || activePreset === 'list_compact' ? 'flex flex-row items-stretch' : 'flex flex-col'
   } {isActive ? 'cursor-grab active:cursor-grabbing' : ''} {
-    dropTargetIdx === index ? 'ring-2 ring-blue-500 shadow-xl' : ''
+    dropTargetIdx === index ? 'ring-2 ring-primary shadow-xl' : ''
   } {draggedIdx === index ? 'opacity-30' : ''}"
 >
   <!-- Image with Nested Radius -->
@@ -131,7 +131,7 @@
       {/if}
       <h3
         data-node="product_title"
-        class="mb-1 text-[var(--theme-text-primary,#0f172a)] line-clamp-2 {nameSizeClass} {nameWeightClass}"
+        class="mb-1 text-[var(--theme-text-primary, var(--color-text-main))] line-clamp-2 {nameSizeClass} {nameWeightClass}"
       >
         {product.name || 'Nama Produk'}
       </h3>
@@ -159,7 +159,7 @@
                       on:click={() => handleVariantChange(group.groupName, opt.name)}
                       class="px-3 py-1 text-[10px] font-semibold rounded-full border transition-all {
                         selections[group.groupName] === opt.name
-                          ? 'bg-[var(--theme-primary,#2563eb)] border-[var(--theme-primary,#2563eb)] text-white shadow-sm'
+                          ? 'bg-[var(--theme-primary, var(--color-primary))] border-[var(--theme-primary, var(--color-primary))] text-white shadow-sm'
                           : 'border-slate-300 text-slate-500 hover:border-slate-400'
                       } disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -180,7 +180,7 @@
       <div class="mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
         <div data-node="product_price" class="min-w-0">
           <span class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight">Harga</span>
-          <p class="text-sm sm:text-base font-extrabold font-mono text-[var(--theme-primary,#2563eb)] truncate tracking-tight">
+          <p class="text-sm sm:text-base font-extrabold font-mono text-[var(--theme-primary, var(--color-primary))] truncate tracking-tight">
             {formatIDR(computedPrice)}
           </p>
         </div>
@@ -195,7 +195,7 @@
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary,#2563eb)] text-white ${ctaBtnRadiusClass}`}
+            class={`px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary, var(--color-primary))] text-white ${ctaBtnRadiusClass}`}
           >
             <span>Beli</span>
           </button>
@@ -203,7 +203,7 @@
       </div>
     {:else}
       <div class="mt-auto flex flex-col items-center">
-        <p data-node="product_price" class="text-xl sm:text-2xl font-black font-mono mb-4 tracking-tight text-[var(--theme-primary,#2563eb)] text-center">
+        <p data-node="product_price" class="text-xl sm:text-2xl font-black font-mono mb-4 tracking-tight text-[var(--theme-primary, var(--color-primary))] text-center">
           {formatIDR(computedPrice)}
         </p>
         <div data-node="product_cta" class="w-full flex gap-2">
@@ -217,7 +217,7 @@
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary,#2563eb)] text-white ${ctaBtnRadiusClass}`}
+            class={`flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary, var(--color-primary))] text-white ${ctaBtnRadiusClass}`}
           >
             <span>Beli Sekarang</span>
           </button>

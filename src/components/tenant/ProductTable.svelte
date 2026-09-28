@@ -222,7 +222,7 @@
       </div>
       <div class="flex flex-wrap items-center gap-2.5">
         <div
-          class="dropdown dropdown-end {isDropdownOpen ? 'dropdown-open' : ''}"
+          class="relative {isDropdownOpen ? 'block' : ''}"
         >
           <div class="relative w-full min-w-[200px]">
             <Input
@@ -259,13 +259,14 @@
               </div>
             </Input>
           </div>
-          <ul
-            class="dropdown-content z-20 menu p-2 shadow-md bg-card rounded-xl w-full mt-2 max-h-60 overflow-y-auto border border-light"
-          >
+          {#if isDropdownOpen}
+            <ul
+              class="absolute right-0 z-20 p-1.5 flex flex-col gap-0.5 shadow-md bg-card rounded-xl w-full mt-2 max-h-60 overflow-y-auto border border-light"
+            >
             <li>
               <button
                 type="button"
-                class="text-sm font-bold font-sans cursor-pointer text-main w-full text-left hover:bg-nested/80"
+                class="text-sm font-bold font-sans cursor-pointer text-main w-full text-left px-3 py-2 rounded-lg hover:bg-nested/80"
                 on:click={() => selectCategory("Semua Kategori")}
               >
                 Semua Kategori
@@ -275,7 +276,7 @@
               <li>
                 <button
                   type="button"
-                  class="text-sm font-medium font-sans cursor-pointer text-main w-full text-left hover:bg-nested/80"
+                  class="text-sm font-medium font-sans cursor-pointer text-main w-full text-left px-3 py-2 rounded-lg hover:bg-nested/80"
                   on:click={() => selectCategory(category.name)}
                 >
                   {category.name}
@@ -288,6 +289,7 @@
               </li>
             {/if}
           </ul>
+          {/if}
         </div>
       </div>
     </div>

@@ -36,7 +36,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`p-4 rounded-2xl border border-light/80 bg-card cq-compact-row text-left transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
           : 'hover:shadow-xs hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -47,7 +47,7 @@
           on:click={(e) => selectImage(e, index)}
           on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
           class={`w-14 h-14 rounded-xl overflow-hidden bg-nested shrink-0 relative group/img cursor-pointer ${
-            isImgActive ? 'ring-2 ring-blue-500' : ''
+            isImgActive ? 'ring-2 ring-primary' : ''
           }`}
         >
           {#if product.imageUrl}

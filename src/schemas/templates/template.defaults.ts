@@ -1,18 +1,18 @@
-import type { TemplateTheme, TemplateSection, TemplateConfig } from './template.schema';
+import type { TemplateTheme, TemplateSection, TemplateConfig } from './template.schema'
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 1
 
 export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
-  primaryColor: '#3b82f6',
+  primaryColor: '#36C6FD',
   fontFamily: 'Inter, sans-serif',
   colors: {
-    primary: '#3b82f6',
-    secondary: '#64748b',
-    accent: '#f59e0b',
+    primary: '#36C6FD',
+    secondary: '#FC018B',
+    accent: '#9A00DD',
     background: '#ffffff',
     surface: '#f8fafc',
     textPrimary: '#0f172a',
-    textMuted: '#64748b',
+    textMuted: '#64748b'
   },
   typography: {
     headingFont: 'Inter, sans-serif',
@@ -21,39 +21,39 @@ export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
     h2: { fontSize: '26px', lineHeight: '1.25', fontWeight: '700' },
     h3: { fontSize: '20px', lineHeight: '1.3', fontWeight: '600' },
     body: { fontSize: '16px', lineHeight: '1.6', fontWeight: '400' },
-    caption: { fontSize: '10px', lineHeight: '1.5', fontWeight: '400' },
+    caption: { fontSize: '10px', lineHeight: '1.5', fontWeight: '400' }
   },
   buttons: {
     borderRadius: '8px',
     primary: {
-      backgroundColor: '#3b82f6',
+      backgroundColor: '#36C6FD',
       textColor: '#ffffff',
       borderColor: 'transparent',
-      hoverBg: '#2563eb',
-      hoverText: '#ffffff',
+      hoverBg: '#00A3EF',
+      hoverText: '#ffffff'
     },
     secondary: {
       backgroundColor: '#f1f5f9',
       textColor: '#0f172a',
       borderColor: 'transparent',
       hoverBg: '#e2e8f0',
-      hoverText: '#0f172a',
+      hoverText: '#0f172a'
     },
     outline: {
       backgroundColor: 'transparent',
-      textColor: '#3b82f6',
-      borderColor: '#3b82f6',
+      textColor: '#36C6FD',
+      borderColor: '#36C6FD',
       hoverBg: '#eff6ff',
-      hoverText: '#2563eb',
-    },
+      hoverText: '#00A3EF'
+    }
   },
   layout: {
     maxWidth: '1200px',
     horizontalMarginDesktop: '32px',
     horizontalMarginTablet: '24px',
-    horizontalMarginMobile: '16px',
-  },
-};
+    horizontalMarginMobile: '16px'
+  }
+}
 
 export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
   {
@@ -64,7 +64,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       showAnnouncement: true,
       announcementText: 'Diskon 20% khusus hari ini',
       announcementAlign: 'center',
-      announcementBgColor: 'var(--theme-primary, #2563eb)',
+      announcementBgColor: 'var(--theme-primary, #36C6FD)',
       announcementTextColor: '#ffffff',
       announcementPaddingY: '8px',
       logoType: 'image_text',
@@ -78,7 +78,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
       navTypographyToken: 'body',
       navTextTransform: 'none',
       navColor: 'var(--theme-text-muted, #64748b)',
-      navHoverColor: 'var(--theme-primary, #2563eb)',
+      navHoverColor: 'var(--theme-primary, #36C6FD)',
     },
     styles: {
       bgColorToken: 'surface',

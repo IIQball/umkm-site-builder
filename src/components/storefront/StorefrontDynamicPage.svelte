@@ -42,7 +42,7 @@
   });
 </script>
 
-<div class="storefront-root min-h-screen w-full bg-[var(--color-bg-base,#ffffff)] text-[var(--color-text-main,#0f172a)] font-[family-name:var(--font-family,sans-serif)] flex flex-col">
+<div class="storefront-root min-h-screen w-full bg-canvas text-main font-[family-name:var(--font-family,sans-serif)] flex flex-col">
   <StoreStatusBanner {isOpen} />
 
   <main class="flex-1 w-full">

@@ -60,24 +60,24 @@
         on:keydown={handleHeadingKeydown}
         class={`p-3 rounded-2xl transition-all cursor-pointer ${
           isHeadingActive
-            ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-            : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
         {#if badgeText}
           <span
             data-node="badge"
-            class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary,#2563eb)] mb-2 shadow-2xs"
+            class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-2 shadow-2xs"
           >
-            <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary,#2563eb)]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
             {badgeText}
           </span>
         {/if}
-        <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main,#0f172a)] tracking-tight mb-2">
+        <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-2">
           {title}
         </h2>
         {#if subtitle}
-          <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary,#334155)] mb-2 font-sans">
+          <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] mb-2 font-sans">
             {subtitle}
           </p>
         {/if}
@@ -94,25 +94,25 @@
           on:keydown={(e) => handleItemKeydown(e, index)}
           class={`p-5 rounded-2xl border cursor-pointer transition-all duration-150 ${
             isItemActive
-              ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
+              ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
               : isExpanded
-                ? 'border-[var(--color-primary,#2563eb)]/40 bg-blue-50/50 dark:bg-blue-950/30'
-                : 'border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,#ffffff)] hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                ? 'border-[var(--color-primary)]/40 bg-blue-50/50 dark:bg-blue-950/30'
+                : 'border-[var(--color-border)] bg-[var(--color-card-base)] hover:bg-slate-50 dark:hover:bg-slate-800/50'
           }`}
         >
           <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-base flex items-center justify-between gap-4">
-            <span class={isExpanded ? 'text-[var(--color-primary,#2563eb)]' : 'text-[var(--color-text-main,#0f172a)]'}>
+            <span class={isExpanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-main)]'}>
               {`0${index + 1}. `}{item.title}
             </span>
             <ChevronDown
               size={18}
               class={`shrink-0 transition-transform ${
-                isExpanded ? 'rotate-180 text-[var(--color-primary,#2563eb)]' : 'text-slate-400'
+                isExpanded ? 'rotate-180 text-[var(--color-primary)]' : 'text-slate-400'
               }`}
             />
           </h3>
           {#if isExpanded}
-            <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed mt-2 font-sans">
+            <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed mt-2 font-sans">
               {item.description}
             </p>
           {/if}
@@ -126,9 +126,9 @@
       tabindex="0"
       on:click={handleImageClick}
       on:keydown={handleImageKeydown}
-      class={`w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-[var(--color-nested-base,#f1f5f9)] transition-all cursor-pointer ${
+      class={`w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-[var(--color-nested-base)] transition-all cursor-pointer ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
           : 'hover:opacity-95'
       }`}
     >

@@ -10,7 +10,7 @@
   $: announcementText = props.announcementText ?? 'Diskon 20% khusus pesanan hari ini';
   $: freeShippingText = props.freeShippingText ?? '';
   $: align = props.announcementAlign ?? 'center';
-  $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
+  $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, var(--color-primary))';
   $: textColor = (props.announcementTextColor as string) || '#ffffff';
   $: paddingY = (props.announcementPaddingY as string) || '8px';
 

@@ -29,7 +29,7 @@
   on:click={selectRows}
   on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
   class={`max-w-2xl mx-auto text-left space-y-2.5 cursor-pointer transition-all ${
-    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
   }`}
 >
   {#each products as product, idx (product.id || product.name + idx)}
@@ -41,7 +41,7 @@
       on:click={(e) => selectCard(e, idx, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
       class={`p-4 rounded-2xl border border-light/80 bg-card shadow-xs flex justify-between items-center transition-all duration-200 cursor-pointer ${
-        isItemActive ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : 'hover:border-slate-300 dark:hover:border-slate-700'
+        isItemActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : 'hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       <div class="min-w-0 pr-3">

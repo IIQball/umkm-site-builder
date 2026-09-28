@@ -5,7 +5,7 @@
   export let section: TemplateSection;
   export let onConfigChange: (key: string, value: unknown) => void;
 
-  $: bgColor = (section.props?.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
+  $: bgColor = (section.props?.announcementBgColor as string) || 'var(--theme-primary, var(--color-primary))';
   $: textColor = (section.props?.announcementTextColor as string) || '#ffffff';
   $: paddingY = (section.props?.announcementPaddingY as string) || '8px';
 
@@ -16,7 +16,7 @@
   ];
 
   const bgTokenOptions = [
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand (Warna Utama)' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
     { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
     { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas' },
@@ -27,14 +27,14 @@
     { value: '#ffffff', label: 'Putih Bersih (White)' },
     { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
     { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
   ];
 </script>
 
 <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
-    <Megaphone size={14} class="text-[var(--theme-primary,#2563eb)]" />
+    <Megaphone size={14} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Gaya Announcement Bar</span>
   </div>
 

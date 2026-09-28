@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { Button } from '@/components/ui';
   import LocationPermissionModal from '@/components/directory/LocationPermissionModal.svelte';
   import DirectoryStoreCard from '@/components/directory/DirectoryStoreCard.svelte';
   import DirectoryMapView from '@/components/directory/DirectoryMapView.svelte';
@@ -157,7 +158,7 @@
   });
 </script>
 
-<div class="space-y-6">
+<div class="space-y-8">
   <DirectoryHeaderControls
     bind:searchQuery
     bind:selectedCategory
@@ -174,9 +175,9 @@
   />
 
   {#if error}
-    <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-xs text-center">
-      {error}
-      <button class="ml-2 font-bold underline" on:click={() => fetchStores(true)}>Coba lagi</button>
+    <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs text-center flex items-center justify-center gap-2">
+      <span>{error}</span>
+      <button class="font-bold underline cursor-pointer hover:text-red-700 dark:hover:text-red-300 transition-colors" on:click={() => fetchStores(true)}>Coba lagi</button>
     </div>
   {/if}
 
@@ -185,11 +186,11 @@
       <DirectoryMapView {stores} {userLocation} />
 
       <div>
-        <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-3 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-emerald-600 text-[18px]">store</span>
+        <h3 class="text-sm sm:text-base font-bold text-main font-heading mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-orange"></span>
           <span>Daftar Toko di Area Ini ({stores.length})</span>
         </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {#each stores as store (store.id)}
             <DirectoryStoreCard {store} />
           {/each}
@@ -197,21 +198,21 @@
       </div>
     </div>
   {:else}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each stores as store (store.id)}
         <DirectoryStoreCard {store} />
       {/each}
 
       {#if loading}
         {#each Array.from({ length: stores.length === 0 ? 6 : 3 }) as _}
-          <div class="p-5 rounded-3xl bg-white dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 flex flex-col gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 animate-pulse"></div>
+          <div class="p-6 rounded-3xl bg-card border border-border flex flex-col gap-3.5 shadow-xs">
+            <div class="w-12 h-12 rounded-2xl bg-nested animate-pulse"></div>
             <div class="space-y-2 mt-2">
-              <div class="h-4 w-3/4 rounded-md bg-zinc-100 dark:bg-zinc-800 animate-pulse"></div>
-              <div class="h-3 w-1/2 rounded-md bg-zinc-50 dark:bg-zinc-800/50 animate-pulse"></div>
+              <div class="h-4 w-3/4 rounded-md bg-nested animate-pulse"></div>
+              <div class="h-3 w-1/2 rounded-md bg-nested/60 animate-pulse"></div>
             </div>
-            <div class="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <div class="h-5 w-24 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse"></div>
+            <div class="mt-auto pt-4 border-t border-border">
+              <div class="h-5 w-24 rounded-full bg-nested animate-pulse"></div>
             </div>
           </div>
         {/each}
@@ -219,30 +220,31 @@
     </div>
 
     {#if stores.length === 0 && !loading}
-      <div class="py-16 flex flex-col items-center justify-center text-center">
-        <div class="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4 text-zinc-400">
+      <div class="py-16 sm:py-20 flex flex-col items-center justify-center text-center p-8 rounded-3xl bg-card border border-border">
+        <div class="w-16 h-16 rounded-2xl bg-nested text-muted flex items-center justify-center mb-4">
           <span class="material-symbols-outlined text-3xl">location_off</span>
         </div>
-        <h3 class="text-base font-bold text-zinc-900 dark:text-white mb-1">Tidak Ada UMKM Ditemukan</h3>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm">
-          {userLocation ? `Tidak ada UMKM dalam radius ${radius} km dari lokasi Anda. Coba perbesar radius atau cari kata kunci lain.` : 'Tidak ada toko yang cocok dengan pencarian atau filter kategori Anda.'}
+        <h3 class="text-lg font-bold text-main font-heading mb-1.5">Tidak Ada Toko UMKM Ditemukan</h3>
+        <p class="text-xs sm:text-sm text-secondary max-w-md font-sans">
+          {userLocation ? `Tidak ada UMKM dalam radius ${radius} km dari lokasi Anda. Coba perbesar radius atau cari kata kunci lain.` : 'Tidak ada toko yang cocok dengan pencarian atau filter kategori yang dipilih.'}
         </p>
       </div>
     {/if}
 
     {#if meta?.hasMore}
-      <div class="mt-10 flex justify-center">
-        <button
-          type="button"
+      <div class="mt-12 flex justify-center">
+        <Button
+          variant="secondary"
+          size="sm"
           on:click={loadMore}
           disabled={loading}
-          class="px-5 py-2.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-sm hover:border-zinc-400 transition-all flex items-center gap-2"
+          class="rounded-full uppercase tracking-wider"
         >
           {#if loading}
-            <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+            <span class="material-symbols-outlined animate-spin text-[16px] text-orange">progress_activity</span>
           {/if}
           <span>{loading ? 'Memuat...' : 'Tampilkan Lebih Banyak'}</span>
-        </button>
+        </Button>
       </div>
     {/if}
   {/if}

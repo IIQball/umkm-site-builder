@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PublicTemplateMarketplace from '@/components/public/PublicTemplateMarketplace.svelte';
+import LandingFooter from '@/components/landing/LandingFooter.svelte';
 import { db } from '@/lib/db/client';
 import { templates, templateCategories, userTemplates, designers, users, stores } from '@/db/schema';
 import { eq, and, isNull, desc, asc } from 'drizzle-orm';
@@ -82,25 +83,17 @@ if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'supera
 const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
 ---
 
-<BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko">
-  <div class="min-h-screen bg-canvas py-10 md:py-14 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto space-y-8 md:space-y-10">
-      <!-- Clean Hero Banner Header -->
-      <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 text-white p-8 sm:p-10 md:p-12 shadow-sm dark:bg-slate-900/90 dark:border-slate-800">
-        <div class="relative z-10 max-w-3xl space-y-4">
-          <div class="inline-flex items-center gap-2 bg-slate-800/80 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-700 shadow-xs">
-            <span class="material-symbols-outlined text-sm text-indigo-400">storefront</span>
-            <span>Marketplace Template UMKM</span>
-          </div>
-
-          <h1 class="text-heading-xl md:text-display-sm font-extrabold tracking-tight text-white leading-tight">
-            Koleksi Desain Siap Pakai untuk Toko Online Anda
-          </h1>
-
-          <p class="text-body-base md:text-body-lg text-slate-300 leading-relaxed font-sans">
-            Jelajahi template toko responsif yang dirancang khusus oleh desainer profesional untuk meningkatkan omzet dan kepercayaan pembeli bisnis Anda.
-          </p>
-        </div>
+<BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko | Pinoka">
+  <div class="w-full min-h-screen bg-canvas text-main flex flex-col justify-between transition-colors duration-200">
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-8 sm:pt-12 pb-20 flex-1 space-y-8 md:space-y-10">
+      <!-- Clean Hero Header -->
+      <div class="mb-10 sm:mb-12 text-center space-y-3">
+        <h1 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-main font-heading leading-tight">
+          Koleksi Desain Siap Pakai
+        </h1>
+        <p class="text-secondary text-sm sm:text-base max-w-xl mx-auto font-sans leading-relaxed">
+          Jelajahi template toko responsif yang dirancang khusus oleh desainer profesional untuk meningkatkan omzet dan kepercayaan pembeli bisnis Anda.
+        </p>
       </div>
 
       <!-- Marketplace Interactive Catalog -->
@@ -115,6 +108,8 @@ const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
         isLoggedIn={!!currentUser}
         userRole={currentUser?.role || null}
       />
-    </div>
+    </main>
+
+    <LandingFooter client:load />
   </div>
 </BaseLayout>

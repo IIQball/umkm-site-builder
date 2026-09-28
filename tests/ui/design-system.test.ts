@@ -15,22 +15,22 @@ import {
 describe('Centralized Design System Tokens (SSOT)', () => {
   describe('Color Tokens', () => {
     it('defines primary, secondary, and semantic color palettes', () => {
-      expect(tokens.colors.primary.DEFAULT).toBe('#2563eb');
-      expect(tokens.colors.primary.dark).toBe('#1d4ed8');
-      expect(tokens.colors.primary.light).toBe('#3b82f6');
+      expect(tokens.colors.primary.DEFAULT).toBe('#36C6FD');
+      expect(tokens.colors.primary.dark).toBe('#00A3EF');
+      expect(tokens.colors.primary.light).toBe('#7dd3fc');
 
-      expect(tokens.colors.secondary.DEFAULT).toBe('#334155');
+      expect(tokens.colors.secondary.DEFAULT).toBe('#FC018B');
 
       expect(tokens.colors.semantic.success.DEFAULT).toBe('#10b981');
       expect(tokens.colors.semantic.error.DEFAULT).toBe('#ef4444');
-      expect(tokens.colors.semantic.warning.DEFAULT).toBe('#f59e0b');
-      expect(tokens.colors.semantic.info.DEFAULT).toBe('#3b82f6');
-      expect(tokens.colors.semantic.violet.DEFAULT).toBe('#8b5cf6');
-      expect(tokens.colors.semantic.orange.DEFAULT).toBe('#ff5b35');
+      expect(tokens.colors.semantic.warning.DEFAULT).toBe('#FECF02');
+      expect(tokens.colors.semantic.info.DEFAULT).toBe('#0284C7');
+      expect(tokens.colors.semantic.violet.DEFAULT).toBe('#9A00DD');
+      expect(tokens.colors.semantic.orange.DEFAULT).toBe('#FC018B');
     });
 
     it('defines neutrals for both light and dark themes', () => {
-      expect(tokens.colors.neutrals.light.bgBase).toBe('#f4f6fa');
+      expect(tokens.colors.neutrals.light.bgBase).toBe('#f8fafc');
       expect(tokens.colors.neutrals.light.cardBase).toBe('#ffffff');
       expect(tokens.colors.neutrals.dark.bgBase).toBe('#0b0f19');
       expect(tokens.colors.neutrals.dark.cardBase).toBe('#111827');

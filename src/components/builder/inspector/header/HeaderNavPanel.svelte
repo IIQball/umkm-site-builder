@@ -9,7 +9,7 @@
   $: navTypographyToken = (section.props?.navTypographyToken as string) || 'body';
   $: navTextTransform = section.props?.navTextTransform || 'none';
   $: navColor = (section.props?.navColor as string) || 'var(--theme-text-muted, #64748b)';
-  $: navHoverColor = (section.props?.navHoverColor as string) || 'var(--theme-primary, #2563eb)';
+  $: navHoverColor = (section.props?.navHoverColor as string) || 'var(--theme-primary, var(--color-primary))';
 
   const gapPresets = [
     { label: '8px (Ketat)', value: '8px' },
@@ -32,13 +32,13 @@
   const colorTokenOptions = [
     { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Muted)' },
     { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Primary)' },
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
     { value: '#ffffff', label: 'Putih Bersih' },
   ];
 
   const hoverColorTokenOptions = [
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
     { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama' },
     { value: '#ffffff', label: 'Putih' },
@@ -47,7 +47,7 @@
 
 <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
-    <Menu size={14} class="text-[var(--theme-primary,#2563eb)]" />
+    <Menu size={14} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Gaya & Tipografi Menu Navigasi</span>
   </div>
 

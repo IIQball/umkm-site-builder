@@ -37,7 +37,7 @@
         align="left"
       />
 
-      <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--color-border,rgba(15,23,42,0.08))] text-xs text-[var(--color-text-secondary,#334155)] font-medium">
+      <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] font-medium">
         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Halal MUI</span>
         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Izin BPOM RI</span>
         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> P-IRT Terdaftar</span>
@@ -52,8 +52,8 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_image')}
       class={`relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-slate-100 dark:bg-slate-800 transition-all cursor-pointer ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img src={imageUrl} alt={title} class="w-full h-full object-cover" />

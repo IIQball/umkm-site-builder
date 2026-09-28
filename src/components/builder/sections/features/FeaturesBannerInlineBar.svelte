@@ -30,8 +30,8 @@
           on:keydown={(e) => handleItemKeydown(e, index)}
           class={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-all cursor-pointer ${
             isActiveNode
-              ? 'ring-2 ring-blue-500 bg-white/10 ring-offset-2 ring-offset-slate-900'
-              : 'hover:bg-white/5 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+              ? 'ring-2 ring-primary bg-white/10 ring-offset-2 ring-offset-slate-900'
+              : 'hover:bg-white/5 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           } ${index > 0 ? 'border-t border-slate-800 pt-3 sm:border-t-0 sm:pt-2.5 sm:border-l sm:pl-4' : ''}`}
         >
           <div

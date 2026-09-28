@@ -27,8 +27,8 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
       class={`px-4 py-1.5 rounded-full text-xs font-heading font-bold transition-all cursor-pointer ${
         isBadgeActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/40 dark:bg-blue-950/40'
-          : 'bg-slate-100 dark:bg-slate-800 text-[var(--color-text-secondary,#334155)] hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/15'
+          : 'bg-nested text-secondary hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <span>{badgeText}</span>
@@ -42,10 +42,10 @@
     tabindex="0"
     on:click={(e) => selectNode && selectNode(e, 'hero_title')}
     on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
-    class={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black text-[var(--color-text-main,#0f172a)] tracking-tighter leading-none transition-all cursor-pointer rounded-2xl p-2 ${
+    class={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black text-main tracking-tighter leading-none transition-all cursor-pointer rounded-2xl p-2 ${
       isTitleActive
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     {title}
@@ -58,10 +58,10 @@
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
-      class={`text-base sm:text-xl text-[var(--color-text-secondary,#334155)] max-w-2xl font-medium leading-relaxed font-sans transition-all cursor-pointer rounded-xl p-2 ${
+      class={`text-base sm:text-xl text-secondary max-w-2xl font-medium leading-relaxed font-sans transition-all cursor-pointer rounded-xl p-2 ${
         isSubtitleActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <p>{subtitle}</p>
@@ -77,13 +77,13 @@
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
       class={`pt-4 rounded-2xl p-2 transition-all cursor-pointer ${
         isCtaActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <a
         href={ctaLink || '#'}
-        class="inline-flex items-center justify-center h-12 min-h-[48px] px-10 rounded-2xl bg-[var(--color-primary,#2563eb)] text-white font-heading font-bold text-base hover:bg-primary-dark active:scale-[0.98] transition-all duration-150 shadow-md"
+        class="inline-flex items-center justify-center h-12 min-h-[48px] px-10 rounded-2xl bg-[var(--color-primary)] text-white font-heading font-bold text-base hover:bg-primary-dark active:scale-[0.98] transition-all duration-150 shadow-md"
       >
         <span>{ctaText}</span>
         <ArrowRight size={18} class="ml-2" />

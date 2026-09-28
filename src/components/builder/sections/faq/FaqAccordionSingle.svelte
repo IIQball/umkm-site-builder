@@ -32,23 +32,23 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
       class={`overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
         isItemActive
-          ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 shadow-md'
-          : 'hover:border-[var(--theme-primary,#2563eb)]/50'
+          ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 shadow-md'
+          : 'hover:border-[var(--theme-primary, var(--color-primary))]/50'
       }`}
-      style="background: var(--color-card-base, #ffffff); border: 1px solid var(--color-border, rgba(15, 23, 42, 0.08)); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
+      style="background: var(--color-card-base); border: 1px solid var(--color-border); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
     >
       <button
         type="button"
         on:click|stopPropagation={() => toggle(index)}
         class="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm hover:opacity-80 transition-colors cursor-pointer"
-        style="color: var(--color-text-main, #0f172a); font-family: var(--font-heading);"
+        style="color: var(--color-text-main); font-family: var(--font-heading);"
       >
         <span class="flex-1 min-w-0">{item.question}</span>
         <span
           class={`p-1.5 rounded-xl transition-transform duration-200 shrink-0 ${
             isOpen ? 'rotate-180' : ''
           }`}
-          style="background: var(--color-nested-base, #f1f5f9); color: {isOpen ? 'var(--theme-primary, #2563eb)' : 'var(--color-text-secondary, #334155)'};"
+          style="background: var(--color-nested-base); color: {isOpen ? 'var(--theme-primary, var(--color-primary))' : 'var(--color-text-secondary)'};"
         >
           <ChevronDown size={15} />
         </span>
@@ -57,7 +57,7 @@
       {#if isOpen}
         <div
           class="px-5 pb-5 pt-1 text-xs leading-relaxed border-t"
-          style="color: var(--color-text-secondary, #334155); border-color: var(--color-border, rgba(15, 23, 42, 0.08)); font-family: var(--font-family);"
+          style="color: var(--color-text-secondary); border-color: var(--color-border); font-family: var(--font-family);"
         >
           {item.answer}
         </div>

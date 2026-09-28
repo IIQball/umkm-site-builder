@@ -53,3 +53,10 @@ When building or refactoring components rendered inside the no-code builder canv
   - `$: isSmallScreen = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';`
 - Use Svelte logic blocks (`{#if isDesktop}`, `{#if isSmallScreen}`) for layout shifts, burger buttons, and nav link visibility instead of `@media (min-width: 768px)` window classes.
 
+## Navbar & Dropdown Menu Icon Restrictions
+
+**DO NOT add leading icons or icon badges inside navbar dropdown menu items (e.g. `NavbarDropdown`, navigation submenus).**
+- Dropdown menu items must only render text (title and description).
+- The only icon permitted inside dropdown items is the trailing indicator at the far right (e.g. `ArrowUpRight`).
+- Never render decorative icon containers or badge boxes on the left side of dropdown menu items.
+

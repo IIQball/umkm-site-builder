@@ -1,7 +1,7 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { RegisterSchema } from "@/schemas/auth.schema";
-  import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft, ArrowRight, KeyRound } from "lucide-svelte";
+  import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft, KeyRound } from "lucide-svelte";
   import Input from "@/components/ui/Input.svelte";
   import OtpInput from "./OtpInput.svelte";
   import Button from "@/components/ui/Button.svelte";
@@ -184,11 +184,11 @@
           on:click={() => { role = 'tenant'; }}
         >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
               <Store size={18} strokeWidth={2.5} />
             </div>
             <div class="pr-6">
-              <h3 class="font-medium text-main text-sm">Merchant / Pemilik Toko</h3>
+              <span class="font-medium text-main text-sm block">Merchant / Pemilik Toko</span>
               <p class="text-xs text-secondary mt-0.5 leading-relaxed">Bangun website UMKM impian tanpa koding.</p>
             </div>
           </div>
@@ -203,14 +203,14 @@
         <button 
           type="button"
           class="relative p-4 rounded-xl border text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 group {role === 'designer' ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-sm' : 'border-light bg-card hover:border-muted hover:shadow-xs'}"
-          on:click={() => { role = 'designer'; }}
+          on:click={() => { role = 'designer' }}
         >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
               <PenTool size={18} strokeWidth={2.5} />
             </div>
             <div class="pr-6">
-              <h3 class="font-medium text-main text-sm">Desainer Template</h3>
+              <span class="font-medium text-main text-sm block">Desainer Template</span>
               <p class="text-xs text-secondary mt-0.5 leading-relaxed">Buat dan jual template desain eksklusif.</p>
             </div>
           </div>

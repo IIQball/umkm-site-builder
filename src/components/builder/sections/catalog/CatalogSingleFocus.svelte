@@ -56,7 +56,7 @@
     on:click={selectImage}
     on:keydown={(e) => { if (e.key === 'Enter') selectImage(e); }}
     class={`aspect-square w-full max-w-sm mx-auto rounded-2xl overflow-hidden bg-nested relative group/img cursor-pointer transition-all ${
-      $canvasStore.selectedNodeId === 'product_image_0' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-xl' : 'hover:shadow-md'
+      $canvasStore.selectedNodeId === 'product_image_0' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl' : 'hover:shadow-md'
     }`}
   >
     {#if product.imageUrl}
@@ -88,8 +88,8 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectDesc(e); }}
       class={`cursor-pointer transition-all rounded-2xl p-2 ${
         $canvasStore.selectedNodeId === 'product_desc'
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">
@@ -121,7 +121,7 @@
       on:click={selectCta}
       on:keydown={(e) => { if (e.key === 'Enter') selectCta(e); }}
       class={`pt-4 border-t border-light/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer rounded-2xl p-2 ${
-        $canvasStore.selectedNodeId === 'catalog_cta' ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+        $canvasStore.selectedNodeId === 'catalog_cta' ? 'ring-2 ring-primary ring-offset-2' : ''
       }`}
     >
       <div>

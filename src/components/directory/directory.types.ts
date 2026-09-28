@@ -36,6 +36,8 @@ export interface DirectoryMeta {
   hasMore: boolean;
 }
 
+import { getStoreDirectUrl } from '@/lib/domain';
+
 export function getStoreUrl(subdomain: string): string {
-  return `/storefront/${subdomain}`;
+  return getStoreDirectUrl(subdomain);
 }

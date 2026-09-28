@@ -106,7 +106,7 @@ export const nodeTextColorOptions = [
   { value: '', label: 'Default (Tema)' },
   { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
   { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
-  { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+  { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand (Warna Utama)' },
   { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
   { value: '#ffffff', label: 'Putih Bersih (White)' },
 ];
@@ -115,7 +115,7 @@ export const nodeBgColorOptions = [
   { value: 'transparent', label: 'Transparan' },
   { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas' },
   { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
-  { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+  { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand' },
   { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
 ];
 

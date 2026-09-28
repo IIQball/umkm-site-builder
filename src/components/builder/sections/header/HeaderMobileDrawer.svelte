@@ -48,7 +48,7 @@
   <!-- Drawer Panel: True overlay dropping down right below navbar, internal scroll, NO parent resize -->
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
   <div
-    class="absolute inset-x-0 top-full z-50 bg-[var(--theme-surface,white)] text-[var(--theme-text-primary,#0f172a)] border-b border-slate-200 dark:border-slate-800 shadow-2xl transition-all duration-200 ease-out max-h-[80vh] overflow-y-auto"
+    class="absolute inset-x-0 top-full z-50 bg-[var(--theme-surface,white)] text-[var(--theme-text-primary, var(--color-text-main))] border-b border-slate-200 dark:border-slate-800 shadow-2xl transition-all duration-200 ease-out max-h-[80vh] overflow-y-auto"
     style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); padding-top: 16px; padding-bottom: 24px;"
     on:click|stopPropagation
   >
@@ -119,7 +119,7 @@
         <a
           href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
           on:click={onClose}
-          class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[var(--theme-primary,#2563eb)] transition-colors"
+          class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[var(--theme-primary, var(--color-primary))] transition-colors"
         >
           <span>{link}</span>
         </a>
@@ -163,7 +163,7 @@
         href={waUrl}
         target="_blank"
         rel="noreferrer"
-        style="height: 44px; border-radius: var(--theme-btn-radius, 10px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+        style="height: 44px; border-radius: var(--theme-btn-radius, 10px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
         class="w-full inline-flex items-center justify-center gap-2 font-bold text-xs shadow-md active:scale-[0.98] transition-transform"
       >
         <MessageCircle size={16} />

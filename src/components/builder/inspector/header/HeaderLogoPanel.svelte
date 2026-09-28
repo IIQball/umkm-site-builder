@@ -26,7 +26,7 @@
 
   const textTokenOptions = [
     { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
     { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
     { value: '#ffffff', label: 'Putih Bersih (White)' },
@@ -35,7 +35,7 @@
 
 <div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
   <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
-    <ImageIcon size={14} class="text-[var(--theme-primary,#2563eb)]" />
+    <ImageIcon size={14} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Gaya & Ukuran Logo</span>
   </div>
 

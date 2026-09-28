@@ -32,7 +32,7 @@
   on:keydown={(e) => { if (e.key === 'Enter') selectTrack(e); }}
   class={`max-w-xl mx-auto space-y-4 text-center cursor-pointer transition-all rounded-3xl p-4 ${
     $canvasStore.selectedNodeId === 'testi_slider_track'
-      ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-xl'
+      ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl'
       : ''
   }`}
 >

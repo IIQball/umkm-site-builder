@@ -169,7 +169,7 @@
   <!-- Background Pixel Grid Guide -->
   {#if $canvasStore.showPixelGrid}
     <div
-      class="absolute inset-0 pointer-events-none opacity-30 z-0 bg-[radial-gradient(var(--theme-primary,#2563eb)_1px,transparent_1px)] [background-size:16px_16px]"
+      class="absolute inset-0 pointer-events-none opacity-30 z-0 bg-[radial-gradient(var(--theme-primary, var(--color-primary))_1px,transparent_1px)] [background-size:16px_16px]"
       aria-hidden="true"></div>
   {/if}
 

@@ -107,7 +107,7 @@
           href={waUrl}
           target="_blank"
           rel="noreferrer"
-          style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, #2563eb); color: var(--theme-btn-primary-text, #ffffff);"
+          style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, white);"
           class="inline-flex items-center justify-center px-4 text-xs font-bold transition-transform active:scale-95 shadow-sm"
         >
           <MessageCircle size={14} class="mr-1.5" />

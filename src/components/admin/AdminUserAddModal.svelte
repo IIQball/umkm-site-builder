@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { UserPlus, Store, ShieldCheck, Eye, EyeOff } from 'lucide-svelte';
+  import { UserPlus, Store, ShieldCheck } from 'lucide-svelte'
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
   import { Button, Input, Modal } from '@/components/ui';
 
   import { authClient } from '@/lib/auth-client';
 
-  export let isOpen = false;
-  export let currentUser: any = null;
+  export let isOpen = false
+  export let currentUser: { role?: string; id?: string } | null = null
 
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
@@ -15,10 +15,6 @@
 
   let newName = '';
   let newEmail = '';
-  let newPassword = '';
-  let confirmPassword = '';
-  let showPassword = false;
-  let showConfirmPassword = false;
 
   let isSubmitting = false;
 
@@ -29,13 +25,9 @@
   };
 
   const resetForm = () => {
-    newName = '';
-    newEmail = '';
-    newPassword = '';
-    confirmPassword = '';
-    showPassword = false;
-    showConfirmPassword = false;
-  };
+    newName = ''
+    newEmail = ''
+  }
 
   const handleAdd = async () => {
     if (!newName || !newEmail) return;
@@ -128,7 +120,7 @@
           />
         </div>
 
-        <div class="p-4 bg-primary/5 border border-primary/20 rounded-xl text-xs text-primary/80 font-medium">
+        <div class="alert alert-info bg-primary/5 border-primary/20 rounded-xl text-xs text-primary/80 font-medium">
           Sistem akan otomatis membuat akun {selectedRole === 'tenant' ? 'Merchant' : 'Admin'} dan mengirimkan undangan aktivasi ke email <strong>{newEmail || 'yang Anda masukkan'}</strong>. Pengguna dapat mengatur kata sandi mereka sendiri melalui link tersebut.
         </div>
       </div>

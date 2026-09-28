@@ -15,7 +15,7 @@
   $: logoText = props.logoText ?? 'Toko UMKM';
   $: logoImageUrl = props.logoImageUrl || '';
   $: logoHeight = Number(props.logoImageHeight) || 40;
-  $: logoTextColor = (props.logoTextColor as string) || 'var(--theme-text-primary, #0f172a)';
+  $: logoTextColor = (props.logoTextColor as string) || 'var(--theme-text-primary, var(--color-text-main))';
   $: logoTypographyToken = (props.logoTypographyToken as string) || 'h3';
 
   $: nodeStyles = props?.nodeStyles?.logo || {};
@@ -54,8 +54,8 @@
   on:keydown={handleKeyDown}
   class={`flex items-center gap-2.5 cursor-pointer rounded-lg transition-all select-none flex-shrink-0 ${
     isNodeActive
-      ? 'ring-2 ring-blue-500 bg-blue-50/30 dark:bg-blue-950/30'
-      : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+      ? 'ring-2 ring-primary bg-blue-50/30 dark:bg-blue-950/30'
+      : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
   }`}
 >
   {#if logoType === 'image_only' || logoType === 'image_text'}
@@ -80,7 +80,7 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class={`font-heading font-bold text-lg text-[var(--color-text-main,#0f172a)] tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
+      class={`font-heading font-bold text-lg text-[var(--color-text-main)] tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
         hideTextOnMobile && isMobile ? 'hidden' : 'inline-block'
       }`}
     >

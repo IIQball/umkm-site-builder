@@ -51,26 +51,26 @@
       on:keydown={handleHeadingKeydown}
       class={`text-center max-w-2xl mx-auto mb-8 p-3 rounded-2xl transition-all cursor-pointer ${
         isHeadingActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       {#if badgeText}
         <span
           data-node="badge"
-          class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary,#2563eb)] mb-4 shadow-2xs"
+          class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-4 shadow-2xs"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary,#2563eb)]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
           {badgeText}
         </span>
       {/if}
       {#if title}
-        <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main,#0f172a)] tracking-tight mb-3">
+        <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-3">
           {title}
         </h2>
       {/if}
       {#if subtitle}
-        <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary,#334155)] leading-relaxed font-sans">
+        <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] leading-relaxed font-sans">
           {subtitle}
         </p>
       {/if}
@@ -88,18 +88,18 @@
       on:keydown={(e) => handleItemKeydown(e, index)}
       class={`zigzag-item p-4 rounded-2xl transition-all duration-150 cursor-pointer ${isEven ? 'zigzag-reverse' : ''} ${
         isItemActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/10 dark:bg-blue-950/10'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/10 dark:bg-blue-950/10'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <div class="text-left">
-        <span class={`text-xs font-heading font-bold uppercase tracking-wider block mb-2 ${isEven ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--color-primary,#2563eb)]'}`}>
+        <span class={`text-xs font-heading font-bold uppercase tracking-wider block mb-2 ${isEven ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--color-primary)]'}`}>
           {item.badge || `Langkah 0${index + 1}`}
         </span>
-        <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main,#0f172a)] mb-3">
+        <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main)] mb-3">
           {item.title}
         </h3>
-        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary,#334155)] leading-relaxed font-sans">
+        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
           {item.description}
         </p>
       </div>
@@ -108,7 +108,7 @@
         tabindex="0"
         on:click|stopPropagation={(e) => handleImageClick(e, index)}
         on:keydown={(e) => handleImageKeydown(e, index)}
-        class="w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-md bg-[var(--color-nested-base,#f1f5f9)]"
+        class="w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-md bg-[var(--color-nested-base)]"
       >
         <img
           src={item.imageUrl || (isEven ? 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80' : 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80')}

@@ -42,10 +42,10 @@
       tabindex="0"
       on:click={(e) => selectNode(e, 'hero_image')}
       on:keydown={(e) => selectNodeKey(e, 'hero_image')}
-      class={`w-full max-w-4xl mt-4 p-2 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-lg transition-all cursor-pointer ${
+      class={`w-full max-w-4xl mt-4 p-2 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-lg transition-all cursor-pointer ${
         isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <img

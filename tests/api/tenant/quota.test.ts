@@ -65,9 +65,9 @@ describe('Tenant Quota API', () => {
     });
   });
 
-  it('GET returns 404 if store not found', async () => {
+  it('GET returns zero quota if store not created yet', async () => {
     // Mock no store
-    const mockStore: { id: string, userId: string }[] = [];
+    const mockStore: { id: string, userId: string }[] = []
     
     const selectMock = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -75,18 +75,24 @@ describe('Tenant Quota API', () => {
           limit: vi.fn().mockResolvedValue(mockStore),
         }),
       }),
-    });
+    })
 
-    (db.select as unknown as Mock) = selectMock;
+    const selectTarget = db.select as unknown as Mock
+    selectTarget.mockImplementation(selectMock)
 
-    const request = new Request('http://localhost/api/tenant/quota');
-    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const request = new Request('http://localhost/api/tenant/quota')
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext
     
-    const response = (await GET(context)) as Response;
-    const data = await response.json();
+    const response = (await GET(context)) as Response
+    const data = await response.json()
 
-    expect(response.status).toBe(404);
-    expect(data.ok).toBe(false);
-    expect(data.error.message).toBe('Toko tidak ditemukan');
-  });
-});
+    expect(response.status).toBe(200)
+    expect(data).toEqual({
+      ok: true,
+      data: {
+        products: 0,
+        categories: 0
+      }
+    })
+  })
+})

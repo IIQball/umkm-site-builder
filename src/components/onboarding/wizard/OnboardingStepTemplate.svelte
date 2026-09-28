@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import {
     ArrowLeft,
     CheckCircle,
@@ -12,6 +13,7 @@
   } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import type { TemplateItem } from '../onboarding.types';
+  import { getMainDomain } from '@/lib/domain';
 
   export let templates: TemplateItem[] = [];
   export let selectedTemplateId: string = '';
@@ -21,6 +23,11 @@
   export let submitError: string = '';
   export let onPrev: () => void;
   export let onNext: () => void;
+
+  let mainDomain = 'localhost:4321';
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 
   $: if (!selectedTemplateId && templates.length > 0) {
     selectedTemplateId = templates[0].id;
@@ -133,7 +140,7 @@
           </div>
           <div class="px-3 py-1 rounded-md bg-card border border-light text-2xs font-mono text-secondary flex items-center gap-1.5 max-w-[260px] truncate shadow-2xs">
             <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-            <span class="text-main font-semibold truncate">{subdomain || 'tokomami'}.umkm.site</span>
+            <span class="text-main font-semibold truncate">{subdomain || 'tokomami'}.{mainDomain}</span>
           </div>
           <div class="text-3xs font-bold uppercase tracking-caps text-primary">
             Preview
@@ -157,7 +164,7 @@
                     <p class="text-3xs text-secondary leading-tight">Katalog Resmi & WhatsApp Order</p>
                   </div>
                 </div>
-                <span class="text-3xs font-bold uppercase tracking-caps px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                <span class="badge badge-success badge-outline badge-xs text-3xs font-bold uppercase tracking-caps">
                   Buka
                 </span>
               </div>

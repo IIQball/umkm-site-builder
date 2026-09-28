@@ -77,7 +77,7 @@
           {:else}
             <button
               type="button"
-              class="join-item btn {btnSizeClass} border-0 font-mono font-bold cursor-pointer transition-all {currentPage === p ? 'bg-slate-900 text-white dark:bg-orange dark:text-white shadow-inner' : 'bg-nested hover:bg-nested/80 text-main'}"
+              class="join-item btn {btnSizeClass} border-0 font-mono font-bold cursor-pointer transition-all {currentPage === p ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-inner' : 'bg-nested hover:bg-nested/80 text-main'}"
               on:click={() => goToPage(Number(p))}
               aria-current={currentPage === p ? 'page' : undefined}
             >

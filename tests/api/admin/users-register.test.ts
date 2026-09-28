@@ -53,17 +53,15 @@ describe('POST /api/admin/users/register', () => {
     const payload = {
       role: 'tenant',
       name: 'Tenant User',
-      email: 'tenant@test.com',
-      password: 'password123',
-      confirmPassword: 'password123'
-    };
+      email: 'tenant@test.com'
+    }
 
-    const response = await POST(mockContext(payload)) as Response;
-    const json = await response.json();
+    const response = await POST(mockContext(payload)) as Response
+    const json = await response.json()
 
-    expect(response.status).toBe(200);
-    expect(json.ok).toBe(true);
-    expect(json.data.id).toBe('new_user_123');
+    expect(response.status).toBe(200)
+    expect(json.ok).toBe(true)
+    expect(json.data.id).toBe('new_user_123')
 
     // verify signUpEmail is called with empty Headers
     expect(auth.api.signUpEmail).toHaveBeenCalledWith(
@@ -75,28 +73,26 @@ describe('POST /api/admin/users/register', () => {
         }),
         headers: expect.any(Headers)
       })
-    );
+    )
 
     // verify session deletion is triggered
-    expect(db.delete).toHaveBeenCalled();
-  });
+    expect(db.delete).toHaveBeenCalled()
+  })
 
-  it('should return 400 if validation fails (password mismatch)', async () => {
+  it('should return 400 if validation fails (invalid email)', async () => {
     const payload = {
       role: 'designer',
       name: 'Designer',
-      email: 'designer@test.com',
-      password: 'password123',
-      confirmPassword: 'password321' // Mismatch
-    };
+      email: 'invalid-email'
+    }
 
-    const response = await POST(mockContext(payload)) as Response;
-    const json = await response.json();
+    const response = await POST(mockContext(payload)) as Response
+    const json = await response.json()
 
-    expect(response.status).toBe(400);
-    expect(json.ok).toBe(false);
-    expect(json.error).toBeDefined();
-  });
+    expect(response.status).toBe(400)
+    expect(json.ok).toBe(false)
+    expect(json.error).toBeDefined()
+  })
 
   it('should return 400 if email already exists', async () => {
     (db.select as unknown as { mockImplementationOnce: (fn: unknown) => void }).mockImplementationOnce(() => ({
@@ -105,20 +101,18 @@ describe('POST /api/admin/users/register', () => {
           limit: vi.fn().mockResolvedValue([{ id: 'existing_user' }]),
         })),
       })),
-    }));
+    }))
 
     const payload = {
       role: 'tenant',
       name: 'Tenant',
-      email: 'existing@test.com',
-      password: 'password123',
-      confirmPassword: 'password123'
-    };
+      email: 'existing@test.com'
+    }
 
-    const response = await POST(mockContext(payload)) as Response;
-    const json = await response.json();
+    const response = await POST(mockContext(payload)) as Response
+    const json = await response.json()
 
-    expect(response.status).toBe(400);
-    expect(json.error.message).toBe('Email is already registered in the system');
-  });
-});
+    expect(response.status).toBe(400)
+    expect(json.error.message).toBe('Email is already registered in the system')
+  })
+})

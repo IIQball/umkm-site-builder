@@ -38,8 +38,8 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectQuote(e); }}
     class={`p-4 rounded-2xl cursor-pointer transition-all ${
       $canvasStore.selectedNodeId === 'testi_spotlight_quote'
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     <p class="text-base sm:text-xl font-heading italic text-main leading-relaxed">
@@ -54,8 +54,8 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectAuthor(e); }}
     class={`pt-2 cursor-pointer transition-all rounded-xl p-2 ${
       $canvasStore.selectedNodeId === 'testi_spotlight_author'
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     <h4 class="font-heading font-black text-sm text-main">

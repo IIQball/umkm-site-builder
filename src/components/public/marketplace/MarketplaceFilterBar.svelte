@@ -15,15 +15,20 @@
   <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
     <!-- Search Bar -->
     <div class="relative flex-1">
-      <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-lg pointer-events-none">
-        search
-      </span>
       <input
+        id="marketplace-search-input"
         type="text"
         bind:value={searchQuery}
         placeholder="Cari tema toko, kuliner, fashion, nama desainer..."
         class="w-full bg-nested/70 border border-light rounded-full pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all shadow-2xs font-sans"
       />
+      <label
+        for="marketplace-search-input"
+        class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-lg cursor-text z-10 select-none"
+        aria-hidden="true"
+      >
+        search
+      </label>
       {#if searchQuery}
         <button
           type="button"
@@ -40,6 +45,7 @@
       <!-- Price Filter Dropdown -->
       <div class="relative min-w-[140px]">
         <select
+          id="marketplace-price-filter"
           bind:value={selectedPriceFilter}
           class="w-full bg-nested/70 border border-light rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:border-primary transition-all shadow-2xs cursor-pointer appearance-none pr-8"
         >
@@ -50,14 +56,19 @@
           <option value="50to100">Rp 50.000 - Rp 100.000</option>
           <option value="above100">&gt; Rp 100.000</option>
         </select>
-        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">
+        <label
+          for="marketplace-price-filter"
+          class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm cursor-pointer z-10 select-none"
+          aria-hidden="true"
+        >
           expand_more
-        </span>
+        </label>
       </div>
 
       <!-- Sorting Dropdown -->
       <div class="relative min-w-[150px]">
         <select
+          id="marketplace-sort-filter"
           bind:value={selectedSort}
           class="w-full bg-nested/70 border border-light rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:border-primary transition-all shadow-2xs cursor-pointer appearance-none pr-8"
         >
@@ -66,9 +77,13 @@
           <option value="price_desc">Harga: Tertinggi</option>
           <option value="name_asc">Nama (A - Z)</option>
         </select>
-        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">
+        <label
+          for="marketplace-sort-filter"
+          class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm cursor-pointer z-10 select-none"
+          aria-hidden="true"
+        >
           sort
-        </span>
+        </label>
       </div>
 
       {#if searchQuery || selectedCategorySlug !== 'all' || selectedPriceFilter !== 'all' || selectedSort !== 'newest'}
@@ -91,12 +106,12 @@
       type="button"
       on:click={() => (selectedCategorySlug = 'all')}
       class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
-        ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
+        ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
         : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
     >
       <span class="material-symbols-outlined text-sm">grid_view</span>
       <span>Semua Kategori</span>
-      <span class="text-3xs opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
+      <span class="text-[11px] opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
         {templates.length}
       </span>
     </button>
@@ -107,13 +122,13 @@
         type="button"
         on:click={() => (selectedCategorySlug = cat.slug)}
         class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
-          ? 'bg-slate-900 text-white dark:bg-primary dark:text-white shadow-2xs'
+          ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
           : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
       >
         <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>
         <span>{cat.name}</span>
         {#if count > 0}
-          <span class="text-3xs opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
+          <span class="text-[11px] opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
             {count}
           </span>
         {/if}

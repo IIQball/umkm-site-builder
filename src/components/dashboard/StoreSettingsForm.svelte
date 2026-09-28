@@ -1,38 +1,52 @@
 <script lang="ts">
-  import { Store, Phone, MapPin, CheckCircle, AlertCircle } from 'lucide-svelte';
-  import { Button } from '@/components/ui';
+  import { onMount } from "svelte";
+  import {
+    Store,
+    Phone,
+    MapPin,
+    CheckCircle,
+    AlertCircle,
+  } from "lucide-svelte";
+  import { Button } from "@/components/ui"
+  import { getMainDomain } from "@/lib/domain"
+  import { toast } from "@/lib/toast"
 
-  export let initialStoreName = '';
-  export let initialWaNumber = '';
-  export let initialGoogleMapsUrl = '';
+  export let initialStoreName = "";
+  export let initialWaNumber = "";
+  export let initialGoogleMapsUrl = "";
   export let initialIsOpen = true;
-  export let subdomain = '';
+  export let subdomain = "";
   export let storeId: string | undefined = undefined;
+
+  let mainDomain = "localhost:4321";
+  onMount(() => {
+    mainDomain = getMainDomain();
+  });
 
   let storeName = initialStoreName;
   let waNumber = initialWaNumber;
   let googleMapsUrl = initialGoogleMapsUrl;
   let isOpen = initialIsOpen;
-  
+
   let formErrors: Record<string, string> = {};
-  let submitStatus: 'idle' | 'submitting' | 'success' | 'error' = 'idle';
-  let submitMessage = '';
+  let submitStatus: "idle" | "submitting" | "success" | "error" = "idle";
+  let submitMessage = "";
   let statusSubmitting = false;
 
   function validate(): boolean {
     formErrors = {};
     let isValid = true;
-    
+
     if (!storeName || storeName.length < 3) {
-      formErrors.storeName = 'Nama toko minimal 3 karakter';
+      formErrors.storeName = "Nama toko minimal 3 karakter";
       isValid = false;
     } else if (storeName.length > 100) {
-      formErrors.storeName = 'Nama toko maksimal 100 karakter';
+      formErrors.storeName = "Nama toko maksimal 100 karakter";
       isValid = false;
     }
 
     if (!waNumber || !/^628[0-9]{7,12}$/.test(waNumber)) {
-      formErrors.waNumber = 'Nomor WhatsApp tidak valid. Gunakan format 628...';
+      formErrors.waNumber = "Nomor WhatsApp tidak valid. Gunakan format 628...";
       isValid = false;
     }
 
@@ -40,7 +54,7 @@
       try {
         new URL(googleMapsUrl);
       } catch {
-        formErrors.googleMapsUrl = 'URL Google Maps tidak valid';
+        formErrors.googleMapsUrl = "URL Google Maps tidak valid";
         isValid = false;
       }
     }
@@ -51,14 +65,16 @@
   async function handleSubmit() {
     if (!validate()) return;
 
-    submitStatus = 'submitting';
-    submitMessage = '';
+    submitStatus = "submitting";
+    submitMessage = "";
 
     try {
-      const endpoint = storeId ? `/api/stores/settings?storeId=${encodeURIComponent(storeId)}` : '/api/stores/settings';
+      const endpoint = storeId
+        ? `/api/stores/settings?storeId=${encodeURIComponent(storeId)}`
+        : "/api/stores/settings";
       const res = await fetch(endpoint, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: storeName,
           waNumber,
@@ -68,58 +84,58 @@
       });
 
       if (res.status === 401) {
-        window.location.href = '/auth/login';
+        window.location.href = "/auth/login";
         return;
       }
 
       const data = await res.json();
 
       if (!data.ok) {
-        submitStatus = 'error';
-        submitMessage = data.error || 'Gagal menyimpan pengaturan toko';
+        submitStatus = "error";
+        submitMessage = data.error || "Gagal menyimpan pengaturan toko";
         return;
       }
 
-      submitStatus = 'success';
-      submitMessage = 'Pengaturan berhasil disimpan';
-      
+      submitStatus = "success";
+      submitMessage = "Pengaturan berhasil disimpan";
+
       setTimeout(() => {
-        submitStatus = 'idle';
+        submitStatus = "idle";
       }, 3000);
-      
     } catch {
-      submitStatus = 'error';
-      submitMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+      submitStatus = "error";
+      submitMessage = "Terjadi kesalahan. Silakan coba lagi.";
     }
   }
 
   async function handleStatusToggle() {
     statusSubmitting = true;
     try {
-      const res = await fetch('/api/stores/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/stores/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isOpen }),
       });
 
       if (res.status === 401) {
-        window.location.href = '/auth/login';
+        window.location.href = "/auth/login";
         return;
       }
 
       const data = await res.json();
 
       if (!data.ok) {
-        isOpen = !isOpen;
-        alert(data.error || 'Gagal mengubah status toko');
-        return;
+        isOpen = !isOpen
+        toast.error(data.error || "Gagal mengubah status toko")
+        return
       }
 
+      toast.success(isOpen ? "Toko berhasil dibuka" : "Toko berhasil ditutup")
     } catch {
-      isOpen = !isOpen;
-      alert('Terjadi kesalahan. Silakan coba lagi.');
+      isOpen = !isOpen
+      toast.error("Terjadi kesalahan. Silakan coba lagi.")
     } finally {
-      statusSubmitting = false;
+      statusSubmitting = false
     }
   }
 </script>
@@ -141,11 +157,15 @@
           value={subdomain}
           readonly
         />
-        <span class="join-item flex items-center bg-nested px-3 text-sm font-medium text-muted border-y border-r border-base-300">
-          .umkm.site
+        <span
+          class="join-item flex items-center bg-nested px-3 text-sm font-medium text-muted border-y border-r border-base-300"
+        >
+          .{mainDomain}
         </span>
       </div>
-      <span class="label-text-alt text-muted mt-1">Subdomain tidak dapat diubah setelah pendaftaran.</span>
+      <span class="label-text-alt text-muted mt-1"
+        >Subdomain tidak dapat diubah setelah pendaftaran.</span
+      >
     </div>
 
     <!-- Editable Fields -->
@@ -155,7 +175,9 @@
         <span class="label-text-alt text-error">*</span>
       </label>
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
           <Store size={18} class="text-base-content/40" />
         </div>
         <input
@@ -168,7 +190,9 @@
         />
       </div>
       {#if formErrors.storeName}
-        <span class="label-text-alt text-error mt-1">{formErrors.storeName}</span>
+        <span class="label-text-alt text-error mt-1"
+          >{formErrors.storeName}</span
+        >
       {/if}
     </div>
 
@@ -178,7 +202,9 @@
         <span class="label-text-alt text-error">*</span>
       </label>
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
           <Phone size={18} class="text-base-content/40" />
         </div>
         <input
@@ -190,18 +216,27 @@
           class:input-error={!!formErrors.waNumber}
         />
       </div>
-      <span class="label-text-alt text-base-content/50 mt-1">Gunakan format 628... (tanpa + atau 0 di depan)</span>
+      <span class="label-text-alt text-base-content/50 mt-1"
+        >Gunakan format 628... (tanpa + atau 0 di depan)</span
+      >
       {#if formErrors.waNumber}
-        <span class="label-text-alt text-error mt-1">{formErrors.waNumber}</span>
+        <span class="label-text-alt text-error mt-1">{formErrors.waNumber}</span
+        >
       {/if}
     </div>
 
     <div class="form-control w-full">
       <label class="label" for="maps-url">
-        <span class="label-text font-medium">Google Maps URL <span class="text-base-content/40 font-normal">(Opsional)</span></span>
+        <span class="label-text font-medium"
+          >Google Maps URL <span class="text-base-content/40 font-normal"
+            >(Opsional)</span
+          ></span
+        >
       </label>
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
           <MapPin size={18} class="text-base-content/40" />
         </div>
         <input
@@ -214,7 +249,9 @@
         />
       </div>
       {#if formErrors.googleMapsUrl}
-        <span class="label-text-alt text-error mt-1">{formErrors.googleMapsUrl}</span>
+        <span class="label-text-alt text-error mt-1"
+          >{formErrors.googleMapsUrl}</span
+        >
       {/if}
     </div>
 
@@ -226,9 +263,13 @@
       </label>
       <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
         <div>
-          <p class="text-sm font-semibold">{isOpen ? 'Toko Sedang Buka' : 'Toko Sedang Tutup'}</p>
+          <p class="text-sm font-semibold">
+            {isOpen ? "Toko Sedang Buka" : "Toko Sedang Tutup"}
+          </p>
           <p class="text-xs text-base-content/60 mt-1">
-            {isOpen ? 'Pelanggan dapat memesan' : 'Pelanggan tidak dapat memesan'}
+            {isOpen
+              ? "Pelanggan dapat memesan"
+              : "Pelanggan tidak dapat memesan"}
           </p>
         </div>
         <input
@@ -243,12 +284,12 @@
     </div>
 
     <!-- Alert Messages -->
-    {#if submitStatus === 'error'}
+    {#if submitStatus === "error"}
       <div class="alert alert-error text-sm">
         <AlertCircle size={16} />
         <span>{submitMessage}</span>
       </div>
-    {:else if submitStatus === 'success'}
+    {:else if submitStatus === "success"}
       <div class="alert alert-success text-sm">
         <CheckCircle size={16} />
         <span>{submitMessage}</span>
@@ -260,8 +301,8 @@
       <Button
         variant="primary"
         size="md"
-        disabled={submitStatus === 'submitting'}
-        loading={submitStatus === 'submitting'}
+        disabled={submitStatus === "submitting"}
+        loading={submitStatus === "submitting"}
         on:click={handleSubmit}
         className="font-bold min-w-[180px]"
       >

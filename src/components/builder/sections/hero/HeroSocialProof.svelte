@@ -28,8 +28,8 @@
     on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_social_proof')}
     class={`flex items-center justify-center gap-3 mb-6 p-2 rounded-2xl transition-all cursor-pointer ${
       isSocialProofActive
-        ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 bg-blue-50/20 dark:bg-blue-950/20'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
     <div class="flex -space-x-2 overflow-hidden">
@@ -44,7 +44,7 @@
           <Star size={12} class="fill-current text-amber-400" />
         {/each}
       </div>
-      <span class="text-[var(--color-text-secondary,#334155)] font-medium font-mono text-[11px]">Dipercaya oleh <strong>2.500+</strong> Pembeli</span>
+      <span class="text-[var(--color-text-secondary)] font-medium font-mono text-[11px]">Dipercaya oleh <strong>2.500+</strong> Pembeli</span>
     </div>
   </div>
 

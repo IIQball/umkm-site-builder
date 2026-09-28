@@ -63,16 +63,16 @@
       tabindex="0"
       on:click={handleBeforeClick}
       on:keydown={handleBeforeKeydown}
-      class={`bg-[var(--color-nested-base,#f1f5f9)] p-6 rounded-2xl border space-y-4 shadow-xs transition-all duration-150 cursor-pointer ${
+      class={`bg-[var(--color-nested-base)] p-6 rounded-2xl border space-y-4 shadow-xs transition-all duration-150 cursor-pointer ${
         activeNodeId === 'feature_item_0'
-          ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'border-[var(--color-border,rgba(15,23,42,0.08))] hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'border-[var(--color-border)] hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
-      <span class="inline-flex items-center rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1 bg-slate-200/80 dark:bg-slate-800/80 text-[var(--color-text-secondary,#334155)] text-xs font-heading font-medium">
+      <span class="inline-flex items-center rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1 bg-slate-200/80 dark:bg-slate-800/80 text-[var(--color-text-secondary)] text-xs font-heading font-medium">
         {beforeTitle}
       </span>
-      <ul class="space-y-3 text-xs text-[var(--color-text-muted,#64748b)] font-sans">
+      <ul class="space-y-3 text-xs text-[var(--color-text-muted)] font-sans">
         {#each beforeItems as item}
           <li class="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <X size={15} class="shrink-0" />
@@ -89,16 +89,16 @@
       tabindex="0"
       on:click={handleAfterClick}
       on:keydown={handleAfterKeydown}
-      class={`bg-[var(--color-card-base,#ffffff)] p-6 rounded-2xl border-2 space-y-4 shadow-sm relative transition-all duration-150 cursor-pointer ${
+      class={`bg-[var(--color-card-base)] p-6 rounded-2xl border-2 space-y-4 shadow-sm relative transition-all duration-150 cursor-pointer ${
         activeNodeId === 'feature_item_1'
-          ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'border-emerald-500 hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
+          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'border-emerald-500 hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
       <span class="inline-flex items-center rounded-full bg-emerald-600 text-white px-3 py-1 text-xs font-heading font-semibold shadow-xs">
         {afterTitle}
       </span>
-      <ul class="space-y-3 text-xs text-[var(--color-text-main,#0f172a)] font-medium font-sans">
+      <ul class="space-y-3 text-xs text-[var(--color-text-main)] font-medium font-sans">
         {#each afterItems as item}
           <li class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
             <Check size={15} class="shrink-0" />

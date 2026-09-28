@@ -20,7 +20,7 @@
   ];
 
   const ctaColorTokenOptions = [
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Tema)' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand (Tema)' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
     { value: '#059669', label: 'Emerald / WhatsApp Hijau' },
     { value: 'var(--theme-text-primary, #0f172a)', label: 'Gelap Kontras (Dark)' },

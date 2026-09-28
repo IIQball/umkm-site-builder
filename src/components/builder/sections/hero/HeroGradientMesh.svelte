@@ -27,8 +27,8 @@
     align="center"
   />
 
-  <div class="w-full max-w-md p-6 rounded-2xl bg-[var(--color-card-base,#ffffff)]/80 backdrop-blur-md border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-xl flex flex-col items-center gap-4">
-    <div class="flex items-center gap-4 text-xs font-medium text-[var(--color-text-secondary,#334155)]">
+  <div class="w-full max-w-md p-6 rounded-2xl bg-[var(--color-card-base)]/80 backdrop-blur-md border border-[var(--color-border)] shadow-xl flex flex-col items-center gap-4">
+    <div class="flex items-center gap-4 text-xs font-medium text-[var(--color-text-secondary)]">
       <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Kualitas Asli</span>
       <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Siap Kirim</span>
       <span class="flex items-center gap-1"><CheckCircle2 size={14} class="text-emerald-500" /> Garansi Aman</span>

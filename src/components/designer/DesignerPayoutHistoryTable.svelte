@@ -60,7 +60,7 @@
   <!-- Table Header & Controls -->
   <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
         <span class="material-symbols-outlined text-lg">account_balance</span>
       </div>
       <div>
@@ -114,7 +114,7 @@
         <button
           type="button"
           on:click={() => activeFilter = 'rejected'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'rejected' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'rejected' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
           Ditolak
@@ -187,7 +187,7 @@
                 class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                 title="Salin Payout Reference"
               >
-                <span class="truncate max-w-[110px]">{refText}</span>
+                <span class="inline-block truncate max-w-[110px] align-middle">{refText}</span>
                 <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === refText ? 'text-emerald-500' : ''}">
                   {copiedId === refText ? 'check' : 'content_copy'}
                 </span>

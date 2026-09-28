@@ -60,7 +60,7 @@
 {#if open}
   <div
     use:teleport
-    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 !bg-slate-950/60 backdrop-blur-sm transition-all"
+    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 !bg-main/60 backdrop-blur-sm transition-all"
     role="presentation"
   >
     <div

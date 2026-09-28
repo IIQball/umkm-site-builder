@@ -1,60 +1,60 @@
-import type { TemplateTheme } from '@/schemas';
-import { calculateGoldenRatioTypography } from '@/lib/utils/designMath';
+import type { TemplateTheme } from '@/schemas'
+import { calculateGoldenRatioTypography } from '@/lib/utils/designMath'
 
 export const buildCanvasCssVars = (
   theme: TemplateTheme,
   isDarkPreview: boolean,
   viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop'
 ): string => {
-  const colors = theme?.colors || {};
-  const typography = theme?.typography || {};
-  const buttons = theme?.buttons || {};
-  const layout = theme?.layout || {};
+  const colors = theme?.colors || {}
+  const typography = theme?.typography || {}
+  const buttons = theme?.buttons || {}
+  const layout = theme?.layout || {}
 
-  const baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16;
-  const goldenRatio = calculateGoldenRatioTypography(baseFontSize);
+  const baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16
+  const goldenRatio = calculateGoldenRatioTypography(baseFontSize)
 
-  const primaryColor = colors.primary || '#3b82f6';
-  const secondaryColor = colors.secondary || '#64748b';
-  const headingFont = typography.headingFont || "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif";
-  const bodyFont = typography.bodyFont || "'Poppins', system-ui, -apple-system, sans-serif";
+  const primaryColor = colors.primary || (isDarkPreview ? '#00A3EF' : '#36C6FD')
+  const secondaryColor = colors.secondary || (isDarkPreview ? '#B90162' : '#FC018B')
+  const headingFont = typography.headingFont || "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif"
+  const bodyFont = typography.bodyFont || "'Poppins', system-ui, -apple-system, sans-serif"
 
   // Active Layout Dimensions
   const activeSafeZone = viewMode === 'mobile'
     ? (layout.horizontalMarginMobile || '16px')
     : viewMode === 'tablet'
       ? (layout.horizontalMarginTablet || '24px')
-      : (layout.horizontalMarginDesktop || '32px');
+      : (layout.horizontalMarginDesktop || '32px')
 
-  const activeGutter = viewMode === 'desktop' ? '24px' : viewMode === 'tablet' ? '16px' : '12px';
-  const activeMaxWidth = layout.maxWidth || '1200px';
+  const activeGutter = viewMode === 'desktop' ? '24px' : viewMode === 'tablet' ? '16px' : '12px'
+  const activeMaxWidth = layout.maxWidth || '1200px'
 
   // Typography Scales
-  const h1Size = typography.h1?.fontSize || `${goldenRatio.h1}px`;
-  const h1Weight = typography.h1?.fontWeight || '700';
-  const h2Size = typography.h2?.fontSize || `${goldenRatio.h2}px`;
-  const h2Weight = typography.h2?.fontWeight || '700';
-  const h3Size = typography.h3?.fontSize || `${goldenRatio.h3}px`;
-  const h3Weight = typography.h3?.fontWeight || '600';
-  const bodySize = typography.body?.fontSize || `${goldenRatio.body}px`;
-  const bodyWeight = typography.body?.fontWeight || '400';
-  const captionSize = typography.caption?.fontSize || `${goldenRatio.caption}px`;
-  const captionWeight = typography.caption?.fontWeight || '700';
+  const h1Size = typography.h1?.fontSize || `${goldenRatio.h1}px`
+  const h1Weight = typography.h1?.fontWeight || '700'
+  const h2Size = typography.h2?.fontSize || `${goldenRatio.h2}px`
+  const h2Weight = typography.h2?.fontWeight || '700'
+  const h3Size = typography.h3?.fontSize || `${goldenRatio.h3}px`
+  const h3Weight = typography.h3?.fontWeight || '600'
+  const bodySize = typography.body?.fontSize || `${goldenRatio.body}px`
+  const bodyWeight = typography.body?.fontWeight || '400'
+  const captionSize = typography.caption?.fontSize || `${goldenRatio.caption}px`
+  const captionWeight = typography.caption?.fontWeight || '700'
 
   // Button Values
-  const btnRadius = buttons.borderRadius || '16px';
-  const btnPrimaryBg = buttons.primary?.backgroundColor || primaryColor;
-  const btnPrimaryText = buttons.primary?.textColor || '#ffffff';
-  const btnSecondaryBg = buttons.secondary?.backgroundColor || (isDarkPreview ? '#1f2937' : '#f1f5f9');
-  const btnSecondaryText = buttons.secondary?.textColor || (isDarkPreview ? '#f8fafc' : '#0f172a');
-  const btnOutlineBorder = buttons.outline?.borderColor || primaryColor;
-  const btnOutlineText = buttons.outline?.textColor || primaryColor;
+  const btnRadius = buttons.borderRadius || '16px'
+  const btnPrimaryBg = buttons.primary?.backgroundColor || primaryColor
+  const btnPrimaryText = buttons.primary?.textColor || '#ffffff'
+  const btnSecondaryBg = buttons.secondary?.backgroundColor || (isDarkPreview ? '#1f2937' : '#f1f5f9')
+  const btnSecondaryText = buttons.secondary?.textColor || (isDarkPreview ? '#f8fafc' : '#0f172a')
+  const btnOutlineBorder = buttons.outline?.borderColor || primaryColor
+  const btnOutlineText = buttons.outline?.textColor || primaryColor
 
   return [
     // 1. Semantic Color Tokens
     `--color-primary: ${primaryColor}`,
-    `--color-primary-dark: #1d4ed8`,
-    `--color-primary-light: #3b82f6`,
+    `--color-primary-dark: ${isDarkPreview ? '#0284c7' : '#00A2EE'}`,
+    `--color-primary-light: ${isDarkPreview ? '#36C6FD' : '#7dd3fc'}`,
     `--color-secondary: ${secondaryColor}`,
     `--color-bg-base: ${isDarkPreview ? '#0b0f19' : (colors.background || '#ffffff')}`,
     `--color-card-base: ${isDarkPreview ? '#111827' : (colors.surface || '#ffffff')}`,
@@ -122,5 +122,5 @@ export const buildCanvasCssVars = (
     `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
     `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
     `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
-  ].join('; ');
-};
+  ].join(String.fromCharCode(59) + ' ')
+}

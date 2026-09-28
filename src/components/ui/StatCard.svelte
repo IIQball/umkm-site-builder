@@ -87,7 +87,7 @@
 
 <div
   class="{isDarkCard
-    ? 'bg-slate-900 text-white dark:bg-slate-800/95 border border-slate-800 dark:border-slate-700 shadow-sm'
+    ? 'bg-main text-canvas dark:bg-nested/95 border border-nested dark:border-nested/70 shadow-sm'
     : isOrangeCard
     ? 'bg-orange text-white border border-orange/20 shadow-md shadow-orange/10'
     : isBlueCard
@@ -101,7 +101,7 @@
       {label}
     </p>
     {#if icon}
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 {isDarkCard ? 'bg-slate-800 text-slate-200 border border-slate-700' : isColoredCard ? 'bg-white/15 text-white border border-white/20' : 'bg-nested border border-light text-muted'}">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 {isDarkCard ? 'bg-nested/50 text-canvas border border-nested/70' : isColoredCard ? 'bg-white/15 text-white border border-white/20' : 'bg-nested border border-light text-muted'}">
         <span class="material-symbols-outlined text-base {iconCls}">{icon}</span>
       </div>
     {/if}
@@ -120,10 +120,10 @@
   </div>
 
   <!-- Footer: Clean description / status / helper note -->
-  <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-2xs {isDarkCard ? 'border-slate-800 text-slate-400' : isColoredCard ? 'border-white/20 text-white/80' : 'border-light/60 text-muted'}">
+  <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-2xs {isDarkCard ? 'border-nested/30 text-canvas/60' : isColoredCard ? 'border-white/20 text-white/80' : 'border-light/60 text-muted'}">
     {#if badge}
-      <span class="inline-flex items-center gap-1.5 font-bold px-2.5 py-0.5 rounded-full border {isDarkCard ? 'bg-slate-800 border-slate-700 text-slate-300' : isColoredCard ? 'bg-white/20 border-white/30 text-white' : 'bg-nested border-light text-slate-700 dark:text-slate-300'} {badgeCls}">
-        <span class="w-1.5 h-1.5 rounded-full {isDarkCard ? 'bg-emerald-400' : isColoredCard ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'}"></span>
+      <span class="inline-flex items-center gap-1.5 font-bold px-2.5 py-0.5 rounded-full border {isDarkCard ? 'bg-nested/30 border-nested/50 text-canvas/80' : isColoredCard ? 'bg-white/20 border-white/30 text-white' : 'bg-nested border-light text-slate-700 dark:text-slate-300'} {badgeCls}">
+        <span class="w-1.5 h-1.5 rounded-full {isDarkCard ? 'bg-success' : isColoredCard ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'}"></span>
         <span>{badge}</span>
       </span>
     {/if}

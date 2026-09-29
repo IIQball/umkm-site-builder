@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Sliders, Type, ChevronRight, PanelRightClose } from 'lucide-svelte';
+  import { Sliders, Type, LayoutGrid, ChevronRight, PanelRightClose } from 'lucide-svelte';
   import ContentTab from './ContentTab.svelte';
+  import LayoutTab from './LayoutTab.svelte';
   import StylesTab from './StylesTab.svelte';
   import NodeStylesTab from './NodeStylesTab.svelte';
   import NodeContentForm from './inspector/NodeContentForm.svelte';
@@ -14,7 +15,7 @@
   export let section: TemplateSection | undefined = undefined;
   export let onSectionUpdate: (section: TemplateSection) => void;
 
-  let activeTab: 'content' | 'styles' = 'content';
+  let activeTab: 'layout' | 'content' | 'styles' = 'layout';
   let nodeTab: 'content' | 'styles' = 'styles';
 
   const getNodeLabel = (nodeId: string): string => {
@@ -86,7 +87,7 @@
             type="button"
             on:click={() => editorStore.selectNode(section.id, null)}
             class={`text-label-caps hover:text-base-content transition-colors uppercase tracking-caps cursor-pointer truncate ${
-              !$activeNodeId ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-base-content/60 hover:underline'
+              !$activeNodeId ? 'text-primary font-bold' : 'text-base-content/60 hover:underline'
             }`}
           >
             {section.type.replace('_', ' ')}
@@ -94,7 +95,7 @@
 
           {#if $activeNodeId}
             <ChevronRight size={13} class="text-base-content/40 flex-shrink-0" />
-            <span class="text-blue-600 dark:text-blue-400 font-semibold truncate text-xs">
+            <span class="text-primary font-semibold truncate text-xs">
               {getNodeLabel($activeNodeId)}
             </span>
           {/if}
@@ -172,7 +173,19 @@
       </div>
     {:else}
       <!-- Standard Full Section Tab Bar -->
-      <div class="grid grid-cols-2 border-b border-base-200 dark:border-slate-800 bg-base-200/50 p-1 gap-1">
+      <div class="grid grid-cols-3 border-b border-base-200 dark:border-slate-800 bg-base-200/50 p-1 gap-1">
+        <button
+          type="button"
+          on:click={() => (activeTab = 'layout')}
+          class={`flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+            activeTab === 'layout'
+              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
+              : 'text-base-content/60 hover:text-base-content'
+          }`}
+        >
+          <LayoutGrid size={13} />
+          <span>Tata Letak</span>
+        </button>
         <button
           type="button"
           on:click={() => (activeTab = 'content')}
@@ -201,7 +214,9 @@
 
       <!-- Tab Content -->
       <div class="flex-1 overflow-y-auto">
-        {#if activeTab === 'content'}
+        {#if activeTab === 'layout'}
+          <LayoutTab {section} />
+        {:else if activeTab === 'content'}
           <ContentTab {section} onUpdate={onSectionUpdate} />
         {:else}
           <StylesTab {section} onUpdate={onSectionUpdate} />

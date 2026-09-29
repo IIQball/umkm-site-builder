@@ -8,6 +8,7 @@
   } from '../nodeContent.constants';
   import HeroImageNodeForm from './HeroImageNodeForm.svelte';
   import HeroExtraNodeForms from './HeroExtraNodeForms.svelte';
+  import HeroCtaLinkSelect from '../../content/hero/HeroCtaLinkSelect.svelte';
   import { isHeroImageSupported } from '../../sections/hero/hero.helpers';
 
   export let section: TemplateSection;
@@ -159,27 +160,28 @@
     </p>
   {/if}
 {:else if nodeId === 'cta' || nodeId === 'hero_cta' || nodeId === 'hero_cta_primary' || nodeId === 'hero_cta_secondary'}
+  {@const isSecondary = nodeId === 'hero_cta_secondary'}
+  {@const activeCtaText = isSecondary ? ((section.props?.secondaryCtaText as string) ?? '') : ctaText}
+  {@const activeCtaLink = isSecondary ? ((section.props?.secondaryCtaLink as string) ?? '#') : ctaLink}
   <div class="space-y-3">
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="cta-text-input">Teks Tombol CTA</label>
+      <label class="font-semibold text-base-content" for="cta-text-input">
+        {isSecondary ? 'Teks Tombol CTA Sekunder' : 'Teks Tombol CTA'}
+      </label>
       <input
         id="cta-text-input"
         type="text"
-        value={ctaText}
-        on:input={(e) => onPropChange('ctaText', e.currentTarget.value)}
+        value={activeCtaText}
+        on:input={(e) => onPropChange(isSecondary ? 'secondaryCtaText' : 'ctaText', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
-        placeholder="Lihat Katalog"
+        placeholder={isSecondary ? 'Pelajari Selengkapnya' : 'Lihat Katalog'}
       />
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="cta-link-input">Tautan Tombol CTA (URL)</label>
-      <input
-        id="cta-link-input"
-        type="text"
-        value={ctaLink}
-        on:input={(e) => onPropChange('ctaLink', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs font-mono"
-        placeholder="#products"
+    <div>
+      <HeroCtaLinkSelect
+        value={activeCtaLink}
+        label={isSecondary ? 'Tujuan Tautan Tombol Sekunder' : 'Tujuan Tautan Tombol CTA'}
+        onChange={(val) => onPropChange(isSecondary ? 'secondaryCtaLink' : 'ctaLink', val)}
       />
     </div>
     <div class="grid grid-cols-2 gap-2">

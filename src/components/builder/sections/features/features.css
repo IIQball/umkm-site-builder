@@ -1,5 +1,5 @@
 /* ========================================================================= */
-/* CONTAINER QUERY CONTEXT (SSOT)                                            */
+/* CONTAINER QUERY CONTEXT & GLOBAL DESIGN SYSTEM INTEGRATION (SSOT)         */
 /* ========================================================================= */
 
 .feature-card {
@@ -7,23 +7,46 @@
   container-name: featurecard;
   width: 100%;
   box-sizing: border-box;
+  font-family: var(--font-family, var(--font-sans, var(--theme-font-body, system-ui, sans-serif)));
+  color: var(--color-text-main, var(--theme-text-primary, #0f172a));
+  background-color: var(--color-bg-base, var(--theme-bg, transparent));
+}
+
+.feature-card h1,
+.feature-card h2,
+.feature-card h3,
+.feature-card h4,
+.feature-card [data-node="title"],
+.feature-card .font-heading {
+  font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
+}
+
+.feature-card [data-node="subtitle"],
+.feature-card [data-node="feature_desc"],
+.feature-card p,
+.feature-card .font-sans {
+  font-family: var(--font-family, var(--font-sans, var(--theme-font-body, system-ui, sans-serif)));
 }
 
 .builder-safe-container {
   width: 100%;
-  padding-left: var(--active-safe-zone, 32px);
-  padding-right: var(--active-safe-zone, 32px);
+  padding-left: var(--active-safe-zone, var(--active-margin, 32px));
+  padding-right: var(--active-safe-zone, var(--active-margin, 32px));
   box-sizing: border-box;
 }
 
 /* ========================================================================= */
-/* CONTAINER QUERY RULES: KHUSUS FEATURES LAYOUTS (EXACT MATCH PROTOTYPE)    */
+/* CONTAINER QUERY RULES: KHUSUS FEATURES LAYOUTS                            */
 /* ========================================================================= */
 
 /* 1. Mobile Default (< 680px) */
-.cq-title {
-  font-size: 1.625rem;
-  line-height: 2rem;
+.cq-title,
+.title-heading {
+  font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
+  font-size: var(--text-h2-size, 1.625rem);
+  font-weight: var(--text-h2-weight, 800);
+  line-height: 1.25;
+  color: var(--color-text-main, var(--theme-text-primary, #0f172a));
 }
 .cq-grid-3 {
   display: flex;
@@ -83,9 +106,10 @@
 
 /* 2. Tablet Container Breakpoint (>= 680px) */
 @container featurecard (min-width: 680px) {
-  .cq-title {
-    font-size: 2.125rem;
-    line-height: 2.5rem;
+  .cq-title,
+  .title-heading {
+    font-size: calc(var(--text-h2-size, 2rem) * 0.95);
+    line-height: 1.2;
   }
   .cq-grid-3 {
     display: grid !important;
@@ -124,9 +148,10 @@
 
 /* 3. Desktop Container Breakpoint (>= 980px) */
 @container featurecard (min-width: 980px) {
-  .cq-title {
-    font-size: 2.5rem;
-    line-height: 2.875rem;
+  .cq-title,
+  .title-heading {
+    font-size: var(--text-h2-size, 2.5rem);
+    line-height: 1.15;
   }
   .cq-grid-3 {
     display: grid !important;

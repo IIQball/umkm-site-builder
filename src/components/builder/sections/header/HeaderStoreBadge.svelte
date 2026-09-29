@@ -11,12 +11,18 @@
   export let isActive: boolean = false;
   export let waNumber: string = '';
   export let ctaText: string = 'Konsultasi Gratis';
+  export let navbarOrder: string[] = ['logo', 'store_badges', 'nav_links', 'cta'];
   export let onToggleMobileMenu: () => void = () => {};
 
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isDesktop = viewMode === 'desktop';
   $: isMobile = viewMode === 'mobile';
   $: isSmallScreen = viewMode === 'mobile' || viewMode === 'tablet';
+
+  $: hasLogo = navbarOrder.includes('logo');
+  $: hasBadges = navbarOrder.includes('store_badges');
+  $: hasNav = navbarOrder.includes('nav_links');
+  $: hasCta = navbarOrder.includes('cta');
 
   $: bpomText = props.bpomText || '✓ BPOM';
   $: halalText = props.halalText || '✓ Halal MUI';
@@ -31,10 +37,12 @@
 >
   <!-- Logo & Legal Badges (BPOM & Halal MUI) -->
   <div data-node="logo" class="flex items-center flex-shrink-0">
-    <HeaderLogo {props} {sectionId} {isActive} />
+    {#if hasLogo}
+      <HeaderLogo {props} {sectionId} {isActive} />
+    {/if}
 
     <!-- Badges Highlight (Desktop & Tablet) -->
-    {#if !isMobile}
+    {#if hasBadges && !isMobile}
       <div class="flex items-center gap-1.5 ml-3 pl-3 border-l border-slate-200 dark:border-slate-800 text-[11px]">
         <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold border border-emerald-200/70 dark:border-emerald-800/70">
           {bpomText}
@@ -47,7 +55,7 @@
   </div>
 
   <!-- Desktop Nav Links in Center -->
-  {#if isDesktop}
+  {#if hasNav && isDesktop}
     <div data-node="nav_links" class="flex-1 flex items-center justify-center">
       <HeaderNav {props} {sectionId} {isActive} onlyDesktop={true} />
     </div>
@@ -55,12 +63,12 @@
 
   <!-- Right Controls: Desktop CTA & Mobile 44x44px Hamburger Button -->
   <div data-node="cta" class="flex items-center gap-2 flex-shrink-0 ml-auto">
-    {#if isDesktop || viewMode === 'tablet'}
+    {#if hasCta && (isDesktop || viewMode === 'tablet')}
       <a
         href={waUrl}
         target="_blank"
         rel="noreferrer"
-        class="inline-flex items-center justify-center px-4 h-9 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold shadow-xs transition-colors"
+        class="btn btn-sm btn-outline inline-flex items-center justify-center px-4 h-9 rounded-xl text-xs font-semibold shadow-xs transition-colors"
       >
         <span>{ctaText || 'Konsultasi Gratis'}</span>
       </a>
@@ -71,7 +79,7 @@
       <button
         type="button"
         on:click={onToggleMobileMenu}
-        class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-800 dark:text-slate-100 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-colors cursor-pointer shadow-xs ml-auto"
+        class="btn btn-ghost btn-square w-11 h-11 min-w-[44px] min-h-[44px] border border-base-300 dark:border-slate-700/80 rounded-xl transition-colors cursor-pointer shadow-xs ml-auto"
         aria-label="Buka menu navigasi"
       >
         <Menu size={20} />

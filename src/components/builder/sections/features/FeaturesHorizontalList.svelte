@@ -1,25 +1,20 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
+  import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
   export let badgeText: string = 'Standar Kualitas';
   export let title: string = 'Komitmen Terbaik di Setiap Pesanan';
   export let subtitle: string = 'Kami memastikan setiap tahapan dari kebun hingga ke tangan Anda melewati proses kurasi ketat.';
   export let items: FeatureItem[] = [];
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'feature_rows'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
 
-  $: isHeadingActive = activeNodeId === 'features_heading' || activeNodeId === 'header';
-
-  const handleHeadingClick = (e: MouseEvent) => {
-    if (selectNode) selectNode(e, 'features_heading');
-  };
-
-  const handleHeadingKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      if (selectNode) selectNode(e, 'features_heading');
-    }
-  };
+  $: isListOnLeft = isFeaturesVisualOnLeft('horizontal_list', elementOrder, false);
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
+  $: hasRows = elementOrder.includes('feature_rows') || elementOrder.includes('features_grid');
 
   const handleItemClick = (e: MouseEvent, index: number) => {
     if (selectNode) selectNode(e, `feature_item_${index}`);
@@ -33,71 +28,60 @@
 </script>
 
 <div class="py-12">
-  <div class="asym-split-container">
-    <!-- Kolom Kiri Sticky -->
-    <div
-      role="button"
-      tabindex="0"
-      on:click={handleHeadingClick}
-      on:keydown={handleHeadingKeydown}
-      class={`text-left asym-sticky-left self-start p-3 rounded-2xl transition-all cursor-pointer ${
-        isHeadingActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-      }`}
-    >
-      {#if badgeText}
-        <span
-          data-node="badge"
-          class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-emerald-50/90 dark:bg-emerald-950/70 border-emerald-200/90 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-300 mb-4 shadow-2xs"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+  <div class="asym-split-container {isListOnLeft ? 'split-reversed' : ''}">
+    <!-- Kolom Sticky Header -->
+    {#if hasHeader}
+      <div class="asym-sticky-left self-start" style="order: {isListOnLeft ? 2 : 1};">
+        <FeaturesHeaderTitle
           {badgeText}
-        </span>
-      {/if}
-      <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-3">
-        {title}
-      </h2>
-      {#if subtitle}
-        <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] leading-relaxed font-sans">
+          {title}
           {subtitle}
-        </p>
-      {/if}
-    </div>
+          {activeNodeId}
+          {selectNode}
+          {elementOrder}
+          align="left"
+          maxWidthClass="max-w-none"
+        />
+      </div>
+    {/if}
 
-    <!-- Kolom Kanan List -->
-    <div class="space-y-4 text-left">
-      {#each items as item, index (item.id || item.title + index)}
-        {@const isItemActive = activeNodeId === `feature_item_${index}`}
-        <div
-          data-node="feature_card"
-          role="button"
-          tabindex="0"
-          on:click={(e) => handleItemClick(e, index)}
-          on:keydown={(e) => handleItemKeydown(e, index)}
-          class={`bg-[var(--color-card-base)] p-6 rounded-2xl border border-[var(--color-border)] transition-all duration-150 flex items-start gap-4 shadow-xs cursor-pointer ${
-            isItemActive
-              ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-          }`}
-        >
+    <!-- Kolom List -->
+    {#if hasRows}
+      <div class="space-y-4 text-left" style="order: {isListOnLeft ? 1 : 2};">
+        {#each items as item, index (item.id || item.title + index)}
+          {@const isItemActive = activeNodeId === `feature_item_${index}`}
           <div
-            data-node="feature_icon"
-            class="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 flex items-center justify-center shrink-0"
+            data-node="feature_card"
+            role="button"
+            tabindex="0"
+            on:click={(e) => handleItemClick(e, index)}
+            on:keydown={(e) => handleItemKeydown(e, index)}
+            class={`bg-[var(--color-card-base)] p-6 border border-[var(--color-border)] transition-all duration-150 flex items-start gap-4 shadow-xs cursor-pointer ${
+              isItemActive
+                ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+            }`}
+            style="border-radius: var(--btn-radius, 16px);"
           >
-            <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+            <div
+              data-node="feature_icon"
+              class="w-12 h-12 flex items-center justify-center border shrink-0"
+              style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
+            >
+              <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)] mb-1">
+                {item.title}
+              </h3>
+              <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
+                {item.description}
+              </p>
+            </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)] mb-1">
-              {item.title}
-            </h3>
-            <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
-              {item.description}
-            </p>
-          </div>
-        </div>
-      {/each}
-    </div>
+        {/each}
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -127,6 +111,9 @@
       display: grid !important;
       grid-template-columns: 4fr 8fr !important;
       gap: 32px !important;
+    }
+    .asym-split-container.split-reversed {
+      grid-template-columns: 8fr 4fr !important;
     }
     .asym-sticky-left {
       position: sticky;

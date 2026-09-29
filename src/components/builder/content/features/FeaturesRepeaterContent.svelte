@@ -47,7 +47,7 @@
           description: 'Deskripsi singkat keunggulan dan nilai tambah produk Anda.',
           badge: 'Baru',
         })}
-      class="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-400 cursor-pointer"
+      class="btn btn-ghost btn-xs text-primary gap-1"
     >
       <Plus size={12} />
       <span>Tambah Fitur</span>
@@ -65,7 +65,7 @@
               handleFeatureFieldChange(index, 'icon', e.currentTarget.value);
               handleFeatureFieldChange(index, 'iconName', e.currentTarget.value);
             }}
-            class="w-28 px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none focus:border-blue-500"
+            class="select select-bordered select-xs w-28"
           >
             {#each FEATURE_ICON_OPTIONS as opt}
               <option value={opt.value}>{opt.label}</option>
@@ -76,7 +76,7 @@
             type="text"
             value={feature.title ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'title', e.currentTarget.value)}
-            class="flex-1 px-2.5 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content font-medium focus:outline-none focus:border-blue-500"
+            class="input input-bordered input-xs flex-1 font-medium"
             placeholder="Judul Fitur"
           />
 
@@ -85,7 +85,7 @@
               type="button"
               on:click={() => handleMoveArrayItem(itemsKey, index, 'up')}
               disabled={index === 0}
-              class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+              class="btn btn-ghost btn-xs btn-square p-0 disabled:opacity-20"
               title="Pindah ke Atas"
             >
               <ChevronUp size={13} />
@@ -94,7 +94,7 @@
               type="button"
               on:click={() => handleMoveArrayItem(itemsKey, index, 'down')}
               disabled={index === features.length - 1}
-              class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+              class="btn btn-ghost btn-xs btn-square p-0 disabled:opacity-20"
               title="Pindah ke Bawah"
             >
               <ChevronDown size={13} />
@@ -102,7 +102,7 @@
             <button
               type="button"
               on:click={() => handleRemoveArrayItem(itemsKey, index)}
-              class="p-1 text-base-content/50 hover:text-rose-500 rounded transition-colors cursor-pointer"
+              class="btn btn-ghost btn-xs btn-square p-0 text-base-content/50 hover:text-error"
               title="Hapus Fitur"
             >
               <Trash2 size={13} />
@@ -116,14 +116,14 @@
             type="text"
             value={feature.badge ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'badge', e.currentTarget.value)}
-            class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs w-full"
             placeholder="Label Badge (opsional)"
           />
           <input
             type="text"
             value={feature.statLabel ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'statLabel', e.currentTarget.value)}
-            class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs w-full"
             placeholder="Teks Tombol/Stat (opsional)"
           />
         </div>
@@ -133,7 +133,7 @@
           value={feature.description ?? ''}
           on:input={(e) => handleFeatureFieldChange(index, 'description', e.currentTarget.value)}
           rows="2"
-          class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none focus:border-blue-500 resize-y"
+          class="textarea textarea-bordered textarea-xs w-full resize-y"
           placeholder="Deskripsi singkat keunggulan..."></textarea>
 
         <!-- Row 4: Links and Conditional Image URL -->
@@ -143,14 +143,14 @@
               type="text"
               value={feature.imageUrl ?? ''}
               on:input={(e) => handleFeatureFieldChange(index, 'imageUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
+              class="input input-bordered input-xs w-full text-[11px]"
               placeholder="URL Gambar Item (opsional)"
             />
             <input
               type="text"
               value={feature.linkUrl ?? ''}
               on:input={(e) => handleFeatureFieldChange(index, 'linkUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
+              class="input input-bordered input-xs w-full text-[11px]"
               placeholder="URL Tautan / Link (opsional)"
             />
           </div>
@@ -160,7 +160,7 @@
               type="text"
               value={feature.linkUrl ?? ''}
               on:input={(e) => handleFeatureFieldChange(index, 'linkUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
+              class="input input-bordered input-xs w-full text-[11px]"
               placeholder="URL Tautan / Link (opsional)"
             />
           </div>

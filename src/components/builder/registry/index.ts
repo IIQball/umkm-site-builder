@@ -124,7 +124,7 @@ export const sectionRegistry: SectionRegistryMap = {
       'dense_icon_matrix',
       'before_after_comparison',
     ],
-    isFullBleed: false,
+    isFullBleed: true,
   },
   product_catalog: {
     type: 'product_catalog',

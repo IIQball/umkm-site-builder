@@ -79,6 +79,23 @@
 
   // Preset 3 and 8 handle their own minimal titles
   $: showHeader = activePreset !== 'compact_boxed' && activePreset !== 'minimal_framed_map';
+
+  $: defaultOrder = ['badge', 'title', 'subtitle', 'map_view'];
+  $: effectiveOrder = (Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
+    ? props.elementOrder
+    : defaultOrder) as string[];
+
+  const getSlotOrder = (slot: string) => {
+    const idx = effectiveOrder.indexOf(slot);
+    return idx === -1 ? 99 : idx;
+  };
+
+  $: headerMinOrder = Math.min(
+    getSlotOrder('badge'),
+    getSlotOrder('title'),
+    getSlotOrder('subtitle')
+  );
+  $: mapOrder = getSlotOrder('map_view');
 </script>
 
 <section
@@ -89,95 +106,99 @@
   }`}
   style="container-type: inline-size; container-name: mapscard;"
 >
-  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col">
     {#if showHeader}
-      <MapsHeader {sectionId} {badge} {title} {subtitle} />
+      <div style="order: {headerMinOrder};" class="w-full">
+        <MapsHeader {sectionId} {badge} {title} {subtitle} elementOrder={effectiveOrder} />
+      </div>
     {/if}
 
-    {#if activePreset === 'split_map_info'}
-      <MapsSplitInfo
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        {whatsappUrl}
-        {storeName}
-        address={rawAddress}
-        {storeHours}
-        {facilities}
-      />
-    {:else if activePreset === 'compact_boxed'}
-      <MapsCompactBoxed
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        {storeName}
-        address={rawAddress}
-      />
-    {:else if activePreset === 'floating_address_card'}
-      <MapsFloatingCard
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        {storeName}
-        address={rawAddress}
-        {facilities}
-        {mapHeight}
-      />
-    {:else if activePreset === 'two_column_directions'}
-      <MapsTwoColumnDirections
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        title={storeName}
-        {directionsLandmark}
-        {directionsParking}
-      />
-    {:else if activePreset === 'store_hours_highlight'}
-      <MapsStoreHours
-        {sectionId}
-        {mapEmbedUrl}
-        {whatsappUrl}
-        {storeHoursStatus}
-        {storeHours}
-      />
-    {:else if activePreset === 'interactive_route_finder'}
-      <MapsRouteFinder
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-      />
-    {:else if activePreset === 'minimal_framed_map'}
-      <MapsMinimalFramed
-        {sectionId}
-        {mapEmbedUrl}
-        {storeName}
-        address={rawAddress}
-      />
-    {:else if activePreset === 'multi_branch_tabs'}
-      <MapsMultiBranch
-        {sectionId}
-        {branches}
-      />
-    {:else if activePreset === 'card_overlay_bottom'}
-      <MapsCardOverlay
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        {storeName}
-        {storeHours}
-        {mapHeight}
-      />
-    {:else}
-      <!-- Preset 1 (Default): fullwidth_map -->
-      <MapsFullwidth
-        {sectionId}
-        {mapEmbedUrl}
-        {directMapsUrl}
-        {storeName}
-        address={rawAddress}
-        {storeHoursStatus}
-        {mapHeight}
-      />
-    {/if}
+    <div style="order: {mapOrder};" class="w-full">
+      {#if activePreset === 'split_map_info'}
+        <MapsSplitInfo
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          {whatsappUrl}
+          {storeName}
+          address={rawAddress}
+          {storeHours}
+          {facilities}
+        />
+      {:else if activePreset === 'compact_boxed'}
+        <MapsCompactBoxed
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          {storeName}
+          address={rawAddress}
+        />
+      {:else if activePreset === 'floating_address_card'}
+        <MapsFloatingCard
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          {storeName}
+          address={rawAddress}
+          {facilities}
+          {mapHeight}
+        />
+      {:else if activePreset === 'two_column_directions'}
+        <MapsTwoColumnDirections
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          title={storeName}
+          {directionsLandmark}
+          {directionsParking}
+        />
+      {:else if activePreset === 'store_hours_highlight'}
+        <MapsStoreHours
+          {sectionId}
+          {mapEmbedUrl}
+          {whatsappUrl}
+          {storeHoursStatus}
+          {storeHours}
+        />
+      {:else if activePreset === 'interactive_route_finder'}
+        <MapsRouteFinder
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+        />
+      {:else if activePreset === 'minimal_framed_map'}
+        <MapsMinimalFramed
+          {sectionId}
+          {mapEmbedUrl}
+          {storeName}
+          address={rawAddress}
+        />
+      {:else if activePreset === 'multi_branch_tabs'}
+        <MapsMultiBranch
+          {sectionId}
+          {branches}
+        />
+      {:else if activePreset === 'card_overlay_bottom'}
+        <MapsCardOverlay
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          {storeName}
+          {storeHours}
+          {mapHeight}
+        />
+      {:else}
+        <!-- Preset 1 (Default): fullwidth_map -->
+        <MapsFullwidth
+          {sectionId}
+          {mapEmbedUrl}
+          {directMapsUrl}
+          {storeName}
+          address={rawAddress}
+          {storeHoursStatus}
+          {mapHeight}
+        />
+      {/if}
+    </div>
   </div>
 </section>

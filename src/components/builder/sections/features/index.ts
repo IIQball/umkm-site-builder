@@ -10,3 +10,4 @@ export { default as FeaturesDenseMatrix } from './FeaturesDenseMatrix.svelte';
 export { default as FeaturesComparison } from './FeaturesComparison.svelte';
 
 export * from './featureIcons';
+export * from './featuresLayout.helpers';

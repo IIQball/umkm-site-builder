@@ -11,6 +11,11 @@
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
   export let onReorder: ((items: FeatureItem[]) => void) | undefined = undefined;
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'feature_cards'];
+
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
+  $: hasCards = elementOrder.includes('feature_cards') || elementOrder.includes('features_grid');
+  $: isCardsFirst = (elementOrder.indexOf('feature_cards') === 0) || (elementOrder.indexOf('features_grid') === 0);
 
   let draggedIdx: number | null = null;
   let dropTargetIdx: number | null = null;
@@ -58,57 +63,66 @@
   };
 </script>
 
-<div class="text-center py-12">
-  <FeaturesHeaderTitle
-    {badgeText}
-    {title}
-    {subtitle}
-    {activeNodeId}
-    {selectNode}
-    maxWidthClass="max-w-2xl"
-  />
+<div class="text-center py-12 flex flex-col">
+  {#if hasHeader}
+    <div style="order: {isCardsFirst ? 2 : 1};">
+      <FeaturesHeaderTitle
+        {badgeText}
+        {title}
+        {subtitle}
+        {activeNodeId}
+        {selectNode}
+        {elementOrder}
+        maxWidthClass="max-w-2xl"
+      />
+    </div>
+  {/if}
 
-  <div class="features-grid-3-container text-left">
-    {#each items as item, index (item.id || item.title + index)}
-      {@const isItemActive = activeNodeId === `feature_item_${index}`}
-      <div
-        data-node="feature_card"
-        role="button"
-        tabindex="0"
-        draggable={isActive}
-        on:click={(e) => handleItemClick(e, index)}
-        on:keydown={(e) => handleItemKeydown(e, index)}
-        on:dragstart={(e) => onDragStart(e, index)}
-        on:dragover={(e) => onDragOver(e, index)}
-        on:dragleave={() => (dropTargetIdx = null)}
-        on:drop={(e) => onDrop(e, index)}
-        class={`p-6 rounded-2xl bg-[var(--color-card-base)] border transition-all duration-150 space-y-3 shadow-xs cursor-pointer ${
-          isItemActive
-            ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-            : isActive
-              ? 'cursor-grab active:cursor-grabbing hover:border-blue-400'
-              : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-        } ${
-          dropTargetIdx === index
-            ? 'border-blue-500 ring-2 ring-blue-400/40 shadow-lg'
-            : 'border-[var(--color-border)]'
-        } ${draggedIdx === index ? 'opacity-30' : ''}`}
-      >
+  {#if hasCards}
+    <div class="features-grid-3-container text-left" style="order: {isCardsFirst ? 1 : 2};">
+      {#each items as item, index (item.id || item.title + index)}
+        {@const isItemActive = activeNodeId === `feature_item_${index}`}
         <div
-          data-node="feature_icon"
-          class="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center border border-[var(--color-primary)]/20 shrink-0"
+          data-node="feature_card"
+          role="button"
+          tabindex="0"
+          draggable={isActive}
+          on:click={(e) => handleItemClick(e, index)}
+          on:keydown={(e) => handleItemKeydown(e, index)}
+          on:dragstart={(e) => onDragStart(e, index)}
+          on:dragover={(e) => onDragOver(e, index)}
+          on:dragleave={() => (dropTargetIdx = null)}
+          on:drop={(e) => onDrop(e, index)}
+          class={`p-6 bg-[var(--color-card-base)] border transition-all duration-150 space-y-3 shadow-xs cursor-pointer ${
+            isItemActive
+              ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+              : isActive
+                ? 'cursor-grab active:cursor-grabbing hover:border-[var(--color-primary)]'
+                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          } ${
+            dropTargetIdx === index
+              ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/40 shadow-lg'
+              : 'border-[var(--color-border)]'
+          } ${draggedIdx === index ? 'opacity-30' : ''}`}
+          style="border-radius: var(--btn-radius, 16px);"
         >
-          <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+          <div
+            data-node="feature_icon"
+            class="w-12 h-12 flex items-center justify-center border shrink-0"
+            style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
+          >
+            <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+          </div>
+          <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)]">
+            {item.title}
+          </h3>
+          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
+            {item.description}
+          </p>
         </div>
-        <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)]">
-          {item.title}
-        </h3>
-        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
-          {item.description}
-        </p>
-      </div>
-    {/each}
-  </div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>

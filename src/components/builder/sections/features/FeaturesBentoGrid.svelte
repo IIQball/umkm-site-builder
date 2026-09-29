@@ -1,17 +1,24 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
 
   export let badgeText: string = 'Benefit Utama';
   export let title: string = 'Dirancang Khusus untuk Kebutuhan Harian';
   export let subtitle: string = 'Setiap detail kami perhitungkan demi kenyamanan penggunaan produk jangka panjang.';
   export let items: FeatureItem[] = [];
-  export let mainImageUrl: string = 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800&auto=format&fit=crop&q=80';
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image'];
+  export let mainImageUrl: string = 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800&auto=format&fit=crop&q=80'
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
 
-  $: isHeadingActive = activeNodeId === 'features_heading' || activeNodeId === 'header';
   $: isImageActive = activeNodeId === 'features_image' || activeNodeId === 'image';
+  $: isGridFirst = elementOrder.indexOf('bento_spotlight') === 0 || elementOrder.indexOf('bento_cards') === 0 || elementOrder.indexOf('features_grid') === 0;
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
+  $: hasSpotlight = elementOrder.includes('bento_spotlight') || elementOrder.includes('features_grid');
+  $: hasCards = elementOrder.includes('bento_cards') || elementOrder.includes('features_grid');
+  $: hasImage = elementOrder.includes('image');
+  $: isCardsBeforeSpotlight = elementOrder.indexOf('bento_cards') !== -1 && elementOrder.indexOf('bento_spotlight') !== -1 && elementOrder.indexOf('bento_cards') < elementOrder.indexOf('bento_spotlight');
 
   $: item0 = items[0] || {
     title: 'Daya Simpan Alami Hingga 6 Bulan',
@@ -36,16 +43,6 @@
     statLabel: 'Gabung Mitra',
   };
 
-  const handleHeadingClick = (e: MouseEvent) => {
-    if (selectNode) selectNode(e, 'features_heading');
-  };
-
-  const handleHeadingKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      if (selectNode) selectNode(e, 'features_heading');
-    }
-  };
-
   const handleImageClick = (e: MouseEvent) => {
     if (selectNode) selectNode(e, 'features_image');
   };
@@ -68,100 +65,92 @@
   };
 </script>
 
-<div class="text-center py-12">
-  <div
-    role="button"
-    tabindex="0"
-    on:click={handleHeadingClick}
-    on:keydown={handleHeadingKeydown}
-    class={`max-w-2xl mx-auto mb-8 p-3 rounded-2xl transition-all cursor-pointer ${
-      isHeadingActive
-        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
-        : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-    }`}
-  >
-    {#if badgeText}
-      <span
-        data-node="badge"
-        class="inline-flex items-center rounded-full border px-2.5 py-1 text-2xs gap-1.5 font-heading font-medium bg-blue-50/90 dark:bg-blue-950/70 border-blue-200/90 dark:border-blue-800/80 text-[var(--color-primary)] mb-4 shadow-2xs"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+<div class="text-center py-12 flex flex-col">
+  {#if hasHeader}
+    <div style="order: {isGridFirst ? 2 : 1};">
+      <FeaturesHeaderTitle
         {badgeText}
-      </span>
-    {/if}
-    <h2 data-node="title" class="title-heading text-heading-lg font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-3">
-      {title}
-    </h2>
-    {#if subtitle}
-      <p data-node="subtitle" class="text-body-base text-[var(--color-text-secondary)] leading-relaxed font-sans">
+        {title}
         {subtitle}
-      </p>
-    {/if}
-  </div>
+        {activeNodeId}
+        {selectNode}
+        {elementOrder}
+        maxWidthClass="max-w-2xl"
+      />
+    </div>
+  {/if}
 
-  <div class="bento-grid-container text-left">
-    <!-- Bento Utama (Span 8) -->
-    <div
-      data-node="feature_card"
-      role="button"
-      tabindex="0"
-      on:click={(e) => handleItemClick(e, 0)}
-      on:keydown={(e) => handleItemKeydown(e, 0)}
-      class={`bg-[var(--color-card-base)] p-6 sm:p-8 rounded-2xl border border-[var(--color-border)] shadow-xs bento-span-8 flex flex-col justify-between transition-all duration-150 cursor-pointer ${
-        activeNodeId === 'feature_item_0'
-          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-      }`}
-    >
-      <div>
-        <span class="text-xs font-heading font-bold text-[var(--color-primary)] uppercase tracking-wider block mb-2">
-          {item0.badge || 'Benefit Utama'}
-        </span>
-        <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main)] mb-2">
-          {item0.title}
-        </h3>
-        <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
-          {item0.description}
-        </p>
-      </div>
-      {#if item0.imageUrl || mainImageUrl}
+  {#if hasSpotlight || hasCards}
+    <div class="bento-grid-container text-left" style="order: {isGridFirst ? 1 : 2};">
+      {#if hasSpotlight}
+        <!-- Bento Utama (Span 8) -->
         <div
+          data-node="feature_card"
           role="button"
           tabindex="0"
-          on:click|stopPropagation={handleImageClick}
-          on:keydown={handleImageKeydown}
-          class={`w-full aspect-[21/9] rounded-xl overflow-hidden mt-6 bg-slate-100 dark:bg-slate-800 transition-all ${
-            isImageActive
-              ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-              : 'hover:opacity-95'
+          on:click={(e) => handleItemClick(e, 0)}
+          on:keydown={(e) => handleItemKeydown(e, 0)}
+          class={`bg-[var(--color-card-base)] p-6 sm:p-8 border border-[var(--color-border)] shadow-xs bento-span-8 flex flex-col justify-between transition-all duration-150 cursor-pointer ${
+            activeNodeId === 'feature_item_0'
+              ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+              : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
+          style="border-radius: var(--btn-radius, 16px); order: {isCardsBeforeSpotlight ? 2 : 1};"
         >
-          <img
-            src={item0.imageUrl || mainImageUrl}
-            alt={item0.title}
-            class="w-full h-full object-cover"
-          />
+        <div>
+          <span class="text-xs font-heading font-bold text-[var(--color-primary)] uppercase tracking-wider block mb-2">
+            {item0.badge || 'Benefit Utama'}
+          </span>
+          <h3 data-node="feature_title" class="text-heading-md font-heading font-black text-[var(--color-text-main)] mb-2">
+            {item0.title}
+          </h3>
+          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
+            {item0.description}
+          </p>
         </div>
-      {/if}
-    </div>
+        {#if hasImage && (item0.imageUrl || mainImageUrl)}
+          <div
+            role="button"
+            tabindex="0"
+            on:click|stopPropagation={handleImageClick}
+            on:keydown={handleImageKeydown}
+            class={`w-full aspect-[21/9] rounded-xl overflow-hidden mt-6 bg-[var(--color-nested-base)] transition-all ${
+              isImageActive
+                ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+                : 'hover:opacity-95'
+            }`}
+            style="border-radius: calc(var(--btn-radius, 16px) * 0.75);"
+          >
+            <img
+              src={item0.imageUrl || mainImageUrl}
+              alt={item0.title}
+              class="w-full h-full object-cover"
+            />
+          </div>
+        {/if}
+      </div>
+    {/if}
 
-    <!-- Bento Samping 1 (Span 4) -->
-    <div
-      data-node="feature_card"
-      role="button"
-      tabindex="0"
-      on:click={(e) => handleItemClick(e, 1)}
-      on:keydown={(e) => handleItemKeydown(e, 1)}
-      class={`bg-[var(--color-card-base)] p-6 rounded-2xl border border-[var(--color-border)] shadow-xs bento-span-4 flex flex-col justify-between transition-all duration-150 cursor-pointer ${
-        activeNodeId === 'feature_item_1'
-          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-      }`}
-    >
+    {#if hasCards}
+      <!-- Bento Samping 1 (Span 4) -->
+      <div
+        data-node="feature_card"
+        role="button"
+        tabindex="0"
+        on:click={(e) => handleItemClick(e, 1)}
+        on:keydown={(e) => handleItemKeydown(e, 1)}
+        class={`bg-[var(--color-card-base)] p-6 border border-[var(--color-border)] shadow-xs bento-span-4 flex flex-col justify-between transition-all duration-150 cursor-pointer ${
+          activeNodeId === 'feature_item_1'
+            ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+            : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+        }`}
+        style="border-radius: var(--btn-radius, 16px); order: {isCardsBeforeSpotlight ? 1 : 2};"
+      >
       <div>
         <div
           data-node="feature_icon"
-          class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mb-4"
+          class="w-10 h-10 flex items-center justify-center mb-4 border"
+          style="background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent); border-color: color-mix(in srgb, var(--color-secondary) 25%, transparent); color: var(--color-secondary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
         >
           <svelte:component this={resolveFeatureIcon(item1.icon || item1.iconName || 'sparkles')} size={20} />
         </div>
@@ -173,7 +162,7 @@
         </p>
       </div>
       {#if item1.statLabel || item1.linkUrl}
-        <span class="text-xs font-heading font-semibold text-amber-600 dark:text-amber-400 mt-4 inline-block">
+        <span class="text-xs font-heading font-semibold mt-4 inline-block" style="color: var(--color-secondary);">
           {item1.statLabel || 'Cek Detail →'}
         </span>
       {/if}
@@ -186,15 +175,17 @@
       tabindex="0"
       on:click={(e) => handleItemClick(e, 2)}
       on:keydown={(e) => handleItemKeydown(e, 2)}
-      class={`bg-[var(--color-card-base)] p-6 rounded-2xl border border-[var(--color-border)] shadow-xs bento-span-4 transition-all duration-150 cursor-pointer ${
+      class={`bg-[var(--color-card-base)] p-6 border border-[var(--color-border)] shadow-xs bento-span-4 transition-all duration-150 cursor-pointer ${
         activeNodeId === 'feature_item_2'
-          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
+      style="border-radius: var(--btn-radius, 16px); order: {isCardsBeforeSpotlight ? 1 : 2};"
     >
       <div
         data-node="feature_icon"
-        class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mb-4"
+        class="w-10 h-10 flex items-center justify-center mb-4 border"
+        style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
       >
         <svelte:component this={resolveFeatureIcon(item2.icon || item2.iconName || 'leaf')} size={20} />
       </div>
@@ -213,25 +204,31 @@
       tabindex="0"
       on:click={(e) => handleItemClick(e, 3)}
       on:keydown={(e) => handleItemKeydown(e, 3)}
-      class={`bg-slate-900 text-white p-6 rounded-2xl shadow-xs bento-span-8 flex items-center justify-between border border-slate-800 transition-all duration-150 cursor-pointer ${
+      class={`p-6 shadow-xs bento-span-8 flex items-center justify-between border transition-all duration-150 cursor-pointer ${
         activeNodeId === 'feature_item_3'
-          ? 'border-blue-500 ring-2 ring-primary ring-offset-2 ring-offset-slate-900'
-          : 'hover:border-slate-700 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+          : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
+      style="background-color: var(--color-nested-base, currentColor); border-color: var(--color-border); border-radius: var(--btn-radius, 16px); color: var(--color-text-main); order: {isCardsBeforeSpotlight ? 1 : 2};"
     >
       <div>
-        <h3 data-node="feature_title" class="text-heading-md font-heading font-bold text-white mb-1">
+        <h3 data-node="feature_title" class="text-heading-md font-heading font-bold mb-1" style="color: var(--color-text-main);">
           {item3.title}
         </h3>
-        <p data-node="feature_desc" class="text-body-sm text-slate-300 font-sans">
+        <p data-node="feature_desc" class="text-body-sm font-sans" style="color: var(--color-text-secondary);">
           {item3.description}
         </p>
       </div>
-      <span class="h-10 min-h-[40px] px-4 py-2.5 rounded-2xl bg-white text-slate-900 text-sm font-heading font-semibold inline-flex items-center justify-center shrink-0 ml-4 hover:bg-slate-100 active:scale-[0.98] shadow-xs">
+      <span
+        class="btn btn-sm btn-primary font-heading font-semibold shrink-0 ml-4 shadow-xs"
+        style="border-radius: var(--btn-radius, 16px); background-color: var(--btn-primary-bg, var(--color-primary)); color: var(--theme-btn-primary-text, var(--btn-primary-text, currentColor));"
+      >
         {item3.statLabel || 'Gabung Mitra'}
       </span>
     </div>
+    {/if}
   </div>
+  {/if}
 </div>
 
 <style>

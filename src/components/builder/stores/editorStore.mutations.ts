@@ -1,5 +1,6 @@
 import type { TemplateConfig } from '@/schemas';
 import type { DocumentState, EditorTemplate } from './editorStore.types';
+import { DEFAULT_SLOTS_BY_SECTION } from './documentStore.actions';
 
 type Updater = (fn: (s: DocumentState) => DocumentState) => void;
 
@@ -73,40 +74,120 @@ export function applyDeleteNode(
     if (s.id !== sectionId) return s;
     const currentProps = { ...(s.props || {}) };
 
-    if (s.type === 'hero') {
-      const order = Array.isArray(currentProps.elementOrder)
-        ? [...currentProps.elementOrder]
-        : ['badge', 'title', 'subtitle', 'image', 'cta'];
-      currentProps.elementOrder = order.filter((k) => k !== nodeId);
-      if (nodeId === 'badge') currentProps.badgeText = '';
-      if (nodeId === 'image') currentProps.imageUrl = '';
-    } else if (s.type === 'header_announcement') {
-      if (nodeId === 'announcement') {
+    if (s.type === 'header_announcement') {
+      const rowOrder = Array.isArray(currentProps.rowOrder) && currentProps.rowOrder.length > 0
+        ? [...currentProps.rowOrder]
+        : ['announcement_bar', 'navbar'];
+      const navbarOrder = Array.isArray(currentProps.navbarOrder) && currentProps.navbarOrder.length > 0
+        ? [...currentProps.navbarOrder]
+        : (s.layoutPreset === 'centered_stacked' ? ['logo', 'nav_links'] : ['logo', 'nav_links', 'cta']);
+
+      if (['announcement', 'announcement_bar', 'contact_bar', 'delivery_bar', 'countdown_bar'].includes(nodeId)) {
         currentProps.showAnnouncement = false;
         currentProps.announcementText = '';
+        currentProps.rowOrder = rowOrder.filter((k) => k !== 'announcement_bar');
       } else if (nodeId === 'logo') {
         currentProps.logoText = '';
         currentProps.logoImageUrl = '';
+        currentProps.navbarOrder = navbarOrder.filter((k) => k !== 'logo');
       } else if (nodeId === 'nav_links') {
         currentProps.navLinks = [];
+        currentProps.navbarOrder = navbarOrder.filter((k) => k !== 'nav_links');
+      } else if (nodeId === 'cta') {
+        currentProps.ctaText = '';
+        currentProps.navbarOrder = navbarOrder.filter((k) => k !== 'cta');
+      } else if (nodeId === 'search_bar') {
+        currentProps.navbarOrder = navbarOrder.filter((k) => k !== 'search_bar');
+      } else if (nodeId === 'store_badges') {
+        currentProps.navbarOrder = navbarOrder.filter((k) => k !== 'store_badges');
       } else if (nodeId.startsWith('nav_')) {
         const idx = parseInt(nodeId.replace('nav_', ''), 10);
         if (Array.isArray(currentProps.navLinks)) {
           currentProps.navLinks = currentProps.navLinks.filter((_, i) => i !== idx);
         }
       }
-    } else if (s.type === 'features' && Array.isArray(currentProps.features)) {
-      const idx = parseInt(nodeId.replace('item_', ''), 10);
-      if (!isNaN(idx)) currentProps.features = currentProps.features.filter((_, i) => i !== idx);
-    } else if (s.type === 'product_catalog' && Array.isArray(currentProps.products)) {
-      const idx = parseInt(nodeId.replace('item_', ''), 10);
-      if (!isNaN(idx)) currentProps.products = currentProps.products.filter((_, i) => i !== idx);
-    } else if (s.type === 'testimonials' && Array.isArray(currentProps.testimonials)) {
-      const idx = parseInt(nodeId.replace('item_', ''), 10);
-      if (!isNaN(idx)) currentProps.testimonials = currentProps.testimonials.filter((_, i) => i !== idx);
-    } else if (s.type === 'faq' && Array.isArray(currentProps.faqs)) {
-      const idx = parseInt(nodeId.replace('item_', ''), 10);
-      if (!isNaN(idx)) currentProps.faqs = currentProps.faqs.filter((_, i) => i !== idx);
+    } else {
+      // Slot-based deletion for standard sections
+      const defaultSlots = DEFAULT_SLOTS_BY_SECTION[s.type] || ['badge', 'title', 'subtitle', 'image', 'cta'];
+      const currentOrder = Array.isArray(currentProps.elementOrder) && currentProps.elementOrder.length > 0
+        ? [...currentProps.elementOrder]
+        : [...defaultSlots];
+
+      // Normalize nodeId to slot key
+      const slotMap: Record<string, string> = {
+        hero_badge: 'badge',
+        badge: 'badge',
+        hero_title: 'title',
+        title: 'title',
+        hero_subtitle: 'subtitle',
+        subtitle: 'subtitle',
+        hero_cta: 'cta',
+        hero_cta_primary: 'cta',
+        cta: 'cta',
+        hero_image: 'image',
+        hero_media: 'image',
+        hero_founder_photo: 'image',
+        image: 'image',
+        hero_terminal: 'terminal',
+        terminal: 'terminal',
+        hero_booking_card: 'booking_card',
+        booking_card: 'booking_card',
+        hero_stat_counter: 'stat_counter',
+        stat_counter: 'stat_counter',
+        hero_trust_badges: 'trust_badges',
+        trust_badges: 'trust_badges',
+        hero_contrast_card: 'contrast_card',
+        contrast_card: 'contrast_card',
+        hero_product_cards: 'product_cards',
+        product_cards: 'product_cards',
+        hero_floating_cards: 'floating_cards',
+        floating_cards: 'floating_cards',
+        hero_social_proof: 'social_proof',
+        social_proof: 'social_proof',
+        hero_chat_simulation: 'chat_simulation',
+        chat_simulation: 'chat_simulation',
+        hero_email_capture: 'email_capture',
+        email_capture: 'email_capture',
+        hero_category_pills: 'category_pills',
+        hero_pill_category: 'category_pills',
+        category_pills: 'category_pills',
+        footer_brand: 'brand_bio',
+        footer_contact: 'contact_info',
+        footer_navigation: 'navigation_links',
+        footer_copyright: 'copyright',
+        testimonials_header: 'title',
+        faq_header: 'title',
+        maps_header: 'title',
+        features_heading: 'title',
+        features_image: 'image',
+      };
+      const targetSlot = slotMap[nodeId] || nodeId;
+
+      currentProps.elementOrder = currentOrder.filter((k) => k !== targetSlot && k !== nodeId);
+
+      if (targetSlot === 'badge') currentProps.badgeText = '';
+      if (targetSlot === 'title') currentProps.title = '';
+      if (targetSlot === 'subtitle') currentProps.subtitle = '';
+      if (targetSlot === 'cta') currentProps.ctaText = '';
+      if (targetSlot === 'image') {
+        currentProps.imageUrl = '';
+        currentProps.mainImageUrl = '';
+      }
+
+      // Array item deletions (cards / items)
+      if (s.type === 'features' && Array.isArray(currentProps.features) && nodeId.startsWith('item_')) {
+        const idx = parseInt(nodeId.replace('item_', ''), 10);
+        if (!isNaN(idx)) currentProps.features = currentProps.features.filter((_, i) => i !== idx);
+      } else if (s.type === 'product_catalog' && Array.isArray(currentProps.products) && nodeId.startsWith('item_')) {
+        const idx = parseInt(nodeId.replace('item_', ''), 10);
+        if (!isNaN(idx)) currentProps.products = currentProps.products.filter((_, i) => i !== idx);
+      } else if (s.type === 'testimonials' && Array.isArray(currentProps.testimonials) && nodeId.startsWith('item_')) {
+        const idx = parseInt(nodeId.replace('item_', ''), 10);
+        if (!isNaN(idx)) currentProps.testimonials = currentProps.testimonials.filter((_, i) => i !== idx);
+      } else if (s.type === 'faq' && Array.isArray(currentProps.faqs) && nodeId.startsWith('item_')) {
+        const idx = parseInt(nodeId.replace('item_', ''), 10);
+        if (!isNaN(idx)) currentProps.faqs = currentProps.faqs.filter((_, i) => i !== idx);
+      }
     }
 
     return { ...s, props: currentProps };

@@ -7,11 +7,18 @@
   export let subtitle: string = 'Camilan kriuk dengan bumbu tabur melimpah. Cocok untuk teman nonton dan nongkrong asyik.';
   export let ctaText: string = 'Borong Sekarang';
   export let ctaLink: string = '#';
-  export let imageUrl: string = 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800&auto=format&fit=crop&q=80';
+  export let imageUrl: string = 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800&auto=format&fit=crop&q=80'
   export let waNumber: string = '';
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
   export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta', 'image'];
+
+  $: hasImage = elementOrder.includes('image');
+  $: imgIdx = elementOrder.indexOf('image');
+  $: titleIdx = elementOrder.indexOf('title') !== -1 ? elementOrder.indexOf('title') : 1;
+  $: isImageLeft = imgIdx !== -1 ? imgIdx < titleIdx : false;
+  $: textSlots = elementOrder.filter((s) => s !== 'image');
 
   $: waUrl = generateWhatsAppLink(waNumber, `Halo, saya mau beli: ${title}`);
   $: effectiveCtaLink = waNumber ? waUrl : ctaLink;
@@ -23,76 +30,8 @@
   $: isImageActive = activeNodeId === 'hero_image' || activeNodeId === 'image';
 </script>
 
-<div class="bg-amber-100/80 dark:bg-amber-950/40 rounded-3xl p-6 sm:p-10 border border-amber-300 dark:border-amber-800 my-4">
-  <div class="cq-grid-split items-center gap-8">
-    <div class="text-left space-y-4">
-      {#if badgeText}
-        <div
-          data-node="badge"
-          role="button"
-          tabindex="0"
-          on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
-          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-          class={`inline-block bg-rose-500 text-white font-black text-xs px-3 py-1 rounded-md -rotate-3 mb-4 shadow-xs transition-all cursor-pointer ${
-            isBadgeActive ? 'ring-2 ring-primary ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-          }`}
-        >
-          {badgeText}
-        </div>
-      {/if}
-
-      <svelte:element
-        this={tagName || 'h1'}
-        data-node="title"
-        role="button"
-        tabindex="0"
-        on:click={(e) => selectNode && selectNode(e, 'hero_title')}
-        on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
-        class={`text-heading-xl font-heading font-black text-slate-950 dark:text-amber-100 uppercase tracking-tight mb-4 transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 ${
-          isTitleActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-        }`}
-      >
-        {title}
-      </svelte:element>
-
-      {#if subtitle}
-        <div
-          data-node="subtitle"
-          role="button"
-          tabindex="0"
-          on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
-          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
-          class={`cursor-pointer mb-4 rounded-xl p-1.5 -ml-1.5 transition-all ${
-            isSubtitleActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-          }`}
-        >
-          <p class="text-body-base text-slate-700 dark:text-amber-200/80 leading-relaxed font-sans">
-            {subtitle}
-          </p>
-        </div>
-      {/if}
-
-      <div
-        data-node="cta"
-        role="button"
-        tabindex="0"
-        on:click={(e) => selectNode && selectNode(e, 'hero_cta')}
-        on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
-        class={`cq-btn-group pt-4 rounded-xl p-1.5 -ml-1.5 transition-all cursor-pointer ${
-          isCtaActive ? 'ring-2 ring-primary ring-offset-2 bg-blue-50/20' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-        }`}
-      >
-        <a
-          href={effectiveCtaLink}
-          target={waNumber ? '_blank' : '_self'}
-          rel={waNumber ? 'noreferrer' : ''}
-          class="inline-flex items-center justify-center h-10 min-h-[40px] px-6 rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-sm font-heading font-bold hover:opacity-90 active:scale-[0.98] transition-all shadow-xs"
-        >
-          {ctaText || 'Borong Sekarang'}
-        </a>
-      </div>
-    </div>
-
+{#snippet imageBlock()}
+  {#if imageUrl}
     <div
       data-node="image"
       role="button"
@@ -108,5 +47,99 @@
         PROMO TERBATAS!
       </span>
     </div>
+  {/if}
+{/snippet}
+
+{#snippet textBlock(centered = false)}
+  <div class={centered ? 'text-center space-y-4 max-w-2xl mx-auto' : 'text-left space-y-4'}>
+    {#each textSlots as slot (slot)}
+      {#if slot === 'badge' && badgeText}
+        <div
+          data-node="badge"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
+          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 6px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
+          class={`badge badge-primary font-black text-xs px-3 py-1 -rotate-3 mb-2 shadow-xs transition-all cursor-pointer ${
+            isBadgeActive ? 'ring-2 ring-primary ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          }`}
+        >
+          {badgeText}
+        </div>
+      {:else if slot === 'title'}
+        <svelte:element
+          this={tagName || 'h1'}
+          data-node="title"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode && selectNode(e, 'hero_title')}
+          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
+          style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); color: var(--color-text-main);"
+          class={`text-heading-xl font-heading font-black uppercase tracking-tight mb-2 transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 block ${
+            isTitleActive ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          }`}
+        >
+          {title}
+        </svelte:element>
+      {:else if slot === 'subtitle' && subtitle}
+        <div
+          data-node="subtitle"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
+          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
+          class={`cursor-pointer mb-2 rounded-xl p-1.5 -ml-1.5 transition-all ${
+            isSubtitleActive ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          }`}
+        >
+          <p
+            style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--color-text-secondary);"
+            class="text-body-base leading-relaxed font-sans"
+          >
+            {subtitle}
+          </p>
+        </div>
+      {:else if slot === 'cta' && ctaText}
+        <div
+          data-node="cta"
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectNode && selectNode(e, 'hero_cta')}
+          on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
+          class={`cq-btn-group pt-2 rounded-xl p-1.5 -ml-1.5 transition-all cursor-pointer ${
+            centered ? 'justify-center' : 'justify-start'
+          } ${
+            isCtaActive ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          }`}
+        >
+          <a
+            href={effectiveCtaLink}
+            target={waNumber ? '_blank' : '_self'}
+            rel={waNumber ? 'noreferrer' : ''}
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
+            class="btn btn-primary font-heading font-bold shadow-xs px-6"
+          >
+            {ctaText || 'Borong Sekarang'}
+          </a>
+        </div>
+      {/if}
+    {/each}
   </div>
+{/snippet}
+
+<div class="bg-amber-100/80 dark:bg-amber-950/40 rounded-3xl p-6 sm:p-10 border border-amber-300 dark:border-amber-800 my-4">
+  {#if !hasImage}
+    {@render textBlock(true)}
+  {:else}
+    <div class="cq-grid-split items-center gap-8">
+      {#if isImageLeft}
+        {@render imageBlock()}
+        {@render textBlock(false)}
+      {:else}
+        {@render textBlock(false)}
+        {@render imageBlock()}
+      {/if}
+    </div>
+  {/if}
 </div>

@@ -2,6 +2,7 @@
   import { editorStore, activeNodeId } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
   import { parsePx } from './hero/hero.helpers';
+  import { getEffectiveHeroElementOrder } from './hero/heroLayout.helpers';
   import HeroFullBanner from './hero/HeroFullBanner.svelte';
   import HeroCenteredMinimal from './hero/HeroCenteredMinimal.svelte';
   import HeroSplitLayout from './hero/HeroSplitLayout.svelte';
@@ -45,6 +46,11 @@
   $: secondaryCtaLink = (props?.secondaryCtaLink as string) || '#';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
   $: waNumber = (props?.whatsappNumber as string) || (props?.waNumber as string) || '';
+  $: elementOrder = getEffectiveHeroElementOrder(
+    activePreset,
+    props?.elementOrder,
+    props?.heroPreset as string
+  );
 
   $: parsedPadding = (() => {
     if (styles?.paddingTop || styles?.paddingBottom) {
@@ -99,7 +105,7 @@
 <section
   id="hero-section"
   data-node="hero_container"
-  class="relative w-full overflow-hidden select-none hero-card {sectionBgClass} {isActive ? 'relative z-10' : ''}"
+  class="relative w-full overflow-hidden select-none hero-card flex flex-col justify-center {sectionBgClass} {isActive ? 'relative z-10' : ''}"
   style="background-color: var(--color-bg-base); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
@@ -131,8 +137,8 @@
   {/if}
 
   <div
-    class="relative z-10 w-full max-w-[var(--theme-max-width,1200px)] mx-auto builder-safe-container box-border"
-    style="padding-left: var(--active-safe-zone, var(--active-margin, 32px)); padding-right: var(--active-safe-zone, var(--active-margin, 32px)); padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
+    class="relative z-10 w-full mx-auto builder-safe-container box-border"
+    style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 32px)); padding-right: var(--active-safe-zone, var(--active-margin, 32px)); padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
   >
     {#if activePreset === 'full_banner_overlay' || activePreset === 'video_background_loop'}
       <HeroFullBanner
@@ -146,6 +152,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'centered_minimal'}
       <HeroCenteredMinimal
@@ -162,6 +169,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'social_proof_community'}
       <HeroSocialProof
@@ -177,6 +185,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'dual_product_showcase'}
       <HeroDualProduct
@@ -192,6 +201,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'badge_ticker_split'}
       <HeroBadgeTicker
@@ -208,6 +218,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'pill_category_selector'}
       <HeroPillCategory
@@ -219,6 +230,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'bento_masonry_hero'}
       <HeroBentoGrid
@@ -235,6 +247,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'split_stat_counter'}
       <HeroStatCounter
@@ -251,6 +264,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'sticky_whatsapp_pill_float'}
       <HeroChatSimulation
@@ -266,6 +280,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'sticker_badge_playful'}
       <HeroStickerPlayful
@@ -280,6 +295,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'editorial_luxury_serif'}
       <HeroEditorialSerif
@@ -293,6 +309,7 @@
         {waNumber}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'side_card_booking'}
       <HeroSideBooking
@@ -305,6 +322,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'dual_contrast_split'}
       <HeroDualContrast
@@ -320,6 +338,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'brand_story_founder'}
       <HeroFounderStory
@@ -336,6 +355,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'gradient_mesh_glow'}
       <HeroGradientMesh
@@ -348,6 +368,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'interactive_terminal_code'}
       <HeroTerminalCode
@@ -363,6 +384,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'floating_cards_showcase'}
       <HeroFloatingCards
@@ -378,6 +400,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'oversized_bold_typography'}
       <HeroOversizedTypography
@@ -390,6 +413,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else if activePreset === 'inline_email_capture'}
       <HeroEmailCapture
@@ -402,6 +426,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {:else}
       <HeroSplitLayout
@@ -419,6 +444,7 @@
         activeNodeId={liveActiveNodeId}
         {selectNode}
         {selectNodeKey}
+        {elementOrder}
       />
     {/if}
   </div>

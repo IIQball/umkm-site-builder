@@ -17,7 +17,7 @@
   $: isDesktop = viewMode === 'desktop';
   $: isSmallScreen = viewMode === 'mobile' || viewMode === 'tablet';
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 </script>
 
 <div class="w-full py-3 box-border overflow-visible flex items-center">

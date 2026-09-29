@@ -38,7 +38,7 @@
     ? props.navLinks
     : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 
   let isMobileMenuOpen = false;
 

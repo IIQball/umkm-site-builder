@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StoreSettingsForm from '../../components/dashboard/StoreSettingsForm.svelte';
+import StoreWhatsappTemplateForm from '../../components/dashboard/StoreWhatsappTemplateForm.svelte';
 import StatCard from '../../components/ui/StatCard.svelte';
 import { getAuthenticatedUser, canManageStore } from '../../lib/auth';
 import { db } from '../../db';
@@ -107,6 +108,14 @@ const isOpen = customization.isOpen !== false;
         initialWaNumber={store.waNumber}
         initialGoogleMapsUrl={store.googleMapsUrl || ''}
         initialIsOpen={isOpen}
+      />
+    </div>
+    
+    <div class="animate-fade-in-up delay-400">
+      <StoreWhatsappTemplateForm 
+        client:load
+        storeId={store.id}
+        initialTemplate={(customization.waCheckoutTemplate as string) || ''}
       />
     </div>
   </div>

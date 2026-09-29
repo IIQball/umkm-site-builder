@@ -22,7 +22,7 @@
   $: hasNav = navbarOrder.includes('nav_links');
   $: hasCta = navbarOrder.includes('cta');
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 </script>
 
 <div class="w-full py-3 box-border overflow-visible flex items-center">

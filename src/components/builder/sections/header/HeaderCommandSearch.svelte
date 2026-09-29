@@ -25,7 +25,7 @@
   let isMobileSearchOpen = false;
   let searchQuery = '';
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 </script>
 
 <div

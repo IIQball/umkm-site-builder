@@ -44,7 +44,7 @@
     ? props.navLinks
     : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 
   // Group 1: Posisi Baris (Vertikal: Atas - Bawah)
   $: validRowSlots = getDefaultHeaderRowOrder(activePreset);

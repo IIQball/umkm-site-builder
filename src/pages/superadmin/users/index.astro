@@ -8,12 +8,12 @@ if (!user) {
   return Astro.redirect('/auth/login');
 }
 
-if (!isAuthorizedAdmin(user)) {
+if (user.role !== 'superadmin') {
   return Astro.redirect('/dashboard');
 }
 ---
 
-<DashboardLayout title="Manajemen Pengguna" breadcrumb="Admin / Pengguna">
+<DashboardLayout title="Manajemen Pengguna" breadcrumb="Super Admin / Pengguna">
   <div class="min-h-full bg-canvas -m-4 md:-m-6 lg:-m-8 p-4 md:p-6 lg:p-8">
     <UserManagementPanel client:load currentUser={user} />
   </div>

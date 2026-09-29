@@ -1,0 +1,302 @@
+---
+/**
+ * LandingBento.astro
+ * Vertical Step-by-Step Feature Showcase using exact Smartphone Device Mockup frames.
+ * 100% matched to user's uploaded reference image (rounded bezel, side buttons, top camera pill notch).
+ */
+---
+
+<section class="relative bg-canvas dark:bg-[#0b0f19] py-24 px-6 overflow-hidden" id="fitur" aria-labelledby="pinoka-feature-heading">
+  <!-- Subtle ambient background glow -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[radial-gradient(ellipse,rgba(20,184,166,0.05)_0%,transparent_60%)] pointer-events-none z-0" aria-hidden="true"></div>
+
+  <div class="relative z-10 max-w-[1080px] mx-auto flex flex-col gap-16 sm:gap-24">
+    <!-- Section Header -->
+    <div class="text-center opacity-0 animate-lp-fade-up">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary mb-3">
+        <span>Alur Kerja & Fitur Utama</span>
+      </div>
+      <h2 class="font-heading text-[clamp(2rem,4.5vw,3rem)] font-extrabold tracking-tight leading-tight text-main mb-4" id="pinoka-feature-heading">
+        Kemudahan Kelola Toko Online<br />
+        <span class="text-primary">Dalam 4 Langkah Praktis</span>
+      </h2>
+      <p class="text-[1.0625rem] text-muted max-w-[52ch] mx-auto leading-relaxed m-0">
+        Dirancang khusus untuk mempermudah operasional toko UMKM dan memberikan penghasilan pasif bagi desainer lokal.
+      </p>
+    </div>
+
+    <!-- Step 1: Visual Editor -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center opacity-0 animate-lp-fade-up">
+      <!-- Text Info (Left on Desktop) -->
+      <div class="lg:col-span-6 flex flex-col gap-4">
+        <!-- Large Step Number & Category Badge -->
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[clamp(2.5rem,4.5vw,3.75rem)] font-black text-primary leading-none tracking-tighter shrink-0 select-none">
+            01
+          </span>
+          <span class="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+            Untuk Merchant
+          </span>
+        </div>
+        <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-main tracking-tight m-0">
+          Editor Visual Drag & Drop
+        </h3>
+        <p class="text-body-base text-muted leading-relaxed m-0">
+          Kustomisasi nama toko, warna tema, logo, dan katalog produk secara langsung di kanvas visual — tanpa perlu mengerti koding atau pemetaan server.
+        </p>
+        <ul class="space-y-2 pt-2 text-xs font-medium text-main">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Live visual editor langsung di smartphone</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Penyimpanan perubahan otomatis (*Auto-Save*)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Smartphone Device Mockup Frame (Right on Desktop) -->
+      <div class="lg:col-span-6 flex justify-center">
+        <!-- Phone Frame Outer Container matching exact uploaded screenshot -->
+        <div class="relative w-full max-w-[260px] sm:max-w-[280px] aspect-[9/18.5] rounded-[40px] border-[5px] border-[#1e293b] bg-[#0f172a] p-2.5 shadow-2xl transition-all duration-300 hover:border-primary/60">
+          <!-- Physical Side Buttons -->
+          <div class="absolute -left-[8px] top-16 w-1.5 h-8 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -left-[8px] top-28 w-1.5 h-10 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -right-[8px] top-20 w-1.5 h-12 bg-[#334155] rounded-r-md"></div>
+
+          <!-- Full White Inner Screen Slot -->
+          <div class="relative w-full h-full rounded-[30px] overflow-hidden bg-white text-slate-900 p-3.5 pt-2 flex flex-col justify-between font-sans shadow-inner">
+            <!-- Top Camera Notch Pill -->
+            <div class="w-16 h-3.5 rounded-full bg-slate-950 mx-auto mb-2 flex items-center justify-end px-2 shrink-0">
+              <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+            </div>
+
+            <!-- Screen Header -->
+            <div class="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100">
+              <span class="font-bold text-slate-900 font-heading">Builder Toko</span>
+              <span class="bg-primary/10 text-primary px-2 py-0.5 rounded font-bold text-[9px]">Editor Visual</span>
+            </div>
+
+            <!-- Replaceable Screenshot Container Slot -->
+            <div class="my-auto p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center space-y-1.5 shadow-2xs">
+              <div class="text-xs font-bold text-slate-900 font-heading">Warung Kopi Ijen</div>
+              <div class="text-[10px] text-primary font-bold">Slot Foto Dashboard Editor</div>
+              <p class="text-[9px] text-slate-400 m-0">Tempel screenshot dashboard toko Anda di sini</p>
+            </div>
+
+            <div class="text-center text-[9px] text-slate-400 font-mono">
+              Pinoka Mobile Editor
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: WhatsApp Orders -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center opacity-0 animate-lp-fade-up">
+      <!-- Smartphone Device Mockup Frame (Left on Desktop) -->
+      <div class="lg:col-span-6 flex justify-center order-2 lg:order-1">
+        <div class="relative w-full max-w-[260px] sm:max-w-[280px] aspect-[9/18.5] rounded-[40px] border-[5px] border-[#1e293b] bg-[#0f172a] p-2.5 shadow-2xl transition-all duration-300 hover:border-emerald-500/60">
+          <!-- Physical Side Buttons -->
+          <div class="absolute -left-[8px] top-16 w-1.5 h-8 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -left-[8px] top-28 w-1.5 h-10 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -right-[8px] top-20 w-1.5 h-12 bg-[#334155] rounded-r-md"></div>
+
+          <!-- Full White Inner Screen Slot -->
+          <div class="relative w-full h-full rounded-[30px] overflow-hidden bg-white text-slate-900 p-3.5 pt-2 flex flex-col justify-between font-sans shadow-inner">
+            <!-- Top Camera Notch Pill -->
+            <div class="w-16 h-3.5 rounded-full bg-slate-950 mx-auto mb-2 flex items-center justify-end px-2 shrink-0">
+              <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+            </div>
+
+            <!-- Screen Header -->
+            <div class="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100">
+              <span class="font-bold text-slate-900 font-heading">WhatsApp Order</span>
+              <span class="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-bold text-[9px]">Format Rapi</span>
+            </div>
+
+            <!-- Replaceable Screenshot Container Slot -->
+            <div class="my-auto p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 text-left space-y-2 text-[10px]">
+              <div class="font-bold text-emerald-950">Halo Admin Toko! Saya pesan:</div>
+              <div class="font-mono bg-white p-2.5 rounded-xl border border-emerald-200 space-y-1 text-slate-800 shadow-2xs">
+                <div>• 2x Kopi Susu Aren (Rp 36k)</div>
+                <div>• 1x Croissant (Rp 14k)</div>
+                <div class="pt-1.5 text-emerald-700 font-bold border-t border-slate-100 mt-1">Total: Rp 50.000</div>
+              </div>
+              <div class="text-[9px] text-emerald-600 text-center font-bold pt-1">Slot Foto Chat WhatsApp</div>
+            </div>
+
+            <div class="text-center text-[9px] text-slate-400 font-mono">
+              Pinoka WA Checkout
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Info (Right on Desktop) -->
+      <div class="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+        <!-- Large Step Number & Category Badge -->
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[clamp(2.5rem,4.5vw,3.75rem)] font-black text-emerald-500 leading-none tracking-tighter shrink-0 select-none">
+            02
+          </span>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            Format Pesanan Otomatis
+          </span>
+        </div>
+        <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-main tracking-tight m-0">
+          Order Langsung Masuk ke WhatsApp
+        </h3>
+        <p class="text-body-base text-muted leading-relaxed m-0">
+          Pembeli dapat memilih produk dan langsung mengirimkan format pesanan terstruktur ke nomor WhatsApp toko Anda tanpa perlu registrasi rumit.
+        </p>
+        <ul class="space-y-2 pt-2 text-xs font-medium text-main">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Format pesan otomatis rapi & mudah diproses</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Tanpa biaya potongan komisi transaksi</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 3: Designer Royalty -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center opacity-0 animate-lp-fade-up">
+      <!-- Text Info (Left on Desktop) -->
+      <div class="lg:col-span-6 flex flex-col gap-4">
+        <!-- Large Step Number & Category Badge -->
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[clamp(2.5rem,4.5vw,3.75rem)] font-black text-purple-500 leading-none tracking-tighter shrink-0 select-none">
+            03
+          </span>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+            Untuk Desainer Template
+          </span>
+        </div>
+        <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-main tracking-tight m-0">
+          Penghasilan Pasif Setiap Bulan
+        </h3>
+        <p class="text-body-base text-muted leading-relaxed m-0">
+          Unggah karya template terbaik Anda. Dapatkan royalti komisi otomatis setiap kali template dipilih dan digunakan oleh merchant UMKM.
+        </p>
+        <ul class="space-y-2 pt-2 text-xs font-medium text-main">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Pencatatan royalti real-time di dashboard</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Penarikan dana langsung ke rekening bank lokal</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Smartphone Device Mockup Frame (Right on Desktop) -->
+      <div class="lg:col-span-6 flex justify-center">
+        <div class="relative w-full max-w-[260px] sm:max-w-[280px] aspect-[9/18.5] rounded-[40px] border-[5px] border-[#1e293b] bg-[#0f172a] p-2.5 shadow-2xl transition-all duration-300 hover:border-purple-500/60">
+          <!-- Physical Side Buttons -->
+          <div class="absolute -left-[8px] top-16 w-1.5 h-8 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -left-[8px] top-28 w-1.5 h-10 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -right-[8px] top-20 w-1.5 h-12 bg-[#334155] rounded-r-md"></div>
+
+          <!-- Full White Inner Screen Slot -->
+          <div class="relative w-full h-full rounded-[30px] overflow-hidden bg-white text-slate-900 p-3.5 pt-2 flex flex-col justify-between font-sans shadow-inner">
+            <!-- Top Camera Notch Pill -->
+            <div class="w-16 h-3.5 rounded-full bg-slate-950 mx-auto mb-2 flex items-center justify-end px-2 shrink-0">
+              <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+            </div>
+
+            <!-- Screen Header -->
+            <div class="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100">
+              <span class="font-bold text-slate-900 font-heading">Dompet Desainer</span>
+              <span class="bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded font-bold text-[9px]">Royalti</span>
+            </div>
+
+            <!-- Replaceable Screenshot Container Slot -->
+            <div class="my-auto p-3.5 bg-purple-50/80 rounded-2xl border border-purple-200/80 text-center space-y-1.5 shadow-2xs">
+              <span class="text-[10px] text-slate-500">Total Saldo Royalti</span>
+              <div class="text-2xl font-extrabold text-slate-900 font-heading">Rp 1.450.000</div>
+              <div class="text-[9px] text-purple-700 font-bold">Slot Foto Saldo Desainer</div>
+            </div>
+
+            <div class="text-center text-[9px] text-slate-400 font-mono">
+              Pinoka Designer Wallet
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Speed & Mobile Performance -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center opacity-0 animate-lp-fade-up">
+      <!-- Smartphone Device Mockup Frame (Left on Desktop) -->
+      <div class="lg:col-span-6 flex justify-center order-2 lg:order-1">
+        <div class="relative w-full max-w-[260px] sm:max-w-[280px] aspect-[9/18.5] rounded-[40px] border-[5px] border-[#1e293b] bg-[#0f172a] p-2.5 shadow-2xl transition-all duration-300 hover:border-cyan-500/60">
+          <!-- Physical Side Buttons -->
+          <div class="absolute -left-[8px] top-16 w-1.5 h-8 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -left-[8px] top-28 w-1.5 h-10 bg-[#334155] rounded-l-md"></div>
+          <div class="absolute -right-[8px] top-20 w-1.5 h-12 bg-[#334155] rounded-r-md"></div>
+
+          <!-- Full White Inner Screen Slot -->
+          <div class="relative w-full h-full rounded-[30px] overflow-hidden bg-white text-slate-900 p-3.5 pt-2 flex flex-col justify-between font-sans shadow-inner">
+            <!-- Top Camera Notch Pill -->
+            <div class="w-16 h-3.5 rounded-full bg-slate-950 mx-auto mb-2 flex items-center justify-end px-2 shrink-0">
+              <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+            </div>
+
+            <!-- Screen Header -->
+            <div class="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100">
+              <span class="font-bold text-slate-900 font-heading">PageSpeed Score</span>
+              <span class="bg-emerald-500/10 text-emerald-700 px-2 py-0.5 rounded font-bold font-mono text-[9px]">98/100</span>
+            </div>
+
+            <!-- Replaceable Screenshot Container Slot -->
+            <div class="my-auto p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center space-y-1.5 shadow-2xs">
+              <span class="text-[10px] text-slate-500">Waktu Muat Toko</span>
+              <div class="text-2xl font-black text-emerald-600 font-mono">0.3 Detik</div>
+              <div class="text-[9px] text-slate-600 font-bold">Slot Foto Skor Performa HP</div>
+            </div>
+
+            <div class="text-center text-[9px] text-slate-400 font-mono">
+              Pinoka Mobile Performance
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Info (Right on Desktop) -->
+      <div class="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+        <!-- Large Step Number & Category Badge -->
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[clamp(2.5rem,4.5vw,3.75rem)] font-black text-cyan-500 leading-none tracking-tighter shrink-0 select-none">
+            04
+          </span>
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+            Optimasi Otomatis
+          </span>
+        </div>
+        <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-main tracking-tight m-0">
+          Super Cepat di Semua HP & Laptop
+        </h3>
+        <p class="text-body-base text-muted leading-relaxed m-0">
+          Toko online Anda teroptimasi secara otomatis agar terbuka dalam hitungan milidetik saat diklik oleh calon pelanggan.
+        </p>
+        <ul class="space-y-2 pt-2 text-xs font-medium text-main">
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Tanpa perlu install aplikasi pihak ketiga</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>100% responsif di semua ukuran layar</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>

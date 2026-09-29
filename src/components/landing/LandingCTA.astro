@@ -1,0 +1,198 @@
+---
+/**
+ * LandingCTA.astro — Clean theme-aware CTA
+ * Subtle gradient that works in both light and dark modes.
+ * Single CTA intent: "register". No duplicate intent with nav.
+ */
+---
+
+<section class="lp-cta-section" aria-labelledby="cta-heading">
+  <!-- Decorative gradient circles -->
+  <div class="lp-cta-orb lp-cta-orb--1" aria-hidden="true"></div>
+  <div class="lp-cta-orb lp-cta-orb--2" aria-hidden="true"></div>
+
+  <div class="lp-cta-inner reveal-on-scroll reveal-scale">
+    <div class="lp-cta-badge" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+      </svg>
+      Gratis Selamanya untuk 1 Website
+    </div>
+
+    <h2 class="lp-cta-heading" id="cta-heading" style="font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 800; max-width: 800px; line-height: 1.1; font-family: var(--font-heading);">
+      Siap Bikin Toko Online<br />
+      <span style="color: var(--color-text-secondary);">yang Langsung Jualan?</span>
+    </h2>
+
+    <p class="lp-cta-desc" style="max-width: 480px; font-size: 1.125rem;">
+      Daftar gratis, pilih template, isi produk. Website UMKM Anda live hari ini.
+    </p>
+
+    <!-- Single Main CTA Button -->
+    <div class="lp-cta-btns" style="margin-top: 1rem;">
+      <a href="/auth/login?mode=register" class="lp-cta-btn lp-cta-btn--main" id="cta-main">
+        Mulai Gratis Sekarang
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+
+    <div style="font-size: 0.75rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Tidak perlu kartu kredit. Tidak perlu koding.
+    </div>
+  </div>
+</section>
+
+<style>
+  .lp-cta-section {
+    position: relative;
+    overflow: hidden;
+    padding: 7rem 1.5rem;
+    background-color: var(--color-bg-base);
+    border-top: 1px solid var(--color-border-light);
+    text-align: center;
+  }
+
+  /* Decorative orbs — slow drift, subtle */
+  .lp-cta-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+  }
+  .lp-cta-orb--1 {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%);
+    top: -140px; left: -100px;
+    animation: lp-orb-drift 18s ease-in-out infinite;
+  }
+  .lp-cta-orb--2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(20,184,166,0.1) 0%, transparent 70%);
+    bottom: -100px; right: -60px;
+    animation: lp-orb-drift 22s ease-in-out infinite reverse;
+    animation-delay: -7s;
+  }
+  html[data-theme="dark"] .lp-cta-orb--1 {
+    background: radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%);
+  }
+  html[data-theme="dark"] .lp-cta-orb--2 {
+    background: radial-gradient(circle, rgba(20,184,166,0.18) 0%, transparent 70%);
+  }
+
+  /* Content */
+  .lp-cta-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .lp-cta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    background: rgba(37,99,235,0.08);
+    border: 1px solid rgba(37,99,235,0.16);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  html[data-theme="dark"] .lp-cta-badge {
+    background: rgba(37,99,235,0.14);
+    border-color: rgba(37,99,235,0.25);
+  }
+
+  .lp-cta-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+
+  .lp-cta-desc {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    max-width: 40ch;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* CTA buttons row */
+  .lp-cta-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    padding-top: 0.5rem;
+  }
+
+  .lp-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 0.875rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 160ms cubic-bezier(0.23,1,0.32,1),
+                box-shadow 160ms;
+  }
+
+  /* ── Main CTA button (uses design system primary) ─── */
+  .lp-cta-btn--main {
+    background: var(--color-primary);
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 8px 24px -4px rgba(var(--color-primary-rgb), 0.35);
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: var(--font-heading);
+    transition: transform 160ms cubic-bezier(0.23,1,0.32,1), background 150ms, box-shadow 160ms;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lp-cta-btn--main:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px -4px rgba(var(--color-primary-rgb), 0.5);
+    }
+  }
+  .lp-cta-btn--main:active { transform: scale(0.97); }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .lp-cta-btns { flex-direction: column; align-items: center; }
+    .lp-cta-btn { width: 100%; justify-content: center; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .lp-cta-orb { animation: none; }
+    .lp-cta-btn { transition: none; }
+  }
+</style>

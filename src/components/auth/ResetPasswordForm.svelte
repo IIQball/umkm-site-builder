@@ -86,7 +86,27 @@
       if (!response.ok) {
         toast.error(data.error || "Gagal mengatur ulang kata sandi");
       } else {
-        await authClient.signOut(); // Pastikan otomatis logout
+        if (data.email) {
+          // If we got the email back, attempt to automatically sign the user in
+          const { error: signInError } = await authClient.signIn.email({
+            email: data.email,
+            password,
+          });
+
+          if (!signInError) {
+            toast.success("Aktivasi berhasil! Anda akan dialihkan ke dasbor...");
+            successMessage = "Kata sandi berhasil disimpan! Anda akan dialihkan ke dasbor sebentar lagi.";
+            setTimeout(() => {
+              if (data.role === 'superadmin') window.location.href = '/superadmin';
+              else if (data.role === 'admin') window.location.href = '/admin';
+              else if (data.role === 'designer') window.location.href = '/designer/wallet';
+              else window.location.href = '/dashboard';
+            }, 1500);
+            return;
+          }
+        }
+        
+        await authClient.signOut(); // Pastikan otomatis logout jika auto-login gagal atau tidak ada email
         toast.success("Kata sandi berhasil diatur ulang! Anda sekarang dapat masuk dengan sandi baru.");
         successMessage = "Kata sandi berhasil diatur ulang! Anda sekarang dapat masuk dengan sandi baru.";
         password = "";

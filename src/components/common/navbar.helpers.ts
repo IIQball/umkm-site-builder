@@ -60,7 +60,8 @@ export const getRoleBadge = (role?: string | null): RoleBadgeMeta => {
 
 export const getDashboardHref = (role?: string | null): string => {
   if (role === 'designer') return '/designer/wallet'
-  if (role === 'admin' || role === 'superadmin') return '/admin'
+  if (role === 'superadmin') return '/superadmin'
+  if (role === 'admin') return '/admin'
   return '/dashboard'
 }
 
@@ -75,13 +76,13 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
   switch (role) {
     case 'superadmin':
       return [
-        { label: 'Overview Dashboard', href: '/admin', icon: LayoutDashboard },
-        { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: Shield },
-        { label: 'Manajemen Pengguna', href: '/admin/users', icon: Users },
-        { label: 'Kurasi Template', href: '/admin/templates', icon: Palette },
-        { label: 'Kategori Bisnis', href: '/admin/template-categories', icon: Layers },
-        { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: Receipt },
-        { label: 'Pengaturan Platform', href: '/admin/settings', icon: Settings }
+        { label: 'Overview Dashboard', href: '/superadmin', icon: LayoutDashboard },
+        { label: 'Kelola Akses Admin', href: '/superadmin/whitelist', icon: Shield },
+        { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: Users },
+        { label: 'Kurasi Template', href: '/superadmin/templates', icon: Palette },
+        { label: 'Kategori Bisnis', href: '/superadmin/template-categories', icon: Layers },
+        { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: Receipt },
+        { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: Settings }
       ]
     case 'admin':
       return [

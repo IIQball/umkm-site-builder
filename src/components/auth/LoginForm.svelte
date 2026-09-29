@@ -45,9 +45,9 @@
       if (role === 'designer') {
         window.location.href = '/designer/wallet';
       } else if (role === 'superadmin') {
-        window.location.href = '/admin';
+        window.location.href = '/superadmin';
       } else if (role === 'admin') {
-        window.location.href = '/admin/merchants';
+        window.location.href = '/admin';
       } else {
         window.location.href = '/dashboard';
       }

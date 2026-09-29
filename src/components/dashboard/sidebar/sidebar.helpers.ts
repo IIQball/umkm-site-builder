@@ -68,6 +68,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Pendampingan UMKM' },
           { label: 'Merchant Anda', href: '/admin/merchants', icon: 'storefront', group: 'Pendampingan UMKM' },
+          { label: 'Link Registrasi', href: '/admin/registrations', icon: 'link', group: 'Pendampingan UMKM' },
         ],
       },
       {
@@ -85,23 +86,23 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Platform & Pengguna',
         items: [
-          { label: 'Overview Dashboard', href: '/admin', icon: 'dashboard', group: 'Platform & Pengguna' },
-          { label: 'Kelola Akses Admin', href: '/admin/whitelist', icon: 'admin_panel_settings', group: 'Platform & Pengguna' },
-          { label: 'Manajemen Pengguna', href: '/admin/users', icon: 'group', group: 'Platform & Pengguna' },
+          { label: 'Overview Dashboard', href: '/superadmin', icon: 'dashboard', group: 'Platform & Pengguna' },
+          { label: 'Manajemen Admin', href: '/superadmin/whitelist', icon: 'admin_panel_settings', group: 'Platform & Pengguna' },
+          { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: 'group', group: 'Platform & Pengguna' },
         ],
       },
       {
         title: 'Katalog & Template',
         items: [
-          { label: 'Kurasi Template', href: '/admin/templates', icon: 'palette', group: 'Katalog & Template' },
-          { label: 'Kategori Bisnis', href: '/admin/template-categories', icon: 'category', group: 'Katalog & Template' },
+          { label: 'Kurasi Template', href: '/superadmin/templates', icon: 'palette', group: 'Katalog & Template' },
+          { label: 'Kategori Bisnis', href: '/superadmin/template-categories', icon: 'category', group: 'Katalog & Template' },
         ],
       },
       {
         title: 'Transaksi & Pengaturan',
         items: [
-          { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Pengaturan' },
-          { label: 'Pengaturan Platform', href: '/admin/settings', icon: 'tune', group: 'Transaksi & Pengaturan' },
+          { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: 'receipt_long', group: 'Transaksi & Pengaturan' },
+          { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: 'tune', group: 'Transaksi & Pengaturan' },
         ],
       },
     ];

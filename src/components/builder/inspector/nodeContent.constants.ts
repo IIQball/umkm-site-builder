@@ -23,10 +23,15 @@ export const getNodeLabel = (id: string): string => {
     case 'hero_email_capture': return 'Form Email Input';
     case 'hero_social_proof': return 'Avatar Komunitas & Rating';
     case 'hero_founder_photo': return 'Foto Profil Pendiri';
-    case 'announcement': return 'Announcement Bar';
-    case 'logo': return 'Logo & Brand';
-    case 'nav_links': return 'Navigation Menu';
-    case 'header': return 'Section Header';
+    case 'announcement': return 'Bar Pengumuman Promo';
+    case 'contact_bar': return 'Bar Kontak & Jam Buka';
+    case 'delivery_bar': return 'Bar Layanan Pesan Antar';
+    case 'countdown_bar': return 'Bar Hitung Mundur Flash Sale';
+    case 'search_bar': return 'Bilah Pencarian Produk';
+    case 'store_badges': return 'Lencana Legalitas Toko';
+    case 'logo': return 'Logo & Brand Toko';
+    case 'nav_links': return 'Menu Navigasi';
+    case 'header': return 'Kepala Halaman (Header)';
     case 'features_heading': return 'Judul & Subjudul Fitur';
     case 'features_image': return 'Gambar Ilustrasi Fitur';
     case 'catalog_header': return 'Judul & Subjudul Katalog';
@@ -97,7 +102,7 @@ export const getNodeLabel = (id: string): string => {
         const idx = parseInt(id.replace('item_', ''), 10);
         return `Item #${isNaN(idx) ? 1 : idx + 1}`;
       }
-      return id.startsWith('nav_') ? 'Navigation Menu' : id;
+      return id.startsWith('nav_') ? 'Menu Navigasi' : id;
     }
   }
 };
@@ -129,8 +134,9 @@ export const nodeMarginOptions = [
 ];
 
 export const btnVariantOptions = [
-  { value: 'primary', label: 'Primary Brand (Solid)' },
-  { value: 'secondary', label: 'Secondary Brand (Solid)' },
+  { value: 'primary', label: 'Primary (Warna Penuh)' },
+  { value: 'secondary', label: 'Secondary (Outline / Garis Tepi)' },
+  { value: 'tertiary', label: 'Tertiary (Teks Garis Bawah)' },
   { value: 'outline', label: 'Outline (Garis Tepi)' },
 ];
 

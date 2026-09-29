@@ -33,18 +33,25 @@ export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
       hoverText: '#ffffff'
     },
     secondary: {
-      backgroundColor: '#f1f5f9',
+      backgroundColor: 'transparent',
       textColor: '#0f172a',
-      borderColor: 'transparent',
-      hoverBg: '#e2e8f0',
+      borderColor: '#cbd5e1',
+      hoverBg: '#f8fafc',
       hoverText: '#0f172a'
     },
     outline: {
       backgroundColor: 'transparent',
-      textColor: '#36C6FD',
-      borderColor: '#36C6FD',
-      hoverBg: '#eff6ff',
-      hoverText: '#00A3EF'
+      textColor: '#0f172a',
+      borderColor: '#cbd5e1',
+      hoverBg: '#f8fafc',
+      hoverText: '#0f172a'
+    },
+    tertiary: {
+      backgroundColor: 'transparent',
+      textColor: '#334155',
+      borderColor: 'transparent',
+      hoverBg: 'transparent',
+      hoverText: '#0f172a'
     }
   },
   layout: {

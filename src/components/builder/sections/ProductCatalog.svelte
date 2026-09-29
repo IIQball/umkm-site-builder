@@ -92,6 +92,8 @@ $: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber 
 $: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
 $: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
 $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
+$: elementOrder = (props?.elementOrder as string[]) || ['badge', 'title', 'subtitle', 'catalog_grid'];
+$: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
 
   $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
   $: detailedCart = cart.map((item) => ({ ...item, subtotal: item.price * item.qty }));
@@ -173,9 +175,9 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
       
-    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
-    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank");
-  };
+    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`
+    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank")
+  }
 </script>
 
 <div
@@ -199,56 +201,61 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
       />
     </div>
   {:else}
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-6xl mx-auto flex flex-col">
       <!-- Catalog Header -->
-      <CatalogHeader
-        {sectionId}
-        {title}
-        {subtitle}
-        {badgeText}
-        align="center"
-      />
+      <div style="order: {isGridFirst ? 2 : 1};">
+        <CatalogHeader
+          {sectionId}
+          {title}
+          {subtitle}
+          {badgeText}
+          {elementOrder}
+          align="center"
+        />
+      </div>
 
-      <!-- Empty State: shown in live storefront when store has no products yet -->
-      {#if isLiveStorefront && products.length === 0}
-        <div class="flex flex-col items-center justify-center gap-4 py-20 text-center text-slate-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-          </svg>
-          <p class="text-lg font-semibold">Belum Ada Produk</p>
-          <p class="text-sm max-w-xs">Toko ini belum menambahkan produk. Silakan hubungi pemilik toko untuk informasi lebih lanjut.</p>
-        </div>
-      {:else}
-        <!-- Preset Dispatcher -->
-        {#if activePreset === 'carousel_scroll'}
-          <CatalogCarouselScroll {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'list_compact'}
-          <CatalogListCompact {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'masonry_catalog'}
-          <CatalogMasonry {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'bento_product_spotlight'}
-          <CatalogBentoSpotlight {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'split_category_sidebar'}
-          <CatalogSidebarFilter {sectionId} {products} {categories} {activeCategoryId} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'price_table_view'}
-          <CatalogPriceTable {sectionId} {products} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'lookbook_gallery'}
-          <CatalogLookbook {sectionId} {products} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'flash_sale_countdown'}
-          <CatalogFlashSale {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'bundle_package_tiers'}
-          <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'single_product_deep_focus'}
-          <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
-          <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-        {:else if activePreset === 'minimal_accordion_catalog'}
-          <CatalogAccordion {sectionId} {products} onBuyNow={handleBuyNow} />
+      <div style="order: {isGridFirst ? 1 : 2};">
+        <!-- Empty State: shown in live storefront when store has no products yet -->
+        {#if isLiveStorefront && products.length === 0}
+          <div class="flex flex-col items-center justify-center gap-4 py-20 text-center text-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <p class="text-lg font-semibold">Belum Ada Produk</p>
+            <p class="text-sm max-w-xs">Toko ini belum menambahkan produk. Silakan hubungi pemilik toko untuk informasi lebih lanjut.</p>
+          </div>
         {:else}
-          <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
-          <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          <!-- Preset Dispatcher -->
+          {#if activePreset === 'carousel_scroll'}
+            <CatalogCarouselScroll {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'list_compact'}
+            <CatalogListCompact {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'masonry_catalog'}
+            <CatalogMasonry {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'bento_product_spotlight'}
+            <CatalogBentoSpotlight {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'split_category_sidebar'}
+            <CatalogSidebarFilter {sectionId} {products} {categories} {activeCategoryId} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'price_table_view'}
+            <CatalogPriceTable {sectionId} {products} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'lookbook_gallery'}
+            <CatalogLookbook {sectionId} {products} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'flash_sale_countdown'}
+            <CatalogFlashSale {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'bundle_package_tiers'}
+            <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'single_product_deep_focus'}
+            <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
+            <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {:else if activePreset === 'minimal_accordion_catalog'}
+            <CatalogAccordion {sectionId} {products} onBuyNow={handleBuyNow} />
+          {:else}
+            <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
+            <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+          {/if}
         {/if}
-      {/if}
+      </div>
     </div>
 
     <!-- Floating Sticky Cart Pill -->
@@ -256,20 +263,17 @@ $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) 
       <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
         <button
           type="button"
-          on:click={() => {
-            currentView = 'checkout';
-            scrollToCatalog();
-          }}
-          class="bg-main text-canvas dark:bg-primary dark:text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
+          on:click={() => { currentView = 'checkout'; scrollToCatalog() }}
+          class="btn btn-primary rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
         >
           <div class="relative">
             <ShoppingCart size={18} />
-            <span class="absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold">
+            <span class="badge badge-error badge-xs absolute -top-2 -right-2 text-white font-mono font-bold p-1">
               {totalCartItems}
             </span>
           </div>
           <span>Keranjang</span>
-          <span class="font-mono bg-white/20 px-2 py-0.5 rounded-full text-xs">
+          <span class="badge badge-ghost font-mono text-xs">
             {formatIDR(cartTotal)}
           </span>
         </button>

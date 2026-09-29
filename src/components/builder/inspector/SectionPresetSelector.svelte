@@ -15,6 +15,7 @@
 
   const handlePresetSelect = (presetId: string) => {
     editorStore.updateSectionLayoutPreset(section.id, presetId);
+    isModalOpen = false;
   };
 </script>
 
@@ -51,7 +52,7 @@
             {activePresetObj?.label || 'Default Layout'}
           </span>
         </div>
-        <span class="inline-flex items-center gap-1 text-3xs font-bold font-mono px-2 py-0.5 rounded-full bg-primary text-white shadow-2xs">
+        <span class="badge badge-primary badge-xs gap-1 font-bold font-mono shadow-2xs">
           <Check size={9} strokeWidth={3} />
           <span>Aktif</span>
         </span>

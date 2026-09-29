@@ -13,6 +13,11 @@ if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect('/auth/login?redirect=/admin/transactions');
 }
 
+// Menu transaksi hanya milik Admin pendamping, bukan Superadmin
+if (user.role === 'superadmin') {
+  return Astro.redirect('/admin');
+}
+
 let initialOrders: Array<{
   id: string;
   userId: string;
@@ -34,9 +39,7 @@ let initialOrders: Array<{
 }> = [];
 
 try {
-  const whereCondition = user.role === 'superadmin'
-    ? undefined
-    : or(eq(transactions.userId, user.id), eq(transactions.assistedBy, user.id));
+  const whereCondition = or(eq(transactions.userId, user.id), eq(transactions.assistedBy, user.id));
 
   const rows = await db
     .select({

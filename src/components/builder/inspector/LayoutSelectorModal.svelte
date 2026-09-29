@@ -51,12 +51,12 @@
           <div>
             <h3 class="text-base font-extrabold text-main font-heading leading-tight flex items-center gap-2">
               <span>Eksplorasi Tata Letak (8pt Grid)</span>
-              <span class="text-3xs font-mono uppercase bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
+              <span class="badge badge-primary badge-outline badge-xs font-mono uppercase font-bold">
                 {filteredPresets.length} Pilihan
               </span>
             </h3>
             <p class="text-2xs text-secondary mt-0.5">
-              {sectionLabel} — Klik kartu untuk langsung mengubah tata letak pada kanvas
+              {sectionLabel} - Klik kartu untuk langsung mengubah tata letak pada kanvas
             </p>
           </div>
         </div>
@@ -106,14 +106,14 @@
 
               <!-- Tag Pill -->
               {#if preset.tag}
-                <span class="absolute top-3 left-3 px-2 py-0.5 rounded-full text-3xs font-bold font-mono tracking-wider bg-slate-900/90 text-slate-300 border border-slate-700/60 backdrop-blur-xs">
+                <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-slate-700/60 backdrop-blur-xs">
                   {preset.tag}
                 </span>
               {/if}
 
               <!-- Active Badge -->
               {#if isSelected}
-                <div class="absolute top-3 right-3 flex items-center gap-1 bg-primary text-white text-3xs font-bold font-mono uppercase px-2.5 py-1 rounded-full shadow-md animate-fade-in">
+                <div class="badge badge-primary badge-xs gap-1 font-mono uppercase absolute top-3 right-3 shadow-md animate-fade-in">
                   <Check size={10} strokeWidth={3} />
                   <span>Aktif</span>
                 </div>
@@ -142,10 +142,10 @@
                 <button
                   type="button"
                   on:click|stopPropagation={() => handleSelect(preset.id)}
-                  class={`text-2xs font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                  class={`btn btn-xs ${
                     isSelected
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'bg-nested hover:bg-primary/10 text-secondary hover:text-primary'
+                      ? 'btn-primary shadow-xs'
+                      : 'btn-ghost bg-nested hover:bg-primary/10 text-secondary hover:text-primary'
                   }`}
                 >
                   {#if isSelected}

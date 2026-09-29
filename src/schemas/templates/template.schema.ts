@@ -81,6 +81,7 @@ export const ThemeButtonsSchema = z.object({
   primary: ThemeButtonVariantSchema,
   secondary: ThemeButtonVariantSchema,
   outline: ThemeButtonVariantSchema,
+  tertiary: ThemeButtonVariantSchema,
   borderRadius: z.string().optional(),
 }).optional();
 

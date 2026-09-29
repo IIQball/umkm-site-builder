@@ -80,7 +80,6 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
         { label: 'Manajemen Pengguna', href: '/admin/users', icon: Users },
         { label: 'Kurasi Template', href: '/admin/templates', icon: Palette },
         { label: 'Kategori Bisnis', href: '/admin/template-categories', icon: Layers },
-        { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: Receipt },
         { label: 'Pengaturan Platform', href: '/admin/settings', icon: Settings }
       ]
     case 'admin':

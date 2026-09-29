@@ -27,7 +27,12 @@
 
   const updateColorOptimistic = (key: string, value: string) => {
     const cssMap: Record<string, Record<string, string>> = {
-      primary: { '--theme-primary': value, '--color-primary': value },
+      primary: {
+        '--theme-primary': value,
+        '--color-primary': value,
+        '--theme-btn-primary-bg': value,
+        '--btn-primary-bg': value,
+      },
       secondary: { '--theme-secondary': value, '--color-secondary': value },
       background: { '--theme-bg': value, '--color-bg-base': value },
       surface: { '--theme-surface': value, '--color-card-base': value },
@@ -65,14 +70,22 @@
   };
 
   const updateButtonVariantOptimistic = (variantKey: string, key: string, value: string) => {
-    if (variantKey === 'primary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-primary-bg': value, '--btn-primary-bg': value });
-    if (variantKey === 'primary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-primary-text': value, '--btn-primary-text': value });
-    if (variantKey === 'secondary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-secondary-bg': value, '--btn-secondary-bg': value });
-    if (variantKey === 'secondary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-secondary-text': value, '--btn-secondary-text': value });
-    if (variantKey === 'outline' && key === 'borderColor') setCanvasCssVar({ '--theme-btn-outline-border': value, '--btn-outline-border': value });
-    if (variantKey === 'outline' && key === 'textColor') setCanvasCssVar({ '--theme-btn-outline-text': value, '--btn-outline-text': value });
+    if (variantKey === 'primary' && key === 'textColor') {
+      setCanvasCssVar({ '--theme-btn-primary-text': value, '--btn-primary-text': value });
+    }
+    if ((variantKey === 'secondary' || variantKey === 'outline') && key === 'textColor') {
+      setCanvasCssVar({
+        '--theme-btn-secondary-text': value,
+        '--btn-secondary-text': value,
+        '--theme-btn-outline-text': value,
+        '--btn-outline-text': value,
+      });
+    }
+    if (variantKey === 'tertiary' && key === 'textColor') {
+      setCanvasCssVar({ '--theme-btn-tertiary-text': value, '--btn-tertiary-text': value });
+    }
 
-    const variant = variantKey as 'primary' | 'secondary' | 'outline';
+    const variant = variantKey as 'primary' | 'secondary' | 'outline' | 'tertiary';
     const current = (theme.buttons || {})[variant] || {};
     editorStore.updateGlobalTheme({
       buttons: { [variant]: { ...current, [key]: value } },

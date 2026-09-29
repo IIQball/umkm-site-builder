@@ -64,7 +64,7 @@
       <button
         type="button"
         on:click={addBeforeItem}
-        class="flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:text-rose-500 cursor-pointer"
+        class="btn btn-ghost btn-xs text-rose-600 hover:text-rose-500 gap-1"
       >
         <Plus size={12} />
         <span>Tambah Poin</span>
@@ -74,7 +74,7 @@
       type="text"
       value={beforeTitle}
       on:input={(e) => handlePropChange('beforeTitle', e.currentTarget.value)}
-      class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-rose-300 dark:border-rose-800 rounded text-xs text-base-content focus:outline-none"
+      class="input input-bordered input-xs w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each beforeItems as item, idx}
@@ -83,13 +83,13 @@
             type="text"
             value={item}
             on:input={(e) => updateBeforeItem(idx, e.currentTarget.value)}
-            class="flex-1 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs flex-1"
             placeholder="Poin kekurangan"
           />
           <button
             type="button"
             on:click={() => removeBeforeItem(idx)}
-            class="p-1 text-base-content/50 hover:text-rose-500 rounded cursor-pointer"
+            class="btn btn-ghost btn-xs btn-square p-0 text-base-content/50 hover:text-rose-500"
             title="Hapus Poin"
           >
             <Trash2 size={13} />
@@ -106,7 +106,7 @@
       <button
         type="button"
         on:click={addAfterItem}
-        class="flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-500 cursor-pointer"
+        class="btn btn-ghost btn-xs text-emerald-600 hover:text-emerald-500 gap-1"
       >
         <Plus size={12} />
         <span>Tambah Poin</span>
@@ -116,7 +116,7 @@
       type="text"
       value={afterTitle}
       on:input={(e) => handlePropChange('afterTitle', e.currentTarget.value)}
-      class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-emerald-300 dark:border-emerald-800 rounded text-xs text-base-content focus:outline-none"
+      class="input input-bordered input-xs w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each afterItems as item, idx}
@@ -125,13 +125,13 @@
             type="text"
             value={item}
             on:input={(e) => updateAfterItem(idx, e.currentTarget.value)}
-            class="flex-1 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs flex-1"
             placeholder="Poin keunggulan"
           />
           <button
             type="button"
             on:click={() => removeAfterItem(idx)}
-            class="p-1 text-base-content/50 hover:text-rose-500 rounded cursor-pointer"
+            class="btn btn-ghost btn-xs btn-square p-0 text-base-content/50 hover:text-rose-500"
             title="Hapus Poin"
           >
             <Trash2 size={13} />

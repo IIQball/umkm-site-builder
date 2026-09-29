@@ -17,6 +17,7 @@
     mapRawFeatureItems,
     getDenseFeatureItems,
   } from './features/features.helpers';
+  import { getEffectiveFeaturesElementOrder } from './features/featuresLayout.helpers';
   import './features/features.css';
 
   export let props: FeaturesProps = {};
@@ -26,9 +27,26 @@
   export let layoutPreset: string = 'grid_3_cards';
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'grid_3_cards';
+  $: elementOrder = getEffectiveFeaturesElementOrder(
+    activePreset,
+    props?.elementOrder,
+    props?.featuresPreset as string
+  );
 
   $: items = mapRawFeatureItems(props);
   $: denseItems = getDenseFeatureItems(items);
+
+  $: customBgColor = styles?.bgColorToken
+    ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
+    : styles?.backgroundColor;
+  $: sectionBgStyle = customBgColor ? `background-color: ${customBgColor};` : 'background-color: var(--color-bg-base);';
+
+  $: marginTop = styles?.marginTop ? (typeof styles.marginTop === 'number' ? `${styles.marginTop}px` : styles.marginTop) : '0px';
+  $: marginBottom = styles?.marginBottom ? (typeof styles.marginBottom === 'number' ? `${styles.marginBottom}px` : styles.marginBottom) : '0px';
+  $: paddingTop = styles?.paddingTop !== undefined ? (typeof styles.paddingTop === 'number' ? `${styles.paddingTop}px` : styles.paddingTop) : '48px';
+  $: paddingBottom = styles?.paddingBottom !== undefined ? (typeof styles.paddingBottom === 'number' ? `${styles.paddingBottom}px` : styles.paddingBottom) : '48px';
+  $: paddingLeft = styles?.paddingLeft !== undefined ? (typeof styles.paddingLeft === 'number' ? `${styles.paddingLeft}px` : styles.paddingLeft) : 'var(--active-safe-zone, var(--active-margin, 32px))';
+  $: paddingRight = styles?.paddingRight !== undefined ? (typeof styles.paddingRight === 'number' ? `${styles.paddingRight}px` : styles.paddingRight) : 'var(--active-safe-zone, var(--active-margin, 32px))';
 
   const handleSelectNode = (e: MouseEvent | KeyboardEvent, key: string) => {
     e.stopPropagation();
@@ -49,12 +67,12 @@
 <section
   id={sectionId}
   data-node="features_container"
-  class="feature-card w-full relative overflow-hidden"
-  style="container-type: inline-size; container-name: featurecard;"
+  class="feature-card w-full relative overflow-hidden {isActive ? 'relative z-10' : ''}"
+  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom}; container-type: inline-size; container-name: featurecard;"
 >
   <div
-    class="builder-safe-container"
-    style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px);"
+    class="relative z-10 w-full mx-auto builder-safe-container box-border"
+    style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: {paddingLeft}; padding-right: {paddingRight}; padding-top: {paddingTop}; padding-bottom: {paddingBottom};"
   >
     {#if activePreset === 'horizontal_list'}
       <FeaturesHorizontalList
@@ -62,13 +80,18 @@
         title={props?.title || 'Komitmen Terbaik di Setiap Pesanan'}
         subtitle={props?.subtitle || 'Kami memastikan setiap tahapan dari kebun hingga ke tangan Anda melewati proses kurasi ketat.'}
         {items}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
 
     {:else if activePreset === 'banner_inline_bar'}
       <FeaturesBannerInlineBar
+        badgeText={props?.badgeText || ''}
+        title={props?.title || ''}
+        subtitle={props?.subtitle || ''}
         items={items.slice(0, 3)}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -79,6 +102,7 @@
         title={props?.title || 'Dirancang Khusus untuk Kebutuhan Harian'}
         subtitle={props?.subtitle || 'Setiap detail kami perhitungkan demi kenyamanan penggunaan produk jangka panjang.'}
         {items}
+        {elementOrder}
         mainImageUrl={props?.mainImageUrl || items[0]?.imageUrl || ''}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
@@ -90,6 +114,7 @@
         title={props?.title || ''}
         subtitle={props?.subtitle || ''}
         items={items.slice(0, 4)}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -100,6 +125,7 @@
         title={props?.title || 'Eksplorasi Varian Rasa Favorit'}
         subtitle={props?.subtitle || 'Pilih varian untuk melihat detail rasa, keunggulan, dan bahan baku.'}
         items={items.slice(0, 4)}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -110,6 +136,7 @@
         title={props?.title || 'Kualitas Diperiksa Langkah demi Langkah'}
         subtitle={props?.subtitle || 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga higienitas dan mutu rasa.'}
         items={items.slice(0, 4)}
+        {elementOrder}
         mainImageUrl={props?.mainImageUrl || items[0]?.imageUrl || ''}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
@@ -123,6 +150,7 @@
         items={items.slice(0, 4)}
         ctaText={typeof props?.ctaText === 'string' ? props.ctaText : 'Hubungi Kami Langsung'}
         ctaLink={typeof props?.ctaLink === 'string' ? props.ctaLink : '#'}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -133,6 +161,7 @@
         title={props?.title || 'Semua Kebaikan Dalam Satu Kemasan'}
         subtitle={props?.subtitle || 'Ringkasan keunggulan formula herbal alami kami untuk kesehatan harian.'}
         items={denseItems}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -156,6 +185,7 @@
           'Renyah tahan 6 bulan berkat kemasan vakum',
           'Bersertifikat Halal MUI & BPOM',
         ]}
+        {elementOrder}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
       />
@@ -171,6 +201,7 @@
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
         onReorder={handleReorder}
+        {elementOrder}
       />
     {/if}
   </div>

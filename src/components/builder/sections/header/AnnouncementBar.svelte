@@ -11,7 +11,7 @@
   $: freeShippingText = props.freeShippingText ?? '';
   $: align = props.announcementAlign ?? 'center';
   $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, var(--color-primary))';
-  $: textColor = (props.announcementTextColor as string) || '#ffffff';
+  $: textColor = (props.announcementTextColor as string) || 'var(--theme-btn-primary-text, currentColor)';
   $: paddingY = (props.announcementPaddingY as string) || '8px';
 
   $: nodeStyles = props?.nodeStyles?.announcement || {};

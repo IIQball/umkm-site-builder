@@ -14,20 +14,25 @@
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
   export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let elementOrder: string[] = ['image', 'badge', 'title', 'subtitle', 'cta'];
 
+  $: hasImage = elementOrder.includes('image');
+  $: imgIdx = elementOrder.indexOf('image');
+  $: titleIdx = elementOrder.indexOf('title') !== -1 ? elementOrder.indexOf('title') : 1;
+  $: isImageLeft = imgIdx !== -1 ? imgIdx < titleIdx : true;
   $: isPhotoActive = activeNodeId === 'hero_founder_photo' || activeNodeId === 'hero_image' || activeNodeId === 'image';
 </script>
 
-<div class="py-10">
-  <div class="cq-grid-split items-center gap-8">
-    <!-- Founder Portrait Card (Sub-node hero_founder_photo) -->
+{#snippet photoBlock()}
+  <!-- Founder Portrait Card (Sub-node hero_founder_photo) -->
+  {#if imageUrl}
     <div
       data-node="hero_founder_photo"
       role="button"
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'hero_founder_photo')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_founder_photo')}
-      class={`relative w-full aspect-[4/5] max-w-sm mx-auto rounded-2xl overflow-hidden shadow-xl bg-slate-100 dark:bg-slate-800 transition-all cursor-pointer ${
+      class={`card relative w-full aspect-[4/5] max-w-sm mx-auto rounded-2xl overflow-hidden shadow-xl bg-[var(--color-nested-base)] border border-[var(--color-border)] transition-all cursor-pointer ${
         isPhotoActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
           : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
@@ -39,9 +44,33 @@
         <p class="text-[11px] text-slate-300 font-sans">Pengrajin Resep Asli</p>
       </div>
     </div>
+  {/if}
+{/snippet}
 
-    <!-- Story Narrative Text -->
-    <div class="text-left">
+{#snippet textBlock()}
+  <div class="text-left">
+    <HeroHeaderContent
+      {badgeText}
+      {tagName}
+      {title}
+      {subtitle}
+      {ctaText}
+      {ctaLink}
+      {secondaryCtaText}
+      {secondaryCtaLink}
+      {waNumber}
+      {activeNodeId}
+      {selectNode}
+      {selectNodeKey}
+      {elementOrder}
+      align="left"
+    />
+  </div>
+{/snippet}
+
+<div class="py-10">
+  {#if !hasImage}
+    <div class="max-w-2xl mx-auto text-center space-y-4">
       <HeroHeaderContent
         {badgeText}
         {tagName}
@@ -55,8 +84,19 @@
         {activeNodeId}
         {selectNode}
         {selectNodeKey}
-        align="left"
+        {elementOrder}
+        align="center"
       />
     </div>
-  </div>
+  {:else}
+    <div class="cq-grid-split items-center gap-8">
+      {#if isImageLeft}
+        {@render photoBlock()}
+        {@render textBlock()}
+      {:else}
+        {@render textBlock()}
+        {@render photoBlock()}
+      {/if}
+    </div>
+  {/if}
 </div>

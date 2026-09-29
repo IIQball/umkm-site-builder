@@ -7,6 +7,12 @@
   export let subtitle: string = '';
   export let badgeText: string = '';
   export let align: 'left' | 'center' | 'right' = 'center';
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle'];
+
+  $: defaultOrder = ['badge', 'title', 'subtitle'];
+  $: effectiveOrder = Array.isArray(elementOrder) && elementOrder.length > 0
+    ? [...elementOrder.filter((s) => defaultOrder.includes(s)), ...defaultOrder.filter((s) => !elementOrder.includes(s))]
+    : defaultOrder;
 
   $: isHeaderSelected = $canvasStore.selectedNodeId === 'faq_header';
 
@@ -36,30 +42,30 @@
         : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/60'
     }`}
   >
-    {#if badgeText}
-      <div
-        class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2 font-heading"
-        style="background: rgba(var(--color-primary-rgb), 0.1); color: var(--theme-primary, var(--color-primary)); border: 1px solid rgba(var(--color-primary-rgb), 0.2); border-radius: var(--btn-radius, var(--theme-btn-radius, 9999px));"
-      >
-        <HelpCircle size={12} class="text-[var(--theme-primary, var(--color-primary))]" />
-        <span>{badgeText}</span>
-      </div>
-    {/if}
-    {#if title}
-      <h2
-        class="text-heading-lg font-heading text-main tracking-tight font-black"
-        style="color: var(--color-text-main); font-family: var(--font-heading);"
-      >
-        {title}
-      </h2>
-    {/if}
-    {#if subtitle}
-      <p
-        class="text-xs sm:text-sm text-secondary max-w-xl mx-auto mt-2 leading-relaxed"
-        style="color: var(--color-text-secondary); font-family: var(--font-family);"
-      >
-        {subtitle}
-      </p>
-    {/if}
+    {#each effectiveOrder as slot}
+      {#if slot === 'badge' && badgeText}
+        <div
+          class="badge badge-primary badge-outline gap-1.5 px-3 py-1 font-heading text-xs font-bold uppercase tracking-wider mb-2"
+          style="border-radius: var(--btn-radius, var(--theme-btn-radius, 9999px));"
+        >
+          <HelpCircle size={12} class="text-[var(--theme-primary, var(--color-primary))]" />
+          <span>{badgeText}</span>
+        </div>
+      {:else if slot === 'title' && title}
+        <h2
+          class="text-heading-lg font-heading text-main tracking-tight font-black"
+          style="color: var(--color-text-main);"
+        >
+          {title}
+        </h2>
+      {:else if slot === 'subtitle' && subtitle}
+        <p
+          class="text-xs sm:text-sm text-secondary font-sans max-w-xl mx-auto mt-2 leading-relaxed"
+          style="color: var(--color-text-secondary);"
+        >
+          {subtitle}
+        </p>
+      {/if}
+    {/each}
   </div>
 {/if}

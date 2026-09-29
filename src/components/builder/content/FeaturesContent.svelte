@@ -28,7 +28,7 @@
       type="text"
       value={badgeText}
       on:input={(e) => handlePropChange('badgeText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
+      class="input input-bordered input-sm w-full"
       placeholder="Keunggulan Layanan Kami"
     />
   </div>
@@ -41,7 +41,7 @@
       type="text"
       value={title}
       on:input={(e) => handlePropChange('title', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
+      class="input input-bordered input-sm w-full"
       placeholder="Kenapa Memilih Produk UMKM Kami?"
     />
   </div>
@@ -54,7 +54,7 @@
       value={subtitle}
       on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
       rows="2"
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500 resize-y"
+      class="textarea textarea-bordered textarea-sm w-full resize-y"
       placeholder="Penjelasan ringkas keunggulan produk/layanan"></textarea>
   </div>
 

@@ -7,8 +7,13 @@
   export let title: string = 'Semua Kebaikan Dalam Satu Kemasan';
   export let subtitle: string = 'Ringkasan keunggulan formula herbal alami kami untuk kesehatan harian.';
   export let items: FeatureItem[] = [];
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'icon_matrix'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
+  $: hasMatrix = elementOrder.includes('icon_matrix') || elementOrder.includes('features_grid');
+  $: isMatrixFirst = (elementOrder.indexOf('icon_matrix') === 0) || (elementOrder.indexOf('features_grid') === 0);
 
   const handleItemClick = (e: MouseEvent, index: number) => {
     if (selectNode) selectNode(e, `feature_item_${index}`);
@@ -21,17 +26,23 @@
   };
 </script>
 
-<div class="text-center py-12">
-  <FeaturesHeaderTitle
-    {badgeText}
-    {title}
-    {subtitle}
-    {activeNodeId}
-    {selectNode}
-    maxWidthClass="max-w-xl"
-  />
+<div class="text-center py-12 flex flex-col">
+  {#if hasHeader}
+    <div style="order: {isMatrixFirst ? 2 : 1};">
+      <FeaturesHeaderTitle
+        {badgeText}
+        {title}
+        {subtitle}
+        {activeNodeId}
+        {selectNode}
+        {elementOrder}
+        maxWidthClass="max-w-xl"
+      />
+    </div>
+  {/if}
 
-  <div class="features-matrix-container text-left">
+  {#if hasMatrix}
+    <div class="features-matrix-container text-left" style="order: {isMatrixFirst ? 1 : 2};">
     {#each items as item, index (`${item.id || 'dm'}-${index}`)}
       {@const isActiveNode = activeNodeId === `feature_item_${index}`}
       <div
@@ -40,15 +51,17 @@
         tabindex="0"
         on:click={(e) => handleItemClick(e, index)}
         on:keydown={(e) => handleItemKeydown(e, index)}
-        class={`p-4 sm:p-5 rounded-2xl border bg-[var(--color-card-base)] flex items-start gap-3.5 shadow-xs transition-all duration-150 cursor-pointer ${
+        class={`p-4 sm:p-5 border bg-[var(--color-card-base)] flex items-start gap-3.5 shadow-xs transition-all duration-150 cursor-pointer ${
           isActiveNode
-            ? 'border-blue-500 ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-            : 'border-[var(--color-border)] hover:border-blue-400/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+            ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+            : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
+        style="border-radius: var(--btn-radius, 16px);"
       >
         <div
           data-node="feature_icon"
-          class="w-11 h-11 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20 mt-0.5"
+          class="w-11 h-11 flex items-center justify-center shrink-0 border mt-0.5"
+          style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
         >
           <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={20} />
         </div>
@@ -65,6 +78,7 @@
       </div>
     {/each}
   </div>
+  {/if}
 </div>
 
 <style>

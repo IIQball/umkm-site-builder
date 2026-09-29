@@ -34,7 +34,7 @@
     ? categories
     : ((props?.categories as any[]) || defaultCategories);
 
-  $: waUrl = generateWhatsAppLink(waNumber);
+  $: waUrl = generateWhatsAppLink(waNumber, (props?.whatsappTemplate as string) || '');
 </script>
 
 <div

@@ -66,6 +66,7 @@
               ...(section.props || {}),
               categories: categories.length > 0 ? categories : (section.props?.categories || []),
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
+              whatsappTemplate: store?.whatsappTemplate || section.props?.whatsappTemplate,
             }
           }
         : section.type === 'google_maps'

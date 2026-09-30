@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import TrafficWidget from '@/components/dashboard/TrafficWidget.svelte';
+import ChartWidget from '@/components/dashboard/ChartWidget.svelte';
 import IncompleteDataWarning from '@/components/dashboard/IncompleteDataWarning.svelte';
 import StatCard from '@/components/ui/StatCard.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
@@ -107,8 +108,17 @@ const engagementScore = Math.min(
         delayClass="delay-250"
       />
     </div>
-    
+
     <div class="animate-fade-in-up delay-300">
+      <ChartWidget 
+        client:load 
+        totalViews={storeData.totalViews}
+        totalClicks={storeData.totalWaClicks}
+        isOnboarded={isOnboarded}
+      />
+    </div>
+    
+    <div class="animate-fade-in-up delay-400">
       <TrafficWidget 
         client:load 
         storeId={storeData.id} 

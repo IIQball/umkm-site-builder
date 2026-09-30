@@ -11,6 +11,61 @@
   }
 
   let stats: StoreStats = { totalViews: initialViews, totalWaClicks: initialClicks };
+  let displayViewsValue: string = String(initialViews);
+  let displayClicksValue: string = String(initialClicks);
+  let viewsAnimationId: number;
+  let clicksAnimationId: number;
+
+  const animateCounter = (
+    target: number,
+    animationIdRef: number,
+    setDisplay: (val: string) => void
+  ) => {
+    if (typeof window === 'undefined' || target === 0) {
+      setDisplay(String(target));
+      return;
+    }
+
+    if (animationIdRef) {
+      window.cancelAnimationFrame(animationIdRef);
+    }
+
+    const duration = 900;
+    const startTime = performance.now();
+
+    const updateCount = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const current = Math.round(target * ease);
+
+      setDisplay(current.toLocaleString('id-ID'));
+
+      if (progress < 1) {
+        animationIdRef = requestAnimationFrame(updateCount);
+      } else {
+        setDisplay(String(target));
+      }
+    };
+
+    animationIdRef = requestAnimationFrame(updateCount);
+  };
+
+  $: {
+    if (stats.totalViews > 0) {
+      animateCounter(stats.totalViews, viewsAnimationId, (val) => {
+        displayViewsValue = val;
+      });
+    }
+  }
+
+  $: {
+    if (stats.totalWaClicks > 0) {
+      animateCounter(stats.totalWaClicks, clicksAnimationId, (val) => {
+        displayClicksValue = val;
+      });
+    }
+  }
 </script>
 
 <div class="space-y-6">
@@ -20,75 +75,72 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-base-content/60">Pengunjung Toko</p>
-            <p class="text-4xl font-bold text-primary mt-2">{stats.totalViews}</p>
-          </div>
-          <div class="rounded-full bg-primary/10 p-4">
-            <Users size={32} class="text-primary" />
-          </div>
+    <!-- Visitors Card - Dark theme (matches analytics StatCard) -->
+    <div class="bg-main text-canvas dark:bg-nested/95 border border-nested dark:border-nested/70 shadow-sm rounded-3xl p-6 transition-all {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
+      <div class="flex items-center justify-between gap-2.5 mb-4">
+        <p class="text-xs font-bold uppercase tracking-wider font-heading text-white/80">Pengunjung Toko</p>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-nested/50 text-canvas border border-nested/70">
+          <span class="material-symbols-outlined text-base">visibility</span>
         </div>
-        {#if stats.totalViews === 0}
-          <div class="mt-4 text-xs text-base-content/60">
-            <p>Belum ada pengunjung tercatat</p>
-            <p>Tunggu sampai orang pertama kali mengunjungi toko Anda</p>
-          </div>
-        {:else}
-          <div class="mt-4 text-xs text-base-content/60">
-            <p>Total orang yang telah berkunjung ke toko Anda</p>
-          </div>
-        {/if}
+      </div>
+      <div class="my-3 min-w-0">
+        <p class="text-heading-md sm:text-2xl font-black font-mono tracking-tight leading-none text-white">
+          {displayViewsValue}
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-nested/30">
+        <span class="inline-flex items-center gap-1.5 font-bold px-2.5 py-0.5 rounded-full border bg-nested/30 border-nested/50 text-canvas/80">
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          <span>Traffic</span>
+        </span>
+        <span class="font-normal text-canvas/60 text-2xs">Total kunjungan ke toko</span>
       </div>
     </div>
 
-    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-base-content/60">Klik WhatsApp</p>
-            <p class="text-4xl font-bold text-success mt-2">{stats.totalWaClicks}</p>
-          </div>
-          <div class="rounded-full bg-success/10 p-4">
-            <MessageCircle size={32} class="text-success" />
-          </div>
+    <!-- WhatsApp Clicks Card - Orange theme (matches analytics StatCard) -->
+    <div class="bg-orange text-white border border-orange/20 shadow-md shadow-orange/10 rounded-3xl p-6 transition-all {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
+      <div class="flex items-center justify-between gap-2.5 mb-4">
+        <p class="text-xs font-bold uppercase tracking-wider font-heading text-white/80">Klik WhatsApp</p>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/15 text-white border border-white/20">
+          <span class="material-symbols-outlined text-base">message</span>
         </div>
-        {#if stats.totalWaClicks === 0}
-          <div class="mt-4 text-xs text-base-content/60">
-            <p>Belum ada yang hubungi via WhatsApp</p>
-            <p>Setiap kali pembeli klik tombol WhatsApp akan tercatat di sini</p>
-          </div>
-        {:else}
-          <div class="mt-4 text-xs text-base-content/60">
-            <p>Jumlah pembeli yang klik tombol WhatsApp Anda</p>
-          </div>
-        {/if}
+      </div>
+      <div class="my-3 min-w-0">
+        <p class="text-heading-md sm:text-2xl font-black font-mono tracking-tight leading-none text-white">
+          {displayClicksValue}
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/20">
+        <span class="inline-flex items-center gap-1.5 font-bold px-2.5 py-0.5 rounded-full border bg-white/20 border-white/30 text-white">
+          <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+          <span>Kontak</span>
+        </span>
+        <span class="font-normal text-white/80 text-2xs">Klik hubungi via WhatsApp</span>
       </div>
     </div>
   </div>
 
   {#if stats.totalViews > 0}
-    <div class="card bg-base-100 shadow-md {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
-      <div class="card-body">
-        <h3 class="card-title text-lg">Tingkat Konversi</h3>
-        <p class="text-sm text-base-content/60 mt-1">Berapa persen pengunjung yang menghubungi via WhatsApp</p>
-        <div class="mt-4">
-          <div class="flex justify-between mb-2">
-            <span class="text-sm font-medium">Persentase Konversi</span>
-            <span class="text-sm font-semibold text-success">
-              {((stats.totalWaClicks / stats.totalViews) * 100).toFixed(2)}%
-            </span>
-          </div>
-          <progress
-            class="progress progress-success w-full"
-            value={stats.totalWaClicks}
-            max={stats.totalViews}></progress>
-          <p class="text-xs text-base-content/60 mt-2">
-            {stats.totalWaClicks} dari {stats.totalViews} pengunjung menghubungi Anda
+    <div class="bg-primary text-white border border-primary/20 shadow-md shadow-primary/10 rounded-3xl p-6 transition-all {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}">
+      <div class="flex items-center justify-between gap-2.5 mb-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider font-heading text-white/80">Tingkat Konversi</p>
+          <p class="text-heading-md sm:text-2xl font-black font-mono tracking-tight leading-none text-white mt-3">
+            {((stats.totalWaClicks / stats.totalViews) * 100).toFixed(2)}%
           </p>
         </div>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/15 text-white border border-white/20">
+          <span class="material-symbols-outlined text-base">trending_up</span>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-col gap-2">
+        <progress
+          class="progress progress-primary w-full"
+          value={stats.totalWaClicks}
+          max={stats.totalViews}></progress>
+        <p class="text-xs text-white/70">
+          {stats.totalWaClicks} dari {stats.totalViews} pengunjung menghubungi Anda
+        </p>
       </div>
     </div>
   {/if}

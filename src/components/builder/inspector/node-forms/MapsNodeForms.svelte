@@ -2,6 +2,7 @@
   import type { TemplateSection } from '@/schemas';
   import type { MapBranchItem } from '../../sections/maps/maps.helpers';
   import { DEFAULT_BRANCHES } from '../../sections/maps/maps.helpers';
+  import MapsBranchTabsForm from './MapsBranchTabsForm.svelte';
 
   export let section: TemplateSection;
   export let nodeId: string | null = null;
@@ -24,26 +25,6 @@
   $: googleMapsUrl = (props.googleMapsUrl as string) || '';
   $: zoom = typeof props.zoom === 'number' ? props.zoom : 14;
   $: mapHeight = (props.mapHeight as string) || '380px';
-
-  function updateBranchField(idx: number, field: keyof MapBranchItem, value: string) {
-    const updated = branches.map((item, i) => (i === idx ? { ...item, [field]: value } : item));
-    onPropChange('branches', updated);
-  }
-
-  function addBranch() {
-    const newBranch: MapBranchItem = {
-      id: `branch_${Date.now()}`,
-      name: `Cabang Baru #${branches.length + 1}`,
-      address: 'Jl. Raya Baru, Banyuwangi',
-    };
-    onPropChange('branches', [...branches, newBranch]);
-  }
-
-  function removeBranch(idx: number) {
-    if (branches.length <= 1) return;
-    const updated = branches.filter((_, i) => i !== idx);
-    onPropChange('branches', updated);
-  }
 </script>
 
 <div class="space-y-4 text-left">
@@ -62,7 +43,7 @@
           value={badge}
           on:input={(e) => onPropChange('badge', e.currentTarget.value)}
           placeholder="Lokasi Gerai Fisik"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -75,7 +56,7 @@
           value={title}
           on:input={(e) => onPropChange('title', e.currentTarget.value)}
           placeholder="Kunjungi Outlet Resmi Kami"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -88,7 +69,7 @@
           value={subtitle}
           on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
           placeholder="Kunjungi outlet dan gerai kami untuk mencicipi langsung..."
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"
         ></textarea>
       </div>
     </div>
@@ -108,7 +89,7 @@
           value={markerTitle}
           on:input={(e) => onPropChange('markerTitle', e.currentTarget.value)}
           placeholder="Warung Khas Banyuwangi"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -121,7 +102,7 @@
           value={address}
           on:input={(e) => onPropChange('address', e.currentTarget.value)}
           placeholder="Jl. Raya Sukowati No. 42, Krajan Kidul, Banyuwangi"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"
         ></textarea>
       </div>
       <div>
@@ -134,7 +115,7 @@
           value={storeHours}
           on:input={(e) => onPropChange('storeHours', e.currentTarget.value)}
           placeholder="Setiap Hari (08.00 - 21.00 WIB)"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -147,7 +128,7 @@
           value={facilities}
           on:input={(e) => onPropChange('facilities', e.currentTarget.value)}
           placeholder="Parkir Mobil/Bus Luas, Musholla, Toilet Bersih"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
     </div>
@@ -167,7 +148,7 @@
           value={storeHoursStatus}
           on:input={(e) => onPropChange('storeHoursStatus', e.currentTarget.value)}
           placeholder="BUKA SEKARANG"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -180,7 +161,7 @@
           value={storeHours}
           on:input={(e) => onPropChange('storeHours', e.currentTarget.value)}
           placeholder="Tutup Pukul 21.00 WIB"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         />
       </div>
       <div>
@@ -193,63 +174,13 @@
           value={whatsappNumber}
           on:input={(e) => onPropChange('whatsappNumber', e.currentTarget.value)}
           placeholder="6281234567890"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         />
       </div>
     </div>
 
   {:else if nodeId === 'maps_branch_tabs'}
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">
-          Daftar Cabang Toko ({branches.length})
-        </h4>
-        <button
-          type="button"
-          on:click={addBranch}
-          class="text-xs text-primary hover:underline font-bold"
-        >
-          + Tambah Cabang
-        </button>
-      </div>
-
-      {#each branches as branch, idx}
-        <div class="p-3 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-base-content">Cabang #{idx + 1}</span>
-            {#if branches.length > 1}
-              <button
-                type="button"
-                on:click={() => removeBranch(idx)}
-                class="text-[10px] text-rose-500 hover:underline font-semibold"
-              >
-                Hapus
-              </button>
-            {/if}
-          </div>
-          <div>
-            <label for={`branch-name-${idx}`} class="block text-[11px] font-semibold text-base-content/60 mb-0.5">Nama Cabang</label>
-            <input
-              id={`branch-name-${idx}`}
-              type="text"
-              value={branch.name}
-              on:input={(e) => updateBranchField(idx, 'name', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs"
-            />
-          </div>
-          <div>
-            <label for={`branch-address-${idx}`} class="block text-[11px] font-semibold text-base-content/60 mb-0.5">Alamat Cabang</label>
-            <input
-              id={`branch-address-${idx}`}
-              type="text"
-              value={branch.address}
-              on:input={(e) => updateBranchField(idx, 'address', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs"
-            />
-          </div>
-        </div>
-      {/each}
-    </div>
+    <MapsBranchTabsForm {branches} {onPropChange} />
 
   {:else if nodeId === 'maps_cta_button'}
     <div class="space-y-3">
@@ -266,7 +197,7 @@
           value={googleMapsUrl}
           on:input={(e) => onPropChange('googleMapsUrl', e.currentTarget.value)}
           placeholder="https://maps.google.com/?q=..."
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         />
         <p class="text-[10px] text-base-content/50 mt-1">
           Kosongkan untuk membuat URL otomatis dari nama alamat toko.
@@ -289,7 +220,7 @@
           value={googleMapsUrl || address}
           on:input={(e) => onPropChange('googleMapsUrl', e.currentTarget.value)}
           placeholder="https://maps.google.com/maps?q=...&output=embed"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         />
       </div>
       <div class="grid grid-cols-2 gap-3">
@@ -316,7 +247,7 @@
             id="maps-height"
             value={mapHeight}
             on:change={(e) => onPropChange('mapHeight', e.currentTarget.value)}
-            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+            class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
           >
             <option value="260px">260px (Ramping)</option>
             <option value="350px">350px (Sedang)</option>

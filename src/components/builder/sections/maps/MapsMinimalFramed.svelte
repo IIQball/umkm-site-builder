@@ -32,18 +32,18 @@
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
     class={`p-2 rounded-xl transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--theme-primary, var(--color-primary))]/5' : ''
+      isCardSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 bg-[var(--theme-primary, var(--color-primary))]/5' : ''
     }`}
   >
     <h2
-      class="font-[var(--theme-font-heading,var(--font-heading,inherit))] text-[var(--theme-text-primary, var(--color-text-main))]"
-      style="font-size: var(--theme-text-h2, var(--text-h2-size, 26px)); font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+      class="font-heading text-[var(--theme-text-primary, var(--color-text-main))]"
+      style="font-size: var(--theme-text-h2, var(--text-h2-size, 26px)); font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700));"
     >
       {storeName}
     </h2>
     {#if address}
       <p
-        class="text-[var(--theme-text-muted, var(--color-text-muted))] font-[var(--theme-font-body,var(--font-family,inherit))] mt-1 flex items-center gap-1.5"
+        class="text-[var(--theme-text-muted, var(--color-text-muted))] font-sans mt-1 flex items-center gap-1.5"
         style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
       >
         <MapPin size={13} class="text-[var(--theme-primary, var(--color-primary))] shrink-0" />
@@ -58,7 +58,7 @@
     on:click={(e) => selectNode(e, 'maps_iframe')}
     on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
     class={`w-full cq-map-frame-height rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] shadow-xs transition-all outline-none ${
-      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
   >
     <iframe

@@ -38,7 +38,7 @@
   on:keydown={handleKeydown}
   class={`mb-5 cursor-pointer rounded-2xl p-2 transition-all duration-200 outline-none ${
     align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
-  } ${isSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--theme-primary, var(--color-primary))]/5' : 'hover:bg-[var(--color-nested-base)]/50'}`}
+  } ${isSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 bg-[var(--theme-primary, var(--color-primary))]/5' : 'hover:bg-[var(--color-nested-base)]/50'}`}
 >
   {#each effectiveOrder as slot}
     {#if slot === 'badge' && badge}

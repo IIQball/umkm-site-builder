@@ -1,7 +1,9 @@
 <script lang="ts">
   import HeroHeaderContent from './HeroHeaderContent.svelte';
+  import HeroImageCard from './HeroImageCard.svelte';
 
   export let badgeText: string = '';
+  export let badgeIcon: string = '';
   export let tagName: string = 'h1';
   export let title: string = '';
   export let subtitle: string = '';
@@ -11,6 +13,8 @@
   export let secondaryCtaLink: string = '#';
   export let waNumber: string = '';
   export let imageUrl: string = '';
+  export let imageFrame: 'none' | 'card' | 'grid' = 'none';
+  export let imageShape: 'rounded' | 'square' | 'circle' | 'squircle' = 'rounded';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent, key: string) => void = () => {};
   export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
@@ -23,22 +27,18 @@
 
 {#snippet imageBlock()}
   {#if imageUrl && hasImage}
-    <div
-      data-node="image"
-      role="button"
-      tabindex="0"
-      on:click={(e) => selectNode(e, 'hero_image')}
-      on:keydown={(e) => selectNodeKey(e, 'hero_image')}
-      class={`w-full max-w-4xl my-3 p-2 rounded-2xl bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-lg transition-all cursor-pointer ${
-        isImageActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
-      }`}
-    >
-      <img
-        src={imageUrl}
-        alt="Pratinjau Banner Hero"
-        class="w-full aspect-[16/9] object-cover rounded-xl"
+    <div class="my-3 w-full flex justify-center">
+      <HeroImageCard
+        {imageUrl}
+        altText={title}
+        {imageFrame}
+        {imageShape}
+        aspectRatio="aspect-[16/9]"
+        maxWidthClass="w-full max-w-4xl"
+        nodeKey="hero_image"
+        isActive={isImageActive}
+        {selectNode}
+        {selectNodeKey}
       />
     </div>
   {/if}
@@ -47,6 +47,7 @@
 <div class="w-full py-6">
   <HeroHeaderContent
     {badgeText}
+    {badgeIcon}
     {tagName}
     {title}
     {subtitle}

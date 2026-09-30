@@ -1,5 +1,6 @@
 <script lang="ts">
   import { LayoutGrid, Sparkles, Check, ChevronRight } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import { editorStore } from '../stores/editorStore';
   import { PRESETS_BY_SECTION_TYPE } from './layoutPresets.data';
@@ -21,19 +22,21 @@
 
 {#if currentPresets.length > 0}
   <div class="space-y-3">
-    <div class="flex items-center justify-between border-b border-base-200 dark:border-slate-800 pb-1.5">
+    <div class="flex items-center justify-between border-b border-base-200 pb-1.5">
       <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70">
         <LayoutGrid size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
         <span>Tata Letak ({currentPresets.length} Variasi)</span>
       </div>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="xs"
         on:click={() => (isModalOpen = true)}
-        class="text-3xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
+        class="!p-0 !h-auto !min-h-0 text-3xs font-bold text-primary hover:underline flex items-center gap-0.5"
       >
         <span>Lihat Semua</span>
         <ChevronRight size={10} />
-      </button>
+      </Button>
     </div>
 
     <!-- Active Preset Hero Card (Click to open Dribbble-style Modal) -->

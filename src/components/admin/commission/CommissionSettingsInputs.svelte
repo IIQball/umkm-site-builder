@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Input } from '@/components/ui';
+  import { Input, Button } from '@/components/ui';
 
   export let platformFeePercentage: number = 30;
   export let adminServiceFee: number = 5000;
@@ -51,27 +51,30 @@
         <span class="text-xs font-bold text-main font-heading">Fee Pendampingan Admin</span>
       </div>
       <div class="flex items-center gap-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={adminServiceFee === 0 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 0 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (adminServiceFee = 0)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {adminServiceFee === 0 ? 'bg-primary text-white border-primary shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           0
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={adminServiceFee === 5000 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 5000 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (adminServiceFee = 5000)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {adminServiceFee === 5000 ? 'bg-primary text-white border-primary shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           5rb
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={adminServiceFee === 10000 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 10000 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (adminServiceFee = 10000)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {adminServiceFee === 10000 ? 'bg-primary text-white border-primary shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           10rb
-        </button>
+        </Button>
       </div>
     </div>
     <Input
@@ -99,27 +102,30 @@
         <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
       </div>
       <div class="flex items-center gap-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={settlementDelayDays === 3 ? 'orange' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {settlementDelayDays === 3 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (settlementDelayDays = 3)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 3 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           3H
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={settlementDelayDays === 7 ? 'orange' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {settlementDelayDays === 7 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (settlementDelayDays = 7)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 7 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           7H
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={settlementDelayDays === 14 ? 'orange' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {settlementDelayDays === 14 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
           on:click={() => (settlementDelayDays = 14)}
-          class="px-2 py-0.5 rounded-full text-3xs font-bold border transition-all cursor-pointer {settlementDelayDays === 14 ? 'bg-orange text-white border-orange shadow-2xs' : 'bg-nested text-muted border-light'}"
         >
           14H
-        </button>
+        </Button>
       </div>
     </div>
     <Input

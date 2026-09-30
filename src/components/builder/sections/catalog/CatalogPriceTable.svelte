@@ -5,6 +5,7 @@
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Pesan';
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   function selectRows(e: Event) {
@@ -29,7 +30,7 @@
   on:click={selectRows}
   on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
   class={`w-full overflow-x-auto rounded-3xl border border-light/80 shadow-xs bg-card text-left transition-all duration-200 cursor-pointer ${
-    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : ''
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
   }`}
 >
   <table class="w-full text-xs text-left">
@@ -45,6 +46,8 @@
       {#each products as product, idx (product.id || product.name + idx)}
         {@const isItemActive = $canvasStore.selectedNodeId === (product.id || `product_item_${idx}`)}
         <tr
+          data-node={product.id || `product_item_${idx}`}
+          data-node-id={product.id || `product_item_${idx}`}
           tabindex="0"
           on:click={(e) => selectCard(e, idx, product)}
           on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
@@ -64,9 +67,10 @@
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
-              class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-bold text-xs transition-all"
+              class="h-8 px-4 active:scale-[0.98] font-heading font-bold text-xs transition-all shadow-xs hover:opacity-90 cursor-pointer flex items-center justify-center"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
             >
-              Pesan
+              <span>{buyButtonText || 'Pesan'}</span>
             </button>
           </td>
         </tr>

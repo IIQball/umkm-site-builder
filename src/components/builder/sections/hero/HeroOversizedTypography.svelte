@@ -1,8 +1,10 @@
 <script lang="ts">
   import { canvasStore } from '../../stores/editorStore';
   import { ArrowRight } from 'lucide-svelte';
+  import { resolveFeatureIcon, stripEmoji } from './heroIcons';
 
   export let badgeText: string = '';
+  export let badgeIcon: string = '';
   export let tagName: string = 'h1';
   export let title: string = '';
   export let subtitle: string = '';
@@ -30,20 +32,26 @@
 <div class={`flex flex-col items-center text-center ${isMobile ? 'py-6 gap-3' : isTablet ? 'py-8 gap-4' : 'py-12 gap-6'}`}>
   {#each effectiveOrder as slot (slot)}
     {#if slot === 'badge' && badgeText}
+      {@const IconComponent = resolveFeatureIcon(badgeIcon)}
       <div
         data-node="badge"
         role="button"
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px));"
-        class={`badge badge-outline gap-1 px-3 sm:px-4 py-1 sm:py-1.5 text-2xs sm:text-xs font-heading font-bold transition-all cursor-pointer ${
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit);"
+        class={`badge badge-outline inline-flex items-center gap-1.5 px-3 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-2xs ${
           isBadgeActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/15'
-            : 'bg-[var(--color-nested-base)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/15'
+            : 'bg-[var(--color-nested-base)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
-        <span>{badgeText}</span>
+        {#if IconComponent}
+          <svelte:component this={IconComponent} size={12} class="text-[var(--color-primary)] shrink-0" />
+        {:else}
+          <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-primary);"></span>
+        {/if}
+        <span>{stripEmoji(badgeText)}</span>
       </div>
     {:else if slot === 'title'}
       <svelte:element
@@ -62,7 +70,7 @@
               : 'text-6xl md:text-7xl lg:text-8xl leading-none tracking-tighter'
         } ${
           isTitleActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
@@ -80,7 +88,7 @@
           isMobile ? 'text-xs sm:text-sm' : isTablet ? 'text-sm sm:text-base' : 'text-base sm:text-xl'
         } ${
           isSubtitleActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
@@ -95,7 +103,7 @@
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
         class={`pt-2 sm:pt-4 rounded-2xl p-2 transition-all cursor-pointer ${
           isCtaActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >

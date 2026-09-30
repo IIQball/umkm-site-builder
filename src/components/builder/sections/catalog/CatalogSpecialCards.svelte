@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
-  import { Gift, Star, Download, FileText, ShoppingBag } from 'lucide-svelte';
+  import { Gift, Star, Download, FileText, ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import { formatRupiah, buildWhatsAppOrderLink } from '../productCatalog.helpers';
 
@@ -8,6 +8,8 @@
   export let products: ProductItem[] = [];
   export let activePreset: string = 'seasonal_hampers_gift';
   export let waNumber: string = '';
+  export let buyButtonText: string = 'Pesan';
+  export let cartButtonText: string = 'Keranjang';
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -37,13 +39,15 @@
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
 
     <div
+      data-node={product.id || `product_item_${index}`}
+      data-node-id={product.id || `product_item_${index}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`bg-card border border-light/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-xl'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -69,11 +73,11 @@
         {:else if activePreset === 'digital_download_catalog'}
           <!-- 18. Digital Download Tags -->
           <div class="flex items-center gap-2 mb-2">
-            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+            <span class="text-2xs font-heading font-medium text-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] px-2.5 py-0.5 rounded-full flex items-center gap-1">
               <FileText size={10} />
               <span>{index % 2 === 0 ? 'PDF RESEP' : 'EXCEL TEMPLATE'}</span>
             </span>
-            <span class="text-[10px] text-secondary font-mono">Instant Download</span>
+            <span class="text-2xs text-[var(--color-text-secondary)] font-sans">Instant Download</span>
           </div>
         {:else}
           <!-- 16 & 19: Seasonal Hampers / Review Paired -->
@@ -100,7 +104,7 @@
             {/if}
 
             {#if activePreset === 'seasonal_hampers_gift'}
-              <span class="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+              <span class="absolute top-2 left-2 bg-[var(--color-primary)] text-white text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
                 <Gift size={11} />
                 <span>HAMPERS EDISI SPESIAL</span>
               </span>
@@ -131,7 +135,7 @@
       </div>
 
       <div class="flex justify-between items-center pt-3 border-t border-light/60 mt-3">
-        <span class="font-heading font-black text-xs sm:text-sm text-primary">
+        <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
           {formatRupiah(product.price)}
         </span>
         <div class="flex gap-2">
@@ -139,7 +143,8 @@
             <button
               type="button"
               on:click|stopPropagation={() => handleOrder(product)}
-              class="h-8 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-xs font-bold transition-all flex items-center gap-1.5"
+              class="h-8 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-white text-xs font-heading font-bold transition-all flex items-center gap-1.5"
+              style="border-radius: var(--btn-radius, 0.75rem);"
             >
               <Download size={13} />
               <span>Download</span>
@@ -148,16 +153,19 @@
             <button
               type="button"
               on:click|stopPropagation={() => onAddToCart(product, {})}
-              class="h-8 px-3 rounded-xl bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-xs font-semibold transition-all"
+              class="h-8 px-3 border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold transition-all flex items-center gap-1.5"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px));"
             >
-              +
+              <ShoppingCart size={13} />
+              <span>{cartButtonText || 'Keranjang'}</span>
             </button>
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
-              class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white text-xs font-bold transition-all"
+              class="h-8 px-4 shadow-xs hover:opacity-90 active:scale-[0.98] text-xs font-heading font-bold transition-all flex items-center justify-center"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
             >
-              Pesan
+              <span>{buyButtonText || 'Pesan'}</span>
             </button>
           {/if}
         </div>

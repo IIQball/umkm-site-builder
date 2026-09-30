@@ -69,14 +69,14 @@
   <div class="flex flex-col lg:flex-row gap-6 lg:gap-10">
     <!-- BAGIAN KIRI: RINGKASAN PESANAN -->
     <div class="flex-1 lg:sticky lg:top-8 self-start">
-      <Card variant="elevated" padding="lg" radius="2xl" class="flex flex-col h-fit bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
-        <h3 class="text-base font-bold mb-6 text-slate-800 dark:text-slate-100">
+      <Card variant="elevated" padding="lg" radius="2xl" class="flex flex-col h-fit shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+        <h3 class="text-base font-bold mb-6 text-base-content">
           Ringkasan Pesanan
         </h3>
 
         {#if detailedCart.length === 0}
-          <div class="p-8 text-center border border-slate-200 dark:border-slate-700 border-dashed rounded-2xl">
-            <p class="font-medium text-slate-500">Keranjang kosong.</p>
+          <div class="p-8 text-center border border-base-300 border-dashed rounded-2xl">
+            <p class="font-medium text-base-content/60">Keranjang kosong.</p>
             <Button
               variant="primary"
               size="sm"
@@ -94,9 +94,9 @@
                 variant="nested"
                 padding="xs"
                 radius="xl"
-                class="flex gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 group hover:bg-slate-100 transition-colors"
+                class="flex gap-4 p-4 bg-base-200/50 group hover:bg-base-200 transition-colors"
               >
-                <div class="w-[72px] h-[72px] rounded-xl overflow-hidden bg-slate-200 flex-shrink-0">
+                <div class="w-[72px] h-[72px] rounded-xl overflow-hidden bg-base-300 flex-shrink-0">
                   {#if itemImg}
                     <img
                       src={itemImg}
@@ -104,16 +104,16 @@
                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   {:else}
-                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                    <div class="w-full h-full flex items-center justify-center text-base-content/40">
                       <span class="text-[10px]">No Foto</span>
                     </div>
                   {/if}
                 </div>
                 <div class="flex-1 flex flex-col justify-center">
-                  <h4 class="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">
+                  <h4 class="font-bold text-sm text-base-content line-clamp-1">
                     {item.product.name}
                   </h4>
-                  <p class="text-[12px] text-slate-500 mt-0.5">
+                  <p class="text-[12px] text-base-content/60 mt-0.5">
                     Varian: {getVariantText(item.selections)}
                   </p>
                   <p class="text-[var(--theme-primary, var(--color-primary))] font-extrabold font-mono mt-1.5 text-sm tracking-tight">
@@ -121,11 +121,11 @@
                   </p>
                 </div>
                 <div class="flex items-center gap-3">
-                  <div class="flex flex-col items-center bg-white dark:bg-slate-600 rounded-xl shadow-sm overflow-hidden border border-slate-100 dark:border-slate-500">
+                  <div class="flex flex-col items-center bg-base-100 rounded-xl shadow-sm overflow-hidden border border-base-200">
                     <Button
                       variant="ghost"
                       size="icon"
-                      class="rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
+                      class="rounded-none h-7 min-h-0 w-8 hover:bg-base-200 text-base-content/70"
                       on:click={() => onUpdateQty(idx, 1)}
                     >
                       <Plus size={14} />
@@ -134,7 +134,7 @@
                     <Button
                       variant="ghost"
                       size="icon"
-                      class="rounded-none h-7 min-h-0 w-8 hover:bg-slate-100 text-slate-500"
+                      class="rounded-none h-7 min-h-0 w-8 hover:bg-base-200 text-base-content/70"
                       on:click={() => onUpdateQty(idx, -1)}
                     >
                       <Minus size={14} />
@@ -143,7 +143,7 @@
                   <Button
                     variant="ghost"
                     size="icon"
-                    class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                    class="text-base-content/30 hover:text-error hover:bg-error/10 transition-colors"
                     on:click={() => onRemoveItem(idx)}
                   >
                     <Trash2 size={18} />
@@ -153,13 +153,13 @@
             {/each}
           </div>
 
-          <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex justify-between items-end">
-            <span class="font-bold text-slate-700 dark:text-slate-300">Total Harga</span>
+          <div class="mt-8 pt-6 border-t border-base-200 flex justify-between items-end">
+            <span class="font-bold text-base-content">Total Harga</span>
             <div class="text-right">
               <p class="text-2xl font-black font-mono text-[var(--theme-primary, var(--color-primary))] tracking-tight">
                 {formatIDR(cartTotal)}
               </p>
-              <p class="text-[10px] text-slate-400 mt-1">
+              <p class="text-[10px] text-base-content/50 mt-1">
                 *Belum termasuk ongkos kirim
               </p>
             </div>
@@ -170,8 +170,8 @@
 
     <!-- BAGIAN KANAN: INFORMASI PENGIRIMAN -->
     <div class="w-full lg:w-[480px]">
-      <Card variant="elevated" padding="lg" radius="2xl" class="bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
-        <h3 class="text-base font-bold mb-6 text-slate-800 dark:text-slate-100">
+      <Card variant="elevated" padding="lg" radius="2xl" class="shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+        <h3 class="text-base font-bold mb-6 text-base-content">
           Informasi Pengiriman
         </h3>
 

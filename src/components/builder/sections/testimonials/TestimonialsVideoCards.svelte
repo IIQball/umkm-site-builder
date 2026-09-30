@@ -37,7 +37,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
       class={`relative rounded-3xl overflow-hidden aspect-[9/15] bg-slate-900 shadow-md group cursor-pointer transition-all duration-200 ${
         isCardActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-2xl'
           : 'hover:shadow-xl'
       }`}
     >

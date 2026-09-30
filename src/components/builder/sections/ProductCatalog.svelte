@@ -3,6 +3,7 @@
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { ShoppingCart } from 'lucide-svelte';
   import { formatIDR } from '@/lib/currency';
+  import { generateWhatsAppLink } from '@/lib/whatsapp';
   import { DEFAULT_DEMO_PRODUCTS, getCleanWaNumber } from './productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
   import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
@@ -87,17 +88,28 @@
     : ((dynamicProducts.length > 0 ? dynamicProducts : (Array.isArray(props?.products) && props.products.length > 0 ? props.products : DEFAULT_DEMO_PRODUCTS)) || DEFAULT_DEMO_PRODUCTS) as ProductItem[];
 
   $: storeName = (props?.storeName as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeName') || '' : '') || 'Toko';
-$: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') || '' : ''));
-
-$: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
-$: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
-$: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
-$: elementOrder = (props?.elementOrder as string[]) || ['badge', 'title', 'subtitle', 'catalog_grid'];
-$: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
+  $: effectiveWaNumber = getCleanWaNumber(storeWaNumber || (props?.whatsappNumber as string) || (typeof window !== 'undefined' ? localStorage.getItem('storeWaNumber') || '' : ''));
+  $: title = (props?.title as string) || (props?.heading as string) || 'Katalog Produk Pilihan';
+  $: subtitle = (props?.subtitle as string) || 'Jelajahi produk berkualitas terbaik dengan penawaran harga menarik hari ini.';
+  $: badgeText = (props?.badgeText as string) || (props?.categoryBadge as string) || 'Produk Unggulan';
+  $: buyButtonText = (props?.buyButtonText as string) || (props?.ctaText as string) || '';
+  $: cartButtonText = (props?.cartButtonText as string) || (props?.secondaryButtonText as string) || 'Keranjang';
+  $: activeCategories = (Array.isArray(props?.categories) && props.categories.length > 0 ? props.categories : (Array.isArray(categories) && categories.length > 0 ? categories : []));
+  $: elementOrder = (props?.elementOrder as string[]) || ['badge', 'title', 'subtitle', 'catalog_grid'];
+  $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
 
   $: totalCartItems = cart.reduce((sum, item) => sum + item.qty, 0);
   $: detailedCart = cart.map((item) => ({ ...item, subtotal: item.price * item.qty }));
   $: cartTotal = detailedCart.reduce((sum, item) => sum + item.subtotal, 0);
+
+  $: marginTop = styles?.marginTop ? (typeof styles.marginTop === 'number' ? `${styles.marginTop}px` : styles.marginTop) : '0px';
+  $: marginBottom = styles?.marginBottom ? (typeof styles.marginBottom === 'number' ? `${styles.marginBottom}px` : styles.marginBottom) : '0px';
+  $: paddingTop = styles?.paddingTop !== undefined ? (typeof styles.paddingTop === 'number' ? `${styles.paddingTop}px` : styles.paddingTop) : '48px';
+  $: paddingBottom = styles?.paddingBottom !== undefined ? (typeof styles.paddingBottom === 'number' ? `${styles.paddingBottom}px` : styles.paddingBottom) : '48px';
+  $: paddingLeft = styles?.paddingLeft !== undefined ? (typeof styles.paddingLeft === 'number' ? `${styles.paddingLeft}px` : styles.paddingLeft) : 'var(--active-safe-zone, var(--active-margin, 32px))';
+  $: paddingRight = styles?.paddingRight !== undefined ? (typeof styles.paddingRight === 'number' ? `${styles.paddingRight}px` : styles.paddingRight) : 'var(--active-safe-zone, var(--active-margin, 32px))';
+  $: customBgColor = styles?.bgColorToken ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})` : styles?.backgroundColor;
+  $: sectionBgStyle = customBgColor ? `background-color: ${customBgColor};` : 'background-color: var(--color-bg-base);';
 
   const addConfiguredItemToCart = (
     product: ProductItem,
@@ -105,24 +117,13 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
     qty: number = 1,
     overrideUnitPrice?: number
   ) => {
-    const variantKey = Object.entries(selections)
-      .map(([k, v]) => `${k}:${typeof v === 'object' && v ? v.name : v}`)
-      .sort()
-      .join('|') || 'default';
-
+    const variantKey = Object.entries(selections).map(([k, v]) => `${k}:${typeof v === 'object' && v ? v.name : v}`).sort().join('|') || 'default';
     const existing = cart.find((c) => c.product.id === product.id && c.variantId === variantKey);
     if (existing) {
       existing.qty += qty;
       cart = [...cart];
     } else {
-      let base = typeof overrideUnitPrice === 'number'
-        ? overrideUnitPrice
-        : typeof product.basePrice === 'number'
-        ? product.basePrice
-        : typeof product.price === 'number'
-        ? product.price
-        : parseFloat(String(product.basePrice ?? product.price ?? 0).replace(/[^0-9.-]+/g, '')) || 0;
-
+      let base = typeof overrideUnitPrice === 'number' ? overrideUnitPrice : typeof product.basePrice === 'number' ? product.basePrice : typeof product.price === 'number' ? product.price : parseFloat(String(product.basePrice ?? product.price ?? 0).replace(/[^0-9.-]+/g, '')) || 0;
       if (typeof overrideUnitPrice !== 'number' && product.variants && Array.isArray(product.variants)) {
         for (const group of product.variants) {
           const sel = selections[group.groupName];
@@ -146,7 +147,7 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
   const scrollToCatalog = () => {
     if (typeof window !== 'undefined') {
       const el = document.getElementById(sectionId || 'produk') || document.querySelector('[data-node="product_catalog_container"]');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -174,19 +175,22 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
       const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as any).name : opt).filter(Boolean).join(", ");
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
-      
-    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`
-    window.open(`https://wa.me/${effectiveWaNumber}?text=${encodeURIComponent(message)}`, "_blank")
-  }
+    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    window.open(generateWhatsAppLink(effectiveWaNumber, message), "_blank");
+  };
 </script>
 
 <div
   data-node="product_catalog_container"
-  class="product-card w-full box-border py-12 px-4 sm:px-6 relative overflow-hidden"
-  style="container-type: inline-size; container-name: productcard;"
+  class="product-card w-full box-border relative overflow-hidden"
+  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom}; container-type: inline-size; container-name: productcard;"
 >
   {#if currentView === 'checkout'}
-    <div class="max-w-5xl mx-auto" transition:fly={{ y: 15, duration: 250 }}>
+    <div
+      class="builder-safe-container relative z-10 w-full mx-auto box-border"
+      style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: {paddingLeft}; padding-right: {paddingRight}; padding-top: {paddingTop}; padding-bottom: {paddingBottom};"
+      transition:fly={{ y: 15, duration: 250 }}
+    >
       <CatalogCheckoutModal
         {detailedCart}
         {cartTotal}
@@ -201,7 +205,10 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
       />
     </div>
   {:else}
-    <div class="max-w-6xl mx-auto flex flex-col">
+    <div
+      class="builder-safe-container relative z-10 w-full mx-auto box-border flex flex-col"
+      style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: {paddingLeft}; padding-right: {paddingRight}; padding-top: {paddingTop}; padding-bottom: {paddingBottom};"
+    >
       <!-- Catalog Header -->
       <div style="order: {isGridFirst ? 2 : 1};">
         <CatalogHeader
@@ -227,32 +234,32 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
         {:else}
           <!-- Preset Dispatcher -->
           {#if activePreset === 'carousel_scroll'}
-            <CatalogCarouselScroll {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogCarouselScroll {sectionId} {products} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'list_compact'}
-            <CatalogListCompact {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogListCompact {sectionId} {products} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'masonry_catalog'}
-            <CatalogMasonry {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogMasonry {sectionId} {products} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'bento_product_spotlight'}
-            <CatalogBentoSpotlight {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogBentoSpotlight {sectionId} {products} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'split_category_sidebar'}
-            <CatalogSidebarFilter {sectionId} {products} {categories} {activeCategoryId} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogSidebarFilter {sectionId} {products} categories={activeCategories} {activeCategoryId} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'price_table_view'}
-            <CatalogPriceTable {sectionId} {products} onBuyNow={handleBuyNow} />
+            <CatalogPriceTable {sectionId} {products} {buyButtonText} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'lookbook_gallery'}
-            <CatalogLookbook {sectionId} {products} onBuyNow={handleBuyNow} />
+            <CatalogLookbook {sectionId} {products} {buyButtonText} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'flash_sale_countdown'}
-            <CatalogFlashSale {sectionId} {products} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogFlashSale {sectionId} {products} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'bundle_package_tiers'}
             <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'single_product_deep_focus'}
-            <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} onBuyNow={handleBuyNow} />
+            <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} {buyButtonText} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
-            <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'minimal_accordion_catalog'}
-            <CatalogAccordion {sectionId} {products} onBuyNow={handleBuyNow} />
+            <CatalogAccordion {sectionId} {products} {buyButtonText} onBuyNow={handleBuyNow} />
           {:else}
             <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
-            <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {/if}
         {/if}
       </div>
@@ -263,19 +270,15 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
       <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
         <button
           type="button"
-          on:click={() => { currentView = 'checkout'; scrollToCatalog() }}
-          class="btn btn-primary rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-bold text-sm group"
+          on:click={() => { currentView = 'checkout'; scrollToCatalog(); }}
+          class="btn btn-primary rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-bold text-sm group"
         >
           <div class="relative">
             <ShoppingCart size={18} />
-            <span class="badge badge-error badge-xs absolute -top-2 -right-2 text-white font-mono font-bold p-1">
-              {totalCartItems}
-            </span>
+            <span class="badge badge-error badge-xs absolute -top-2 -right-2 text-white font-mono font-bold p-1">{totalCartItems}</span>
           </div>
           <span>Keranjang</span>
-          <span class="badge badge-ghost font-mono text-xs">
-            {formatIDR(cartTotal)}
-          </span>
+          <span class="badge badge-ghost font-mono text-xs">{formatIDR(cartTotal)}</span>
         </button>
       </div>
     {/if}
@@ -288,10 +291,6 @@ $: isGridFirst = elementOrder.indexOf('catalog_grid') === 0;
     mode={variantModalMode}
     onClose={() => { isVariantModalOpen = false; selectedVariantProduct = null; }}
     onAddToCart={(prod, sels, q, uPrice) => addConfiguredItemToCart(prod, sels, q, uPrice)}
-    onBuyNow={(prod, sels, q, uPrice) => {
-      addConfiguredItemToCart(prod, sels, q, uPrice);
-      currentView = 'checkout';
-      scrollToCatalog();
-    }}
+    onBuyNow={(prod, sels, q, uPrice) => { addConfiguredItemToCart(prod, sels, q, uPrice); currentView = 'checkout'; scrollToCatalog(); }}
   />
 </div>

@@ -19,7 +19,7 @@ describe('Features Section Layout & Slot Ordering Engine', () => {
       'badge', 'title', 'subtitle', 'feature_rows',
     ]);
     expect(getDefaultFeaturesSlots('banner_inline_bar')).toEqual([
-      'badge', 'title', 'ribbon_bar',
+      'badge', 'title', 'subtitle', 'ribbon_bar',
     ]);
     expect(getDefaultFeaturesSlots('bento_grid_asymmetric')).toEqual([
       'badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image',

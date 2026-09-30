@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Image as ImageIcon } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
@@ -33,8 +34,8 @@
   ];
 </script>
 
-<div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
-  <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
+<div class="space-y-3 p-3 bg-base-200/40 rounded-xl border border-base-200">
+  <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 pb-2">
     <ImageIcon size={14} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Gaya & Ukuran Logo</span>
   </div>
@@ -44,19 +45,21 @@
     <div>
       <div class="flex items-center justify-between text-[11px] font-medium text-base-content/70 mb-1">
         <span>Tinggi Gambar Logo (8pt Grid)</span>
-        <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">{logoHeight}px</span>
+        <span class="font-mono text-primary font-semibold">{logoHeight}px</span>
       </div>
-      <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[11px]">
+      <div class="grid grid-cols-5 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 text-[11px]">
         {#each logoHeightOptions as opt}
-          <button
+          <Button
             type="button"
+            size="xs"
+            variant={logoHeight === opt.value ? 'primary' : 'ghost'}
             on:click={() => onConfigChange('logoImageHeight', opt.value)}
-            class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
+            class={`!py-1 !h-auto !min-h-0 rounded font-medium text-center ${
               logoHeight === opt.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
             }`}
           >
             {opt.label}
-          </button>
+          </Button>
         {/each}
       </div>
     </div>
@@ -71,7 +74,7 @@
           id="logo-typography-token"
           value={logoTypographyToken}
           on:change={(e) => onConfigChange('logoTypographyToken', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
         >
           {#each typographyTokenOptions as opt}
             <option value={opt.value}>{opt.label}</option>
@@ -85,7 +88,7 @@
           id="logo-text-token"
           value={logoTextColor}
           on:change={(e) => onConfigChange('logoTextColor', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
         >
           {#each textTokenOptions as opt}
             <option value={opt.value}>{opt.label}</option>

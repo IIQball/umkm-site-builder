@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Menu } from 'lucide-svelte';
+  import { Menu, MessageCircle } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
+  import { navigateToSection } from './headerNav.helpers';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
@@ -24,14 +25,22 @@
 
 <div
   id={`section-header-nav-${sectionId}`}
-  class="header-nav-container w-full mx-auto flex items-center justify-between gap-3 sm:gap-4 border-b border-base-200 dark:border-slate-800 min-h-[64px] box-border relative overflow-visible"
-  style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); height: 64px;"
+  class="header-nav-container w-full mx-auto flex items-center justify-between gap-3 sm:gap-4 border-b min-h-[64px] box-border relative overflow-visible"
+  style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); height: 64px; max-width: var(--theme-max-width, var(--active-max-width, 1200px)); border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
 >
   <!-- Desktop Left Half Links (Hidden on Tablet & Mobile) -->
   {#if hasNav && isDesktop}
-    <div class="flex-1 flex items-center justify-start gap-6 text-xs font-semibold">
+    <div
+      style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); font-family: var(--theme-font-body, var(--font-family, inherit));"
+      class="flex-1 flex items-center justify-start gap-6"
+    >
       {#each navLinks.slice(0, Math.ceil(navLinks.length / 2)) as link}
-        <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary, var(--color-primary))] transition-colors">
+        <a
+          href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+          on:click={(e) => navigateToSection(e, link)}
+          style="color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
+          class="hover:text-[var(--theme-primary,var(--color-primary))] transition-colors"
+        >
           {link}
         </a>
       {/each}
@@ -46,11 +55,19 @@
   {/if}
 
   <!-- Desktop Right Half Links + CTA (Hidden on Tablet & Mobile) -->
-  <div class="flex-1 flex items-center justify-end gap-3 text-xs font-semibold ml-auto">
+  <div
+    style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); font-family: var(--theme-font-body, var(--font-family, inherit));"
+    class="flex-1 flex items-center justify-end gap-3 ml-auto"
+  >
     {#if hasNav && isDesktop}
       <div class="flex items-center gap-6 mr-3">
         {#each navLinks.slice(Math.ceil(navLinks.length / 2)) as link}
-          <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} class="hover:text-[var(--theme-primary, var(--color-primary))] transition-colors">
+          <a
+            href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+            on:click={(e) => navigateToSection(e, link)}
+            style="color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
+            class="hover:text-[var(--theme-primary,var(--color-primary))] transition-colors"
+          >
             {link}
           </a>
         {/each}
@@ -62,9 +79,10 @@
         href={waUrl}
         target="_blank"
         rel="noreferrer"
-        style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
-        class="btn btn-sm btn-primary inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm"
+        style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px)); border: none;"
+        class="inline-flex items-center justify-center px-4 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
       >
+        <MessageCircle size={15} class="mr-1.5" />
         <span>{ctaText}</span>
       </a>
     {/if}
@@ -74,7 +92,8 @@
       <button
         type="button"
         on:click={onToggleMobileMenu}
-        class="btn btn-ghost btn-square w-11 h-11 min-w-[44px] min-h-[44px] border border-base-300 dark:border-slate-700/80 rounded-xl transition-colors cursor-pointer ml-auto shadow-xs"
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 10px)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
+        class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs ml-auto"
         aria-label="Buka menu navigasi"
       >
         <Menu size={20} />

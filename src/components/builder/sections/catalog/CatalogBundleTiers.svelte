@@ -55,7 +55,7 @@
   on:click={selectTiers}
   on:keydown={(e) => { if (e.key === 'Enter') selectTiers(e); }}
   class={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left cursor-pointer transition-all ${
-    $canvasStore.selectedNodeId === 'catalog_bundle_tier' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
+    $canvasStore.selectedNodeId === 'catalog_bundle_tier' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 rounded-3xl p-2' : ''
   }`}
 >
   {#each tiers as tier, idx (tier.name + idx)}
@@ -63,6 +63,8 @@
     {@const isCardActive = $canvasStore.selectedNodeId === (tier.id || `product_item_${idx}`)}
 
     <div
+      data-node={tier.id || `product_item_${idx}`}
+      data-node-id={tier.id || `product_item_${idx}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, idx, tier)}
@@ -71,17 +73,17 @@
         isPopular
           ? 'bg-blue-50/60 dark:bg-blue-950/40 border-2 border-primary shadow-lg'
           : 'bg-card border border-light/80 shadow-xs hover:shadow-md'
-      } ${isCardActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : ''}`}
+      } ${isCardActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''}`}
     >
       {#if isPopular}
-        <span class="absolute -top-3 right-6 bg-primary text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+        <span class="absolute -top-3 right-6 bg-[var(--color-primary)] text-white text-2xs font-heading font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
           <Sparkles size={11} />
           <span>POPULER</span>
         </span>
       {/if}
 
       <div>
-        <span class={`text-[11px] font-bold uppercase tracking-wider ${isPopular ? 'text-primary' : 'text-secondary'}`}>
+        <span class={`text-2xs font-heading font-bold uppercase tracking-wider ${isPopular ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
           {tier.badge || `Tier 0${idx + 1}`}
         </span>
         <h3 class="font-heading font-black text-lg text-main mt-1 mb-2">
@@ -108,17 +110,18 @@
       </div>
 
       <div class="pt-4 border-t border-light/60">
-        <p class="font-heading font-black text-lg sm:text-xl text-primary mb-3">
+        <p class="font-heading font-black text-lg sm:text-xl text-[var(--color-primary)] mb-3">
           {formatRupiah(tier.price)}
         </p>
         <button
           type="button"
           on:click|stopPropagation={() => handleOrder(tier)}
-          class={`w-full h-10 rounded-2xl font-heading font-semibold text-xs transition-all active:scale-[0.98] ${
+          class={`w-full h-10 font-heading font-bold text-xs transition-all active:scale-[0.98] ${
             isPopular
-              ? 'bg-primary hover:bg-primary-hover text-white shadow-md'
-              : 'bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 text-main'
+              ? 'bg-[var(--color-primary)] hover:opacity-90 text-white shadow-md'
+              : 'border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-main)]'
           }`}
+          style="border-radius: var(--btn-radius, 0.75rem);"
         >
           Pilih Paket Bundling
         </button>

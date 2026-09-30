@@ -25,14 +25,14 @@
           value={val}
           on:input={(e) => onColorChange(item.key, e.currentTarget.value)}
           on:change={(e) => onColorChange(item.key, e.currentTarget.value)}
-          class="w-8 h-8 rounded border border-base-300 dark:border-slate-700 cursor-pointer bg-transparent"
+          class="w-8 h-8 rounded border border-base-300 cursor-pointer bg-transparent"
         />
         <input
           type="text"
           value={val}
           on:input={(e) => onColorChange(item.key, e.currentTarget.value)}
           on:change={(e) => onColorChange(item.key, e.currentTarget.value)}
-          class="flex-1 px-3 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-base-content font-mono uppercase text-xs"
+          class="flex-1 px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-base-content font-mono uppercase text-xs"
         />
       </div>
     </div>

@@ -13,7 +13,7 @@
   export let onDeleteDraft: ((tpl: any) => void) | undefined = undefined;
 </script>
 
-<tr class={`transition-colors group ${isSelected ? 'bg-blue-500/5 hover:bg-blue-500/10' : 'hover:bg-nested/40'}`}>
+<tr class={`transition-colors group ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-nested/40'}`}>
   <!-- Checkbox Column -->
   <td class="pl-5 pr-1 py-4 w-10 text-center">
     {#if tpl.status === 'draft' && onToggleSelect}
@@ -22,8 +22,8 @@
         on:click|stopPropagation={() => onToggleSelect && onToggleSelect(tpl.id)}
         class={`w-5 h-5 rounded-md border transition-all flex items-center justify-center cursor-pointer mx-auto ${
           isSelected
-            ? 'bg-blue-600 border-blue-600 text-white'
-            : 'bg-card border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+            ? 'bg-primary border-primary text-primary-content'
+            : 'bg-card border-border hover:border-primary text-transparent'
         }`}
         title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
         aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}

@@ -38,7 +38,7 @@
     <!-- Kolom 1: Profil Toko -->
     <div
       style="order: {getSlotOrder('brand_bio')};"
-      class="space-y-3 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="space-y-3 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_brand')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
       role="button"
@@ -70,7 +70,7 @@
     <!-- Kolom 2: Kontak Layanan -->
     <div
       style="order: {getSlotOrder('contact_info')};"
-      class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_contact')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
       role="button"
@@ -115,7 +115,7 @@
     <!-- Kolom 3: Navigasi Cepat -->
     <div
       style="order: {getSlotOrder('navigation_links')};"
-      class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_navigation' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_navigation' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_navigation')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_navigation')}
       role="button"
@@ -144,7 +144,7 @@
 
   <!-- Bottom Bar -->
   <div
-    class="cq-footer-bottom-bar pt-6 rounded-2xl p-2 font-sans transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="cq-footer-bottom-bar pt-6 rounded-2xl p-2 font-sans transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     style="order: {copyrightOrder}; font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}

@@ -79,7 +79,7 @@
   {/if}
 
   {#if hasCards}
-    <div class="features-grid-3-container text-left" style="order: {isCardsFirst ? 1 : 2};">
+    <div class="features-grid-3-container text-left" data-node="feature_cards" data-node-id="feature_cards" style="order: {isCardsFirst ? 1 : 2};">
       {#each items as item, index (item.id || item.title + index)}
         {@const isItemActive = activeNodeId === `feature_item_${index}`}
         <div
@@ -95,10 +95,10 @@
           on:drop={(e) => onDrop(e, index)}
           class={`p-6 bg-[var(--color-card-base)] border transition-all duration-150 space-y-3 shadow-xs cursor-pointer ${
             isItemActive
-              ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+              ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)] ring-offset-2'
               : isActive
                 ? 'cursor-grab active:cursor-grabbing hover:border-[var(--color-primary)]'
-                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
           } ${
             dropTargetIdx === index
               ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/40 shadow-lg'
@@ -106,19 +106,33 @@
           } ${draggedIdx === index ? 'opacity-30' : ''}`}
           style="border-radius: var(--btn-radius, 16px);"
         >
-          <div
-            data-node="feature_icon"
-            class="w-12 h-12 flex items-center justify-center border shrink-0"
-            style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
-          >
-            <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+          <div class="flex items-center justify-between gap-2">
+            <div
+              data-node="feature_icon"
+              class="w-12 h-12 flex items-center justify-center border shrink-0"
+              style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
+            >
+              <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
+            </div>
+            {#if item.badge}
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-2xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary);">
+                {item.badge}
+              </span>
+            {/if}
           </div>
-          <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)]">
+          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]">
             {item.title}
           </h3>
           <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
             {item.description}
           </p>
+          {#if item.statLabel || item.linkUrl}
+            <div class="pt-1">
+              <span class="text-xs font-heading font-semibold text-[var(--color-primary)] inline-flex items-center gap-1">
+                {item.statLabel || 'Pelajari Lebih Lanjut →'}
+              </span>
+            </div>
+          {/if}
         </div>
       {/each}
     </div>

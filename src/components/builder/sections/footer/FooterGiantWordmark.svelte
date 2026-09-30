@@ -20,7 +20,7 @@
     style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: var(--theme-text-muted, var(--color-text-muted));"
   >
     <div
-      class="max-w-xs space-y-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="max-w-xs space-y-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_brand')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
       role="button"
@@ -47,7 +47,7 @@
     </div>
 
     <div
-      class="flex gap-4 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="flex gap-4 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_contact')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
       role="button"
@@ -74,7 +74,7 @@
 
   <!-- Giant Typography Wordmark Container -->
   <div
-    class="border-t border-[var(--color-border)] pt-4 text-center overflow-hidden select-none cursor-pointer rounded-xl transition-all {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="border-t border-[var(--color-border)] pt-4 text-center overflow-hidden select-none cursor-pointer rounded-xl transition-all {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"

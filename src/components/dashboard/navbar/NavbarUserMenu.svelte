@@ -20,7 +20,7 @@
   >
     <div class="relative flex-shrink-0">
       <div
-        class="w-7 h-7 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-xs shadow-xs"
+        class="w-7 h-7 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs shadow-xs"
       >
         {userInitial}
       </div>
@@ -63,7 +63,7 @@
       <div class="px-4 py-3 border-b border-light mb-1.5">
         <div class="flex items-center gap-2.5 mb-2">
           <div
-            class="w-9 h-9 rounded-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0"
+            class="w-9 h-9 rounded-xl bg-neutral text-neutral-content flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0"
           >
             {userInitial}
           </div>

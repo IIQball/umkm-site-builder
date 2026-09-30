@@ -30,22 +30,22 @@
   $: isAfterBefore = elementOrder.indexOf('after_card') !== -1 && elementOrder.indexOf('before_card') !== -1 && elementOrder.indexOf('after_card') < elementOrder.indexOf('before_card');
 
   const handleBeforeClick = (e: MouseEvent) => {
-    if (selectNode) selectNode(e, 'feature_item_0');
+    if (selectNode) selectNode(e, 'before_card');
   };
 
   const handleBeforeKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      if (selectNode) selectNode(e, 'feature_item_0');
+      if (selectNode) selectNode(e, 'before_card');
     }
   };
 
   const handleAfterClick = (e: MouseEvent) => {
-    if (selectNode) selectNode(e, 'feature_item_1');
+    if (selectNode) selectNode(e, 'after_card');
   };
 
   const handleAfterKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      if (selectNode) selectNode(e, 'feature_item_1');
+      if (selectNode) selectNode(e, 'after_card');
     }
   };
 </script>
@@ -70,20 +70,21 @@
     {#if hasBefore}
       <!-- Kartu Sebelum / Produk Biasa -->
       <div
-        data-node="feature_card"
+        data-node="before_card"
+        data-node-id="before_card"
         role="button"
         tabindex="0"
         on:click={handleBeforeClick}
         on:keydown={handleBeforeKeydown}
         class={`bg-[var(--color-nested-base)] p-6 border space-y-4 shadow-xs transition-all duration-150 cursor-pointer ${
-          activeNodeId === 'feature_item_0'
-            ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-            : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          activeNodeId === 'feature_item_0' || activeNodeId === 'before_card'
+            ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)] ring-offset-2'
+            : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
         }`}
         style="border-radius: var(--btn-radius, 16px); order: {isAfterBefore ? 2 : 1};"
       >
         <span
-          class="badge badge-outline gap-1 text-xs font-heading font-medium px-3 py-1"
+          class="inline-block rounded-full border text-xs font-heading font-medium px-3 py-1"
           style="background-color: var(--color-card-base); border-color: var(--color-border); color: var(--color-text-muted);"
         >
           {beforeTitle}
@@ -102,21 +103,22 @@
     {#if hasAfter}
       <!-- Kartu Sesudah / Produk Kami -->
       <div
-        data-node="feature_card"
+        data-node="after_card"
+        data-node-id="after_card"
         role="button"
         tabindex="0"
         on:click={handleAfterClick}
         on:keydown={handleAfterKeydown}
         class={`bg-[var(--color-card-base)] p-6 border-2 space-y-4 shadow-sm relative transition-all duration-150 cursor-pointer ${
-          activeNodeId === 'feature_item_1'
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-            : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+          activeNodeId === 'feature_item_1' || activeNodeId === 'after_card'
+            ? 'ring-2 ring-[var(--color-primary)] ring-offset-2'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
         }`}
         style="border-radius: var(--btn-radius, 16px); border-color: var(--color-primary); order: {isAfterBefore ? 1 : 2};"
       >
         <span
-          class="badge badge-primary gap-1 text-xs font-heading font-semibold shadow-xs px-3 py-1"
-          style="background-color: var(--btn-primary-bg, var(--color-primary)); color: var(--theme-btn-primary-text, var(--btn-primary-text, currentColor));"
+          class="inline-block rounded-full text-xs font-heading font-semibold shadow-xs px-3 py-1"
+          style="background-color: var(--btn-primary-bg, var(--color-primary)); color: var(--theme-btn-primary-text, #ffffff);"
         >
           {afterTitle}
         </span>

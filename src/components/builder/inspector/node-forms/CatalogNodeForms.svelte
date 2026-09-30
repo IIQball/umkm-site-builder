@@ -1,13 +1,9 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { ProductItem } from '@/types';
-  import { Upload, X, Loader2 } from 'lucide-svelte';
-  import {
-    compressToWebP,
-    uploadToCloudinary,
-    deleteOldImage,
-  } from '../imageUpload.helpers';
-  import { isCatalogImageSupported, DEFAULT_DEMO_PRODUCTS } from '../../sections/productCatalog.helpers';
+  import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
+  import CatalogCategoryManager from '../../content/CatalogCategoryManager.svelte';
+  import { isCatalogImageSupported, DEFAULT_DEMO_PRODUCTS, DEFAULT_CATALOG_CATEGORIES, type CatalogCategory } from '../../sections/productCatalog.helpers';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -20,67 +16,33 @@
     ? (section.props.products as ProductItem[])
     : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
 
+  $: rawCategories = section.props?.categories;
+  $: categories = (Array.isArray(rawCategories) && rawCategories.length > 0
+    ? rawCategories
+    : DEFAULT_CATALOG_CATEGORIES) as CatalogCategory[];
+
   $: title = (section.props?.title as string) || (section.props?.heading as string) || '';
   $: subtitle = (section.props?.subtitle as string) || '';
   $: badgeText = (section.props?.badgeText as string) || '';
   $: waNumber = (section.props?.whatsappNumber as string) || '';
+  $: buyButtonText = (section.props?.buyButtonText as string) || (section.props?.ctaText as string) || '';
+  $: cartButtonText = (section.props?.cartButtonText as string) || (section.props?.secondaryButtonText as string) || '';
 
-  // Extract index if nodeId is product_item_X or product_image_X
+  // Extract index if nodeId is product_item_X or product_image_X or item_X
   $: itemIndex = (() => {
     if (nodeId.startsWith('product_item_')) return parseInt(nodeId.replace('product_item_', ''), 10);
     if (nodeId.startsWith('product_image_')) return parseInt(nodeId.replace('product_image_', ''), 10);
+    if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
     return 0;
   })();
 
   $: currentProduct = products[itemIndex] || products[0];
-
-  let isUploading = false;
-  let errorMessage = '';
-  let fileInput: HTMLInputElement;
 
   function updateProductField(field: keyof ProductItem, value: any) {
     const updated = [...products];
     if (updated[itemIndex]) {
       updated[itemIndex] = { ...updated[itemIndex], [field]: value };
       onPropChange('products', updated);
-    }
-  }
-
-  async function handleImageFileChange(e: Event) {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    errorMessage = '';
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!allowed.includes(file.type)) {
-      errorMessage = 'Format file wajib JPG, JPEG, atau PNG';
-      return;
-    }
-
-    try {
-      isUploading = true;
-      const webpBlob = await compressToWebP(file, 1000, 1000);
-      const url = await uploadToCloudinary(webpBlob, 'products', `${Date.now()}_prod_${itemIndex}.webp`);
-
-      const oldUrl = currentProduct?.imageUrl;
-      if (oldUrl && oldUrl !== url) {
-        await deleteOldImage(oldUrl);
-      }
-      updateProductField('imageUrl', url);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Upload gambar gagal';
-    } finally {
-      isUploading = false;
-      if (fileInput) fileInput.value = '';
-    }
-  }
-
-  async function handleRemoveImage() {
-    const oldUrl = currentProduct?.imageUrl;
-    updateProductField('imageUrl', '');
-    if (oldUrl) {
-      await deleteOldImage(oldUrl);
     }
   }
 </script>
@@ -94,7 +56,7 @@
         type="text"
         value={title}
         on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
         placeholder="Katalog Produk Pilihan"
       />
     </div>
@@ -105,7 +67,7 @@
         rows="2"
         value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Deskripsi katalog toko..."
       ></textarea>
     </div>
@@ -116,79 +78,57 @@
         type="text"
         value={badgeText}
         on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Katalog Unggulan"
       />
     </div>
   </div>
+{:else if nodeId === 'title'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="cat-title-only">Judul Utama Katalog (H2)</label>
+    <input
+      id="cat-title-only"
+      type="text"
+      value={title}
+      on:input={(e) => onPropChange('title', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
+      placeholder="Katalog Produk Pilihan"
+    />
+  </div>
+{:else if nodeId === 'subtitle'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="cat-sub-only">Deskripsi Subjudul</label>
+    <textarea
+      id="cat-sub-only"
+      rows="3"
+      value={subtitle}
+      on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Deskripsi katalog toko..."
+    ></textarea>
+  </div>
+{:else if nodeId === 'badge'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="cat-badge-only">Teks Badge Kategori</label>
+    <input
+      id="cat-badge-only"
+      type="text"
+      value={badgeText}
+      on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Katalog Unggulan"
+    />
+  </div>
 {:else if nodeId.startsWith('product_image_')}
   {#if hasImageSupport}
-    <div class="space-y-4 text-left">
-      <div class="space-y-1.5">
-        <label class="font-semibold text-xs text-base-content" for="cat-prod-img-upload">
-          Foto Produk #{itemIndex + 1}: {currentProduct?.name || ''}
-        </label>
-        {#if currentProduct?.imageUrl}
-          <div class="relative group rounded-xl overflow-hidden border border-base-300 dark:border-slate-800 bg-base-200/50 p-2 flex items-center gap-3">
-            <img
-              src={currentProduct.imageUrl}
-              alt="Preview"
-              class="w-14 h-14 object-cover rounded-lg border border-base-300 dark:border-slate-700 bg-white"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold truncate text-base-content">{currentProduct.name || 'Produk'}</p>
-              <p class="text-[10px] text-base-content/60">Cloudinary WebP</p>
-            </div>
-            <button
-              type="button"
-              on:click={handleRemoveImage}
-              class="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors cursor-pointer"
-              title="Hapus Gambar"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        {:else}
-          <button
-            type="button"
-            on:click={() => fileInput?.click()}
-            disabled={isUploading}
-            class="w-full border-2 border-dashed border-base-300 dark:border-slate-800 hover:border-primary/50 rounded-xl p-5 text-center cursor-pointer transition-colors bg-base-200/30 flex flex-col items-center gap-1.5"
-          >
-            {#if isUploading}
-              <Loader2 size={18} class="animate-spin text-primary" />
-              <span class="text-xs text-primary font-medium">Mengunggah...</span>
-            {:else}
-              <Upload size={18} class="text-base-content/50" />
-              <span class="text-xs font-medium text-base-content">Pilih Foto Produk (PNG/JPG)</span>
-              <span class="text-[10px] text-base-content/60">Otomatis kompresi WebP</span>
-            {/if}
-          </button>
-        {/if}
-        <input
-          id="cat-prod-img-upload"
-          type="file"
-          accept="image/png, image/jpeg, image/jpg"
-          bind:this={fileInput}
-          on:change={handleImageFileChange}
-          class="hidden"
-        />
-        {#if errorMessage}
-          <p class="text-[11px] text-error font-medium">{errorMessage}</p>
-        {/if}
-      </div>
-
-      <div class="space-y-1">
-        <label class="font-semibold text-xs text-base-content" for="cat-prod-img-url">URL Gambar Manual</label>
-        <input
-          id="cat-prod-img-url"
-          type="text"
-          value={currentProduct?.imageUrl || ''}
-          on:input={(e) => updateProductField('imageUrl', e.currentTarget.value)}
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
-          placeholder="https://images.unsplash.com/..."
-        />
-      </div>
+    <div class="space-y-2 text-left">
+      <ImageUploadDropzone
+        imageUrl={currentProduct?.imageUrl || ''}
+        onImageChange={(url) => updateProductField('imageUrl', url)}
+        label={`Foto Produk #${itemIndex + 1}: ${currentProduct?.name || ''}`}
+        folder="products"
+        compact={true}
+      />
     </div>
   {:else}
     <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl text-left">
@@ -204,7 +144,7 @@
         type="text"
         value={currentProduct?.name || ''}
         on:input={(e) => updateProductField('name', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -214,7 +154,7 @@
         type="number"
         value={currentProduct?.price || 0}
         on:input={(e) => updateProductField('price', parseFloat(e.currentTarget.value) || 0)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
       />
     </div>
     <div class="space-y-1">
@@ -224,7 +164,7 @@
         rows="2"
         value={currentProduct?.description || ''}
         on:input={(e) => updateProductField('description', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       ></textarea>
     </div>
     <div class="space-y-1">
@@ -234,10 +174,48 @@
         type="text"
         value={currentProduct?.badge || ''}
         on:input={(e) => updateProductField('badge', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Terlaris / Promo"
       />
     </div>
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="prod-edit-cat">Kategori Produk</label>
+      <select
+        id="prod-edit-cat"
+        value={(currentProduct as any)?.categoryId || (currentProduct as any)?.category?.id || ''}
+        on:change={(e) => {
+          const catId = e.currentTarget.value;
+          const targetCat = categories.find((c) => c.id === catId);
+          const updated = [...products];
+          if (updated[itemIndex]) {
+            updated[itemIndex] = {
+              ...updated[itemIndex],
+              categoryId: catId,
+              categoryName: targetCat ? targetCat.name : '',
+              category: targetCat ? { id: targetCat.id, name: targetCat.name, slug: targetCat.slug } : null,
+            };
+            onPropChange('products', updated);
+          }
+        }}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      >
+        <option value="">— Tanpa Kategori / Umum —</option>
+        {#each categories as cat}
+          <option value={cat.id}>{cat.name}</option>
+        {/each}
+      </select>
+    </div>
+    {#if hasImageSupport}
+      <div class="pt-2 border-t border-base-200">
+        <ImageUploadDropzone
+          imageUrl={currentProduct?.imageUrl || ''}
+          onImageChange={(url) => updateProductField('imageUrl', url)}
+          label="Foto Produk"
+          folder="products"
+          compact={true}
+        />
+      </div>
+    {/if}
   </div>
 {:else if nodeId === 'catalog_timer'}
   <div class="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl space-y-1 text-left">
@@ -249,8 +227,30 @@
     <p class="font-semibold text-xs text-blue-700 dark:text-blue-300">Paket Bundling Bertingkat</p>
     <p class="text-[11px] text-base-content/70">Tampilkan pilihan paket hemat vs lengkap untuk mendongkrak Nilai Transaksi Rata-rata (AOV).</p>
   </div>
-{:else if nodeId === 'catalog_cta'}
-  <div class="space-y-2 text-left">
+{:else if nodeId === 'catalog_cta' || nodeId === 'cta'}
+  <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="cat-buy-btn-text">Teks Tombol Utama / Beli</label>
+      <input
+        id="cat-buy-btn-text"
+        type="text"
+        value={buyButtonText}
+        on:input={(e) => onPropChange('buyButtonText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Beli / Pesan"
+      />
+    </div>
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="cat-cart-btn-text">Teks Tombol Keranjang</label>
+      <input
+        id="cat-cart-btn-text"
+        type="text"
+        value={cartButtonText}
+        on:input={(e) => onPropChange('cartButtonText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Keranjang"
+      />
+    </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="cat-wa-number">Nomor WhatsApp Toko</label>
       <input
@@ -258,19 +258,21 @@
         type="text"
         value={waNumber}
         on:input={(e) => onPropChange('whatsappNumber', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         placeholder="628123456789"
       />
     </div>
     <p class="text-[10px] text-base-content/60">Pesanan dari katalog otomatis masuk ke chat WhatsApp dengan format teks terstruktur.</p>
   </div>
 {:else if nodeId === 'catalog_categories' || nodeId === 'catalog_sidebar'}
-  <div class="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl space-y-1 text-left">
-    <p class="font-semibold text-xs text-base-content">Bilah Filter Kategori</p>
-    <p class="text-[11px] text-base-content/60">Pengunjung dapat memfilter katalog berdasarkan kategori produk secara instan.</p>
+  <div class="space-y-2 text-left">
+    <CatalogCategoryManager
+      {categories}
+      onUpdateCategories={(cats) => onPropChange('categories', cats)}
+    />
   </div>
 {:else if nodeId === 'catalog_price_rows'}
-  <div class="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl space-y-1 text-left">
+  <div class="p-3 bg-slate-100 rounded-xl space-y-1 text-left">
     <p class="font-semibold text-xs text-base-content">Baris Tabel & Pricelist</p>
     <p class="text-[11px] text-base-content/60">Layout ringkas tabular dan akordeon fokus pada kejelasan harga serta spesifikasi produk tanpa gambar.</p>
   </div>
@@ -282,7 +284,7 @@
       rows="4"
       value={currentProduct?.description || ''}
       on:input={(e) => updateProductField('description', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
     ></textarea>
   </div>
 {/if}

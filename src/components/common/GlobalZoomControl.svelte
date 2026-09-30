@@ -35,7 +35,7 @@
   style="zoom: 1 !important;"
 >
   <div
-    class="flex items-center gap-1 bg-card/90 dark:bg-slate-900/90 backdrop-blur-md border border-light dark:border-slate-800 rounded-full px-2 py-1.5 shadow-xl shadow-black/10 text-main"
+    class="flex items-center gap-1 bg-card/90 backdrop-blur-md border border-light rounded-full px-2 py-1.5 shadow-xl shadow-black/10 text-main"
   >
     <!-- Zoom Out Button -->
     <button

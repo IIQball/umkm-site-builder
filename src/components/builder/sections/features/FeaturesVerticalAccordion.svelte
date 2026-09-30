@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { ChevronDown } from 'lucide-svelte';
+  import { resolveFeatureIcon } from './featureIcons';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
@@ -65,7 +66,8 @@
         {/if}
 
         {#if hasAccordion}
-          {#each items as item, index (item.id || item.title + index)}
+          <div data-node="accordion_list" data-node-id="accordion_list" class="space-y-3">
+            {#each items as item, index (item.id || item.title + index)}
             {@const isExpanded = activeIdx === index}
             {@const isItemActive = activeNodeId === `feature_item_${index}`}
             <div
@@ -76,16 +78,28 @@
               on:keydown={(e) => handleItemKeydown(e, index)}
               class={`p-5 border cursor-pointer transition-all duration-150 ${
                 isItemActive
-                  ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+                  ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)] ring-offset-2'
                   : isExpanded
                     ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10'
                     : 'border-[var(--color-border)] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)]'
               }`}
               style="border-radius: var(--btn-radius, 16px);"
             >
-              <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-base flex items-center justify-between gap-4">
-                <span class={isExpanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-main)]'}>
-                  {`0${index + 1}. `}{item.title}
+              <h3 data-node="feature_title" class="feature-item-title-compact font-heading flex items-center justify-between gap-4">
+                <span class="flex items-center gap-2.5 min-w-0 {isExpanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-main)]'}">
+                  <span
+                    data-node="feature_icon"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border"
+                    style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary);"
+                  >
+                    <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={15} />
+                  </span>
+                  <span class="truncate">{`0${index + 1}. `}{item.title}</span>
+                  {#if item.badge}
+                    <span class="inline-block px-2 py-0.5 rounded-full text-3xs font-heading font-medium shrink-0" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                      {item.badge}
+                    </span>
+                  {/if}
                 </span>
                 <ChevronDown
                   size={18}
@@ -98,9 +112,17 @@
                 <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed mt-2 font-sans">
                   {item.description}
                 </p>
+                {#if item.statLabel || item.linkUrl}
+                  <div class="mt-2.5 pt-2 border-t border-[var(--color-border)]">
+                    <span class="text-xs font-heading font-semibold text-[var(--color-primary)] inline-flex items-center gap-1">
+                      {item.statLabel || 'Detail Selengkapnya →'}
+                    </span>
+                  </div>
+                {/if}
               {/if}
             </div>
           {/each}
+          </div>
         {/if}
       </div>
     {/if}
@@ -114,7 +136,7 @@
         on:keydown={handleImageKeydown}
         class={`w-full aspect-[4/3] overflow-hidden shadow-xl bg-[var(--color-nested-base)] transition-all cursor-pointer ${
           isImageActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+            ? 'ring-2 ring-[var(--color-primary)] ring-offset-2'
             : 'hover:opacity-95'
         }`}
         style="border-radius: var(--btn-radius, 16px); order: {isImageOnLeft ? 1 : 2};"

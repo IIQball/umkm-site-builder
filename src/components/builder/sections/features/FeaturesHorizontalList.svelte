@@ -47,7 +47,7 @@
 
     <!-- Kolom List -->
     {#if hasRows}
-      <div class="space-y-4 text-left" style="order: {isListOnLeft ? 1 : 2};">
+      <div class="space-y-4 text-left" data-node="feature_rows" data-node-id="feature_rows" style="order: {isListOnLeft ? 1 : 2};">
         {#each items as item, index (item.id || item.title + index)}
           {@const isItemActive = activeNodeId === `feature_item_${index}`}
           <div
@@ -58,8 +58,8 @@
             on:keydown={(e) => handleItemKeydown(e, index)}
             class={`bg-[var(--color-card-base)] p-6 border border-[var(--color-border)] transition-all duration-150 flex items-start gap-4 shadow-xs cursor-pointer ${
               isItemActive
-                ? 'border-[var(--color-primary)] ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+                ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)] ring-offset-2'
+                : 'hover:border-[var(--color-primary)]/80 hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
             }`}
             style="border-radius: var(--btn-radius, 16px);"
           >
@@ -71,12 +71,22 @@
               <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
             </div>
             <div class="flex-1 min-w-0">
-              <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-[var(--color-text-main)] mb-1">
+              {#if item.badge}
+                <span class="inline-block px-2 py-0.5 rounded-full text-2xs font-heading font-medium mb-1" style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary);">
+                  {item.badge}
+                </span>
+              {/if}
+              <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)] mb-1">
                 {item.title}
               </h3>
               <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
                 {item.description}
               </p>
+              {#if item.statLabel || item.linkUrl}
+                <span class="text-xs font-heading font-semibold text-[var(--color-primary)] inline-flex items-center gap-1 mt-1.5">
+                  {item.statLabel || 'Cek Detail →'}
+                </span>
+              {/if}
             </div>
           </div>
         {/each}
@@ -93,20 +103,11 @@
     width: 100%;
   }
 
-  .title-heading {
-    font-size: 1.625rem;
-    line-height: 2rem;
-  }
-
   .asym-sticky-left {
     position: static;
   }
 
   @container featurecard (min-width: 640px) {
-    .title-heading {
-      font-size: 2.125rem;
-      line-height: 2.5rem;
-    }
     .asym-split-container {
       display: grid !important;
       grid-template-columns: 4fr 8fr !important;
@@ -122,10 +123,6 @@
   }
 
   @container featurecard (min-width: 960px) {
-    .title-heading {
-      font-size: 2.5rem;
-      line-height: 2.875rem;
-    }
     .asym-split-container {
       gap: 40px !important;
     }

@@ -22,7 +22,7 @@
       type="text"
       value={markerTitle}
       on:input={(e) => handlePropChange('markerTitle', e.currentTarget.value)}
-      class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500"
+      class="w-full px-3 py-2 bg-base-200/50 border border-base-300 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-primary"
       placeholder="Lokasi Toko Kami"
     />
   </div>
@@ -36,7 +36,7 @@
       value={address}
       on:input={(e) => handlePropChange('address', e.currentTarget.value)}
       rows="3"
-      class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-blue-500 resize-y"
+      class="w-full px-3 py-2 bg-base-200/50 border border-base-300 rounded-md text-base-content placeholder-base-content/40 focus:outline-none focus:border-primary resize-y"
       placeholder="Jl. Merdeka Barat No. 12, Gambir, Jakarta Pusat"></textarea>
     <p class="text-[11px] text-base-content/50 mt-1">
       Peta akan otomatis mencari koordinat dari teks alamat ini.
@@ -56,7 +56,7 @@
         step="1"
         value={zoom}
         on:input={(e) => handlePropChange('zoom', parseInt(e.currentTarget.value, 10))}
-        class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
+        class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer accent-primary"
       />
     </div>
 
@@ -68,7 +68,7 @@
         id="map-height"
         value={mapHeight}
         on:change={(e) => handlePropChange('mapHeight', e.currentTarget.value)}
-        class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500 text-xs"
+        class="w-full px-3 py-2 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary text-xs"
       >
         <option value="320px">320px (Kecil)</option>
         <option value="400px">400px (Standar)</option>

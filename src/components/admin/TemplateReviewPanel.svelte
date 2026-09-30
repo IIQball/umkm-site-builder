@@ -9,7 +9,7 @@
     Clock,
     XCircle,
   } from 'lucide-svelte';
-  import { Card, Pagination } from '@/components/ui';
+  import { Card, Pagination, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import type { AdminTemplateItem } from './review/review.types';
   import TemplateReviewTable from './review/TemplateReviewTable.svelte';
@@ -161,63 +161,59 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari nama template / desainer..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-52 sm:w-60"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-52 sm:w-60"
         />
       </div>
 
       <!-- Segmented Status Filter (Exact matching style from OrderHistoryTable) -->
       <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'all' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold {activeTab === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('all')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeTab === 'all'
-            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
           Semua ({templates.length})
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'pending' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'pending' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('pending')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'pending'
-            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
           <span>Menunggu</span>
           {#if countPending > 0}
             <span class="opacity-80 font-mono text-3xs">({countPending})</span>
           {/if}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'approved' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'approved' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('approved')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'approved'
-            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           <span>Disetujui</span>
           {#if countApproved > 0}
             <span class="opacity-80 font-mono text-3xs">({countApproved})</span>
           {/if}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'rejected' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'rejected' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('rejected')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'rejected'
-            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
           <span>Ditolak</span>
           {#if countRejected > 0}
             <span class="opacity-80 font-mono text-3xs">({countRejected})</span>
           {/if}
-        </button>
+        </Button>
       </div>
     </div>
   </div>

@@ -27,7 +27,7 @@
 <div class="max-w-xl mx-auto space-y-5 text-center py-4">
   <!-- Newsletter & Promo Capture Node -->
   <div
-    class="space-y-3.5 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_newsletter' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="space-y-3.5 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_newsletter' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_newsletter')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_newsletter')}
     role="button"
@@ -78,7 +78,7 @@
 
   <!-- Copyright Row -->
   <div
-    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}

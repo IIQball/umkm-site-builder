@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Input } from '@/components/ui';
+  import { Input, Button } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
 
   export let numericPriceState: number = 50000;
@@ -38,42 +38,44 @@
 
   <!-- Quick Preset Price Chips -->
   <div class="flex items-center gap-2 pt-1">
-    <button
+    <Button
       type="button"
+      size="xs"
+      variant={numericPriceState === 0 ? 'primary' : 'outline'}
       on:click={() => onSelectPricePreset(0)}
-      class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {numericPriceState === 0
-        ? 'bg-emerald-500 text-white border-emerald-500'
-        : 'bg-card border-light text-secondary hover:text-main'}"
+      class="!px-2.5 !py-1 !h-auto !min-h-0 text-2xs font-bold {numericPriceState === 0
+        ? '!bg-emerald-500 !text-white !border-emerald-500'
+        : ''}"
     >
       Gratis (Rp 0)
-    </button>
-    <button
+    </Button>
+    <Button
       type="button"
+      size="xs"
+      variant={numericPriceState === 25000 ? 'primary' : 'outline'}
       on:click={() => onSelectPricePreset(25000)}
-      class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {numericPriceState === 25000
-        ? 'bg-primary text-white border-primary'
-        : 'bg-card border-light text-secondary hover:text-main'}"
+      class="!px-2.5 !py-1 !h-auto !min-h-0 text-2xs font-bold"
     >
       Rp 25.000
-    </button>
-    <button
+    </Button>
+    <Button
       type="button"
+      size="xs"
+      variant={numericPriceState === 50000 ? 'primary' : 'outline'}
       on:click={() => onSelectPricePreset(50000)}
-      class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {numericPriceState === 50000
-        ? 'bg-primary text-white border-primary'
-        : 'bg-card border-light text-secondary hover:text-main'}"
+      class="!px-2.5 !py-1 !h-auto !min-h-0 text-2xs font-bold"
     >
       Rp 50.000
-    </button>
-    <button
+    </Button>
+    <Button
       type="button"
+      size="xs"
+      variant={numericPriceState === 100000 ? 'primary' : 'outline'}
       on:click={() => onSelectPricePreset(100000)}
-      class="px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer {numericPriceState === 100000
-        ? 'bg-primary text-white border-primary'
-        : 'bg-card border-light text-secondary hover:text-main'}"
+      class="!px-2.5 !py-1 !h-auto !min-h-0 text-2xs font-bold"
     >
       Rp 100.000
-    </button>
+    </Button>
   </div>
 
   <!-- Dynamic Commission Simulator -->

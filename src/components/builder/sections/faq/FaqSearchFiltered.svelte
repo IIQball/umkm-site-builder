@@ -46,7 +46,7 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectSearchBar(e); }}
     class={`relative w-full mx-auto transition-all rounded-2xl ${
       $canvasStore.selectedNodeId === 'faq_search_bar'
-        ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900'
+        ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100'
         : ''
     }`}
   >
@@ -56,14 +56,14 @@
       bind:value={searchQuery}
       on:click|stopPropagation
       placeholder="Ketik kata kunci (misal: pengiriman, expired, COD)..."
-      class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-[var(--color-nested-base)] border border-[var(--color-border)] text-xs text-[var(--theme-text-primary, var(--color-text-main))] shadow-xs focus:outline-none focus:border-[var(--theme-primary, var(--color-primary))] focus:ring-1 focus:ring-[var(--theme-primary, var(--color-primary))] transition-all font-[var(--font-family,inherit)]"
+      class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-[var(--color-nested-base)] border border-[var(--color-border)] text-xs text-[var(--theme-text-primary, var(--color-text-main))] shadow-xs focus:outline-none focus:border-[var(--theme-primary, var(--color-primary))] focus:ring-1 focus:ring-[var(--theme-primary, var(--color-primary))] transition-all font-sans"
     />
   </div>
 
   <!-- Filtered FAQs List -->
   <div class="space-y-2 text-left">
     {#if filteredFaqs.length === 0}
-      <div class="p-8 text-center text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] bg-[var(--theme-surface, var(--color-card-base))] rounded-2xl border border-[var(--color-border)] font-[var(--font-family,inherit)]">
+      <div class="p-8 text-center text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] bg-[var(--theme-surface, var(--color-card-base))] rounded-2xl border border-[var(--color-border)] font-sans">
         Tidak ditemukan pertanyaan yang cocok dengan "{searchQuery}".
       </div>
     {:else}
@@ -78,14 +78,14 @@
           on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
           class={`rounded-2xl border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
             isItemActive
-              ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+              ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 shadow-md'
               : 'hover:border-[var(--theme-primary, var(--color-primary))]/30'
           }`}
         >
           <button
             type="button"
             on:click|stopPropagation={() => toggle(index)}
-            class="w-full p-4 flex items-center justify-between gap-4 text-left font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))] hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
+            class="w-full p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))] hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
           >
             <span class="flex-1 min-w-0">{item.question}</span>
             <span
@@ -98,7 +98,7 @@
           </button>
 
           {#if isOpen}
-            <div class="px-4 pb-4 pt-1 text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed border-t border-[var(--color-border)] font-[var(--font-family,inherit)]">
+            <div class="px-4 pb-4 pt-1 text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed border-t border-[var(--color-border)] font-sans">
               {item.answer}
             </div>
           {/if}

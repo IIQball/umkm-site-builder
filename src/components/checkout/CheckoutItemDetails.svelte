@@ -15,10 +15,10 @@
   export let lineItemSubtitle: string;
 </script>
 
-<div class="bg-card border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-xs space-y-6">
+<div class="bg-card border border-border rounded-3xl p-6 sm:p-7 shadow-xs space-y-6">
   <!-- Browser Showcase Mockup -->
-  <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/80 bg-nested shadow-sm group transition-all">
-    <div class="px-4 py-2.5 bg-canvas/80 border-b border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-3">
+  <div class="rounded-2xl overflow-hidden border border-border bg-nested shadow-sm group transition-all">
+    <div class="px-4 py-2.5 bg-canvas/80 border-b border-border flex items-center justify-between gap-3">
       <div class="flex items-center gap-1.5">
         <span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400/80"></span>
@@ -77,7 +77,7 @@
   </div>
 
   <!-- Value Benefits Cards -->
-  <div class="border-t border-slate-200 dark:border-slate-800 pt-5 space-y-3">
+  <div class="border-t border-border pt-5 space-y-3">
     <h2 class="text-xs font-bold text-main uppercase tracking-wider font-heading flex items-center gap-1.5">
       <Sparkles size={14} class="text-primary" />
       <span>Fasilitas & Hak Lisensi Termasuk</span>

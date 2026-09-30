@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
-  import { Zap, ShoppingBag } from 'lucide-svelte';
+  import { Zap, ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import { formatRupiah } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Beli Kilat';
+  export let cartButtonText: string = 'Keranjang';
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -40,7 +42,7 @@
     on:click={selectTimer}
     on:keydown={(e) => { if (e.key === 'Enter') selectTimer(e); }}
     class={`bg-rose-600 text-white p-4 sm:p-5 rounded-2xl flex flex-wrap items-center justify-between gap-3 mb-8 cursor-pointer transition-all duration-200 ${
-      $canvasStore.selectedNodeId === 'catalog_timer' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-xl' : 'hover:brightness-105'
+      $canvasStore.selectedNodeId === 'catalog_timer' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-xl' : 'hover:brightness-105'
     }`}
   >
     <div class="flex items-center gap-2">
@@ -69,18 +71,22 @@
       {@const originalPrice = typeof product.price === 'number' ? Math.round(product.price * 1.35) : 0}
 
       <div
+        data-node={product.id || `product_item_${index}`}
+        data-node-id={product.id || `product_item_${index}`}
         role="button"
         tabindex="0"
         on:click={(e) => selectCard(e, index, product)}
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
         class={`bg-card p-4 rounded-2xl border border-light/80 shadow-xs flex flex-col justify-between transition-all duration-200 cursor-pointer ${
           isCardActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-lg'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-lg'
             : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
         <div>
           <div
+            data-node={`product_image_${index}`}
+            data-node-id={`product_image_${index}`}
             role="button"
             tabindex="0"
             on:click={(e) => selectImage(e, index)}
@@ -101,7 +107,10 @@
                 <ShoppingBag size={24} />
               </div>
             {/if}
-            <span class="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+            <span
+              class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
+              style="background-color: var(--color-primary); color: #ffffff;"
+            >
               HEMAT 35%
             </span>
           </div>
@@ -113,7 +122,7 @@
 
         <div class="mt-3 pt-3 border-t border-light/60">
           <div class="flex items-baseline gap-2 mb-2">
-            <span class="font-heading font-black text-xs sm:text-sm text-rose-600">
+            <span class="font-heading font-black text-xs sm:text-sm text-primary">
               {formatRupiah(product.price)}
             </span>
             {#if originalPrice > 0}
@@ -127,16 +136,18 @@
             <button
               type="button"
               on:click|stopPropagation={() => onAddToCart(product, {})}
-              class="flex-1 h-8 rounded-xl bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-xs font-semibold transition-all"
+              class="flex-1 h-8 rounded-[var(--theme-btn-radius,var(--btn-radius,8px))] border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold transition-all cursor-pointer flex items-center justify-center gap-1"
             >
-              +
+              <ShoppingCart size={13} />
+              <span>{cartButtonText || 'Keranjang'}</span>
             </button>
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
-              class="flex-1 h-8 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white text-xs font-bold transition-all"
+              class="flex-1 h-8 rounded-[var(--theme-btn-radius,var(--btn-radius,8px))] active:scale-[0.98] text-xs font-heading font-bold transition-all cursor-pointer shadow-xs hover:opacity-90 flex items-center justify-center"
+              style="background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
             >
-              Beli Kilat
+              {buyButtonText || 'Beli Kilat'}
             </button>
           </div>
         </div>

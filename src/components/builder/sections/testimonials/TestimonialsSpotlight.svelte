@@ -38,7 +38,7 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectQuote(e); }}
     class={`p-4 rounded-2xl cursor-pointer transition-all ${
       $canvasStore.selectedNodeId === 'testi_spotlight_quote'
-        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100'
         : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
@@ -54,7 +54,7 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectAuthor(e); }}
     class={`pt-2 cursor-pointer transition-all rounded-xl p-2 ${
       $canvasStore.selectedNodeId === 'testi_spotlight_author'
-        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+        ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100'
         : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-primary/50'
     }`}
   >
@@ -74,7 +74,7 @@
         aria-label={`Lihat ulasan ${idx + 1}`}
         on:click={() => (activeIdx = idx)}
         class={`h-2 rounded-full transition-all ${
-          activeIdx === idx ? 'w-6 bg-primary shadow-xs' : 'w-2 bg-slate-300 dark:bg-slate-700'
+          activeIdx === idx ? 'w-6 bg-primary shadow-xs' : 'w-2 bg-base-300'
         }`}
       ></button>
     {/each}

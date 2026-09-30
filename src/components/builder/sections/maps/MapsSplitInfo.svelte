@@ -38,24 +38,24 @@
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
     class={`bg-[var(--theme-surface, var(--color-card-base))] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm flex flex-col justify-between space-y-4 transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+      isCardSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
   >
     <div>
       <span
-        class="font-bold text-[var(--theme-primary, var(--color-primary))] uppercase tracking-wider font-[var(--theme-font-heading,var(--font-heading,inherit))] block mb-1"
+        class="font-bold text-[var(--theme-primary, var(--color-primary))] uppercase tracking-wider font-heading block mb-1"
         style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));"
       >
         Kontak & Alamat
       </span>
       <h3
-        class="font-[var(--theme-font-heading,var(--font-heading,inherit))] text-[var(--theme-text-primary, var(--color-text-main))] mt-1 mb-3"
-        style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+        class="font-heading text-[var(--theme-text-primary, var(--color-text-main))] mt-1 mb-3"
+        style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700));"
       >
         {storeName}
       </h3>
       <div
-        class="space-y-3 text-[var(--theme-text-muted, var(--color-text-muted))] font-[var(--theme-font-body,var(--font-family,inherit))]"
+        class="space-y-3 text-[var(--theme-text-muted, var(--color-text-muted))] font-sans"
         style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
       >
         <div class="flex items-start gap-2">
@@ -84,8 +84,8 @@
         tabindex="0"
         on:click={(e) => selectNode(e, 'maps_cta_button')}
         on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
-        class={`inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-[var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))] text-[var(--theme-btn-primary-text, var(--btn-primary-text, white))] font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
-          isCtaSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+        class={`inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-[var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))] text-[var(--theme-btn-primary-text, var(--btn-primary-text, white))] font-heading font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
+          isCtaSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
         }`}
         style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);"
       >
@@ -97,7 +97,7 @@
           href={whatsappUrl}
           target="_blank"
           rel="noreferrer"
-          class="inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-emerald-600 text-white font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-xs"
+          class="inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-emerald-600 text-white font-heading font-bold hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-xs"
           style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);"
         >
           <MessageCircle size={13} />
@@ -114,7 +114,7 @@
     on:click={(e) => selectNode(e, 'maps_iframe')}
     on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
     class={`w-full h-full min-h-[260px] rounded-2xl overflow-hidden shadow-md border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] transition-all outline-none ${
-      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
   >
     <iframe

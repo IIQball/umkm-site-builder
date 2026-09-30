@@ -21,7 +21,7 @@
   export let onOpenPaymentModal: () => void;
 </script>
 
-<div class="bg-card border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+<div class="bg-card border border-border rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
   <div>
     <h2 class="text-heading-sm font-bold text-main font-heading">
       {checkoutTitle}
@@ -51,7 +51,7 @@
   </div>
 
   <!-- Price Breakdown -->
-  <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
+  <div class="space-y-2.5 pt-2 border-t border-border text-xs">
     <div class="flex justify-between items-center text-secondary">
       <span>Biaya Lisensi Template</span>
       <span class="font-mono font-medium text-main">{formatIDR(pageData.amount)}</span>
@@ -65,7 +65,7 @@
       <span class="font-mono font-medium text-secondary">Termasuk (0%)</span>
     </div>
 
-    <div class="flex justify-between items-baseline pt-4 border-t border-slate-200 dark:border-slate-800">
+    <div class="flex justify-between items-baseline pt-4 border-t border-border">
       <span class="text-sm font-extrabold text-main font-heading">Total Pembayaran</span>
       <span class="font-mono text-2xl font-black text-primary">
         {formatIDR(pageData.amount)}

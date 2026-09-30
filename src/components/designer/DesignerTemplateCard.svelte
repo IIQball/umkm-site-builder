@@ -87,8 +87,8 @@
           on:click|stopPropagation={() => onToggleSelect && onToggleSelect(template.id)}
           class={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center cursor-pointer shadow-sm ${
             isSelected
-              ? 'bg-blue-600 border-blue-600 text-white'
-              : 'bg-card/90 dark:bg-slate-900/90 border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+              ? 'bg-primary border-primary text-primary-content'
+              : 'bg-card/90 border-border hover:border-primary text-transparent'
           }`}
           title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
           aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
@@ -124,7 +124,7 @@
     <!-- Sold count overlay -->
     {#if template.totalSold > 0}
       <div class="absolute bottom-3 left-3 z-10 pointer-events-none">
-        <span class="text-3xs font-bold text-main bg-card/90 dark:bg-slate-900/90 backdrop-blur-md border border-light rounded-full px-2.5 py-1 shadow-xs flex items-center gap-1 font-mono">
+        <span class="text-3xs font-bold text-main bg-card/90 backdrop-blur-md border border-light rounded-full px-2.5 py-1 shadow-xs flex items-center gap-1 font-mono">
           <span>{template.totalSold}× Terjual</span>
         </span>
       </div>

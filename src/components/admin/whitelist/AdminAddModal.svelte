@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { Plus, Eye, EyeOff, UserPlus } from 'lucide-svelte';
-  import { toast } from '@/lib/toast';
-  import { createEventDispatcher } from 'svelte';
-  import { Button, Modal } from '@/components/ui';
+  import { Plus, Eye, EyeOff, UserPlus } from "lucide-svelte";
+  import { toast } from "@/lib/toast";
+  import { createEventDispatcher } from "svelte";
+  import { Button, Modal } from "@/components/ui";
 
   export let isOpen = false;
 
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
-  let newName = '';
-  let newEmail = '';
-  let newPassword = '';
-  let confirmPassword = '';
+  let newName = "";
+  let newEmail = "";
+  let newPassword = "";
+  let confirmPassword = "";
   let showPassword = false;
   let showConfirmPassword = false;
 
@@ -19,38 +19,43 @@
 
   const close = () => {
     if (isSubmitting) return;
-    dispatch('close');
+    dispatch("close");
   };
 
   const handleAdd = async () => {
     if (!newName || !newEmail || !newPassword || !confirmPassword) return;
     if (newPassword !== confirmPassword) {
-      toast.error('Konfirmasi kata sandi tidak cocok');
+      toast.error("Konfirmasi kata sandi tidak cocok");
       return;
     }
 
     isSubmitting = true;
 
     try {
-      const res = await fetch('/api/admin/whitelist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName, email: newEmail, password: newPassword, confirmPassword }),
+      const res = await fetch("/api/admin/whitelist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newName,
+          email: newEmail,
+          password: newPassword,
+          confirmPassword,
+        }),
       });
       const result = await res.json();
 
       if (res.ok && result.ok) {
-        toast.success('Akun admin berhasil didaftarkan');
-        newName = '';
-        newEmail = '';
-        newPassword = '';
-        confirmPassword = '';
-        dispatch('success');
+        toast.success("Akun admin berhasil didaftarkan");
+        newName = "";
+        newEmail = "";
+        newPassword = "";
+        confirmPassword = "";
+        dispatch("success");
       } else {
-        toast.error(result.error?.message || 'Gagal mendaftarkan admin');
+        toast.error(result.error?.message || "Gagal mendaftarkan admin");
       }
     } catch {
-      toast.error('Terjadi kesalahan jaringan');
+      toast.error("Terjadi kesalahan jaringan");
     } finally {
       isSubmitting = false;
     }
@@ -59,17 +64,27 @@
 
 <Modal open={isOpen} on:close={close} size="md">
   <svelte:fragment slot="header">
-    <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
+    <h3
+      class="font-bold text-main text-base flex items-center gap-2 leading-none"
+    >
       <UserPlus size={18} class="text-primary" />
       <span>Pendaftaran Admin Baru</span>
     </h3>
   </svelte:fragment>
 
   <!-- Form -->
-  <form id="admin-add-form" on:submit|preventDefault={handleAdd} class="space-y-5 py-1">
+  <form
+    id="admin-add-form"
+    on:submit|preventDefault={handleAdd}
+    class="space-y-5 py-1"
+  >
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div class="form-control w-full">
-        <label for="newName" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Nama Lengkap</label>
+        <label
+          for="newName"
+          class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2"
+          >Nama Lengkap</label
+        >
         <input
           id="newName"
           type="text"
@@ -81,9 +96,13 @@
           class="input h-11 px-4 bg-nested/30 text-main border-light focus:border-primary rounded-xl text-sm font-medium w-full transition-all focus:ring-4 focus:ring-primary/10"
         />
       </div>
-      
+
       <div class="form-control w-full">
-        <label for="newEmail" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Alamat Email</label>
+        <label
+          for="newEmail"
+          class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2"
+          >Alamat Email</label
+        >
         <input
           id="newEmail"
           type="email"
@@ -98,7 +117,11 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div class="form-control w-full">
-        <label for="newPassword" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Kata Sandi Baru</label>
+        <label
+          for="newPassword"
+          class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2"
+          >Kata Sandi Baru</label
+        >
         <div class="relative">
           {#if showPassword}
             <input
@@ -125,7 +148,7 @@
           {/if}
           <button
             type="button"
-            on:click={() => showPassword = !showPassword}
+            on:click={() => (showPassword = !showPassword)}
             class="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-muted hover:text-main transition-colors"
           >
             {#if showPassword}<EyeOff size={16} />{:else}<Eye size={16} />{/if}
@@ -134,7 +157,11 @@
       </div>
 
       <div class="form-control w-full">
-        <label for="confirmPassword" class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2">Konfirmasi Sandi</label>
+        <label
+          for="confirmPassword"
+          class="block text-[11px] font-extrabold uppercase tracking-widest text-muted mb-2"
+          >Konfirmasi Sandi</label
+        >
         <div class="relative">
           {#if showConfirmPassword}
             <input
@@ -161,10 +188,12 @@
           {/if}
           <button
             type="button"
-            on:click={() => showConfirmPassword = !showConfirmPassword}
+            on:click={() => (showConfirmPassword = !showConfirmPassword)}
             class="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-muted hover:text-main transition-colors"
           >
-            {#if showConfirmPassword}<EyeOff size={16} />{:else}<Eye size={16} />{/if}
+            {#if showConfirmPassword}<EyeOff size={16} />{:else}<Eye
+                size={16}
+              />{/if}
           </button>
         </div>
       </div>
@@ -186,7 +215,11 @@
       form="admin-add-form"
       variant="primary"
       size="sm"
-      disabled={isSubmitting || !newName || !newEmail || !newPassword || !confirmPassword}
+      disabled={isSubmitting ||
+        !newName ||
+        !newEmail ||
+        !newPassword ||
+        !confirmPassword}
       loading={isSubmitting}
       className="font-bold px-6"
     >

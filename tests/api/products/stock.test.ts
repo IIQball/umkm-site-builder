@@ -15,6 +15,7 @@ vi.mock('@/db/index', () => ({
 
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
+  canManageStore: vi.fn(),
 }));
 
 describe('PATCH /api/products/[id]/stock', () => {
@@ -24,6 +25,7 @@ describe('PATCH /api/products/[id]/stock', () => {
 
   it('updates product stock status', async () => {
     (auth.getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
+    (auth.canManageStore as Mock).mockResolvedValue(true);
     
     let selectCount = 0;
     (db.select as Mock).mockImplementation(() => {

@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { db, users, sessions } from '@/db/index';
+import { db, users, sessions, tenantInvitations } from '@/db/index';
 import { eq } from 'drizzle-orm';
 
 const resetPasswordSchema = z.object({
@@ -53,6 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
             if (signinRes && signinRes.user) {
               // Verification succeeded! Update the name
               await db.update(users).set({ name }).where(eq(users.id, uid));
+              
               // Automatically clean up the temporary session created for verification
               await db.delete(sessions).where(eq(sessions.userId, uid));
             }
@@ -60,6 +61,12 @@ export const POST: APIRoute = async ({ request }) => {
             console.error("Name update failed due to unauthorized uid mismatch or sign in error", e);
           }
         }
+        
+        // Mark invitation as accepted if this email was invited (regardless of role)
+        await db
+          .update(tenantInvitations)
+          .set({ acceptedAt: new Date() })
+          .where(eq(tenantInvitations.email, userEmail));
       }
     }
 

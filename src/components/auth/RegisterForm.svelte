@@ -154,12 +154,13 @@
         return;
       }
 
-      toast.success("Akun berhasil dibuat!");
-      if (role === 'designer') {
-        window.location.href = '/designer/wallet';
-      } else {
-        window.location.href = '/dashboard';
-      }
+      toast.success("Akun berhasil dibuat! Silakan masuk dengan akun baru Anda.");
+      
+      // Sign out immediately so they don't skip the login screen
+      await authClient.signOut();
+      
+      // Redirect to login view (without ?mode=register)
+      window.location.href = '/auth/login';
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
     } finally {

@@ -89,6 +89,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
           { label: 'Overview Dashboard', href: '/superadmin', icon: 'dashboard', group: 'Platform & Pengguna' },
           { label: 'Manajemen Admin', href: '/superadmin/whitelist', icon: 'admin_panel_settings', group: 'Platform & Pengguna' },
           { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: 'group', group: 'Platform & Pengguna' },
+          { label: 'Link Registrasi', href: '/superadmin/registrations', icon: 'link', group: 'Platform & Pengguna' },
         ],
       },
       {

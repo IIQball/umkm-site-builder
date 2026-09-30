@@ -10,6 +10,9 @@ export default defineConfig({
   integrations: [
     svelte(),
   ],
+  redirects: {
+    '/reset-password': '/activation'
+  },
   vite: {
     server: {
       allowedHosts: true,

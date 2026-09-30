@@ -30,20 +30,17 @@
     
     // Only allow numbers
     const numVal = val.replace(/[^0-9]/g, '');
+    const finalVal = numVal.slice(0, 1);
     
-    if (numVal.length > 1) {
-       target.value = numVal[0] || '';
-       values[i] = numVal[0] || '';
-    } else {
-       target.value = numVal;
-       values[i] = numVal;
-    }
+    target.value = finalVal;
+    values[i] = finalVal;
+    values = [...values]; // Trigger reactivity
 
     updateValue();
 
     // Move to next if typed a number
-    if (numVal && i < length - 1) {
-      inputs[i + 1].focus();
+    if (finalVal && i < length - 1) {
+      inputs[i + 1]?.focus();
     }
   }
 
@@ -53,6 +50,7 @@
         // If empty, delete previous and move back
         e.preventDefault();
         values[i - 1] = '';
+        values = [...values];
         updateValue();
         inputs[i - 1].focus();
       }
@@ -107,7 +105,7 @@
       pattern="[0-9]*"
       maxlength="1"
       {disabled}
-      bind:value={values[i]}
+      value={values[i]}
       on:input={(e) => handleInput(i, e)}
       on:keydown={(e) => handleKeyDown(i, e)}
       class="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold bg-surface border-2 rounded-xl transition-all duration-300 ease-out focus:scale-105 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 {values[i] ? 'border-primary/50 text-main' : 'border-border text-muted'} {disabled ? 'opacity-50 cursor-not-allowed' : ''}"

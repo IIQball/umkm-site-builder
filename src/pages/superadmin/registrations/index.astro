@@ -9,8 +9,8 @@ import { eq, desc } from 'drizzle-orm';
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user || user.role !== 'admin') {
-  return Astro.redirect('/auth/login?redirect=/admin/registrations');
+if (!user || user.role !== 'superadmin') {
+  return Astro.redirect('/auth/login?redirect=/superadmin/registrations');
 }
 
 let initialInvitations: Array<{
@@ -56,15 +56,15 @@ try {
 }
 ---
 
-<DashboardLayout title="Link Registrasi" breadcrumb="Admin / Link Registrasi">
+<DashboardLayout title="Link Registrasi" breadcrumb="Superadmin / Link Registrasi">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
         <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
-          <span>Link Registrasi Merchant</span>
+          <span>Link Registrasi Admin</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Buat dan kelola link undangan registrasi khusus untuk merchant binaan Anda.
+          Buat dan kelola link undangan registrasi khusus untuk Admin.
         </p>
       </div>
     </div>

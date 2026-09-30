@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions } from '@/db/index';
+import { db, users, sessions, tenantInvitations } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin, auth } from '@/lib/auth';
 import { manualUserRegistrationSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -45,6 +45,21 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         newUserId = res.user.id;
         // Delete the session created by signUpEmail to prevent auto-login
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
+
+        // Insert a record into tenantInvitations so it appears in the invitation dashboard
+        const invId = crypto.randomUUID();
+        const token = crypto.randomUUID();
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24);
+        
+        await db.insert(tenantInvitations).values({
+          id: invId,
+          name: validated.name,
+          email: validated.email,
+          token: token,
+          invitedBy: user.id,
+          expiresAt: expiresAt,
+        });
 
         // We will trigger the activation email from the client-side to prevent server deadlocks
       } else {

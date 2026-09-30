@@ -8,10 +8,11 @@
 
   export let isOpen = false
   export let currentUser: { role?: string; id?: string } | null = null
+  export let forceRole: 'tenant' | 'admin' | null = null;
 
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
-  $: selectedRole = currentUser?.role === 'superadmin' ? 'admin' : 'tenant';
+  $: selectedRole = forceRole ? forceRole : (currentUser?.role === 'superadmin' ? 'admin' : 'tenant');
 
   let newName = '';
   let newEmail = '';

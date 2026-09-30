@@ -6,7 +6,6 @@
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
-  import AdminUserAddModal from './AdminUserAddModal.svelte';
   import AdminUserTable from './user/AdminUserTable.svelte';
 
   export let initialUsersJson: string = '[]';
@@ -27,7 +26,6 @@
   let suspendModalOpen = false;
   let unsuspendModalOpen = false;
   let detailModalOpen = false;
-  let isAddModalOpen = false;
   let suspendReason = '';
   let actionLoading = false;
   
@@ -167,17 +165,6 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <Button
-          variant="primary"
-          size="md"
-          on:click={() => isAddModalOpen = true}
-          class="font-bold"
-        >
-          <span class="material-symbols-outlined text-white text-base">person_add</span>
-          <span>{currentUser?.role === 'superadmin' ? 'Tambah Admin' : 'Tambah Pengguna'}</span>
-        </Button>
-      </div>
     </div>
     
 
@@ -256,10 +243,5 @@
   onClose={closeModal}
 />
 
-<AdminUserAddModal 
-  isOpen={isAddModalOpen} 
-  currentUser={currentUser}
-  on:close={() => isAddModalOpen = false} 
-  on:success={() => { isAddModalOpen = false; fetchUsers(); }} 
-/>
+
 

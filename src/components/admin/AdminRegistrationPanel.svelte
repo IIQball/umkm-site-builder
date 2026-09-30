@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, Button, Input } from '@/components/ui';
   import { UserPlus, Mail, Clock, CheckCircle, RefreshCcw, Link2, Search, XCircle, FileText } from 'lucide-svelte';
-  import AdminInviteModal from './AdminInviteModal.svelte';
+  import AdminUserAddModal from './AdminUserAddModal.svelte';
   import { toast } from '@/lib/toast';
 
   export let invitations: Array<{
@@ -16,9 +16,12 @@
   }> = [];
   export let currentUser: { id: string; role?: string } | null = null;
 
+  $: targetRoleName = currentUser?.role === 'superadmin' ? 'Admin' : 'Merchant';
+
   let searchQuery = '';
   let isAddModalOpen = false;
   let isExtending: string | null = null;
+  let isDeleting: string | null = null;
 
   $: filteredInvitations = invitations.filter((i) => {
     if (!searchQuery.trim()) return true;
@@ -49,6 +52,29 @@
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus undangan ini? Jika pengguna belum aktivasi, akunnya juga akan ikut terhapus.')) return;
+    
+    isDeleting = id;
+    try {
+      const res = await fetch(`/api/admin/invitations/delete?id=${id}`, {
+        method: 'DELETE',
+      });
+      const result = await res.json();
+      
+      if (res.ok && result.ok) {
+        toast.success(result.data?.message || 'Undangan berhasil dihapus');
+        window.location.reload();
+      } else {
+        toast.error(result.error?.message || 'Gagal menghapus undangan');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan jaringan');
+    } finally {
+      isDeleting = null;
+    }
+  };
+
   const getStatus = (inv: typeof invitations[0]) => {
     if (inv.acceptedAt) return { label: 'Terdaftar', color: 'badge-success', icon: CheckCircle };
     if (new Date(inv.expiresAt) < new Date()) return { label: 'Kedaluwarsa', color: 'badge-error', icon: XCircle };
@@ -67,14 +93,14 @@
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
-              Daftar Undangan Tenant
+              Daftar Undangan {targetRoleName}
             </h3>
             <span class="badge badge-primary badge-outline font-bold text-xs">
               {invitations.length} Undangan
             </span>
           </div>
           <p class="text-body-sm text-secondary mt-0.5 font-sans">
-            Kelola link registrasi untuk calon tenant binaan Anda.
+            Kelola link registrasi untuk calon {targetRoleName.toLowerCase()} binaan Anda.
           </p>
         </div>
       </div>
@@ -115,7 +141,7 @@
         <div class="max-w-md mx-auto">
           <h4 class="text-heading-sm font-bold text-main font-heading">Belum Ada Undangan</h4>
           <p class="text-body-xs text-secondary mt-1">
-            Anda belum pernah membuat undangan registrasi. Klik "Buat Undangan" untuk mengirim link pendaftaran ke calon tenant.
+            Anda belum pernah membuat undangan registrasi. Klik "Buat Undangan" untuk mengirim link pendaftaran ke calon {targetRoleName.toLowerCase()}.
           </p>
         </div>
       </div>
@@ -169,22 +195,35 @@
 
                 <!-- Actions -->
                 <td class="py-4 px-5 sm:px-6 text-right">
-                  {#if !inv.acceptedAt}
+                  <div class="flex items-center justify-end gap-2">
+                    {#if !inv.acceptedAt}
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="rounded-xl font-bold gap-1 text-primary hover:bg-primary/10"
+                        title="Perpanjang Masa Aktif Undangan"
+                        on:click={() => handleExtend(inv.id)}
+                        disabled={isExtending === inv.id || isDeleting === inv.id}
+                        loading={isExtending === inv.id}
+                      >
+                        <RefreshCcw size={12} />
+                        <span class="hidden lg:inline">Perpanjang Link</span>
+                      </Button>
+                    {:else}
+                      <span class="text-3xs text-secondary italic">Sudah terdaftar</span>
+                    {/if}
                     <Button
                       variant="ghost"
                       size="xs"
-                      className="rounded-xl font-bold gap-1 text-primary hover:bg-primary/10"
-                      title="Perpanjang Masa Aktif Undangan"
-                      on:click={() => handleExtend(inv.id)}
-                      disabled={isExtending === inv.id}
-                      loading={isExtending === inv.id}
+                      className="rounded-xl font-bold gap-1 text-error hover:bg-error/10"
+                      title="Hapus Undangan"
+                      on:click={() => handleDelete(inv.id)}
+                      disabled={isExtending === inv.id || isDeleting === inv.id}
+                      loading={isDeleting === inv.id}
                     >
-                      <RefreshCcw size={12} />
-                      <span class="hidden lg:inline">Perpanjang Link</span>
+                      <XCircle size={12} />
                     </Button>
-                  {:else}
-                    <span class="text-3xs text-secondary italic">Sudah terdaftar</span>
-                  {/if}
+                  </div>
                 </td>
               </tr>
             {/each}
@@ -195,7 +234,7 @@
   </Card>
 </div>
 
-<AdminInviteModal 
+<AdminUserAddModal 
   isOpen={isAddModalOpen} 
   currentUser={currentUser}
   on:close={() => isAddModalOpen = false} 

@@ -21,6 +21,7 @@ import {
   applyNodeStyleToken,
   applySectionSpacing,
   applyNodeSpacing,
+  applyUpdateSectionLayoutPreset,
 } from './documentStore.actions';
 
 export * from './documentStore.actions';
@@ -55,17 +56,11 @@ export function createDocumentStore() {
     },
 
     updateSectionLayoutPreset(sectionId: string, preset: string) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) =>
-          s.id === sectionId ? { ...s, layoutPreset: preset } : s
-        );
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+      update((state) => applyUpdateSectionLayoutPreset(state, sectionId, preset, pushHistory));
     },
 
-    reorderSectionSlot(sectionId: string, fromIndex: number, toIndex: number) {
-      update((state) => applyReorderSectionSlot(state, sectionId, fromIndex, toIndex, pushHistory));
+    reorderSectionSlot(sectionId: string, fromIndex: number, toIndex: number, groupKey: string = 'elementOrder') {
+      update((state) => applyReorderSectionSlot(state, sectionId, fromIndex, toIndex, pushHistory, groupKey));
     },
 
     updateSectionProps(sectionId: string, props: Record<string, unknown>) {

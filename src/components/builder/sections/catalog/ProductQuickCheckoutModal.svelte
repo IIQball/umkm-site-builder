@@ -117,9 +117,9 @@
   <div class="flex flex-col lg:flex-row gap-6 lg:gap-10 {mode === 'add_to_cart' ? 'justify-center max-w-2xl mx-auto' : ''}">
     <!-- LEFT: PRODUCT DETAILS & VARIANTS -->
     <div class="flex-1 {mode === 'buy_now' ? 'lg:sticky lg:top-8 self-start' : ''}">
-      <Card variant="elevated" padding="none" radius="2xl" class="flex flex-col overflow-hidden bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+      <Card variant="elevated" padding="none" radius="2xl" class="flex flex-col overflow-hidden shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
         <!-- Image Container -->
-        <div class="relative aspect-square sm:aspect-video lg:aspect-square overflow-hidden bg-slate-50 w-full flex-shrink-0">
+        <div class="relative aspect-square sm:aspect-video lg:aspect-square overflow-hidden bg-base-200/50 w-full flex-shrink-0">
           {#if firstProductImageUrl(product.imageUrls)}
             <img 
               src={firstProductImageUrl(product.imageUrls)} 
@@ -133,14 +133,14 @@
               class="w-full h-full object-cover"
             />
           {:else}
-            <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+            <div class="w-full h-full flex items-center justify-center bg-base-200 text-base-content/40">
               <span class="text-sm">Tidak ada gambar</span>
             </div>
           {/if}
           
           {#if product.category?.name}
             <div class="absolute top-4 left-4 z-10">
-              <Badge size="sm" dot={false} uppercase={true} class="bg-white/90 backdrop-blur-sm shadow-sm text-slate-700">
+              <Badge size="sm" dot={false} uppercase={true} class="bg-base-100/90 backdrop-blur-sm shadow-sm text-base-content">
                 {product.category.name}
               </Badge>
             </div>
@@ -148,13 +148,13 @@
         </div>
 
         <div class="p-6 sm:p-8">
-          <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-2">{product.name}</h3>
+          <h3 class="text-xl sm:text-2xl font-black text-base-content mb-2">{product.name}</h3>
           <p class="text-2xl font-black font-mono text-[var(--theme-primary, var(--color-primary))] tracking-tight mb-6">{formatIDR(unitPrice)}</p>
           
           {#if product.description}
             <div class="mb-8">
-              <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Deskripsi Produk</h4>
-              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">{product.description}</p>
+              <h4 class="text-sm font-bold text-base-content mb-2">Deskripsi Produk</h4>
+              <p class="text-sm text-base-content/70 leading-relaxed whitespace-pre-wrap">{product.description}</p>
             </div>
           {/if}
 
@@ -164,7 +164,7 @@
               {#each normalizedVariants as variantGroup}
                 {#if Array.isArray(variantGroup.options) && variantGroup.options.length > 0}
                   <div>
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-3 uppercase tracking-wider">{variantGroup.groupName}</h4>
+                    <h4 class="text-xs font-bold text-base-content mb-3 uppercase tracking-wider">{variantGroup.groupName}</h4>
                     <div class="flex flex-wrap gap-2">
                       {#each variantGroup.options as option}
                         {@const groupKey = String(variantGroup.groupName)}
@@ -189,24 +189,25 @@
           {/if}
           
           <!-- QUANTITY -->
-          <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-6">
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Jumlah</span>
-            <div class="flex items-center bg-slate-50 dark:bg-slate-700 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600">
-              <Button variant="ghost" size="icon" class="rounded-none h-9 w-10 text-slate-600 dark:text-slate-300" on:click={() => handleQtyChange(-1)}>
+          <div class="flex items-center justify-between border-t border-base-200 pt-6">
+            <span class="text-sm font-bold text-base-content">Jumlah</span>
+            <div class="flex items-center bg-base-200 rounded-xl overflow-hidden border border-base-300">
+              <Button variant="ghost" size="icon" class="rounded-none h-9 w-10 text-base-content/70" on:click={() => handleQtyChange(-1)}>
                 <Minus size={16} />
               </Button>
-              <span class="text-sm font-bold w-12 text-center py-1">{qty}</span>
-              <Button variant="ghost" size="icon" class="rounded-none h-9 w-10 text-slate-600 dark:text-slate-300" on:click={() => handleQtyChange(1)}>
+              <span class="text-sm font-bold w-12 text-center py-1 text-base-content">{qty}</span>
+              <Button variant="ghost" size="icon" class="rounded-none h-9 w-10 text-base-content/70" on:click={() => handleQtyChange(1)}>
                 <Plus size={16} />
               </Button>
             </div>
           </div>
           
           {#if mode === 'add_to_cart'}
-            <div class="mt-8 border-t border-slate-100 dark:border-slate-700 pt-6">
+            <div class="mt-8 border-t border-base-200 pt-6">
               <Button
                 size="lg"
-                class="w-full font-bold shadow-md text-white bg-slate-900 hover:bg-slate-800"
+                variant="primary"
+                class="w-full font-bold shadow-md"
                 on:click={() => onAddToCart && onAddToCart({ product, qty, selections: selectedVariants, variantId: 'custom', price: unitPrice })}
               >
                 Masukkan Keranjang - {formatIDR(totalPrice)}
@@ -220,8 +221,8 @@
     <!-- RIGHT: FORM PEMESANAN -->
     {#if mode === 'buy_now'}
     <div class="w-full lg:w-[480px] lg:sticky lg:top-8 self-start">
-      <Card variant="elevated" padding="lg" radius="2xl" class="bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
-        <h3 class="text-base font-bold mb-6 text-slate-800 dark:text-slate-100">
+      <Card variant="elevated" padding="lg" radius="2xl" class="shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+        <h3 class="text-base font-bold mb-6 text-base-content">
           Informasi Pengiriman
         </h3>
 
@@ -250,9 +251,9 @@
             />
           </div>
 
-          <div class="border-t border-slate-100 dark:border-slate-700 pt-5 mb-5 flex justify-between items-center">
-            <span class="text-sm text-slate-500">Total Pembayaran</span>
-            <span class="text-xl font-black font-mono tracking-tight text-slate-900 dark:text-white">{formatIDR(totalPrice)}</span>
+          <div class="border-t border-base-200 pt-5 mb-5 flex justify-between items-center">
+            <span class="text-sm text-base-content/60">Total Pembayaran</span>
+            <span class="text-xl font-black font-mono tracking-tight text-base-content">{formatIDR(totalPrice)}</span>
           </div>
 
           <Button

@@ -5,6 +5,7 @@
   import DirectoryStoreCard from '@/components/directory/DirectoryStoreCard.svelte';
   import DirectoryMapView from '@/components/directory/DirectoryMapView.svelte';
   import DirectoryHeaderControls from '@/components/directory/DirectoryHeaderControls.svelte';
+  import DirectoryStoreSkeleton from '@/components/directory/DirectoryStoreSkeleton.svelte';
   import type { DirectoryStore, BusinessCategory, DirectoryMeta } from '@/components/directory/directory.types';
 
   let stores: DirectoryStore[] = [];
@@ -205,16 +206,7 @@
 
       {#if loading}
         {#each Array.from({ length: stores.length === 0 ? 6 : 3 }) as _}
-          <div class="p-6 rounded-3xl bg-card border border-border flex flex-col gap-3.5 shadow-xs">
-            <div class="w-12 h-12 rounded-2xl bg-nested animate-pulse"></div>
-            <div class="space-y-2 mt-2">
-              <div class="h-4 w-3/4 rounded-md bg-nested animate-pulse"></div>
-              <div class="h-3 w-1/2 rounded-md bg-nested/60 animate-pulse"></div>
-            </div>
-            <div class="mt-auto pt-4 border-t border-border">
-              <div class="h-5 w-24 rounded-full bg-nested animate-pulse"></div>
-            </div>
-          </div>
+          <DirectoryStoreSkeleton />
         {/each}
       {/if}
     </div>

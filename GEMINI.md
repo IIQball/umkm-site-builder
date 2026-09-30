@@ -160,8 +160,6 @@ umkm-site-builder/
 │   │   │   │   ├── CatalogCardPanel.svelte     # [107 baris] Panel pengubah style kartu produk
 │   │   │   │   ├── CatalogCtaPanel.svelte      # [169 baris] Panel styling tombol CTA katalog
 │   │   │   │   ├── CatalogGridPanel.svelte     # [101 baris] Panel layout grid katalog produk
-│   │   │   │   ├── catalogStyles.helpers.ts    # [42 baris] Fungsi helper styling css katalog
-│   │   │   │   ├── CatalogStylesTab.svelte     # [22 baris] Tab pengeditan gaya katalog produk
 │   │   │   │   ├── GeneralStylesTab.svelte     # [36 baris] Tab layout jarak & padding section
 │   │   │   │   ├── GlobalThemeInspector.svelte # [147 baris] Panel warna dasar tema template builder
 │   │   │   │   ├── HeaderStylesTab.svelte      # [23 baris] Tab konfigurasi gaya navigasi header
@@ -187,7 +185,6 @@ umkm-site-builder/
 │   │   │   ├── SectionPresetSelector.svelte # [87 baris] Panel ringkasan & trigger modal galeri layout
 │   │   │   ├── SectionSlotReorder.svelte   # [73 baris] Panel drag-and-drop slots section
 │   │   │   ├── SectionSpacingControls.svelte # [150 baris] Kontrol padding & margin interaktif
-│   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
 │   │   │   ├── layer/ # Komponen pohon layer section & sub-node
 │   │   │   │   ├── AddNodeDropdown.svelte      # [45 baris] Tombol nambah block section baru
 │   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 291 baris] Helper manipulasi susunan layer adaptif
@@ -201,7 +198,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── CatalogAccordion.svelte # [73 baris] Layout katalog akordeon minimalis
 │   │   │   │   │   ├── CatalogBentoSpotlight.svelte # [178 baris] Layout bento spotlight katalog
 │   │   │   │   │   ├── CatalogBundleTiers.svelte # [129 baris] Layout paket bundling produk bertingkat
-│   │   │   │   │   ├── CatalogCarouselMasonry.svelte # [88 baris] Layout masonry & lookbook katalog
 │   │   │   │   │   ├── CatalogCarouselScroll.svelte # [140 baris] Layout slider carousel produk horizontal
 │   │   │   │   │   ├── CatalogCheckoutModal.svelte # [246 baris] Modal checkout cepat katalog
 │   │   │   │   │   ├── CatalogFlashSale.svelte # [147 baris] Layout promo flash sale countdown
@@ -215,14 +211,12 @@ umkm-site-builder/
 │   │   │   │   │   ├── CatalogSingleFocus.svelte # [143 baris] Layout fokus tunggal produk unggulan
 │   │   │   │   │   ├── CatalogSpecialCards.svelte # [168 baris] Layout kartu spesial katalog
 │   │   │   │   │   ├── ProductCatalogCard.svelte # [213 baris] Komponen visual kartu katalog produk
-│   │   │   │   │   ├── ProductCatalogQuickView.svelte # [156 baris] Detail popup cepat ulasan produk
 │   │   │   │   │   └── ProductQuickCheckoutModal.svelte # [⚠️ >300 baris - 313 baris] Modal checkout instan WhatsApp langsung dari katalog
 │   │   │   │   ├── faq/ # Preset layout FAQ tanya jawab (10 preset)
 │   │   │   │   │   ├── faq.css                 # [62 baris] Container queries `@container faqcard`
 │   │   │   │   │   ├── faq.helpers.ts          # [79 baris] Helper WhatsApp deep-link & default FAQs
 │   │   │   │   │   ├── FaqAccordionSingle.svelte # [68 baris] Preset FAQ akordeon 1 kolom terpusat
 │   │   │   │   │   ├── FaqAccordionTwoCol.svelte # [128 baris] Preset FAQ akordeon 2 kolom simetris
-│   │   │   │   │   ├── FaqBoxedCardsGrid.svelte # [35 baris] Preset FAQ kotak kartu grid
 │   │   │   │   │   ├── FaqCategorizedTabs.svelte # [114 baris] Preset FAQ dengan tab kategori
 │   │   │   │   │   ├── FaqChatStyle.svelte     # [58 baris] Preset FAQ gaya balon obrolan
 │   │   │   │   │   ├── FaqGridCards.svelte     # [56 baris] Preset FAQ grid 2 kolom kartu terbuka
@@ -261,7 +255,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── FooterNewsletter.svelte # [59 baris] Preset footer langganan newsletter
 │   │   │   │   │   ├── FooterNewsletterCentric.svelte # [91 baris] Preset footer form newsletter promo
 │   │   │   │   │   ├── FooterSocialLinksGrid.svelte # [192 baris] Preset footer showcase tautan akun media sosial
-│   │   │   │   │   ├── FooterSocialShowcase.svelte # [40 baris] Preset footer showcase media sosial
 │   │   │   │   │   ├── FooterSplitMap.svelte   # [85 baris] Preset footer info toko & peta mini
 │   │   │   │   │   └── index.ts                # [12 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   ├── header/ # Preset layout header & announcement (12 preset)
@@ -285,7 +278,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── HeroDualContrast.svelte # [52 baris] Preset hero duo-tone kontras kuota & pendaftaran
 │   │   │   │   │   ├── HeroDualProduct.svelte  # [79 baris] Preset hero showcase 2 kartu produk terlaris
 │   │   │   │   │   ├── HeroEditorialSerif.svelte # [77 baris] Preset hero editorial mewah tipografi serif
-│   │   │   │   │   ├── HeroElementToolbar.svelte # [102 baris] Floating toolbar elemen teks/gambar hero
 │   │   │   │   │   ├── HeroEmailCapture.svelte # [59 baris] Preset hero penangkap email prospek
 │   │   │   │   │   ├── HeroFloatingCards.svelte # [53 baris] Preset hero kartu mengambang 3D
 │   │   │   │   │   ├── HeroFounderStory.svelte # [63 baris] Preset hero kisah profil pendiri & artisan
@@ -305,7 +297,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── maps.helpers.ts         # [69 baris] Helper sanitasi URL embed & navigasi Google Maps
 │   │   │   │   │   ├── MapsCardOverlay.svelte  # [93 baris] Preset maps bilah penutup bawah melayang
 │   │   │   │   │   ├── MapsCompactBoxed.svelte # [93 baris] Preset maps kotak kompak terpusat
-│   │   │   │   │   ├── MapsDirectionsGuide.svelte # [65 baris] Preset maps panduan rute & navigasi
 │   │   │   │   │   ├── MapsFloatingCard.svelte # [102 baris] Preset maps kartu alamat pojok kanan atas
 │   │   │   │   │   ├── MapsFullwidth.svelte    # [100 baris] Preset maps peta penuh kartu glassmorphism melayang
 │   │   │   │   │   ├── MapsHeader.svelte       # [64 baris] Header judul H2 maps & sub-node selection
@@ -328,7 +319,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── TestimonialsSocialCards.svelte # [91 baris] Preset testimoni kartu postingan media sosial
 │   │   │   │   │   ├── TestimonialsSplitStats.svelte # [113 baris] Preset testimoni split rating stats 4.9/5
 │   │   │   │   │   ├── TestimonialsSpotlight.svelte # [83 baris] Preset testimoni kutipan tunggal spotlight
-│   │   │   │   │   ├── TestimonialsSpotlightCarousel.svelte # [93 baris] Preset testimoni spotlight & slider
 │   │   │   │   │   └── TestimonialsVideoCards.svelte # [78 baris] Preset testimoni kartu video ulasan vertikal
 │   │   │   │   ├── FAQ.svelte                  # [85 baris] Komponen visual Frequently Asked Questions
 │   │   │   │   ├── Features.svelte             # [178 baris] Komponen visual daftar keunggulan/layanan
@@ -374,8 +364,7 @@ umkm-site-builder/
 │   │   ├── common/ # Komponen navigasi & shell layout umum
 │   │   │   ├── GlobalZoomControl.svelte        # [89 baris] Kontrol interaktif floating pill zoom-in & zoom-out (25%-200%)
 │   │   │   ├── Navbar.astro                    # [23 baris] Navigasi utama header base layout
-│   │   │   ├── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
-│   │   │   └── ThemeToggle.astro               # [37 baris] Tombol pengubah dark mode / light mode
+│   │   │   └── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
 │   │   ├── dashboard/ # Komponen dashboard manajemen tenant
 │   │   │   ├── category/ # Pengelola master kategori template
 │   │   │   │   ├── TenantCategoryDeleteModal.svelte # [41 baris] Modal konfirmasi hapus kategori tenant
@@ -387,8 +376,7 @@ umkm-site-builder/
 │   │   │   ├── sidebar/ # Komponen navigasi samping dashboard tenant
 │   │   │   │   ├── sidebar.helpers.ts          # [170 baris] Helper navigasi sidebar dashboard
 │   │   │   │   ├── SidebarDesktop.svelte       # [195 baris] Sidebar dashboard versi layar desktop
-│   │   │   │   ├── SidebarMobile.svelte        # [178 baris] Drawer sidebar dashboard versi mobile
-│   │   │   │   └── SidebarUserProfile.svelte   # [89 baris] Mini profil & badge status tenant
+│   │   │   │   └── SidebarMobile.svelte        # [178 baris] Drawer sidebar dashboard versi mobile
 │   │   │   ├── CategoryManager.svelte          # [⚠️ mepet 300 baris - 258 baris] Pengelola CRUD kategori produk tenant
 │   │   │   ├── ConfirmTemplateModal.svelte     # [82 baris] Modal konfirmasi penerapan template toko
 │   │   │   ├── DashboardNavbar.svelte          # [176 baris] Navigasi panel dashboard tenant & profil aksi
@@ -433,15 +421,13 @@ umkm-site-builder/
 │   │   │   │   └── MarketplaceFilterBar.svelte # [124 baris] Toolbar filter kategori & harga
 │   │   │   ├── marketplace.types.ts            # [23 baris] Tipe data catalog template marketplace
 │   │   │   ├── PublicTemplateMarketplace.svelte # [199 baris] Pasar katalog template interaktif
-│   │   │   ├── StoreDirectory.svelte           # [⚠️ mepet 300 baris - 250 baris] Direktori daftar pencarian toko UMKM publik
-│   │   │   └── TemplateCardAction.svelte       # [100 baris] Kartu katalog template dengan tombol beli & demo
+│   │   │   └── StoreDirectory.svelte           # [⚠️ mepet 300 baris - 250 baris] Direktori daftar pencarian toko UMKM publik
 │   │   ├── shared/ # Komponen bersama lintas peran pengguna
 │   │   │   └── ImageUpload.svelte              # [⚠️ >300 baris - 312 baris] Pengunggah gambar terintegrasi Cloudinary API
 │   │   ├── storefront/ # Komponen rendering toko storefront tenant
 │   │   │   ├── DynamicSection.svelte           # [41 baris] Komponen rendering section dinamis storefront
 │   │   │   ├── Footer.svelte                   # [10 baris] Footer publik website toko tenant
 │   │   │   ├── Hero.svelte                     # [18 baris] Banner hero publik website toko tenant
-│   │   │   ├── ProductGrid.svelte              # [⚠️ mepet 300 baris - 295 baris] Grid daftar produk di storefront
 │   │   │   ├── PromoBanner.svelte              # [11 baris] Banner promosi publik website toko tenant
 │   │   │   └── StoreStatusBanner.svelte        # [30 baris] Banner status operasional toko storefront tenant
 │   │   ├── tenant/ # Komponen manajemen operasional tenant

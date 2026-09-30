@@ -1,12 +1,8 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { TestimonialItem } from '@/types';
-  import { Upload, X, Loader2, Star } from 'lucide-svelte';
-  import {
-    compressToWebP,
-    uploadToCloudinary,
-    deleteOldImage,
-  } from '../imageUpload.helpers';
+  import { Star } from 'lucide-svelte';
+  import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
   import {
     isTestimonialsImageSupported,
     DEFAULT_TESTIMONIALS,
@@ -43,53 +39,11 @@
   $: currentTesti = testimonials[itemIndex] || testimonials[0];
   $: currentLogo = logos[itemIndex] || logos[0];
 
-  let isUploading = false;
-  let errorMessage = '';
-  let fileInput: HTMLInputElement;
-
   function updateTestiField(field: keyof TestimonialItem, value: any) {
     const updated = [...testimonials];
     if (updated[itemIndex]) {
       updated[itemIndex] = { ...updated[itemIndex], [field]: value };
       onPropChange('testimonials', updated);
-    }
-  }
-
-  async function handleAvatarUpload(e: Event) {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    errorMessage = '';
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!allowed.includes(file.type)) {
-      errorMessage = 'Format file wajib JPG, JPEG, atau PNG';
-      return;
-    }
-
-    try {
-      isUploading = true;
-      const webpBlob = await compressToWebP(file, 400, 400);
-      const url = await uploadToCloudinary(webpBlob, 'testimonials', `${Date.now()}_testi_${itemIndex}.webp`);
-
-      const oldUrl = currentTesti?.avatar;
-      if (oldUrl && oldUrl !== url) {
-        await deleteOldImage(oldUrl);
-      }
-      updateTestiField('avatar', url);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Upload gambar gagal';
-    } finally {
-      isUploading = false;
-      if (fileInput) fileInput.value = '';
-    }
-  }
-
-  async function handleRemoveAvatar() {
-    const oldUrl = currentTesti?.avatar;
-    updateTestiField('avatar', '');
-    if (oldUrl) {
-      await deleteOldImage(oldUrl);
     }
   }
 </script>
@@ -103,7 +57,7 @@
         type="text"
         value={title}
         on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
         placeholder="Kata Mereka yang Sudah Mencoba"
       />
     </div>
@@ -114,7 +68,7 @@
         rows="2"
         value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Ulasan kepuasan pelanggan..."
       ></textarea>
     </div>
@@ -125,7 +79,7 @@
         type="text"
         value={badgeText}
         on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Ulasan Pembeli"
       />
     </div>
@@ -133,71 +87,16 @@
 {:else if nodeId.startsWith('testi_avatar_')}
   {#if hasImageSupport}
     <div class="space-y-4 text-left">
-      <div class="space-y-1.5">
-        <label class="font-semibold text-xs text-base-content" for="testi-avatar-upload">
-          Foto Avatar: {currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}
-        </label>
-        {#if currentTesti?.avatar}
-          <div class="relative group rounded-xl overflow-hidden border border-base-300 dark:border-slate-800 bg-base-200/50 p-2 flex items-center gap-3">
-            <img
-              src={currentTesti.avatar}
-              alt="Avatar Preview"
-              class="w-12 h-12 object-cover rounded-full border border-base-300 dark:border-slate-700 bg-white"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold truncate text-base-content">{currentTesti.customerName || 'Avatar'}</p>
-              <p class="text-[10px] text-base-content/60">Cloudinary WebP</p>
-            </div>
-            <button
-              type="button"
-              on:click={handleRemoveAvatar}
-              class="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors cursor-pointer"
-              title="Hapus Foto"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        {:else}
-          <button
-            type="button"
-            on:click={() => fileInput?.click()}
-            disabled={isUploading}
-            class="w-full border-2 border-dashed border-base-300 dark:border-slate-800 hover:border-primary/50 rounded-xl p-5 text-center cursor-pointer transition-colors bg-base-200/30 flex flex-col items-center gap-1.5"
-          >
-            {#if isUploading}
-              <Loader2 size={18} class="animate-spin text-primary" />
-              <span class="text-xs text-primary font-medium">Mengunggah...</span>
-            {:else}
-              <Upload size={18} class="text-base-content/50" />
-              <span class="text-xs font-medium text-base-content">Pilih Foto Avatar (PNG/JPG)</span>
-              <span class="text-[10px] text-base-content/60">Kompresi otomatis WebP</span>
-            {/if}
-          </button>
-        {/if}
-        <input
-          id="testi-avatar-upload"
-          type="file"
-          accept="image/png, image/jpeg, image/jpg"
-          bind:this={fileInput}
-          on:change={handleAvatarUpload}
-          class="hidden"
-        />
-        {#if errorMessage}
-          <p class="text-[11px] text-error font-medium">{errorMessage}</p>
-        {/if}
-      </div>
-
-      <div class="space-y-1">
-        <label class="font-semibold text-xs text-base-content" for="testi-avatar-url">URL Foto Manual</label>
-        <input
-          id="testi-avatar-url"
-          type="text"
-          value={currentTesti?.avatar || ''}
-          on:input={(e) => updateTestiField('avatar', e.currentTarget.value)}
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
-          placeholder="https://images.unsplash.com/..."
-        />
-      </div>
+      <ImageUploadDropzone
+        imageUrl={currentTesti?.avatar || ''}
+        onImageChange={(url) => updateTestiField('avatar', url)}
+        label={`Foto Avatar: ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
+        placeholderTitle="Tarik & Lepas Foto Avatar ke Sini"
+        placeholderSubtitle="pilih berkas avatar manual"
+        maxWidth={400}
+        maxHeight={400}
+        folder="testimonials"
+      />
     </div>
   {:else}
     <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl text-left">
@@ -213,7 +112,7 @@
         type="text"
         value={currentTesti?.customerName || ''}
         on:input={(e) => updateTestiField('customerName', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -223,7 +122,7 @@
         type="text"
         value={currentTesti?.role || ''}
         on:input={(e) => updateTestiField('role', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Pembeli Terverifikasi • Banyuwangi"
       />
     </div>
@@ -237,7 +136,7 @@
           max="5"
           value={currentTesti?.rating || 5}
           on:input={(e) => updateTestiField('rating', parseInt(e.currentTarget.value, 10) || 5)}
-          class="w-20 px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="w-20 px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         />
         <div class="flex items-center gap-0.5 text-amber-400">
           {#each Array(currentTesti?.rating || 5) as _}
@@ -253,7 +152,7 @@
         rows="3"
         value={currentTesti?.comment || ''}
         on:input={(e) => updateTestiField('comment', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       ></textarea>
     </div>
   </div>
@@ -265,7 +164,7 @@
       rows="4"
       value={currentTesti?.comment || ''}
       on:input={(e) => updateTestiField('comment', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
     ></textarea>
   </div>
 {:else if nodeId === 'testi_spotlight_author'}
@@ -277,7 +176,7 @@
         type="text"
         value={currentTesti?.customerName || ''}
         on:input={(e) => updateTestiField('customerName', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -287,7 +186,7 @@
         type="text"
         value={currentTesti?.role || ''}
         on:input={(e) => updateTestiField('role', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       />
     </div>
   </div>

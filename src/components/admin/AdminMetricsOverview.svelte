@@ -4,6 +4,7 @@
   import { formatIDR, formatDate } from '@/lib/utils/format';
   import { toast } from '@/lib/toast';
 
+  export let isSuperAdmin = false;
   let loading = true;
   let metrics = {
     totalTransactions: 0,
@@ -122,9 +123,11 @@
           </div>
           <h3 class="font-bold text-main mb-2">Grafik Mutasi Transaksi</h3>
           <p class="text-sm text-secondary max-w-sm mb-6">Area ini dipersiapkan untuk integrasi grafik analitik mutasi dan pendapatan platform di masa depan.</p>
-          <Button variant="primary" href="/admin/transactions">
-            Lihat Detail Mutasi
-          </Button>
+          {#if !isSuperAdmin}
+            <Button variant="primary" href="/admin/transactions">
+              Lihat Detail Mutasi
+            </Button>
+          {/if}
         </div>
       </div>
 

@@ -1,72 +1,154 @@
 <script lang="ts">
-  import { Layers, ArrowUp, ArrowDown } from 'lucide-svelte';
+  import { Layers, Trash2, Plus } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import { editorStore } from '../stores/editorStore';
+  import {
+    DEFAULT_SLOTS_BY_SECTION,
+    SLOT_LABELS,
+    getDefaultHeroSlots,
+    getHeroSlotLabel,
+    getEffectiveHeroElementOrder,
+    getDefaultFeaturesSlots,
+    getFeaturesSlotLabel,
+    getEffectiveFeaturesElementOrder,
+    getDefaultCatalogSlots,
+    getCatalogSlotLabel,
+    getEffectiveCatalogElementOrder,
+    getAddedSlotDefaultProps,
+  } from './sectionSlot.helpers';
+  import type { ProductItem } from '@/types';
+  import HeaderSlotControls from './HeaderSlotControls.svelte';
 
   export let section: TemplateSection;
 
-  const defaultSlotsBySection: Record<string, string[]> = {
-    hero: ['badge', 'title', 'subtitle', 'image', 'cta'],
-    header_announcement: ['announcement_bar', 'logo', 'nav_links', 'cta'],
-    faq: ['title', 'subtitle', 'faq_list'],
-    features: ['title', 'subtitle', 'features_grid'],
+  $: isHeader = section.type === 'header_announcement';
+  $: preset =
+    section.layoutPreset ||
+    (section.props?.layoutPreset as string) ||
+    (section.styles?.layoutPreset as string) ||
+    (section.type === 'hero' ? 'split_left_text' : section.type === 'features' ? 'grid_3_cards' : section.type === 'product_catalog' ? 'grid_standard' : 'default_split');
+
+  $: products = (Array.isArray(section.props?.products)
+    ? (section.props.products as ProductItem[])
+    : undefined);
+
+  $: defaultStandardSlots =
+    section.type === 'hero'
+      ? getDefaultHeroSlots(preset)
+      : section.type === 'features'
+        ? getDefaultFeaturesSlots(preset)
+        : section.type === 'product_catalog'
+          ? getDefaultCatalogSlots(preset, products)
+          : DEFAULT_SLOTS_BY_SECTION[section.type] || [];
+
+  $: standardElementOrder =
+    section.type === 'hero'
+      ? getEffectiveHeroElementOrder(
+          preset,
+          section.props?.elementOrder,
+          section.props?.heroPreset as string
+        )
+      : section.type === 'features'
+        ? getEffectiveFeaturesElementOrder(
+            preset,
+            section.props?.elementOrder,
+            section.props?.featuresPreset as string
+          )
+        : section.type === 'product_catalog'
+          ? getEffectiveCatalogElementOrder(
+              preset,
+              section.props?.elementOrder,
+              products,
+              section.props?.catalogPreset as string
+            )
+          : (Array.isArray(section.props?.elementOrder) && section.props.elementOrder.length > 0
+              ? (section.props.elementOrder as string[])
+              : defaultStandardSlots
+            ).filter((s) => defaultStandardSlots.includes(s));
+
+  $: missingStandardSlots = defaultStandardSlots.filter((s) => !standardElementOrder.includes(s));
+
+  const getSlotLabel = (slot: string): string => {
+    if (section.type === 'hero') return getHeroSlotLabel(slot, preset);
+    if (section.type === 'features') return getFeaturesSlotLabel(slot, preset);
+    if (section.type === 'product_catalog') return getCatalogSlotLabel(slot, preset, products);
+    return SLOT_LABELS[slot] || slot;
   };
 
-  const slotLabels: Record<string, string> = {
-    badge: 'Promo Badge',
-    title: 'Judul Heading',
-    subtitle: 'Deskripsi Subtitle',
-    image: 'Gambar / Visual Media',
-    cta: 'Tombol CTA',
-    announcement_bar: 'Announcement Bar',
-    logo: 'Logo & Brand',
-    nav_links: 'Menu Navigasi',
-    faq_list: 'Daftar Pertanyaan FAQ',
-    features_grid: 'Daftar Keunggulan',
+  const handleDeleteSlot = (slot: string) => {
+    const newOrder = standardElementOrder.filter((s) => s !== slot);
+    editorStore.updateSectionProps(section.id, {
+      elementOrder: newOrder,
+      ...(section.type === 'hero' ? { heroPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'features' ? { featuresPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'product_catalog' ? { catalogPreset: preset, layoutPreset: preset } : {}),
+    });
+    editorStore.deleteNode(section.id, slot);
   };
 
-  $: elementOrder = (section.props?.elementOrder as string[]) || defaultSlotsBySection[section.type] || [];
-
-  const handleMoveSlot = (fromIdx: number, direction: -1 | 1) => {
-    const toIdx = fromIdx + direction;
-    if (toIdx < 0 || toIdx >= elementOrder.length) return;
-    editorStore.reorderSectionSlot(section.id, fromIdx, toIdx);
+  const handleAddSlot = (slot: string) => {
+    if (standardElementOrder.includes(slot)) return;
+    const newOrder = [...standardElementOrder, slot];
+    const defaultProps = getAddedSlotDefaultProps(slot, section.type);
+    editorStore.updateSectionProps(section.id, {
+      elementOrder: newOrder,
+      ...(section.type === 'hero' ? { heroPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'features' ? { featuresPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'product_catalog' ? { catalogPreset: preset, layoutPreset: preset } : {}),
+      ...defaultProps,
+    });
   };
 </script>
 
-{#if elementOrder.length > 1}
+{#if isHeader}
+  <HeaderSlotControls {section} {preset} />
+{:else if standardElementOrder.length > 0}
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Layers size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
-      <span>Urutan Slot Elemen</span>
+    <div class="flex items-center justify-between border-b border-base-200 pb-1.5">
+      <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70">
+        <Layers size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
+        <span>Elemen Section</span>
+      </div>
+      <span class="badge badge-ghost badge-xs font-mono font-semibold">
+        {standardElementOrder.length} Elemen
+      </span>
     </div>
 
     <div class="space-y-1.5">
-      {#each elementOrder as slot, index}
-        <div class="flex items-center justify-between p-2 rounded-lg bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 text-xs">
-          <span class="font-medium text-base-content">{slotLabels[slot] || slot}</span>
-          <div class="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={index === 0}
-              on:click={() => handleMoveSlot(index, -1)}
-              class="p-1 rounded bg-base-100 hover:bg-base-300 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-              title="Pindah ke Atas"
-            >
-              <ArrowUp size={12} />
-            </button>
-            <button
-              type="button"
-              disabled={index === elementOrder.length - 1}
-              on:click={() => handleMoveSlot(index, 1)}
-              class="p-1 rounded bg-base-100 hover:bg-base-300 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-              title="Pindah ke Bawah"
-            >
-              <ArrowDown size={12} />
-            </button>
-          </div>
+      {#each standardElementOrder as slot (slot)}
+        <div class="flex items-center justify-between p-2 rounded-lg bg-base-200/50 border border-base-300 text-xs">
+          <span class="font-medium text-base-content">{getSlotLabel(slot)}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            on:click={() => handleDeleteSlot(slot)}
+            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/40 hover:text-error hover:bg-error/10"
+            title="Hapus Elemen"
+            aria-label="Hapus Elemen"
+          >
+            <Trash2 size={12} />
+          </Button>
         </div>
       {/each}
+
+      {#if missingStandardSlots.length > 0}
+        <div class="flex flex-wrap gap-1 pt-1">
+          {#each missingStandardSlots as slot}
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              on:click={() => handleAddSlot(slot)}
+              class="!h-auto !min-h-0 !py-1 !px-2 border border-dashed border-primary/40 text-primary hover:bg-primary/10 gap-1 font-semibold"
+            >
+              <Plus size={10} />
+              <span>Tambah {getSlotLabel(slot)}</span>
+            </Button>
+          {/each}
+        </div>
+      {/if}
     </div>
   </div>
 {/if}

@@ -48,3 +48,16 @@
   `{#await}`, etc.), never inside raw HTML elements like `<div>` or `<span>`.
 - Wrong: `<div>{@const x = foo()}</div>`
 - Right: `{#each items as item}{@const label = item.name.toUpperCase()}<span>{label}</span>{/each}`
+
+## 6. Standarisasi Penggunaan Komponen Tombol (`Button.svelte`)
+
+- **Wajib Menggunakan `Button.svelte` (`@/components/ui`)**:
+  - Seluruh tombol aksi, navigasi, kontrol toolbar, panel inspector, dan modal di dashboard Admin, Designer, dan antarmuka Builder Shell WAJIB mengimpor dan menggunakan komponen `Button`:
+    ```svelte
+    import { Button } from '@/components/ui';
+    ```
+  - Gunakan prop yang telah disediakan: `variant` (`'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'dark' | 'orange' | 'tertiary'`), `size` (`'sm' | 'md' | 'lg' | 'xs' | 'icon'`), `loading`, `disabled`.
+- **Pengecualian Kritis: Canvas Template Sections**:
+  - Komponen varian seksi kanvas yang dirender di dalam storefront/preview kanvas (`src/components/builder/sections/*`) **DILARANG** menggunakan `Button.svelte` SaaS.
+  - Komponen tersebut harus menggunakan tag native `<button>` agar dapat mewarisi token tema CSS dinamis tenant (`var(--theme-btn-*)`) secara murni tanpa intervensi DaisyUI platform SaaS.
+

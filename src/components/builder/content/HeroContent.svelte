@@ -1,222 +1,255 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
+  import { Button } from '@/components/ui';
   import { makeHandlePropChange } from './content.helpers';
-  import { Upload, X, Loader2 } from 'lucide-svelte';
+  import HeroImageUploadContent from './hero/HeroImageUploadContent.svelte';
+  import HeroImageStyleSettings from './hero/HeroImageStyleSettings.svelte';
+  import HeroCtaLinkSelect from './hero/HeroCtaLinkSelect.svelte';
+  import SearchableIconDropdown from '../inspector/SearchableIconDropdown.svelte';
   import {
-    compressToWebP,
-    uploadToCloudinary,
-    deleteOldImage,
-  } from '../inspector/imageUpload.helpers';
+    stripEmoji,
+    HERO_BADGE_ICON_OPTIONS,
+  } from '../sections/hero/heroIcons';
+  import {
+    supportsHeroImage,
+    supportsHeroCta,
+    supportsHeroBadge,
+    isHeroNonBackgroundImage,
+  } from '../sections/hero/heroLayout.helpers';
+
+  import HeroTrustBadgesContent from './hero/HeroTrustBadgesContent.svelte';
+  import HeroTerminalContent from './hero/HeroTerminalContent.svelte';
+  import HeroFloatingCardsContent from './hero/HeroFloatingCardsContent.svelte';
+  import HeroSocialProofContent from './hero/HeroSocialProofContent.svelte';
+  import HeroDualProductContent from './hero/HeroDualProductContent.svelte';
+  import HeroBentoContent from './hero/HeroBentoContent.svelte';
+  import HeroChatContent from './hero/HeroChatContent.svelte';
+  import HeroCustomCardContent from './hero/HeroCustomCardContent.svelte';
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
 
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
+  $: preset =
+    (section.props?.layoutPreset as string) ||
+    (section.styles?.layoutPreset as string) ||
+    section.layoutPreset ||
+    'split_left_text';
+
+  $: supportsImage = supportsHeroImage(preset);
+  $: isNonBgImage = isHeroNonBackgroundImage(preset);
+  $: supportsCta = supportsHeroCta(preset);
+  $: supportsBadge = supportsHeroBadge(preset);
+
   $: subtitle = (section.props?.subtitle as string) ?? '';
   $: imageUrl = (section.props?.imageUrl as string) ?? '';
-  $: imageMode = (section.props?.imageMode as 'element' | 'background') ?? 'element';
-
-  let isUploading = false;
-  let uploadProgress = 0;
-  let errorMessage = '';
-  let fileInput: HTMLInputElement;
-
-  async function handleImageUpload(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    errorMessage = '';
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg'];
-    if (!allowed.includes(file.type)) {
-      errorMessage = 'Format file wajib JPG, JPEG, atau PNG';
-      input.value = '';
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      errorMessage = 'Ukuran maksimal file sebelum dikompresi adalah 5MB';
-      input.value = '';
-      return;
-    }
-
-    try {
-      isUploading = true;
-      uploadProgress = 30;
-      const webpBlob = await compressToWebP(file, 1920, 1080);
-      uploadProgress = 60;
-      const url = await uploadToCloudinary(webpBlob, 'templates', `${Date.now()}_hero.webp`);
-      uploadProgress = 100;
-
-      const oldUrl = imageUrl;
-      if (oldUrl && oldUrl !== url) {
-        await deleteOldImage(oldUrl);
-      }
-
-      handlePropChange('imageUrl', url);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Upload gagal';
-    } finally {
-      isUploading = false;
-      input.value = '';
-    }
-  }
-
-  async function handleRemoveImage() {
-    const oldUrl = imageUrl;
-    handlePropChange('imageUrl', '');
-    if (oldUrl) {
-      await deleteOldImage(oldUrl);
-    }
-  }
+  $: badgeIcon = (section.props?.badgeIcon as string) ?? '';
+  $: imageFrame = (section.props?.imageFrame as string) ?? 'none';
+  $: imageShape = (section.props?.imageShape as string) ?? 'rounded';
 </script>
 
 <div class="space-y-4">
+  <!-- Lencana Promo & Kategori - Hanya jika didukung layout -->
+  {#if supportsBadge}
+    <div class="space-y-2">
+      <div>
+        <label for="hero-badge" class="block font-semibold text-xs text-base-content/80 mb-1">
+          Lencana Promo & Kategori
+        </label>
+        <input
+          id="hero-badge"
+          type="text"
+          value={stripEmoji(section.props?.badgeText ?? '')}
+          on:input={(e) => handlePropChange('badgeText', stripEmoji(e.currentTarget.value))}
+          class="input input-bordered input-sm w-full"
+          placeholder="Promo Spesial UMKM"
+        />
+      </div>
+      <SearchableIconDropdown
+        label="Ikon Lencana Promo (Badge)"
+        selectedIcon={badgeIcon}
+        options={HERO_BADGE_ICON_OPTIONS}
+        onSelect={(val) => handlePropChange('badgeIcon', val)}
+      />
+    </div>
+  {/if}
+
+  <!-- Judul Utama (H1) -->
   <div>
-    <label for="hero-title" class="block font-semibold text-xs text-base-content/80 mb-1">Judul Utama (Title)</label>
+    <label for="hero-title" class="block font-semibold text-xs text-base-content/80 mb-1">
+      Judul Utama (H1)
+    </label>
     <input
       id="hero-title"
       type="text"
-      value={section.props?.title ?? ''}
-      on:input={(e) => handlePropChange('title', e.currentTarget.value)}
-      class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
+      value={stripEmoji(section.props?.title ?? '')}
+      on:input={(e) => handlePropChange('title', stripEmoji(e.currentTarget.value))}
+      class="input input-bordered input-sm w-full"
       placeholder="Selamat datang di toko kami"
     />
   </div>
 
+  <!-- Subjudul & Deskripsi -->
   <div>
-    <label for="hero-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">Subjudul (Subtitle)</label>
+    <label for="hero-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">
+      Subjudul & Deskripsi
+    </label>
     <textarea
       id="hero-subtitle"
-      value={subtitle}
-      on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
+      value={stripEmoji(subtitle)}
+      on:input={(e) => handlePropChange('subtitle', stripEmoji(e.currentTarget.value))}
       rows="2"
-      class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500 resize-y"
-      placeholder="Produk berkualitas dengan harga terjangkau"></textarea>
+      class="textarea textarea-bordered textarea-sm w-full resize-y"
+      placeholder="Produk berkualitas dengan harga terjangkau dan pelayanan terpercaya."
+    ></textarea>
   </div>
 
-  <!-- Panel Upload Gambar Banner / Background -->
-  <div class="pt-2 border-t border-base-300 dark:border-slate-800">
-    <div class="flex items-center justify-between mb-1.5">
-      <label for="hero-img-uploader" class="block font-semibold text-xs text-base-content/80">Gambar Banner / Background</label>
-      {#if imageUrl}
-        <span class="text-[10px] text-emerald-600 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Tersedia</span>
+  <!-- Panel Upload Gambar Spanduk / Background - Hanya jika didukung layout -->
+  {#if supportsImage}
+    <div class="space-y-3">
+      <HeroImageUploadContent
+        {imageUrl}
+        onPropChange={handlePropChange}
+      />
+      {#if isNonBgImage}
+        <HeroImageStyleSettings
+          {imageFrame}
+          {imageShape}
+          onPropChange={handlePropChange}
+        />
       {/if}
     </div>
+  {/if}
 
-    <!-- Tipe Tampilan Gambar -->
-    <div class="grid grid-cols-2 gap-2 mb-3">
-      <button
-        type="button"
-        on:click={() => handlePropChange('imageMode', 'element')}
-        class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all {imageMode === 'element' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-base-200/40 border-base-300 hover:bg-base-200'}"
-      >
-        Elemen Bebas
-      </button>
-      <button
-        type="button"
-        on:click={() => handlePropChange('imageMode', 'background')}
-        class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all {imageMode === 'background' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-base-200/40 border-base-300 hover:bg-base-200'}"
-      >
-        Full Background
-      </button>
-    </div>
-
-    {#if imageUrl}
-      <div class="relative group rounded-xl overflow-hidden aspect-video bg-base-200 border border-base-300 mb-2">
-        <img src={imageUrl} alt="Banner Hero" class="w-full h-full object-cover" />
-        <button
-          type="button"
-          on:click={handleRemoveImage}
-          class="btn btn-circle btn-error btn-xs absolute top-2 right-2 shadow-lg"
-          title="Hapus gambar secara permanen"
-        >
-          <X size={13} />
-        </button>
+  <!-- Tombol Aksi (CTA) - Hanya jika didukung layout -->
+  {#if supportsCta}
+    <div class="space-y-2.5 pt-1">
+      <div>
+        <label for="cta-text" class="block font-semibold text-xs text-base-content/80 mb-1">
+          Teks Tombol Aksi (CTA)
+        </label>
+        <input
+          id="cta-text"
+          type="text"
+          value={stripEmoji(section.props?.ctaText ?? '')}
+          on:input={(e) => handlePropChange('ctaText', stripEmoji(e.currentTarget.value))}
+          class="input input-bordered input-sm w-full"
+          placeholder="Lihat Katalog"
+        />
       </div>
-    {/if}
+      <div>
+        <HeroCtaLinkSelect
+          value={(section.props?.ctaLink as string) || '#produk'}
+          onChange={(val) => handlePropChange('ctaLink', val)}
+        />
+      </div>
+    </div>
+  {/if}
 
-    <input
-      id="hero-img-uploader"
-      bind:this={fileInput}
-      type="file"
-      accept="image/png,image/jpeg,image/jpg"
-      class="hidden"
-      on:change={handleImageUpload}
+  <!-- Pengaturan Konten Spesifik Layout Hero -->
+  {#if preset === 'gradient_mesh_glow' || preset === 'badge_ticker_split'}
+    <HeroTrustBadgesContent
+      trustBadges={section.props?.trustBadges as Array<{ text: string; icon?: string }> || []}
+      onPropChange={handlePropChange}
     />
-
-    <button
-      type="button"
-      disabled={isUploading}
-      on:click={() => fileInput?.click()}
-      class="w-full py-2.5 px-3 border border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-primary transition-all cursor-pointer disabled:opacity-50"
-    >
-      {#if isUploading}
-        <Loader2 size={16} class="animate-spin text-primary" />
-        <span>Mengunggah & Mengonversi ({uploadProgress}%)...</span>
-      {:else}
-        <Upload size={16} />
-        <span>{imageUrl ? 'Ganti Gambar (Otomatis Replace)' : 'Upload Gambar Banner (JPG/PNG)'}</span>
-      {/if}
-    </button>
-    <p class="text-[10.5px] text-base-content/50 mt-1">Maks 5MB. Otomatis convert ke WebP ringan (&le;200KB).</p>
-
-    {#if errorMessage}
-      <p class="text-xs text-rose-500 font-semibold mt-1">{errorMessage}</p>
-    {/if}
-  </div>
-
-  <div class="grid grid-cols-2 gap-2">
-    <div>
-      <label for="cta-text" class="block font-semibold text-xs text-base-content/80 mb-1">Teks CTA</label>
-      <input
-        id="cta-text"
-        type="text"
-        value={section.props?.ctaText ?? ''}
-        on:input={(e) => handlePropChange('ctaText', e.currentTarget.value)}
-        class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
-        placeholder="Lihat Katalog"
-      />
-    </div>
-    <div>
-      <label for="cta-link" class="block font-semibold text-xs text-base-content/80 mb-1">Link CTA</label>
-      <input
-        id="cta-link"
-        type="text"
-        value={section.props?.ctaLink ?? ''}
-        on:input={(e) => handlePropChange('ctaLink', e.currentTarget.value)}
-        class="w-full px-3 py-2 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-sm text-base-content focus:outline-none focus:border-blue-500"
-        placeholder="#catalog"
-      />
-    </div>
-  </div>
+  {:else if preset === 'interactive_terminal_code'}
+    <HeroTerminalContent
+      terminalFile={(section.props?.terminalFile as string) || 'store-system.sh'}
+      terminalCmd1={(section.props?.terminalCmd1 as string) || '$ check --stock ready'}
+      terminalRes1={(section.props?.terminalRes1 as string) || 'Seluruh produk terverifikasi & siap kirim'}
+      terminalCmd2={(section.props?.terminalCmd2 as string) || '$ order --instant-whatsapp'}
+      terminalRes2={(section.props?.terminalRes2 as string) || 'Integrasi otomatis pesan WA tanpa ribet'}
+      terminalStatus={(section.props?.terminalStatus as string) || '_ Siap melayani pelanggan...'}
+      onPropChange={handlePropChange}
+    />
+  {:else if preset === 'floating_cards_showcase'}
+    <HeroFloatingCardsContent
+      floatingCards={section.props?.floatingCards as Array<{ icon: string; title: string; desc: string }> || []}
+      onPropChange={handlePropChange}
+    />
+  {:else if preset === 'social_proof_community'}
+    <HeroSocialProofContent
+      socialProofStars={typeof section.props?.socialProofStars === 'number' ? section.props.socialProofStars : 5}
+      socialProofAvatars={(section.props?.socialProofAvatars as string[]) || []}
+      socialProofText={(section.props?.socialProofText as string) || 'Dipercaya oleh 2.500+ Pembeli'}
+      onPropChange={handlePropChange}
+    />
+  {:else if preset === 'dual_product_showcase'}
+    <HeroDualProductContent
+      selectedProductIndex1={typeof section.props?.selectedProductIndex1 === 'number' ? section.props.selectedProductIndex1 : -1}
+      selectedProductIndex2={typeof section.props?.selectedProductIndex2 === 'number' ? section.props.selectedProductIndex2 : -1}
+      onPropChange={handlePropChange}
+    />
+  {:else if preset === 'bento_masonry_hero'}
+    <HeroBentoContent
+      bentoPromoTitle={(section.props?.bentoPromoTitle as string) || 'Diskon Pembeli Pertama'}
+      bentoPromoHighlight={(section.props?.bentoPromoHighlight as string) || 'Potongan 25%'}
+      bentoPromoSubtitle={(section.props?.bentoPromoSubtitle as string) || 'Klaim voucher di WhatsApp sekarang'}
+      bentoPromoTextColor={(section.props?.bentoPromoTextColor as string) || 'auto'}
+      bentoReviewStars={typeof section.props?.bentoReviewStars === 'number' ? section.props.bentoReviewStars : 5}
+      bentoReviewText={(section.props?.bentoReviewText as string) || '"Bahan sangat halus dan adem, motifnya khas dan tidak pasaran."'}
+      bentoReviewAuthor={(section.props?.bentoReviewAuthor as string) || '- Pelanggan Terverifikasi'}
+      bentoFeatureIcon={(section.props?.bentoFeatureIcon as string) || 'Truck'}
+      bentoFeatureTitle={(section.props?.bentoFeatureTitle as string) || 'Kirim Seluruh Indonesia'}
+      bentoFeatureSubtitle={(section.props?.bentoFeatureSubtitle as string) || 'Packing aman bubble wrap tebal'}
+      onPropChange={handlePropChange}
+    />
+  {:else if preset === 'sticky_whatsapp_pill_float'}
+    <HeroChatContent
+      chatMessages={(section.props?.chatMessages as import('./hero/heroContent.types').ChatItem[]) || []}
+      onPropChange={handlePropChange}
+    />
+  {:else if ['sticker_badge_playful', 'dual_contrast_split', 'brand_story_founder', 'split_stat_counter'].includes(preset)}
+    <HeroCustomCardContent
+      {preset}
+      stickerText={(section.props?.stickerText as string) || 'PROMO TERBATAS!'}
+      contrastCardBg={(section.props?.contrastCardBg as string) || 'slate-950'}
+      contrastBadgeText={(section.props?.contrastBadgeText as string) || 'Pendaftaran Terbatas'}
+      contrastTitleText={(section.props?.contrastTitleText as string) || 'Kuota Tersisa 4 Peserta'}
+      contrastDescText={(section.props?.contrastDescText as string) || 'Mendapatkan modul lengkap, sertifikat kelulusan, dan sesi praktik langsung bersama mentor berpengalaman.'}
+      founderRole={(section.props?.founderRole as string) || 'Pendiri & Artisan'}
+      founderTitle={(section.props?.founderTitle as string) || 'Pengrajin Resep Asli'}
+      stats={(section.props?.stats as Array<{ value: string; label: string }>) || []}
+      onPropChange={handlePropChange}
+    />
+  {/if}
 
   <!-- Pengaturan Tinggi Section Canvas (8pt Grid) -->
-  <div class="pt-3 border-t border-base-300 dark:border-slate-800">
-    <span class="block font-semibold text-xs text-base-content/80 mb-1">Tinggi Minimum Hero (8pt Grid)</span>
-    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-xs">
+  <div class="pt-3 border-t border-base-300">
+    <span class="block font-semibold text-xs text-base-content/80 mb-1">
+      Tinggi Minimum Spanduk (Grid 8pt)
+    </span>
+    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 text-xs">
       {#each [
         { label: '480px', value: '480px' },
         { label: '560px', value: '560px' },
         { label: '640px', value: '640px' },
-        { label: 'Auto', value: 'auto' },
+        { label: 'Otomatis', value: 'auto' },
       ] as h}
-        <button
+        <Button
           type="button"
-          on:click={() => onUpdate({
-            ...section,
-            styles: {
-              ...(section.styles || {}),
-              minHeight: h.value,
-            }
-          })}
-          class={`py-1.5 rounded font-medium transition-colors cursor-pointer text-center ${
-            (section.styles?.minHeight || '560px') === h.value ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60'
+          size="xs"
+          variant={(section.styles?.minHeight || 'auto') === h.value ? 'primary' : 'ghost'}
+          on:click={() =>
+            onUpdate({
+              ...section,
+              styles: {
+                ...(section.styles || {}),
+                minHeight: h.value,
+              },
+            })}
+          class={`!py-1.5 !h-auto !min-h-0 rounded font-medium text-center ${
+            (section.styles?.minHeight || 'auto') === h.value
+              ? 'shadow-sm font-bold'
+              : 'text-base-content/60'
           }`}
         >
           {h.label}
-        </button>
+        </Button>
       {/each}
     </div>
+    <span class="block text-[10.5px] text-base-content/50 mt-1">
+      Semua elemen tetap terpusat di tengah secara vertikal saat tinggi ditambah.
+    </span>
   </div>
 </div>

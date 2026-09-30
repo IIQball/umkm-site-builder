@@ -33,22 +33,22 @@
     <!-- Floating Top Badges -->
     <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
       {#if tpl.categoryName}
-        <span class="inline-flex items-center gap-1.5 bg-card/90 dark:bg-slate-900/90 backdrop-blur-md text-main border border-light px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
+        <span class="inline-flex items-center gap-1.5 bg-card/90 backdrop-blur-md text-main border border-light px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
           <span class="material-symbols-outlined text-xs text-primary">{tpl.categoryIcon || 'category'}</span>
           <span>{tpl.categoryName}</span>
         </span>
       {:else}
-        <span class="inline-flex items-center gap-1 bg-card/90 dark:bg-slate-900/90 backdrop-blur-md text-secondary border border-light px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
+        <span class="inline-flex items-center gap-1 bg-card/90 backdrop-blur-md text-secondary border border-light px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
           Umum
         </span>
       {/if}
 
       {#if tpl.price === 0}
-        <span class="inline-flex items-center gap-1 bg-emerald-800 text-white px-3 py-1 rounded-full text-xs font-bold shadow-xs">
+        <span class="inline-flex items-center gap-1 bg-success text-success-content px-3 py-1 rounded-full text-xs font-bold shadow-xs">
           Gratis
         </span>
       {:else}
-        <span class="inline-flex items-center gap-1 bg-card/95 dark:bg-slate-900/95 backdrop-blur-md text-main font-mono font-black px-3 py-1 rounded-full text-xs shadow-xs border border-light">
+        <span class="inline-flex items-center gap-1 bg-card/95 backdrop-blur-md text-main font-mono font-black px-3 py-1 rounded-full text-xs shadow-xs border border-light">
           {formatCurrency(tpl.price)}
         </span>
       {/if}
@@ -102,7 +102,7 @@
           <Button
             variant={tpl.price === 0 ? 'secondary' : 'primary'}
             size="sm"
-            className="rounded-xl font-bold {tpl.price === 0 ? '!bg-emerald-800 hover:!bg-emerald-900 !text-white' : ''}"
+            className="rounded-xl font-bold {tpl.price === 0 ? '!bg-success hover:!bg-success/90 !text-success-content' : ''}"
             loading={isPurchasing}
             disabled={isPurchasing}
             on:click={() => onPurchase(tpl)}

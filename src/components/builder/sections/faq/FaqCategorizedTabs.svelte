@@ -50,7 +50,7 @@
     on:keydown={(e) => { if (e.key === 'Enter') selectTabs(e); }}
     class={`flex flex-wrap justify-center gap-2 p-1.5 rounded-2xl w-fit mx-auto transition-all ${
       $canvasStore.selectedNodeId === 'faq_tabs'
-        ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--color-nested-base)]'
+        ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 bg-[var(--color-nested-base)]'
         : ''
     }`}
   >
@@ -63,7 +63,7 @@
             ? 'background-color: var(--btn-primary-bg, var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--btn-primary-text, var(--theme-btn-primary-text, white));'
             : 'background-color: var(--btn-secondary-bg, var(--theme-btn-secondary-bg, var(--color-nested-base))); color: var(--btn-secondary-text, var(--theme-btn-secondary-text, var(--color-text-secondary)));'
         }`}
-        class="px-4 py-2 text-xs font-[var(--font-heading,inherit)] font-bold transition-all cursor-pointer shadow-xs hover:opacity-90"
+        class="px-4 py-2 text-xs font-heading font-bold transition-all cursor-pointer shadow-xs hover:opacity-90"
       >
         {tab.label}
       </button>
@@ -83,14 +83,14 @@
         on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
         class={`rounded-2xl border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] overflow-hidden shadow-xs transition-all duration-200 cursor-pointer ${
           isItemActive
-            ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+            ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 shadow-md'
             : 'hover:border-[var(--theme-primary, var(--color-primary))]/30'
         }`}
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(index)}
-          class="w-full p-4 flex items-center justify-between gap-4 text-left font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))] hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
+          class="w-full p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))] hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
@@ -103,7 +103,7 @@
         </button>
 
         {#if isOpen}
-          <div class="px-4 pb-4 pt-1 text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed border-t border-[var(--color-border)] font-[var(--font-family,inherit)]">
+          <div class="px-4 pb-4 pt-1 text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed border-t border-[var(--color-border)] font-sans">
             {item.answer}
           </div>
         {/if}

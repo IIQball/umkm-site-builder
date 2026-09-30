@@ -137,10 +137,10 @@
       </div>
       <div>
         <h3 class="text-base font-extrabold text-main font-heading leading-tight">
-          {bankAccount ? 'Ganti Rekening Bank' : 'Hubungkan Rekening Bank'}
+          Tambah Rekening Bank
         </h3>
         <p class="text-2xs text-muted mt-0.5">
-          Pilih bank dan masukkan nomor rekening untuk verifikasi otomatis
+          Pilih bank dan masukkan nomor rekening (maksimal 3 rekening terdaftar)
         </p>
       </div>
     </div>

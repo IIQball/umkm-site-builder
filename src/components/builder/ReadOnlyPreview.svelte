@@ -15,7 +15,7 @@
   import { onMount } from 'svelte';
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';
-  import { Badge } from '@/components/ui';
+  import { Badge, Button } from '@/components/ui';
   import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
 
@@ -138,56 +138,52 @@
       </div>
 
       <!-- Center: Viewport Switcher -->
-      <div class="flex items-center bg-nested p-1 rounded-lg border border-light">
-        <button
+      <div class="flex items-center bg-nested p-1 rounded-lg border border-light gap-1">
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'desktop' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'desktop')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'desktop'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'desktop' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Desktop (100%)"
         >
           <Monitor size={14} />
           <span class="hidden sm:inline">Desktop</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'tablet' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'tablet')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'tablet'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'tablet' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Tablet (768px)"
         >
           <Tablet size={14} />
           <span class="hidden sm:inline">Tablet</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'mobile' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'mobile')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'mobile'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'mobile' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Mobile (375px)"
         >
           <Smartphone size={14} />
           <span class="hidden sm:inline">Mobile</span>
-        </button>
+        </Button>
       </div>
 
       <!-- Right: Theme Toggle -->
       <div class="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant="ghost"
           on:click={toggleTheme}
-          class="p-1.5 rounded-lg bg-nested hover:bg-nested/80 text-secondary hover:text-main transition-colors cursor-pointer"
+          class="!p-1.5 !h-8 !w-8 !min-h-0 !min-w-0 rounded-lg bg-nested hover:bg-nested/80 text-secondary hover:text-main"
           title="Ganti Tema (Terang / Gelap)"
         >
           {#if isDark}
@@ -195,7 +191,7 @@
           {:else}
             <Moon size={14} class="text-secondary" />
           {/if}
-        </button>
+        </Button>
       </div>
     </div>
   </header>
@@ -216,10 +212,10 @@
           isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
         } ${
           viewMode === 'desktop'
-            ? 'min-h-[800px] border border-base-300 dark:border-slate-800'
+            ? 'min-h-[800px] border border-base-300'
             : viewMode === 'tablet'
-            ? 'min-h-[800px] border border-slate-400 dark:border-slate-700'
-            : 'min-h-[667px] border border-slate-400 dark:border-slate-700'
+            ? 'min-h-[800px] border border-base-300'
+            : 'min-h-[667px] border border-base-300'
         }`}
       >
         {#if sections.length === 0}

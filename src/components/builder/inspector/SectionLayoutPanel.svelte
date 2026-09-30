@@ -1,7 +1,5 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
-  import SectionPresetSelector from './SectionPresetSelector.svelte';
-  import SectionSlotReorder from './SectionSlotReorder.svelte';
   import SectionSpacingControls from './SectionSpacingControls.svelte';
 
   export let section: TemplateSection;
@@ -20,13 +18,7 @@
 </script>
 
 <div class="space-y-6">
-  <!-- 1. Layout Preset Selector -->
-  <SectionPresetSelector {section} />
-
-  <!-- 2. Slot Reorder (Up / Down) -->
-  <SectionSlotReorder {section} />
-
-  <!-- 3. Spacing (Padding & Margin) -->
+  <!-- Spacing (Padding & Margin) -->
   <SectionSpacingControls
     {section}
     {onStyleChange}

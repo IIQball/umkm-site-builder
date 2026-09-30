@@ -42,7 +42,7 @@
         type="text"
         value={title}
         on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
         placeholder="Pertanyaan yang Sering Diajukan"
       />
     </div>
@@ -53,7 +53,7 @@
         rows="2"
         value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Temukan solusi cepat dan informasi penting..."
       ></textarea>
     </div>
@@ -64,7 +64,7 @@
         type="text"
         value={badgeText}
         on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Pusat Bantuan Konsumen"
       />
     </div>
@@ -78,7 +78,7 @@
         type="text"
         value={waNumber}
         on:input={(e) => onPropChange('whatsappNumber', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         placeholder="6281234567890"
       />
       <p class="text-[10px] text-base-content/60">
@@ -109,7 +109,7 @@
         type="text"
         value={currentFaq?.question || ''}
         on:input={(e) => updateFaqField('question', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -119,7 +119,7 @@
         rows="4"
         value={currentFaq?.answer || ''}
         on:input={(e) => updateFaqField('answer', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       ></textarea>
     </div>
     <div class="space-y-1">
@@ -129,7 +129,7 @@
         type="text"
         value={currentFaq?.category || 'Umum'}
         on:input={(e) => updateFaqField('category', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Pemesanan / Pembayaran / Pengiriman"
       />
     </div>

@@ -14,7 +14,7 @@
 <div class="cq-footer-row-compact py-2">
   <!-- Status Indicator Node -->
   <div
-    class="flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_status_badge' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_status_badge' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_status_badge')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_status_badge')}
     role="button"
@@ -35,7 +35,7 @@
 
   <!-- Info & Copyright Node -->
   <div
-    class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"
@@ -50,7 +50,7 @@
 
   <!-- Chat Button Node -->
   <div
-    class="p-1 rounded-xl transition-all cursor-pointer shrink-0 {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="p-1 rounded-xl transition-all cursor-pointer shrink-0 {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_contact')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
     role="button"

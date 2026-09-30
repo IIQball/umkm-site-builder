@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Sparkles, Plus, Trash2 } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import type { FooterMenuLink } from '@/types';
   import { DEFAULT_MENU_LINKS } from '../../sections/footer/footer.helpers';
@@ -87,7 +88,7 @@
       {#if activePreset === 'boxed_card_footer'}
         <div>
           <label for="b-badge" class="block text-xs font-semibold text-base-content/70 mb-1">Badge Resmi</label>
-          <input id="b-badge" type="text" value={boxedOfficialBadge} on:input={(e) => onPropChange('boxedOfficialBadge', e.currentTarget.value)} placeholder="Gerai Resmi UMKM" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+          <input id="b-badge" type="text" value={boxedOfficialBadge} on:input={(e) => onPropChange('boxedOfficialBadge', e.currentTarget.value)} placeholder="Gerai Resmi UMKM" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
         </div>
       {/if}
       <div>
@@ -102,7 +103,7 @@
             onPropChange('description', v);
           }}
           placeholder="Pelopor kuliner khas nusantara..."
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"
         ></textarea>
       </div>
     </div>
@@ -121,37 +122,37 @@
           }}
           placeholder="6281234567890"
           pattern="^628[0-9]&#123;8,13&#125;$"
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
         />
       </div>
       <div>
         <label for="c-addr" class="block text-xs font-semibold text-base-content/70 mb-1">Alamat Fisik</label>
-        <textarea id="c-addr" rows="2" value={address} on:input={(e) => onPropChange('address', e.currentTarget.value)} placeholder="Jl. Raya Sukowati No. 42..." class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"></textarea>
+        <textarea id="c-addr" rows="2" value={address} on:input={(e) => onPropChange('address', e.currentTarget.value)} placeholder="Jl. Raya Sukowati No. 42..." class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"></textarea>
       </div>
       <div>
         <label for="c-hrs" class="block text-xs font-semibold text-base-content/70 mb-1">Jam Operasional</label>
-        <input id="c-hrs" type="text" value={storeHours} on:input={(e) => onPropChange('storeHours', e.currentTarget.value)} placeholder="08.00 - 21.00 WIB" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="c-hrs" type="text" value={storeHours} on:input={(e) => onPropChange('storeHours', e.currentTarget.value)} placeholder="08.00 - 21.00 WIB" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       {#if activePreset === 'centered_simple' || activePreset === 'live_status_badge'}
         <div>
           <label for="c-btn" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Tombol Chat</label>
-          <input id="c-btn" type="text" value={statusChatButtonText} on:input={(e) => onPropChange('statusChatButtonText', e.currentTarget.value)} placeholder="Chat Admin" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+          <input id="c-btn" type="text" value={statusChatButtonText} on:input={(e) => onPropChange('statusChatButtonText', e.currentTarget.value)} placeholder="Chat Admin" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
         </div>
       {/if}
       {#if activePreset === 'boxed_card_footer'}
         <div class="grid grid-cols-2 gap-2 pt-1">
           <div>
             <label for="b-cta1-t" class="block text-xs font-semibold text-base-content/70 mb-1">Teks CTA 1</label>
-            <input id="b-cta1-t" type="text" value={boxedPrimaryCtaText} on:input={(e) => onPropChange('boxedPrimaryCtaText', e.currentTarget.value)} placeholder="Katalog Resmi" class="w-full px-2 py-1 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+            <input id="b-cta1-t" type="text" value={boxedPrimaryCtaText} on:input={(e) => onPropChange('boxedPrimaryCtaText', e.currentTarget.value)} placeholder="Katalog Resmi" class="w-full px-2 py-1 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
           </div>
           <div>
             <label for="b-cta1-l" class="block text-xs font-semibold text-base-content/70 mb-1">Link CTA 1</label>
-            <input id="b-cta1-l" type="text" value={boxedPrimaryCtaLink} on:input={(e) => onPropChange('boxedPrimaryCtaLink', e.currentTarget.value)} placeholder="#products" class="w-full px-2 py-1 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+            <input id="b-cta1-l" type="text" value={boxedPrimaryCtaLink} on:input={(e) => onPropChange('boxedPrimaryCtaLink', e.currentTarget.value)} placeholder="#products" class="w-full px-2 py-1 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
           </div>
         </div>
         <div>
           <label for="b-cta2-t" class="block text-xs font-semibold text-base-content/70 mb-1">Teks CTA 2</label>
-          <input id="b-cta2-t" type="text" value={boxedSecondaryCtaText} on:input={(e) => onPropChange('boxedSecondaryCtaText', e.currentTarget.value)} placeholder="Konsultasi" class="w-full px-2 py-1 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+          <input id="b-cta2-t" type="text" value={boxedSecondaryCtaText} on:input={(e) => onPropChange('boxedSecondaryCtaText', e.currentTarget.value)} placeholder="Konsultasi" class="w-full px-2 py-1 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
         </div>
       {/if}
     </div>
@@ -160,18 +161,35 @@
     <div class="space-y-3">
       <div class="flex items-center justify-between">
         <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Tautan Menu Navigasi</h4>
-        <button type="button" on:click={addLink} class="px-2 py-1 bg-primary text-white rounded-lg text-[11px] font-semibold flex items-center gap-1 cursor-pointer"><Plus size={12} /> Tambah</button>
+        <Button
+          type="button"
+          variant="primary"
+          size="xs"
+          on:click={addLink}
+          class="!h-auto !min-h-0 !py-1 !px-2 rounded-lg text-[11px] font-semibold flex items-center gap-1"
+        >
+          <Plus size={12} /> Tambah
+        </Button>
       </div>
       <div class="space-y-2">
         {#each menuLinks as link, idx}
-          <div class="p-2 rounded-xl bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 space-y-1.5">
+          <div class="p-2 rounded-xl bg-base-200/50 border border-base-300 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-bold text-base-content/50">Menu #{idx + 1}</span>
-              <button type="button" on:click={() => removeLink(idx)} class="text-error hover:bg-error/10 p-1 rounded cursor-pointer" title="Hapus"><Trash2 size={12} /></button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                on:click={() => removeLink(idx)}
+                class="!w-6 !h-6 !min-h-0 !p-1 text-error hover:bg-error/10 rounded"
+                title="Hapus"
+              >
+                <Trash2 size={12} />
+              </Button>
             </div>
             <div class="grid grid-cols-2 gap-1.5">
-              <input type="text" value={link.label} on:input={(e) => updateLink(idx, 'label', e.currentTarget.value)} placeholder="Nama Menu" class="px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs" />
-              <input type="text" value={link.url} on:input={(e) => updateLink(idx, 'url', e.currentTarget.value)} placeholder="#products" class="px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs" />
+              <input type="text" value={link.label} on:input={(e) => updateLink(idx, 'label', e.currentTarget.value)} placeholder="Nama Menu" class="px-2 py-1 bg-base-100 border border-base-300 rounded text-xs" />
+              <input type="text" value={link.url} on:input={(e) => updateLink(idx, 'url', e.currentTarget.value)} placeholder="#products" class="px-2 py-1 bg-base-100 border border-base-300 rounded text-xs" />
             </div>
           </div>
         {/each}
@@ -183,15 +201,15 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Banner Floating CTA</h4>
       <div>
         <label for="fl-title" class="block text-xs font-semibold text-base-content/70 mb-1">Judul Penawaran</label>
-        <input id="fl-title" type="text" value={floatingCtaTitle} on:input={(e) => onPropChange('floatingCtaTitle', e.currentTarget.value)} placeholder="Ingin Pesan Menu Katering?" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="fl-title" type="text" value={floatingCtaTitle} on:input={(e) => onPropChange('floatingCtaTitle', e.currentTarget.value)} placeholder="Ingin Pesan Menu Katering?" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       <div>
         <label for="fl-sub" class="block text-xs font-semibold text-base-content/70 mb-1">Subjudul</label>
-        <textarea id="fl-sub" rows="2" value={floatingCtaSubtitle} on:input={(e) => onPropChange('floatingCtaSubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"></textarea>
+        <textarea id="fl-sub" rows="2" value={floatingCtaSubtitle} on:input={(e) => onPropChange('floatingCtaSubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"></textarea>
       </div>
       <div>
         <label for="fl-btn" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Tombol</label>
-        <input id="fl-btn" type="text" value={floatingCtaButtonText} on:input={(e) => onPropChange('floatingCtaButtonText', e.currentTarget.value)} placeholder="Chat Sekarang" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="fl-btn" type="text" value={floatingCtaButtonText} on:input={(e) => onPropChange('floatingCtaButtonText', e.currentTarget.value)} placeholder="Chat Sekarang" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
     </div>
 
@@ -200,19 +218,19 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Form Langganan Promo WA</h4>
       <div>
         <label for="nl-b" class="block text-xs font-semibold text-base-content/70 mb-1">Badge Promo</label>
-        <input id="nl-b" type="text" value={newsletterBadge} on:input={(e) => onPropChange('newsletterBadge', e.currentTarget.value)} placeholder="Voucher Diskon 15%" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="nl-b" type="text" value={newsletterBadge} on:input={(e) => onPropChange('newsletterBadge', e.currentTarget.value)} placeholder="Voucher Diskon 15%" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       <div>
         <label for="nl-t" class="block text-xs font-semibold text-base-content/70 mb-1">Judul Utama</label>
-        <input id="nl-t" type="text" value={newsletterTitle} on:input={(e) => onPropChange('newsletterTitle', e.currentTarget.value)} placeholder="Dapatkan Info Promo" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="nl-t" type="text" value={newsletterTitle} on:input={(e) => onPropChange('newsletterTitle', e.currentTarget.value)} placeholder="Dapatkan Info Promo" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       <div>
         <label for="nl-s" class="block text-xs font-semibold text-base-content/70 mb-1">Subjudul</label>
-        <textarea id="nl-s" rows="2" value={newsletterSubtitle} on:input={(e) => onPropChange('newsletterSubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"></textarea>
+        <textarea id="nl-s" rows="2" value={newsletterSubtitle} on:input={(e) => onPropChange('newsletterSubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"></textarea>
       </div>
       <div>
         <label for="nl-bt" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Tombol Form</label>
-        <input id="nl-bt" type="text" value={newsletterButtonText} on:input={(e) => onPropChange('newsletterButtonText', e.currentTarget.value)} placeholder="Daftar Promo" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="nl-bt" type="text" value={newsletterButtonText} on:input={(e) => onPropChange('newsletterButtonText', e.currentTarget.value)} placeholder="Daftar Promo" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
     </div>
 
@@ -221,11 +239,11 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Bilah Status Operasional Toko</h4>
       <div>
         <label for="st-t" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Status Toko</label>
-        <input id="st-t" type="text" value={statusBadgeText} on:input={(e) => onPropChange('statusBadgeText', e.currentTarget.value)} placeholder="TOKO BUKA" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="st-t" type="text" value={statusBadgeText} on:input={(e) => onPropChange('statusBadgeText', e.currentTarget.value)} placeholder="TOKO BUKA" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       <div>
         <label for="st-s" class="block text-xs font-semibold text-base-content/70 mb-1">Subteks Operasional</label>
-        <input id="st-s" type="text" value={statusBadgeSubtext} on:input={(e) => onPropChange('statusBadgeSubtext', e.currentTarget.value)} placeholder="Siap Menerima Pesanan" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="st-s" type="text" value={statusBadgeSubtext} on:input={(e) => onPropChange('statusBadgeSubtext', e.currentTarget.value)} placeholder="Siap Menerima Pesanan" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
     </div>
 
@@ -234,7 +252,7 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Peta Mini Lokasi</h4>
       <div>
         <label for="m-url" class="block text-xs font-semibold text-base-content/70 mb-1">URL Google Maps / Query</label>
-        <input id="m-url" type="text" value={googleMapsUrl} on:input={(e) => onPropChange('googleMapsUrl', e.currentTarget.value)} placeholder="https://maps.google.com/maps?q=..." class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="m-url" type="text" value={googleMapsUrl} on:input={(e) => onPropChange('googleMapsUrl', e.currentTarget.value)} placeholder="https://maps.google.com/maps?q=..." class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
     </div>
 
@@ -243,11 +261,11 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Ubin Tautan Sosial Media</h4>
       <div>
         <label for="so-t" class="block text-xs font-semibold text-base-content/70 mb-1">Judul Showcase</label>
-        <input id="so-t" type="text" value={communityTitle} on:input={(e) => onPropChange('communityTitle', e.currentTarget.value)} placeholder="Terhubung dengan Kami" class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="so-t" type="text" value={communityTitle} on:input={(e) => onPropChange('communityTitle', e.currentTarget.value)} placeholder="Terhubung dengan Kami" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
       <div>
         <label for="so-s" class="block text-xs font-semibold text-base-content/70 mb-1">Subjudul</label>
-        <textarea id="so-s" rows="2" value={communitySubtitle} on:input={(e) => onPropChange('communitySubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs resize-y"></textarea>
+        <textarea id="so-s" rows="2" value={communitySubtitle} on:input={(e) => onPropChange('communitySubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"></textarea>
       </div>
     </div>
 
@@ -256,7 +274,7 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Baris Hak Cipta (Copyright)</h4>
       <div>
         <label for="cr-val" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Hak Cipta</label>
-        <input id="cr-val" type="text" value={copyrightText} on:input={(e) => onPropChange('copyrightText', e.currentTarget.value)} placeholder="© 2026 Warung Berkah..." class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs" />
+        <input id="cr-val" type="text" value={copyrightText} on:input={(e) => onPropChange('copyrightText', e.currentTarget.value)} placeholder="© 2026 Warung Berkah..." class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
       </div>
     </div>
   {/if}

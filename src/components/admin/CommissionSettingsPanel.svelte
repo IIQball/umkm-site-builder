@@ -3,6 +3,7 @@
   import StatCard from '../ui/StatCard.svelte';
   import { Card, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
+  import { formatIDR } from '@/lib/currency';
   import CommissionSimulationCard from './commission/CommissionSimulationCard.svelte';
   import CommissionSettingsInputs from './commission/CommissionSettingsInputs.svelte';
 
@@ -148,7 +149,7 @@
     />
     <StatCard
       label="Fee Pendampingan Admin"
-      value="Rp {Number(adminServiceFee || 0).toLocaleString('id-ID')}"
+      value={formatIDR(Number(adminServiceFee || 0))}
       rawValue={adminServiceFee}
       icon="support_agent"
       cardTheme="blue"

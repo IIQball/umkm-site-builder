@@ -339,6 +339,9 @@ export const stores = pgTable('stores', {
     storeSubdomainUniqueIdx: uniqueIndex('stores_subdomain_unique_idx')
       .on(table.subdomain)
       .where(sql`${table.deletedAt} IS NULL`),
+    storeActiveDirectoryIdx: index('stores_active_directory_idx')
+      .on(table.categoryId, table.latitude, table.longitude)
+      .where(sql`${table.status} = 'active' AND ${table.deletedAt} IS NULL`),
   };
 });
 

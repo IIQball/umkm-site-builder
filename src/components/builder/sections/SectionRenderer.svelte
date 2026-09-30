@@ -22,7 +22,7 @@
     return false;
   };
 
-  const buildStyle = (styles: SectionStyles = {}): string => {
+  const buildStyle = (styles: SectionStyles = {}, fullBleed = false): string => {
     const s = styles || {};
     const rules: string[] = [];
     const defaultTextColor = isDarkColor(s.backgroundColor || '#ffffff') ? '#f8fafc' : '#0f172a';
@@ -30,17 +30,21 @@
     const defaultPadding = '0px';
     rules.push(`background-color: ${s.backgroundColor || 'transparent'}`);
     rules.push(`color: ${s.color || defaultTextColor}`);
-    rules.push(`padding: ${s.padding || defaultPadding}`);
+    if (!fullBleed) {
+      rules.push(`padding: ${s.padding || defaultPadding}`);
+    }
     rules.push(`text-align: ${s.textAlign || 'center'}`);
     rules.push(`border-radius: ${s.borderRadius || '0px'}`);
     if (s.fontFamily) rules.push(`font-family: ${s.fontFamily}`);
 
     if (s.marginTop) rules.push(`margin-top: ${s.marginTop}`);
     if (s.marginBottom) rules.push(`margin-bottom: ${s.marginBottom}`);
-    if (s.paddingTop) rules.push(`padding-top: ${s.paddingTop}`);
-    if (s.paddingBottom) rules.push(`padding-bottom: ${s.paddingBottom}`);
-    if (s.paddingLeft) rules.push(`padding-left: ${s.paddingLeft}`);
-    if (s.paddingRight) rules.push(`padding-right: ${s.paddingRight}`);
+    if (!fullBleed) {
+      if (s.paddingTop) rules.push(`padding-top: ${s.paddingTop}`);
+      if (s.paddingBottom) rules.push(`padding-bottom: ${s.paddingBottom}`);
+      if (s.paddingLeft) rules.push(`padding-left: ${s.paddingLeft}`);
+      if (s.paddingRight) rules.push(`padding-right: ${s.paddingRight}`);
+    }
     if (s.fontSize) rules.push(`font-size: ${s.fontSize}`);
     if (s.fontWeight) rules.push(`font-weight: ${s.fontWeight}`);
     if (s.display) rules.push(`display: ${s.display}`);
@@ -60,7 +64,9 @@
     return rules.join('; ');
   };
 
-  $: inlineStyle = buildStyle(section?.styles);
+  $: sectionDef = getSectionDefinition(section?.type);
+  $: isFullBleed = sectionDef?.isFullBleed ?? (section?.type === 'header_announcement' || section?.type === 'hero' || section?.type === 'features' || section?.type === 'product_catalog');
+  $: inlineStyle = buildStyle(section?.styles, isFullBleed);
   $: containerWidthMode = section?.styles?.containerWidth || 'boxed';
   $: containerClass = containerWidthMode === 'full'
     ? 'w-full max-w-full'
@@ -68,16 +74,13 @@
   $: containerStyle = containerWidthMode === 'full'
     ? ''
     : 'max-width: var(--theme-max-width, 1200px);';
-
-  $: sectionDef = getSectionDefinition(section?.type);
-  $: isFullBleed = sectionDef?.isFullBleed ?? (section?.type === 'header_announcement' || section?.type === 'hero');
   $: sectionProps = section?.type === 'product_catalog'
     ? { ...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined), isLiveStorefront }
     : section?.type === 'hero'
     ? { ...(section.props || {}), ...(isLiveStorefront ? { selectNode: () => {}, selectNodeKey: () => {}, activeNodeId: null } : {}) }
     : (section?.props || {});
 
-  // Semantic anchor IDs — match navbar href targets (#beranda, #produk, etc.)
+  // Semantic anchor IDs - match navbar href targets (#beranda, #produk, etc.)
   const SECTION_TYPE_TO_ANCHOR: Record<string, string> = {
     hero: 'beranda',
     header_announcement: 'header',
@@ -88,16 +91,32 @@
     google_maps: 'lokasi',
     footer: 'kontak',
   };
+  const SECTION_TYPE_TO_ALIASES: Record<string, string[]> = {
+    hero: ['hero', 'home'],
+    product_catalog: ['products', 'catalog', 'katalog', 'menu'],
+    features: ['features', 'fitur', 'keunggulan', 'about', 'tentang-kami'],
+    testimonials: ['testimonials', 'testimoni', 'reviews'],
+    faq: ['tanya-jawab', 'bantuan', 'pertanyaan'],
+    google_maps: ['maps', 'peta', 'alamat', 'location'],
+    footer: ['footer', 'contact', 'hubungi-kami'],
+  };
   $: anchorId = SECTION_TYPE_TO_ANCHOR[section?.type] || (section?.id ? `section-${section.id}` : undefined);
 </script>
 
 <section
   id={anchorId}
+  data-section-type={section?.type}
+  data-section-id={section?.id}
   style={inlineStyle}
-  class={`relative box-border w-full max-w-full min-w-0 scroll-mt-20 font-[family-name:var(--theme-font-body)] ${
+  class={`relative box-border w-full max-w-full min-w-0 scroll-mt-20 font-sans ${
     section?.type === 'header_announcement' ? 'overflow-visible z-30' : 'overflow-x-hidden'
   }`}
 >
+  {#if section?.type && SECTION_TYPE_TO_ALIASES[section.type]}
+    {#each SECTION_TYPE_TO_ALIASES[section.type] as alias}
+      <span id={alias} class="absolute -top-20 opacity-0 pointer-events-none" aria-hidden="true"></span>
+    {/each}
+  {/if}
   {#if sectionDef}
     {#if isFullBleed}
       <svelte:component

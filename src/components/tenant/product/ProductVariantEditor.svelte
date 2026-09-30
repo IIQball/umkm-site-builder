@@ -70,7 +70,7 @@
       <div class="flex items-center gap-2 mb-3">
         <input
           type="text"
-          class="input input-bordered input-sm flex-1 rounded-xl bg-nested text-main font-sans text-xs focus:border-blue-500 focus:outline-none"
+          class="input input-bordered input-sm flex-1 rounded-xl bg-nested text-main font-sans text-xs focus:border-primary focus:outline-none"
           class:input-error={fieldErrors[`variantGroup_${gi}`]}
           bind:value={group.groupName}
           placeholder="Nama grup (contoh: Ukuran, Warna)"
@@ -96,7 +96,7 @@
           <div class="flex items-center gap-2">
             <input
               type="text"
-              class="input input-bordered input-xs flex-1 rounded-lg bg-nested text-main font-sans focus:border-blue-500 focus:outline-none h-8 px-3"
+              class="input input-bordered input-xs flex-1 rounded-lg bg-nested text-main font-sans focus:border-primary focus:outline-none h-8 px-3"
               class:input-error={fieldErrors[`variantOption_${gi}_${oi}`]}
               bind:value={option.name}
               placeholder="Nama opsi (contoh: S, M, L)"
@@ -104,7 +104,7 @@
             <div class="relative">
               <input
                 type="text"
-                class="input input-bordered input-xs w-28 rounded-lg bg-nested text-main font-sans focus:border-blue-500 focus:outline-none h-8 px-3 text-right"
+                class="input input-bordered input-xs w-28 rounded-lg bg-nested text-main font-sans focus:border-primary focus:outline-none h-8 px-3 text-right"
                 value={formatPriceAdjustment(option.priceAdjustment)}
                 on:input={(e) => {
                   option.priceAdjustment = parsePriceAdjustment(e.currentTarget.value);

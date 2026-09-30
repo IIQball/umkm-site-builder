@@ -41,14 +41,16 @@ export const buildCanvasCssVars = (
   const captionSize = typography.caption?.fontSize || `${goldenRatio.caption}px`
   const captionWeight = typography.caption?.fontWeight || '700'
 
-  // Button Values
-  const btnRadius = buttons.borderRadius || '16px'
-  const btnPrimaryBg = buttons.primary?.backgroundColor || primaryColor
+  // Button Values (Following Button.ts: Primary = full color, Secondary = outline, Tertiary = underline text)
+  const btnRadius = buttons.borderRadius || '8px'
+  const btnPrimaryBg = primaryColor
   const btnPrimaryText = buttons.primary?.textColor || '#ffffff'
-  const btnSecondaryBg = buttons.secondary?.backgroundColor || (isDarkPreview ? '#1f2937' : '#f1f5f9')
-  const btnSecondaryText = buttons.secondary?.textColor || (isDarkPreview ? '#f8fafc' : '#0f172a')
-  const btnOutlineBorder = buttons.outline?.borderColor || primaryColor
-  const btnOutlineText = buttons.outline?.textColor || primaryColor
+  const btnSecondaryBg = 'transparent'
+  const btnSecondaryBorder = isDarkPreview ? 'rgba(248, 250, 252, 0.2)' : 'rgba(15, 23, 42, 0.2)'
+  const btnSecondaryText = buttons.secondary?.textColor || buttons.outline?.textColor || (isDarkPreview ? '#f8fafc' : '#0f172a')
+  const btnOutlineBorder = btnSecondaryBorder
+  const btnOutlineText = btnSecondaryText
+  const btnTertiaryText = buttons.tertiary?.textColor || (isDarkPreview ? '#cbd5e1' : '#334155')
 
   return [
     // 1. Semantic Color Tokens
@@ -87,9 +89,11 @@ export const buildCanvasCssVars = (
     `--btn-primary-bg: ${btnPrimaryBg}`,
     `--btn-primary-text: ${btnPrimaryText}`,
     `--btn-secondary-bg: ${btnSecondaryBg}`,
+    `--btn-secondary-border: ${btnSecondaryBorder}`,
     `--btn-secondary-text: ${btnSecondaryText}`,
     `--btn-outline-border: ${btnOutlineBorder}`,
     `--btn-outline-text: ${btnOutlineText}`,
+    `--btn-tertiary-text: ${btnTertiaryText}`,
 
     // 5. Layout & Safe Zone Dimensions
     `--active-max-width: ${activeMaxWidth}`,
@@ -115,9 +119,11 @@ export const buildCanvasCssVars = (
     `--theme-btn-primary-bg: ${btnPrimaryBg}`,
     `--theme-btn-primary-text: ${btnPrimaryText}`,
     `--theme-btn-secondary-bg: ${btnSecondaryBg}`,
+    `--theme-btn-secondary-border: ${btnSecondaryBorder}`,
     `--theme-btn-secondary-text: ${btnSecondaryText}`,
     `--theme-btn-outline-border: ${btnOutlineBorder}`,
     `--theme-btn-outline-text: ${btnOutlineText}`,
+    `--theme-btn-tertiary-text: ${btnTertiaryText}`,
     `--theme-max-width: ${activeMaxWidth}`,
     `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
     `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,

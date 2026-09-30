@@ -34,16 +34,16 @@
     on:click={(e) => selectNode(e, 'maps_hours_badge')}
     on:keydown={(e) => handleKeydown(e, 'maps_hours_badge')}
     class={`bg-[var(--theme-surface, var(--color-card-base))] text-[var(--theme-text-primary, var(--color-text-main))] border border-[var(--color-border)] p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 transition-all outline-none ${
-      isHoursSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+      isHoursSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
   >
     <div
-      class="flex items-center gap-2.5 font-[var(--theme-font-heading,var(--font-heading,inherit))]"
+      class="flex items-center gap-2.5 font-heading"
       style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
     >
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
       <span class="font-bold text-emerald-600 dark:text-emerald-400 tracking-wide">{storeHoursStatus}</span>
-      <span class="text-[var(--theme-text-muted, var(--color-text-muted))] flex items-center gap-1.5 font-[var(--theme-font-body,var(--font-family,inherit))]">
+      <span class="text-[var(--theme-text-muted, var(--color-text-muted))] flex items-center gap-1.5 font-sans">
         <Clock size={13} />
         <span>• {storeHours}</span>
       </span>
@@ -54,7 +54,7 @@
         href={whatsappUrl}
         target="_blank"
         rel="noreferrer"
-        class="inline-flex items-center gap-1.5 text-[var(--theme-primary, var(--color-primary))] hover:underline font-semibold transition-colors font-[var(--theme-font-heading,var(--font-heading,inherit))]"
+        class="inline-flex items-center gap-1.5 text-[var(--theme-primary, var(--color-primary))] hover:underline font-semibold transition-colors font-heading"
         style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
       >
         <MessageCircle size={13} />
@@ -70,7 +70,7 @@
     on:click={(e) => selectNode(e, 'maps_iframe')}
     on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
     class={`w-full cq-map-frame-height rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] transition-all outline-none ${
-      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''
+      isIframeSelected ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
   >
     <iframe

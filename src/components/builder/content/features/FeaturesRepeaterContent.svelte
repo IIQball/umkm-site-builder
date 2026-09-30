@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import type { FeatureItem } from '@/types';
   import {
@@ -9,10 +10,12 @@
     makeHandleMoveArrayItem,
   } from '../content.helpers';
   import { FEATURE_ICON_OPTIONS } from '../../sections/features/featureIcons';
+  import SearchableIconDropdown from '../../inspector/SearchableIconDropdown.svelte';
+  import ImageUploadDropzone from '../../inspector/ImageUploadDropzone.svelte';
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
-  export let hasImageSupport: boolean = false;
+  export let hasItemImages: boolean = false;
 
   $: handleArrayItemChange = makeHandleArrayItemChange(section, onUpdate);
   $: handleAddArrayItem = makeHandleAddArrayItem(section, onUpdate);
@@ -33,11 +36,13 @@
   }
 </script>
 
-<div class="pt-3 border-t border-base-300 dark:border-slate-800 space-y-3">
+<div class="pt-3 border-t border-base-300 space-y-3 text-left">
   <div class="flex items-center justify-between">
     <span class="block font-semibold text-xs text-base-content/80">Daftar Fitur / Benefit</span>
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="xs"
       on:click={() =>
         handleAddArrayItem(itemsKey, {
           id: `f-${Date.now()}`,
@@ -47,66 +52,71 @@
           description: 'Deskripsi singkat keunggulan dan nilai tambah produk Anda.',
           badge: 'Baru',
         })}
-      class="flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-400 cursor-pointer"
+      class="!h-auto !min-h-0 !py-1 !px-2 text-primary gap-1"
     >
       <Plus size={12} />
       <span>Tambah Fitur</span>
-    </button>
+    </Button>
   </div>
 
   <div class="space-y-3">
     {#each features as feature, index}
-      <div class="p-3 bg-base-200/50 dark:bg-slate-950/60 border border-base-300 dark:border-slate-800 rounded-xl space-y-2.5">
-        <!-- Row 1: Icon Selector, Title, Reorder & Delete -->
+      <div class="p-3 bg-base-200/50 border border-base-300 rounded-xl space-y-2.5">
+        <!-- Row 1: Searchable Icon Selector, Title, Reorder & Delete -->
         <div class="flex items-center justify-between gap-2">
-          <select
-            value={feature.iconName || feature.icon || 'sparkles'}
-            on:change={(e) => {
-              handleFeatureFieldChange(index, 'icon', e.currentTarget.value);
-              handleFeatureFieldChange(index, 'iconName', e.currentTarget.value);
-            }}
-            class="w-28 px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none focus:border-blue-500"
-          >
-            {#each FEATURE_ICON_OPTIONS as opt}
-              <option value={opt.value}>{opt.label}</option>
-            {/each}
-          </select>
+          <div class="w-32 shrink-0">
+            <SearchableIconDropdown
+              label=""
+              options={FEATURE_ICON_OPTIONS}
+              selectedIcon={feature.iconName || feature.icon || 'sparkles'}
+              onSelect={(val) => {
+                handleFeatureFieldChange(index, 'icon', val);
+                handleFeatureFieldChange(index, 'iconName', val);
+              }}
+            />
+          </div>
 
           <input
             type="text"
             value={feature.title ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'title', e.currentTarget.value)}
-            class="flex-1 px-2.5 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content font-medium focus:outline-none focus:border-blue-500"
+            class="input input-bordered input-xs flex-1 font-medium"
             placeholder="Judul Fitur"
           />
 
           <div class="flex items-center">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               on:click={() => handleMoveArrayItem(itemsKey, index, 'up')}
               disabled={index === 0}
-              class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+              class="!w-6 !h-6 !min-h-0 !p-0 disabled:opacity-20"
               title="Pindah ke Atas"
             >
               <ChevronUp size={13} />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               on:click={() => handleMoveArrayItem(itemsKey, index, 'down')}
               disabled={index === features.length - 1}
-              class="p-1 text-base-content/50 hover:text-base-content disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+              class="!w-6 !h-6 !min-h-0 !p-0 disabled:opacity-20"
               title="Pindah ke Bawah"
             >
               <ChevronDown size={13} />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               on:click={() => handleRemoveArrayItem(itemsKey, index)}
-              class="p-1 text-base-content/50 hover:text-rose-500 rounded transition-colors cursor-pointer"
+              class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-error"
               title="Hapus Fitur"
             >
               <Trash2 size={13} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -116,14 +126,14 @@
             type="text"
             value={feature.badge ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'badge', e.currentTarget.value)}
-            class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs w-full"
             placeholder="Label Badge (opsional)"
           />
           <input
             type="text"
             value={feature.statLabel ?? ''}
             on:input={(e) => handleFeatureFieldChange(index, 'statLabel', e.currentTarget.value)}
-            class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs w-full"
             placeholder="Teks Tombol/Stat (opsional)"
           />
         </div>
@@ -133,38 +143,33 @@
           value={feature.description ?? ''}
           on:input={(e) => handleFeatureFieldChange(index, 'description', e.currentTarget.value)}
           rows="2"
-          class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-xs text-base-content focus:outline-none focus:border-blue-500 resize-y"
+          class="textarea textarea-bordered textarea-xs w-full resize-y"
           placeholder="Deskripsi singkat keunggulan..."></textarea>
 
-        <!-- Row 4: Links and Conditional Image URL -->
-        {#if hasImageSupport}
-          <div class="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              value={feature.imageUrl ?? ''}
-              on:input={(e) => handleFeatureFieldChange(index, 'imageUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
-              placeholder="URL Gambar Item (opsional)"
-            />
-            <input
-              type="text"
-              value={feature.linkUrl ?? ''}
-              on:input={(e) => handleFeatureFieldChange(index, 'linkUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
-              placeholder="URL Tautan / Link (opsional)"
-            />
-          </div>
-        {:else}
-          <div>
-            <input
-              type="text"
-              value={feature.linkUrl ?? ''}
-              on:input={(e) => handleFeatureFieldChange(index, 'linkUrl', e.currentTarget.value)}
-              class="w-full px-2 py-1 bg-base-100 dark:bg-slate-900 border border-base-300 dark:border-slate-700 rounded text-[11px] text-base-content focus:outline-none"
-              placeholder="URL Tautan / Link (opsional)"
+        <!-- Row 4: Conditional Image Upload Dropzone (Only for presets supporting item images) -->
+        {#if hasItemImages}
+          <div class="pt-1 border-t border-base-200 space-y-2">
+            <ImageUploadDropzone
+              compact={true}
+              imageUrl={feature.imageUrl || ''}
+              onImageChange={(url) => handleFeatureFieldChange(index, 'imageUrl', url)}
+              label={`Gambar Fitur #${index + 1}`}
+              placeholderTitle="Tarik Gambar ke Sini"
+              placeholderSubtitle="pilih manual"
             />
           </div>
         {/if}
+
+        <!-- Row 5: Link / URL -->
+        <div>
+          <input
+            type="text"
+            value={feature.linkUrl ?? ''}
+            on:input={(e) => handleFeatureFieldChange(index, 'linkUrl', e.currentTarget.value)}
+            class="input input-bordered input-xs w-full text-[11px]"
+            placeholder="URL Tautan / Link (opsional, misal #katalog)"
+          />
+        </div>
       </div>
     {/each}
   </div>

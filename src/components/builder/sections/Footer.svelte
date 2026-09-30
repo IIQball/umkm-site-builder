@@ -103,6 +103,11 @@
   $: boxedPrimaryCtaLink = props?.boxedPrimaryCtaLink || '#products';
   $: boxedSecondaryCtaText = props?.boxedSecondaryCtaText || 'Konsultasi Pesanan';
 
+  $: defaultOrder = ['brand_bio', 'contact_info', 'navigation_links', 'copyright'];
+  $: effectiveOrder = (Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
+    ? props.elementOrder
+    : defaultOrder) as string[];
+
   const handleSelectNode = (e: MouseEvent | KeyboardEvent, key: string) => {
     e.stopPropagation();
     if (sectionId) {
@@ -231,6 +236,7 @@
         {copyrightText}
         activeNodeId={$activeNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {/if}
   </div>

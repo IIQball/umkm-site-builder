@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { Check, Search, LayoutGrid, Sparkles } from 'lucide-svelte';
   import { Modal, Button } from '@/components/ui';
   import {
@@ -14,6 +15,8 @@
   export let onClose: () => void = () => {};
 
   let searchQuery = '';
+  let scrollContainerEl: HTMLElement | null = null;
+  let prevOpen = false;
 
   $: allPresets = PRESETS_BY_SECTION_TYPE[sectionType] || [];
   $: sectionLabel = SECTION_TYPE_LABELS[sectionType] || 'Section Layout';
@@ -28,8 +31,34 @@
     );
   });
 
+  async function scrollToActivePreset(smooth = true) {
+    await tick();
+    if (!scrollContainerEl || !activePresetId) return;
+    const targetCard = scrollContainerEl.querySelector(`[data-preset-id="${activePresetId}"]`) as HTMLElement;
+    if (targetCard) {
+      targetCard.scrollIntoView({
+        behavior: smooth ? 'smooth' : 'auto',
+        block: 'center',
+      });
+    }
+  }
+
+  $: if (open && !prevOpen) {
+    prevOpen = true;
+    setTimeout(() => {
+      scrollToActivePreset(false);
+    }, 50);
+    setTimeout(() => {
+      scrollToActivePreset(false);
+    }, 180);
+  } else if (!open) {
+    prevOpen = false;
+  }
+
   const handleSelect = (presetId: string) => {
+    activePresetId = presetId;
     onSelectPreset(presetId);
+    scrollToActivePreset(true);
   };
 </script>
 
@@ -51,12 +80,12 @@
           <div>
             <h3 class="text-base font-extrabold text-main font-heading leading-tight flex items-center gap-2">
               <span>Eksplorasi Tata Letak (8pt Grid)</span>
-              <span class="text-3xs font-mono uppercase bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
+              <span class="badge badge-primary badge-outline badge-xs font-mono uppercase font-bold">
                 {filteredPresets.length} Pilihan
               </span>
             </h3>
             <p class="text-2xs text-secondary mt-0.5">
-              {sectionLabel} — Klik kartu untuk langsung mengubah tata letak pada kanvas
+              {sectionLabel} - Klik kartu untuk langsung mengubah tata letak pada kanvas
             </p>
           </div>
         </div>
@@ -78,7 +107,7 @@
   </svelte:fragment>
 
   <!-- Modal Body: Side-by-Side Visual Shot Grid (Ala Dribbble) -->
-  <div class="flex-1 overflow-y-auto p-5 sm:p-7 bg-base-200/30">
+  <div bind:this={scrollContainerEl} class="flex-1 overflow-y-auto p-5 sm:p-7 bg-base-200/30">
     {#if filteredPresets.length === 0}
       <div class="py-16 text-center text-secondary space-y-2">
         <Sparkles size={28} class="mx-auto text-muted/60" />
@@ -90,6 +119,7 @@
         {#each filteredPresets as preset}
           {@const isSelected = activePresetId === preset.id}
           <div
+            data-preset-id={preset.id}
             role="button"
             tabindex="0"
             on:click={() => handleSelect(preset.id)}
@@ -106,14 +136,14 @@
 
               <!-- Tag Pill -->
               {#if preset.tag}
-                <span class="absolute top-3 left-3 px-2 py-0.5 rounded-full text-3xs font-bold font-mono tracking-wider bg-slate-900/90 text-slate-300 border border-slate-700/60 backdrop-blur-xs">
+                <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-slate-700/60 backdrop-blur-xs">
                   {preset.tag}
                 </span>
               {/if}
 
               <!-- Active Badge -->
               {#if isSelected}
-                <div class="absolute top-3 right-3 flex items-center gap-1 bg-primary text-white text-3xs font-bold font-mono uppercase px-2.5 py-1 rounded-full shadow-md animate-fade-in">
+                <div class="badge badge-primary badge-xs gap-1 font-mono uppercase absolute top-3 right-3 shadow-md animate-fade-in">
                   <Check size={10} strokeWidth={3} />
                   <span>Aktif</span>
                 </div>
@@ -139,14 +169,12 @@
               <!-- Action button inside card -->
               <div class="pt-2 border-t border-light/50 flex items-center justify-between">
                 <span class="text-3xs font-mono text-muted">Preset ID: {preset.id}</span>
-                <button
+                <Button
                   type="button"
-                  on:click|stopPropagation={() => handleSelect(preset.id)}
-                  class={`text-2xs font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isSelected
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'bg-nested hover:bg-primary/10 text-secondary hover:text-primary'
-                  }`}
+                  size="xs"
+                  variant={isSelected ? 'primary' : 'ghost'}
+                  on:click={(e) => { e.stopPropagation(); handleSelect(preset.id); }}
+                  class={isSelected ? 'shadow-xs' : 'bg-nested hover:bg-primary/10 text-secondary hover:text-primary'}
                 >
                   {#if isSelected}
                     <Check size={12} />
@@ -154,7 +182,7 @@
                   {:else}
                     <span>Pilih Layout</span>
                   {/if}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

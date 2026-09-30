@@ -15,7 +15,7 @@
 </script>
 
 <div class="space-y-3">
-  <div class="flex items-center justify-between p-2 bg-base-200/50 dark:bg-slate-900 rounded-lg">
+  <div class="flex items-center justify-between p-2 bg-base-200/50 rounded-lg">
     <span class="font-semibold text-base-content">Tampilkan Bar</span>
     <label class="relative inline-flex items-center cursor-pointer">
       <input
@@ -35,7 +35,7 @@
       type="text"
       value={announcementText}
       on:input={(e) => onPropChange('announcementText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
       placeholder="Gratis Ongkir se-Indonesia!"
     />
   </div>
@@ -47,7 +47,7 @@
         id="announcement-bg"
         value={announcementBg}
         on:change={(e) => onPropChange('announcementBg', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       >
         <option value="">Default Brand</option>
         {#each nodeBgColorOptions as opt}
@@ -61,7 +61,7 @@
         id="announcement-color"
         value={announcementTextColor}
         on:change={(e) => onPropChange('announcementTextColor', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       >
         {#each nodeTextColorOptions as opt}
           <option value={opt.value}>{opt.label}</option>

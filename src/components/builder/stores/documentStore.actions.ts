@@ -8,6 +8,8 @@ import {
   type DocumentState,
   clone,
 } from './editorStore.types';
+import { getDefaultHeroSlots } from '../sections/hero/heroLayout.helpers';
+import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
 
 export const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
   switch (type) {
@@ -97,24 +99,54 @@ export function applyThemeUpdates(
   return pushHistory(state, { ...state.template.config, theme: newTheme });
 }
 
+export const DEFAULT_SLOTS_BY_SECTION: Record<string, string[]> = {
+  hero: ['badge', 'title', 'subtitle', 'cta', 'image'],
+  header_announcement: ['logo', 'nav_links', 'cta', 'announcement_bar'],
+  features: ['badge', 'title', 'subtitle', 'features_grid'],
+  product_catalog: ['badge', 'title', 'subtitle', 'catalog_grid'],
+  testimonials: ['badge', 'title', 'subtitle', 'testimonials_grid'],
+  faq: ['badge', 'title', 'subtitle', 'faq_list'],
+  google_maps: ['badge', 'title', 'subtitle', 'map_view'],
+  footer: ['brand_bio', 'contact_info', 'navigation_links', 'copyright'],
+};
+
 export function applyReorderSectionSlot(
   state: DocumentState,
   sectionId: string,
   fromIndex: number,
   toIndex: number,
-  pushHistory: (state: DocumentState, config: TemplateConfig) => DocumentState
+  pushHistory: (state: DocumentState, config: TemplateConfig) => DocumentState,
+  groupKey: string = 'elementOrder'
 ): DocumentState {
   if (!state.template) return state;
   const sections = state.template.config.sections.map((s) => {
     if (s.id !== sectionId) return s;
     const currentProps = { ...(s.props || {}) };
-    const order = Array.isArray(currentProps.elementOrder)
-      ? [...currentProps.elementOrder]
-      : ['badge', 'title', 'subtitle', 'image', 'cta'];
+    let defaultSlots: string[] = [];
+    if (groupKey === 'rowOrder') {
+      defaultSlots = ['announcement_bar', 'navbar'];
+    } else if (groupKey === 'navbarOrder') {
+      const preset = (currentProps.layoutPreset as string) || s.layoutPreset || '';
+      defaultSlots = preset === 'centered_stacked' ? ['logo', 'nav_links'] : ['logo', 'nav_links', 'cta'];
+    } else if (s.type === 'hero') {
+      const preset = (currentProps.layoutPreset as string) || (s.styles?.layoutPreset as string) || s.layoutPreset || 'split_left_text';
+      defaultSlots = getDefaultHeroSlots(preset);
+    } else {
+      defaultSlots = DEFAULT_SLOTS_BY_SECTION[s.type] || ['badge', 'title', 'subtitle', 'image', 'cta'];
+    }
+
+    const currentList = currentProps[groupKey];
+    const order = Array.isArray(currentList) && currentList.length > 0
+      ? [...(currentList as string[])]
+      : [...defaultSlots];
     if (fromIndex < 0 || fromIndex >= order.length || toIndex < 0 || toIndex >= order.length) return s;
     const [moved] = order.splice(fromIndex, 1);
     order.splice(toIndex, 0, moved);
-    currentProps.elementOrder = order;
+    currentProps[groupKey] = order;
+    if (s.type === 'hero') {
+      const preset = (currentProps.layoutPreset as string) || (s.styles?.layoutPreset as string) || s.layoutPreset || 'split_left_text';
+      currentProps.heroPreset = preset;
+    }
     return { ...s, props: currentProps };
   });
   return pushHistory(state, { ...state.template.config, sections });
@@ -205,6 +237,29 @@ export function applyNodeSpacing(
     nodeStyles[nodeId] = current;
     currentProps.nodeStyles = nodeStyles;
     return { ...s, props: currentProps };
+  });
+  return pushHistory(state, { ...state.template.config, sections });
+}
+
+export function applyUpdateSectionLayoutPreset(
+  state: DocumentState,
+  sectionId: string,
+  preset: string,
+  pushHistory: (state: DocumentState, config: TemplateConfig) => DocumentState
+): DocumentState {
+  if (!state.template) return state;
+  const sections = state.template.config.sections.map((s) => {
+    if (s.id !== sectionId) return s;
+    const nextProps: Record<string, unknown> = { ...(s.props || {}), layoutPreset: preset };
+    if (s.type === 'hero') {
+      nextProps.elementOrder = getDefaultHeroSlots(preset);
+      nextProps.heroPreset = preset;
+    } else if (s.type === 'features') {
+      nextProps.elementOrder = getDefaultFeaturesSlots(preset);
+      nextProps.featuresPreset = preset;
+    }
+    const nextStyles = { ...(s.styles || {}), layoutPreset: preset };
+    return { ...s, layoutPreset: preset, props: nextProps, styles: nextStyles };
   });
   return pushHistory(state, { ...state.template.config, sections });
 }

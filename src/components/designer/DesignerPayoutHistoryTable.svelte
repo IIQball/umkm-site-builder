@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatCurrency } from '@/lib/utils/format';
+  import { formatCurrency, formatDate } from '@/lib/utils/format';
   import type { PayoutHistoryItem } from '@/types';
   import { Card, Badge, Table, Pagination } from '@/components/ui';
 
@@ -21,12 +21,6 @@
       // clipboard not available
     }
   };
-
-  const formatDate = (d: Date | string): string =>
-    new Date(d).toLocaleString('id-ID', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
 
   $: filteredPayouts = (payoutHistory || []).filter(p => {
     const matchesFilter = activeFilter === 'ALL' || p.status === activeFilter;
@@ -82,7 +76,7 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari keterangan / Ref ID..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 

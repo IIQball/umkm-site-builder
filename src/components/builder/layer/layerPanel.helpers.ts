@@ -2,23 +2,32 @@ import type { ComponentType } from 'svelte';
 import {
   Megaphone, Sparkles, CheckCircle, ShoppingBag, MessageSquare, HelpCircle,
   MapPin, Heading, FileText, Image, MousePointerClick,
-  ListFilter, Clock, Package, Star, User, Search, Navigation,
+  ListFilter, Clock, Package, Star, User, Search, Navigation, Layers,
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
-import type { LayerNodeItem, FeatureItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
+import type { LayerNodeItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
 import { DEFAULT_DEMO_PRODUCTS } from '../sections/productCatalog.helpers';
 import { getAllSectionDefinitions } from '../registry';
 import { getFooterLayerNodes } from '../sections/footer/footer.helpers';
+import {
+  headerHasRowOrder,
+  getDefaultHeaderNavbarOrder,
+  getHeaderTopBarType,
+} from '../sections/header/headerLayout.helpers';
+import { getEffectiveHeroElementOrder } from '../sections/hero/heroLayout.helpers';
+import {
+  getEffectiveFeaturesElementOrder,
+  getFeaturesSlotLabel,
+} from '../sections/features/featuresLayout.helpers';
+import {
+  getEffectiveCatalogElementOrder,
+  getCatalogSlotLabel,
+} from '../sections/catalog/catalogLayout.helpers';
 
 export const sectionTypeLabels: Record<TemplateSection['type'], string> = {
-  header_announcement: 'Header & Pengumuman',
-  hero: 'Banner Utama (Hero)',
-  features: 'Fitur & Keunggulan',
-  product_catalog: 'Katalog Produk',
-  testimonials: 'Testimoni Pelanggan',
-  faq: 'FAQ (Tanya Jawab)',
-  google_maps: 'Google Maps & Lokasi',
-  footer: 'Footer & Kontak',
+  header_announcement: 'Header & Pengumuman', hero: 'Banner Utama (Hero)', features: 'Fitur & Keunggulan',
+  product_catalog: 'Katalog Produk', testimonials: 'Testimoni Pelanggan', faq: 'FAQ (Tanya Jawab)',
+  google_maps: 'Google Maps & Lokasi', footer: 'Footer & Kontak',
 };
 
 export const sectionTypeIcons: Record<TemplateSection['type'], ComponentType> = getAllSectionDefinitions().reduce(
@@ -32,22 +41,27 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
     case 'header_announcement': {
       const list: LayerNodeItem[] = [];
       const preset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'default_split';
-      const noAnnouncementPresets = ['compact_inline', 'transparent_glass_header', 'floating_pill_island', 'top_contact_bar', 'delivery_order_cta', 'store_badge_highlight', 'promo_countdown_banner'];
+      const hasRows = headerHasRowOrder(preset);
+      const rowOrder = (section.props?.rowOrder as string[]) || (hasRows ? ['announcement_bar', 'navbar'] : ['navbar']);
 
-      if (preset === 'top_contact_bar') {
-        list.push({ id: 'contact_bar', name: 'Bilah Kontak Atas', icon: Clock });
-      } else if (preset === 'delivery_order_cta') {
-        list.push({ id: 'delivery_bar', name: 'Bilah Status Pengiriman', icon: Clock });
-      } else if (preset === 'promo_countdown_banner') {
-        list.push({ id: 'countdown_bar', name: 'Hitung Mundur Flash Sale', icon: Clock });
-      } else if (!noAnnouncementPresets.includes(preset) && section.props?.showAnnouncement !== false && section.props?.announcementText !== undefined && section.props?.announcementText !== '') {
-        list.push({ id: 'announcement', name: 'Bilah Pengumuman', icon: Megaphone });
+      if (hasRows && rowOrder.includes('announcement_bar') && section.props?.showAnnouncement !== false) {
+        const topBarType = getHeaderTopBarType(preset);
+        if (topBarType === 'contact') list.push({ id: 'contact_bar', name: 'Bar Kontak & Jam Buka', icon: Clock });
+        else if (topBarType === 'delivery') list.push({ id: 'delivery_bar', name: 'Bar Layanan Pesan Antar', icon: Clock });
+        else if (topBarType === 'countdown') list.push({ id: 'countdown_bar', name: 'Bar Hitung Mundur Promo', icon: Clock });
+        else list.push({ id: 'announcement', name: 'Bar Pengumuman Promo', icon: Megaphone });
       }
-      list.push({ id: 'logo', name: 'Logo Toko & Brand', icon: Image });
-      if (preset === 'store_badge_highlight') {
-        list.push({ id: 'store_badges', name: 'Lencana Legalitas (BPOM/Halal)', icon: CheckCircle });
-      }
-      list.push({ id: 'nav_links', name: 'Menu Navigasi', icon: ListFilter });
+
+      const defaultNav = getDefaultHeaderNavbarOrder(preset);
+      const navbarOrder = (Array.isArray(section.props?.navbarOrder) && section.props.navbarOrder.length > 0
+        ? section.props.navbarOrder
+        : defaultNav).filter((s: string) => defaultNav.includes(s)) as string[];
+
+      if (navbarOrder.includes('logo')) list.push({ id: 'logo', name: 'Logo & Brand Toko', icon: Image });
+      if (navbarOrder.includes('store_badges')) list.push({ id: 'store_badges', name: 'Lencana Legalitas (BPOM / Halal)', icon: CheckCircle });
+      if (navbarOrder.includes('search_bar')) list.push({ id: 'search_bar', name: 'Bilah Pencarian Produk', icon: Search });
+      if (navbarOrder.includes('nav_links')) list.push({ id: 'nav_links', name: 'Menu Navigasi Toko', icon: ListFilter });
+      if (navbarOrder.includes('cta')) list.push({ id: 'cta', name: 'Tombol Pesan WhatsApp (CTA)', icon: MousePointerClick });
       return list;
     }
     case 'hero': {
@@ -57,49 +71,41 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
         (section.styles?.layoutPreset as string) ||
         'split_left_text';
 
+      const elementOrder = getEffectiveHeroElementOrder(
+        preset,
+        section.props?.elementOrder,
+        section.props?.heroPreset as string
+      );
+
       const list: LayerNodeItem[] = [];
 
-      // 1. Badge / Kategori
-      if (preset !== 'interactive_terminal_code') {
-        list.push({ id: 'hero_badge', name: 'Lencana & Kategori', icon: Sparkles });
-      }
+      const HERO_SLOT_NODE_MAP: Record<string, { id: string; name: string; icon: ComponentType }> = {
+        badge: { id: 'hero_badge', name: 'Lencana Promo & Kategori', icon: Sparkles },
+        title: { id: 'hero_title', name: 'Judul Utama (H1)', icon: Heading },
+        subtitle: { id: 'hero_subtitle', name: 'Subjudul & Deskripsi', icon: FileText },
+        cta: { id: 'hero_cta', name: 'Tombol Aksi (CTA)', icon: MousePointerClick },
+        terminal: { id: 'hero_terminal', name: 'Kotak Kode Terminal', icon: FileText },
+        booking_card: { id: 'hero_booking_card', name: 'Formulir Reservasi', icon: FileText },
+        stat_counter: { id: 'hero_stat_counter', name: 'Metrik Statistik Angka', icon: CheckCircle },
+        trust_badges: { id: 'hero_trust_badges', name: 'Lencana Sertifikasi / Jaminan', icon: CheckCircle },
+        contrast_card: { id: 'hero_contrast_card', name: 'Kartu Pendaftaran Kuota', icon: Sparkles },
+        product_cards: { id: 'hero_product_cards', name: 'Dua Kartu Produk Bundling', icon: Package },
+        floating_cards: { id: 'hero_floating_cards', name: 'Kartu Keunggulan Melayang', icon: Sparkles },
+        social_proof: { id: 'hero_social_proof', name: 'Avatar Komunitas & Rating', icon: Star },
+        chat_simulation: { id: 'hero_chat_simulation', name: 'Simulasi Balon Chat WA', icon: MessageSquare },
+        email_capture: { id: 'hero_email_capture', name: 'Formulir Input Email / WA', icon: FileText },
+        category_pills: { id: 'hero_pill_category', name: 'Filter Kategori Kapsul', icon: ListFilter },
+        bento_promo: { id: 'hero_bento_promo', name: 'Ubin Teks Promo', icon: Sparkles },
+        bento_review: { id: 'hero_bento_review', name: 'Ubin Rating & Ulasan', icon: CheckCircle },
+      };
 
-      // 2. Judul Utama (H1)
-      list.push({ id: 'hero_title', name: 'Judul Utama (H1)', icon: Heading });
-
-      // 3. Deskripsi Subtitle
-      list.push({ id: 'hero_subtitle', name: 'Subjudul / Deskripsi', icon: FileText });
-
-      // 4. CTA Buttons
-      if (preset !== 'pill_category_selector') {
-        list.push({ id: 'hero_cta', name: 'Grup Tombol Aksi (CTA)', icon: MousePointerClick });
-      }
-
-      // 5. Preset-specific components
-      if (preset === 'side_card_booking') {
-        list.push({ id: 'hero_booking_card', name: 'Formulir Reservasi / Booking', icon: FileText });
-      } else if (preset === 'sticky_whatsapp_pill_float') {
-        list.push({ id: 'hero_chat_simulation', name: 'Simulasi Balon Chat WA', icon: MessageSquare });
-      } else if (preset === 'split_stat_counter') {
-        list.push({ id: 'hero_stat_counter', name: 'Metrik Statistik Angka', icon: CheckCircle });
-      } else if (preset === 'bento_masonry_hero') {
-        list.push({ id: 'hero_bento_promo', name: 'Ubin Teks Promo', icon: Sparkles });
-        list.push({ id: 'hero_bento_image', name: 'Ubin Gambar Galeri', icon: Image });
-        list.push({ id: 'hero_bento_review', name: 'Ubin Rating & Ulasan', icon: CheckCircle });
-      } else if (preset === 'pill_category_selector') {
-        list.push({ id: 'hero_pill_category', name: 'Filter Kategori Kapsul', icon: ListFilter });
-      } else if (preset === 'inline_email_capture') {
-        list.push({ id: 'hero_email_capture', name: 'Formulir Input Email', icon: FileText });
-      } else if (preset === 'social_proof_community') {
-        list.push({ id: 'hero_social_proof', name: 'Avatar Komunitas & Rating', icon: Sparkles });
-      } else if (preset === 'brand_story_founder') {
-        list.push({ id: 'hero_founder_photo', name: 'Foto Profil Pendiri', icon: Image });
-      }
-
-      // 6. Image showcase if supported
-      const imageSupportedPresets = ['split_left_text', 'split_right_text', 'full_banner_overlay', 'video_background_loop', 'floating_cards_showcase', 'dual_product_showcase', 'badge_ticker_split', 'editorial_luxury_serif', 'side_card_booking', 'dual_contrast_split', 'sticker_badge_playful', 'pill_category_selector', 'centered_minimal'];
-      if (imageSupportedPresets.includes(preset) && preset !== 'brand_story_founder' && preset !== 'bento_masonry_hero') {
-        list.push({ id: 'hero_image', name: 'Gambar Utama (Showcase)', icon: Image });
+      for (const slot of elementOrder) {
+        if (slot === 'image') {
+          const isFounder = preset === 'brand_story_founder';
+          list.push({ id: isFounder ? 'hero_founder_photo' : 'hero_image', name: isFounder ? 'Foto Profil Pendiri' : 'Gambar Utama (Showcase)', icon: Image });
+        } else if (HERO_SLOT_NODE_MAP[slot]) {
+          list.push(HERO_SLOT_NODE_MAP[slot]);
+        }
       }
 
       return list;
@@ -111,50 +117,42 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
         (section.styles?.layoutPreset as string) ||
         'grid_3_cards';
 
-      const list: LayerNodeItem[] = [
-        { id: 'features_heading', name: 'Judul & Subjudul Fitur', icon: Heading },
-      ];
+      const elementOrder = getEffectiveFeaturesElementOrder(
+        preset,
+        section.props?.elementOrder,
+        section.props?.featuresPreset as string
+      );
 
-      if (preset === 'before_after_comparison') {
-        list.push({ id: 'feature_item_0', name: 'Kartu Sebelum (Komparasi)', icon: FileText });
-        list.push({ id: 'feature_item_1', name: 'Kartu Sesudah (Keunggulan)', icon: CheckCircle });
-        return list;
-      }
+      const list: LayerNodeItem[] = [];
 
-      const rawItems = (Array.isArray(section.props?.items) && section.props.items.length > 0)
-        ? (section.props.items as FeatureItem[])
-        : (Array.isArray(section.props?.features) && section.props.features.length > 0)
-          ? (section.props.features as FeatureItem[])
-          : [];
+      const FEATURES_SLOT_ICON_MAP: Record<string, ComponentType> = {
+        badge: Sparkles,
+        title: Heading,
+        subtitle: FileText,
+        cta: MousePointerClick,
+        image: Image,
+        feature_cards: Package,
+        feature_rows: ListFilter,
+        ribbon_bar: Sparkles,
+        bento_spotlight: Package,
+        bento_cards: CheckCircle,
+        zigzag_items: Layers,
+        tab_nav: ListFilter,
+        tab_card: FileText,
+        accordion_list: ListFilter,
+        scroll_cards: Layers,
+        icon_matrix: CheckCircle,
+        before_card: FileText,
+        after_card: CheckCircle,
+        features_grid: Package,
+      };
 
-      let itemCount = 3;
-      if (preset === 'dense_icon_matrix') {
-        itemCount = Math.max(8, rawItems.length);
-      } else if (
-        ['bento_grid_asymmetric', 'alternating_zigzag_rows', 'interactive_tabs', 'vertical_accordion_showcase', 'sticky_scroll_highlight'].includes(preset)
-      ) {
-        itemCount = 4;
-      } else if (preset === 'horizontal_list') {
-        itemCount = rawItems.length > 0 ? rawItems.length : 6;
-      } else if (preset === 'grid_3_cards' || preset === 'banner_inline_bar') {
-        itemCount = 3;
-      }
-
-      for (let idx = 0; idx < itemCount; idx++) {
-        const item = rawItems[idx];
-        const name = item?.title ? `${item.title}` : `Kartu Keunggulan #${idx + 1}`;
-        list.push({ id: `feature_item_${idx}`, name, icon: CheckCircle });
-      }
-
-      const hasImage = [
-        'bento_grid_asymmetric',
-        'alternating_zigzag_rows',
-        'interactive_tabs',
-        'vertical_accordion_showcase',
-      ].includes(preset);
-
-      if (hasImage) {
-        list.push({ id: 'features_image', name: 'Gambar Ilustrasi Fitur', icon: Image });
+      for (const slot of elementOrder) {
+        list.push({
+          id: slot,
+          name: getFeaturesSlotLabel(slot, preset),
+          icon: FEATURES_SLOT_ICON_MAP[slot] || CheckCircle,
+        });
       }
 
       return list;
@@ -166,40 +164,52 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
         (section.styles?.layoutPreset as string) ||
         'grid_standard';
 
+      const rawProducts = (Array.isArray(section.props?.products) && section.props.products.length > 0
+        ? (section.props.products as ProductItem[])
+        : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+
+      const elementOrder = getEffectiveCatalogElementOrder(
+        preset,
+        section.props?.elementOrder,
+        rawProducts,
+        (section.props?.catalogPreset as string) || (section.props?.layoutPreset as string) || (section.layoutPreset as string)
+      );
+
+      const CATALOG_SLOT_ICON_MAP: Record<string, ComponentType> = {
+        badge: Sparkles,
+        title: Heading,
+        subtitle: FileText,
+        catalog_sidebar: ListFilter,
+        catalog_categories: ListFilter,
+        catalog_timer: Clock,
+        catalog_bundle_tier: Package,
+        catalog_cta: MousePointerClick,
+        product_image_0: Image,
+        product_desc: FileText,
+        catalog_price_rows: FileText,
+      };
+
       const list: LayerNodeItem[] = [];
 
-      // 1. Header node
-      list.push({ id: 'catalog_header', name: 'Judul & Subjudul Katalog', icon: Heading });
-
-      // 2. Preset-specific secondary nodes
-      if (preset === 'split_category_sidebar') {
-        list.push({ id: 'catalog_sidebar', name: 'Bilah Filter Kategori', icon: ListFilter });
-      } else if (preset === 'interactive_filter_tabs') {
-        list.push({ id: 'catalog_categories', name: 'Tab Filter Kategori', icon: ListFilter });
-      } else if (preset === 'flash_sale_countdown') {
-        list.push({ id: 'catalog_timer', name: 'Timer Hitung Mundur Promo', icon: Clock });
-      } else if (preset === 'bundle_package_tiers') {
-        list.push({ id: 'catalog_bundle_tier', name: 'Paket Bundling Hemat', icon: Package });
-        list.push({ id: 'catalog_cta', name: 'Tombol Pesan WhatsApp', icon: MousePointerClick });
-        return list;
-      } else if (preset === 'single_product_deep_focus') {
-        list.push({ id: 'product_image_0', name: 'Foto Produk Utama', icon: Image });
-        list.push({ id: 'product_desc', name: 'Deskripsi & Manfaat Produk', icon: FileText });
-        list.push({ id: 'catalog_cta', name: 'Tombol Pesan WhatsApp', icon: MousePointerClick });
-        return list;
-      } else if (preset === 'price_table_view' || preset === 'minimal_accordion_catalog') {
-        list.push({ id: 'catalog_price_rows', name: 'Daftar / Tabel Harga', icon: FileText });
-        return list;
+      for (const slot of elementOrder) {
+        const label = getCatalogSlotLabel(slot, preset, rawProducts);
+        if (slot.startsWith('product_item_')) {
+          const idx = parseInt(slot.replace('product_item_', ''), 10);
+          const prod = rawProducts[idx];
+          list.push({
+            id: prod?.id || slot,
+            name: label,
+            icon: ShoppingBag,
+          });
+        } else {
+          list.push({
+            id: slot,
+            name: label,
+            icon: CATALOG_SLOT_ICON_MAP[slot] || Sparkles,
+          });
+        }
       }
 
-      // 3. Product items
-      const rawProducts = Array.isArray(section.props?.products) && section.props.products.length > 0
-        ? (section.props.products as ProductItem[])
-        : DEFAULT_DEMO_PRODUCTS;
-
-      rawProducts.forEach((item: ProductItem, idx: number) => {
-        list.push({ id: item.id || `product_item_${idx}`, name: item.name ? `${item.name}` : `Produk #${idx + 1}`, icon: ShoppingBag });
-      });
       return list;
     }
     case 'testimonials': {

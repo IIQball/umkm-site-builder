@@ -147,7 +147,7 @@
     >
       <div class="relative flex-shrink-0">
         <div
-          class="w-9 h-9 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-xs shadow-xs"
+          class="w-9 h-9 rounded-lg bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs shadow-xs"
         >
           {userInitial}
         </div>

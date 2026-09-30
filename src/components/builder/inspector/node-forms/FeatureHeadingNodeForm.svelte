@@ -30,7 +30,7 @@
       type="text"
       value={badgeText}
       on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
       placeholder="Keunggulan Layanan Kami"
     />
   </div>
@@ -42,7 +42,7 @@
       type="text"
       value={title}
       on:input={(e) => onPropChange('title', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
       placeholder="Kenapa Memilih Produk UMKM Kami?"
     />
   </div>
@@ -53,7 +53,7 @@
       id="feat-title-tag"
       value={titleTag}
       on:change={(e) => handleTagChange(e.currentTarget.value)}
-      class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+      class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
     >
       <option value="h2">H2 (Section Title - Rekomendasi)</option>
       <option value="h3">H3 (Card Title)</option>
@@ -75,7 +75,7 @@
       value={subtitle}
       on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
       rows="3"
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs resize-y"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs resize-y"
       placeholder="Penjelasan keunggulan produk/layanan..."></textarea>
   </div>
 </div>

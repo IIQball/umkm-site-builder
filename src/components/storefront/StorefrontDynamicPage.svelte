@@ -42,7 +42,7 @@
   });
 </script>
 
-<div class="storefront-root min-h-screen w-full bg-canvas text-main font-[family-name:var(--font-family,sans-serif)] flex flex-col">
+<div class="storefront-root min-h-screen w-full bg-canvas text-main font-sans flex flex-col">
   <StoreStatusBanner {isOpen} />
 
   <main class="flex-1 w-full">
@@ -66,6 +66,7 @@
               ...(section.props || {}),
               categories: categories.length > 0 ? categories : (section.props?.categories || []),
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
+              whatsappTemplate: store?.whatsappTemplate || section.props?.whatsappTemplate,
             }
           }
         : section.type === 'google_maps'

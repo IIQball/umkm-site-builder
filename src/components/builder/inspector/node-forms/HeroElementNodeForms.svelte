@@ -8,6 +8,12 @@
   } from '../nodeContent.constants';
   import HeroImageNodeForm from './HeroImageNodeForm.svelte';
   import HeroExtraNodeForms from './HeroExtraNodeForms.svelte';
+  import HeroCtaLinkSelect from '../../content/hero/HeroCtaLinkSelect.svelte';
+  import SearchableIconDropdown from '../SearchableIconDropdown.svelte';
+  import {
+    stripEmoji,
+    HERO_BADGE_ICON_OPTIONS,
+  } from '../../sections/hero/heroIcons';
   import { isHeroImageSupported } from '../../sections/hero/hero.helpers';
 
   export let section: TemplateSection;
@@ -15,6 +21,7 @@
   export let onPropChange: (key: string, value: unknown) => void = () => {};
 
   $: badgeText = (section.props?.badgeText as string) ?? '';
+  $: badgeIcon = (section.props?.badgeIcon as string) ?? '';
   $: badgeColor = (section.props?.badgeColor as string) ?? 'primary';
   $: title = (section.props?.title as string) ?? '';
   $: subtitle = (section.props?.subtitle as string) ?? '';
@@ -41,23 +48,29 @@
 {#if nodeId === 'badge' || nodeId === 'hero_badge'}
   <div class="space-y-3">
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="badge-text-input">Teks Promo Badge</label>
+      <label class="font-semibold text-base-content" for="badge-text-input">Teks Lencana Promo (Badge)</label>
       <input
         id="badge-text-input"
         type="text"
         value={badgeText}
-        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+        on:input={(e) => onPropChange('badgeText', stripEmoji(e.currentTarget.value))}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
         placeholder="Diskon 50% Hari Ini"
       />
     </div>
+    <SearchableIconDropdown
+      label="Ikon Lencana Promo (Badge)"
+      selectedIcon={badgeIcon}
+      options={HERO_BADGE_ICON_OPTIONS}
+      onSelect={(val) => onPropChange('badgeIcon', val)}
+    />
     <div class="space-y-1">
       <label class="font-semibold text-base-content" for="badge-color-select">Varian Warna Badge</label>
       <select
         id="badge-color-select"
         value={badgeColor}
         on:change={(e) => onPropChange('badgeColor', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       >
         <option value="primary">Primary Brand (Solid)</option>
         <option value="secondary">Secondary Accent</option>
@@ -70,13 +83,13 @@
 {:else if nodeId === 'title' || nodeId === 'hero_title'}
   <div class="space-y-3">
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="hero-title-input">Judul Utama (Heading)</label>
+      <label class="font-semibold text-base-content" for="hero-title-input">Judul Utama (H1)</label>
       <textarea
         id="hero-title-input"
         rows="2"
         value={title}
         on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
         placeholder="Judul Toko / Headline Utama"
       ></textarea>
     </div>
@@ -86,7 +99,7 @@
         id="hero-title-tag"
         value={tagName}
         on:change={(e) => onPropChange('tagName', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       >
         <option value="h1">H1 (Hero Only - SSOT Single H1)</option>
         <option value="h2">H2 (Section Title)</option>
@@ -101,7 +114,7 @@
           id="title-color-select"
           value={getTitleStyle('color')}
           on:change={(e) => handleTitleColorChange(e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         >
           {#each nodeTextColorOptions as opt}
             <option value={opt.value}>{opt.label}</option>
@@ -114,7 +127,7 @@
           id="title-margin-select"
           value={section.styles?.titleMarginBottom || '16px'}
           on:change={(e) => onPropChange('titleMarginBottom', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         >
           {#each nodeMarginOptions as opt}
             <option value={opt.value}>{opt.label}</option>
@@ -126,13 +139,13 @@
 {:else if nodeId === 'subtitle' || nodeId === 'hero_subtitle'}
   <div class="space-y-3">
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="hero-subtitle-input">Deskripsi (Subtitle)</label>
+      <label class="font-semibold text-base-content" for="hero-subtitle-input">Subjudul & Deskripsi</label>
       <textarea
         id="hero-subtitle-input"
         rows="3"
         value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
         placeholder="Deskripsi singkat produk atau layanan toko Anda..."
       ></textarea>
     </div>
@@ -142,7 +155,7 @@
         id="subtitle-margin-select"
         value={section.styles?.subtitleMarginBottom || '24px'}
         on:change={(e) => onPropChange('subtitleMarginBottom', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       >
         {#each nodeMarginOptions as opt}
           <option value={opt.value}>{opt.label}</option>
@@ -159,27 +172,28 @@
     </p>
   {/if}
 {:else if nodeId === 'cta' || nodeId === 'hero_cta' || nodeId === 'hero_cta_primary' || nodeId === 'hero_cta_secondary'}
+  {@const isSecondary = nodeId === 'hero_cta_secondary'}
+  {@const activeCtaText = isSecondary ? ((section.props?.secondaryCtaText as string) ?? '') : ctaText}
+  {@const activeCtaLink = isSecondary ? ((section.props?.secondaryCtaLink as string) ?? '#') : ctaLink}
   <div class="space-y-3">
     <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="cta-text-input">Teks Tombol CTA</label>
+      <label class="font-semibold text-base-content" for="cta-text-input">
+        {isSecondary ? 'Teks Tombol Aksi Sekunder' : 'Teks Tombol Aksi (CTA)'}
+      </label>
       <input
         id="cta-text-input"
         type="text"
-        value={ctaText}
-        on:input={(e) => onPropChange('ctaText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
-        placeholder="Lihat Katalog"
+        value={activeCtaText}
+        on:input={(e) => onPropChange(isSecondary ? 'secondaryCtaText' : 'ctaText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
+        placeholder={isSecondary ? 'Pelajari Selengkapnya' : 'Lihat Katalog'}
       />
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-base-content" for="cta-link-input">Tautan Tombol CTA (URL)</label>
-      <input
-        id="cta-link-input"
-        type="text"
-        value={ctaLink}
-        on:input={(e) => onPropChange('ctaLink', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs font-mono"
-        placeholder="#products"
+    <div>
+      <HeroCtaLinkSelect
+        value={activeCtaLink}
+        label={isSecondary ? 'Tujuan Tautan Tombol Sekunder' : 'Tujuan Tautan Tombol CTA'}
+        onChange={(val) => onPropChange(isSecondary ? 'secondaryCtaLink' : 'ctaLink', val)}
       />
     </div>
     <div class="grid grid-cols-2 gap-2">
@@ -189,7 +203,7 @@
           id="cta-variant-select"
           value={ctaVariant}
           on:change={(e) => onPropChange('ctaVariant', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         >
           {#each btnVariantOptions as opt}
             <option value={opt.value}>{opt.label}</option>
@@ -202,7 +216,7 @@
           id="cta-height-select"
           value={section.styles?.buttonHeight || 'md'}
           on:change={(e) => onPropChange('buttonHeight', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         >
           {#each btnHeightOptions as opt}
             <option value={opt.value}>{opt.label}</option>
@@ -211,6 +225,8 @@
       </div>
     </div>
   </div>
+{:else if nodeId === 'image' || nodeId === 'hero_image' || nodeId === 'hero_media' || nodeId === 'hero_bento_image' || nodeId === 'hero_founder_photo'}
+  <HeroImageNodeForm {section} {onPropChange} />
 {:else}
   <HeroExtraNodeForms {section} {nodeId} {onPropChange} />
 {/if}

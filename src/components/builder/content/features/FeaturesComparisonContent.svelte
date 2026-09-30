@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Plus, Trash2 } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import { makeHandlePropChange } from '../content.helpers';
 
@@ -56,25 +57,27 @@
   }
 </script>
 
-<div class="pt-3 border-t border-base-300 dark:border-slate-800 space-y-4">
+<div class="pt-3 border-t border-base-300 space-y-4">
   <!-- Sisi Sebelum / Pasaran Biasa -->
   <div class="space-y-2 p-3 bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-xl">
     <div class="flex items-center justify-between">
       <span class="text-xs font-bold text-rose-700 dark:text-rose-400">Judul Kolom Sebelum / Biasa</span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="xs"
         on:click={addBeforeItem}
-        class="flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:text-rose-500 cursor-pointer"
+        class="!h-auto !min-h-0 !py-1 !px-2 text-rose-600 hover:text-rose-500 gap-1"
       >
         <Plus size={12} />
         <span>Tambah Poin</span>
-      </button>
+      </Button>
     </div>
     <input
       type="text"
       value={beforeTitle}
       on:input={(e) => handlePropChange('beforeTitle', e.currentTarget.value)}
-      class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-rose-300 dark:border-rose-800 rounded text-xs text-base-content focus:outline-none"
+      class="input input-bordered input-xs w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each beforeItems as item, idx}
@@ -83,17 +86,19 @@
             type="text"
             value={item}
             on:input={(e) => updateBeforeItem(idx, e.currentTarget.value)}
-            class="flex-1 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs flex-1"
             placeholder="Poin kekurangan"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             on:click={() => removeBeforeItem(idx)}
-            class="p-1 text-base-content/50 hover:text-rose-500 rounded cursor-pointer"
+            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-rose-500"
             title="Hapus Poin"
           >
             <Trash2 size={13} />
-          </button>
+          </Button>
         </div>
       {/each}
     </div>
@@ -103,20 +108,22 @@
   <div class="space-y-2 p-3 bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl">
     <div class="flex items-center justify-between">
       <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">Judul Kolom Sesudah / UMKM</span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="xs"
         on:click={addAfterItem}
-        class="flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-500 cursor-pointer"
+        class="!h-auto !min-h-0 !py-1 !px-2 text-emerald-600 hover:text-emerald-500 gap-1"
       >
         <Plus size={12} />
         <span>Tambah Poin</span>
-      </button>
+      </Button>
     </div>
     <input
       type="text"
       value={afterTitle}
       on:input={(e) => handlePropChange('afterTitle', e.currentTarget.value)}
-      class="w-full px-2.5 py-1 bg-base-100 dark:bg-slate-950 border border-emerald-300 dark:border-emerald-800 rounded text-xs text-base-content focus:outline-none"
+      class="input input-bordered input-xs w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each afterItems as item, idx}
@@ -125,17 +132,19 @@
             type="text"
             value={item}
             on:input={(e) => updateAfterItem(idx, e.currentTarget.value)}
-            class="flex-1 px-2 py-1 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded text-xs text-base-content focus:outline-none"
+            class="input input-bordered input-xs flex-1"
             placeholder="Poin keunggulan"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             on:click={() => removeAfterItem(idx)}
-            class="p-1 text-base-content/50 hover:text-rose-500 rounded cursor-pointer"
+            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-rose-500"
             title="Hapus Poin"
           >
             <Trash2 size={13} />
-          </button>
+          </Button>
         </div>
       {/each}
     </div>

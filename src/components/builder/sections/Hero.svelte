@@ -2,22 +2,19 @@
   import { editorStore, activeNodeId } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
   import { parsePx } from './hero/hero.helpers';
+  import { getEffectiveHeroElementOrder } from './hero/heroLayout.helpers';
   import HeroFullBanner from './hero/HeroFullBanner.svelte';
   import HeroCenteredMinimal from './hero/HeroCenteredMinimal.svelte';
   import HeroSplitLayout from './hero/HeroSplitLayout.svelte';
   import HeroTerminalCode from './hero/HeroTerminalCode.svelte';
   import HeroFloatingCards from './hero/HeroFloatingCards.svelte';
-  import HeroEmailCapture from './hero/HeroEmailCapture.svelte';
   import HeroSocialProof from './hero/HeroSocialProof.svelte';
   import HeroDualProduct from './hero/HeroDualProduct.svelte';
   import HeroBadgeTicker from './hero/HeroBadgeTicker.svelte';
-  import HeroPillCategory from './hero/HeroPillCategory.svelte';
   import HeroBentoGrid from './hero/HeroBentoGrid.svelte';
   import HeroStatCounter from './hero/HeroStatCounter.svelte';
   import HeroChatSimulation from './hero/HeroChatSimulation.svelte';
   import HeroStickerPlayful from './hero/HeroStickerPlayful.svelte';
-  import HeroEditorialSerif from './hero/HeroEditorialSerif.svelte';
-  import HeroSideBooking from './hero/HeroSideBooking.svelte';
   import HeroDualContrast from './hero/HeroDualContrast.svelte';
   import HeroFounderStory from './hero/HeroFounderStory.svelte';
   import HeroGradientMesh from './hero/HeroGradientMesh.svelte';
@@ -44,7 +41,15 @@
   $: secondaryCtaText = (props?.secondaryCtaText as string) || '';
   $: secondaryCtaLink = (props?.secondaryCtaLink as string) || '#';
   $: badgeText = props?.badgeText || 'Promo Spesial UMKM';
+  $: badgeIcon = (props?.badgeIcon as string) || '';
+  $: imageFrame = ((props?.imageFrame as 'none' | 'card' | 'grid') || 'none');
+  $: imageShape = ((props?.imageShape as 'rounded' | 'square' | 'circle' | 'squircle') || 'rounded');
   $: waNumber = (props?.whatsappNumber as string) || (props?.waNumber as string) || '';
+  $: elementOrder = getEffectiveHeroElementOrder(
+    activePreset,
+    props?.elementOrder,
+    props?.heroPreset as string
+  );
 
   $: parsedPadding = (() => {
     if (styles?.paddingTop || styles?.paddingBottom) {
@@ -94,12 +99,32 @@
       };
 
   $: liveActiveNodeId = isLiveStorefront ? null : $activeNodeId;
+
+  $: commonProps = {
+    badgeText,
+    badgeIcon,
+    tagName,
+    title,
+    subtitle,
+    ctaText,
+    ctaLink,
+    secondaryCtaText,
+    secondaryCtaLink,
+    imageUrl,
+    imageFrame,
+    imageShape,
+    waNumber,
+    activeNodeId: liveActiveNodeId,
+    selectNode,
+    selectNodeKey,
+    elementOrder,
+  };
 </script>
 
 <section
   id="hero-section"
   data-node="hero_container"
-  class="relative w-full overflow-hidden select-none hero-card {sectionBgClass} {isActive ? 'relative z-10' : ''}"
+  class="relative w-full overflow-hidden select-none hero-card flex flex-col justify-center {sectionBgClass} {isActive ? 'relative z-10' : ''}"
   style="background-color: var(--color-bg-base); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
@@ -131,295 +156,103 @@
   {/if}
 
   <div
-    class="relative z-10 w-full max-w-[var(--theme-max-width,1200px)] mx-auto builder-safe-container box-border"
-    style="padding-left: var(--active-safe-zone, var(--active-margin, 32px)); padding-right: var(--active-safe-zone, var(--active-margin, 32px)); padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
+    class="relative z-10 w-full mx-auto builder-safe-container box-border"
+    style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 32px)); padding-right: var(--active-safe-zone, var(--active-margin, 32px)); padding-top: {paddingTop}px; padding-bottom: {paddingBottom}px;"
   >
     {#if activePreset === 'full_banner_overlay' || activePreset === 'video_background_loop'}
-      <HeroFullBanner
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
+      <HeroFullBanner {...commonProps} />
     {:else if activePreset === 'centered_minimal'}
-      <HeroCenteredMinimal
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        {imageUrl}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+      <HeroCenteredMinimal {...commonProps} />
+    {:else if activePreset === 'split_left_text' || activePreset === 'split_right_text'}
+      <HeroSplitLayout
+        {...commonProps}
+        isImageLeft={activePreset === 'split_right_text'}
       />
     {:else if activePreset === 'social_proof_community'}
       <HeroSocialProof
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        socialProofStars={props?.socialProofStars}
+        socialProofAvatars={props?.socialProofAvatars}
+        socialProofText={props?.socialProofText}
       />
     {:else if activePreset === 'dual_product_showcase'}
       <HeroDualProduct
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        selectedProductIndex1={props?.selectedProductIndex1}
+        selectedProductIndex2={props?.selectedProductIndex2}
       />
     {:else if activePreset === 'badge_ticker_split'}
       <HeroBadgeTicker
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
-    {:else if activePreset === 'pill_category_selector'}
-      <HeroPillCategory
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {imageUrl}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        trustBadges={props?.trustBadges}
       />
     {:else if activePreset === 'bento_masonry_hero'}
       <HeroBentoGrid
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        bentoPromoTitle={props?.bentoPromoTitle}
+        bentoPromoHighlight={props?.bentoPromoHighlight}
+        bentoPromoSubtitle={props?.bentoPromoSubtitle}
+        bentoPromoTextColor={props?.bentoPromoTextColor}
+        bentoReviewStars={props?.bentoReviewStars}
+        bentoReviewText={props?.bentoReviewText}
+        bentoReviewAuthor={props?.bentoReviewAuthor}
+        bentoFeatureIcon={props?.bentoFeatureIcon}
+        bentoFeatureTitle={props?.bentoFeatureTitle}
+        bentoFeatureSubtitle={props?.bentoFeatureSubtitle}
       />
     {:else if activePreset === 'split_stat_counter'}
       <HeroStatCounter
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        stats={props?.stats}
       />
     {:else if activePreset === 'sticky_whatsapp_pill_float'}
       <HeroChatSimulation
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        chatMessages={props?.chatMessages}
       />
     {:else if activePreset === 'sticker_badge_playful'}
       <HeroStickerPlayful
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
-    {:else if activePreset === 'editorial_luxury_serif'}
-      <HeroEditorialSerif
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {imageUrl}
-        {waNumber}
-        {selectNode}
-        {selectNodeKey}
-      />
-    {:else if activePreset === 'side_card_booking'}
-      <HeroSideBooking
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        stickerText={props?.stickerText}
       />
     {:else if activePreset === 'dual_contrast_split'}
       <HeroDualContrast
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        contrastCardBg={props?.contrastCardBg}
+        contrastBadgeText={props?.contrastBadgeText}
+        contrastTitleText={props?.contrastTitleText}
+        contrastDescText={props?.contrastDescText}
       />
     {:else if activePreset === 'brand_story_founder'}
       <HeroFounderStory
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        founderRole={props?.founderRole}
+        founderTitle={props?.founderTitle}
       />
     {:else if activePreset === 'gradient_mesh_glow'}
       <HeroGradientMesh
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        trustBadges={props?.trustBadges}
       />
     {:else if activePreset === 'interactive_terminal_code'}
       <HeroTerminalCode
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        terminalFile={props?.terminalFile}
+        terminalCmd1={props?.terminalCmd1}
+        terminalRes1={props?.terminalRes1}
+        terminalCmd2={props?.terminalCmd2}
+        terminalRes2={props?.terminalRes2}
+        terminalStatus={props?.terminalStatus}
       />
     {:else if activePreset === 'floating_cards_showcase'}
       <HeroFloatingCards
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
+        {...commonProps}
+        floatingCards={props?.floatingCards}
       />
     {:else if activePreset === 'oversized_bold_typography'}
-      <HeroOversizedTypography
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
-    {:else if activePreset === 'inline_email_capture'}
-      <HeroEmailCapture
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
+      <HeroOversizedTypography {...commonProps} />
     {:else}
-      <HeroSplitLayout
-        isImageLeft={activePreset === 'split_right_text'}
-        {badgeText}
-        {tagName}
-        {title}
-        {subtitle}
-        {ctaText}
-        {ctaLink}
-        {secondaryCtaText}
-        {secondaryCtaLink}
-        {imageUrl}
-        {waNumber}
-        activeNodeId={liveActiveNodeId}
-        {selectNode}
-        {selectNodeKey}
-      />
+      <HeroSplitLayout {...commonProps} />
     {/if}
   </div>
 </section>

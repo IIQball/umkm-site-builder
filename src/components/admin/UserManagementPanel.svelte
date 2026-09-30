@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Search } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Card, Button, Input, Select, StatCard } from '@/components/ui';
+  import { Card, Input, Select, StatCard } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';

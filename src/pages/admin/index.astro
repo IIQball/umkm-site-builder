@@ -1,7 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
 import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
 import { db } from '@/lib/db/client';
 import { stores, users } from '@/db/schema';

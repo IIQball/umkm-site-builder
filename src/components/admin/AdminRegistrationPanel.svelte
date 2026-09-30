@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Card, Button, Input } from '@/components/ui';
-  import { UserPlus, Mail, Clock, CheckCircle, RefreshCcw, Link2, Search, XCircle, FileText } from 'lucide-svelte';
+  import { Mail, Clock, CheckCircle, RefreshCcw, Link2, Search, XCircle, FileText } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
   import { toast } from '@/lib/toast';
 

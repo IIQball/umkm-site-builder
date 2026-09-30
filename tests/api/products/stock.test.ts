@@ -15,6 +15,7 @@ vi.mock('@/db/index', () => ({
 
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
+  canManageStore: vi.fn(() => true),
 }));
 
 describe('PATCH /api/products/[id]/stock', () => {

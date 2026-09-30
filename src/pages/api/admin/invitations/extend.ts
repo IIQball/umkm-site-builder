@@ -21,13 +21,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const newExpiresAt = new Date();
     newExpiresAt.setHours(newExpiresAt.getHours() + 24);
 
-    let whereClause = eq(tenantInvitations.id, body.id);
-    if (user.role !== 'superadmin') {
-      whereClause = and(
-        eq(tenantInvitations.id, body.id), 
-        eq(tenantInvitations.invitedBy, user.id)
-      ) as any;
-    }
+    const whereClause = user.role !== 'superadmin' 
+      ? and(eq(tenantInvitations.id, body.id), eq(tenantInvitations.invitedBy, user.id))
+      : eq(tenantInvitations.id, body.id);
 
     const updated = await db
       .update(tenantInvitations)

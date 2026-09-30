@@ -31,7 +31,6 @@
   }
 
   export let stores: AssistedStoreItem[] = []
-  export let currentUser: { id: string; role?: string } | null = null
 
   let searchQuery = '';
 

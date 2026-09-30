@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { db, tenantInvitations, users } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const DELETE: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {

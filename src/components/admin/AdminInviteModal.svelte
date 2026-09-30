@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UserPlus, Store, ShieldCheck } from 'lucide-svelte'
+  import { UserPlus, Store } from 'lucide-svelte'
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
   import { Button, Input, Modal } from '@/components/ui';
@@ -9,7 +9,6 @@
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
   export let isOpen = false
-  export let currentUser: { role?: string; id?: string } | null = null
 
   let newName = '';
   let newEmail = '';

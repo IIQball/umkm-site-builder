@@ -4,7 +4,6 @@
   import Button from "@/components/ui/Button.svelte";
   import Input from "@/components/ui/Input.svelte";
   import { Eye, EyeOff } from "lucide-svelte";
-  import { authClient } from "@/lib/auth-client";
   import { toast } from "@/lib/toast";
 
   let token = "";

@@ -80,7 +80,7 @@ export const auth = betterAuth({
           parsedUrl.pathname = '/activation';
         }
         finalUrl = parsedUrl.toString();
-      } catch (e) {
+      } catch {
         // ignore parsing error
       }
 
@@ -246,9 +246,6 @@ export const auth = betterAuth({
             }
           }
 
-          console.log("=== DB HOOK USER CREATE BEFORE ===");
-          console.log(JSON.stringify(user, null, 2));
-          
           return {
             data: {
               ...user,

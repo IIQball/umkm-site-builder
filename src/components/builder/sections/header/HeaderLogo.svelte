@@ -22,16 +22,16 @@
   $: isNodeActive = isActive && $activeNodeId === 'logo';
 
   const typoTokenMap: Record<string, string> = {
-    h2: 'var(--theme-text-h2, 26px)',
-    h3: 'var(--theme-text-h3, 20px)',
-    body: 'var(--theme-text-body, 16px)',
+    h2: 'var(--theme-text-h2, var(--text-h2-size, 26px))',
+    h3: 'var(--theme-text-h3, var(--text-h3-size, 20px))',
+    body: 'var(--theme-text-body, var(--text-body-size, 16px))',
   };
 
   $: textInlineStyle = [
     `color: ${nodeStyles.color || logoTextColor}`,
-    `font-size: ${nodeStyles.fontSize || typoTokenMap[logoTypographyToken] || 'var(--theme-text-h3, 20px)'}`,
-    `font-weight: ${nodeStyles.fontWeight || '700'}`,
-    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-heading, inherit)',
+    `font-size: ${nodeStyles.fontSize || typoTokenMap[logoTypographyToken] || 'var(--theme-text-h3, var(--text-h3-size, 20px))'}`,
+    `font-weight: ${nodeStyles.fontWeight || 'var(--theme-text-h3-weight, var(--text-h3-weight, 700))'}`,
+    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-heading, var(--font-heading, inherit))',
   ].filter(Boolean).join('; ');
 
   const handleClick = (e: MouseEvent) => {
@@ -52,9 +52,10 @@
   tabindex="0"
   on:click={handleClick}
   on:keydown={handleKeyDown}
-  class={`flex items-center gap-2.5 cursor-pointer rounded-lg transition-all select-none flex-shrink-0 ${
+  style="border-radius: 8px;"
+  class={`flex items-center gap-2.5 cursor-pointer transition-all select-none flex-shrink-0 ${
     isNodeActive
-      ? 'ring-2 ring-primary bg-blue-50/30 dark:bg-blue-950/30'
+      ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10'
       : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
   }`}
 >
@@ -64,13 +65,13 @@
       <img
         src={logoImageUrl}
         alt={logoText || 'Logo'}
-        style={`height: ${logoHeight}px; width: ${logoShape === 'circle' ? `${logoHeight}px` : 'auto'}; max-height: 80px;`}
-        class={`object-cover select-none pointer-events-none ${logoShape === 'circle' ? 'rounded-full aspect-square' : 'rounded-lg'}`}
+        style={`height: ${logoHeight}px; width: ${logoShape === 'circle' ? `${logoHeight}px` : 'auto'}; max-height: 80px; border-radius: ${logoShape === 'circle' ? '9999px' : (props.logoBorderRadius || '6px')};`}
+        class="object-cover select-none pointer-events-none"
       />
     {:else}
       <div
-        style={`height: ${logoHeight}px; width: ${logoHeight}px;`}
-        class={`bg-blue-600/10 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-200 dark:border-blue-900 ${logoShape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}
+        style={`height: ${logoHeight}px; width: ${logoHeight}px; border-radius: ${logoShape === 'circle' ? '9999px' : (props.logoBorderRadius || '6px')}; background-color: color-mix(in srgb, var(--theme-primary, var(--color-primary)) 12%, transparent); color: var(--theme-primary, var(--color-primary)); border: 1px solid color-mix(in srgb, var(--theme-primary, var(--color-primary)) 25%, transparent);`}
+        class="flex items-center justify-center flex-shrink-0"
       >
         <Store size={Math.max(16, Math.min(32, logoHeight * 0.55))} />
       </div>
@@ -80,7 +81,7 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class={`font-heading font-bold text-lg text-[var(--color-text-main)] tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
+      class={`tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
         hideTextOnMobile && isMobile ? 'hidden' : 'inline-block'
       }`}
     >

@@ -2,8 +2,10 @@
   import type { Snippet } from 'svelte';
   import { ArrowRight } from 'lucide-svelte';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
+  import { resolveFeatureIcon, stripEmoji } from './heroIcons';
 
   export let badgeText: string = '';
+  export let badgeIcon: string = '';
   export let tagName: string = 'h1';
   export let title: string = '';
   export let subtitle: string = '';
@@ -43,15 +45,19 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px));"
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit);"
         class={`badge badge-outline gap-1.5 px-3 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-2xs ${
           isBadgeActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/15'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/15'
             : 'bg-[var(--color-nested-base)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
-        <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-primary);"></span>
-        <span>{badgeText}</span>
+        {#if badgeIcon}
+          <svelte:component this={resolveFeatureIcon(badgeIcon)} size={12} class="text-[var(--color-primary)] shrink-0" />
+        {:else}
+          <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-primary);"></span>
+        {/if}
+        <span>{stripEmoji(badgeText)}</span>
       </div>
     {:else if slot === 'title'}
       <svelte:element
@@ -61,14 +67,14 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_title')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
-        style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); color: var(--color-text-main);"
+        style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); color: var(--color-text-main); font-family: var(--font-heading, inherit);"
         class={`text-heading-xl font-heading font-extrabold tracking-tight leading-tight transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 block w-full ${
           isTitleActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
-        {title}
+        {stripEmoji(title)}
       </svelte:element>
     {:else if slot === 'subtitle' && subtitle}
       <div
@@ -77,14 +83,14 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
-        style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--color-text-secondary);"
+        style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--color-text-secondary); font-family: var(--font-body, var(--font-sans, inherit));"
         class={`text-body-base leading-relaxed font-sans transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 w-full ${
           isSubtitleActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
-        <p>{subtitle}</p>
+        <p>{stripEmoji(subtitle)}</p>
       </div>
     {:else if slot === 'cta' && (ctaText || secondaryCtaText)}
       <div
@@ -97,7 +103,7 @@
           align === 'center' ? 'justify-center' : 'justify-start'
         } ${
           isCtaActive
-            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
+            ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
         }`}
       >
@@ -105,28 +111,28 @@
           {#if ctaVariant === 'tertiary'}
             <a
               href={effectivePrimaryLink}
-              style="color: var(--theme-btn-tertiary-text, var(--btn-tertiary-text, var(--color-text-main)));"
+              style="color: var(--theme-btn-tertiary-text, var(--btn-tertiary-text, var(--color-text-main))); font-family: var(--font-heading, inherit);"
               class="btn btn-link btn-sm font-heading font-semibold text-sm no-underline hover:underline px-0"
             >
-              <span>{ctaText}</span>
+              <span>{stripEmoji(ctaText)}</span>
               <ArrowRight size={15} class="ml-1.5" />
             </a>
           {:else if ctaVariant === 'secondary' || ctaVariant === 'outline'}
             <a
               href={effectivePrimaryLink}
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-btn-secondary-text, var(--btn-secondary-text, var(--color-text-main))); border: 1px solid var(--theme-btn-outline-border, var(--btn-outline-border, var(--color-border)));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-btn-secondary-text, var(--btn-secondary-text, var(--color-text-main))); border: 1px solid var(--theme-btn-outline-border, var(--btn-outline-border, var(--color-border))); font-family: var(--font-heading, inherit);"
               class="btn btn-outline btn-sm font-heading font-semibold text-sm px-6 shadow-2xs"
             >
-              <span>{ctaText}</span>
+              <span>{stripEmoji(ctaText)}</span>
               <ArrowRight size={15} class="ml-1.5" />
             </a>
           {:else}
             <a
               href={effectivePrimaryLink}
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, currentColor); border: none; font-family: var(--font-heading, inherit);"
               class="btn btn-primary btn-sm font-heading font-semibold text-sm px-6 shadow-xs"
             >
-              <span>{ctaText}</span>
+              <span>{stripEmoji(ctaText)}</span>
               <ArrowRight size={15} class="ml-1.5" />
             </a>
           {/if}
@@ -135,18 +141,18 @@
           {#if secondaryCtaVariant === 'tertiary'}
             <a
               href={secondaryCtaLink || '#'}
-              style="color: var(--theme-btn-tertiary-text, var(--btn-tertiary-text, var(--color-text-main)));"
+              style="color: var(--theme-btn-tertiary-text, var(--btn-tertiary-text, var(--color-text-main))); font-family: var(--font-heading, inherit);"
               class="btn btn-link btn-sm font-heading font-semibold text-sm no-underline hover:underline px-0"
             >
-              <span>{secondaryCtaText}</span>
+              <span>{stripEmoji(secondaryCtaText)}</span>
             </a>
           {:else}
             <a
               href={secondaryCtaLink || '#'}
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-btn-secondary-text, var(--btn-secondary-text, var(--color-text-main))); border: 1px solid var(--theme-btn-outline-border, var(--btn-outline-border, var(--color-border)));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-btn-secondary-text, var(--btn-secondary-text, var(--color-text-main))); border: 1px solid var(--theme-btn-outline-border, var(--btn-outline-border, var(--color-border))); font-family: var(--font-heading, inherit);"
               class="btn btn-outline btn-sm font-heading font-semibold text-sm px-5 shadow-2xs"
             >
-              <span>{secondaryCtaText}</span>
+              <span>{stripEmoji(secondaryCtaText)}</span>
             </a>
           {/if}
         {/if}

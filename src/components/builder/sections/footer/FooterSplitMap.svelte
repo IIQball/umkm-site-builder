@@ -16,7 +16,7 @@
   <div class="cq-split-map">
     <!-- Kolom Kiri: Informasi Kontak Toko -->
     <div
-      class="space-y-3 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="space-y-3 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_contact')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
       role="button"
@@ -53,7 +53,7 @@
 
     <!-- Kolom Kanan: Peta Mini -->
     <div
-      class="p-2 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_mini_map' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+      class="p-2 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_mini_map' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       on:click={(e) => selectNode(e, 'footer_mini_map')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_mini_map')}
       role="button"
@@ -72,7 +72,7 @@
 
   <!-- Bottom Copyright -->
   <div
-    class="border-t border-[var(--color-border)] pt-4 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="border-t border-[var(--color-border)] pt-4 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}

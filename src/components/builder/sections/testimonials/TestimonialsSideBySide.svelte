@@ -51,7 +51,7 @@
           : 'bg-card border border-light/80 shadow-xs hover:shadow-md'
       } ${
         isCardActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-2xl'
           : ''
       }`}
     >

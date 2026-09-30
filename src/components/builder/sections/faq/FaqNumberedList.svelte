@@ -29,7 +29,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectItem(e, index, item); }}
       class={`flex gap-4 p-4 rounded-2xl border-b border-[var(--color-border)] transition-all duration-200 cursor-pointer ${
         isItemActive
-          ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900 bg-[var(--theme-surface, var(--color-card-base))] shadow-xs'
+          ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 bg-[var(--theme-surface, var(--color-card-base))] shadow-xs'
           : 'hover:bg-[var(--theme-surface, var(--color-card-base))]/60'
       }`}
     >
@@ -37,10 +37,10 @@
         {formatIndex(index)}
       </span>
       <div class="space-y-1">
-        <h4 class="font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))]">
+        <h4 class="font-heading font-bold text-xs sm:text-sm text-[var(--theme-text-primary, var(--color-text-main))]">
           {item.question}
         </h4>
-        <p class="text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed font-[var(--font-family,inherit)]">
+        <p class="text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed font-sans">
           {item.answer}
         </p>
       </div>

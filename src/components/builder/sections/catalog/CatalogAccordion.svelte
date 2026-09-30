@@ -5,6 +5,7 @@
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Pesan';
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   function selectRows(e: Event) {
@@ -29,19 +30,21 @@
   on:click={selectRows}
   on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
   class={`max-w-2xl mx-auto text-left space-y-2.5 cursor-pointer transition-all ${
-    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 rounded-3xl p-2' : ''
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 rounded-3xl p-2' : ''
   }`}
 >
   {#each products as product, idx (product.id || product.name + idx)}
     {@const isItemActive = $canvasStore.selectedNodeId === (product.id || `product_item_${idx}`)}
 
     <div
+      data-node={product.id || `product_item_${idx}`}
+      data-node-id={product.id || `product_item_${idx}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, idx, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
       class={`p-4 rounded-2xl border border-light/80 bg-card shadow-xs flex justify-between items-center transition-all duration-200 cursor-pointer ${
-        isItemActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900' : 'hover:border-slate-300 dark:hover:border-slate-700'
+        isItemActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : 'hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       <div class="min-w-0 pr-3">
@@ -56,15 +59,16 @@
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
-        <span class="font-heading font-black text-xs sm:text-sm text-primary">
+        <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
           {formatRupiah(product.price)}
         </span>
         <button
           type="button"
           on:click|stopPropagation={() => onBuyNow(product, {})}
-          class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-heading font-semibold text-xs transition-all shadow-xs"
+          class="h-8 px-4 shadow-xs hover:opacity-90 active:scale-[0.98] text-xs font-heading font-bold transition-all flex items-center justify-center"
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
         >
-          Pesan
+          <span>{buyButtonText || 'Pesan'}</span>
         </button>
       </div>
     </div>

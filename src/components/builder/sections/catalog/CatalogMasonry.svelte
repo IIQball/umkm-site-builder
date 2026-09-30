@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { ProductItem } from '@/types';
-  import { ShoppingBag } from 'lucide-svelte';
+  import { ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import { formatRupiah } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Beli';
+  export let cartButtonText: string = 'Keranjang';
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -33,18 +35,22 @@
     {@const aspectClass = aspectRatios[index % aspectRatios.length]}
 
     <div
+      data-node={product.id || `product_item_${index}`}
+      data-node-id={product.id || `product_item_${index}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`bg-card p-3 rounded-2xl border border-light/80 shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between ${
         isCardActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       <div>
         <div
+          data-node={`product_image_${index}`}
+          data-node-id={`product_image_${index}`}
           role="button"
           tabindex="0"
           on:click={(e) => selectImage(e, index)}
@@ -91,16 +97,18 @@
           <button
             type="button"
             on:click|stopPropagation={() => onAddToCart(product, {})}
-            class="h-7 px-2.5 rounded-lg bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-[11px] font-semibold transition-all"
+            class="h-7 px-2.5 rounded-lg border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer"
           >
-            +
+            <ShoppingCart size={12} />
+            <span>{cartButtonText || 'Keranjang'}</span>
           </button>
           <button
             type="button"
             on:click|stopPropagation={() => onBuyNow(product, {})}
-            class="h-7 px-3 rounded-lg bg-primary hover:bg-primary-hover active:scale-[0.98] text-white text-[11px] font-bold transition-all"
+            class="h-7 px-3 rounded-lg active:scale-[0.98] text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs hover:opacity-90 flex items-center justify-center"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
-            Beli
+            {buyButtonText || 'Beli'}
           </button>
         </div>
       </div>

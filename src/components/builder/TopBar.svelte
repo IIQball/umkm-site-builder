@@ -80,13 +80,16 @@
         use:focus
       />
     {:else}
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="xs"
         on:click={() => (isEditingName = true)}
-        class="text-xs sm:text-sm font-semibold text-main truncate hover:text-primary hover:bg-nested px-2 py-0.5 rounded transition-colors text-left max-w-[140px] sm:max-w-[220px]"
+        class="!p-1 !h-auto !min-h-0 text-xs sm:text-sm font-semibold text-main truncate hover:text-primary hover:bg-nested rounded text-left max-w-[140px] sm:max-w-[220px]"
         title="Klik untuk mengubah nama template"
       >
         {templateName}
-      </button>
+      </Button>
     {/if}
 
     <Badge variant={badge.variant} size="sm" className="hidden sm:inline-flex capitalize">

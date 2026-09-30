@@ -9,10 +9,10 @@
   export let activePreset: string = 'grid_standard';
   export let isHorizontalLayout: boolean = false;
   export let cardRadiusClass: string = 'rounded-2xl';
-  export let cardPresetClass: string = 'bg-white shadow-sm border border-slate-100';
+  export let cardPresetClass: string = 'bg-[var(--color-card-base)] shadow-sm border border-[var(--color-border)]';
   export let imageAspectClass: string = 'aspect-square w-full h-full object-cover';
   export let badgePosClass: string = 'top-3 left-3';
-  export let badgeColorClass: string = 'bg-red-500 text-white';
+  export let badgeColorClass: string = 'bg-[var(--color-primary)] text-white';
   export let nameSizeClass: string = 'text-sm font-semibold';
   export let nameWeightClass: string = 'font-semibold';
   export let isInlinePrice: boolean = false;
@@ -24,6 +24,8 @@
   export let onDragOver: (e: DragEvent, idx: number) => void = () => {};
   export let onDrop: (e: DragEvent, idx: number) => void = () => {};
   export let onDragLeave: () => void = () => {};
+  export let buyButtonText: string = '';
+  export let cartButtonText: string = 'Keranjang';
   export let onAddToCart: (prod: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (prod: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -79,7 +81,8 @@
 </script>
 
 <div
-  data-node="product_card"
+  data-node={`product_item_${index}`}
+  data-node-id={`product_item_${index}`}
   role="group"
   aria-label={product.name || 'Kartu Produk'}
   draggable={isActive}
@@ -90,13 +93,14 @@
   class="relative overflow-hidden transition-all duration-200 {cardRadiusClass} {cardPresetClass} {
     activePreset === 'carousel_scroll' ? 'min-w-[260px] max-w-[280px] snap-start flex flex-col' : isHorizontalLayout || activePreset === 'list_compact' ? 'flex flex-row items-stretch' : 'flex flex-col'
   } {isActive ? 'cursor-grab active:cursor-grabbing' : ''} {
-    dropTargetIdx === index ? 'ring-2 ring-primary shadow-xl' : ''
+    dropTargetIdx === index ? 'ring-2 ring-[var(--color-primary)] shadow-xl' : ''
   } {draggedIdx === index ? 'opacity-30' : ''}"
 >
   <!-- Image with Nested Radius -->
   <div
-    data-node="product_image"
-    class="relative overflow-hidden bg-slate-100 dark:bg-slate-800 {isHorizontalLayout || activePreset === 'list_compact' ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}"
+    data-node={`product_image_${index}`}
+    data-node-id={`product_image_${index}`}
+    class="relative overflow-hidden bg-[var(--color-nested-base)] {isHorizontalLayout || activePreset === 'list_compact' ? 'w-32 sm:w-44 flex-shrink-0' : 'w-full'}"
   >
     {#if displayImage}
       <ImageFallback
@@ -116,7 +120,10 @@
     {/if}
     {#if product.badge}
       <div data-node="product_badge" class="absolute {badgePosClass} z-10">
-        <span class="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider {badgeColorClass}">
+        <span
+          class="px-2.5 py-1 text-2xs font-heading font-semibold rounded-full uppercase tracking-wider shadow-xs {badgeColorClass}"
+          style="background-color: var(--color-primary); color: #ffffff;"
+        >
           {product.badge}
         </span>
       </div>
@@ -127,17 +134,17 @@
   <div class="p-4 flex-1 flex flex-col justify-between {isHorizontalLayout || activePreset === 'list_compact' ? 'min-w-0' : ''}">
     <div>
       {#if categoryLabel}
-        <span class="inline-block mb-1.5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">{categoryLabel}</span>
+        <span class="inline-block mb-1.5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-full bg-[var(--color-nested-base)] text-[var(--color-text-secondary)]">{categoryLabel}</span>
       {/if}
       <h3
         data-node="product_title"
-        class="mb-1 text-[var(--theme-text-primary, var(--color-text-main))] line-clamp-2 {nameSizeClass} {nameWeightClass}"
+        class="mb-1 text-[var(--color-text-main)] line-clamp-2 {nameSizeClass} {nameWeightClass}"
       >
         {product.name || 'Nama Produk'}
       </h3>
       
       {#if product.description}
-        <p class="text-xs text-slate-500 line-clamp-2 mb-3">
+        <p class="text-xs text-[var(--color-text-secondary)] line-clamp-2 mb-3">
           {product.description}
         </p>
       {/if}
@@ -157,11 +164,10 @@
                       type="button"
                       disabled={!opt.isAvailable}
                       on:click={() => handleVariantChange(group.groupName, opt.name)}
-                      class="px-3 py-1 text-[10px] font-semibold rounded-full border transition-all {
-                        selections[group.groupName] === opt.name
-                          ? 'bg-[var(--theme-primary, var(--color-primary))] border-[var(--theme-primary, var(--color-primary))] text-white shadow-sm'
-                          : 'border-slate-300 text-slate-500 hover:border-slate-400'
-                      } disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="px-3 py-1 text-2xs font-heading font-semibold rounded-full border transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={selections[group.groupName] === opt.name
+                        ? 'background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); border-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white));'
+                        : 'border-color: var(--color-border); color: var(--color-text-secondary); background-color: transparent;'}
                     >
                       {opt.name} {opt.priceAdjustment ? `(+${formatIDR(opt.priceAdjustment)})` : ''}
                     </button>
@@ -177,10 +183,10 @@
     {/if}
 
     {#if isInlinePrice}
-      <div class="mt-auto pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+      <div class="mt-auto pt-2 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2">
         <div data-node="product_price" class="min-w-0">
-          <span class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block leading-tight">Harga</span>
-          <p class="text-sm sm:text-base font-extrabold font-mono text-[var(--theme-primary, var(--color-primary))] truncate tracking-tight">
+          <span class="text-[10px] uppercase font-semibold text-[var(--color-text-muted)] block leading-tight">Harga</span>
+          <p class="text-sm sm:text-base font-extrabold font-mono text-[var(--color-primary)] truncate tracking-tight">
             {formatIDR(computedPrice)}
           </p>
         </div>
@@ -188,38 +194,44 @@
           <button
             type="button"
             on:click={() => { if (!isActive) onAddToCart(product, selections); }}
-            class="px-3 py-2 text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white {ctaBtnRadiusClass}"
+            class="px-3 py-2 text-xs font-heading font-bold border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] text-[var(--color-text-main)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-[var(--color-card-base)] {ctaBtnRadiusClass}"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 12px));"
           >
             <ShoppingCart size={14} />
+            <span class="hidden sm:inline">{cartButtonText || 'Keranjang'}</span>
           </button>
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`px-3.5 py-2 text-xs font-bold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 bg-[var(--theme-primary, var(--color-primary))] text-white ${ctaBtnRadiusClass}`}
+            class="px-3.5 py-2 text-xs font-heading font-bold shadow-xs hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shrink-0 {ctaBtnRadiusClass}"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 12px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
-            <span>Beli</span>
+            <span>{buyButtonText || 'Beli'}</span>
           </button>
         </div>
       </div>
     {:else}
       <div class="mt-auto flex flex-col items-center">
-        <p data-node="product_price" class="text-xl sm:text-2xl font-black font-mono mb-4 tracking-tight text-[var(--theme-primary, var(--color-primary))] text-center">
+        <p data-node="product_price" class="text-xl sm:text-2xl font-black font-mono mb-4 tracking-tight text-[var(--color-primary)] text-center">
           {formatIDR(computedPrice)}
         </p>
         <div data-node="product_cta" class="w-full flex gap-2">
           <button
             type="button"
             on:click={() => { if (!isActive) onAddToCart(product, selections); }}
-            class="px-4 py-2.5 text-sm font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-white {ctaBtnRadiusClass}"
+            class="px-4 py-2.5 text-sm font-heading font-bold border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] text-[var(--color-text-main)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-[var(--color-card-base)] {ctaBtnRadiusClass}"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 12px));"
           >
             <ShoppingCart size={16} />
+            <span>{cartButtonText || 'Keranjang'}</span>
           </button>
           <button
             type="button"
             on:click={() => { if (!isActive) onBuyNow(product, selections); }}
-            class={`flex-1 py-2.5 text-sm font-bold shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer bg-[var(--theme-primary, var(--color-primary))] text-white ${ctaBtnRadiusClass}`}
+            class="flex-1 py-2.5 text-sm font-heading font-bold shadow-xs hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer {ctaBtnRadiusClass}"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 12px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
-            <span>Beli Sekarang</span>
+            <span>{buyButtonText || 'Beli Sekarang'}</span>
           </button>
         </div>
       </div>

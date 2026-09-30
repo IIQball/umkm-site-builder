@@ -135,8 +135,8 @@ describe('Web Builder Layout Selector & Schematics Tests', () => {
     expect(heroBanner).toContain('<svg');
     expect(heroBanner).not.toEqual(heroSplit);
 
-    const heroEmail = getPresetSchematicSvg('hero', 'inline_email_capture');
-    expect(heroEmail).toContain('<svg');
+    const heroSocial = getPresetSchematicSvg('hero', 'social_proof_community');
+    expect(heroSocial).toContain('<svg');
 
     // Features: Grid vs List vs Ribbon Bar vs Comparison
     const featuresGrid = getPresetSchematicSvg('features', 'grid_3_cards');

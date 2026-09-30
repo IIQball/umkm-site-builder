@@ -90,15 +90,15 @@ export function getHeaderTopBarType(preset: string): HeaderTopBarType {
  */
 export function getHeaderRowSlotLabel(slot: string, preset: string): string {
   if (slot === 'navbar') return 'Bilah Navigasi Utama';
-  if (slot === 'announcement_bar') {
+  if (slot === 'announcement_bar' || slot === 'announcement') {
     const topBarType = getHeaderTopBarType(preset);
     switch (topBarType) {
       case 'contact':
-        return 'Bar Info Kontak & Jam Buka';
+        return 'Bar Kontak & Jam Buka';
       case 'delivery':
         return 'Bar Layanan Pesan Antar';
       case 'countdown':
-        return 'Bar Hitung Mundur Flash Sale';
+        return 'Bar Hitung Mundur Promo';
       default:
         return 'Bar Pengumuman Promo';
     }
@@ -114,9 +114,9 @@ export function getHeaderNavbarSlotLabel(slot: string): string {
     case 'logo':
       return 'Logo & Brand Toko';
     case 'nav_links':
-      return 'Menu Navigasi';
+      return 'Menu Navigasi Toko';
     case 'cta':
-      return 'Tombol WhatsApp (CTA)';
+      return 'Tombol Pesan WhatsApp (CTA)';
     case 'search_bar':
       return 'Bilah Pencarian Produk';
     case 'store_badges':
@@ -124,4 +124,23 @@ export function getHeaderNavbarSlotLabel(slot: string): string {
     default:
       return slot;
   }
+}
+
+/**
+ * Daftar seluruh elemen yang didukung oleh preset header tertentu.
+ */
+export function getHeaderSupportedSlots(preset: string): Array<{ id: string; name: string }> {
+  const slots: Array<{ id: string; name: string }> = [];
+  if (headerHasRowOrder(preset)) {
+    const topBarType = getHeaderTopBarType(preset);
+    if (topBarType === 'contact') slots.push({ id: 'contact_bar', name: 'Bar Kontak & Jam Buka' });
+    else if (topBarType === 'delivery') slots.push({ id: 'delivery_bar', name: 'Bar Layanan Pesan Antar' });
+    else if (topBarType === 'countdown') slots.push({ id: 'countdown_bar', name: 'Bar Hitung Mundur Promo' });
+    else slots.push({ id: 'announcement', name: 'Bar Pengumuman Promo' });
+  }
+  const defaultNav = getDefaultHeaderNavbarOrder(preset);
+  for (const s of defaultNav) {
+    slots.push({ id: s, name: getHeaderNavbarSlotLabel(s) });
+  }
+  return slots;
 }

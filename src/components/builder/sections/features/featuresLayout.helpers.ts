@@ -106,7 +106,7 @@ export function getDefaultFeaturesSlots(preset: string): string[] {
     case 'horizontal_list':
       return ['badge', 'title', 'subtitle', 'feature_rows'];
     case 'banner_inline_bar':
-      return ['badge', 'title', 'ribbon_bar'];
+      return ['badge', 'title', 'subtitle', 'ribbon_bar'];
     case 'bento_grid_asymmetric':
       return ['badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image'];
     case 'alternating_zigzag_rows':
@@ -210,8 +210,8 @@ export function getEffectiveFeaturesElementOrder(
     return [...defaultSlots];
   }
 
-  // Jika preset sama persis dengan yang tersimpan di props, filter slot yang valid
-  if (featuresPreset === preset) {
+  // Jika preset sama persis dengan yang tersimpan di props atau tidak didefinisikan, filter slot yang valid
+  if (!featuresPreset || featuresPreset === preset) {
     const expanded: string[] = [];
     for (const s of rawOrder as string[]) {
       for (const norm of normalizeLegacySlot(s, preset)) {

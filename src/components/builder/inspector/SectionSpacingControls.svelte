@@ -40,7 +40,7 @@
 
 <!-- Spacing (Padding & Margin Locked on 8pt Grid) -->
 <div class="space-y-3">
-  <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
+  <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 pb-1.5">
     <Sliders size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Jarak & Padding (Kelipatan 8px)</span>
   </div>
@@ -70,7 +70,7 @@
             padding: `${val} ${section.styles?.paddingLeft || '0px'}`,
           });
         }}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each paddingYOptions as py}
           <option value={py.value}>{py.label}</option>
@@ -101,7 +101,7 @@
             padding: `${section.styles?.paddingTop || '0px'} ${val}`,
           });
         }}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each paddingXOptions as px}
           <option value={px.value}>{px.label}</option>
@@ -121,7 +121,7 @@
         value={section.styles?.marginTop || '0px'}
         on:change={(e) => onStyleChange('marginTop', e.currentTarget.value)}
         on:input={(e) => onStyleChange('marginTop', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each marginOptions as m}
           <option value={m.value}>{m.label}</option>
@@ -138,7 +138,7 @@
         value={section.styles?.marginBottom || '0px'}
         on:change={(e) => onStyleChange('marginBottom', e.currentTarget.value)}
         on:input={(e) => onStyleChange('marginBottom', e.currentTarget.value)}
-        class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each marginOptions as m}
           <option value={m.value}>{m.label}</option>

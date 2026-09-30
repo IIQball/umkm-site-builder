@@ -7,7 +7,7 @@
   export let title: string = '';
   export let subtitle: string = '';
   export let items: FeatureItem[] = [];
-  export let elementOrder: string[] = ['badge', 'title', 'ribbon_bar'];
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'ribbon_bar'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
 
@@ -50,7 +50,7 @@
       style:border-radius="var(--btn-radius, 16px)"
       style:color="var(--color-text-main)"
     >
-      <div class="banner-ribbon-container text-left">
+      <div class="banner-ribbon-container text-left" data-node="ribbon_bar" data-node-id="ribbon_bar">
         {#each items as item, index (item.id || `ribbon-${index}`)}
           {@const isActiveNode = activeNodeId === `feature_item_${index}`}
           <div
@@ -61,8 +61,8 @@
             on:keydown={(e) => handleItemKeydown(e, index)}
             class={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-all cursor-pointer ${
               isActiveNode
-                ? 'ring-2 ring-primary bg-[var(--color-primary)]/10 ring-offset-2 dark:ring-offset-slate-900'
-                : 'hover:bg-[var(--color-primary)]/5 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+                ? 'ring-2 ring-[var(--color-primary)] bg-[var(--color-primary)]/10 ring-offset-2'
+                : 'hover:bg-[var(--color-primary)]/5 hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
             } ${index > 0 ? 'border-t border-[var(--color-border)] pt-3 sm:border-t-0 sm:pt-2.5 sm:border-l sm:pl-4' : ''}`}
           >
             <div
@@ -73,7 +73,12 @@
               <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={20} />
             </div>
             <div class="min-w-0 flex-1">
-              <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-sm sm:text-base text-[var(--color-text-main)] truncate">
+              {#if item.badge}
+                <span class="inline-block px-1.5 py-0.5 rounded text-3xs font-heading font-medium mb-0.5" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                  {item.badge}
+                </span>
+              {/if}
+              <h3 data-node="feature_title" class="feature-item-title-compact font-heading text-[var(--color-text-main)] truncate">
                 {item.title}
               </h3>
               {#if item.description}
@@ -104,7 +109,7 @@
   @container featurecard (min-width: 640px) {
     .banner-ribbon-container {
       display: grid !important;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
       gap: 16px !important;
     }
     .ribbon-desc {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Menu } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
 
   export let section: TemplateSection;
@@ -45,8 +46,8 @@
   ];
 </script>
 
-<div class="space-y-3 p-3 bg-base-200/40 dark:bg-slate-900/40 rounded-xl border border-base-200 dark:border-slate-800">
-  <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 dark:border-slate-800 pb-2">
+<div class="space-y-3 p-3 bg-base-200/40 rounded-xl border border-base-200">
+  <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content border-b border-base-200 pb-2">
     <Menu size={14} class="text-[var(--theme-primary, var(--color-primary))]" />
     <span>Gaya & Tipografi Menu Navigasi</span>
   </div>
@@ -54,17 +55,19 @@
   <!-- Gap Spacing (8pt scale) -->
   <div>
     <span class="block font-medium text-[11px] text-base-content/70 mb-1">Jarak Antar Menu (8pt Grid)</span>
-    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[10px]">
+    <div class="grid grid-cols-4 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 text-[10px]">
       {#each gapPresets as preset}
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={navGap === preset.value ? 'primary' : 'ghost'}
           on:click={() => onConfigChange('navGap', preset.value)}
-          class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
+          class={`!py-1 !h-auto !min-h-0 rounded font-medium text-center ${
             navGap === preset.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
           }`}
         >
           {preset.value}
-        </button>
+        </Button>
       {/each}
     </div>
   </div>
@@ -76,7 +79,7 @@
       id="nav-typo-token"
       value={navTypographyToken}
       on:change={(e) => onConfigChange('navTypographyToken', e.currentTarget.value)}
-      class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+      class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
     >
       {#each typographyTokenOptions as opt}
         <option value={opt.value}>{opt.label}</option>
@@ -87,17 +90,19 @@
   <!-- Text Transform -->
   <div>
     <span class="block font-medium text-[11px] text-base-content/70 mb-1">Kapitalisasi Teks</span>
-    <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 dark:border-slate-800 text-[10px]">
+    <div class="grid grid-cols-3 gap-1 bg-base-200/80 p-1 rounded-lg border border-base-300 text-[10px]">
       {#each transformPresets as preset}
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={navTextTransform === preset.value ? 'primary' : 'ghost'}
           on:click={() => onConfigChange('navTextTransform', preset.value)}
-          class={`py-1 rounded font-medium transition-colors cursor-pointer text-center ${
+          class={`!py-1 !h-auto !min-h-0 rounded font-medium text-center ${
             navTextTransform === preset.value ? 'bg-base-100 text-base-content font-bold shadow-sm' : 'text-base-content/60'
           }`}
         >
           {preset.label}
-        </button>
+        </Button>
       {/each}
     </div>
   </div>
@@ -110,7 +115,7 @@
         id="nav-default-color-token"
         value={navColor}
         on:change={(e) => onConfigChange('navColor', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each colorTokenOptions as opt}
           <option value={opt.value}>{opt.label}</option>
@@ -124,7 +129,7 @@
         id="nav-hover-color-token"
         value={navHoverColor}
         on:change={(e) => onConfigChange('navHoverColor', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-100 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-100 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each hoverColorTokenOptions as opt}
           <option value={opt.value}>{opt.label}</option>

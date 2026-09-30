@@ -1,3 +1,5 @@
+import { slugify } from '@/lib/utils/format';
+
 export const iconOptions = [
   { value: 'restaurant', label: 'Kuliner (restaurant)' },
   { value: 'checkroom', label: 'Fashion (checkroom)' },
@@ -10,11 +12,5 @@ export const iconOptions = [
   { value: 'folder', label: 'Folder Umum (folder)' },
 ];
 
-export const generateSlug = (val: string): string => {
-  return val
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-};
+export const generateSlug = (val: string): string => slugify(val);
+

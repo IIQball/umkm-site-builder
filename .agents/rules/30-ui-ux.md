@@ -166,3 +166,9 @@ it before reporting — "it renders" is not the bar.
 - **Jarak Rapat Header ke Grid**: Margin bawah antara subteks judul seksi dan baris kartu pertama pada mobile maksimal `mb-6` (24px). Jarak yang melebihi 32px di layar kecil memutus relasi visual dan membuat konten tampak seperti seksi terpisah.
 - **Batas Offset Translasi Scrub Mobile**: Jangan gunakan nilai translasi vertikal GSAP/motion yang besar (seperti `y: 100px+`) pada mobile. Batasi translasi awal mobile maksimal `y: 20px–30px` agar kartu langsung terlihat menyatu dengan judul seksi saat pertama kali tampil di viewport.
 - **Scroll Margin Anchor**: Setiap seksi yang ditargetkan tautan menu navigasi (`id="testimonials"`, dll.) wajib menyertakan `scroll-mt-24 sm:scroll-mt-28` agar judul seksi tidak tertutup di bawah bilah navigasi yang melayang saat di-scroll otomatis.
+
+## 19. No-Code Builder Panel & Layer Tree Usability
+
+- **Lebar Sidebar Simetris**: Panel kiri (Lapisan/Layers) dan panel kanan (Inspector) harus menggunakan lebar standar yang proporsional (minimal `w-80` / 320px) agar teks nama seksi memiliki ruang baca yang cukup dan tampilan editor seimbang.
+- **Anti-Truncation pada Nama Seksi**: Dilarang menggunakan pemotongan agresif `truncate` pada nama seksi di panel navigasi lapisan. Gunakan `leading-snug whitespace-normal break-words` dan selalu sematkan atribut `title` dengan teks lengkap untuk kenyamanan pengguna.
+- **Ukuran Tombol Aksi Baris Kompak**: Tombol aksi mikro (reorder, hapus) di dalam baris lapisan harus berukuran kompak (`!w-5 !h-5`) agar tidak mencuri ruang lebar nama komponen.

@@ -16,7 +16,7 @@
       id="logo-type-select"
       value={logoType}
       on:change={(e) => onPropChange('logoType', e.currentTarget.value)}
-      class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs cursor-pointer"
+      class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs cursor-pointer"
     >
       <option value="image_text">Icon Gambar & Teks</option>
       <option value="text_only">Hanya Teks Toko</option>
@@ -31,7 +31,7 @@
       type="text"
       value={section.props?.logoText || ''}
       on:input={(e) => onPropChange('logoText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg focus:outline-none focus:border-primary text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
       placeholder="Nama Toko Anda"
     />
   </div>

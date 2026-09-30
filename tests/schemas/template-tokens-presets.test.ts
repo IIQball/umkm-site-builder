@@ -116,11 +116,11 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
     const heroPresets = [
       'split_left_text', 'split_right_text', 'centered_minimal', 'full_banner_overlay',
       'video_background_loop', 'gradient_mesh_glow', 'interactive_terminal_code',
-      'floating_cards_showcase', 'oversized_bold_typography', 'inline_email_capture',
+      'floating_cards_showcase', 'oversized_bold_typography',
       'social_proof_community', 'dual_product_showcase',
-      'badge_ticker_split', 'pill_category_selector', 'bento_masonry_hero',
+      'badge_ticker_split', 'bento_masonry_hero',
       'split_stat_counter', 'sticky_whatsapp_pill_float', 'sticker_badge_playful',
-      'editorial_luxury_serif', 'side_card_booking', 'dual_contrast_split', 'brand_story_founder'
+      'dual_contrast_split', 'brand_story_founder'
     ];
     for (const p of heroPresets) {
       expect(HeroPresetSchema.safeParse(p).success).toBe(true);

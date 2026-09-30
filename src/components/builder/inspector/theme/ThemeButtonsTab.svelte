@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
+  import { Button } from '@/components/ui';
   import { RADIUS_PRESETS } from '@/components/tokens/radius';
 
   export let theme: TemplateTheme;
@@ -50,26 +51,28 @@
         {currentRadius}
       </span>
     </div>
-    <div class="grid grid-cols-3 gap-1 bg-base-200/70 p-1 rounded-xl border border-base-300 dark:border-slate-800 text-[11px]">
+    <div class="grid grid-cols-3 gap-1 bg-base-200/70 p-1 rounded-xl border border-base-300 text-[11px]">
       {#each RADIUS_PRESETS as rp}
         {@const valStr = getRadiusString(rp.value)}
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={currentRadius === valStr ? 'primary' : 'ghost'}
           on:click={() => onButtonRadiusChange(valStr)}
-          class={`py-1.5 px-2 rounded-lg font-medium transition-all cursor-pointer text-center ${
+          class={`!py-1.5 !px-2 !h-auto !min-h-0 rounded-lg font-medium text-center ${
             currentRadius === valStr
-              ? 'bg-base-100 text-primary font-bold shadow-xs'
+              ? 'font-bold shadow-xs'
               : 'text-base-content/60 hover:text-base-content hover:bg-base-100/50'
           }`}
         >
           {rp.label}
-        </button>
+        </Button>
       {/each}
     </div>
   </div>
 
   <!-- 2. Button Types & Previews (Following Button.ts) -->
-  <div class="pt-3 border-t border-base-200 dark:border-slate-800 space-y-4">
+  <div class="pt-3 border-t border-base-200 space-y-4">
     <div class="flex items-center justify-between">
       <span class="font-semibold text-base-content text-[11px] uppercase tracking-wider">
         Varian Tombol (Button.ts)
@@ -85,7 +88,7 @@
             ? secondaryTextColor
             : tertiaryTextColor}
 
-      <div class="p-3.5 bg-base-200/40 dark:bg-slate-900/60 rounded-xl border border-base-300 dark:border-slate-800 space-y-3">
+      <div class="p-3.5 bg-base-200/40 rounded-xl border border-base-300 space-y-3">
         <!-- Header & Badge -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
@@ -99,7 +102,7 @@
         <p class="text-[10.5px] text-base-content/60 leading-relaxed">{cfg.desc}</p>
 
         <!-- Live Visual Preview -->
-        <div class="p-3 rounded-lg bg-base-100/90 dark:bg-slate-950/70 border border-base-200 dark:border-slate-800/80 flex items-center justify-center min-h-[56px]">
+        <div class="p-3 rounded-lg bg-base-100/90 border border-base-200 flex items-center justify-center min-h-[56px]">
           {#if cfg.type === 'primary'}
             <button
               type="button"
@@ -141,7 +144,7 @@
               type="color"
               value={activeColor}
               on:input={(e) => onButtonVariantChange(cfg.key, 'textColor', e.currentTarget.value)}
-              class="w-7 h-7 rounded-lg border border-base-300 dark:border-slate-700 cursor-pointer p-0.5 bg-base-100"
+              class="w-7 h-7 rounded-lg border border-base-300 cursor-pointer p-0.5 bg-base-100"
               title="Pilih warna teks"
             />
             <span class="font-mono text-[11px] text-base-content/70">{activeColor}</span>

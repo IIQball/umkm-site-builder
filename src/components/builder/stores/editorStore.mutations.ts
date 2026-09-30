@@ -1,6 +1,9 @@
 import type { TemplateConfig } from '@/schemas';
 import type { DocumentState, EditorTemplate } from './editorStore.types';
 import { DEFAULT_SLOTS_BY_SECTION } from './documentStore.actions';
+import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
+import { getAddedSlotDefaultProps } from '../inspector/sectionSlot.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from '../sections/productCatalog.helpers';
 
 type Updater = (fn: (s: DocumentState) => DocumentState) => void;
 
@@ -127,30 +130,20 @@ export function applyDeleteNode(
         hero_image: 'image',
         hero_media: 'image',
         hero_founder_photo: 'image',
-        image: 'image',
         hero_terminal: 'terminal',
-        terminal: 'terminal',
         hero_booking_card: 'booking_card',
-        booking_card: 'booking_card',
         hero_stat_counter: 'stat_counter',
-        stat_counter: 'stat_counter',
         hero_trust_badges: 'trust_badges',
-        trust_badges: 'trust_badges',
         hero_contrast_card: 'contrast_card',
-        contrast_card: 'contrast_card',
         hero_product_cards: 'product_cards',
-        product_cards: 'product_cards',
         hero_floating_cards: 'floating_cards',
-        floating_cards: 'floating_cards',
         hero_social_proof: 'social_proof',
-        social_proof: 'social_proof',
         hero_chat_simulation: 'chat_simulation',
-        chat_simulation: 'chat_simulation',
         hero_email_capture: 'email_capture',
-        email_capture: 'email_capture',
         hero_category_pills: 'category_pills',
         hero_pill_category: 'category_pills',
-        category_pills: 'category_pills',
+        hero_bento_promo: 'bento_promo',
+        hero_bento_review: 'bento_review',
         footer_brand: 'brand_bio',
         footer_contact: 'contact_info',
         footer_navigation: 'navigation_links',
@@ -160,6 +153,7 @@ export function applyDeleteNode(
         maps_header: 'title',
         features_heading: 'title',
         features_image: 'image',
+        catalog_header: 'title',
       };
       const targetSlot = slotMap[nodeId] || nodeId;
 
@@ -178,9 +172,12 @@ export function applyDeleteNode(
       if (s.type === 'features' && Array.isArray(currentProps.features) && nodeId.startsWith('item_')) {
         const idx = parseInt(nodeId.replace('item_', ''), 10);
         if (!isNaN(idx)) currentProps.features = currentProps.features.filter((_, i) => i !== idx);
-      } else if (s.type === 'product_catalog' && Array.isArray(currentProps.products) && nodeId.startsWith('item_')) {
-        const idx = parseInt(nodeId.replace('item_', ''), 10);
-        if (!isNaN(idx)) currentProps.products = currentProps.products.filter((_, i) => i !== idx);
+      } else if (s.type === 'product_catalog') {
+        const productsList = Array.isArray(currentProps.products) && currentProps.products.length > 0
+          ? [...currentProps.products]
+          : [...DEFAULT_DEMO_PRODUCTS];
+        const idx = parseInt(nodeId.replace(/^(product_item_|item_)/, ''), 10);
+        if (!isNaN(idx)) currentProps.products = productsList.filter((_, i) => i !== idx);
       } else if (s.type === 'testimonials' && Array.isArray(currentProps.testimonials) && nodeId.startsWith('item_')) {
         const idx = parseInt(nodeId.replace('item_', ''), 10);
         if (!isNaN(idx)) currentProps.testimonials = currentProps.testimonials.filter((_, i) => i !== idx);
@@ -219,37 +216,62 @@ export function applyAddNode(
         : ['badge', 'title', 'subtitle', 'image', 'cta'];
       if (!order.includes(nodeType)) order.push(nodeType);
       currentProps.elementOrder = order;
-      if (nodeType === 'badge' && !currentProps.badgeText) {
-        currentProps.badgeText = 'Promo Spesial Baru';
-      }
-      if (nodeType === 'image' && !currentProps.imageUrl) {
-        currentProps.imageUrl = 'https://images.unsplash.com/photo-1556742049-0a67c55c70ff?w=800';
-      }
+      if (nodeType === 'badge' && !currentProps.badgeText) currentProps.badgeText = 'Promo Spesial Baru';
+      if (nodeType === 'image' && !currentProps.imageUrl) currentProps.imageUrl = 'https://images.unsplash.com/photo-1556742049-0a67c55c70ff?w=800';
+      if (nodeType === 'bento_promo' && !currentProps.bentoPromoTitle) currentProps.bentoPromoTitle = 'Diskon Pembeli Pertama';
+      if (nodeType === 'bento_review' && !currentProps.bentoReviewText) currentProps.bentoReviewText = '"Bahan sangat halus dan adem, motifnya khas dan tidak pasaran."';
       selectedNodeKey = nodeType;
     } else if (s.type === 'header_announcement') {
-      if (nodeType === 'announcement') {
+      if (['announcement', 'announcement_bar', 'contact_bar', 'delivery_bar', 'countdown_bar'].includes(nodeType)) {
         currentProps.showAnnouncement = true;
         currentProps.announcementText = currentProps.announcementText || 'Diskon 20% khusus hari ini';
-        selectedNodeKey = 'announcement';
-      } else if (nodeType === 'logo') {
-        currentProps.logoText = currentProps.logoText || 'Toko UMKM';
-        selectedNodeKey = 'logo';
+        const rowOrder = Array.isArray(currentProps.rowOrder) ? [...currentProps.rowOrder] : ['navbar'];
+        if (!rowOrder.includes('announcement_bar')) currentProps.rowOrder = ['announcement_bar', ...rowOrder];
+        selectedNodeKey = nodeType;
       } else {
-        const navs = Array.isArray(currentProps.navLinks) ? [...currentProps.navLinks] : ['Beranda'];
-        navs.push('Menu Baru');
-        currentProps.navLinks = navs;
-        selectedNodeKey = 'nav_links';
+        const navOrder = Array.isArray(currentProps.navbarOrder) ? [...currentProps.navbarOrder] : ['logo', 'nav_links', 'cta'];
+        const cleanType = nodeType === 'nav' ? 'nav_links' : nodeType;
+        if (!navOrder.includes(cleanType)) navOrder.push(cleanType);
+        currentProps.navbarOrder = navOrder;
+        if (cleanType === 'logo' && !currentProps.logoText) currentProps.logoText = 'Toko UMKM';
+        if (cleanType === 'cta' && !currentProps.ctaText) currentProps.ctaText = 'Chat WA';
+        if (cleanType === 'nav_links' && (!Array.isArray(currentProps.navLinks) || currentProps.navLinks.length === 0)) currentProps.navLinks = ['Beranda', 'Produk', 'Tentang', 'Kontak'];
+        selectedNodeKey = cleanType;
       }
     } else if (s.type === 'features') {
-      const items = Array.isArray(currentProps.features) ? [...currentProps.features] : [];
-      items.push({ icon: 'star', title: 'Fitur Baru', description: 'Keunggulan produk dan layanan Anda.' });
-      currentProps.features = items;
-      selectedNodeKey = `item_${items.length - 1}`;
+      const preset = (s.layoutPreset as string) || (s.props?.layoutPreset as string) || 'grid_3_cards';
+      const defaultSlots = getDefaultFeaturesSlots(preset);
+      const isSlot = defaultSlots.includes(nodeType) || ['badge', 'title', 'subtitle', 'cta', 'image', 'feature_cards', 'feature_rows', 'ribbon_bar', 'bento_spotlight', 'bento_cards', 'zigzag_items', 'tab_nav', 'tab_card', 'accordion_list', 'scroll_cards', 'icon_matrix', 'before_card', 'after_card'].includes(nodeType);
+      if (isSlot) {
+        const order = Array.isArray(currentProps.elementOrder) ? [...currentProps.elementOrder] : [...defaultSlots];
+        if (!order.includes(nodeType)) order.push(nodeType);
+        currentProps.elementOrder = order;
+        Object.assign(currentProps, getAddedSlotDefaultProps(nodeType, 'features'));
+        selectedNodeKey = nodeType;
+      } else {
+        const items = Array.isArray(currentProps.features) ? [...currentProps.features] : [];
+        items.push({ icon: 'star', title: 'Fitur Baru', description: 'Keunggulan produk dan layanan Anda.' });
+        currentProps.features = items;
+        selectedNodeKey = `item_${items.length - 1}`;
+      }
     } else if (s.type === 'product_catalog') {
-      const items = Array.isArray(currentProps.products) ? [...currentProps.products] : [];
-      items.push({ name: 'Produk Baru', price: 99000, imageUrl: '', badge: 'Baru' });
-      currentProps.products = items;
-      selectedNodeKey = `item_${items.length - 1}`;
+      const isHeaderSlot = ['badge', 'title', 'subtitle', 'catalog_sidebar', 'catalog_categories', 'catalog_timer', 'catalog_bundle_tier', 'catalog_cta', 'product_image_0', 'product_desc', 'catalog_price_rows'].includes(nodeType);
+      if (isHeaderSlot) {
+        const order = Array.isArray(currentProps.elementOrder) ? [...currentProps.elementOrder] : ['badge', 'title', 'subtitle'];
+        if (!order.includes(nodeType)) order.push(nodeType);
+        currentProps.elementOrder = order;
+        Object.assign(currentProps, getAddedSlotDefaultProps(nodeType, 'product_catalog'));
+        selectedNodeKey = nodeType;
+      } else {
+        const items = Array.isArray(currentProps.products) && currentProps.products.length > 0
+          ? [...currentProps.products]
+          : [...DEFAULT_DEMO_PRODUCTS];
+        items.push({ name: 'Produk Baru', price: 99000, imageUrl: '', badge: 'Baru' });
+        currentProps.products = items;
+        const newSlot = `product_item_${items.length - 1}`;
+        if (Array.isArray(currentProps.elementOrder)) currentProps.elementOrder = [...currentProps.elementOrder, newSlot];
+        selectedNodeKey = newSlot;
+      }
     } else if (s.type === 'testimonials') {
       const items = Array.isArray(currentProps.testimonials) ? [...currentProps.testimonials] : [];
       items.push({ customerName: 'Pelanggan Baru', rating: 5, comment: 'Pelayanan sangat memuaskan!' });

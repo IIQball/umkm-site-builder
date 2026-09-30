@@ -25,10 +25,10 @@
 
 <div
   id={`section-header-nav-${sectionId}`}
-  class={`header-nav-container w-full mx-auto flex items-center justify-between gap-4 border-b border-base-200 dark:border-slate-800 box-border overflow-visible ${
+  class={`header-nav-container w-full mx-auto flex items-center justify-between gap-4 box-border overflow-visible ${
     activePreset === 'compact_inline' ? 'min-h-[56px] h-14' : 'min-h-[64px] h-16'
   }`}
-  style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px));"
+  style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
 >
   <!-- Kolom 1 (Kiri) -->
   <div class="flex items-center flex-shrink-0">
@@ -49,8 +49,8 @@
             href={waUrl}
             target="_blank"
             rel="noreferrer"
-            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
-            class="btn btn-sm btn-primary inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-transform"
+            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
+            class="inline-flex items-center justify-center px-4 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
           >
             <MessageCircle size={15} class="mr-1.5" />
             <span>{ctaText}</span>
@@ -79,8 +79,8 @@
             href={waUrl}
             target="_blank"
             rel="noreferrer"
-            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
-            class="btn btn-sm btn-primary inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-transform"
+            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
+            class="inline-flex items-center justify-center px-4 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
           >
             <MessageCircle size={15} class="mr-1.5" />
             <span>{ctaText}</span>
@@ -109,8 +109,8 @@
             href={waUrl}
             target="_blank"
             rel="noreferrer"
-            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, 8px); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
-            class="btn btn-sm btn-primary inline-flex items-center justify-center px-4 font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-transform"
+            style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
+            class="inline-flex items-center justify-center px-4 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
           >
             <MessageCircle size={15} class="mr-1.5" />
             <span>{ctaText}</span>
@@ -124,7 +124,8 @@
       <button
         type="button"
         on:click={onToggleMobileMenu}
-        class="btn btn-ghost btn-square w-11 h-11 min-w-[44px] min-h-[44px] border border-base-300 dark:border-slate-700/80 rounded-xl transition-colors cursor-pointer shadow-xs ml-auto"
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 10px)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
+        class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs ml-auto"
         aria-label="Buka menu navigasi"
       >
         <Menu size={20} />

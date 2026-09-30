@@ -6,6 +6,7 @@
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Lihat Detail';
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   function selectCard(e: Event, idx: number, prod: ProductItem) {
@@ -29,17 +30,21 @@
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
 
     <div
+      data-node={product.id || `product_item_${index}`}
+      data-node-id={product.id || `product_item_${index}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
       class={`group relative rounded-3xl overflow-hidden aspect-[3/4] shadow-md transition-all duration-300 text-left cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-2xl'
           : 'hover:shadow-xl'
       }`}
     >
       <div
+        data-node={`product_image_${index}`}
+        data-node-id={`product_image_${index}`}
         role="button"
         tabindex="0"
         on:click={(e) => selectImage(e, index)}
@@ -75,9 +80,10 @@
           <button
             type="button"
             on:click|stopPropagation={() => onBuyNow(product, {})}
-            class="w-full h-8 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 active:scale-[0.98] text-xs font-bold transition-all backdrop-blur-sm"
+            class="w-full h-8 bg-white/20 hover:bg-[var(--theme-btn-primary-bg,var(--theme-primary,var(--color-primary)))] text-white hover:text-white border border-white/30 hover:border-transparent active:scale-[0.98] text-xs font-heading font-bold transition-all backdrop-blur-sm cursor-pointer shadow-xs"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
-            Lihat Detail
+            {buyButtonText || 'Lihat Detail'}
           </button>
         </div>
       </div>

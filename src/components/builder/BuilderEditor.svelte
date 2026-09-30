@@ -5,6 +5,7 @@
   import LayerPanel from './LayerPanel.svelte';
   import Canvas from './Canvas.svelte';
   import PropertyInspector from './PropertyInspector.svelte';
+  import { Button } from '@/components/ui';
   import { editorStore, canvasStore, activeSection } from './stores/editorStore';
 
   export let templateId: string;
@@ -136,12 +137,13 @@
         <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Gagal Memuat Template</h2>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
       </div>
-      <button
+      <Button
+        variant="primary"
+        size="sm"
         on:click={fetchTemplate}
-        class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors cursor-pointer"
       >
         Coba Lagi
-      </button>
+      </Button>
     </div>
   {:else if $editorStore.template}
     <!-- Top Bar -->
@@ -175,16 +177,17 @@
         />
       {:else}
         <!-- Floating Button to Open Left Sidebar -->
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="xs"
           on:click={() => canvasStore.toggleLeftSidebar()}
-          class="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 shadow-md transition-all cursor-pointer text-xs font-semibold"
+          class="!absolute top-3 left-3 z-30 shadow-md bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800"
           title="Buka Sidebar Kiri (Layers Tree) - Ctrl+\"
-          aria-label="Buka Sidebar Kiri"
         >
           <PanelLeft size={14} class="text-blue-500" />
           <span class="hidden sm:inline">Layers</span>
-        </button>
+        </Button>
       {/if}
 
       <!-- Middle Panel: Canvas Preview -->
@@ -203,17 +206,18 @@
         />
       {:else}
         <!-- Floating Button to Open Right Sidebar -->
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="xs"
           on:click={() => canvasStore.toggleRightSidebar()}
-          class="absolute top-3 right-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 shadow-md transition-all cursor-pointer text-xs font-semibold"
+          class="!absolute top-3 right-3 z-30 shadow-md bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800"
           title="Buka Sidebar Kanan (Inspector) - Ctrl+/"
-          aria-label="Buka Sidebar Kanan"
         >
           <Sliders size={14} class="text-blue-500" />
           <span class="hidden sm:inline">Inspector</span>
           <PanelRight size={14} />
-        </button>
+        </Button>
       {/if}
     </div>
   {/if}

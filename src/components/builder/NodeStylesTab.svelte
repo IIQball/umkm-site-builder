@@ -1,5 +1,6 @@
 <script lang="ts">
   import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Sliders, Palette, Sparkles } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
   import type { NodeStyles } from '@/types';
   import { fontSizes, fontWeights, nodeAnimationOptions, hoverOptions } from './inspector/nodeStyles.constants';
@@ -57,19 +58,21 @@
 <div class="p-4 space-y-5 text-xs text-base-content/80">
   <!-- Typography -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Type size={13} class="text-blue-500" />
+    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 pb-1.5">
+      <Type size={13} class="text-primary" />
       <span>Typography & Text Align</span>
     </div>
 
     <div>
       <span class="block font-medium mb-1 text-base-content/80">Perataan Teks</span>
-      <div class="grid grid-cols-4 gap-1 bg-base-200/60 p-1 rounded-md border border-base-300 dark:border-slate-700">
+      <div class="grid grid-cols-4 gap-1 bg-base-200/60 p-1 rounded-md border border-base-300">
         {#each alignButtons as btn}
-          <button
+          <Button
             type="button"
+            size="icon"
+            variant={nodeStyles.textAlign === btn.value || (btn.value === 'left' && !nodeStyles.textAlign) ? 'primary' : 'ghost'}
             on:click={() => handleStyleChange('textAlign', btn.value)}
-            class={`flex items-center justify-center py-1.5 rounded transition-colors cursor-pointer ${
+            class={`!w-full !h-auto !min-h-0 !py-1.5 rounded transition-colors ${
               nodeStyles.textAlign === btn.value || (btn.value === 'left' && !nodeStyles.textAlign)
                 ? 'bg-base-100 text-base-content font-semibold shadow-sm'
                 : 'text-base-content/60 hover:text-base-content'
@@ -77,12 +80,12 @@
             title={btn.title}
           >
             <svelte:component this={btn.icon} size={13} />
-          </button>
+          </Button>
         {/each}
       </div>
     </div>
 
-    <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[11px] text-blue-600 dark:text-blue-400">
+    <div class="p-2.5 bg-primary/10 border border-primary/20 rounded-md text-[11px] text-primary">
       <span class="font-semibold block mb-0.5">Tipografi Global Active:</span>
       Elemen ini mengikuti font family & skala dari <strong>Global Design System</strong>.
     </div>
@@ -95,7 +98,7 @@
           value={nodeStyles.fontSize || ''}
           on:change={(e) => handleStyleChange('fontSize', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('fontSize', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           <option value="">Default (Warisan Tema)</option>
           {#each fontSizes as s}
@@ -110,7 +113,7 @@
           value={nodeStyles.fontWeight || ''}
           on:change={(e) => handleStyleChange('fontWeight', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('fontWeight', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           <option value="">Default</option>
           {#each fontWeights as w}
@@ -123,8 +126,8 @@
 
   <!-- Colors (Token Dropdowns) -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Palette size={13} class="text-blue-500" />
+    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 pb-1.5">
+      <Palette size={13} class="text-primary" />
       <span>Warna Elemen (Token)</span>
     </div>
 
@@ -135,7 +138,7 @@
         value={nodeStyles.color || ''}
         on:change={(e) => handleStyleChange('color', e.currentTarget.value)}
         on:input={(e) => handleStyleChange('color', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
       >
         {#each textTokenOptions as opt}
           <option value={opt.value}>{opt.label}</option>
@@ -150,7 +153,7 @@
         value={nodeStyles.backgroundColor || 'transparent'}
         on:change={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
         on:input={(e) => handleStyleChange('backgroundColor', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
       >
         {#each bgTokenOptions as opt}
           <option value={opt.value}>{opt.label}</option>
@@ -166,8 +169,8 @@
 
   <!-- Animation & Hover -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Sparkles size={13} class="text-blue-500" />
+    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 pb-1.5">
+      <Sparkles size={13} class="text-primary" />
       <span>Animasi & Efek Interaktif</span>
     </div>
 
@@ -179,7 +182,7 @@
           value={nodeStyles.animation || ''}
           on:change={(e) => handleStyleChange('animation', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('animation', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           {#each nodeAnimationOptions as anim}
             <option value={anim.value}>{anim.label}</option>
@@ -194,7 +197,7 @@
           value={nodeStyles.hoverEffect || ''}
           on:change={(e) => handleStyleChange('hoverEffect', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('hoverEffect', e.currentTarget.value)}
-          class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           {#each hoverOptions as hov}
             <option value={hov.value}>{hov.label}</option>
@@ -206,8 +209,8 @@
 
   <!-- Margin Per Node (8pt grid locked) -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Sliders size={13} class="text-blue-500" />
+    <div class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-content/60 border-b border-base-200 pb-1.5">
+      <Sliders size={13} class="text-primary" />
       <span>Margin Per Elemen (8pt Grid)</span>
     </div>
 
@@ -219,7 +222,7 @@
           value={nodeStyles.marginTop || '0px'}
           on:change={(e) => handleStyleChange('marginTop', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('marginTop', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           {#each marginPresets as m}
             <option value={m.value}>{m.label}</option>
@@ -233,7 +236,7 @@
           value={nodeStyles.marginBottom || '0px'}
           on:change={(e) => handleStyleChange('marginBottom', e.currentTarget.value)}
           on:input={(e) => handleStyleChange('marginBottom', e.currentTarget.value)}
-          class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-md text-base-content focus:outline-none focus:border-blue-500"
+          class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-md text-base-content focus:outline-none focus:border-primary"
         >
           {#each marginPresets as m}
             <option value={m.value}>{m.label}</option>

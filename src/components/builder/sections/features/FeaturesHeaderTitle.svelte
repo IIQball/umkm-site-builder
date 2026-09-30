@@ -14,7 +14,12 @@
     (k) => ['badge', 'title', 'subtitle'].includes(k)
   );
 
-  $: isHeadingActive = activeNodeId === 'features_heading' || activeNodeId === 'header';
+  $: isHeadingActive =
+    activeNodeId === 'features_heading' ||
+    activeNodeId === 'header' ||
+    activeNodeId === 'badge' ||
+    activeNodeId === 'title' ||
+    activeNodeId === 'subtitle';
 
   const handleHeadingClick = (e: MouseEvent) => {
     if (selectNode) selectNode(e, 'features_heading');
@@ -35,15 +40,15 @@
   on:keydown={handleHeadingKeydown}
   class={`flex flex-col ${align === 'center' ? 'items-center text-center mx-auto' : 'items-start text-left'} ${maxWidthClass} mb-8 p-3 rounded-2xl transition-all cursor-pointer ${
     isHeadingActive
-      ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900 bg-primary/10'
-      : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+      ? 'ring-2 ring-[var(--color-primary)] ring-offset-2 bg-[var(--color-primary)]/10'
+      : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
   }`}
 >
   {#each effectiveOrder as slot}
     {#if slot === 'badge' && badgeText}
       <span
         data-node="badge"
-        class={`badge badge-primary badge-outline text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 ${badgeColorClass}`}
+        class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 ${badgeColorClass}`}
         style={!badgeColorClass ? 'background-color: color-mix(in srgb, var(--color-primary) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); color: var(--color-primary);' : ''}
       >
         <span

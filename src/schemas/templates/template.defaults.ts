@@ -149,7 +149,35 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     type: 'product_catalog',
     layoutPreset: 'grid_standard',
     props: {
-      products: [],
+      title: 'Katalog Produk Pilihan',
+      subtitle: 'Pilih produk terbaik kami dengan jaminan kualitas dan kemudahan pemesanan.',
+      badgeText: 'Produk Unggulan',
+      products: [
+        {
+          id: 'prod_1',
+          name: 'Produk Unggulan 1',
+          price: 50000,
+          badge: 'Terlaris',
+          imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60',
+          description: 'Deskripsi lengkap mengenai keunggulan, kualitas, atau manfaat utama produk Anda.',
+        },
+        {
+          id: 'prod_2',
+          name: 'Produk Unggulan 2',
+          price: 65000,
+          badge: 'Spesial',
+          imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60',
+          description: 'Bahan berkualitas premium yang diproses secara higienis untuk menjaga mutu terbaik.',
+        },
+        {
+          id: 'prod_3',
+          name: 'Produk Unggulan 3',
+          price: 80000,
+          badge: 'Favorit',
+          imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60',
+          description: 'Pilihan favorit pelanggan setia dengan cita rasa dan kemasan eksklusif.',
+        },
+      ],
     },
     styles: {
       bgColorToken: 'background',

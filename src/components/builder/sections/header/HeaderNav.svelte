@@ -2,6 +2,7 @@
   import { Menu, X } from 'lucide-svelte';
   import { editorStore, canvasStore, activeNodeId } from '../../stores/editorStore';
   import type { HeaderAnnouncementProps } from '@/types';
+  import { navigateToSection } from './headerNav.helpers';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
@@ -40,8 +41,8 @@
   ].filter(Boolean).join('; ');
 
   const typoTokenMap: Record<string, string> = {
-    body: 'var(--theme-text-body, 16px)',
-    caption: 'var(--theme-text-caption, 10px)',
+    body: 'var(--theme-text-body, var(--text-body-size, 14px))',
+    caption: 'var(--theme-text-caption, var(--text-caption-size, 12px))',
   };
 
   const getLinkStyle = (index: number) => {
@@ -49,8 +50,9 @@
     const color = isHovered ? navHoverColor : (nodeStyles.color || navColor);
     return [
       `color: ${color}`,
-      `font-size: ${nodeStyles.fontSize || typoTokenMap[navTypographyToken] || 'var(--theme-text-body, 16px)'}`,
-      `font-weight: ${nodeStyles.fontWeight || '500'}`,
+      `font-size: ${nodeStyles.fontSize || typoTokenMap[navTypographyToken] || 'var(--theme-text-body, var(--text-body-size, 14px))'}`,
+      `font-weight: ${nodeStyles.fontWeight || 'var(--text-body-weight, 500)'}`,
+      `font-family: var(--theme-font-body, var(--font-family, inherit))`,
       `text-transform: ${navTextTransform}`,
       'transition: color 0.15s ease, transform 0.15s ease',
     ].filter(Boolean).join('; ');
@@ -107,8 +109,8 @@
   on:keydown={handleNavContainerKeyDown}
   class={`relative flex items-center justify-end rounded-lg transition-all cursor-pointer ${
     isNodeActive
-      ? 'ring-2 ring-primary bg-primary/10'
-      : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/40'
+      ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10'
+      : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/40'
   }`}
 >
   <!-- Desktop / Wide Viewport Navigation Links -->
@@ -127,6 +129,12 @@
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
         on:drop={(e) => onDrop(e, index)}
+        on:click={(e) => {
+          if (draggedIdx === null) navigateToSection(e, link);
+        }}
+        on:keydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') navigateToSection(e, link);
+        }}
         style={getLinkStyle(index)}
         class={`whitespace-nowrap px-1.5 py-1 rounded cursor-pointer select-none ${
           isActive ? 'cursor-grab active:cursor-grabbing' : ''
@@ -141,7 +149,8 @@
     {#if ctaText}
       <a
         href={ctaLink}
-        class="ml-2 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors whitespace-nowrap"
+        style="height: var(--theme-btn-height, 36px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
+        class="ml-2 px-3.5 inline-flex items-center justify-center font-bold shadow-sm transition-all hover:brightness-105 active:scale-95 whitespace-nowrap cursor-pointer"
       >
         {ctaText}
       </a>
@@ -154,7 +163,8 @@
       {#if ctaText}
         <a
           href={ctaLink}
-          class="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[11px] font-semibold whitespace-nowrap"
+          style="height: 32px; border-radius: var(--theme-btn-radius, var(--btn-radius, 6px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, 11px);"
+          class="px-2.5 inline-flex items-center justify-center font-bold whitespace-nowrap shadow-xs cursor-pointer"
         >
           {ctaText}
         </a>
@@ -165,8 +175,9 @@
           e.stopPropagation();
           isMobileMenuOpen = !isMobileMenuOpen;
         }}
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-text-primary, var(--color-text-main)); border: 1px solid var(--color-border); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
         aria-label="Toggle navigation menu"
-        class="p-1.5 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+        class="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs"
       >
         {#if isMobileMenuOpen}
           <X size={20} />
@@ -179,16 +190,25 @@
     <!-- Mobile Dropdown Drawer -->
     {#if isMobileMenuOpen}
       <div
-        class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl p-3 z-50 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 12px)); background-color: var(--theme-surface, var(--color-card-base, white)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
+        class="absolute right-0 top-full mt-2 w-56 shadow-xl p-3 z-50 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
       >
         {#each navLinks as link, index (link + index)}
           <span
             role="button"
             tabindex="0"
-            on:click={() => (isMobileMenuOpen = false)}
-            on:keydown={(e) => e.key === 'Enter' && (isMobileMenuOpen = false)}
-            style={getLinkStyle(index)}
-            class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer block truncate"
+            on:click={(e) => {
+              isMobileMenuOpen = false;
+              navigateToSection(e, link);
+            }}
+            on:keydown={(e) => {
+              if (e.key === 'Enter') {
+                isMobileMenuOpen = false;
+                navigateToSection(e, link);
+              }
+            }}
+            style="{getLinkStyle(index)}; border-radius: var(--theme-btn-radius, var(--btn-radius, 6px));"
+            class="px-2.5 py-1.5 hover:bg-[var(--color-nested-base)] cursor-pointer block truncate"
           >
             {link}
           </span>
@@ -197,7 +217,8 @@
           <a
             href={ctaLink}
             on:click={() => (isMobileMenuOpen = false)}
-            class="mt-1 w-full text-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors block"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, 14px);"
+            class="mt-1 w-full text-center px-3 py-2 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all block cursor-pointer"
           >
             {ctaText}
           </a>

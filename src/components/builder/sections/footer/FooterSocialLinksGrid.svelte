@@ -42,7 +42,7 @@
 <div class="max-w-2xl mx-auto space-y-6 text-center py-2">
   <!-- Social Media Nodes Showcase -->
   <div
-    class="space-y-6 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_socials' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="space-y-6 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_socials' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     on:click={(e) => selectNode(e, 'footer_socials')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_socials')}
     role="button"
@@ -128,7 +128,7 @@
         class="p-3.5 rounded-2xl border hover:border-[var(--theme-primary, var(--color-primary))]/40 flex items-center gap-3 transition-colors group shadow-xs"
         on:click|stopPropagation
       >
-        <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-base-200 text-base-content flex items-center justify-center shrink-0">
           <Share2 size={18} />
         </div>
         <div class="min-w-0">
@@ -179,7 +179,7 @@
 
   <!-- Copyright -->
   <div
-    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-slate-900' : ''}"
+    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}

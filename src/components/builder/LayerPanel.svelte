@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Layers, PanelLeftClose } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
+  import { Button } from '@/components/ui';
   import { canvasStore } from './stores/editorStore';
   import { sectionTypeLabels, sectionTypeIcons, sectionTypes } from './layer/layerPanel.helpers';
   import LayerSectionItem from './layer/LayerSectionItem.svelte';
@@ -33,7 +34,7 @@
   };
 </script>
 
-<aside class="w-72 flex-shrink-0 bg-card border-r border-light flex flex-col h-full overflow-hidden text-main transition-colors">
+<aside class="w-80 flex-shrink-0 bg-card border-r border-light flex flex-col h-full overflow-hidden text-main transition-colors">
   <!-- Header with Title, Add Section & Close Button -->
   <div class="p-3 border-b border-light flex items-center justify-between gap-1.5">
     <div class="flex items-center gap-2 text-main min-w-0 flex-1">
@@ -44,14 +45,16 @@
     <div class="flex items-center gap-1 flex-shrink-0">
       <!-- Add Section Dropdown -->
       <div class="relative">
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant="secondary"
           on:click={() => (isAddMenuOpen = !isAddMenuOpen)}
-          class="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-main bg-nested hover:bg-nested/80 rounded-md border border-light transition-colors cursor-pointer"
+          class="!px-2 !py-1 !h-auto !min-h-0 text-xs font-semibold text-main bg-nested hover:bg-nested/80 rounded-md border border-light"
         >
           <Plus size={13} />
           <span>Tambah</span>
-        </button>
+        </Button>
 
         {#if isAddMenuOpen}
           <button
@@ -64,29 +67,32 @@
               Pilih Komponen Seksi
             </div>
             {#each sectionTypes as type}
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="xs"
                 on:click={() => handleAdd(type)}
-                class="w-full px-3 py-2 text-left text-xs text-secondary hover:bg-primary/10 hover:text-primary flex items-center gap-2.5 transition-colors cursor-pointer"
+                class="!w-full !px-3 !py-2 !h-auto !min-h-0 !justify-start text-left text-xs text-secondary hover:bg-primary/10 hover:text-primary gap-2.5 rounded-none"
               >
                 <svelte:component this={sectionTypeIcons[type]} size={14} class="text-muted" />
                 <span>{sectionTypeLabels[type]}</span>
-              </button>
+              </Button>
             {/each}
           </div>
         {/if}
       </div>
 
       <!-- Close Left Sidebar Button -->
-      <button
+      <Button
         type="button"
+        size="xs"
+        variant="ghost"
         on:click={() => canvasStore.toggleLeftSidebar()}
-        class="p-1 rounded-md text-muted hover:text-main hover:bg-nested border border-transparent hover:border-light transition-colors cursor-pointer"
+        class="!p-1 !h-7 !w-7 !min-h-0 !min-w-0 rounded-md text-muted hover:text-main hover:bg-nested"
         title="Tutup Panel Lapisan (Ctrl+\)"
-        aria-label="Tutup Panel Lapisan"
       >
         <PanelLeftClose size={15} />
-      </button>
+      </Button>
     </div>
   </div>
 

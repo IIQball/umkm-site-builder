@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatCurrency } from '@/lib/utils';
+  import { Button } from '@/components/ui';
 
   export let platformFeePercentage: number = 30;
   export let designerShare: number = 70;
@@ -15,27 +16,30 @@
       Rasio Pembagian Komisi
     </span>
     <div class="flex items-center gap-2">
-      <button
-        type="button"
+      <Button
+        size="xs"
+        variant={platformFeePercentage === 20 ? 'secondary' : 'ghost'}
+        class="!rounded-full !px-3 !py-1 !h-auto !min-h-0 text-xs font-bold {platformFeePercentage === 20 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
         on:click={() => onSelectRatio(20)}
-        class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 20 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
       >
         20% / 80%
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        size="xs"
+        variant={platformFeePercentage === 30 ? 'secondary' : 'ghost'}
+        class="!rounded-full !px-3 !py-1 !h-auto !min-h-0 text-xs font-bold {platformFeePercentage === 30 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
         on:click={() => onSelectRatio(30)}
-        class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 30 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
       >
         30% / 70% (Standar)
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        size="xs"
+        variant={platformFeePercentage === 40 ? 'secondary' : 'ghost'}
+        class="!rounded-full !px-3 !py-1 !h-auto !min-h-0 text-xs font-bold {platformFeePercentage === 40 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
         on:click={() => onSelectRatio(40)}
-        class="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer {platformFeePercentage === 40 ? 'bg-card text-main border-slate-400 dark:border-slate-500 shadow-2xs' : 'bg-card text-secondary border-light hover:text-main'}"
       >
         40% / 60%
-      </button>
+      </Button>
     </div>
   </div>
 

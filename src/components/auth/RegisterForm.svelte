@@ -69,8 +69,8 @@
         toast.error(data.error || "Gagal mengirim OTP.");
         step = 2; // Kembalikan ke step 2 jika gagal
       }
-    } catch (err: any) {
-      toast.error(err.message || "Kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kesalahan sistem.");
       step = 2; // Kembalikan ke step 2 jika gagal
     } finally {
       loading = false;
@@ -98,8 +98,8 @@
       } else {
         toast.error(data.error || "Kode OTP tidak valid.");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kesalahan sistem.");
     } finally {
       loading = false;
     }
@@ -154,12 +154,13 @@
         return;
       }
 
-      toast.success("Akun berhasil dibuat!");
-      if (role === 'designer') {
-        window.location.href = '/designer/wallet';
-      } else {
-        window.location.href = '/dashboard';
-      }
+      toast.success("Akun berhasil dibuat! Silakan masuk dengan akun baru Anda.");
+      
+      // Sign out immediately so they don't skip the login screen
+      await authClient.signOut();
+      
+      // Redirect to login view (without ?mode=register)
+      window.location.href = '/auth/login';
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
     } finally {
@@ -382,10 +383,12 @@
         size="md"
         fullWidth
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={togglePasswordVisibility}
           aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -394,7 +397,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <Input
@@ -409,10 +412,12 @@
         size="md"
         fullWidth
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={toggleConfirmPasswordVisibility}
           aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
         >
@@ -421,7 +426,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <div class="pt-2 flex items-center gap-3 w-full">

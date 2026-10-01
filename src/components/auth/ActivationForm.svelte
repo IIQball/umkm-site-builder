@@ -9,6 +9,8 @@
   let token = "";
   let password = "";
   let confirmPassword = "";
+  let name = "";
+  let uid = "";
   let loading = false;
   let isTokenValid = true;
   let showPassword = false;
@@ -23,9 +25,14 @@
   };
 
   onMount(() => {
-    // Read the token from URL search params
+    // Read the token, uid, and name from URL search params
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get("token");
+    const nameParam = urlParams.get("name");
+    const uidParam = urlParams.get("uid");
+    
+    if (nameParam) name = nameParam;
+    if (uidParam) uid = uidParam;
 
     if (!tokenParam) {
       toast.error("Token verifikasi tidak ditemukan di URL. Silakan minta tautan reset password yang baru.");
@@ -38,6 +45,7 @@
   const passwordSchema = z.object({
     password: z.string().min(8, "Kata sandi minimal 8 karakter"),
     confirmPassword: z.string(),
+    name: z.string().min(3, "Nama minimal 3 karakter"),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Konfirmasi kata sandi tidak cocok",
     path: ["confirmPassword"],
@@ -48,7 +56,7 @@
 
     if (!isTokenValid) return;
 
-    const validationResult = passwordSchema.safeParse({ password, confirmPassword });
+    const validationResult = passwordSchema.safeParse({ password, confirmPassword, name });
     if (!validationResult.success) {
       toast.error(validationResult.error.errors[0].message);
       return;
@@ -64,7 +72,9 @@
         },
         body: JSON.stringify({
           token,
-          password
+          password,
+          uid,
+          name
         }),
       });
 
@@ -85,9 +95,19 @@
 </script>
 
 <form novalidate on:submit={handleSubmit} class="space-y-5 w-full">
-  <div class="space-y-4">
+    <div class="space-y-4">
       <Input
-        label="Kata Sandi Baru"
+        label="Nama Lengkap"
+        id="name"
+        type="text"
+        bind:value={name}
+        placeholder="Nama Lengkap"
+        disabled={loading || !isTokenValid}
+        size="md"
+      />
+
+      <Input
+        label="Kata Sandi"
         id="password"
         type={showPassword ? "text" : "password"}
         bind:value={password}
@@ -95,10 +115,12 @@
         disabled={loading || !isTokenValid}
         size="md"
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={togglePasswordVisibility}
           aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -107,7 +129,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <Input
@@ -119,10 +141,12 @@
         disabled={loading || !isTokenValid}
         size="md"
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={toggleConfirmPasswordVisibility}
           aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -131,13 +155,13 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
     </div>
 
     <div class="pt-2 w-full">
       <Button type="submit" variant="primary" size="lg" fullWidth disabled={!isTokenValid || loading} {loading}>
-        Simpan Kata Sandi Baru
+        Aktifkan Akun & Simpan Sandi
       </Button>
     </div>
 </form>

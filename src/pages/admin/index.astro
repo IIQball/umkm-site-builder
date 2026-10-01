@@ -1,9 +1,9 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
 import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
 import AdminBankManager from '@/components/admin/AdminBankManager.svelte';
+import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
 import { db } from '@/lib/db/client';
 import { stores, users } from '@/db/schema';
 import { eq, and, isNull, desc } from 'drizzle-orm';
@@ -11,7 +11,7 @@ import { eq, and, isNull, desc } from 'drizzle-orm';
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user || !isAuthorizedAdmin(user)) {
+if (!user || user.role !== 'admin') {
   return Astro.redirect('/auth/login?redirect=/admin');
 }
 
@@ -137,104 +137,25 @@ const pageTitle = isSuper ? 'Dasbor Super Admin' : 'Dasbor Admin Pendamping';
       </div>
     </div>
 
-    <!-- SUPER ADMIN DASHBOARD VIEW -->
-    {isSuper ? (
-      <div class="space-y-8">
-        <!-- Super Admin Quick Navigation Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          <a
-            href="/admin/whitelist"
-            class="p-4 rounded-2xl bg-card border border-light hover:border-primary/50 transition-all group flex flex-col justify-between shadow-2xs"
-          >
-            <div class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-main block group-hover:text-primary transition-colors">Akses Admin</span>
-              <span class="text-3xs text-muted">Whitelist Google Auth</span>
-            </div>
-          </a>
-
-          <a
-            href="/admin/users"
-            class="p-4 rounded-2xl bg-card border border-light hover:border-primary/50 transition-all group flex flex-col justify-between shadow-2xs"
-          >
-            <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-xl">group</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-main block group-hover:text-primary transition-colors">Pengguna</span>
-              <span class="text-3xs text-muted">Manajemen User</span>
-            </div>
-          </a>
-
-          <a
-            href="/admin/templates"
-            class="p-4 rounded-2xl bg-card border border-light hover:border-primary/50 transition-all group flex flex-col justify-between shadow-2xs"
-          >
-            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-xl">palette</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-main block group-hover:text-primary transition-colors">Kurasi Template</span>
-              <span class="text-3xs text-muted">Review & Verifikasi</span>
-            </div>
-          </a>
-
-          <a
-            href="/admin/template-categories"
-            class="p-4 rounded-2xl bg-card border border-light hover:border-primary/50 transition-all group flex flex-col justify-between shadow-2xs"
-          >
-            <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-xl">category</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-main block group-hover:text-primary transition-colors">Kategori</span>
-              <span class="text-3xs text-muted">Master Kategori</span>
-            </div>
-          </a>
-
-          <a
-            href="/admin/settings"
-            class="p-4 rounded-2xl bg-card border border-light hover:border-primary/50 transition-all group flex flex-col justify-between shadow-2xs"
-          >
-            <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-xl">tune</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-main block group-hover:text-primary transition-colors">Pengaturan</span>
-              <span class="text-3xs text-muted">Komisi & Platform</span>
-            </div>
-          </a>
-        </div>
-
-        <!-- Global Platform Metrics Overview -->
-        <div>
-          <AdminMetricsOverview client:load isSuperAdmin={true} />
-        </div>
+    <div class="space-y-8">
+      <!-- Section 1: Bank Accounts Manager (Admin can add up to 3 bank accounts like designer) -->
+      <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-4">
+        <AdminBankManager client:load />
       </div>
-    ) : (
-      /* REGULAR ADMIN DASHBOARD VIEW */
-      <div class="space-y-8">
-        <!-- Section 1: Bank Accounts Manager (Admin can add up to 3 bank accounts like designer) -->
-        <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-4">
-          <AdminBankManager client:load />
-        </div>
 
-        <!-- Section 2: Toko Binaan Saya (Assisted Stores) -->
-        <div>
-          <AdminAssistedStores client:load stores={assistedStores} currentUser={user} />
-        </div>
-
-        <!-- Section 3: Overview Metrik Transaksi & Layanan -->
-        <div class="pt-2">
-          <div class="mb-4">
-            <h2 class="text-lg font-bold text-main font-heading">Ringkasan Aktivitas & Layanan</h2>
-            <p class="text-xs text-secondary mt-0.5">Monitoring transaksi toko UMKM dan aktivitas sistem.</p>
-          </div>
-          <AdminMetricsOverview client:load isSuperAdmin={false} />
-        </div>
+      <!-- Section 2: Toko Binaan Saya (Assisted Stores) -->
+      <div>
+        <AdminAssistedStores client:load stores={assistedStores} currentUser={user} />
       </div>
-    )}
+
+      <!-- Section 3: Overview Metrik Transaksi & Layanan -->
+      <div class="pt-2">
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-main font-heading">Ringkasan Aktivitas & Layanan</h2>
+          <p class="text-xs text-secondary mt-0.5">Monitoring transaksi toko UMKM dan aktivitas sistem.</p>
+        </div>
+        <AdminMetricsOverview client:load isSuperAdmin={false} />
+      </div>
+    </div>
   </div>
 </DashboardLayout>

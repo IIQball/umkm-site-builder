@@ -26,7 +26,7 @@
     if (!currentPath) return false;
     const cleanCurrent = currentPath.replace(/\/$/, "") || "/";
     const cleanHref = href.replace(/\/$/, "") || "/";
-    if (cleanHref === "/dashboard" || cleanHref === "/admin") {
+    if (cleanHref === "/dashboard" || cleanHref === "/admin" || cleanHref === "/superadmin") {
       return cleanCurrent === cleanHref;
     }
     return (

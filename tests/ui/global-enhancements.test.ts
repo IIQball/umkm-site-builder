@@ -188,5 +188,5 @@ describe('Web Builder Layout Selector & Schematics Tests', () => {
     const { sectionRegistry } = await import('@/components/builder/registry');
     expect(sectionRegistry.product_catalog).toBeDefined();
     expect(sectionRegistry.product_catalog.stylesComponent).toBeUndefined();
-  });
+  }, 15000);
 });

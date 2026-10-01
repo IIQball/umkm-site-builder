@@ -48,28 +48,80 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     resetPasswordTokenExpiresIn: 60 * 60 * 24, // 24 jam kadaluarsa
     sendResetPassword: async ({ user, url }) => {
-      const role = (user as unknown as { role?: string }).role
-      const isAdmin = role === 'admin' || role === 'superadmin'
-      const subject = isAdmin ? 'Aktivasi / Reset Password Akun Admin UMKM Site Builder' : 'Reset Password Akun UMKM Site Builder';
-      const bodyText = isAdmin 
-        ? 'Akun admin Anda telah didaftarkan atau Anda meminta pengaturan ulang kata sandi.'
-        : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+      // Fetch full user record from database to ensure custom fields (role, status) are available
+      const dbUser = await db.query.users.findFirst({
+        where: eq(users.id, user.id)
+      });
       
-      // For admins, we might want to direct them to an activation-looking URL, but since BetterAuth handles it, 
-      // the URL will go to whatever redirectTo we specify. Wait, if we use authClient.requestPasswordReset in the frontend, 
-      // it specifies redirectTo. If we call it from backend, we need to pass redirectTo? 
-      // We can just use the provided url.
+      const role = dbUser?.role || 'tenant';
+      const status = dbUser?.status || 'active';
+      const isAdmin = role === 'admin' || role === 'superadmin';
+      const isActivation = status === 'pending';
+
+      let subject = 'Reset Password Akun UMKM Site Builder';
+      let bodyText = 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+
+      if (isActivation) {
+        subject = isAdmin ? 'Aktivasi Akun Admin UMKM Site Builder' : 'Aktivasi Akun Merchant UMKM Site Builder';
+        bodyText = isAdmin 
+          ? 'Akun Admin Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai mengelola platform.'
+          : 'Selamat bergabung! Akun Merchant Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai menggunakan layanan kami.';
+      } else {
+        subject = isAdmin ? 'Reset Password Akun Admin UMKM Site Builder' : 'Reset Password Akun UMKM Site Builder';
+        bodyText = isAdmin 
+          ? 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Admin Anda.'
+          : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+      }
+      
+      let finalUrl = url;
+      try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.pathname === '/reset-password') {
+          parsedUrl.pathname = '/activation';
+        }
+        finalUrl = parsedUrl.toString();
+      } catch {
+        // ignore parsing error
+      }
+
+      const calloutText = isActivation
+        ? 'Tautan aktivasi ini bersifat rahasia dan hanya berlaku selama 24 jam sejak email ini dikirimkan.'
+        : 'Tautan reset kata sandi ini bersifat rahasia dan hanya berlaku selama 24 jam sejak email ini dikirimkan.';
+
+      const btnText = isActivation ? 'Aktifkan Akun Sekarang' : 'Atur Ulang Kata Sandi';
 
       await sendEmail({
         to: user.email,
         subject,
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-            <h2 style="color: #0f172a;">Halo ${user.name},</h2>
-            <p>${bodyText}</p>
-            <p>Klik tombol di bawah ini untuk membuat kata sandi baru:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Atur Ulang Kata Sandi</a>
-            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika Anda tidak merasa melakukan tindakan ini, abaikan saja email ini.</p>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 0; color: #334155; line-height: 1.6;">
+            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin-bottom: 24px;">${subject}</h1>
+            
+            <p style="margin-bottom: 16px;">Halo <strong>${user.name}</strong>,</p>
+            
+            <p style="margin-bottom: 24px;">${bodyText}</p>
+            
+            <div style="background-color: #f0fdfa; border-left: 4px solid #14b8a6; padding: 16px; border-radius: 4px; margin-bottom: 32px;">
+              <p style="margin: 0; color: #0f766e; font-size: 14px;">
+                <strong style="display: flex; align-items: center; gap: 8px;">
+                  ⚠️ Informasi Penting:
+                </strong>
+                <br>
+                ${calloutText}
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+              <a href="${finalUrl}" style="display: inline-block; padding: 14px 28px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(54, 198, 253, 0.2);">
+                ${btnText}
+              </a>
+            </div>
+            
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jika tombol di atas tidak berfungsi, Anda dapat menyalin dan menempelkan tautan berikut ke browser Anda:</p>
+              <p style="font-size: 13px; color: #3b82f6; word-break: break-all; margin-top: 0;">${finalUrl}</p>
+              <p style="font-size: 13px; color: #94a3b8; margin-top: 24px;">Jika Anda tidak merasa melakukan tindakan ini, abaikan saja email ini.</p>
+            </div>
           </div>
         `
       });
@@ -79,16 +131,43 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
+      const status = (user as unknown as { status?: string }).status;
+      // Jangan kirim email verifikasi untuk user yang didaftarkan admin (mereka akan menerima email reset password/aktivasi)
+      if (status === 'pending') {
+        return;
+      }
       await sendEmail({
         to: user.email,
         subject: 'Verifikasi Email UMKM Site Builder',
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-            <h2 style="color: #0f172a;">Halo ${user.name},</h2>
-            <p>Terima kasih telah mendaftar di UMKM Site Builder. Silakan verifikasi email Anda untuk melanjutkan.</p>
-            <p>Klik tombol di bawah ini untuk memverifikasi akun Anda:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; margin: 16px 0; font-weight: bold;">Verifikasi Email</a>
-            <p style="font-size: 13px; color: #64748b; margin-top: 24px;">Jika tautan tidak berfungsi, Anda juga dapat menggunakan kode OTP ini: <strong>${token}</strong> (jika aplikasi memintanya).</p>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 0; color: #334155; line-height: 1.6;">
+            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin-bottom: 24px;">Verifikasi Email Anda</h1>
+            
+            <p style="margin-bottom: 16px;">Halo <strong>${user.name}</strong>,</p>
+            
+            <p style="margin-bottom: 24px;">Terima kasih telah mendaftar di UMKM Site Builder. Silakan verifikasi alamat email Anda untuk melanjutkan dan mulai menggunakan layanan kami.</p>
+            
+            <div style="background-color: #f0fdfa; border-left: 4px solid #14b8a6; padding: 16px; border-radius: 4px; margin-bottom: 32px;">
+              <p style="margin: 0; color: #0f766e; font-size: 14px;">
+                <strong style="display: flex; align-items: center; gap: 8px;">
+                  🔐 Kode OTP Anda:
+                </strong>
+                <br>
+                Gunakan kode berikut jika aplikasi memintanya: <strong style="font-size: 18px; color: #0f172a;">${token}</strong>
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+              <a href="${url}" style="display: inline-block; padding: 14px 28px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(54, 198, 253, 0.2);">
+                Verifikasi Email Sekarang
+              </a>
+            </div>
+            
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jika tombol di atas tidak berfungsi, Anda dapat menyalin dan menempelkan tautan berikut ke browser Anda:</p>
+              <p style="font-size: 13px; color: #3b82f6; word-break: break-all; margin-top: 0;">${url}</p>
+              <p style="font-size: 13px; color: #94a3b8; margin-top: 24px;">Tautan ini hanya berlaku untuk 1 kali penggunaan. Jika Anda tidak merasa mendaftar, abaikan saja email ini.</p>
+            </div>
           </div>
         `
       });
@@ -193,7 +272,7 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        before: async (session) => {
+        before: async (session, ctx) => {
           const user = await db.query.users.findFirst({
             where: (u) => eq(u.id, session.userId),
           });
@@ -205,7 +284,9 @@ export const auth = betterAuth({
           }
 
           // Otomatis aktifkan akun saat pengguna berhasil login pertama kali
-          if (user?.status === 'pending') {
+          // Pastikan ini BUKAN dari proses signUpEmail admin (yang auto-create session)
+          const isSignInRequest = ctx?.path?.includes('/sign-in') || ctx?.path?.includes('/callback');
+          if (user?.status === 'pending' && isSignInRequest) {
             await db.update(users).set({ status: 'active' }).where(eq(users.id, user.id));
           }
 

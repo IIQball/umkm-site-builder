@@ -115,10 +115,12 @@
         disabled={loading || !isTokenValid}
         size="md"
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={togglePasswordVisibility}
           aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -127,7 +129,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <Input
@@ -139,10 +141,12 @@
         disabled={loading || !isTokenValid}
         size="md"
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={toggleConfirmPasswordVisibility}
           aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -151,7 +155,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
     </div>
 

@@ -85,19 +85,11 @@
   </svelte:fragment>
 
   <div class="py-1">
+    <p class="text-[13px] text-secondary mb-5 leading-relaxed">
+      Kirimkan link undangan registrasi ke alamat email calon <strong class="font-semibold">{selectedRole === 'admin' ? 'Admin' : 'Merchant'}</strong> baru. Mereka akan menerima instruksi lengkap untuk masuk ke sistem.
+    </p>
     <form on:submit|preventDefault={handleAdd} class="animate-fade-in">
       <div class="space-y-5">
-        <div class="flex items-center gap-3 mb-2 pb-4 border-b border-light">
-          <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-            {#if selectedRole === 'tenant'}<Store size={20}/>
-            {:else}<ShieldCheck size={20}/>{/if}
-          </div>
-          <div>
-            <p class="text-xs text-muted uppercase tracking-wider font-bold">Mendaftar sebagai</p>
-            <p class="font-bold text-main capitalize">{selectedRole === 'tenant' ? 'Merchant' : selectedRole}</p>
-          </div>
-        </div>
-
         <div class="grid grid-cols-1 gap-5">
           <Input
             id="newName"
@@ -121,8 +113,14 @@
           />
         </div>
 
-        <div class="alert alert-info bg-primary/5 border-primary/20 rounded-xl text-xs text-primary/80 font-medium">
-          Sistem akan otomatis membuat akun {selectedRole === 'tenant' ? 'Merchant' : 'Admin'} dan mengirimkan undangan aktivasi ke email <strong>{newEmail || 'yang Anda masukkan'}</strong>. Pengguna dapat mengatur kata sandi mereka sendiri melalui link tersebut.
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-3.5 text-xs text-primary/80 leading-relaxed font-medium">
+          Sistem akan membuat profil awal dan mengirimkan link aktivasi ke 
+          {#if newEmail}
+            <strong class="text-primary font-bold">{newEmail}</strong>
+          {:else}
+            <span class="text-primary/60 italic">alamat email di atas</span>
+          {/if}.
+          Pengguna dapat membuat kata sandi mereka secara mandiri melalui link tersebut.
         </div>
       </div>
     </form>
@@ -143,7 +141,7 @@
         className="font-bold px-6"
       >
         <UserPlus size={16} class="mr-1" />
-        <span>Daftarkan Akun</span>
+        <span>Kirim Undangan</span>
       </Button>
     </div>
   </svelte:fragment>

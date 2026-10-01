@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions } from '@/db/index';
+import { db, users, sessions, activityLogs } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { adminStatusUpdateSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -46,6 +46,18 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
     if (validated.status === 'suspended') {
       await db.delete(sessions).where(eq(sessions.userId, userId));
     }
+
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      action: validated.status === 'suspended' ? 'USER_SUSPENDED' : 'USER_ACTIVATED',
+      details: { 
+        targetUserId: userId,
+        targetUserEmail: targetUser[0].email,
+        targetUserName: targetUser[0].name,
+        reason: suspendReason
+      }
+    });
 
     return jsonSuccess(null);
   });

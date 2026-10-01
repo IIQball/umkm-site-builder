@@ -4,7 +4,7 @@ import AdminRegistrationPanel from '@/components/admin/AdminRegistrationPanel.sv
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { tenantInvitations, users } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -22,6 +22,8 @@ let initialInvitations: Array<{
   expiresAt: string;
   acceptedAt: string | null;
   createdAt: string;
+  userId: string | null;
+  userStatus: string | null;
 }> = [];
 
 try {
@@ -35,10 +37,15 @@ try {
       expiresAt: tenantInvitations.expiresAt,
       acceptedAt: tenantInvitations.acceptedAt,
       createdAt: tenantInvitations.createdAt,
+      userId: users.id,
+      userStatus: users.status,
     })
     .from(tenantInvitations)
     .innerJoin(users, eq(tenantInvitations.email, users.email))
-    .where(eq(tenantInvitations.invitedBy, user.id))
+    .where(and(
+      eq(tenantInvitations.invitedBy, user.id),
+      eq(users.role, 'tenant')
+    ))
     .orderBy(desc(tenantInvitations.createdAt));
 
   initialInvitations = (rows || []).map((row) => ({
@@ -50,6 +57,8 @@ try {
     expiresAt: row.expiresAt.toISOString(),
     acceptedAt: row.acceptedAt ? row.acceptedAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
+    userId: row.userId,
+    userStatus: row.userStatus,
   }));
 } catch (error) {
   console.error('[AdminRegistrations] Failed to query invitations:', error);
@@ -58,17 +67,12 @@ try {
 
 <DashboardLayout title="Link Registrasi" breadcrumb="Admin / Link Registrasi">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
-      <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
-          <span>Link Registrasi Merchant</span>
-        </h1>
-        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Buat dan kelola link undangan registrasi khusus untuk merchant binaan Anda.
-        </p>
-      </div>
-    </div>
-
-    <AdminRegistrationPanel client:load invitations={initialInvitations} currentUser={user} />
+    <AdminRegistrationPanel 
+      client:load 
+      invitations={initialInvitations} 
+      currentUser={user} 
+      title="Link Registrasi Merchant"
+      description="Buat dan kelola link undangan registrasi khusus untuk merchant binaan Anda."
+    />
   </div>
 </DashboardLayout>

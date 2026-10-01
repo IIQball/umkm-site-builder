@@ -76,6 +76,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Layanan' },
           { label: 'Marketplace Template', href: '/templates', icon: 'palette', group: 'Transaksi & Layanan' },
+          { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'history', group: 'Transaksi & Layanan' },
         ],
       },
     ];
@@ -87,7 +88,6 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         title: 'Platform & Pengguna',
         items: [
           { label: 'Overview Dashboard', href: '/superadmin', icon: 'dashboard', group: 'Platform & Pengguna' },
-          { label: 'Manajemen Admin', href: '/superadmin/whitelist', icon: 'admin_panel_settings', group: 'Platform & Pengguna' },
           { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: 'group', group: 'Platform & Pengguna' },
           { label: 'Link Registrasi', href: '/superadmin/registrations', icon: 'link', group: 'Platform & Pengguna' },
         ],
@@ -104,6 +104,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: 'receipt_long', group: 'Pengaturan Sistem' },
           { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: 'tune', group: 'Pengaturan Sistem' },
+          { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'history', group: 'Pengaturan Sistem' },
         ],
       },
     ];

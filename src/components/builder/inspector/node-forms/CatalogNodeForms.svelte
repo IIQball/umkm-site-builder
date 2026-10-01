@@ -2,8 +2,8 @@
   import type { TemplateSection } from '@/schemas';
   import type { ProductItem } from '@/types';
   import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
-  import CatalogCategoryManager from '../../content/CatalogCategoryManager.svelte';
-  import { isCatalogImageSupported, DEFAULT_DEMO_PRODUCTS, DEFAULT_CATALOG_CATEGORIES, type CatalogCategory } from '../../sections/productCatalog.helpers';
+  import CatalogExtraNodeForms from './CatalogExtraNodeForms.svelte';
+  import { isCatalogImageSupported, isCatalogCategorySupported, DEFAULT_DEMO_PRODUCTS, DEFAULT_CATALOG_CATEGORIES, type CatalogCategory } from '../../sections/productCatalog.helpers';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -28,11 +28,13 @@
   $: buyButtonText = (section.props?.buyButtonText as string) || (section.props?.ctaText as string) || '';
   $: cartButtonText = (section.props?.cartButtonText as string) || (section.props?.secondaryButtonText as string) || '';
 
-  // Extract index if nodeId is product_item_X or product_image_X or item_X
+  // Extract index if nodeId is product_item_X or product_image_X or item_X or matches product.id
   $: itemIndex = (() => {
     if (nodeId.startsWith('product_item_')) return parseInt(nodeId.replace('product_item_', ''), 10);
     if (nodeId.startsWith('product_image_')) return parseInt(nodeId.replace('product_image_', ''), 10);
     if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
+    const foundIdx = products.findIndex((p) => p.id === nodeId);
+    if (foundIdx !== -1) return foundIdx;
     return 0;
   })();
 
@@ -42,6 +44,19 @@
     const updated = [...products];
     if (updated[itemIndex]) {
       updated[itemIndex] = { ...updated[itemIndex], [field]: value };
+      onPropChange('products', updated);
+    }
+  }
+
+  function handleToggleDiscount(checked: boolean) {
+    const updated = [...products];
+    if (updated[itemIndex]) {
+      const prod = { ...updated[itemIndex], showOriginalPrice: checked };
+      if (checked && (!prod.originalPrice || prod.originalPrice <= (prod.price || 0))) {
+        const defaultOriginal = prod.price ? Math.round(prod.price * 1.3) : 0;
+        if (defaultOriginal > 0) prod.originalPrice = defaultOriginal;
+      }
+      updated[itemIndex] = prod;
       onPropChange('products', updated);
     }
   }
@@ -135,7 +150,7 @@
       Preset tata letak ini tidak menggunakan ilustrasi gambar.
     </p>
   {/if}
-{:else if nodeId.startsWith('product_item_') || nodeId.startsWith('item_')}
+{:else if nodeId.startsWith('product_item_') || nodeId.startsWith('item_') || products.some((p) => p.id === nodeId)}
   <div class="space-y-3 text-left">
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="prod-edit-name">Nama Produk #{itemIndex + 1}</label>
@@ -156,6 +171,34 @@
         on:input={(e) => updateProductField('price', parseFloat(e.currentTarget.value) || 0)}
         class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
       />
+    </div>
+    <!-- Opsi Diskon / Harga Coret -->
+    <div class="p-2.5 bg-base-100/70 border border-base-300/80 rounded-lg space-y-2">
+      <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-base-content">
+        <input
+          type="checkbox"
+          checked={currentProduct?.showOriginalPrice ?? false}
+          on:change={(e) => handleToggleDiscount(e.currentTarget.checked)}
+          class="checkbox checkbox-primary checkbox-xs rounded"
+        />
+        <span>Tampilkan Efek Harga Coret (Diskon)</span>
+      </label>
+
+      {#if currentProduct?.showOriginalPrice}
+        <div class="space-y-1 pt-1">
+          <label for="prod-edit-orig-price" class="block font-medium text-2xs text-base-content/70">
+            Harga Sebelum Diskon (Coret) (Rp)
+          </label>
+          <input
+            id="prod-edit-orig-price"
+            type="number"
+            value={currentProduct?.originalPrice ?? (currentProduct?.price ? Math.round(currentProduct.price * 1.3) : '')}
+            on:input={(e) => updateProductField('originalPrice', parseFloat(e.currentTarget.value) || 0)}
+            class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded text-xs text-base-content focus:outline-none focus:border-primary font-mono"
+            placeholder="Contoh: 75000"
+          />
+        </div>
+      {/if}
     </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="prod-edit-desc">Deskripsi Singkat</label>
@@ -178,33 +221,35 @@
         placeholder="Terlaris / Promo"
       />
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="prod-edit-cat">Kategori Produk</label>
-      <select
-        id="prod-edit-cat"
-        value={(currentProduct as any)?.categoryId || (currentProduct as any)?.category?.id || ''}
-        on:change={(e) => {
-          const catId = e.currentTarget.value;
-          const targetCat = categories.find((c) => c.id === catId);
-          const updated = [...products];
-          if (updated[itemIndex]) {
-            updated[itemIndex] = {
-              ...updated[itemIndex],
-              categoryId: catId,
-              categoryName: targetCat ? targetCat.name : '',
-              category: targetCat ? { id: targetCat.id, name: targetCat.name, slug: targetCat.slug } : null,
-            };
-            onPropChange('products', updated);
-          }
-        }}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-      >
-        <option value="">— Tanpa Kategori / Umum —</option>
-        {#each categories as cat}
-          <option value={cat.id}>{cat.name}</option>
-        {/each}
-      </select>
-    </div>
+    {#if isCatalogCategorySupported(activePreset)}
+      <div class="space-y-1">
+        <label class="font-semibold text-xs text-base-content" for="prod-edit-cat">Kategori Produk</label>
+        <select
+          id="prod-edit-cat"
+          value={(currentProduct as any)?.categoryId || (currentProduct as any)?.category?.id || ''}
+          on:change={(e) => {
+            const catId = e.currentTarget.value;
+            const targetCat = categories.find((c) => c.id === catId);
+            const updated = [...products];
+            if (updated[itemIndex]) {
+              updated[itemIndex] = {
+                ...updated[itemIndex],
+                categoryId: catId,
+                categoryName: targetCat ? targetCat.name : '',
+                category: targetCat ? { id: targetCat.id, name: targetCat.name, slug: targetCat.slug } : null,
+              };
+              onPropChange('products', updated);
+            }
+          }}
+          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        >
+          <option value="">— Tanpa Kategori / Umum —</option>
+          {#each categories as cat}
+            <option value={cat.id}>{cat.name}</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
     {#if hasImageSupport}
       <div class="pt-2 border-t border-base-200">
         <ImageUploadDropzone
@@ -217,74 +262,15 @@
       </div>
     {/if}
   </div>
-{:else if nodeId === 'catalog_timer'}
-  <div class="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl space-y-1 text-left">
-    <p class="font-semibold text-xs text-rose-700 dark:text-rose-300">Banner Flash Sale Countdown</p>
-    <p class="text-[11px] text-base-content/70">Waktu mundur otomatis memicu psikologi kelangkaan (Urgency FOMO) bagi calon pembeli toko.</p>
-  </div>
-{:else if nodeId === 'catalog_bundle_tier'}
-  <div class="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-xl space-y-1 text-left">
-    <p class="font-semibold text-xs text-blue-700 dark:text-blue-300">Paket Bundling Bertingkat</p>
-    <p class="text-[11px] text-base-content/70">Tampilkan pilihan paket hemat vs lengkap untuk mendongkrak Nilai Transaksi Rata-rata (AOV).</p>
-  </div>
-{:else if nodeId === 'catalog_cta' || nodeId === 'cta'}
-  <div class="space-y-3 text-left">
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="cat-buy-btn-text">Teks Tombol Utama / Beli</label>
-      <input
-        id="cat-buy-btn-text"
-        type="text"
-        value={buyButtonText}
-        on:input={(e) => onPropChange('buyButtonText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Beli / Pesan"
-      />
-    </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="cat-cart-btn-text">Teks Tombol Keranjang</label>
-      <input
-        id="cat-cart-btn-text"
-        type="text"
-        value={cartButtonText}
-        on:input={(e) => onPropChange('cartButtonText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Keranjang"
-      />
-    </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="cat-wa-number">Nomor WhatsApp Toko</label>
-      <input
-        id="cat-wa-number"
-        type="text"
-        value={waNumber}
-        on:input={(e) => onPropChange('whatsappNumber', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
-        placeholder="628123456789"
-      />
-    </div>
-    <p class="text-[10px] text-base-content/60">Pesanan dari katalog otomatis masuk ke chat WhatsApp dengan format teks terstruktur.</p>
-  </div>
-{:else if nodeId === 'catalog_categories' || nodeId === 'catalog_sidebar'}
-  <div class="space-y-2 text-left">
-    <CatalogCategoryManager
-      {categories}
-      onUpdateCategories={(cats) => onPropChange('categories', cats)}
-    />
-  </div>
-{:else if nodeId === 'catalog_price_rows'}
-  <div class="p-3 bg-slate-100 rounded-xl space-y-1 text-left">
-    <p class="font-semibold text-xs text-base-content">Baris Tabel & Pricelist</p>
-    <p class="text-[11px] text-base-content/60">Layout ringkas tabular dan akordeon fokus pada kejelasan harga serta spesifikasi produk tanpa gambar.</p>
-  </div>
-{:else if nodeId === 'product_desc'}
-  <div class="space-y-1 text-left">
-    <label class="font-semibold text-xs text-base-content" for="cat-deep-desc">Deskripsi Manfaat Produk Unggulan</label>
-    <textarea
-      id="cat-deep-desc"
-      rows="4"
-      value={currentProduct?.description || ''}
-      on:input={(e) => updateProductField('description', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-    ></textarea>
-  </div>
+{:else}
+  <CatalogExtraNodeForms
+    {nodeId}
+    {buyButtonText}
+    {cartButtonText}
+    {waNumber}
+    {categories}
+    {currentProduct}
+    {onPropChange}
+    {updateProductField}
+  />
 {/if}

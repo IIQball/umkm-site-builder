@@ -19,6 +19,8 @@
   export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta', 'image'];
   export let stickerText: string = 'PROMO TERBATAS!';
+  export let badgeBgColor: string = '';
+  export let cardBgColor: string = '';
 
   $: hasImage = elementOrder.includes('image');
   $: imgIdx = elementOrder.indexOf('image');
@@ -37,7 +39,10 @@
 </script>
 
 {#snippet promoSticker()}
-  <span class="absolute bottom-4 left-4 bg-yellow-400 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg shadow-md -rotate-6 font-heading z-10">
+  <span
+    class="absolute bottom-4 left-4 font-black text-xs px-3 py-1.5 rounded-lg shadow-md -rotate-6 font-heading z-10"
+    style="background-color: {badgeBgColor || 'var(--theme-secondary, var(--color-secondary, #fbbf24))'}; color: {badgeBgColor ? 'white' : '#0f172a'};"
+  >
     {stickerText || 'PROMO TERBATAS!'}
   </span>
 {/snippet}
@@ -111,7 +116,7 @@
         >
           <p
             style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--color-text-secondary);"
-            class="text-body-base leading-relaxed font-sans"
+            class="text-body-base leading-relaxed"
           >
             {subtitle}
           </p>
@@ -144,7 +149,10 @@
   </div>
 {/snippet}
 
-<div class="bg-[var(--color-bg-secondary)] rounded-3xl p-6 sm:p-10 border border-[var(--color-border)] my-4">
+<div
+  class="rounded-3xl p-6 sm:p-10 border border-[var(--color-border)] my-4"
+  style="background-color: {cardBgColor || 'var(--color-bg-secondary)'};"
+>
   {#if !hasImage}
     {@render textBlock(true)}
   {:else}

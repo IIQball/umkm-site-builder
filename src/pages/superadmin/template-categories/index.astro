@@ -12,7 +12,7 @@ export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
-  return Astro.redirect('/auth/login?redirect=/admin/template-categories');
+  return Astro.redirect('/auth/login?redirect=/superadmin/template-categories');
 }
 
 if (!isAuthorizedSuperAdmin(user)) {
@@ -30,7 +30,7 @@ try {
 }
 ---
 
-<DashboardLayout title="Kategori Template" breadcrumb="Admin / Kategori Template">
+<DashboardLayout title="Kategori Template" breadcrumb="Super Admin / Kategori Template">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
     <!-- Page Header (matching designer/wallet & designer/templates style) -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">

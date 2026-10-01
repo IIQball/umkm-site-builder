@@ -46,8 +46,6 @@ export const DEFAULT_FAQS: (FAQItem & { category?: string; iconName?: string })[
   },
 ];
 
-export const getCleanWaNumber = getEffectiveWhatsAppNumber;
-
 export function buildWhatsAppHelpLink(wa?: string, message?: string): string {
   const cleanWa = getEffectiveWhatsAppNumber(wa);
   const text = message || 'Halo admin, saya ingin bertanya seputar produk/layanan toko.';

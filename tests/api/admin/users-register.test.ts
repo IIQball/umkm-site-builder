@@ -15,12 +15,18 @@ vi.mock('@/db/index', () => ({
     delete: vi.fn(() => ({
       where: vi.fn().mockResolvedValue([{}]),
     })),
+    insert: vi.fn(() => ({
+      values: vi.fn().mockResolvedValue([{}]),
+    })),
   },
   users: {
     email: 'mock_email',
   },
   sessions: {
     userId: 'mock_userId',
+  },
+  tenantInvitations: {
+    id: 'mock_id',
   },
 }));
 

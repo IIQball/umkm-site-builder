@@ -98,7 +98,7 @@
   </div>
 
   <!-- Badge & Stat Label -->
-  <div class="grid grid-cols-2 gap-2">
+  <div class="space-y-3.5">
     <div class="space-y-1">
       <label class="font-semibold text-[11px] text-base-content/70" for="feat-item-badge">Badge (Opsional)</label>
       <input

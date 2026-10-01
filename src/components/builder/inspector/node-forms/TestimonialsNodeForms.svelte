@@ -1,10 +1,9 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { TestimonialItem } from '@/types';
-  import { Star } from 'lucide-svelte';
+  import { Star, CheckCircle2 } from 'lucide-svelte';
   import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
   import {
-    isTestimonialsImageSupported,
     DEFAULT_TESTIMONIALS,
     DEFAULT_CLIENT_LOGOS,
     type ClientLogoItem,
@@ -13,9 +12,6 @@
   export let section: TemplateSection;
   export let nodeId: string;
   export let onPropChange: (key: string, value: unknown) => void = () => {};
-
-  $: activePreset = (section.layoutPreset || section.props?.layoutPreset || section.styles?.layoutPreset || 'masonry_grid') as string;
-  $: hasImageSupport = isTestimonialsImageSupported(activePreset);
 
   $: testimonials = (Array.isArray(section.props?.testimonials) && section.props.testimonials.length > 0
     ? (section.props.testimonials as TestimonialItem[])
@@ -33,6 +29,9 @@
     if (nodeId.startsWith('testi_item_')) return parseInt(nodeId.replace('testi_item_', ''), 10);
     if (nodeId.startsWith('testi_avatar_')) return parseInt(nodeId.replace('testi_avatar_', ''), 10);
     if (nodeId.startsWith('testi_logo_')) return parseInt(nodeId.replace('testi_logo_', ''), 10);
+    if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
+    const foundIdx = testimonials.findIndex((t) => t.id === nodeId);
+    if (foundIdx !== -1) return foundIdx;
     return 0;
   })();
 
@@ -48,8 +47,19 @@
   }
 </script>
 
-{#if nodeId === 'testimonials_header' || nodeId === 'header'}
+{#if nodeId === 'testimonials_header' || nodeId === 'header' || nodeId === 'testimonials_container' || nodeId === 'testimonials_grid'}
   <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="testi-header-badge">Teks Lencana (Badge)</label>
+      <input
+        id="testi-header-badge"
+        type="text"
+        value={badgeText}
+        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Ulasan Pembeli"
+      />
+    </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-header-title">Judul Section Testimoni (H2)</label>
       <input
@@ -72,38 +82,55 @@
         placeholder="Ulasan kepuasan pelanggan..."
       ></textarea>
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="testi-header-badge">Teks Badge Ulasan</label>
-      <input
-        id="testi-header-badge"
-        type="text"
-        value={badgeText}
-        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Ulasan Pembeli"
-      />
-    </div>
+  </div>
+{:else if nodeId === 'title'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-title-node">Judul Utama Testimoni (H2)</label>
+    <input
+      id="testi-title-node"
+      type="text"
+      value={title}
+      on:input={(e) => onPropChange('title', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
+      placeholder="Kata Mereka yang Sudah Mencoba"
+    />
+  </div>
+{:else if nodeId === 'subtitle'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-subtitle-node">Deskripsi Subjudul</label>
+    <textarea
+      id="testi-subtitle-node"
+      rows="3"
+      value={subtitle}
+      on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Ulasan kepuasan pelanggan..."
+    ></textarea>
+  </div>
+{:else if nodeId === 'badge'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-badge-node">Teks Lencana (Badge)</label>
+    <input
+      id="testi-badge-node"
+      type="text"
+      value={badgeText}
+      on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Ulasan Pembeli"
+    />
   </div>
 {:else if nodeId.startsWith('testi_avatar_')}
-  {#if hasImageSupport}
-    <div class="space-y-4 text-left">
-      <ImageUploadDropzone
-        imageUrl={currentTesti?.avatar || ''}
-        onImageChange={(url) => updateTestiField('avatar', url)}
-        label={`Foto Avatar: ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
-        placeholderTitle="Tarik & Lepas Foto Avatar ke Sini"
-        placeholderSubtitle="pilih berkas avatar manual"
-        maxWidth={400}
-        maxHeight={400}
-        folder="testimonials"
-      />
-    </div>
-  {:else}
-    <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl text-left">
-      Preset tata letak ini tidak menggunakan ilustrasi avatar gambar.
-    </p>
-  {/if}
-{:else if nodeId.startsWith('testi_item_')}
+  <div class="space-y-3 text-left">
+    <ImageUploadDropzone
+      imageUrl={currentTesti?.avatar || ''}
+      onImageChange={(url) => updateTestiField('avatar', url)}
+      label={`Foto Avatar: ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
+      maxWidth={400}
+      maxHeight={400}
+      folder="testimonials"
+    />
+  </div>
+{:else if nodeId.startsWith('testi_item_') || nodeId.startsWith('item_') || testimonials.some(t => t.id === nodeId)}
   <div class="space-y-3 text-left">
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-name">Nama Pengulas</label>
@@ -123,24 +150,28 @@
         value={currentTesti?.role || ''}
         on:input={(e) => updateTestiField('role', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Pembeli Terverifikasi • Banyuwangi"
+        placeholder="Pelanggan Setia • Banyuwangi"
       />
     </div>
     <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="testi-rating">Bintang Rating (1-5)</label>
+      <label class="font-semibold text-xs text-base-content" for="testi-rating">
+        Jumlah Bintang Rating: {currentTesti?.rating || 5} / 5
+      </label>
       <div class="flex items-center gap-2">
         <input
           id="testi-rating"
-          type="number"
+          type="range"
           min="1"
           max="5"
+          step="1"
           value={currentTesti?.rating || 5}
           on:input={(e) => updateTestiField('rating', parseInt(e.currentTarget.value, 10) || 5)}
-          class="w-20 px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-mono"
+          class="range range-xs range-warning flex-1 cursor-pointer"
+          aria-label="Jumlah Bintang Rating"
         />
-        <div class="flex items-center gap-0.5 text-amber-400">
+        <div class="flex items-center gap-0.5 text-amber-400 shrink-0">
           {#each Array(currentTesti?.rating || 5) as _}
-            <Star size={13} class="fill-amber-400 text-amber-400" />
+            <Star size={12} class="fill-current text-amber-400" />
           {/each}
         </div>
       </div>
@@ -154,6 +185,43 @@
         on:input={(e) => updateTestiField('comment', e.currentTarget.value)}
         class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       ></textarea>
+    </div>
+
+    <!-- Verified Badge Setting -->
+    <div class="p-2.5 bg-base-200/60 border border-base-300 rounded-lg space-y-1.5">
+      <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-base-content">
+        <input
+          type="checkbox"
+          checked={currentTesti?.verified !== false}
+          on:change={(e) => updateTestiField('verified', e.currentTarget.checked)}
+          class="checkbox checkbox-primary checkbox-xs rounded"
+        />
+        <span class="flex items-center gap-1 text-emerald-600">
+          <CheckCircle2 size={12} />
+          <span>Status Pembeli Terverifikasi</span>
+        </span>
+      </label>
+      {#if currentTesti?.verified !== false}
+        <input
+          type="text"
+          value={currentTesti?.verifiedText ?? 'Pembeli Terverifikasi'}
+          on:input={(e) => updateTestiField('verifiedText', e.currentTarget.value)}
+          class="w-full px-2.5 py-1 bg-base-100 border border-base-300 rounded text-2xs text-base-content focus:outline-none focus:border-primary"
+          placeholder="Teks lencana terverifikasi"
+        />
+      {/if}
+    </div>
+
+    <!-- Foto Avatar -->
+    <div class="space-y-1 pt-1">
+      <span class="block font-semibold text-xs text-base-content">Foto Avatar Pengulas</span>
+      <ImageUploadDropzone
+        imageUrl={currentTesti?.avatar || ''}
+        onImageChange={(url) => updateTestiField('avatar', url)}
+        label={`Foto ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
+        folder="testimonials"
+        compact={true}
+      />
     </div>
   </div>
 {:else if nodeId === 'testi_spotlight_quote'}

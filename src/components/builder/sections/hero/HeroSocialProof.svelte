@@ -63,7 +63,7 @@
             <Star size={12} class="fill-current text-amber-400" />
           {/each}
         </div>
-        <span class="text-[var(--color-text-secondary)] font-medium font-sans text-[11px]">{socialProofText}</span>
+        <span class="text-[var(--color-text-secondary)] font-medium text-[11px]">{socialProofText}</span>
       </div>
     </div>
   {/if}

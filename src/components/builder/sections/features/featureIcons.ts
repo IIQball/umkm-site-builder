@@ -41,6 +41,7 @@ import {
   Lock,
   RefreshCw,
   Percent,
+  HelpCircle,
 } from 'lucide-svelte';
 
 export const FEATURE_ICON_MAP: Record<string, ComponentType> = {
@@ -129,6 +130,8 @@ export const FEATURE_ICON_MAP: Record<string, ComponentType> = {
   RefreshCw: RefreshCw,
   percent: Percent,
   Percent: Percent,
+  'help-circle': HelpCircle,
+  HelpCircle: HelpCircle,
 };
 
 export function resolveFeatureIcon(name?: string): ComponentType {

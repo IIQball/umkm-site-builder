@@ -1,13 +1,15 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
   import { ShoppingBag, CheckCircle, ShieldCheck } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah, buildWhatsAppOrderLink } from '../productCatalog.helpers';
+  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
   export let waNumber: string = '';
   export let buyButtonText: string = 'Pesan Langsung via WA';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   $: product = products[0] || {
@@ -17,6 +19,10 @@
     imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&auto=format&fit=crop&q=80',
     description: 'Diproses dingin tanpa pemanasan dan bebas bahan kimia. Menjaga kemurnian asam laurat alami untuk imunitas dan metabolisme tubuh.',
   };
+  $: pStyle = resolveProductNodeStyle(product, 0, nodeStyles);
+  $: currentPrice = Number(product?.price ?? 0);
+  $: originalPrice = Number(product?.originalPrice) || (product?.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0);
+  $: hasDiscount = (product?.showOriginalPrice === true || (product?.showOriginalPrice !== false && !!product?.originalPrice && Number(product?.originalPrice) > currentPrice)) && originalPrice > currentPrice;
 
   function selectImage(e: Event) {
     e.stopPropagation();
@@ -52,6 +58,7 @@
 <div
   data-node="product_item_0"
   data-node-id="product_item_0"
+  style={pStyle.marginStyle}
   class="cq-prod-split-view items-center text-left bg-card border border-light/80 rounded-3xl p-6 sm:p-10 shadow-xs"
 >
   <!-- Large Hero Photo -->
@@ -81,7 +88,7 @@
     {#if product.badge}
       <span
         class="absolute top-3 left-3 text-2xs font-heading font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs"
-        style="background-color: var(--color-primary); color: #ffffff;"
+        style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
       >
         {product.badge}
       </span>
@@ -107,7 +114,7 @@
       <span class="text-xs font-heading font-bold uppercase tracking-wider text-[var(--color-primary)]">
         Sorotan Produk Unggulan
       </span>
-      <h3 class="font-heading text-xl sm:text-2xl font-black text-main mt-1 mb-2">
+      <h3 class="font-heading text-xl sm:text-2xl font-black text-main mt-1 mb-2" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
         {product.name}
       </h3>
       <p class="text-xs sm:text-sm text-secondary leading-relaxed">
@@ -140,9 +147,16 @@
     >
       <div>
         <span class="text-xs text-secondary block font-mono">Harga Spesial</span>
-        <span class="font-heading font-black text-2xl text-primary">
-          {formatRupiah(product.price)}
-        </span>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span class="font-heading font-black text-2xl text-primary">
+            {formatIDR(product.price)}
+          </span>
+          {#if hasDiscount}
+            <span class="text-sm text-secondary/60 line-through font-mono">
+              {formatIDR(originalPrice)}
+            </span>
+          {/if}
+        </div>
       </div>
       <button
         type="button"

@@ -1,9 +1,27 @@
 import type { TemplateConfig } from '@/schemas';
 import type { DocumentState, EditorTemplate } from './editorStore.types';
-import { DEFAULT_SLOTS_BY_SECTION } from './documentStore.actions';
 import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
-import { getAddedSlotDefaultProps } from '../inspector/sectionSlot.helpers';
+import { getAddedSlotDefaultProps, getSectionDefaultSlots } from '../inspector/sectionSlot.helpers';
 import { DEFAULT_DEMO_PRODUCTS } from '../sections/productCatalog.helpers';
+import { DEFAULT_TESTIMONIALS } from '../sections/testimonials/testimonials.helpers';
+import { DEFAULT_FAQS } from '../sections/faq/faq.helpers';
+
+const SLOT_MAP: Record<string, string> = {
+  hero_badge: 'badge', badge: 'badge', hero_title: 'title', title: 'title',
+  hero_subtitle: 'subtitle', subtitle: 'subtitle', hero_cta: 'cta', hero_cta_primary: 'cta',
+  cta: 'cta', hero_image: 'image', hero_media: 'image', hero_founder_photo: 'image',
+  hero_terminal: 'terminal', hero_booking_card: 'booking_card', hero_stat_counter: 'stat_counter',
+  hero_trust_badges: 'trust_badges', hero_contrast_card: 'contrast_card',
+  hero_product_cards: 'product_cards', hero_floating_cards: 'floating_cards',
+  hero_social_proof: 'social_proof', hero_chat_simulation: 'chat_simulation',
+  hero_email_capture: 'email_capture', hero_category_pills: 'category_pills',
+  hero_pill_category: 'category_pills', hero_bento_promo: 'bento_promo',
+  hero_bento_review: 'bento_review',
+  maps_badge: 'badge', maps_title: 'title', maps_subtitle: 'subtitle',
+  faq_badge: 'badge', faq_title: 'title', faq_subtitle: 'subtitle',
+  testimonials_header: 'title', faq_header: 'title', maps_header: 'title',
+  features_heading: 'title', features_image: 'image', catalog_header: 'title',
+};
 
 type Updater = (fn: (s: DocumentState) => DocumentState) => void;
 
@@ -111,51 +129,13 @@ export function applyDeleteNode(
       }
     } else {
       // Slot-based deletion for standard sections
-      const defaultSlots = DEFAULT_SLOTS_BY_SECTION[s.type] || ['badge', 'title', 'subtitle', 'image', 'cta'];
+      const defaultSlots = getSectionDefaultSlots(s);
       const currentOrder = Array.isArray(currentProps.elementOrder) && currentProps.elementOrder.length > 0
         ? [...currentProps.elementOrder]
         : [...defaultSlots];
 
       // Normalize nodeId to slot key
-      const slotMap: Record<string, string> = {
-        hero_badge: 'badge',
-        badge: 'badge',
-        hero_title: 'title',
-        title: 'title',
-        hero_subtitle: 'subtitle',
-        subtitle: 'subtitle',
-        hero_cta: 'cta',
-        hero_cta_primary: 'cta',
-        cta: 'cta',
-        hero_image: 'image',
-        hero_media: 'image',
-        hero_founder_photo: 'image',
-        hero_terminal: 'terminal',
-        hero_booking_card: 'booking_card',
-        hero_stat_counter: 'stat_counter',
-        hero_trust_badges: 'trust_badges',
-        hero_contrast_card: 'contrast_card',
-        hero_product_cards: 'product_cards',
-        hero_floating_cards: 'floating_cards',
-        hero_social_proof: 'social_proof',
-        hero_chat_simulation: 'chat_simulation',
-        hero_email_capture: 'email_capture',
-        hero_category_pills: 'category_pills',
-        hero_pill_category: 'category_pills',
-        hero_bento_promo: 'bento_promo',
-        hero_bento_review: 'bento_review',
-        footer_brand: 'brand_bio',
-        footer_contact: 'contact_info',
-        footer_navigation: 'navigation_links',
-        footer_copyright: 'copyright',
-        testimonials_header: 'title',
-        faq_header: 'title',
-        maps_header: 'title',
-        features_heading: 'title',
-        features_image: 'image',
-        catalog_header: 'title',
-      };
-      const targetSlot = slotMap[nodeId] || nodeId;
+      const targetSlot = SLOT_MAP[nodeId] || nodeId;
 
       currentProps.elementOrder = currentOrder.filter((k) => k !== targetSlot && k !== nodeId);
 
@@ -178,12 +158,16 @@ export function applyDeleteNode(
           : [...DEFAULT_DEMO_PRODUCTS];
         const idx = parseInt(nodeId.replace(/^(product_item_|item_)/, ''), 10);
         if (!isNaN(idx)) currentProps.products = productsList.filter((_, i) => i !== idx);
-      } else if (s.type === 'testimonials' && Array.isArray(currentProps.testimonials) && nodeId.startsWith('item_')) {
-        const idx = parseInt(nodeId.replace('item_', ''), 10);
-        if (!isNaN(idx)) currentProps.testimonials = currentProps.testimonials.filter((_, i) => i !== idx);
-      } else if (s.type === 'faq' && Array.isArray(currentProps.faqs) && nodeId.startsWith('item_')) {
-        const idx = parseInt(nodeId.replace('item_', ''), 10);
-        if (!isNaN(idx)) currentProps.faqs = currentProps.faqs.filter((_, i) => i !== idx);
+      } else if (s.type === 'testimonials') {
+        const testisArray = Array.isArray(currentProps.testimonials) && currentProps.testimonials.length > 0
+          ? [...currentProps.testimonials]
+          : [...DEFAULT_TESTIMONIALS];
+        const idx = parseInt(nodeId.replace(/^(testi_item_|item_)/, ''), 10);
+        if (!isNaN(idx)) currentProps.testimonials = testisArray.filter((_, i) => i !== idx);
+      } else if (s.type === 'faq') {
+        const faqsList = Array.isArray(currentProps.faqs) && currentProps.faqs.length > 0 ? [...currentProps.faqs] : [...DEFAULT_FAQS];
+        const idx = parseInt(nodeId.replace(/^(faq_item_|item_)/, ''), 10);
+        if (!isNaN(idx)) currentProps.faqs = faqsList.filter((_, i) => i !== idx);
       }
     }
 
@@ -273,15 +257,33 @@ export function applyAddNode(
         selectedNodeKey = newSlot;
       }
     } else if (s.type === 'testimonials') {
-      const items = Array.isArray(currentProps.testimonials) ? [...currentProps.testimonials] : [];
-      items.push({ customerName: 'Pelanggan Baru', rating: 5, comment: 'Pelayanan sangat memuaskan!' });
+      const items = Array.isArray(currentProps.testimonials) && currentProps.testimonials.length > 0 ? [...currentProps.testimonials] : [...DEFAULT_TESTIMONIALS];
+      items.push({ id: `testi_${Date.now()}`, customerName: `Pelanggan Baru #${items.length + 1}`, rating: 5, comment: 'Kualitas produk sangat memuaskan!', avatar: '', role: 'Pelanggan Terverifikasi', platform: 'WhatsApp', verified: true, verifiedText: 'Pembeli Terverifikasi' });
       currentProps.testimonials = items;
-      selectedNodeKey = `item_${items.length - 1}`;
+      const newSlot = `testi_item_${items.length - 1}`;
+      if (Array.isArray(currentProps.elementOrder)) currentProps.elementOrder = [...currentProps.elementOrder, newSlot];
+      selectedNodeKey = newSlot;
     } else if (s.type === 'faq') {
-      const items = Array.isArray(currentProps.faqs) ? [...currentProps.faqs] : [];
-      items.push({ question: 'Pertanyaan Baru?', answer: 'Tuliskan jawaban yang jelas dan informatif di sini.' });
-      currentProps.faqs = items;
-      selectedNodeKey = `item_${items.length - 1}`;
+      if (['badge', 'title', 'subtitle', 'faq_cs_card', 'faq_search_bar', 'faq_tabs', 'faq_list'].includes(nodeType)) {
+        const order = Array.isArray(currentProps.elementOrder) ? [...currentProps.elementOrder] : getSectionDefaultSlots(s);
+        if (!order.includes(nodeType)) order.push(nodeType);
+        currentProps.elementOrder = order;
+        Object.assign(currentProps, getAddedSlotDefaultProps(nodeType, 'faq'));
+        selectedNodeKey = nodeType;
+      } else {
+        const items = Array.isArray(currentProps.faqs) && currentProps.faqs.length > 0 ? [...currentProps.faqs] : [...DEFAULT_FAQS];
+        items.push({ id: `faq_${Date.now()}`, question: 'Pertanyaan Baru?', answer: 'Tuliskan jawaban yang jelas dan informatif di sini.', category: 'Umum' });
+        currentProps.faqs = items;
+        const newSlot = `faq_item_${items.length - 1}`;
+        if (Array.isArray(currentProps.elementOrder)) currentProps.elementOrder = [...currentProps.elementOrder, newSlot];
+        selectedNodeKey = newSlot;
+      }
+    } else if (s.type === 'google_maps' || s.type === 'footer') {
+      const order = Array.isArray(currentProps.elementOrder) ? [...currentProps.elementOrder] : getSectionDefaultSlots(s);
+      if (!order.includes(nodeType)) order.push(nodeType);
+      currentProps.elementOrder = order;
+      Object.assign(currentProps, getAddedSlotDefaultProps(nodeType, s.type));
+      selectedNodeKey = nodeType;
     }
 
     return { ...s, props: currentProps };

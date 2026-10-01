@@ -1,20 +1,34 @@
 <script lang="ts">
   import { MessageCircle } from 'lucide-svelte';
+  import { resolveFooterNodeStyle } from './footerStyles.helpers';
 
   export let statusBadgeText: string = 'TOKO BUKA';
   export let statusBadgeSubtext: string = 'Siap Menerima Pesanan WhatsApp';
   export let statusChatButtonText: string = 'Chat Sekarang';
   export let whatsappLink: string;
   export let copyrightText: string;
+  export let attributionText: string = 'Powered by Pinoka';
   export let storeHours: string = '09.00 - 21.00 WIB';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = ['footer_status_badge', 'footer_copyright', 'footer_contact'];
+
+  $: styleStatus = resolveFooterNodeStyle('footer_status_badge', nodeStyles);
+  $: styleContact = resolveFooterNodeStyle('footer_contact', nodeStyles);
+  $: styleCopyright = resolveFooterNodeStyle('footer_copyright', nodeStyles);
+
+  $: hasStatus = !elementOrder.length || elementOrder.includes('footer_status_badge') || elementOrder.includes('status_badge');
+  $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
+  $: hasContact = !elementOrder.length || elementOrder.includes('footer_contact') || elementOrder.includes('contact_button') || elementOrder.includes('chat_button');
 </script>
 
 <div class="cq-footer-row-compact py-2">
+  {#if hasStatus}
   <!-- Status Indicator Node -->
   <div
     class="flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_status_badge' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleStatus.marginTop}; margin-bottom: {styleStatus.marginBottom};"
     on:click={(e) => selectNode(e, 'footer_status_badge')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_status_badge')}
     role="button"
@@ -22,7 +36,7 @@
   >
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
     <span
-      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; color: var(--theme-text-primary, var(--color-text-main)); text-transform: uppercase;"
+      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; color: {styleStatus.color || 'var(--theme-text-primary, var(--color-text-main))'}; text-transform: uppercase;"
     >
       {statusBadgeText}
     </span>
@@ -32,25 +46,37 @@
       • {statusBadgeSubtext}
     </span>
   </div>
+  {/if}
 
+  {#if hasCopyright}
   <!-- Info & Copyright Node -->
   <div
-    class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    class="p-2 rounded-xl transition-all cursor-pointer space-y-0.5 {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"
     tabindex="0"
   >
     <p
-      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
+      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85);"
     >
       {copyrightText} Jam: {storeHours}
     </p>
+    <p
+      style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);"
+      class="opacity-80"
+    >
+      {attributionText}
+    </p>
   </div>
+  {/if}
 
+  {#if hasContact}
   <!-- Chat Button Node -->
   <div
     class="p-1 rounded-xl transition-all cursor-pointer shrink-0 {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
     on:click={(e) => selectNode(e, 'footer_contact')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
     role="button"
@@ -68,4 +94,5 @@
       <span>{statusChatButtonText}</span>
     </a>
   </div>
+  {/if}
 </div>

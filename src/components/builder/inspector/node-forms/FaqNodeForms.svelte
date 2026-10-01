@@ -2,6 +2,8 @@
   import type { TemplateSection } from '@/schemas';
   import type { FAQItem } from '@/types';
   import { DEFAULT_FAQS } from '../../sections/faq/faq.helpers';
+  import SearchableIconDropdown from '../SearchableIconDropdown.svelte';
+  import { PROMO_ICON_OPTIONS } from '../../sections/header/headerIcons';
 
   export let section: TemplateSection;
   export let nodeId: string;
@@ -19,6 +21,8 @@
   $: itemIndex = (() => {
     if (nodeId.startsWith('faq_item_')) return parseInt(nodeId.replace('faq_item_', ''), 10);
     if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
+    const foundIdx = faqs.findIndex((f) => f.id === nodeId);
+    if (foundIdx !== -1) return foundIdx;
     return 0;
   })();
 
@@ -33,8 +37,61 @@
   }
 </script>
 
-{#if nodeId === 'faq_header' || nodeId === 'header'}
+{#if nodeId === 'badge'}
   <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-badge-input">Teks Lencana (Badge)</label>
+      <input
+        id="faq-badge-input"
+        type="text"
+        value={badgeText}
+        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Pusat Bantuan Konsumen"
+      />
+    </div>
+  </div>
+{:else if nodeId === 'title'}
+  <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-title-input">Judul Utama FAQ (H2)</label>
+      <input
+        id="faq-title-input"
+        type="text"
+        value={title}
+        on:input={(e) => onPropChange('title', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
+        placeholder="Pertanyaan yang Sering Diajukan"
+      />
+    </div>
+  </div>
+{:else if nodeId === 'subtitle'}
+  <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-sub-input">Deskripsi Subjudul FAQ</label>
+      <textarea
+        id="faq-sub-input"
+        rows="3"
+        value={subtitle}
+        on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Temukan solusi cepat dan informasi penting seputar layanan serta produk kami..."
+      ></textarea>
+    </div>
+  </div>
+{:else if nodeId === 'faq_header' || nodeId === 'header'}
+  <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-header-badge">Teks Lencana (Badge)</label>
+      <input
+        id="faq-header-badge"
+        type="text"
+        value={badgeText}
+        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Pusat Bantuan Konsumen"
+      />
+    </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="faq-header-title">Judul Section FAQ (H2)</label>
       <input
@@ -57,20 +114,48 @@
         placeholder="Temukan solusi cepat dan informasi penting..."
       ></textarea>
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="faq-header-badge">Teks Badge Tagline</label>
-      <input
-        id="faq-header-badge"
-        type="text"
-        value={badgeText}
-        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Pusat Bantuan Konsumen"
-      />
-    </div>
   </div>
 {:else if nodeId === 'faq_cs_card'}
   <div class="space-y-3 text-left">
+    <SearchableIconDropdown
+      label="Ikon Kartu CS"
+      selectedIcon={(section.props?.csIcon as string) || 'HelpCircle'}
+      options={PROMO_ICON_OPTIONS}
+      onSelect={(val) => onPropChange('csIcon', val)}
+    />
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-cs-title">Judul Kartu Bantuan</label>
+      <input
+        id="faq-cs-title"
+        type="text"
+        value={(section.props?.csTitle as string) || 'Butuh Bantuan Langsung?'}
+        on:input={(e) => onPropChange('csTitle', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
+        placeholder="Butuh Bantuan Langsung?"
+      />
+    </div>
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-cs-desc">Deskripsi CS</label>
+      <textarea
+        id="faq-cs-desc"
+        rows="2"
+        value={(section.props?.csDesc as string) || 'Tim customer service kami siap membalas pesan dan membantu konsultasi produk Anda.'}
+        on:input={(e) => onPropChange('csDesc', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Tim CS kami siap membantu..."
+      ></textarea>
+    </div>
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="faq-cs-btn">Teks Tombol WA CS</label>
+      <input
+        id="faq-cs-btn"
+        type="text"
+        value={(section.props?.csButtonText as string) || 'Chat WhatsApp CS Toko'}
+        on:input={(e) => onPropChange('csButtonText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Chat WhatsApp CS Toko"
+      />
+    </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="faq-wa-num">Nomor WhatsApp Bantuan CS</label>
       <input
@@ -100,10 +185,10 @@
       Mengelompokkan daftar tanya jawab ke dalam tab topik seperti Pemesanan, Pembayaran, dan Pengiriman.
     </p>
   </div>
-{:else if nodeId.startsWith('faq_item_') || nodeId.startsWith('item_')}
+{:else if nodeId.startsWith('faq_item_') || nodeId.startsWith('item_') || faqs.some((f) => f.id === nodeId)}
   <div class="space-y-3 text-left">
     <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="faq-question">Pertanyaan</label>
+      <label class="font-semibold text-xs text-base-content" for="faq-question">Pertanyaan #{itemIndex + 1}</label>
       <input
         id="faq-question"
         type="text"
@@ -133,5 +218,11 @@
         placeholder="Pemesanan / Pembayaran / Pengiriman"
       />
     </div>
+    <SearchableIconDropdown
+      label="Ikon Kartu FAQ (Floating Help Center)"
+      selectedIcon={currentFaq?.iconName || 'HelpCircle'}
+      options={PROMO_ICON_OPTIONS}
+      onSelect={(val) => updateFaqField('iconName', val)}
+    />
   </div>
 {/if}

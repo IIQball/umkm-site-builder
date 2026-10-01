@@ -39,18 +39,43 @@ export function getDefaultCatalogSlots(preset: string, products?: ProductItem[])
   const baseSlots = CATALOG_PRESET_SLOTS[preset] || ['badge', 'title', 'subtitle'];
   const slots: string[] = [...baseSlots];
 
-  // Tiap produk adalah elemen mandiri
-  prods.forEach((_, idx) => {
-    slots.push(`product_item_${idx}`);
-  });
+  // Tiap produk adalah elemen mandiri (single product focus hanya memuat 1 item)
+  if (preset === 'single_product_deep_focus') {
+    slots.push('product_item_0');
+  } else {
+    prods.forEach((_, idx) => {
+      slots.push(`product_item_${idx}`);
+    });
+  }
 
   return slots;
+}
+
+/**
+ * Slot yang diizinkan untuk ditambah ke tata letak katalog produk.
+ * Mencegah kategori muncul di layout yang tidak mendukungnya.
+ */
+export function getAllowedCatalogSlots(preset: string, products?: ProductItem[]): string[] {
+  const prods = (Array.isArray(products) && products.length > 0 ? products : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
+  const baseSlots = CATALOG_PRESET_SLOTS[preset] || ['badge', 'title', 'subtitle'];
+  const allowed = new Set<string>(['badge', 'title', 'subtitle', ...baseSlots]);
+
+  if (preset === 'single_product_deep_focus') {
+    allowed.add('product_item_0');
+  } else {
+    prods.forEach((_, idx) => {
+      allowed.add(`product_item_${idx}`);
+    });
+  }
+
+  return Array.from(allowed);
 }
 
 /**
  * Label Bahasa Indonesia baku untuk tiap slot elemen katalog.
  */
 export function getCatalogSlotLabel(slot: string, _preset?: string, products?: ProductItem[]): string {
+  const prods = (Array.isArray(products) && products.length > 0 ? products : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
   switch (slot) {
     case 'badge':
       return 'Lencana & Tagline';
@@ -79,7 +104,6 @@ export function getCatalogSlotLabel(slot: string, _preset?: string, products?: P
     default: {
       if (slot.startsWith('product_item_')) {
         const idx = parseInt(slot.replace('product_item_', ''), 10);
-        const prods = (Array.isArray(products) && products.length > 0 ? products : DEFAULT_DEMO_PRODUCTS) as ProductItem[];
         const prod = prods[idx];
         if (prod?.name) {
           return `Produk #${idx + 1}: ${prod.name}`;
@@ -89,6 +113,10 @@ export function getCatalogSlotLabel(slot: string, _preset?: string, products?: P
       if (slot.startsWith('product_image_')) {
         const idx = parseInt(slot.replace('product_image_', ''), 10);
         return `Foto Produk #${idx + 1}`;
+      }
+      const prodById = prods.find((p) => p.id === slot);
+      if (prodById) {
+        return `Produk: ${prodById.name}`;
       }
       return slot;
     }

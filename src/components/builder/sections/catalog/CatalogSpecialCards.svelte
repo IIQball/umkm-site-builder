@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
   import { Gift, Star, Download, FileText, ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah, buildWhatsAppOrderLink } from '../productCatalog.helpers';
+  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
@@ -10,6 +11,7 @@
   export let waNumber: string = '';
   export let buyButtonText: string = 'Pesan';
   export let cartButtonText: string = 'Keranjang';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -37,6 +39,10 @@
   {#each products as product, index (product.id || product.name + index)}
     {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
+    {@const pStyle = resolveProductNodeStyle(product, index, nodeStyles)}
+    {@const currentPrice = Number(product.price ?? 0)}
+    {@const originalPrice = Number(product.originalPrice) || (product.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+    {@const hasDiscount = (product.showOriginalPrice === true || (product.showOriginalPrice !== false && !!product.originalPrice && Number(product.originalPrice) > currentPrice)) && originalPrice > currentPrice}
 
     <div
       data-node={product.id || `product_item_${index}`}
@@ -45,10 +51,11 @@
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
+      style={pStyle.marginStyle}
       class={`bg-card border border-light/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
         isCardActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-xl'
-          : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
+          : 'hover:shadow-md hover:border-light hover:shadow-md'
       }`}
     >
       <div>
@@ -62,13 +69,13 @@
             class={`grid grid-cols-2 gap-2 mb-3 cursor-pointer ${isImgActive ? 'ring-2 ring-primary rounded-2xl p-1' : ''}`}
           >
             <div class="relative rounded-xl overflow-hidden aspect-square bg-nested">
-              <img src={product.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'} alt="Sebelum" class="w-full h-full object-cover grayscale" />
-              <span class="absolute bottom-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded">Sebelum</span>
-            </div>
-            <div class="relative rounded-xl overflow-hidden aspect-square bg-nested">
-              <img src={product.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'} alt="Sesudah" class="w-full h-full object-cover" />
-              <span class="absolute bottom-1.5 left-1.5 bg-teal-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">14 Hari</span>
-            </div>
+               <img src={product.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'} alt="Sebelum" class="w-full h-full object-cover grayscale" width="300" height="300" />
+               <span class="absolute bottom-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded">Sebelum</span>
+             </div>
+             <div class="relative rounded-xl overflow-hidden aspect-square bg-nested">
+               <img src={product.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'} alt="Sesudah" class="w-full h-full object-cover" width="300" height="300" />
+               <span class="absolute bottom-1.5 left-1.5 bg-teal-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">14 Hari</span>
+             </div>
           </div>
         {:else if activePreset === 'digital_download_catalog'}
           <!-- 18. Digital Download Tags -->
@@ -90,21 +97,27 @@
               isImgActive ? 'ring-2 ring-primary' : ''
             }`}
           >
-            {#if product.imageUrl}
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                class="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
-                loading="lazy"
-              />
+             {#if product.imageUrl}
+               <img
+                 src={product.imageUrl}
+                 alt={product.name}
+                 class="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
+                 loading="lazy"
+                 width="400"
+                 height="225"
+               />
             {:else}
               <div class="w-full h-full flex items-center justify-center text-secondary/60">
                 <ShoppingBag size={24} />
               </div>
             {/if}
 
-            {#if activePreset === 'seasonal_hampers_gift'}
-              <span class="absolute top-2 left-2 bg-[var(--color-primary)] text-white text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+            {#if product.badge}
+              <span class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full shadow-xs z-10" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
+                {product.badge}
+              </span>
+            {:else if activePreset === 'seasonal_hampers_gift'}
+              <span class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs z-10" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
                 <Gift size={11} />
                 <span>HAMPERS EDISI SPESIAL</span>
               </span>
@@ -112,7 +125,7 @@
           </div>
         {/if}
 
-        <h3 class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-1">
+        <h3 class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-1" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
           {product.name}
         </h3>
 
@@ -135,9 +148,16 @@
       </div>
 
       <div class="flex justify-between items-center pt-3 border-t border-light/60 mt-3">
-        <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
-          {formatRupiah(product.price)}
-        </span>
+        <div class="flex items-baseline gap-1.5 flex-wrap">
+          <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
+            {formatIDR(product.price)}
+          </span>
+          {#if hasDiscount}
+            <span class="text-2xs text-secondary/60 line-through font-mono">
+              {formatIDR(originalPrice)}
+            </span>
+          {/if}
+        </div>
         <div class="flex gap-2">
           {#if activePreset === 'digital_download_catalog'}
             <button

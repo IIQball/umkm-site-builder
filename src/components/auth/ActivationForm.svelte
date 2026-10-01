@@ -1,0 +1,167 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { z } from "zod";
+  import Button from "@/components/ui/Button.svelte";
+  import Input from "@/components/ui/Input.svelte";
+  import { Eye, EyeOff } from "lucide-svelte";
+  import { toast } from "@/lib/toast";
+
+  let token = "";
+  let password = "";
+  let confirmPassword = "";
+  let name = "";
+  let uid = "";
+  let loading = false;
+  let isTokenValid = true;
+  let showPassword = false;
+  let showConfirmPassword = false;
+
+  const togglePasswordVisibility = () => {
+    showPassword = !showPassword;
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    showConfirmPassword = !showConfirmPassword;
+  };
+
+  onMount(() => {
+    // Read the token, uid, and name from URL search params
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenParam = urlParams.get("token");
+    const nameParam = urlParams.get("name");
+    const uidParam = urlParams.get("uid");
+    
+    if (nameParam) name = nameParam;
+    if (uidParam) uid = uidParam;
+
+    if (!tokenParam) {
+      toast.error("Token verifikasi tidak ditemukan di URL. Silakan minta tautan reset password yang baru.");
+      isTokenValid = false;
+    } else {
+      token = tokenParam;
+    }
+  });
+
+  const passwordSchema = z.object({
+    password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+    confirmPassword: z.string(),
+    name: z.string().min(3, "Nama minimal 3 karakter"),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Konfirmasi kata sandi tidak cocok",
+    path: ["confirmPassword"],
+  });
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    if (!isTokenValid) return;
+
+    const validationResult = passwordSchema.safeParse({ password, confirmPassword, name });
+    if (!validationResult.success) {
+      toast.error(validationResult.error.errors[0].message);
+      return;
+    }
+
+    loading = true;
+
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          password,
+          uid,
+          name
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Gagal mengatur ulang kata sandi");
+      } else {
+        toast.success("Akun berhasil diaktifkan! Mengalihkan ke halaman masuk...");
+        window.location.href = '/auth/login?success=activation_complete';
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
+    } finally {
+      loading = false;
+    }
+  };
+</script>
+
+<form novalidate on:submit={handleSubmit} class="space-y-5 w-full">
+    <div class="space-y-4">
+      <Input
+        label="Nama Lengkap"
+        id="name"
+        type="text"
+        bind:value={name}
+        placeholder="Nama Lengkap"
+        disabled={loading || !isTokenValid}
+        size="md"
+      />
+
+      <Input
+        label="Kata Sandi"
+        id="password"
+        type={showPassword ? "text" : "password"}
+        bind:value={password}
+        placeholder="Minimal 8 karakter"
+        disabled={loading || !isTokenValid}
+        size="md"
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          slot="suffix"
+          type="button"
+          class="text-muted"
+          on:click={togglePasswordVisibility}
+          aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+        >
+          {#if showPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </Button>
+      </Input>
+
+      <Input
+        label="Konfirmasi Kata Sandi"
+        id="confirmPassword"
+        type={showConfirmPassword ? "text" : "password"}
+        bind:value={confirmPassword}
+        placeholder="Ulangi kata sandi baru"
+        disabled={loading || !isTokenValid}
+        size="md"
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          slot="suffix"
+          type="button"
+          class="text-muted"
+          on:click={toggleConfirmPasswordVisibility}
+          aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+        >
+          {#if showConfirmPassword}
+            <EyeOff size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </Button>
+      </Input>
+    </div>
+
+    <div class="pt-2 w-full">
+      <Button type="submit" variant="primary" size="lg" fullWidth disabled={!isTokenValid || loading} {loading}>
+        Aktifkan Akun & Simpan Sandi
+      </Button>
+    </div>
+</form>

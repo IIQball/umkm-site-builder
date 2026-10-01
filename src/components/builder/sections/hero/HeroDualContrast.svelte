@@ -54,7 +54,7 @@
     <div class="relative z-10 space-y-3">
       <span class="badge badge-warning badge-outline text-xs font-mono uppercase tracking-wider">{contrastBadgeText}</span>
       <h3 class="text-2xl font-heading font-bold text-white">{contrastTitleText}</h3>
-      <p class="text-xs text-slate-300 leading-relaxed font-sans">
+      <p class="text-xs text-slate-300 leading-relaxed">
         {contrastDescText}
       </p>
     </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
@@ -11,6 +12,7 @@
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'feature_rows'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: isListOnLeft = isFeaturesVisualOnLeft('horizontal_list', elementOrder, false);
   $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
@@ -39,6 +41,7 @@
           {activeNodeId}
           {selectNode}
           {elementOrder}
+          {nodeStyles}
           align="left"
           maxWidthClass="max-w-none"
         />
@@ -50,6 +53,7 @@
       <div class="space-y-4 text-left" data-node="feature_rows" data-node-id="feature_rows" style="order: {isListOnLeft ? 1 : 2};">
         {#each items as item, index (item.id || item.title + index)}
           {@const isItemActive = activeNodeId === `feature_item_${index}`}
+          {@const itemStyle = resolveFeatureItemStyle(item, index, nodeStyles)}
           <div
             data-node="feature_card"
             role="button"
@@ -76,7 +80,7 @@
                   {item.badge}
                 </span>
               {/if}
-              <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)] mb-1">
+              <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)] mb-1" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
                 {item.title}
               </h3>
               <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">

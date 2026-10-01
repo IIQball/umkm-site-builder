@@ -100,6 +100,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     { prefix: '/admin', roles: ['admin', 'superadmin'] },
     { prefix: '/api/admin', roles: ['admin', 'superadmin'] },
 
+    // Superadmin specific prefix
+    { prefix: '/superadmin', roles: ['superadmin'] },
+    { prefix: '/api/superadmin', roles: ['superadmin'] },
+
     // Role-specific protected routes
     { prefix: '/dashboard', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/onboarding', roles: ['tenant', 'admin', 'superadmin'] },

@@ -1,13 +1,16 @@
 <script lang="ts">
-  import { Star } from 'lucide-svelte';
+  import { Star, CheckCircle2 } from 'lucide-svelte';
   import type { TestimonialItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { calculateAverageRating } from './testimonials.helpers';
+  import { resolveTestimonialItemStyle } from './testimonialStyles.helpers';
 
   export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: stats = calculateAverageRating(testimonials);
+  $: statsStyle = nodeStyles?.['testi_stats'] || {};
 
   function selectStats(e: Event) {
     e.stopPropagation();
@@ -32,13 +35,18 @@
     on:click={selectStats}
     on:keydown={(e) => { if (e.key === 'Enter') selectStats(e); }}
     class={`bg-card p-6 rounded-3xl border border-light/80 shadow-xs space-y-3 cursor-pointer transition-all ${
-      $canvasStore.selectedNodeId === 'testi_stats'
+      $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === 'testi_stats'
         ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
         : 'hover:border-slate-300 dark:hover:border-slate-700'
     }`}
   >
     <div class="flex items-baseline gap-1">
-      <span class="text-4xl font-heading font-black text-main">{stats.average}</span>
+      <span
+        class="text-4xl font-heading font-black"
+        style="{statsStyle.color ? `color: ${statsStyle.color};` : 'color: var(--color-text-main);'}"
+      >
+        {stats.average}
+      </span>
       <span class="text-sm font-medium text-secondary">/ 5.0</span>
     </div>
 
@@ -81,29 +89,46 @@
 
   <!-- List Ulasan Kanan -->
   <div class="space-y-3">
-    {#each testimonials.slice(0, 3) as item, index (item.id || index)}
-      {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {#each testimonials as item, index (item.id || index)}
+      {@const itemStyle = resolveTestimonialItemStyle(item, index, nodeStyles)}
+      {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
 
       <div
         role="button"
         tabindex="0"
         on:click={(e) => selectCard(e, index, item)}
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
-        class={`p-4 rounded-2xl border border-light/80 bg-card shadow-xs space-y-1.5 transition-all duration-200 cursor-pointer ${
+        class={`p-4 rounded-2xl border border-light/80 bg-card shadow-xs space-y-2 transition-all duration-200 cursor-pointer ${
           isCardActive
             ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
             : 'hover:border-slate-300 dark:hover:border-slate-700'
         }`}
       >
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-heading font-bold text-main">{item.customerName}</span>
-          <div class="flex items-center gap-0.5 text-amber-400">
+        <div class="flex justify-between items-center text-xs gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            {#if item.avatar}
+              <img src={item.avatar} alt={item.customerName} class="w-6 h-6 rounded-full object-cover shrink-0" />
+            {/if}
+            <div class="min-w-0">
+              <span class="font-heading font-bold text-main block truncate">{item.customerName}</span>
+              {#if item.verified !== false}
+                <span class="text-[9px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                  <CheckCircle2 size={9} />
+                  <span>{item.verifiedText || 'Pembeli Terverifikasi'}</span>
+                </span>
+              {/if}
+            </div>
+          </div>
+          <div class="flex items-center gap-0.5 text-amber-400 shrink-0">
             {#each Array(item.rating || 5) as _}
               <Star size={11} class="fill-amber-400 text-amber-400" />
             {/each}
           </div>
         </div>
-        <p class="text-xs text-secondary italic leading-relaxed">
+        <p
+          class="text-xs text-secondary italic leading-relaxed"
+          style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
+        >
           "{item.comment}"
         </p>
       </div>

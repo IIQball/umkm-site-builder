@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
   import { ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah, DEFAULT_CATALOG_CATEGORIES, type CatalogCategory } from '../productCatalog.helpers';
+  import { DEFAULT_CATALOG_CATEGORIES, resolveProductNodeStyle, type CatalogCategory } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
@@ -10,6 +11,7 @@
   export let activeCategoryId: string = 'all';
   export let buyButtonText: string = 'Beli';
   export let cartButtonText: string = 'Keranjang';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onCategorySelect: (id: string) => void = (id: string) => { activeCategoryId = id; };
   export let onAddToCart: (p: ProductItem, s: Record<string, string>) => void = () => {};
   export let onBuyNow: (p: ProductItem, s: Record<string, string>) => void = () => {};
@@ -59,7 +61,7 @@
     on:click={selectSidebar}
     on:keydown={(e) => { if (e.key === 'Enter') selectSidebar(e); }}
     class={`bg-card p-5 rounded-3xl border border-light/80 shadow-xs self-start w-full cursor-pointer transition-all duration-200 ${
-      $canvasStore.selectedNodeId === 'catalog_sidebar' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : 'hover:border-slate-300 dark:hover:border-slate-700'
+      $canvasStore.selectedNodeId === 'catalog_sidebar' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : 'hover:border-light hover:shadow-md'
     }`}
   >
     <h3 class="font-heading font-bold text-xs text-main uppercase tracking-wider mb-3 px-1">
@@ -88,6 +90,10 @@
     {#each (filteredProducts.length > 0 ? filteredProducts : products) as product, index (product.id || product.name + index)}
       {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
       {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
+      {@const pStyle = resolveProductNodeStyle(product, index, nodeStyles)}
+      {@const currentPrice = Number(product.price ?? 0)}
+      {@const originalPrice = Number(product.originalPrice) || (product.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+      {@const hasDiscount = (product.showOriginalPrice === true || (product.showOriginalPrice !== false && !!product.originalPrice && Number(product.originalPrice) > currentPrice)) && originalPrice > currentPrice}
 
       <div
         data-node={product.id || `product_item_${index}`}
@@ -96,10 +102,11 @@
         tabindex="0"
         on:click={(e) => selectCard(e, index, product)}
         on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
+        style={pStyle.marginStyle}
         class={`bg-card p-4 rounded-2xl border border-light/80 shadow-xs flex flex-col justify-between transition-all duration-200 cursor-pointer ${
           isCardActive
             ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-lg'
-            : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
+            : 'hover:shadow-md hover:border-light hover:shadow-md'
         }`}
       >
         <div>
@@ -130,14 +137,14 @@
             {#if product.badge}
               <span
                 class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
-                style="background-color: var(--color-primary); color: #ffffff;"
+                style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
               >
                 {product.badge}
               </span>
             {/if}
           </div>
 
-          <h3 class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-2">
+          <h3 class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-2" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
             {product.name}
           </h3>
           {#if product.description}
@@ -148,9 +155,16 @@
         </div>
 
         <div class="flex justify-between items-center mt-4 pt-3 border-t border-light/60">
-          <span class="font-heading font-black text-primary text-xs sm:text-sm">
-            {formatRupiah(product.price)}
-          </span>
+          <div class="flex items-baseline gap-1.5 flex-wrap">
+            <span class="font-heading font-black text-primary text-xs sm:text-sm">
+              {formatIDR(product.price)}
+            </span>
+            {#if hasDiscount}
+              <span class="text-2xs text-secondary/60 line-through font-mono">
+                {formatIDR(originalPrice)}
+              </span>
+            {/if}
+          </div>
           <div class="flex gap-1.5">
             <button
               type="button"

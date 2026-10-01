@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { editorStore, activeNodeId } from '../stores/editorStore';
+  import { editorStore, activeNodeId, canvasStore } from '../stores/editorStore';
   import type { FeaturesProps, SectionStyles, FeatureItem } from '@/types';
   import {
     FeaturesGrid3Cards,
@@ -35,6 +35,8 @@
 
   $: items = mapRawFeatureItems(props);
   $: denseItems = getDenseFeatureItems(items);
+  $: nodeStyles = (props?.nodeStyles || {}) as Record<string, Record<string, string>>;
+  $: currentActiveNodeId = (isActive && $canvasStore?.selectedSectionId === sectionId) ? $activeNodeId : null;
 
   $: customBgColor = styles?.bgColorToken
     ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
@@ -81,7 +83,8 @@
         subtitle={props?.subtitle ?? 'Kami memastikan setiap tahapan dari kebun hingga ke tangan Anda melewati proses kurasi ketat.'}
         {items}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -92,7 +95,8 @@
         subtitle={props?.subtitle ?? ''}
         {items}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -103,8 +107,9 @@
         subtitle={props?.subtitle ?? 'Setiap detail kami perhitungkan demi kenyamanan penggunaan produk jangka panjang.'}
         {items}
         {elementOrder}
+        {nodeStyles}
         mainImageUrl={props?.mainImageUrl || items[0]?.imageUrl || ''}
-        activeNodeId={$activeNodeId}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -115,7 +120,8 @@
         subtitle={props?.subtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga mutu terbaik.'}
         {items}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -126,7 +132,8 @@
         subtitle={props?.subtitle ?? 'Pilih varian untuk melihat detail rasa, keunggulan, dan bahan baku.'}
         {items}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -137,8 +144,9 @@
         subtitle={props?.subtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga higienitas dan mutu rasa.'}
         {items}
         {elementOrder}
-        mainImageUrl={props?.mainImageUrl || items[0]?.imageUrl || ''}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        mainImageUrl={props?.mainImageUrl || items[0]?.imageUrl || 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800&auto=format&fit=crop&q=80'}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -151,7 +159,8 @@
         ctaText={typeof props?.ctaText === 'string' ? props.ctaText : 'Hubungi Kami Langsung'}
         ctaLink={typeof props?.ctaLink === 'string' ? props.ctaLink : '#'}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -162,7 +171,8 @@
         subtitle={props?.subtitle ?? 'Ringkasan keunggulan formula herbal alami kami untuk kesehatan harian.'}
         items={denseItems}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -186,7 +196,8 @@
           'Bersertifikat Halal MUI & BPOM',
         ]}
         {elementOrder}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
       />
 
@@ -198,10 +209,11 @@
         subtitle={props?.subtitle ?? 'Kami memadukan bahan baku lokal pilihan dengan proses produksi higienis bersertifikasi resmi.'}
         {items}
         {isActive}
-        activeNodeId={$activeNodeId}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
         onReorder={handleReorder}
         {elementOrder}
+        {nodeStyles}
       />
     {/if}
   </div>

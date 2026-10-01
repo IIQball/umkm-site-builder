@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Send, Sparkles } from 'lucide-svelte';
+  import { resolveFooterNodeStyle } from './footerStyles.helpers';
 
   export let newsletterBadge: string = 'Voucher Diskon 15%';
   export let newsletterTitle: string = 'Dapatkan Info Promo Langsung di HP';
@@ -7,8 +8,17 @@
   export let newsletterButtonText: string = 'Daftar Promo';
   export let newsletterPlaceholder: string = 'Masukkan nomor WhatsApp...';
   export let copyrightText: string;
+  export let attributionText: string = 'Powered by Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = ['footer_newsletter', 'footer_copyright'];
+
+  $: styleNewsletter = resolveFooterNodeStyle('footer_newsletter', nodeStyles);
+  $: styleCopyright = resolveFooterNodeStyle('footer_copyright', nodeStyles);
+
+  $: hasNewsletter = !elementOrder.length || elementOrder.includes('footer_newsletter') || elementOrder.includes('newsletter');
+  $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
 
   let inputNumber = '';
   let submitted = false;
@@ -25,9 +35,11 @@
 </script>
 
 <div class="max-w-xl mx-auto space-y-5 text-center py-4">
+  {#if hasNewsletter}
   <!-- Newsletter & Promo Capture Node -->
   <div
     class="space-y-3.5 p-3 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_newsletter' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleNewsletter.marginTop}; margin-bottom: {styleNewsletter.marginBottom};"
     on:click={(e) => selectNode(e, 'footer_newsletter')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_newsletter')}
     role="button"
@@ -44,7 +56,7 @@
     {/if}
 
     <h3
-      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); color: var(--theme-text-primary, var(--color-text-main));"
+      style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); color: {styleNewsletter.color || 'var(--theme-text-primary, var(--color-text-main))'};"
     >
       {newsletterTitle}
     </h3>
@@ -75,16 +87,20 @@
       </button>
     </form>
   </div>
+  {/if}
 
+  {#if hasCopyright}
   <!-- Copyright Row -->
   <div
-    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-    style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
+    class="pt-6 border-t border-[var(--color-border)] p-2 rounded-xl transition-all cursor-pointer space-y-1 {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"
     tabindex="0"
   >
-    {copyrightText}
+    <p>{copyrightText}</p>
+    <p style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);">{attributionText}</p>
   </div>
+  {/if}
 </div>

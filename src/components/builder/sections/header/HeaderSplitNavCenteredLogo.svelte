@@ -3,7 +3,13 @@
   import HeaderLogo from './HeaderLogo.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
-  import { navigateToSection } from './headerNav.helpers';
+  import {
+    navigateToSection,
+    resolveNavFontSize,
+    resolveColorTokenMatch,
+    NAV_COLOR_TOKENS,
+    NAV_HOVER_COLOR_TOKENS,
+  } from './headerNav.helpers';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
@@ -21,6 +27,13 @@
   $: hasLogo = navbarOrder.includes('logo');
   $: hasNav = navbarOrder.includes('nav_links');
   $: hasCta = navbarOrder.includes('cta');
+
+  $: navColorVal = (props.navColor as string) || NAV_COLOR_TOKENS[0].value;
+  $: navHoverColorVal = (props.navHoverColor as string) || NAV_HOVER_COLOR_TOKENS[0].value;
+  $: activeNavColor = resolveColorTokenMatch(navColorVal, NAV_COLOR_TOKENS, NAV_COLOR_TOKENS[0].value);
+  $: activeNavHoverColor = resolveColorTokenMatch(navHoverColorVal, NAV_HOVER_COLOR_TOKENS, NAV_HOVER_COLOR_TOKENS[0].value);
+  $: activeFontSize = resolveNavFontSize(props.navTypographyToken as string);
+  $: activeTextTransform = props.navTextTransform || 'none';
 </script>
 
 <div
@@ -31,15 +44,15 @@
   <!-- Desktop Left Half Links (Hidden on Tablet & Mobile) -->
   {#if hasNav && isDesktop}
     <div
-      style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); font-family: var(--theme-font-body, var(--font-family, inherit));"
+      style="font-family: var(--theme-font-body, var(--font-family, inherit));"
       class="flex-1 flex items-center justify-start gap-6"
     >
       {#each navLinks.slice(0, Math.ceil(navLinks.length / 2)) as link}
         <a
           href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
           on:click={(e) => navigateToSection(e, link)}
-          style="color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
-          class="hover:text-[var(--theme-primary,var(--color-primary))] transition-colors"
+          style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform};"
+          class="builder-header-nav-link transition-colors cursor-pointer"
         >
           {link}
         </a>
@@ -56,7 +69,7 @@
 
   <!-- Desktop Right Half Links + CTA (Hidden on Tablet & Mobile) -->
   <div
-    style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); font-family: var(--theme-font-body, var(--font-family, inherit));"
+    style="font-family: var(--theme-font-body, var(--font-family, inherit));"
     class="flex-1 flex items-center justify-end gap-3 ml-auto"
   >
     {#if hasNav && isDesktop}
@@ -65,8 +78,8 @@
           <a
             href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
             on:click={(e) => navigateToSection(e, link)}
-            style="color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
-            class="hover:text-[var(--theme-primary,var(--color-primary))] transition-colors"
+            style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform};"
+            class="builder-header-nav-link transition-colors cursor-pointer"
           >
             {link}
           </a>
@@ -101,3 +114,17 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .builder-header-nav-link {
+    color: var(--nav-item-color);
+    font-size: var(--nav-item-size);
+    font-weight: 500;
+    font-family: var(--theme-font-body, var(--font-family, inherit));
+    text-transform: var(--nav-item-transform, none);
+    transition: color 0.15s ease, opacity 0.15s ease;
+  }
+  .builder-header-nav-link:hover {
+    color: var(--nav-item-hover-color) !important;
+  }
+</style>

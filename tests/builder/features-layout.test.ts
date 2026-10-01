@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   getDefaultFeaturesSlots,
+  getAllowedFeaturesSlots,
   getEffectiveFeaturesElementOrder,
   getFeaturesSlotLabel,
   getFeaturesSplitSlot,
@@ -19,7 +20,7 @@ describe('Features Section Layout & Slot Ordering Engine', () => {
       'badge', 'title', 'subtitle', 'feature_rows',
     ]);
     expect(getDefaultFeaturesSlots('banner_inline_bar')).toEqual([
-      'badge', 'title', 'subtitle', 'ribbon_bar',
+      'ribbon_bar',
     ]);
     expect(getDefaultFeaturesSlots('bento_grid_asymmetric')).toEqual([
       'badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image',
@@ -91,6 +92,17 @@ describe('Features Section Layout & Slot Ordering Engine', () => {
     const legacyOrder = ['badge', 'title', 'features_grid'];
     const tabsEffective = getEffectiveFeaturesElementOrder('interactive_tabs', legacyOrder, 'interactive_tabs');
     expect(tabsEffective).toEqual(['badge', 'title', 'tab_nav', 'tab_card']);
+
+    // Legacy banner_inline_bar sanitization (removes unwanted default badge/title/subtitle)
+    const legacyRibbon = ['badge', 'title', 'subtitle', 'ribbon_bar'];
+    const sanitizedRibbon = getEffectiveFeaturesElementOrder('banner_inline_bar', legacyRibbon, 'banner_inline_bar');
+    expect(sanitizedRibbon).toEqual(['ribbon_bar']);
+  });
+
+  it('provides allowed slots for each layout preset including optional slots', () => {
+    expect(getAllowedFeaturesSlots('banner_inline_bar')).toEqual([
+      'ribbon_bar', 'badge', 'title', 'subtitle',
+    ]);
   });
 
   it('falls back to default slots when current order has no valid slots', () => {

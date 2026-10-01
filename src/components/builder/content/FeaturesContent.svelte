@@ -5,6 +5,7 @@
     SHOWCASE_IMAGE_FEATURE_PRESETS,
     ITEM_IMAGE_FEATURE_PRESETS,
   } from '../sections/features/features.helpers';
+  import { getEffectiveFeaturesElementOrder } from '../sections/features/featuresLayout.helpers';
   import ImageUploadDropzone from '../inspector/ImageUploadDropzone.svelte';
   import FeaturesComparisonContent from './features/FeaturesComparisonContent.svelte';
   import FeaturesRepeaterContent from './features/FeaturesRepeaterContent.svelte';
@@ -15,9 +16,13 @@
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
 
   $: layoutPreset = (section.layoutPreset || section.props?.layoutPreset || 'grid_3_cards') as string;
+  $: elementOrder = getEffectiveFeaturesElementOrder(
+    layoutPreset,
+    section.props?.elementOrder,
+    section.props?.featuresPreset as string
+  );
   $: isComparison = layoutPreset === 'before_after_comparison';
-  $: isStickyScroll = layoutPreset === 'sticky_scroll_highlight';
-  $: hasShowcaseImage = SHOWCASE_IMAGE_FEATURE_PRESETS.includes(layoutPreset);
+  $: hasShowcaseImage = SHOWCASE_IMAGE_FEATURE_PRESETS.includes(layoutPreset) || elementOrder.includes('image');
   $: hasItemImages = ITEM_IMAGE_FEATURE_PRESETS.includes(layoutPreset);
 
   $: badgeText = (section.props?.badgeText as string) ?? '';
@@ -30,46 +35,52 @@
 
 <div class="space-y-4 text-left">
   <!-- Badge Section -->
-  <div>
-    <label for="feature-badge" class="block font-semibold text-xs text-base-content/80 mb-1">Badge / Tagline</label>
-    <input
-      id="feature-badge"
-      type="text"
-      value={badgeText}
-      on:input={(e) => handlePropChange('badgeText', e.currentTarget.value)}
-      class="input input-bordered input-sm w-full"
-      placeholder="Keunggulan Layanan Kami"
-    />
-  </div>
+  {#if elementOrder.includes('badge')}
+    <div>
+      <label for="feature-badge" class="block font-semibold text-xs text-base-content/80 mb-1">Badge / Tagline</label>
+      <input
+        id="feature-badge"
+        type="text"
+        value={badgeText}
+        on:input={(e) => handlePropChange('badgeText', e.currentTarget.value)}
+        class="input input-bordered input-sm w-full"
+        placeholder="Keunggulan Layanan Kami"
+      />
+    </div>
+  {/if}
 
   <!-- Judul Section -->
-  <div>
-    <label for="feature-title" class="block font-semibold text-xs text-base-content/80 mb-1">Judul Section (Heading Utama)</label>
-    <input
-      id="feature-title"
-      type="text"
-      value={title}
-      on:input={(e) => handlePropChange('title', e.currentTarget.value)}
-      class="input input-bordered input-sm w-full"
-      placeholder="Kenapa Memilih Produk UMKM Kami?"
-    />
-  </div>
+  {#if elementOrder.includes('title')}
+    <div>
+      <label for="feature-title" class="block font-semibold text-xs text-base-content/80 mb-1">Judul Section (Heading Utama)</label>
+      <input
+        id="feature-title"
+        type="text"
+        value={title}
+        on:input={(e) => handlePropChange('title', e.currentTarget.value)}
+        class="input input-bordered input-sm w-full"
+        placeholder="Kenapa Memilih Produk UMKM Kami?"
+      />
+    </div>
+  {/if}
 
   <!-- Subtitle Section -->
-  <div>
-    <label for="feature-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">Subjudul (Subtitle)</label>
-    <textarea
-      id="feature-subtitle"
-      value={subtitle}
-      on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
-      rows="2"
-      class="textarea textarea-bordered textarea-sm w-full resize-y"
-      placeholder="Penjelasan ringkas keunggulan produk/layanan"></textarea>
-  </div>
+  {#if elementOrder.includes('subtitle')}
+    <div>
+      <label for="feature-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">Subjudul (Subtitle)</label>
+      <textarea
+        id="feature-subtitle"
+        value={subtitle}
+        on:input={(e) => handlePropChange('subtitle', e.currentTarget.value)}
+        rows="2"
+        class="textarea textarea-bordered textarea-sm w-full resize-y"
+        placeholder="Penjelasan ringkas keunggulan produk/layanan"></textarea>
+    </div>
+  {/if}
 
-  <!-- CTA Buttons for Sticky Scroll Layout -->
-  {#if isStickyScroll}
-    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-base-200">
+  <!-- CTA Buttons (Jika didukung layout) -->
+  {#if elementOrder.includes('cta')}
+    <div class="space-y-3 pt-2 border-t border-base-200">
       <div>
         <label for="feature-cta-text" class="block font-semibold text-xs text-base-content/80 mb-1">Teks Tombol CTA</label>
         <input

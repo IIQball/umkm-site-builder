@@ -37,8 +37,6 @@ export const DEFAULT_BRANCHES: MapBranchItem[] = [
   },
 ];
 
-export const getCleanWaNumber = getEffectiveWhatsAppNumber;
-
 export function buildWhatsAppHelpLink(waNumber?: string, message: string = 'Halo admin, saya ingin bertanya tentang rute dan jam operasional toko.'): string {
   const clean = getEffectiveWhatsAppNumber(waNumber);
   return generateWhatsAppLink(clean, message);

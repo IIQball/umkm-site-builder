@@ -60,7 +60,7 @@
             <svelte:component this={IconComp} class="w-5 h-5" />
           </div>
           <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)]">{stripEmoji(card.title)}</h3>
-          <p class="text-xs text-[var(--color-text-secondary)] font-sans">{stripEmoji(card.desc)}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{stripEmoji(card.desc)}</p>
         </div>
       {/each}
     </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { MessageCircle, ShoppingBag } from 'lucide-svelte';
+  import { resolveFooterNodeStyle } from './footerStyles.helpers';
 
   export let boxedOfficialBadge: string = 'Gerai Resmi UMKM';
   export let brandName: string;
@@ -9,16 +10,30 @@
   export let boxedSecondaryCtaText: string = 'Konsultasi Pesanan';
   export let whatsappLink: string;
   export let copyrightText: string;
+  export let attributionText: string = 'Powered by Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = ['footer_brand', 'footer_contact', 'footer_copyright'];
+
+  $: styleBrand = resolveFooterNodeStyle('footer_brand', nodeStyles);
+  $: styleContact = resolveFooterNodeStyle('footer_contact', nodeStyles);
+  $: styleCopyright = resolveFooterNodeStyle('footer_copyright', nodeStyles);
+
+  $: hasBrand = !elementOrder.length || elementOrder.includes('footer_brand') || elementOrder.includes('brand_bio');
+  $: hasContact = !elementOrder.length || elementOrder.includes('footer_contact') || elementOrder.includes('contact_info') || elementOrder.includes('cta_buttons');
+  $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
 </script>
 
 <div class="py-2">
   <div class="bg-[var(--theme-surface, var(--color-card-base))] rounded-3xl shadow-md border border-[var(--color-border)] p-6 sm:p-8">
+    {#if hasBrand || hasContact}
     <div class="cq-footer-row-compact text-left">
+      {#if hasBrand}
       <!-- Identitas Brand & Toko -->
       <div
         class="space-y-1 p-2 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+        style="margin-top: {styleBrand.marginTop}; margin-bottom: {styleBrand.marginBottom};"
         on:click={(e) => selectNode(e, 'footer_brand')}
         on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
         role="button"
@@ -37,16 +52,19 @@
           {brandName}
         </h4>
         <p
-          class="text-[var(--theme-text-muted, var(--color-text-secondary))] max-w-md mt-1 font-sans leading-relaxed"
-          style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
+          class="text-[var(--theme-text-muted, var(--color-text-secondary))] max-w-md mt-1 leading-relaxed"
+          style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: {styleBrand.color || 'var(--theme-text-muted, var(--color-text-secondary))'};"
         >
           {tagline}
         </p>
       </div>
+      {/if}
 
+      {#if hasContact}
       <!-- Action Buttons -->
       <div
         class="flex flex-col sm:flex-row gap-2.5 shrink-0 p-2 rounded-2xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+        style="margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
         on:click={(e) => selectNode(e, 'footer_contact')}
         on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
         role="button"
@@ -73,18 +91,23 @@
           <span>{boxedSecondaryCtaText}</span>
         </a>
       </div>
+      {/if}
     </div>
+    {/if}
 
+    {#if hasCopyright}
     <!-- Bottom Copyright -->
     <div
-      class="border-t border-[var(--color-border)] mt-6 pt-4 text-[var(--theme-text-muted, var(--color-text-secondary))] text-left p-2 rounded-xl transition-all cursor-pointer font-sans {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-      style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85);"
+      class="border-t border-[var(--color-border)] mt-6 pt-4 text-[var(--theme-text-muted, var(--color-text-secondary))] text-left p-2 rounded-xl transition-all cursor-pointer space-y-1 {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+      style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-secondary))'};"
       on:click={(e) => selectNode(e, 'footer_copyright')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
       role="button"
       tabindex="0"
     >
-      {copyrightText}
+      <p>{copyrightText}</p>
+      <p style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);">{attributionText}</p>
     </div>
+    {/if}
   </div>
 </div>

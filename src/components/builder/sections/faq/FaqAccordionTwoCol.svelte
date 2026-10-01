@@ -2,9 +2,11 @@
   import type { FAQItem } from '@/types';
   import { ChevronDown } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveFaqItemStyle } from './faqStyles.helpers';
 
   export let sectionId: string = '';
   export let faqs: FAQItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   let openSet = new Set<number>([0]);
 
@@ -34,7 +36,8 @@
     {#each col1 as item, i (item.id || i * 2)}
       {@const originalIdx = i * 2}
       {@const isOpen = openSet.has(originalIdx)}
-      {@const isItemActive = $canvasStore.selectedNodeId === (item.id || `faq_item_${originalIdx}`)}
+      {@const isItemActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `faq_item_${originalIdx}`)}
+      {@const itemStyle = resolveFaqItemStyle(item, originalIdx, nodeStyles)}
 
       <div
         role="button"
@@ -46,20 +49,20 @@
             ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 shadow-md'
             : 'hover:border-[var(--theme-primary, var(--color-primary))]/50'
         }`}
-        style="background: var(--color-card-base); border: 1px solid var(--color-border); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
+        style="background: {itemStyle.backgroundColor || 'var(--theme-surface, var(--color-card-base))'}; border: 1px solid {itemStyle.borderColor || 'var(--color-border)'}; border-radius: var(--theme-btn-border-radius, var(--btn-radius, 16px));"
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(originalIdx)}
           class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs hover:opacity-80 transition-colors cursor-pointer"
-          style="color: var(--color-text-main); font-family: var(--font-heading);"
+          style="color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading));"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
             class={`p-1.5 rounded-xl transition-transform duration-200 shrink-0 ${
               isOpen ? 'rotate-180' : ''
             }`}
-            style="background: var(--color-nested-base); color: {isOpen ? 'var(--theme-primary, var(--color-primary))' : 'var(--color-text-secondary)'};"
+            style="background: var(--color-nested-base); color: {isOpen ? 'var(--theme-primary, var(--color-primary))' : 'var(--theme-text-muted, var(--color-text-secondary))'};"
           >
             <ChevronDown size={14} />
           </span>
@@ -68,7 +71,7 @@
         {#if isOpen}
           <div
             class="px-4 pb-4 pt-1 text-xs leading-relaxed border-t"
-            style="color: var(--color-text-secondary); border-color: var(--color-border); font-family: var(--font-family);"
+            style="color: var(--theme-text-muted, var(--color-text-secondary)); border-color: var(--color-border); font-family: var(--theme-body-font, var(--font-family));"
           >
             {item.answer}
           </div>
@@ -82,7 +85,8 @@
     {#each col2 as item, i (item.id || i * 2 + 1)}
       {@const originalIdx = i * 2 + 1}
       {@const isOpen = openSet.has(originalIdx)}
-      {@const isItemActive = $canvasStore.selectedNodeId === (item.id || `faq_item_${originalIdx}`)}
+      {@const isItemActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `faq_item_${originalIdx}`)}
+      {@const itemStyle = resolveFaqItemStyle(item, originalIdx, nodeStyles)}
 
       <div
         role="button"
@@ -94,20 +98,20 @@
             ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 shadow-md'
             : 'hover:border-[var(--theme-primary, var(--color-primary))]/50'
         }`}
-        style="background: var(--color-card-base); border: 1px solid var(--color-border); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px));"
+        style="background: {itemStyle.backgroundColor || 'var(--theme-surface, var(--color-card-base))'}; border: 1px solid {itemStyle.borderColor || 'var(--color-border)'}; border-radius: var(--theme-btn-border-radius, var(--btn-radius, 16px));"
       >
         <button
           type="button"
           on:click|stopPropagation={() => toggle(originalIdx)}
           class="w-full p-4 flex items-center justify-between gap-3 text-left font-heading font-bold text-xs hover:opacity-80 transition-colors cursor-pointer"
-          style="color: var(--color-text-main); font-family: var(--font-heading);"
+          style="color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading));"
         >
           <span class="flex-1 min-w-0">{item.question}</span>
           <span
             class={`p-1.5 rounded-xl transition-transform duration-200 shrink-0 ${
               isOpen ? 'rotate-180' : ''
             }`}
-            style="background: var(--color-nested-base); color: {isOpen ? 'var(--theme-primary, var(--color-primary))' : 'var(--color-text-secondary)'};"
+            style="background: var(--color-nested-base); color: {isOpen ? 'var(--theme-primary, var(--color-primary))' : 'var(--theme-text-muted, var(--color-text-secondary))'};"
           >
             <ChevronDown size={14} />
           </span>
@@ -116,7 +120,7 @@
         {#if isOpen}
           <div
             class="px-4 pb-4 pt-1 text-xs leading-relaxed border-t"
-            style="color: var(--color-text-secondary); border-color: var(--color-border); font-family: var(--font-family);"
+            style="color: var(--theme-text-muted, var(--color-text-secondary)); border-color: var(--color-border); font-family: var(--theme-body-font, var(--font-family));"
           >
             {item.answer}
           </div>

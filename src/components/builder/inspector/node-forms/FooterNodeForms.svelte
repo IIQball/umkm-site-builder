@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { Sparkles, Plus, Trash2 } from 'lucide-svelte';
-  import { Button } from '@/components/ui';
+  import { Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
-  import type { FooterMenuLink } from '@/types';
-  import { DEFAULT_MENU_LINKS } from '../../sections/footer/footer.helpers';
+  import type { FooterMenuLink, FooterSocialLink } from '@/types';
+  import { DEFAULT_MENU_LINKS, DEFAULT_SOCIAL_LINKS } from '../../sections/footer/footer.helpers';
   import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
+  import FooterNavLinksForm from './FooterNavLinksForm.svelte';
+  import FooterSocialsForm from './FooterSocialsForm.svelte';
 
   export let section: TemplateSection;
   export let nodeId: string | null = null;
@@ -45,6 +46,7 @@
   $: communitySubtitle = (props.communitySubtitle as string) || '';
   $: googleMapsUrl = (props.googleMapsUrl as string) || '';
   $: copyrightText = (props.copyrightText as string) || '';
+  $: adminAttributionName = (props.adminAttributionName as string) ?? (props.adminName as string) ?? 'Admin Pendamping';
 
   $: menuLinks = (Array.isArray(props.footerLinks) && props.footerLinks.length > 0
     ? props.footerLinks
@@ -52,24 +54,11 @@
       ? props.menuLinks
       : DEFAULT_MENU_LINKS) as FooterMenuLink[];
 
-  function updateLink(idx: number, field: keyof FooterMenuLink, val: string) {
-    const updated = menuLinks.map((item, i) => (i === idx ? { ...item, [field]: val } : item));
-    onPropChange('footerLinks', updated);
-    onPropChange('menuLinks', updated);
-  }
-
-  function addLink() {
-    const newLinks = [...menuLinks, { label: 'Tautan Baru', url: '#products' }];
-    onPropChange('footerLinks', newLinks);
-    onPropChange('menuLinks', newLinks);
-  }
-
-  function removeLink(idx: number) {
-    if (menuLinks.length <= 1) return;
-    const newLinks = menuLinks.filter((_, i) => i !== idx);
-    onPropChange('footerLinks', newLinks);
-    onPropChange('menuLinks', newLinks);
-  }
+  $: socialLinks = (Array.isArray(props.socialLinks) && props.socialLinks.length > 0
+    ? props.socialLinks
+    : Array.isArray(props.footerSocialLinks) && props.footerSocialLinks.length > 0
+      ? props.footerSocialLinks
+      : DEFAULT_SOCIAL_LINKS) as FooterSocialLink[];
 </script>
 
 <div class="space-y-4 text-left">
@@ -158,43 +147,7 @@
     </div>
 
   {:else if nodeId === 'footer_navigation'}
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Tautan Menu Navigasi</h4>
-        <Button
-          type="button"
-          variant="primary"
-          size="xs"
-          on:click={addLink}
-          class="!h-auto !min-h-0 !py-1 !px-2 rounded-lg text-[11px] font-semibold flex items-center gap-1"
-        >
-          <Plus size={12} /> Tambah
-        </Button>
-      </div>
-      <div class="space-y-2">
-        {#each menuLinks as link, idx}
-          <div class="p-2 rounded-xl bg-base-200/50 border border-base-300 space-y-1.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold text-base-content/50">Menu #{idx + 1}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                on:click={() => removeLink(idx)}
-                class="!w-6 !h-6 !min-h-0 !p-1 text-error hover:bg-error/10 rounded"
-                title="Hapus"
-              >
-                <Trash2 size={12} />
-              </Button>
-            </div>
-            <div class="grid grid-cols-2 gap-1.5">
-              <input type="text" value={link.label} on:input={(e) => updateLink(idx, 'label', e.currentTarget.value)} placeholder="Nama Menu" class="px-2 py-1 bg-base-100 border border-base-300 rounded text-xs" />
-              <input type="text" value={link.url} on:input={(e) => updateLink(idx, 'url', e.currentTarget.value)} placeholder="#products" class="px-2 py-1 bg-base-100 border border-base-300 rounded text-xs" />
-            </div>
-          </div>
-        {/each}
-      </div>
-    </div>
+    <FooterNavLinksForm {menuLinks} {onPropChange} />
 
   {:else if nodeId === 'footer_floating_cta'}
     <div class="space-y-3">
@@ -257,24 +210,19 @@
     </div>
 
   {:else if nodeId === 'footer_socials'}
-    <div class="space-y-3">
-      <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Ubin Tautan Sosial Media</h4>
-      <div>
-        <label for="so-t" class="block text-xs font-semibold text-base-content/70 mb-1">Judul Showcase</label>
-        <input id="so-t" type="text" value={communityTitle} on:input={(e) => onPropChange('communityTitle', e.currentTarget.value)} placeholder="Terhubung dengan Kami" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
-      </div>
-      <div>
-        <label for="so-s" class="block text-xs font-semibold text-base-content/70 mb-1">Subjudul</label>
-        <textarea id="so-s" rows="2" value={communitySubtitle} on:input={(e) => onPropChange('communitySubtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs resize-y"></textarea>
-      </div>
-    </div>
+    <FooterSocialsForm {socialLinks} {communityTitle} {communitySubtitle} {onPropChange} />
 
   {:else if nodeId === 'footer_copyright'}
     <div class="space-y-3">
-      <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Baris Hak Cipta (Copyright)</h4>
+      <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Baris Hak Cipta & Powered by Pinoka</h4>
       <div>
         <label for="cr-val" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Hak Cipta</label>
         <input id="cr-val" type="text" value={copyrightText} on:input={(e) => onPropChange('copyrightText', e.currentTarget.value)} placeholder="© 2026 Warung Berkah..." class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
+      </div>
+      <div>
+        <label for="cr-admin" class="block text-xs font-semibold text-base-content/70 mb-1">Nama Admin Pendamping (Preview Template)</label>
+        <input id="cr-admin" type="text" value={adminAttributionName} on:input={(e) => onPropChange('adminAttributionName', e.currentTarget.value)} placeholder="Admin Pendamping" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
+        <p class="text-[10px] text-base-content/60 mt-1">Pada toko tenant, teks ini otomatis menyesuaikan: jika didaftarkan admin muncul "Didampingi oleh [Nama]", jika mandiri hanya "Powered by Pinoka".</p>
       </div>
     </div>
   {/if}

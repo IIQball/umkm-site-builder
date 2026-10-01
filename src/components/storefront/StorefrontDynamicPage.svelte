@@ -83,6 +83,17 @@
               storeName: store?.name || section.props?.storeName,
             }
           }
+        : section.type === 'footer'
+        ? {
+            ...section,
+            props: {
+              ...(section.props || {}),
+              brandName: store?.name || section.props?.brandName,
+              address: store?.address || section.props?.address,
+              whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
+              googleMapsUrl: store?.googleMapsUrl || section.props?.googleMapsUrl,
+            }
+          }
         : section}
       <SectionRenderer
         section={enrichedSection}

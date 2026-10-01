@@ -6,7 +6,18 @@
   import { getDefaultFeaturesSlots, getFeaturesSlotLabel, getEffectiveFeaturesElementOrder } from '../sections/features/featuresLayout.helpers';
   import { getDefaultCatalogSlots, getCatalogSlotLabel, getEffectiveCatalogElementOrder } from '../sections/catalog/catalogLayout.helpers';
   import { getHeaderSupportedSlots } from '../sections/header/headerLayout.helpers';
-  import type { ProductItem } from '@/types';
+  import {
+    getAllowedFaqSlots,
+    getFaqSlotLabel,
+    getEffectiveFaqElementOrder,
+    getAllowedMapsSlots,
+    getMapsSlotLabel,
+    getEffectiveMapsElementOrder,
+    getAllowedFooterSlots,
+    getFooterSlotLabel,
+    getEffectiveFooterElementOrder,
+  } from '../inspector/sectionSlot.helpers';
+  import type { ProductItem, FAQItem } from '@/types';
   import { getSectionNodes } from './layerPanel.helpers';
 
   export let section: TemplateSection;
@@ -26,9 +37,7 @@
   type NodeOption = { type: string; label: string };
 
   const genericNodeMap: Partial<Record<TemplateSection['type'], NodeOption[]>> = {
-    product_catalog: [{ type: 'item', label: '+ Item Produk Baru' }],
     testimonials: [{ type: 'item', label: '+ Ulasan Pelanggan Baru' }],
-    faq: [{ type: 'item', label: '+ Pertanyaan Tanya Jawab' }],
   };
 
   $: nodeOptions = (() => {
@@ -92,6 +101,36 @@
       }));
       options.push({ type: 'product_item', label: '+ Produk Baru' });
       return options;
+    }
+    if (section.type === 'faq') {
+      const faqsList = Array.isArray(section.props?.faqs) ? (section.props.faqs as FAQItem[]) : undefined;
+      const allowed = getAllowedFaqSlots(preset, faqsList);
+      const active = getEffectiveFaqElementOrder(preset, section.props?.elementOrder, faqsList, section.props?.faqPreset as string);
+      const missing = allowed.filter((s) => !s.startsWith('faq_item_') && !active.includes(s));
+      const options: NodeOption[] = missing.map((s) => ({
+        type: s,
+        label: `+ ${getFaqSlotLabel(s, preset, faqsList)}`,
+      }));
+      options.push({ type: 'item', label: '+ Pertanyaan Baru' });
+      return options;
+    }
+    if (section.type === 'google_maps') {
+      const allowed = getAllowedMapsSlots(preset, section.props?.branchMode as string);
+      const active = getEffectiveMapsElementOrder(preset, section.props?.elementOrder, section.props?.branchMode as string);
+      const missing = allowed.filter((s) => !active.includes(s));
+      return missing.map((s) => ({
+        type: s,
+        label: `+ ${getMapsSlotLabel(s, preset)}`,
+      }));
+    }
+    if (section.type === 'footer') {
+      const allowed = getAllowedFooterSlots(preset);
+      const active = getEffectiveFooterElementOrder(preset, section.props?.elementOrder as string[] | undefined);
+      const missing = allowed.filter((s) => !active.includes(s));
+      return missing.map((s) => ({
+        type: s,
+        label: `+ ${getFooterSlotLabel(s, preset)}`,
+      }));
     }
     return genericNodeMap[section.type] || [];
   })();

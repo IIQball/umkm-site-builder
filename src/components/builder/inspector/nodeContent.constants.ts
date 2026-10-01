@@ -3,6 +3,13 @@ import { getCatalogSlotLabel } from '../sections/catalog/catalogLayout.helpers';
 
 export const getNodeLabel = (id: string, sectionType?: string, preset?: string): string => {
   if (sectionType === 'features') {
+    if (id.startsWith('feature_item_')) {
+      const idx = parseInt(id.replace('feature_item_', ''), 10);
+      return `Item Fitur #${isNaN(idx) ? '' : idx + 1}`;
+    }
+    if (id === 'feature_badge') return 'Lencana & Tagline';
+    if (id === 'feature_title') return 'Judul Utama (Heading)';
+    if (id === 'feature_subtitle') return 'Subjudul & Deskripsi';
     if (id === 'features_heading' || id === 'header') {
       return preset === 'banner_inline_bar' ? 'Judul Ringkas Ribbon' : 'Judul Utama (Heading)';
     }
@@ -39,7 +46,7 @@ export const getNodeLabel = (id: string, sectionType?: string, preset?: string):
     case 'badge':
     case 'hero_badge': return 'Lencana Promo & Kategori';
     case 'title':
-    case 'hero_title': return 'Judul Utama (H1)';
+    case 'hero_title': return sectionType === 'hero' ? 'Judul Utama (H1)' : 'Judul Utama (H2)';
     case 'subtitle':
     case 'hero_subtitle': return 'Subjudul & Deskripsi';
     case 'image':
@@ -175,14 +182,9 @@ export const getNodeLabel = (id: string, sectionType?: string, preset?: string):
   }
 };
 
-export const nodeTextColorOptions = [
-  { value: '', label: 'Default (Tema)' },
-  { value: 'var(--theme-text-primary, #0f172a)', label: 'Teks Utama (Text Primary)' },
-  { value: 'var(--theme-text-muted, #64748b)', label: 'Teks Redup (Text Muted)' },
-  { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand (Warna Utama)' },
-  { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
-  { value: '#ffffff', label: 'Putih Bersih (White)' },
-];
+import { textColorOptions, marginOptions } from './nodeStyles.constants';
+
+export const nodeTextColorOptions = textColorOptions;
 
 export const nodeBgColorOptions = [
   { value: 'transparent', label: 'Transparan' },
@@ -192,14 +194,8 @@ export const nodeBgColorOptions = [
   { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
 ];
 
-export const nodeMarginOptions = [
-  { value: '0px', label: '0px (Tanpa Jarak)' },
-  { value: '8px', label: '8px (Ketat)' },
-  { value: '16px', label: '16px (Normal)' },
-  { value: '24px', label: '24px (Renggang)' },
-  { value: '32px', label: '32px (Lebar)' },
-  { value: '48px', label: '48px (Sangat Lebar)' },
-];
+export const nodeMarginOptions = marginOptions;
+
 
 export const btnVariantOptions = [
   { value: 'primary', label: 'Primary (Warna Penuh)' },

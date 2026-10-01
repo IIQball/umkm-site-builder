@@ -2,7 +2,13 @@
   import { Menu, X } from 'lucide-svelte';
   import { editorStore, canvasStore, activeNodeId } from '../../stores/editorStore';
   import type { HeaderAnnouncementProps } from '@/types';
-  import { navigateToSection } from './headerNav.helpers';
+  import {
+    navigateToSection,
+    resolveNavFontSize,
+    resolveColorTokenMatch,
+    NAV_COLOR_TOKENS,
+    NAV_HOVER_COLOR_TOKENS,
+  } from './headerNav.helpers';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
@@ -12,10 +18,13 @@
   $: isMobileView = $canvasStore?.viewMode === 'mobile' || $canvasStore?.viewMode === 'tablet';
   $: navLinks = Array.isArray(props?.navLinks) ? props.navLinks : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
   $: navGap = props.navGap || '16px';
-  $: navTypographyToken = (props.navTypographyToken as string) || 'body';
-  $: navTextTransform = props.navTextTransform || 'none';
-  $: navColor = (props.navColor as string) || 'var(--theme-text-muted, var(--color-text-muted))';
-  $: navHoverColor = (props.navHoverColor as string) || 'var(--theme-primary, var(--color-primary))';
+  $: navColorVal = (props.navColor as string) || NAV_COLOR_TOKENS[0].value;
+  $: navHoverColorVal = (props.navHoverColor as string) || NAV_HOVER_COLOR_TOKENS[0].value;
+  $: activeNavColor = resolveColorTokenMatch(navColorVal, NAV_COLOR_TOKENS, NAV_COLOR_TOKENS[0].value);
+  $: activeNavHoverColor = resolveColorTokenMatch(navHoverColorVal, NAV_HOVER_COLOR_TOKENS, NAV_HOVER_COLOR_TOKENS[0].value);
+  $: activeFontSize = nodeStyles.fontSize || resolveNavFontSize(props.navTypographyToken as string);
+  $: activeTextTransform = props.navTextTransform || 'none';
+  $: activeFontWeight = nodeStyles.fontWeight || 'var(--text-body-weight, 500)';
   $: ctaText = props.ctaText || '';
   $: ctaLink = props.ctaLink || '#';
 
@@ -23,7 +32,6 @@
   $: isNodeActive = isActive && ($activeNodeId === 'nav_links' || ($activeNodeId && $activeNodeId.startsWith('nav_')));
 
   let isMobileMenuOpen = false;
-  let hoveredIdx: number | null = null;
   let draggedIdx: number | null = null;
   let dropTargetIdx: number | null = null;
 
@@ -39,24 +47,6 @@
     `gap: ${gapPx}`,
     nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-body, inherit)',
   ].filter(Boolean).join('; ');
-
-  const typoTokenMap: Record<string, string> = {
-    body: 'var(--theme-text-body, var(--text-body-size, 14px))',
-    caption: 'var(--theme-text-caption, var(--text-caption-size, 12px))',
-  };
-
-  const getLinkStyle = (index: number) => {
-    const isHovered = hoveredIdx === index;
-    const color = isHovered ? navHoverColor : (nodeStyles.color || navColor);
-    return [
-      `color: ${color}`,
-      `font-size: ${nodeStyles.fontSize || typoTokenMap[navTypographyToken] || 'var(--theme-text-body, var(--text-body-size, 14px))'}`,
-      `font-weight: ${nodeStyles.fontWeight || 'var(--text-body-weight, 500)'}`,
-      `font-family: var(--theme-font-body, var(--font-family, inherit))`,
-      `text-transform: ${navTextTransform}`,
-      'transition: color 0.15s ease, transform 0.15s ease',
-    ].filter(Boolean).join('; ');
-  };
 
   const handleNavContainerClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -123,8 +113,6 @@
         role="button"
         tabindex="0"
         draggable={isActive}
-        on:mouseenter={() => (hoveredIdx = index)}
-        on:mouseleave={() => (hoveredIdx = null)}
         on:dragstart={(e) => onDragStart(e, index)}
         on:dragover={(e) => onDragOver(e, index)}
         on:dragleave={() => (dropTargetIdx = null)}
@@ -135,8 +123,8 @@
         on:keydown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') navigateToSection(e, link);
         }}
-        style={getLinkStyle(index)}
-        class={`whitespace-nowrap px-1.5 py-1 rounded cursor-pointer select-none ${
+        style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-weight: {activeFontWeight}; --nav-item-transform: {activeTextTransform};"
+        class={`builder-header-nav-link whitespace-nowrap px-1.5 py-1 rounded cursor-pointer select-none ${
           isActive ? 'cursor-grab active:cursor-grabbing' : ''
         } ${dropTargetIdx === index ? 'border-l-2 border-blue-500 pl-1' : ''} ${
           draggedIdx === index ? 'opacity-30' : ''
@@ -207,8 +195,8 @@
                 navigateToSection(e, link);
               }
             }}
-            style="{getLinkStyle(index)}; border-radius: var(--theme-btn-radius, var(--btn-radius, 6px));"
-            class="px-2.5 py-1.5 hover:bg-[var(--color-nested-base)] cursor-pointer block truncate"
+            style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform}; border-radius: var(--theme-btn-radius, var(--btn-radius, 6px));"
+            class="builder-header-nav-link px-2.5 py-1.5 hover:bg-[var(--color-nested-base)] cursor-pointer block truncate"
           >
             {link}
           </span>
@@ -227,3 +215,17 @@
     {/if}
   {/if}
 </div>
+
+<style>
+  .builder-header-nav-link {
+    color: var(--nav-item-color);
+    font-size: var(--nav-item-size);
+    font-weight: var(--nav-item-weight, 500);
+    font-family: var(--theme-font-body, var(--font-family, inherit));
+    text-transform: var(--nav-item-transform, none);
+    transition: color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+  }
+  .builder-header-nav-link:hover {
+    color: var(--nav-item-hover-color) !important;
+  }
+</style>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
@@ -11,6 +12,7 @@
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'zigzag_items'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
   $: hasZigzag = elementOrder.includes('zigzag_items') || elementOrder.includes('features_grid');
@@ -49,6 +51,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-2xl"
       />
     </div>
@@ -59,6 +62,7 @@
       {#each items as item, index (item.id || item.title + index)}
         {@const isEven = (index % 2 === 1) !== isReversedOrientation}
         {@const isItemActive = activeNodeId === `feature_item_${index}`}
+        {@const itemStyle = resolveFeatureItemStyle(item, index, nodeStyles)}
         <div
           data-node="feature_card"
           role="button"
@@ -88,7 +92,7 @@
                 {item.badge || `Langkah 0${index + 1}`}
               </span>
             </div>
-            <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]">
+            <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
               {item.title}
             </h3>
             <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">

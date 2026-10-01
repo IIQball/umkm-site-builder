@@ -106,7 +106,37 @@ export function getDefaultFeaturesSlots(preset: string): string[] {
     case 'horizontal_list':
       return ['badge', 'title', 'subtitle', 'feature_rows'];
     case 'banner_inline_bar':
-      return ['badge', 'title', 'subtitle', 'ribbon_bar'];
+      return ['ribbon_bar'];
+    case 'bento_grid_asymmetric':
+      return ['badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image'];
+    case 'alternating_zigzag_rows':
+      return ['badge', 'title', 'subtitle', 'zigzag_items'];
+    case 'interactive_tabs':
+      return ['badge', 'title', 'subtitle', 'tab_nav', 'tab_card', 'image'];
+    case 'vertical_accordion_showcase':
+      return ['badge', 'title', 'subtitle', 'accordion_list', 'image'];
+    case 'sticky_scroll_highlight':
+      return ['badge', 'title', 'subtitle', 'cta', 'scroll_cards'];
+    case 'dense_icon_matrix':
+      return ['badge', 'title', 'subtitle', 'icon_matrix'];
+    case 'before_after_comparison':
+      return ['badge', 'title', 'subtitle', 'before_card', 'after_card'];
+    default:
+      return ['badge', 'title', 'subtitle', 'feature_cards'];
+  }
+}
+
+/**
+ * Daftar seluruh slot yang diizinkan untuk tiap preset features (termasuk slot opsional).
+ */
+export function getAllowedFeaturesSlots(preset: string): string[] {
+  switch (preset) {
+    case 'banner_inline_bar':
+      return ['ribbon_bar', 'badge', 'title', 'subtitle'];
+    case 'grid_3_cards':
+      return ['badge', 'title', 'subtitle', 'feature_cards'];
+    case 'horizontal_list':
+      return ['badge', 'title', 'subtitle', 'feature_rows'];
     case 'bento_grid_asymmetric':
       return ['badge', 'title', 'subtitle', 'bento_spotlight', 'bento_cards', 'image'];
     case 'alternating_zigzag_rows':
@@ -206,16 +236,32 @@ export function getEffectiveFeaturesElementOrder(
   featuresPreset?: string
 ): string[] {
   const defaultSlots = getDefaultFeaturesSlots(preset);
+  const allowedSlots = getAllowedFeaturesSlots(preset);
+
   if (!Array.isArray(rawOrder) || rawOrder.length === 0) {
     return [...defaultSlots];
+  }
+
+  const rawList = rawOrder as string[];
+
+  // Sanitasi legacy default banner_inline_bar yang sebelumnya membawa slot badge/title/subtitle yang tidak diinginkan
+  if (
+    preset === 'banner_inline_bar' &&
+    rawList.length === 4 &&
+    rawList.includes('badge') &&
+    rawList.includes('title') &&
+    rawList.includes('subtitle') &&
+    rawList.includes('ribbon_bar')
+  ) {
+    return ['ribbon_bar'];
   }
 
   // Jika preset sama persis dengan yang tersimpan di props atau tidak didefinisikan, filter slot yang valid
   if (!featuresPreset || featuresPreset === preset) {
     const expanded: string[] = [];
-    for (const s of rawOrder as string[]) {
+    for (const s of rawList) {
       for (const norm of normalizeLegacySlot(s, preset)) {
-        if (defaultSlots.includes(norm) && !expanded.includes(norm)) {
+        if (allowedSlots.includes(norm) && !expanded.includes(norm)) {
           expanded.push(norm);
         }
       }
@@ -224,14 +270,13 @@ export function getEffectiveFeaturesElementOrder(
   }
 
   // Jika user baru ganti layout, adaptasikan slot yang relevan atau gunakan defaultSlots
-  const rawList = rawOrder as string[];
   const signatureSlots = defaultSlots.filter(
     (s) => !['badge', 'title', 'subtitle'].includes(s)
   );
 
   // Jika semua signature slot preset baru sudah ada, pertahankan urutan
   if (signatureSlots.length > 0 && signatureSlots.every((s) => rawList.includes(s))) {
-    const valid = rawList.filter((s) => defaultSlots.includes(s));
+    const valid = rawList.filter((s) => allowedSlots.includes(s));
     if (valid.length > 0) return valid;
   }
 

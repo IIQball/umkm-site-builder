@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { Play } from 'lucide-svelte';
+  import { Play, Star, CheckCircle2 } from 'lucide-svelte';
   import type { TestimonialItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
-  import { DEFAULT_VIDEO_REVIEWS } from './testimonials.helpers';
+  import { resolveTestimonialItemStyle } from './testimonialStyles.helpers';
 
   export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
-  $: videoItems = testimonials.length > 0 ? testimonials : (DEFAULT_VIDEO_REVIEWS as any);
+  $: videoItems = Array.isArray(testimonials) && testimonials.length > 0 ? testimonials : [];
 
   function selectCard(e: Event, idx: number, item: any) {
     e.stopPropagation();
@@ -25,10 +26,11 @@
 </script>
 
 <div class="cq-testi-grid-3 text-left">
-  {#each videoItems as item, index (item.id || item.customerName + index)}
-    {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
-    {@const isAvatarActive = $canvasStore.selectedNodeId === `testi_avatar_${index}`}
-    {@const coverImg = item.coverImageUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500'}
+  {#each videoItems as item, index (item.id || index)}
+    {@const itemStyle = resolveTestimonialItemStyle(item, index, nodeStyles)}
+    {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {@const isAvatarActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === `testi_avatar_${index}`}
+    {@const coverImg = item.avatar || item.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500'}
 
     <div
       role="button"
@@ -64,13 +66,30 @@
       </div>
 
       <!-- Bottom Card Info -->
-      <div class="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white pointer-events-none">
-        <h4 class="font-heading font-bold text-xs sm:text-sm text-white line-clamp-1">
-          {item.title || item.comment || 'Video Ulasan Pelanggan'}
+      <div class="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white pointer-events-none space-y-1">
+        <div class="flex items-center gap-0.5 text-amber-400">
+          {#each Array(item.rating || 5) as _}
+            <Star size={11} class="fill-amber-400 text-amber-400" />
+          {/each}
+        </div>
+        <h4
+          class="font-heading font-bold text-xs sm:text-sm line-clamp-2"
+          style="{itemStyle.color ? `color: ${itemStyle.color};` : 'color: #ffffff;'}"
+        >
+          "{item.comment || 'Ulasan Pembeli'}"
         </h4>
-        <p class="text-[11px] text-slate-300 mt-0.5 truncate">
-          {item.customerName} {item.location ? `• ${item.location}` : ''}
-        </p>
+        <div class="flex items-center gap-1.5 text-[11px] text-slate-300">
+          <span class="font-semibold text-white truncate">{item.customerName}</span>
+          {#if item.verified !== false}
+            <span class="text-emerald-400 flex items-center gap-0.5 text-[10px] shrink-0">
+              <CheckCircle2 size={10} />
+              <span>{item.verifiedText || 'Terverifikasi'}</span>
+            </span>
+          {/if}
+          {#if item.role}
+            <span class="truncate">• {item.role}</span>
+          {/if}
+        </div>
       </div>
     </div>
   {/each}

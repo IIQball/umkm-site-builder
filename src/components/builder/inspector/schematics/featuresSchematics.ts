@@ -148,21 +148,68 @@ export const getFeaturesSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 8. Vertical Accordion Showcase
+  // 8. Vertical Accordion Showcase (Split: header + akordeon kiri, gambar kanan)
   if (id === 'vertical_accordion_showcase') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="24" y="16" width="192" height="22" rx="4" fill="#1e293b"/>
-      <circle cx="40" cy="27" r="5" fill="#3b82f6"/>
-      <rect x="52" y="24" width="70" height="5" rx="1.5" fill="#f8fafc"/>
-      <rect x="24" y="42" width="192" height="46" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
-      <circle cx="40" cy="56" r="5" fill="#3b82f6"/>
-      <rect x="52" y="53" width="70" height="5" rx="1.5" fill="#f8fafc"/>
-      <rect x="52" y="64" width="140" height="4" rx="1" fill="#64748b"/>
-      <rect x="52" y="72" width="110" height="4" rx="1" fill="#64748b"/>
-      <rect x="24" y="92" width="192" height="22" rx="4" fill="#1e293b"/>
-      <circle cx="40" cy="103" r="5" fill="#3b82f6"/>
-      <rect x="52" y="100" width="70" height="5" rx="1.5" fill="#f8fafc"/>
+      <!-- Left col: header + accordion -->
+      <rect x="12" y="12" width="28" height="6" rx="3" fill="#3b82f6" opacity="0.8"/>
+      <rect x="12" y="22" width="88" height="7" rx="2" fill="#f8fafc"/>
+      <rect x="12" y="32" width="72" height="4" rx="1.5" fill="#64748b"/>
+      <!-- Accordion item 1 (Expanded) -->
+      <rect x="12" y="42" width="98" height="28" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1.2"/>
+      <circle cx="22" cy="51" r="4" fill="#3b82f6"/>
+      <rect x="30" y="49" width="56" height="4" rx="1" fill="#f8fafc"/>
+      <path d="M96 50l3 3 3-3" stroke="#3b82f6" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="30" y="58" width="68" height="3" rx="1" fill="#94a3b8"/>
+      <rect x="30" y="63" width="50" height="3" rx="1" fill="#64748b"/>
+      <!-- Accordion item 2 (Collapsed) -->
+      <rect x="12" y="74" width="98" height="15" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="22" cy="81" r="4" fill="#64748b"/>
+      <rect x="30" y="79" width="52" height="4" rx="1" fill="#94a3b8"/>
+      <path d="M96 80l3 3 3-3" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Accordion item 3 (Collapsed) -->
+      <rect x="12" y="93" width="98" height="15" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="22" cy="100" r="4" fill="#64748b"/>
+      <rect x="30" y="98" width="48" height="4" rx="1" fill="#94a3b8"/>
+      <path d="M96 99l3 3 3-3" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Right col: 4:3 Image illustration with inner photo frame -->
+      <rect x="120" y="14" width="108" height="96" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <rect x="126" y="20" width="96" height="84" rx="5" fill="#0f172a"/>
+      <circle cx="150" cy="45" r="8" fill="#3b82f6" opacity="0.6"/>
+      <path d="M132 88l24-28 18 18 20-22 24 32H132z" fill="#334155"/>
+    </svg>`;
+  }
+
+  // 9. Sticky Scroll Highlight (Asym: judul sticky kiri, kartu benefit kanan)
+  if (id === 'sticky_scroll_highlight') {
+    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="240" height="135" rx="8" fill="#090d16"/>
+      <!-- Left sticky col: Badge, Heading, Subtitle, CTA -->
+      <rect x="12" y="18" width="28" height="6" rx="3" fill="#3b82f6" opacity="0.8"/>
+      <rect x="12" y="28" width="72" height="7" rx="2" fill="#f8fafc"/>
+      <rect x="12" y="38" width="58" height="7" rx="2" fill="#f8fafc"/>
+      <rect x="12" y="49" width="68" height="4" rx="1" fill="#64748b"/>
+      <rect x="12" y="56" width="50" height="4" rx="1" fill="#64748b"/>
+      <rect x="12" y="66" width="38" height="11" rx="4" fill="#3b82f6"/>
+      <rect x="17" y="70" width="28" height="3" rx="1" fill="#ffffff"/>
+      <!-- Right stacked benefit cards -->
+      <!-- Card 1 -->
+      <rect x="96" y="14" width="132" height="48" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.2"/>
+      <rect x="104" y="20" width="28" height="4" rx="1" fill="#3b82f6"/>
+      <rect x="208" y="18" width="12" height="12" rx="3" fill="#3b82f6" opacity="0.3"/>
+      <circle cx="214" cy="24" r="3" fill="#3b82f6"/>
+      <rect x="104" y="30" width="78" height="5" rx="1.5" fill="#f8fafc"/>
+      <rect x="104" y="39" width="96" height="3.5" rx="1" fill="#64748b"/>
+      <rect x="104" y="45" width="80" height="3.5" rx="1" fill="#64748b"/>
+      <!-- Card 2 -->
+      <rect x="96" y="68" width="132" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="104" y="74" width="28" height="4" rx="1" fill="#22c55e"/>
+      <rect x="208" y="72" width="12" height="12" rx="3" fill="#22c55e" opacity="0.3"/>
+      <circle cx="214" cy="78" r="3" fill="#22c55e"/>
+      <rect x="104" y="84" width="78" height="5" rx="1.5" fill="#f8fafc"/>
+      <rect x="104" y="93" width="96" height="3.5" rx="1" fill="#64748b"/>
+      <rect x="104" y="99" width="80" height="3.5" rx="1" fill="#64748b"/>
     </svg>`;
   }
 

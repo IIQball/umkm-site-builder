@@ -5,7 +5,13 @@
   import type { HeaderAnnouncementProps } from '@/types';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
   import { stripEmoji } from './headerIcons';
-  import { navigateToSection } from './headerNav.helpers';
+  import {
+    navigateToSection,
+    resolveNavFontSize,
+    resolveColorTokenMatch,
+    NAV_COLOR_TOKENS,
+    NAV_HOVER_COLOR_TOKENS,
+  } from './headerNav.helpers';
 
   export let isOpen: boolean = false;
   export let onClose: () => void;
@@ -23,6 +29,13 @@
   $: navLinks = Array.isArray(props?.navLinks) && props.navLinks.length > 0
     ? props.navLinks
     : ['Beranda', 'Produk', 'Tentang', 'Kontak'];
+
+  $: navColorVal = (props?.navColor as string) || NAV_COLOR_TOKENS[0].value;
+  $: navHoverColorVal = (props?.navHoverColor as string) || NAV_HOVER_COLOR_TOKENS[0].value;
+  $: activeNavColor = resolveColorTokenMatch(navColorVal, NAV_COLOR_TOKENS, NAV_COLOR_TOKENS[0].value);
+  $: activeNavHoverColor = resolveColorTokenMatch(navHoverColorVal, NAV_HOVER_COLOR_TOKENS, NAV_HOVER_COLOR_TOKENS[0].value);
+  $: activeFontSize = resolveNavFontSize(props?.navTypographyToken as string);
+  $: activeTextTransform = props?.navTextTransform || 'none';
 
   let isCategoriesOpen = false;
 
@@ -186,8 +199,8 @@
             onClose();
             navigateToSection(e, link);
           }}
-          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit); font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500);"
-          class="flex items-center justify-between px-3 py-2.5 hover:bg-[var(--color-nested-base)] hover:text-[var(--theme-primary,var(--color-primary))] transition-colors cursor-pointer"
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); --nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform};"
+          class="builder-header-nav-link flex items-center justify-between px-3 py-2.5 hover:bg-[var(--color-nested-base)] transition-colors cursor-pointer"
         >
           <span>{link}</span>
         </a>
@@ -254,3 +267,17 @@
     </div>
   </div>
 {/if}
+
+<style>
+  .builder-header-nav-link {
+    color: var(--nav-item-color);
+    font-size: var(--nav-item-size);
+    font-weight: var(--text-body-weight, 500);
+    font-family: var(--theme-font-body, var(--font-family, inherit));
+    text-transform: var(--nav-item-transform, none);
+    transition: color 0.15s ease, opacity 0.15s ease;
+  }
+  .builder-header-nav-link:hover {
+    color: var(--nav-item-hover-color) !important;
+  }
+</style>

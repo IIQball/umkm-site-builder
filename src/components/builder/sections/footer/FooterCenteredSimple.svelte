@@ -1,5 +1,6 @@
 <script lang="ts">
   import { MessageCircle } from 'lucide-svelte';
+  import { resolveFooterNodeStyle } from './footerStyles.helpers';
 
   export let brandName: string;
   export let tagline: string;
@@ -7,13 +8,26 @@
   export let whatsappLink: string;
   export let chatButtonText: string = 'Chat Admin Pemesanan';
   export let copyrightText: string;
+  export let attributionText: string = 'Powered by Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = ['footer_brand', 'footer_contact', 'footer_copyright'];
+
+  $: styleBrand = resolveFooterNodeStyle('footer_brand', nodeStyles);
+  $: styleContact = resolveFooterNodeStyle('footer_contact', nodeStyles);
+  $: styleCopyright = resolveFooterNodeStyle('footer_copyright', nodeStyles);
+
+  $: hasBrand = !elementOrder.length || elementOrder.includes('footer_brand') || elementOrder.includes('brand_bio');
+  $: hasContact = !elementOrder.length || elementOrder.includes('footer_contact') || elementOrder.includes('contact_info');
+  $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
 </script>
 
 <div class="max-w-lg mx-auto space-y-4 text-center py-2">
-  <div
-    class="space-y-3 rounded-2xl p-3 transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+  {#if hasBrand}
+    <div
+      class="space-y-3 rounded-2xl p-3 transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleBrand.marginTop}; margin-bottom: {styleBrand.marginBottom};"
     on:click={(e) => selectNode(e, 'footer_brand')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
     role="button"
@@ -35,15 +49,18 @@
       </span>
     </div>
     <p
-      style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: var(--theme-text-muted, var(--color-text-muted));"
-      class="leading-relaxed font-sans"
+      style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: {styleBrand.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
+      class="leading-relaxed"
     >
       {tagline}
     </p>
   </div>
+  {/if}
 
+  {#if hasContact}
   <div
     class="pt-1 rounded-2xl p-2 transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
     on:click={(e) => selectNode(e, 'footer_contact')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
     role="button"
@@ -61,15 +78,19 @@
       <span>{chatButtonText}</span>
     </a>
   </div>
+  {/if}
 
+  {#if hasCopyright}
   <div
-    class="pt-6 border-t border-[var(--color-border)] rounded-2xl p-2 transition-all cursor-pointer font-sans {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-    style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
+    class="pt-6 border-t border-[var(--color-border)] rounded-2xl p-2 transition-all cursor-pointer space-y-1 {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
     on:click={(e) => selectNode(e, 'footer_copyright')}
     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
     role="button"
     tabindex="0"
   >
-    {copyrightText}
+    <p>{copyrightText}</p>
+    <p style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);">{attributionText}</p>
   </div>
+  {/if}
 </div>

@@ -7,11 +7,12 @@
   export let title: string = '';
   export let subtitle: string = '';
   export let items: FeatureItem[] = [];
-  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'ribbon_bar'];
+  export let elementOrder: string[] = ['ribbon_bar'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
-  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s)) && (badgeText || title || subtitle);
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
   $: hasRibbon = elementOrder.includes('ribbon_bar') || elementOrder.includes('features_grid');
   $: isRibbonFirst = (elementOrder.indexOf('ribbon_bar') === 0) || (elementOrder.indexOf('features_grid') === 0);
 
@@ -36,6 +37,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-2xl"
       />
     </div>

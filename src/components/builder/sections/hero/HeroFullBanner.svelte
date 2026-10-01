@@ -78,7 +78,7 @@
         on:click={(e) => selectNode(e, 'hero_subtitle')}
         on:keydown={(e) => selectNodeKey(e, 'hero_subtitle')}
         style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); font-family: var(--font-body, var(--font-sans, inherit));"
-        class={`text-body-base text-white/95 max-w-xl leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-medium font-sans transition-all cursor-pointer rounded-xl p-2 bg-black/25 backdrop-blur-[2px] ${
+        class={`text-body-base text-white/95 max-w-xl leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-medium transition-all cursor-pointer rounded-xl p-2 bg-black/25 backdrop-blur-[2px] ${
           isSubtitleActive
             ? 'ring-2 ring-primary bg-white/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-white/70'

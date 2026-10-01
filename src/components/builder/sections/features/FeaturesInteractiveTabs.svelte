@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
@@ -11,6 +12,7 @@
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'tab_nav', 'tab_card', 'image'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   let activeTabIdx = 0;
   $: activeItem = items[activeTabIdx] || items[0] || {
@@ -20,6 +22,7 @@
     imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
     statLabel: 'Pesan Varian Ini',
   };
+  $: activeItemStyle = resolveFeatureItemStyle(activeItem, activeTabIdx, nodeStyles);
 
   $: isImageActive = activeNodeId === 'features_image' || activeNodeId === 'image';
   $: isItemActive = activeNodeId === `feature_item_${activeTabIdx}` || activeNodeId === 'tab_card';
@@ -66,6 +69,7 @@
       {activeNodeId}
       {selectNode}
       {elementOrder}
+      {nodeStyles}
       maxWidthClass="max-w-2xl"
     />
   {/if}
@@ -123,7 +127,7 @@
               </span>
             {/if}
           </div>
-          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]">
+          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]" style={activeItemStyle.color ? `color: ${activeItemStyle.color} !important;` : ''}>
             {activeItem.title}
           </h3>
           <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">

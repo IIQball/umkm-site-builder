@@ -25,6 +25,7 @@ export const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     platform: 'WhatsApp',
     role: 'Pelanggan Setia • Banyuwangi',
     verified: true,
+    verifiedText: 'Pembeli Terverifikasi',
   },
   {
     id: 'testi_2',
@@ -35,6 +36,7 @@ export const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     platform: 'Instagram',
     role: 'Penikmat Kopi • Malang',
     verified: true,
+    verifiedText: 'Pembeli Terverifikasi',
   },
   {
     id: 'testi_3',
@@ -45,6 +47,7 @@ export const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     platform: 'Google Review',
     role: 'Pemesanan 150 Porsi • Jember',
     verified: true,
+    verifiedText: 'Pembeli Terverifikasi',
   },
 ];
 

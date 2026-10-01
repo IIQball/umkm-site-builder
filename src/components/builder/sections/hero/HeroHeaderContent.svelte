@@ -45,7 +45,7 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit);"
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); color: var(--hero-badge-color, inherit); margin-top: var(--hero-badge-mt, 0px); margin-bottom: var(--hero-badge-mb, 0px);"
         class={`badge badge-outline gap-1.5 px-3 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-2xs ${
           isBadgeActive
             ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/15'
@@ -67,7 +67,7 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_title')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_title')}
-        style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); color: var(--color-text-main); font-family: var(--font-heading, inherit);"
+        style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); color: var(--hero-title-color, var(--color-text-main)); font-family: var(--font-heading, inherit); margin-top: var(--hero-title-mt, 0px); margin-bottom: var(--hero-title-mb, 0px);"
         class={`text-heading-xl font-heading font-extrabold tracking-tight leading-tight transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 block w-full ${
           isTitleActive
             ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
@@ -83,8 +83,8 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_subtitle')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_subtitle')}
-        style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--color-text-secondary); font-family: var(--font-body, var(--font-sans, inherit));"
-        class={`text-body-base leading-relaxed font-sans transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 w-full ${
+        style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); color: var(--hero-subtitle-color, var(--color-text-secondary)); font-family: var(--font-body, var(--font-sans, inherit)); margin-top: var(--hero-subtitle-mt, 0px); margin-bottom: var(--hero-subtitle-mb, 0px);"
+        class={`text-body-base leading-relaxed transition-all cursor-pointer rounded-xl p-1.5 -ml-1.5 w-full ${
           isSubtitleActive
             ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
             : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
@@ -99,6 +99,7 @@
         tabindex="0"
         on:click={(e) => selectNode && selectNode(e, 'hero_cta')}
         on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_cta')}
+        style="margin-top: var(--hero-cta-mt, 0px); margin-bottom: var(--hero-cta-mb, 0px); color: var(--hero-cta-color, inherit);"
         class={`flex flex-wrap items-center gap-3 pt-2 rounded-xl p-1.5 -ml-1.5 transition-all cursor-pointer ${
           align === 'center' ? 'justify-center' : 'justify-start'
         } ${

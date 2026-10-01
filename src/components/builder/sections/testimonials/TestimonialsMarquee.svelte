@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { Star } from 'lucide-svelte';
+  import { Star, CheckCircle2 } from 'lucide-svelte';
   import type { TestimonialItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveTestimonialItemStyle } from './testimonialStyles.helpers';
 
   export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   function selectCard(e: Event, idx: number, item: TestimonialItem) {
     e.stopPropagation();
@@ -17,8 +19,9 @@
 <div class="overflow-hidden w-full py-4">
   <div class="testi-marquee-track gap-4 px-4 text-left">
     {#each [...testimonials, ...testimonials, ...testimonials] as item, index}
-      {@const originalIdx = index % testimonials.length}
-      {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${originalIdx}`)}
+      {@const originalIdx = index % (testimonials.length || 1)}
+      {@const itemStyle = resolveTestimonialItemStyle(item, originalIdx, nodeStyles)}
+      {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `testi_item_${originalIdx}`)}
 
       <div
         role="button"
@@ -36,16 +39,27 @@
             <Star size={12} class="fill-amber-400 text-amber-400" />
           {/each}
         </div>
-        <p class="text-xs text-secondary italic line-clamp-3 leading-relaxed">
+        <p
+          class="text-xs text-secondary italic line-clamp-3 leading-relaxed"
+          style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
+        >
           "{item.comment}"
         </p>
         <div class="flex items-center gap-2 pt-2 border-t border-light/60">
           {#if item.avatar}
-            <img src={item.avatar} alt={item.customerName} class="w-6 h-6 rounded-full object-cover" />
+            <img src={item.avatar} alt={item.customerName} class="w-7 h-7 rounded-full object-cover shrink-0" />
           {/if}
-          <p class="font-heading font-bold text-xs text-main truncate">
-            {item.customerName}
-          </p>
+          <div class="min-w-0 flex-1">
+            <p class="font-heading font-bold text-xs text-main truncate">
+              {item.customerName}
+            </p>
+            {#if item.verified !== false}
+              <span class="text-[9px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                <CheckCircle2 size={9} />
+                <span>{item.verifiedText || 'Pembeli Terverifikasi'}</span>
+              </span>
+            {/if}
+          </div>
         </div>
       </div>
     {/each}

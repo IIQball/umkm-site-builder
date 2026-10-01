@@ -12,8 +12,10 @@
     buildWhatsAppFooterLink,
     buildMiniMapEmbedUrl,
     formatCopyrightText,
+    formatAttributionText,
     getDynamicLandingNavLinks,
   } from './footer/footer.helpers';
+  import { getEffectiveFooterElementOrder } from './footer/footerLayout.helpers';
   import {
     FooterMultiColumn,
     FooterCenteredSimple,
@@ -32,12 +34,17 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
   export let layoutPreset: string = 'multi_column';
+  export let isLiveStorefront: boolean = false;
   export let store: {
+    id?: string;
     name?: string;
     waNumber?: string;
     googleMapsUrl?: string;
     address?: string;
     storeHours?: string;
+    registeredBy?: string | null;
+    managedByAdmin?: { name: string } | null;
+    registrar?: { name: string } | null;
     customization?: any;
   } | null = null;
 
@@ -103,10 +110,16 @@
   $: boxedPrimaryCtaLink = props?.boxedPrimaryCtaLink || '#products';
   $: boxedSecondaryCtaText = props?.boxedSecondaryCtaText || 'Konsultasi Pesanan';
 
-  $: defaultOrder = ['brand_bio', 'contact_info', 'navigation_links', 'copyright'];
-  $: effectiveOrder = (Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-    ? props.elementOrder
-    : defaultOrder) as string[];
+  $: designerAdminName = (props?.adminAttributionName as string) || (props?.adminName as string) || '';
+  $: attributionText = formatAttributionText({
+    store,
+    designerAdminName,
+    isLiveStorefront,
+  });
+  $: nodeStyles = ((props?.nodeStyles || styles?.nodeStyles || {}) as unknown) as Record<string, Record<string, string>>;
+  $: effectiveOrder = getEffectiveFooterElementOrder(activePreset, props?.elementOrder as string[] | undefined);
+
+  $: currentActiveNodeId = (isActive || $canvasStore?.selectedSectionId === sectionId) ? $activeNodeId : null;
 
   const handleSelectNode = (e: MouseEvent | KeyboardEvent, key: string) => {
     e.stopPropagation();
@@ -131,8 +144,11 @@
         {whatsappLink}
         chatButtonText={statusChatButtonText}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'cta_focused'}
       <FooterCtaFocused
@@ -143,17 +159,23 @@
         {floatingCtaButtonText}
         {whatsappLink}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'minimal_single_row'}
       <FooterMinimalSingleRow
         {brandName}
         {logoImageUrl}
         {copyrightText}
+        {attributionText}
         {socialLinks}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'giant_wordmark'}
       <FooterGiantWordmark
@@ -162,8 +184,11 @@
         {whatsappNumber}
         {whatsappLink}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'newsletter_centric'}
       <FooterNewsletterCentric
@@ -173,8 +198,11 @@
         {newsletterButtonText}
         {newsletterPlaceholder}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'live_status_badge'}
       <FooterLiveStatusBadge
@@ -183,9 +211,12 @@
         {statusChatButtonText}
         {whatsappLink}
         {copyrightText}
+        {attributionText}
         {storeHours}
-        activeNodeId={$activeNodeId}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'split_map_footer'}
       <FooterSplitMap
@@ -196,8 +227,11 @@
         {whatsappLink}
         {mapEmbedUrl}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'social_links_grid'}
       <FooterSocialLinksGrid
@@ -206,8 +240,11 @@
         {socialLinks}
         {whatsappLink}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else if activePreset === 'boxed_card_footer'}
       <FooterBoxedCard
@@ -219,8 +256,11 @@
         {boxedSecondaryCtaText}
         {whatsappLink}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
+        elementOrder={effectiveOrder}
       />
     {:else}
       <!-- Preset 1: multi_column (Default) -->
@@ -234,7 +274,9 @@
         {whatsappLink}
         {menuLinks}
         {copyrightText}
-        activeNodeId={$activeNodeId}
+        {attributionText}
+        {nodeStyles}
+        activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
         elementOrder={effectiveOrder}
       />

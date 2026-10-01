@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
-  import { MAX_WIDTH_OPTIONS } from '@/components/tokens/spacing';
 
   export let theme: TemplateTheme;
   export let onLayoutChange: (key: string, value: string) => void = () => {};
@@ -9,17 +8,14 @@
 </script>
 
 <div class="space-y-4">
-  <div>
-    <label for="layout-max-width" class="block font-semibold text-base-content/80 mb-1">Max-Width Konten Global</label>
-    <select
-      id="layout-max-width"
-      value={layout.maxWidth || '1200px'}
-      on:change={(e) => onLayoutChange('maxWidth', e.currentTarget.value)}
-      on:input={(e) => onLayoutChange('maxWidth', e.currentTarget.value)}
-      class="w-full px-3 py-2 bg-base-200/50 border border-base-300 rounded-lg text-base-content focus:outline-none"
-    >
-      {#each MAX_WIDTH_OPTIONS as opt}<option value={opt.value}>{opt.label}</option>{/each}
-    </select>
+  <div class="p-3 bg-base-200/40 rounded-xl border border-base-200 text-xs space-y-1">
+    <div class="flex items-center justify-between font-semibold text-base-content">
+      <span>Lebar Konten Global</span>
+      <span class="badge badge-sm badge-neutral font-mono">1200px (Standar)</span>
+    </div>
+    <p class="text-[11px] text-base-content/60 leading-relaxed">
+      Terkunci otomatis pada standar 1200px agar tampilan kisi dan seksi konsisten di semua layar.
+    </p>
   </div>
 
   <div class="pt-2 border-t border-base-200 space-y-3">

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { editorStore, activeNodeId } from '../stores/editorStore';
+  import { editorStore, activeNodeId, canvasStore } from '../stores/editorStore';
   import type { HeroProps, SectionStyles } from '@/types';
-  import { parsePx } from './hero/hero.helpers';
+  import { parsePx, resolveHeroNodeVariables } from './hero/hero.helpers';
   import { getEffectiveHeroElementOrder } from './hero/heroLayout.helpers';
   import HeroFullBanner from './hero/HeroFullBanner.svelte';
   import HeroCenteredMinimal from './hero/HeroCenteredMinimal.svelte';
@@ -18,7 +18,6 @@
   import HeroDualContrast from './hero/HeroDualContrast.svelte';
   import HeroFounderStory from './hero/HeroFounderStory.svelte';
   import HeroGradientMesh from './hero/HeroGradientMesh.svelte';
-  import HeroOversizedTypography from './hero/HeroOversizedTypography.svelte';
   import './hero/hero.css';
 
   export let props: HeroProps = {};
@@ -78,7 +77,7 @@
     ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
     : styles?.backgroundColor;
   $: customBgStyle = customBgColor ? `background-color: ${customBgColor};` : '';
-  $: sectionBgClass = isFullBannerPreset ? 'bg-slate-950 text-white' : 'text-[var(--color-text-main)]';
+  $: sectionBgClass = isFullBannerPreset ? 'bg-main text-canvas' : 'text-[var(--color-text-main)]';
 
   const selectNode = isLiveStorefront
     ? (_e: MouseEvent, _key: string) => {}
@@ -98,7 +97,9 @@
         }
       };
 
-  $: liveActiveNodeId = isLiveStorefront ? null : $activeNodeId;
+  $: liveActiveNodeId = (!isActive || isLiveStorefront || $canvasStore?.selectedSectionId !== sectionId) ? null : $activeNodeId;
+
+  $: heroNodeVariables = resolveHeroNodeVariables(props?.nodeStyles as Record<string, Record<string, string>>, styles);
 
   $: commonProps = {
     badgeText,
@@ -125,7 +126,7 @@
   id="hero-section"
   data-node="hero_container"
   class="relative w-full overflow-hidden select-none hero-card flex flex-col justify-center {sectionBgClass} {isActive ? 'relative z-10' : ''}"
-  style="background-color: var(--color-bg-base); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard;"
+  style="background-color: var(--color-bg-base); {customBgStyle} margin-top: {marginTop}px; margin-bottom: {marginBottom}px; min-height: {styles?.minHeight || 'auto'}; container-type: inline-size; container-name: herocard; {heroNodeVariables}"
 >
   {#if activePreset === 'full_banner_overlay' && heroBgImage}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
@@ -151,7 +152,7 @@
   {:else if activePreset === 'gradient_mesh_glow'}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
       <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--color-primary)] opacity-20 blur-3xl"></div>
-      <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-purple-600 opacity-20 blur-3xl"></div>
+      <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-[var(--color-secondary,var(--color-primary))] opacity-20 blur-3xl"></div>
     </div>
   {/if}
 
@@ -214,6 +215,8 @@
       <HeroStickerPlayful
         {...commonProps}
         stickerText={props?.stickerText}
+        badgeBgColor={(props?.badgeBgColor as string) || ''}
+        cardBgColor={(props?.cardBgColor as string) || ''}
       />
     {:else if activePreset === 'dual_contrast_split'}
       <HeroDualContrast
@@ -249,8 +252,6 @@
         {...commonProps}
         floatingCards={props?.floatingCards}
       />
-    {:else if activePreset === 'oversized_bold_typography'}
-      <HeroOversizedTypography {...commonProps} />
     {:else}
       <HeroSplitLayout {...commonProps} />
     {/if}

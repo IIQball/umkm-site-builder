@@ -4,6 +4,9 @@
 
   export let sectionId: string = '';
   export let logos: ClientLogoItem[] = DEFAULT_CLIENT_LOGOS;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+
+  $: logoStyle = nodeStyles?.['testi_logo_cloud'] || {};
 
   function selectLogo(e: Event, idx: number) {
     e.stopPropagation();
@@ -14,13 +17,16 @@
 </script>
 
 <div class="text-center">
-  <p class="text-xs font-heading font-bold uppercase tracking-widest text-secondary/70 mb-6">
+  <p
+    class="text-xs font-heading font-bold uppercase tracking-widest text-secondary/70 mb-6"
+    style="{logoStyle.color ? `color: ${logoStyle.color};` : ''}"
+  >
     Telah Dipercaya Oleh Berbagai Instansi & Komunitas
   </p>
 
   <div class="cq-logo-grid items-center">
     {#each logos as logo, index (logo.id || logo.name + index)}
-      {@const isLogoActive = $canvasStore.selectedNodeId === `testi_logo_${index}`}
+      {@const isLogoActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === `testi_logo_${index}`}
 
       <div
         role="button"

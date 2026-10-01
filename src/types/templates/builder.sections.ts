@@ -129,6 +129,8 @@ export interface ProductItem {
   name: string;
   price: number;
   basePrice?: number;
+  originalPrice?: number;
+  showOriginalPrice?: boolean;
   image?: string | null; imageUrl?: string | null;
   imageUrls?: string[];
   description?: string;
@@ -168,11 +170,15 @@ export interface TestimonialItem {
   rating?: number;
   platform?: string;
   verified?: boolean;
+  verifiedText?: string;
+  verifiedIcon?: string;
+  comments?: Array<{ author: string; text: string; time?: string }>;
 }
 
 export interface TestimonialsProps {
   title?: string;
   subtitle?: string;
+  badgeText?: string;
   testimonials?: TestimonialItem[];
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
@@ -204,24 +210,22 @@ export interface MapBranchItem {
 
 export interface GoogleMapsProps {
   badge?: string;
+  badgeText?: string;
+  badgeIcon?: string;
   title?: string;
   subtitle?: string;
   apiKey?: string;
   address?: string;
   googleMapsUrl?: string;
-  latitude?: number;
-  longitude?: number;
-  zoom?: number;
+  latitude?: number; longitude?: number; zoom?: number;
   mapHeight?: string;
   showMarker?: boolean;
   markerTitle?: string;
   storeHours?: string;
   storeHoursStatus?: string;
-  phone?: string;
-  whatsappNumber?: string;
+  phone?: string; whatsappNumber?: string;
   facilities?: string;
-  directionsLandmark?: string;
-  directionsParking?: string;
+  directionsLandmark?: string; directionsParking?: string;
   branches?: MapBranchItem[];
   storeImageUrl?: string;
   nodeStyles?: Record<string, NodeStyles>;
@@ -254,24 +258,20 @@ export interface FooterProps {
   address?: string;
   storeHours?: string;
   googleMapsUrl?: string;
-  // Preset 3: CTA Focused
+  // Presets 3, 6, 7, 9, 10
   floatingCtaTitle?: string;
   floatingCtaSubtitle?: string;
   floatingCtaButtonText?: string;
-  // Preset 6: Newsletter Centric
   newsletterBadge?: string;
   newsletterTitle?: string;
   newsletterSubtitle?: string;
   newsletterButtonText?: string;
   newsletterPlaceholder?: string;
-  // Preset 7: Live Status Badge
   statusBadgeText?: string;
   statusBadgeSubtext?: string;
   statusChatButtonText?: string;
-  // Preset 9: Social Links Grid
   communityTitle?: string;
   communitySubtitle?: string;
-  // Preset 10: Boxed Card
   boxedOfficialBadge?: string;
   boxedStoreTitle?: string;
   boxedStoreSubtitle?: string;

@@ -54,7 +54,7 @@
         {#each currentStats as item (item.label)}
           <div class="stat px-2 py-1">
             <div class="stat-value text-2xl font-heading font-black text-[var(--color-text-main)]">{item.value}</div>
-            <div class="stat-desc text-xs text-[var(--color-text-secondary)] font-medium font-sans">{item.label}</div>
+            <div class="stat-desc text-xs text-[var(--color-text-secondary)] font-medium">{item.label}</div>
           </div>
         {/each}
       </div>

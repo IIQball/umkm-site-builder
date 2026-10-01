@@ -105,7 +105,7 @@
       >
         <span class="text-xs font-bold uppercase tracking-wider opacity-90">{bentoPromoTitle}</span>
         <p class="text-2xl font-extrabold my-2 font-heading">{bentoPromoHighlight}</p>
-        <span class="text-xs opacity-80 font-sans">{bentoPromoSubtitle}</span>
+        <span class="text-xs opacity-80">{bentoPromoSubtitle}</span>
       </div>
     {/if}
 
@@ -128,7 +128,7 @@
             <Star size={12} class="fill-current text-amber-400" />
           {/each}
         </div>
-        <p class="text-xs text-[var(--color-text-secondary)] italic font-sans">{bentoReviewText}</p>
+        <p class="text-xs text-[var(--color-text-secondary)] italic">{bentoReviewText}</p>
         <p class="text-[11px] font-bold text-[var(--color-text-main)] font-heading mt-2">{bentoReviewAuthor}</p>
       </div>
     {/if}
@@ -145,7 +145,7 @@
       </div>
       <div>
         <p class="font-bold text-xs text-[var(--color-text-main)] font-heading">{bentoFeatureTitle}</p>
-        <p class="text-2xs text-[var(--color-text-secondary)] font-sans">{bentoFeatureSubtitle}</p>
+        <p class="text-2xs text-[var(--color-text-secondary)]">{bentoFeatureSubtitle}</p>
       </div>
     </div>
   </div>

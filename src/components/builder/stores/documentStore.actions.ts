@@ -8,8 +8,7 @@ import {
   type DocumentState,
   clone,
 } from './editorStore.types';
-import { getDefaultHeroSlots } from '../sections/hero/heroLayout.helpers';
-import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
+import { getSectionDefaultSlots } from '../inspector/sectionSlot.helpers';
 
 export const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
   switch (type) {
@@ -105,9 +104,9 @@ export const DEFAULT_SLOTS_BY_SECTION: Record<string, string[]> = {
   features: ['badge', 'title', 'subtitle', 'features_grid'],
   product_catalog: ['badge', 'title', 'subtitle', 'catalog_grid'],
   testimonials: ['badge', 'title', 'subtitle', 'testimonials_grid'],
-  faq: ['badge', 'title', 'subtitle', 'faq_list'],
-  google_maps: ['badge', 'title', 'subtitle', 'map_view'],
-  footer: ['brand_bio', 'contact_info', 'navigation_links', 'copyright'],
+  faq: ['badge', 'title', 'subtitle', 'faq_item_0', 'faq_item_1', 'faq_item_2', 'faq_item_3'],
+  google_maps: ['badge', 'title', 'subtitle', 'maps_iframe', 'maps_info_card', 'maps_cta_button'],
+  footer: ['footer_brand', 'footer_contact', 'footer_navigation', 'footer_copyright'],
 };
 
 export function applyReorderSectionSlot(
@@ -128,11 +127,8 @@ export function applyReorderSectionSlot(
     } else if (groupKey === 'navbarOrder') {
       const preset = (currentProps.layoutPreset as string) || s.layoutPreset || '';
       defaultSlots = preset === 'centered_stacked' ? ['logo', 'nav_links'] : ['logo', 'nav_links', 'cta'];
-    } else if (s.type === 'hero') {
-      const preset = (currentProps.layoutPreset as string) || (s.styles?.layoutPreset as string) || s.layoutPreset || 'split_left_text';
-      defaultSlots = getDefaultHeroSlots(preset);
     } else {
-      defaultSlots = DEFAULT_SLOTS_BY_SECTION[s.type] || ['badge', 'title', 'subtitle', 'image', 'cta'];
+      defaultSlots = getSectionDefaultSlots(s);
     }
 
     const currentList = currentProps[groupKey];
@@ -252,11 +248,13 @@ export function applyUpdateSectionLayoutPreset(
     if (s.id !== sectionId) return s;
     const nextProps: Record<string, unknown> = { ...(s.props || {}), layoutPreset: preset };
     if (s.type === 'hero') {
-      nextProps.elementOrder = getDefaultHeroSlots(preset);
+      nextProps.elementOrder = getSectionDefaultSlots({ ...s, layoutPreset: preset });
       nextProps.heroPreset = preset;
     } else if (s.type === 'features') {
-      nextProps.elementOrder = getDefaultFeaturesSlots(preset);
+      nextProps.elementOrder = getSectionDefaultSlots({ ...s, layoutPreset: preset });
       nextProps.featuresPreset = preset;
+    } else {
+      nextProps.elementOrder = getSectionDefaultSlots({ ...s, layoutPreset: preset });
     }
     const nextStyles = { ...(s.styles || {}), layoutPreset: preset };
     return { ...s, layoutPreset: preset, props: nextProps, styles: nextStyles };

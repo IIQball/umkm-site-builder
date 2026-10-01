@@ -172,3 +172,9 @@ it before reporting — "it renders" is not the bar.
 - **Lebar Sidebar Simetris**: Panel kiri (Lapisan/Layers) dan panel kanan (Inspector) harus menggunakan lebar standar yang proporsional (minimal `w-80` / 320px) agar teks nama seksi memiliki ruang baca yang cukup dan tampilan editor seimbang.
 - **Anti-Truncation pada Nama Seksi**: Dilarang menggunakan pemotongan agresif `truncate` pada nama seksi di panel navigasi lapisan. Gunakan `leading-snug whitespace-normal break-words` dan selalu sematkan atribut `title` dengan teks lengkap untuk kenyamanan pengguna.
 - **Ukuran Tombol Aksi Baris Kompak**: Tombol aksi mikro (reorder, hapus) di dalam baris lapisan harus berukuran kompak (`!w-5 !h-5`) agar tidak mencuri ruang lebar nama komponen.
+
+## 20. Form Controls di Sidebar Inspector
+
+- **Single-Column Constraint**: Seluruh field form, input, select, dan textarea di dalam panel inspector sidebar wajib menggunakan layout 1 kolom penuh (`w-full` stacked vertically).
+- **Dilarang Multi-Kolom di Card Sub-Item**: Hindari pemakaian `grid-cols-2`, `grid-cols-3`, atau layout horizontal pada form sub-item kartu inspector yang sempit agar teks label, placeholder, dan opsi dropdown tidak terpotong.
+

@@ -27,9 +27,41 @@ export function isCatalogImageSupported(preset: string): boolean {
   return (IMAGE_SUPPORTED_CATALOG_PRESETS as readonly string[]).includes(preset);
 }
 
-export const formatRupiah = formatIDR;
+export function isCatalogCategorySupported(preset: string): boolean {
+  return preset === 'interactive_filter_tabs' || preset === 'split_category_sidebar';
+}
 
-export const getCleanWaNumber = getEffectiveWhatsAppNumber;
+export function isCatalogCartSupported(preset: string): boolean {
+  return !['price_table_view', 'lookbook_gallery', 'bundle_package_tiers', 'single_product_deep_focus', 'minimal_accordion_catalog'].includes(preset);
+}
+
+export function isCatalogSingleProduct(preset: string): boolean {
+  return preset === 'single_product_deep_focus';
+}
+
+export function resolveProductNodeStyle(
+  product: ProductItem,
+  index: number,
+  nodeStyles?: Record<string, Record<string, string>>
+): { color: string; marginTop: string; marginBottom: string; marginStyle: string } {
+  if (!nodeStyles) return { color: '', marginTop: '', marginBottom: '', marginStyle: '' };
+  const specific = (product?.id && nodeStyles[product.id]) || nodeStyles[`product_item_${index}`] || {};
+  const generic = nodeStyles['catalog_grid'] || nodeStyles['product_cards'] || {};
+  const color = specific.color || generic.color || '';
+  const marginTop = specific.marginTop || generic.marginTop || '';
+  const marginBottom = specific.marginBottom || generic.marginBottom || '';
+  const marginStyle = `${marginTop ? `margin-top: ${marginTop};` : ''} ${marginBottom ? `margin-bottom: ${marginBottom};` : ''}`.trim();
+  return { color, marginTop, marginBottom, marginStyle };
+}
+
+export interface CartItem {
+  product: ProductItem;
+  selections: Record<string, { name: string; priceAdjustment?: number } | string>;
+  variantId: string;
+  qty: number;
+  price: number;
+  subtotal: number;
+}
 
 export function buildWhatsAppOrderLink(waNumber: string, productName: string, price: number | string): string {
   const cleanPhone = getEffectiveWhatsAppNumber(waNumber);

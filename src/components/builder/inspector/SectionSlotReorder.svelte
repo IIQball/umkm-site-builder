@@ -10,14 +10,31 @@
     getHeroSlotLabel,
     getEffectiveHeroElementOrder,
     getDefaultFeaturesSlots,
+    getAllowedFeaturesSlots,
     getFeaturesSlotLabel,
     getEffectiveFeaturesElementOrder,
     getDefaultCatalogSlots,
+    getAllowedCatalogSlots,
     getCatalogSlotLabel,
     getEffectiveCatalogElementOrder,
+    getDefaultTestimonialsSlots,
+    getTestimonialsSlotLabel,
+    getEffectiveTestimonialsElementOrder,
+    getDefaultFaqSlots,
+    getAllowedFaqSlots,
+    getFaqSlotLabel,
+    getEffectiveFaqElementOrder,
+    getDefaultMapsSlots,
+    getAllowedMapsSlots,
+    getMapsSlotLabel,
+    getEffectiveMapsElementOrder,
+    getDefaultFooterSlots,
+    getAllowedFooterSlots,
+    getFooterSlotLabel,
+    getEffectiveFooterElementOrder,
     getAddedSlotDefaultProps,
   } from './sectionSlot.helpers';
-  import type { ProductItem } from '@/types';
+  import type { ProductItem, TestimonialItem, FAQItem } from '@/types';
   import HeaderSlotControls from './HeaderSlotControls.svelte';
 
   export let section: TemplateSection;
@@ -27,10 +44,32 @@
     section.layoutPreset ||
     (section.props?.layoutPreset as string) ||
     (section.styles?.layoutPreset as string) ||
-    (section.type === 'hero' ? 'split_left_text' : section.type === 'features' ? 'grid_3_cards' : section.type === 'product_catalog' ? 'grid_standard' : 'default_split');
+    (section.type === 'hero'
+      ? 'split_left_text'
+      : section.type === 'features'
+        ? 'grid_3_cards'
+        : section.type === 'product_catalog'
+          ? 'grid_standard'
+          : section.type === 'testimonials'
+            ? 'masonry_grid'
+            : section.type === 'faq'
+              ? 'accordion_single_col'
+              : section.type === 'google_maps'
+                ? 'fullwidth_map'
+                : section.type === 'footer'
+                  ? 'multi_column'
+                  : 'default_split');
 
   $: products = (Array.isArray(section.props?.products)
     ? (section.props.products as ProductItem[])
+    : undefined);
+
+  $: testimonials = (Array.isArray(section.props?.testimonials)
+    ? (section.props.testimonials as TestimonialItem[])
+    : undefined);
+
+  $: faqs = (Array.isArray(section.props?.faqs)
+    ? (section.props.faqs as FAQItem[])
     : undefined);
 
   $: defaultStandardSlots =
@@ -40,7 +79,15 @@
         ? getDefaultFeaturesSlots(preset)
         : section.type === 'product_catalog'
           ? getDefaultCatalogSlots(preset, products)
-          : DEFAULT_SLOTS_BY_SECTION[section.type] || [];
+          : section.type === 'testimonials'
+            ? getDefaultTestimonialsSlots(preset, testimonials)
+            : section.type === 'faq'
+              ? getDefaultFaqSlots(preset, faqs)
+              : section.type === 'google_maps'
+                ? getDefaultMapsSlots(preset, section.props?.branchMode as string)
+                : section.type === 'footer'
+                  ? getDefaultFooterSlots(preset)
+                  : DEFAULT_SLOTS_BY_SECTION[section.type] || [];
 
   $: standardElementOrder =
     section.type === 'hero'
@@ -51,28 +98,70 @@
         )
       : section.type === 'features'
         ? getEffectiveFeaturesElementOrder(
+          preset,
+          section.props?.elementOrder,
+          section.props?.featuresPreset as string
+        )
+      : section.type === 'product_catalog'
+        ? getEffectiveCatalogElementOrder(
             preset,
             section.props?.elementOrder,
-            section.props?.featuresPreset as string
+            products,
+            section.props?.catalogPreset as string
           )
-        : section.type === 'product_catalog'
-          ? getEffectiveCatalogElementOrder(
+        : section.type === 'testimonials'
+          ? getEffectiveTestimonialsElementOrder(
               preset,
               section.props?.elementOrder,
-              products,
-              section.props?.catalogPreset as string
+              testimonials,
+              section.props?.testimonialsPreset as string
             )
+          : section.type === 'faq'
+            ? getEffectiveFaqElementOrder(
+                preset,
+                section.props?.elementOrder,
+                faqs,
+                section.props?.faqPreset as string
+              )
+          : section.type === 'google_maps'
+            ? getEffectiveMapsElementOrder(
+                preset,
+                section.props?.elementOrder,
+                section.props?.branchMode as string
+              )
+          : section.type === 'footer'
+            ? getEffectiveFooterElementOrder(
+                preset,
+                section.props?.elementOrder as string[] | undefined
+              )
           : (Array.isArray(section.props?.elementOrder) && section.props.elementOrder.length > 0
               ? (section.props.elementOrder as string[])
               : defaultStandardSlots
             ).filter((s) => defaultStandardSlots.includes(s));
 
-  $: missingStandardSlots = defaultStandardSlots.filter((s) => !standardElementOrder.includes(s));
+  $: allowedStandardSlots =
+    section.type === 'features'
+      ? getAllowedFeaturesSlots(preset)
+      : section.type === 'product_catalog'
+        ? getAllowedCatalogSlots(preset, products)
+        : section.type === 'faq'
+          ? getAllowedFaqSlots(preset, faqs)
+          : section.type === 'google_maps'
+            ? getAllowedMapsSlots(preset, section.props?.branchMode as string)
+            : section.type === 'footer'
+              ? getAllowedFooterSlots(preset)
+              : defaultStandardSlots;
+
+  $: missingStandardSlots = allowedStandardSlots.filter((s) => !standardElementOrder.includes(s));
 
   const getSlotLabel = (slot: string): string => {
     if (section.type === 'hero') return getHeroSlotLabel(slot, preset);
     if (section.type === 'features') return getFeaturesSlotLabel(slot, preset);
     if (section.type === 'product_catalog') return getCatalogSlotLabel(slot, preset, products);
+    if (section.type === 'testimonials') return getTestimonialsSlotLabel(slot, preset, testimonials);
+    if (section.type === 'faq') return getFaqSlotLabel(slot, preset, faqs);
+    if (section.type === 'google_maps') return getMapsSlotLabel(slot, preset);
+    if (section.type === 'footer') return getFooterSlotLabel(slot, preset);
     return SLOT_LABELS[slot] || slot;
   };
 
@@ -83,6 +172,10 @@
       ...(section.type === 'hero' ? { heroPreset: preset, layoutPreset: preset } : {}),
       ...(section.type === 'features' ? { featuresPreset: preset, layoutPreset: preset } : {}),
       ...(section.type === 'product_catalog' ? { catalogPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'testimonials' ? { testimonialsPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'faq' ? { faqPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'google_maps' ? { layoutPreset: preset } : {}),
+      ...(section.type === 'footer' ? { layoutPreset: preset } : {}),
     });
     editorStore.deleteNode(section.id, slot);
   };
@@ -96,6 +189,10 @@
       ...(section.type === 'hero' ? { heroPreset: preset, layoutPreset: preset } : {}),
       ...(section.type === 'features' ? { featuresPreset: preset, layoutPreset: preset } : {}),
       ...(section.type === 'product_catalog' ? { catalogPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'testimonials' ? { testimonialsPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'faq' ? { faqPreset: preset, layoutPreset: preset } : {}),
+      ...(section.type === 'google_maps' ? { layoutPreset: preset } : {}),
+      ...(section.type === 'footer' ? { layoutPreset: preset } : {}),
       ...defaultProps,
     });
   };

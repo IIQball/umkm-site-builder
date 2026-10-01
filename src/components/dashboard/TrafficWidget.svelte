@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Users, MessageCircle } from 'lucide-svelte';
+
 
   export let initialViews = 0;
   export let initialClicks = 0;
@@ -13,8 +13,8 @@
   let stats: StoreStats = { totalViews: initialViews, totalWaClicks: initialClicks };
   let displayViewsValue: string = String(initialViews);
   let displayClicksValue: string = String(initialClicks);
-  let viewsAnimationId: number;
-  let clicksAnimationId: number;
+  let viewsAnimationId: number = 0;
+  let clicksAnimationId: number = 0;
 
   const animateCounter = (
     target: number,

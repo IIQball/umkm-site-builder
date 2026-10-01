@@ -1,0 +1,69 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import AuditLogTable from '@/components/admin/AuditLogTable.svelte';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import { getAuditLogs } from '@/services/audit.service';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!isAuthorizedAdmin(user)) {
+  return Astro.redirect('/auth/login?redirect=/admin/audit-logs');
+}
+
+const page = Number(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+const actionFilter = Astro.url.searchParams.get('action') || 'all';
+const roleFilter = Astro.url.searchParams.get('role') || 'all';
+
+let initialLogs: any[] = [];
+let total = 0;
+let totalPages = 1;
+
+try {
+  const result = await getAuditLogs({ 
+    page, 
+    limit,
+    callerRole: user.role,
+    callerId: user.id,
+    actionFilter,
+    roleFilter
+  });
+  
+  initialLogs = result.data.map(log => ({
+    ...log,
+    createdAt: log.createdAt ? log.createdAt.toISOString() : new Date().toISOString()
+  }));
+  total = result.meta.total;
+  totalPages = result.meta.totalPages;
+} catch (error) {
+  console.error('[AdminAuditLogs] Failed to query audit logs:', error);
+}
+---
+
+<DashboardLayout title="Audit Logs" breadcrumb="Super Admin / Audit Logs">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Log Aktivitas Sistem</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau seluruh jejak aktivitas pengguna, admin, dan sistem secara real-time.
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-card-base border border-light rounded-2xl shadow-sm overflow-hidden">
+      <AuditLogTable 
+        client:load 
+        initialLogs={initialLogs} 
+        total={total}
+        currentPage={page}
+        totalPages={totalPages}
+        initialActionFilter={actionFilter}
+        initialRoleFilter={roleFilter}
+      />
+    </div>
+  </div>
+</DashboardLayout>

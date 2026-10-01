@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions, tenantInvitations } from '@/db/index';
+import { db, users, sessions, tenantInvitations, activityLogs } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin, auth } from '@/lib/auth';
 import { manualUserRegistrationSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -16,6 +16,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(manualUserRegistrationSchema, body);
+
+    // Prevent Admin from registering another Admin or Designer
+    if (user.role === 'admin' && validated.role !== 'tenant') {
+      throw new AppError(`Sebagai Admin, Anda hanya diizinkan untuk mendaftarkan merchant (tenant). Hanya Superadmin yang dapat mendaftarkan role ${validated.role}.`, 403);
+    }
 
     // Check if email already exists
     const existing = await db.select().from(users).where(eq(users.email, validated.email)).limit(1);
@@ -59,6 +64,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           token: token,
           invitedBy: user.id,
           expiresAt: expiresAt,
+        });
+        
+        // Explicitly set the role and registeredBy in case BetterAuth ignored it
+        await db.update(users).set({ 
+          role: validated.role,
+          registeredBy: user.id
+        }).where(eq(users.id, newUserId));
+
+        // Add activity log
+        await db.insert(activityLogs).values({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          action: `Register ${validated.role === 'admin' ? 'Admin' : 'Merchant'}`,
+          details: { email: validated.email, targetRole: validated.role },
         });
 
         // We will trigger the activation email from the client-side to prevent server deadlocks

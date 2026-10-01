@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, adminWhitelist, sessions } from '@/db/index';
+import { db, users, adminWhitelist, sessions, activityLogs } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedSuperAdmin, auth } from '@/lib/auth';
 import { adminWhitelistSchema, adminStatusUpdateSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -57,6 +57,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }) as unknown as { user?: { id: string } };
       if (res && res.user) {
         newUserId = res.user.id;
+        // Explicitly set the role to 'admin' in case BetterAuth ignored it
+        await db.update(users).set({ role: 'admin' }).where(eq(users.id, newUserId));
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
       } else {
         throw new AppError('Failed to create admin account', 500);
@@ -71,6 +73,13 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       email: validated.email,
       role: 'admin',
       addedBy: user.id,
+    });
+
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      action: 'Add Admin Whitelist',
+      details: { email: validated.email },
     });
 
     return jsonSuccess({ id: newUserId });
@@ -91,6 +100,14 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     const validated = validate(adminStatusUpdateSchema, body);
 
     await db.update(users).set({ status: validated.status }).where(eq(users.id, id));
+    
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      action: 'Update Admin Status',
+      details: { targetUserId: id, newStatus: validated.status },
+    });
+
     return jsonSuccess(null);
   });
 };
@@ -118,6 +135,13 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
 
     await db.delete(users).where(eq(users.id, id));
     await db.delete(adminWhitelist).where(eq(adminWhitelist.email, targetUser[0].email));
+
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      userId: user.id,
+      action: 'Delete Admin Whitelist',
+      details: { email: targetUser[0].email },
+    });
 
     return jsonSuccess(null);
   });

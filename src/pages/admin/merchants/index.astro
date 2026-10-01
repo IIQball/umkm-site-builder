@@ -31,8 +31,8 @@ let assistedStores: Array<{
 
 try {
   const whereCondition = user.role === 'superadmin'
-    ? isNull(stores.deletedAt)
-    : and(eq(stores.registeredBy, user.id), isNull(stores.deletedAt));
+    ? and(eq(users.role, 'tenant'), isNull(users.deletedAt))
+    : and(eq(users.registeredBy, user.id), eq(users.role, 'tenant'), isNull(users.deletedAt));
 
   const rows = await db
     .select({
@@ -40,15 +40,15 @@ try {
       name: stores.name,
       subdomain: stores.subdomain,
       status: stores.status,
-      userId: stores.userId,
-      createdAt: stores.createdAt,
+      userId: users.id,
+      createdAt: users.createdAt,
       tenantName: users.name,
       tenantEmail: users.email,
     })
-    .from(stores)
-    .leftJoin(users, eq(stores.userId, users.id))
+    .from(users)
+    .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
     .where(whereCondition)
-    .orderBy(desc(stores.createdAt));
+    .orderBy(desc(users.createdAt));
 
   assistedStores = (rows || []).map((s) => ({
     id: s.id,

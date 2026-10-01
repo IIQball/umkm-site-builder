@@ -176,12 +176,12 @@
     <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-100" />
     <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-150" />
     <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="orange" icon="pending_actions" delayClass="delay-175" />
-    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="orange" icon="block" delayClass="delay-200" />
+    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="dark" icon="block" delayClass="delay-200" />
   </div>
 
-  <!-- Filters (Search & Selects) -->
-  <div class="flex flex-col sm:flex-row gap-4">
-    <div class="relative flex-1">
+  <div class="flex flex-col gap-4">
+    <!-- Search Bar -->
+    <div class="relative w-full md:w-96">
       <Input 
         bind:value={searchQuery}
         placeholder="Cari nama atau email..." 
@@ -191,22 +191,35 @@
       </Input>
     </div>
     
-    {#if currentUser?.role === 'superadmin'}
-    <div class="w-full sm:w-48 shrink-0">
-      <Select 
-        bind:value={roleFilter}
-        options={roleOptions}
-        size="md"
-      />
-    </div>
-    {/if}
-    
-    <div class="w-full sm:w-48 shrink-0">
-      <Select 
-        bind:value={statusFilter}
-        options={statusOptions}
-        size="md"
-      />
+    <!-- Filter Pills -->
+    <div class="flex flex-col sm:flex-row gap-4 sm:items-center">
+      {#if currentUser?.role === 'superadmin'}
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+        {#each roleOptions as opt}
+          <button 
+            type="button"
+            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap {roleFilter === opt.value ? 'bg-main text-canvas shadow-xs' : 'bg-card-base text-secondary hover:bg-nested border border-light/50 hover:text-main'}"
+            on:click={() => roleFilter = opt.value as any}
+          >
+            {opt.label}
+          </button>
+        {/each}
+      </div>
+      
+      <div class="hidden sm:block w-px h-6 bg-light"></div>
+      {/if}
+
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+        {#each statusOptions as opt}
+          <button 
+            type="button"
+            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap {statusFilter === opt.value ? 'bg-main text-canvas shadow-xs' : 'bg-card-base text-secondary hover:bg-nested border border-light/50 hover:text-main'}"
+            on:click={() => statusFilter = opt.value as any}
+          >
+            {opt.label}
+          </button>
+        {/each}
+      </div>
     </div>
   </div>
 

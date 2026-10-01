@@ -107,106 +107,111 @@
         Tidak ditemukan toko yang sesuai dengan kata kunci pencarian "{searchQuery}".
       </div>
     {:else}
-      <div class="overflow-x-auto">
-        <table class="table table-sm w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-light/80 bg-nested/50 text-3xs uppercase tracking-wider font-bold text-secondary">
-              <th class="py-3 px-5 sm:px-6">Toko & Subdomain</th>
-              <th class="py-3 px-4">Pemilik / Tenant</th>
-              <th class="py-3 px-4">Kategori</th>
-              <th class="py-3 px-4">Status</th>
-              <th class="py-3 px-5 sm:px-6 text-right">Aksi Cepat</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-light/60 text-xs">
-            {#each filteredStores as store (store.id)}
-              <tr class="hover:bg-nested/30 transition-colors group">
-                <!-- Store Info -->
-                <td class="py-4 px-5 sm:px-6">
-                  <div class="font-bold text-main font-heading text-sm group-hover:text-primary transition-colors">
-                    {store.name}
+      <div class="flex flex-col gap-3 p-4 sm:p-5 bg-card-base/50">
+        {#each filteredStores as store (store.userId)}
+          <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-card-base rounded-2xl border border-light/60 shadow-xs hover:shadow-sm hover:border-light transition-all duration-300">
+            <!-- Left: Info -->
+            <div class="flex-1 min-w-0 flex items-start gap-4">
+              <!-- Avatar / Icon -->
+              <div class="w-11 h-11 rounded-2xl bg-nested/50 text-secondary flex items-center justify-center shrink-0 border border-light/50 group-hover:scale-105 transition-transform">
+                <Store size={20} strokeWidth={2} class={store.id ? 'text-indigo-600' : 'text-muted'} />
+              </div>
+              
+              <!-- Text Info -->
+              <div class="flex flex-col gap-1 w-full">
+                <!-- Row 1: Toko Name & Category -->
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="font-bold text-main font-heading text-[15px] group-hover:text-primary transition-colors truncate max-w-[200px] sm:max-w-xs">
+                    {store.name || 'Belum Membuat Toko'}
                   </div>
+                  {#if store.category?.name}
+                    <span class="badge badge-ghost badge-sm text-[10px] font-semibold tracking-wide">
+                      {store.category.name}
+                    </span>
+                  {/if}
+                  {#if !store.id}
+                    <span class="badge badge-warning badge-outline badge-sm text-[10px] font-bold gap-1 shadow-xs bg-warning/5">
+                      Menunggu Setup
+                    </span>
+                  {/if}
+                </div>
+
+                <!-- Row 2: Subdomain -->
+                {#if store.subdomain}
                   <a
                     href={getStoreDirectUrl(store.subdomain)}
                     target="_blank"
                     rel="noreferrer"
-                    class="inline-flex items-center gap-1 text-3xs text-secondary hover:text-primary transition-colors font-mono mt-0.5"
+                    class="inline-flex items-center gap-1 text-[11px] text-secondary hover:text-primary transition-colors font-mono"
                   >
                     <span>{store.subdomain}.{mainDomain}</span>
                     <ExternalLink size={10} />
                   </a>
-                </td>
+                {/if}
 
-                <!-- Owner Info -->
-                <td class="py-4 px-4">
-                  <div class="font-semibold text-main">
+                <!-- Row 3: Tenant Name & Email -->
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[11px] font-medium text-secondary">
                     {store.tenantName || store.owner?.name || 'Tanpa Nama'}
-                  </div>
-                  <div class="text-3xs text-secondary font-mono">
+                  </span>
+                  <span class="text-[10px] text-muted">•</span>
+                  <span class="text-[11px] text-muted font-mono">
                     {store.tenantEmail || store.owner?.email || '-'}
-                  </div>
-                </td>
+                  </span>
+                </div>
+              </div>
+            </div>
 
-                <!-- Category -->
-                <td class="py-4 px-4">
-                  {#if store.category?.name}
-                    <span class="badge badge-ghost badge-sm text-3xs font-semibold">
-                      {store.category.name}
-                    </span>
-                  {:else}
-                    <span class="text-muted text-3xs">Umum</span>
-                  {/if}
-                </td>
-
-                <!-- Status -->
-                <td class="py-4 px-4">
-                  <span class="badge {store.status === 'active' ? 'badge-success' : 'badge-warning'} badge-outline badge-sm text-3xs font-bold gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full {store.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+            <!-- Right: Status & Actions -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
+              <!-- Status Badge -->
+              {#if store.id}
+                <div class="shrink-0 w-24">
+                  <span class="badge {store.status === 'active' ? 'badge-success' : 'badge-warning'} badge-outline badge-sm text-[10px] font-bold w-full justify-center shadow-xs">
+                    <span class="w-1.5 h-1.5 rounded-full mr-1.5 {store.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
                     <span>{store.status === 'active' ? 'Aktif' : store.status}</span>
                   </span>
-                </td>
+                </div>
+              {/if}
 
-                <!-- Actions -->
-                <td class="py-4 px-5 sm:px-6 text-right">
-                  <div class="flex items-center justify-end gap-1.5">
-                    <Button
-                      href={`/dashboard/store-settings?storeId=${store.id}`}
-                      variant="secondary"
-                      size="xs"
-                      className="rounded-xl font-bold gap-1"
-                      title="Pengaturan Toko"
-                    >
-                      <Settings size={12} />
-                      <span>Kelola Toko</span>
-                    </Button>
+              <!-- Actions -->
+              <div class="flex items-center justify-end gap-1.5 border-t sm:border-t-0 sm:border-l border-light/60 pt-3 sm:pt-0 sm:pl-6 shrink-0">
+                {#if store.id}
+                  <Button
+                    href={`/dashboard/store-settings?storeId=${store.id}`}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-xl text-secondary hover:bg-nested hover:scale-105 transition-all"
+                    title="Pengaturan Toko"
+                  >
+                    <Settings size={16} />
+                  </Button>
 
-                    <Button
-                      href={`/dashboard/products?storeId=${store.id}`}
-                      variant="ghost"
-                      size="xs"
-                      className="rounded-xl font-bold gap-1"
-                      title="Kelola Produk Tenant"
-                    >
-                      <Package size={12} />
-                      <span class="hidden md:inline">Produk</span>
-                    </Button>
+                  <Button
+                    href={`/dashboard/products?storeId=${store.id}`}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-xl text-secondary hover:bg-nested hover:scale-105 transition-all"
+                    title="Kelola Produk Tenant"
+                  >
+                    <Package size={16} />
+                  </Button>
+                {/if}
 
-                    <Button
-                      href={`/templates?tenantId=${store.userId}`}
-                      variant="ghost"
-                      size="xs"
-                      className="rounded-xl font-bold gap-1 text-primary hover:bg-primary/10"
-                      title="Beli Template untuk Toko Ini"
-                    >
-                      <ShoppingBag size={12} />
-                      <span class="hidden lg:inline">Beli Template</span>
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+                <Button
+                  href={`/templates?tenantId=${store.userId}`}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 rounded-xl font-bold text-xs text-primary hover:bg-primary/10 hover:scale-105 transition-all"
+                  title="Beli Template untuk Toko Ini"
+                >
+                  <ShoppingBag size={14} class="mr-1.5" />
+                  Beli Template
+                </Button>
+              </div>
+            </div>
+          </div>
+        {/each}
       </div>
     {/if}
   </Card>

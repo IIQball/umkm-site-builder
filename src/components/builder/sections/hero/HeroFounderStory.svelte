@@ -32,7 +32,7 @@
 {#snippet founderBadge()}
   <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white text-left pointer-events-none rounded-b-2xl">
     <p class="font-bold text-sm font-heading">{founderRole || 'Pendiri & Artisan'}</p>
-    <p class="text-[11px] text-slate-300 font-sans">{founderTitle || 'Pengrajin Resep Asli'}</p>
+    <p class="text-[11px] text-slate-300">{founderTitle || 'Pengrajin Resep Asli'}</p>
   </div>
 {/snippet}
 

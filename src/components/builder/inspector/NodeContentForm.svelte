@@ -5,7 +5,7 @@
   import AnnouncementNodeForm from './node-forms/AnnouncementNodeForm.svelte';
   import LogoNodeForm from './node-forms/LogoNodeForm.svelte';
   import NavLinksNodeForm from './node-forms/NavLinksNodeForm.svelte';
-  import HeroElementNodeForms from './node-forms/HeroElementNodeForms.svelte';
+  import HeroNodeForms from './node-forms/HeroNodeForms.svelte';
   import FeatureHeadingNodeForm from './node-forms/FeatureHeadingNodeForm.svelte';
   import FeatureItemNodeForm from './node-forms/FeatureItemNodeForm.svelte';
   import FeatureImageNodeForm from './node-forms/FeatureImageNodeForm.svelte';
@@ -69,7 +69,7 @@
   {:else if nodeId === 'nav_links'}
     <NavLinksNodeForm {section} {onPropChange} {onSectionUpdate} />
   {:else if section.type === 'features' && isFeatureHeadingSlot(nodeId)}
-    <FeatureHeadingNodeForm {section} {onPropChange} />
+    <FeatureHeadingNodeForm {section} {nodeId} {onPropChange} />
   {:else if section.type === 'features' && (nodeId === 'features_image' || nodeId === 'image')}
     {#if hasFeatureImageSupport}
       <FeatureImageNodeForm {section} {onPropChange} />
@@ -123,7 +123,11 @@
     <MapsNodeForms {section} {nodeId} {onPropChange} />
   {:else if section.type === 'footer'}
     <FooterNodeForms {section} {nodeId} {onPropChange} />
+  {:else if section.type === 'hero'}
+    <HeroNodeForms {section} {nodeId} {onPropChange} />
   {:else}
-    <HeroElementNodeForms {section} {nodeId} {onPropChange} />
+    <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl">
+      Pilih elemen pada kanvas untuk mengedit kontennya.
+    </p>
   {/if}
 </div>

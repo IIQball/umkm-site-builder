@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
 
   export let badgeText: string = 'Keunggulan Layanan Kami';
@@ -12,6 +13,7 @@
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
   export let onReorder: ((items: FeatureItem[]) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'feature_cards'];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
   $: hasCards = elementOrder.includes('feature_cards') || elementOrder.includes('features_grid');
@@ -73,6 +75,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-2xl"
       />
     </div>
@@ -82,6 +85,7 @@
     <div class="features-grid-3-container text-left" data-node="feature_cards" data-node-id="feature_cards" style="order: {isCardsFirst ? 1 : 2};">
       {#each items as item, index (item.id || item.title + index)}
         {@const isItemActive = activeNodeId === `feature_item_${index}`}
+        {@const itemStyle = resolveFeatureItemStyle(item, index, nodeStyles)}
         <div
           data-node="feature_card"
           role="button"
@@ -120,7 +124,7 @@
               </span>
             {/if}
           </div>
-          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]">
+          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
             {item.title}
           </h3>
           <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">

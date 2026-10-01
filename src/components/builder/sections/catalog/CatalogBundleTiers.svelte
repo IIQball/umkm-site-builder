@@ -1,12 +1,14 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
   import { Check, Sparkles } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah, buildWhatsAppOrderLink } from '../productCatalog.helpers';
+  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
   export let waNumber: string = '';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   $: tiers = ((products.length >= 2 ? products.slice(0, 3) : [
@@ -61,6 +63,10 @@
   {#each tiers as tier, idx (tier.name + idx)}
     {@const isPopular = idx === 1}
     {@const isCardActive = $canvasStore.selectedNodeId === (tier.id || `product_item_${idx}`)}
+    {@const pStyle = resolveProductNodeStyle(tier, idx, nodeStyles)}
+    {@const currentPrice = Number(tier.price ?? 0)}
+    {@const originalPrice = Number(tier.originalPrice) || (tier.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+    {@const hasDiscount = (tier.showOriginalPrice === true || (tier.showOriginalPrice !== false && !!tier.originalPrice && Number(tier.originalPrice) > currentPrice)) && originalPrice > currentPrice}
 
     <div
       data-node={tier.id || `product_item_${idx}`}
@@ -69,6 +75,7 @@
       tabindex="0"
       on:click={(e) => selectCard(e, idx, tier)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, tier); }}
+      style={pStyle.marginStyle}
       class={`p-6 sm:p-7 rounded-3xl flex flex-col justify-between relative transition-all duration-200 cursor-pointer ${
         isPopular
           ? 'bg-blue-50/60 dark:bg-blue-950/40 border-2 border-primary shadow-lg'
@@ -76,17 +83,17 @@
       } ${isCardActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''}`}
     >
       {#if isPopular}
-        <span class="absolute -top-3 right-6 bg-[var(--color-primary)] text-white text-2xs font-heading font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+        <span class="absolute -top-3 right-6 text-2xs font-heading font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
           <Sparkles size={11} />
           <span>POPULER</span>
         </span>
       {/if}
 
       <div>
-        <span class={`text-2xs font-heading font-bold uppercase tracking-wider ${isPopular ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
+        <span class={`text-2xs font-heading font-bold uppercase tracking-wider ${isPopular ? 'text-[var(--theme-secondary,var(--color-secondary))]' : 'text-[var(--color-text-muted)]'}`}>
           {tier.badge || `Tier 0${idx + 1}`}
         </span>
-        <h3 class="font-heading font-black text-lg text-main mt-1 mb-2">
+        <h3 class="font-heading font-black text-lg text-main mt-1 mb-2" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
           {tier.name}
         </h3>
         <p class="text-xs text-secondary leading-relaxed mb-6">
@@ -110,9 +117,16 @@
       </div>
 
       <div class="pt-4 border-t border-light/60">
-        <p class="font-heading font-black text-lg sm:text-xl text-[var(--color-primary)] mb-3">
-          {formatRupiah(tier.price)}
-        </p>
+        <div class="flex items-baseline gap-2 mb-3">
+          <p class="font-heading font-black text-lg sm:text-xl text-[var(--color-primary)]">
+            {formatIDR(tier.price)}
+          </p>
+          {#if hasDiscount}
+            <span class="text-xs text-secondary line-through font-mono opacity-70">
+              {formatIDR(originalPrice)}
+            </span>
+          {/if}
+        </div>
         <button
           type="button"
           on:click|stopPropagation={() => handleOrder(tier)}

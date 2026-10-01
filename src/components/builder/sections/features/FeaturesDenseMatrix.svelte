@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { canvasStore } from '../../stores/editorStore';
 
@@ -11,6 +12,7 @@
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'icon_matrix'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: isMobile = $canvasStore?.viewMode === 'mobile';
   $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
@@ -38,6 +40,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-xl"
       />
     </div>
@@ -47,6 +50,7 @@
     <div class="features-matrix-container text-left {isMobile ? 'is-canvas-mobile' : ''}" data-node="icon_matrix" data-node-id="icon_matrix" style="order: {isMatrixFirst ? 1 : 2};">
     {#each items as item, index (`${item.id || 'dm'}-${index}`)}
       {@const isActiveNode = activeNodeId === `feature_item_${index}`}
+      {@const itemStyle = resolveFeatureItemStyle(item, index, nodeStyles)}
       <div
         data-node="feature_card"
         role="button"
@@ -69,7 +73,7 @@
         </div>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
-            <h3 data-node="feature_title" class="feature-item-title-compact font-heading text-[var(--color-text-main)] leading-snug">
+            <h3 data-node="feature_title" class="feature-item-title-compact font-heading text-[var(--color-text-main)] leading-snug" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
               {item.title}
             </h3>
             {#if item.badge}

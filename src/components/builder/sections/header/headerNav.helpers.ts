@@ -116,3 +116,78 @@ export function navigateToSection(
     onAfterNavigate();
   }
 }
+
+export const NAV_TYPOGRAPHY_TOKENS = [
+  { label: 'Caption / Kompak (12px)', value: 'caption', fontSize: 'var(--theme-text-caption, var(--text-caption-size, 12px))' },
+  { label: 'Body / Standar (14px)', value: 'body', fontSize: 'var(--theme-text-body, var(--text-body-size, 14px))' },
+  { label: 'Medium / Sedang (16px)', value: 'medium', fontSize: 'var(--theme-text-body-lg, 16px)' },
+  { label: 'Large / Menonjol (18px)', value: 'large', fontSize: 'var(--theme-text-h3, var(--text-h3-size, 18px))' },
+];
+
+export const NAV_TYPOGRAPHY_MAP: Record<string, string> = {
+  caption: 'var(--theme-text-caption, var(--text-caption-size, 12px))',
+  body: 'var(--theme-text-body, var(--text-body-size, 14px))',
+  medium: 'var(--theme-text-body-lg, 16px)',
+  large: 'var(--theme-text-h3, var(--text-h3-size, 18px))',
+};
+
+export function resolveNavFontSize(token: string | undefined): string {
+  if (!token) return NAV_TYPOGRAPHY_MAP.body;
+  return NAV_TYPOGRAPHY_MAP[token] || token;
+}
+
+export const NAV_TRANSFORM_OPTIONS = [
+  { label: 'Normal', value: 'none' },
+  { label: 'KAPITAL', value: 'uppercase' },
+  { label: 'Huruf Awal', value: 'capitalize' },
+  { label: 'kecil', value: 'lowercase' },
+];
+
+export const NAV_COLOR_TOKENS = [
+  { label: 'Teks Redup (Muted)', value: 'var(--theme-text-muted, var(--color-text-muted, #64748b))', preview: '#64748b' },
+  { label: 'Teks Utama (Primary Text)', value: 'var(--theme-text-primary, var(--color-text-main, #0f172a))', preview: '#0f172a' },
+  { label: 'Warna Brand (Primary)', value: 'var(--theme-primary, var(--color-primary))', preview: '#36C6FD' },
+  { label: 'Warna Aksen (Secondary)', value: 'var(--theme-secondary, var(--color-secondary, #3b82f6))', preview: '#3b82f6' },
+  { label: 'Putih Bersih (White)', value: '#ffffff', preview: '#ffffff' },
+  { label: 'Hitam Gelap (#0f172a)', value: '#0f172a', preview: '#0f172a' },
+];
+
+export const NAV_HOVER_COLOR_TOKENS = [
+  { label: 'Warna Brand (Primary)', value: 'var(--theme-primary, var(--color-primary))', preview: '#36C6FD' },
+  { label: 'Warna Aksen (Secondary)', value: 'var(--theme-secondary, var(--color-secondary, #3b82f6))', preview: '#3b82f6' },
+  { label: 'Teks Utama (Primary Text)', value: 'var(--theme-text-primary, var(--color-text-main, #0f172a))', preview: '#0f172a' },
+  { label: 'Teks Redup (Muted)', value: 'var(--theme-text-muted, var(--color-text-muted, #64748b))', preview: '#64748b' },
+  { label: 'Putih Bersih (White)', value: '#ffffff', preview: '#ffffff' },
+  { label: 'Emas / Amber (#f59e0b)', value: '#f59e0b', preview: '#f59e0b' },
+];
+
+export function resolveColorTokenMatch(
+  currentValue: string | undefined,
+  options: Array<{ value: string }>,
+  defaultFallback: string
+): string {
+  if (!currentValue) return defaultFallback;
+  const exact = options.find((opt) => opt.value === currentValue);
+  if (exact) return exact.value;
+  if (currentValue.includes('text-muted') || currentValue.includes('#64748b') || currentValue.includes('text-secondary')) {
+    const match = options.find((opt) => opt.value.includes('text-muted'));
+    if (match) return match.value;
+  }
+  if (currentValue.includes('text-primary') || currentValue.includes('text-main') || currentValue.includes('#0f172a')) {
+    const match = options.find((opt) => opt.value.includes('text-primary') || opt.value === '#0f172a');
+    if (match) return match.value;
+  }
+  if (currentValue.includes('primary') || currentValue.includes('#36C6FD') || currentValue.includes('#00A3EF')) {
+    const match = options.find((opt) => opt.value.includes('primary') && !opt.value.includes('text-primary'));
+    if (match) return match.value;
+  }
+  if (currentValue.includes('secondary') || currentValue.includes('#3b82f6') || currentValue.includes('#FC018B')) {
+    const match = options.find((opt) => opt.value.includes('secondary'));
+    if (match) return match.value;
+  }
+  if (currentValue.toLowerCase() === '#ffffff' || currentValue.toLowerCase() === 'white') {
+    const match = options.find((opt) => opt.value === '#ffffff');
+    if (match) return match.value;
+  }
+  return currentValue;
+}

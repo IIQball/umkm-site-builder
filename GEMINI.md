@@ -11,8 +11,8 @@ umkm-site-builder/
 │   │   ├── 10-process.md                       # [77 baris] SOP & workflow proses pengembangan fitur
 │   │   ├── 15-file-size-limits.md              # [20 baris] Batas maksimal 300 baris per file & modularisasi
 │   │   ├── 20-code-standards.md                # [91 baris] Standar penulisan clean code & konvensi penamaan
-│   │   ├── 30-ui-ux.md                         # [147 baris] Panduan standar desain UI/UX & aksesibilitas
-│   │   ├── 31-component-patterns.md            # [51 baris] Pola arsitektur komponen Svelte & Astro
+│   │   ├── 30-ui-ux.md                         # [181 baris] Panduan standar desain UI/UX & aksesibilitas
+│   │   ├── 31-component-patterns.md            # [151 baris] Pola arsitektur komponen Svelte & Astro
 │   │   ├── 40-security.md                      # [98 baris] Protokol keamanan web, otentikasi, & proteksi role
 │   │   ├── 50-design-system-rules.md           # [11 baris] Aturan konsistensi token Design System global
 │   │   ├── 50-qa-testing.md                    # [110 baris] Standar penulisan test suite unit & integrasi Vitest
@@ -124,7 +124,8 @@ umkm-site-builder/
 │   │   │   │   │   ├── FeaturesComparisonContent.svelte # [144 baris] Form inspector komparasi keunggulan fitur
 │   │   │   │   │   └── FeaturesRepeaterContent.svelte # [173 baris] Form repeater item keunggulan fitur
 │   │   │   │   ├── content.helpers.ts          # [51 baris] Helper pengisian konten section builder
-│   │   │   │   ├── FaqContent.svelte           # [91 baris] Form inspector konten FAQ section
+│   │   │   │   ├── FaqContent.svelte           # [162 baris] Form inspector konten FAQ section
+│   │   │   │   ├── FaqItemCard.svelte          # [108 baris] Kartu editor butir pertanyaan FAQ modular
 │   │   │   │   ├── FeaturesContent.svelte      # [68 baris] Form inspector konten features section
 │   │   │   │   ├── FooterContent.svelte        # [78 baris] Form inspector konten footer section
 │   │   │   │   ├── GoogleMapsContent.svelte    # [82 baris] Form inspector konten Google Maps section
@@ -133,19 +134,23 @@ umkm-site-builder/
 │   │   │   │   ├── ProductCatalogContent.svelte # [151 baris] Form inspector data produk katalog
 │   │   │   │   └── TestimonialsContent.svelte  # [104 baris] Form inspector isi ulasan/testimonial
 │   │   │   ├── inspector/ # Panel properti kustomisasi node & tema
+│   │   │   │   ├── faq/ # Sub-panel konfigurasi elemen FAQ
+│   │   │   │   │   └── FaqElementNodePanel.svelte # [186 baris] Panel kustomisasi gaya elemen FAQ & gating margin kartu
 │   │   │   │   ├── header/ # Sub-panel konfigurasi elemen header
 │   │   │   │   │   ├── HeaderAnnouncementPanel.svelte # [91 baris] Panel teks pengumuman header
 │   │   │   │   │   ├── HeaderLogoPanel.svelte  # [99 baris] Panel upload/URL logo toko
 │   │   │   │   │   └── HeaderNavPanel.svelte   # [137 baris] Panel menu navigasi menu header
+│   │   │   │   ├── testimonials/ # Sub-panel konfigurasi elemen ulasan testimoni
+│   │   │   │   │   └── TestimonialsElementNodePanel.svelte # [265 baris] Panel kustomisasi gaya elemen ulasan & gating margin kartu
 │   │   │   │   ├── node-forms/ # Form input mikro spesifik sub-node
 │   │   │   │   │   ├── AnnouncementNodeForm.svelte # [73 baris] Form spesifik node pengumuman
 │   │   │   │   │   ├── CatalogNodeForms.svelte # [⚠️ mepet 300 baris - 289 baris] Form spesifik node katalog produk
-│   │   │   │   │   ├── FaqNodeForms.svelte     # [138 baris] Form spesifik node tanya jawab FAQ
+│   │   │   │   │   ├── FaqNodeForms.svelte     # [187 baris] Form spesifik node tanya jawab FAQ
 │   │   │   │   │   ├── FeatureHeadingNodeForm.svelte # [83 baris] Form spesifik heading section fitur
 │   │   │   │   │   ├── FeatureImageNodeForm.svelte # [127 baris] Form upload gambar kartu fitur
 │   │   │   │   │   ├── FeatureItemNodeForm.svelte # [⚠️ mepet 300 baris - 250 baris] Form konfigurasi item benefit fitur
 │   │   │   │   │   ├── FooterNodeForms.svelte  # [237 baris] Form spesifik kustomisasi elemen sub-node footer
-│   │   │   │   │   ├── HeroElementNodeForms.svelte # [217 baris] Form elemen visual/teks hero
+│   │   │   │   │   ├── HeroNodeForms.svelte    # [254 baris] Form spesifik elemen visual/teks/CTA hero
 │   │   │   │   │   ├── HeroExtraNodeForms.svelte # [93 baris] Form elemen pendukung hero
 │   │   │   │   │   ├── HeroImageNodeForm.svelte # [121 baris] Form konfigurasi node gambar hero
 │   │   │   │   │   ├── LogoNodeForm.svelte     # [139 baris] Form logo toko pada header
@@ -202,7 +207,7 @@ umkm-site-builder/
 │   │   │   │   │   ├── CatalogCheckoutModal.svelte # [246 baris] Modal checkout cepat katalog
 │   │   │   │   │   ├── CatalogFlashSale.svelte # [147 baris] Layout promo flash sale countdown
 │   │   │   │   │   ├── CatalogGridStandard.svelte # [207 baris] Layout grid katalog standar
-│   │   │   │   │   ├── CatalogHeader.svelte    # [57 baris] Header judul & deskripsi katalog produk
+│   │   │   │   │   ├── CatalogHeader.svelte    # [115 baris] Header judul, badge, & deskripsi katalog produk
 │   │   │   │   │   ├── CatalogListCompact.svelte # [102 baris] Layout list compact horizontal
 │   │   │   │   │   ├── CatalogLookbook.svelte  # [87 baris] Layout lookbook galeri visual majalah
 │   │   │   │   │   ├── CatalogMasonry.svelte   # [110 baris] Layout masonry katalog 3 kolom
@@ -214,18 +219,20 @@ umkm-site-builder/
 │   │   │   │   │   └── ProductQuickCheckoutModal.svelte # [⚠️ >300 baris - 313 baris] Modal checkout instan WhatsApp langsung dari katalog
 │   │   │   │   ├── faq/ # Preset layout FAQ tanya jawab (10 preset)
 │   │   │   │   │   ├── faq.css                 # [62 baris] Container queries `@container faqcard`
-│   │   │   │   │   ├── faq.helpers.ts          # [79 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── faq.helpers.ts          # [74 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── faqLayout.helpers.ts    # [139 baris] SSOT sinkronisasi slot, label elemen per ulasan, dan elementOrder FAQ
+│   │   │   │   │   ├── faqStyles.helpers.ts    # [88 baris] Helper cascading styles node & aturan gating margin kartu FAQ
 │   │   │   │   │   ├── FaqAccordionSingle.svelte # [68 baris] Preset FAQ akordeon 1 kolom terpusat
 │   │   │   │   │   ├── FaqAccordionTwoCol.svelte # [128 baris] Preset FAQ akordeon 2 kolom simetris
-│   │   │   │   │   ├── FaqCategorizedTabs.svelte # [114 baris] Preset FAQ dengan tab kategori
-│   │   │   │   │   ├── FaqChatStyle.svelte     # [58 baris] Preset FAQ gaya balon obrolan
-│   │   │   │   │   ├── FaqGridCards.svelte     # [56 baris] Preset FAQ grid 2 kolom kartu terbuka
-│   │   │   │   │   ├── FaqHeader.svelte        # [66 baris] Header judul H2 FAQ & sub-node selection
-│   │   │   │   │   ├── FaqHelpCenter.svelte    # [57 baris] Preset FAQ gaya Help Center floating cards
-│   │   │   │   │   ├── FaqHorizontalCards.svelte # [53 baris] Preset FAQ kartu horizontal slider
-│   │   │   │   │   ├── FaqNumberedList.svelte  # [50 baris] Preset FAQ daftar bernomor 01, 02, 03
-│   │   │   │   │   ├── FaqSearchFiltered.svelte # [110 baris] Preset FAQ dengan filter pencarian real-time
-│   │   │   │   │   └── FaqSplitSidebar.svelte  # [140 baris] Preset FAQ layout split sidebar CS WhatsApp
+│   │   │   │   │   ├── FaqCategorizedTabs.svelte # [124 baris] Preset FAQ dengan tab kategori
+│   │   │   │   │   ├── FaqChatStyle.svelte     # [68 baris] Preset FAQ gaya balon obrolan
+│   │   │   │   │   ├── FaqGridCards.svelte     # [59 baris] Preset FAQ grid 2 kolom kartu terbuka
+│   │   │   │   │   ├── FaqHeader.svelte        # [124 baris] Header judul H2 FAQ & sub-node selection
+│   │   │   │   │   ├── FaqHelpCenter.svelte    # [61 baris] Preset FAQ gaya Help Center floating cards
+│   │   │   │   │   ├── FaqHorizontalCards.svelte # [57 baris] Preset FAQ kartu horizontal slider
+│   │   │   │   │   ├── FaqNumberedList.svelte  # [54 baris] Preset FAQ daftar bernomor 01, 02, 03
+│   │   │   │   │   ├── FaqSearchFiltered.svelte # [119 baris] Preset FAQ dengan filter pencarian real-time
+│   │   │   │   │   └── FaqSplitSidebar.svelte  # [185 baris] Preset FAQ layout split sidebar CS WhatsApp
 │   │   │   │   ├── features/ # Preset layout keunggulan fitur (10 preset)
 │   │   │   │   │   ├── featureIcons.ts         # [164 baris] Helper pemetaan icon Lucide fitur
 │   │   │   │   │   ├── features.css            # [188 baris] Container queries `@container featurecard`
@@ -309,9 +316,11 @@ umkm-site-builder/
 │   │   │   │   ├── testimonials/ # Preset layout testimoni ulasan (10 preset)
 │   │   │   │   │   ├── testimonials.css        # [94 baris] Container queries `@container testicard` & marquee keyframes
 │   │   │   │   │   ├── testimonials.helpers.ts # [110 baris] Helper kalkulasi rating rata-rata & mock data
+│   │   │   │   │   ├── testimonialStyles.helpers.ts # [28 baris] Helper resolusi style CSS ulasan dari nodeStyles
+│   │   │   │   │   ├── testimonialsLayout.helpers.ts # [135 baris] Helper SSOT tata letak & urutan slot elemen ulasan
 │   │   │   │   │   ├── TestimonialsCarouselSlider.svelte # [83 baris] Preset testimoni slider carousel panah
 │   │   │   │   │   ├── TestimonialsChatBubble.svelte # [54 baris] Preset testimoni bubble chat WhatsApp
-│   │   │   │   │   ├── TestimonialsHeader.svelte # [57 baris] Header judul H2 testimoni & sub-node selection
+│   │   │   │   │   ├── TestimonialsHeader.svelte # [125 baris] Header judul, badge, & deskripsi ulasan testimoni
 │   │   │   │   │   ├── TestimonialsLogoCloud.svelte # [45 baris] Preset testimoni logo client cloud
 │   │   │   │   │   ├── TestimonialsMarquee.svelte # [54 baris] Preset testimoni running text horizontal 25s
 │   │   │   │   │   ├── TestimonialsMasonryGrid.svelte # [81 baris] Preset testimoni masonry grid 3 kolom

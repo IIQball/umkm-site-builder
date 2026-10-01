@@ -177,7 +177,6 @@ export function getDefaultHeroSlots(preset: string): string[] {
       return ['badge', 'title', 'subtitle', 'cta', 'trust_badges'];
     case 'full_banner_overlay':
     case 'video_background_loop':
-    case 'oversized_bold_typography':
       return ['badge', 'title', 'subtitle', 'cta'];
     case 'bento_masonry_hero':
       return ['badge', 'title', 'subtitle', 'cta', 'image', 'bento_promo', 'bento_review'];

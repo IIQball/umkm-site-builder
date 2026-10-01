@@ -16,10 +16,31 @@
 
   $: navLinks = (section.props?.navLinks as string[]) || [];
 
+  const SECTION_PRESETS = [
+    { label: 'Beranda (Hero Banner)', value: 'Beranda' },
+    { label: 'Katalog Produk', value: 'Produk' },
+    { label: 'Keunggulan / Fitur', value: 'Tentang' },
+    { label: 'Tanya Jawab (FAQ)', value: 'FAQ' },
+    { label: 'Lokasi Gerai / Maps', value: 'Lokasi' },
+    { label: 'Ulasan Pelanggan', value: 'Testimoni' },
+    { label: 'Kontak Kami (Footer)', value: 'Kontak' },
+    { label: 'Nama Menu Kustom...', value: 'custom' },
+  ];
+
+  function getSelectedPreset(link: string): string {
+    const found = SECTION_PRESETS.find((p) => p.value.toLowerCase() === link.trim().toLowerCase());
+    return found ? found.value : 'custom';
+  }
+
   function updateNavLink(index: number, value: string) {
     const updated = [...navLinks];
     updated[index] = value;
     onPropChange('navLinks', updated);
+  }
+
+  function handleSelectPreset(index: number, selected: string) {
+    if (selected === 'custom') return;
+    updateNavLink(index, selected);
   }
 </script>
 
@@ -33,32 +54,48 @@
       type="button"
       variant="primary"
       size="xs"
-      on:click={() => handleAddArrayItem('navLinks', 'Menu Baru')}
+      on:click={() => handleAddArrayItem('navLinks', 'Produk')}
       class="!h-auto !min-h-0 !py-1 !px-2 gap-1"
     >
       <Plus size={12} /> Tambah
     </Button>
   </div>
 
-  <div class="space-y-1.5">
+  <div class="space-y-2">
     {#each navLinks as link, idx}
-      <div class="flex items-center gap-2">
-        <input
-          type="text"
-          value={link}
-          on:input={(e) => updateNavLink(idx, e.currentTarget.value)}
-          class="flex-1 px-3 py-1 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          on:click={() => handleRemoveArrayItem('navLinks', idx)}
-          class="!w-6 !h-6 !min-h-0 !p-0 text-error hover:bg-error/10"
-          title="Hapus Menu"
-        >
-          <Trash2 size={13} />
-        </Button>
+      {@const presetVal = getSelectedPreset(link)}
+      <div class="p-2 rounded-lg bg-base-200/50 border border-base-300 space-y-1.5">
+        <div class="flex items-center gap-2">
+          <select
+            value={presetVal}
+            on:change={(e) => handleSelectPreset(idx, e.currentTarget.value)}
+            class="flex-1 px-2.5 py-1 bg-base-100 border border-base-300 rounded-lg text-xs font-medium focus:outline-none focus:border-primary cursor-pointer"
+          >
+            {#each SECTION_PRESETS as p}
+              <option value={p.value}>{p.label}</option>
+            {/each}
+          </select>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            on:click={() => handleRemoveArrayItem('navLinks', idx)}
+            class="!w-6 !h-6 !min-h-0 !p-0 text-error hover:bg-error/10 shrink-0"
+            title="Hapus Menu"
+          >
+            <Trash2 size={13} />
+          </Button>
+        </div>
+
+        {#if presetVal === 'custom'}
+          <input
+            type="text"
+            value={link}
+            on:input={(e) => updateNavLink(idx, e.currentTarget.value)}
+            placeholder="Tulis nama menu kustom..."
+            class="w-full px-2.5 py-1 bg-base-100 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
+          />
+        {/if}
       </div>
     {/each}
   </div>

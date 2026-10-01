@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
 
   export let badgeText: string = 'Benefit Utama';
@@ -11,6 +12,7 @@
   export let mainImageUrl: string = 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800&auto=format&fit=crop&q=80';
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: isImageActive = activeNodeId === 'features_image' || activeNodeId === 'image';
   $: isGridFirst = elementOrder.indexOf('bento_spotlight') === 0 || elementOrder.indexOf('bento_cards') === 0 || elementOrder.indexOf('features_grid') === 0;
@@ -48,6 +50,10 @@
     description: 'Dapatkan harga grosir khusus dan materi promosi gratis.',
     statLabel: 'Gabung Mitra',
   };
+  $: style0 = resolveFeatureItemStyle(item0, 0, nodeStyles);
+  $: style1 = resolveFeatureItemStyle(item1, 1, nodeStyles);
+  $: style2 = resolveFeatureItemStyle(item2, 2, nodeStyles);
+  $: style3 = resolveFeatureItemStyle(item3, 3, nodeStyles);
 
   const handleImageClick = (e: MouseEvent) => {
     if (selectNode) selectNode(e, 'features_image');
@@ -81,6 +87,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-2xl"
       />
     </div>
@@ -117,7 +124,7 @@
                 {item0.badge || 'Benefit Utama'}
               </span>
             </div>
-            <h3 data-node="feature_title" class="feature-item-title mb-2">
+            <h3 data-node="feature_title" class="feature-item-title mb-2" style={style0.color ? `color: ${style0.color} !important;` : ''}>
               {item0.title}
             </h3>
             <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
@@ -178,7 +185,7 @@
                 </span>
               {/if}
             </div>
-            <h3 data-node="feature_title" class="feature-item-title mb-2">
+            <h3 data-node="feature_title" class="feature-item-title mb-2" style={style1.color ? `color: ${style1.color} !important;` : ''}>
               {item1.title}
             </h3>
             <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
@@ -220,7 +227,7 @@
               </span>
             {/if}
           </div>
-          <h3 data-node="feature_title" class="feature-item-title mb-2">
+          <h3 data-node="feature_title" class="feature-item-title mb-2" style={style2.color ? `color: ${style2.color} !important;` : ''}>
             {item2.title}
           </h3>
           <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
@@ -257,7 +264,7 @@
             </div>
             <div>
               <div class="flex items-center gap-2 mb-1">
-                <h3 data-node="feature_title" class="feature-item-title">
+                <h3 data-node="feature_title" class="feature-item-title" style={style3.color ? `color: ${style3.color} !important;` : ''}>
                   {item3.title}
                 </h3>
                 {#if item3.badge}

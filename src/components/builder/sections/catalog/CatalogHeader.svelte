@@ -7,19 +7,21 @@
   export let badgeText: string = '';
   export let align: 'left' | 'center' | 'right' = 'center';
   export let elementOrder: string[] = ['badge', 'title', 'subtitle'];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let isActive: boolean = false;
+
+  $: badgeStyle = nodeStyles?.['badge'] || nodeStyles?.['catalog_badge'] || {};
+  $: titleStyle = nodeStyles?.['title'] || nodeStyles?.['catalog_title'] || nodeStyles?.['catalog_header'] || {};
+  $: subtitleStyle = nodeStyles?.['subtitle'] || nodeStyles?.['catalog_subtitle'] || {};
 
   $: effectiveOrder = (elementOrder && elementOrder.length > 0 ? elementOrder : ['badge', 'title', 'subtitle']).filter(
     (k) => k !== 'catalog_grid'
   );
 
-  $: isHeaderSelected = $canvasStore.selectedNodeId === 'catalog_header';
-
-  function handleSelectContainer(e?: Event) {
-    if (e) e.stopPropagation();
-    if (sectionId) {
-      canvasStore.selectNode(sectionId, 'catalog_header');
-    }
-  }
+  $: isThisSectionSelected = isActive || $canvasStore?.selectedSectionId === sectionId;
+  $: isBadgeActive = isThisSectionSelected && ($canvasStore?.selectedNodeId === 'badge' || $canvasStore?.selectedNodeId === 'catalog_badge');
+  $: isTitleActive = isThisSectionSelected && ($canvasStore?.selectedNodeId === 'title' || $canvasStore?.selectedNodeId === 'catalog_title' || $canvasStore?.selectedNodeId === 'catalog_header');
+  $: isSubtitleActive = isThisSectionSelected && ($canvasStore?.selectedNodeId === 'subtitle' || $canvasStore?.selectedNodeId === 'catalog_subtitle');
 
   function handleSelectSlot(e: Event, slot: string) {
     e.stopPropagation();
@@ -27,26 +29,12 @@
       canvasStore.selectNode(sectionId, slot);
     }
   }
-
-  function handleKey(e: KeyboardEvent) {
-    if (e.key === 'Enter') handleSelectContainer(e);
-  }
 </script>
 
 {#if title || subtitle || badgeText}
   <div
-    data-node="catalog_header"
-    data-node-id="catalog_header"
-    role="button"
-    tabindex="0"
-    on:click={handleSelectContainer}
-    on:keydown={handleKey}
-    class={`flex flex-col cursor-pointer transition-all duration-150 mb-8 rounded-2xl p-3 ${
+    class={`flex flex-col mb-8 ${
       align === 'left' ? 'items-start text-left' : align === 'right' ? 'items-end text-right' : 'items-center text-center'
-    } ${
-      isHeaderSelected
-        ? 'ring-2 ring-[var(--color-primary)] ring-offset-2 dark:ring-offset-base-100'
-        : 'hover:outline hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/60'
     }`}
   >
     {#each effectiveOrder as slot}
@@ -57,15 +45,17 @@
           role="button"
           tabindex="0"
           on:click={(e) => handleSelectSlot(e, 'badge')}
-          on:keydown={(e) => e.key === 'Enter' && handleSelectSlot(e, 'badge')}
+          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSlot(e, 'badge')}
           class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 transition-all cursor-pointer ${
-            $canvasStore.selectedNodeId === 'badge' ? 'ring-2 ring-[var(--color-primary)] ring-offset-1' : ''
+            isBadgeActive
+              ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2'
+              : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/50'
           }`}
-          style="background-color: color-mix(in srgb, var(--color-primary) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); color: var(--color-primary);"
+          style="{badgeStyle.color ? `color: ${badgeStyle.color} !important; border-color: ${badgeStyle.color} !important;` : 'color: var(--color-primary); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);'} background-color: color-mix(in srgb, var(--color-primary) 10%, transparent); margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
         >
           <span
             class="w-1.5 h-1.5 rounded-full"
-            style="background-color: var(--color-primary);"
+            style="background-color: currentColor;"
           ></span>
           <span>{badgeText}</span>
         </div>
@@ -76,12 +66,18 @@
           role="button"
           tabindex="0"
           on:click={(e) => handleSelectSlot(e, 'title')}
-          on:keydown={(e) => e.key === 'Enter' && handleSelectSlot(e, 'title')}
-          class={`inline-block transition-all ${
-            $canvasStore.selectedNodeId === 'title' ? 'ring-2 ring-[var(--color-primary)] rounded-lg' : ''
+          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSlot(e, 'title')}
+          class={`cursor-pointer transition-all rounded-xl px-2 py-0.5 mb-2 ${
+            isTitleActive
+              ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 bg-[var(--theme-primary, var(--color-primary))]/10'
+              : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/50'
           }`}
+          style="margin-top: {titleStyle.marginTop || '0px'}; margin-bottom: {titleStyle.marginBottom || '12px'};"
         >
-          <h2 class="cq-title font-heading font-extrabold text-[var(--color-text-main)] tracking-tight mb-3">
+          <h2
+            class="cq-title font-heading font-extrabold tracking-tight"
+            style="{titleStyle.color ? `color: ${titleStyle.color} !important;` : 'color: var(--theme-text-primary, var(--color-text-main));'} font-family: var(--theme-heading-font, var(--font-heading));"
+          >
             {title}
           </h2>
         </div>
@@ -92,12 +88,18 @@
           role="button"
           tabindex="0"
           on:click={(e) => handleSelectSlot(e, 'subtitle')}
-          on:keydown={(e) => e.key === 'Enter' && handleSelectSlot(e, 'subtitle')}
-          class={`inline-block transition-all ${
-            $canvasStore.selectedNodeId === 'subtitle' ? 'ring-2 ring-[var(--color-primary)] rounded-lg' : ''
+          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSlot(e, 'subtitle')}
+          class={`cursor-pointer transition-all rounded-xl px-2 py-0.5 ${
+            isSubtitleActive
+              ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 bg-[var(--theme-primary, var(--color-primary))]/10'
+              : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/50'
           }`}
+          style="margin-top: {subtitleStyle.marginTop || '0px'}; margin-bottom: {subtitleStyle.marginBottom || '0px'};"
         >
-          <p class="text-body-base text-[var(--color-text-secondary)] max-w-2xl mx-auto leading-relaxed font-sans">
+          <p
+            class="text-body-base max-w-2xl mx-auto leading-relaxed"
+            style="{subtitleStyle.color ? `color: ${subtitleStyle.color} !important;` : 'color: var(--theme-text-muted, var(--color-text-secondary));'} font-family: var(--theme-body-font, var(--font-family));"
+          >
             {subtitle}
           </p>
         </div>

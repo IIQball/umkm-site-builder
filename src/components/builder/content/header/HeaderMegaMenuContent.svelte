@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LayoutGrid, Plus, Trash2, Info } from 'lucide-svelte';
+  import { LayoutGrid, Plus, Trash2 } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import type { TemplateSection } from '@/schemas';
 
@@ -62,14 +62,6 @@
       <Plus size={12} />
       <span>Tambah</span>
     </Button>
-  </div>
-
-  <div class="p-2.5 bg-blue-500/10 rounded-lg border border-blue-500/20 text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2">
-    <Info size={14} class="text-blue-500 flex-shrink-0 mt-0.5" />
-    <div class="text-[11px] leading-relaxed">
-      <span class="font-bold block">Integrasi Otomatis Tenant</span>
-      Daftar di bawah digunakan sebagai pratinjau konten desainer template. Saat dipakai oleh toko tenant, kategori akan otomatis terisi sesuai kategori produk nyata dari toko.
-    </div>
   </div>
 
   <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">

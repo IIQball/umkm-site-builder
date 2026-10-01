@@ -5,9 +5,13 @@
   import HeaderLogoContent from './header/HeaderLogoContent.svelte';
   import HeaderMegaMenuContent from './header/HeaderMegaMenuContent.svelte';
   import HeaderTopBarContent from './header/HeaderTopBarContent.svelte';
+  import NavLinksNodeForm from '../inspector/node-forms/NavLinksNodeForm.svelte';
   import {
     getHeaderTopBarType,
     headerSupportsCta,
+    headerSupportsNavLinks,
+    getDefaultHeaderNavbarOrder,
+    headerHasRowOrder,
   } from '../sections/header/headerLayout.helpers';
 
   export let section: TemplateSection;
@@ -23,30 +27,57 @@
 
   $: topBarType = getHeaderTopBarType(activePreset);
   $: supportsCta = headerSupportsCta(activePreset);
+  $: supportsNavLinks = headerSupportsNavLinks(activePreset);
   $: isStoreBadge = activePreset === 'store_badge_highlight';
   $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
+
+  $: defaultNavbarOrder = getDefaultHeaderNavbarOrder(activePreset);
+  $: navbarOrder = (
+    Array.isArray(section.props?.navbarOrder) && section.props.navbarOrder.length > 0
+      ? section.props.navbarOrder
+      : defaultNavbarOrder
+  ).filter((s: string) => defaultNavbarOrder.includes(s)) as string[];
+
+  $: hasRows = headerHasRowOrder(activePreset);
+  $: rowOrder = (section.props?.rowOrder as string[]) || (hasRows ? ['announcement_bar', 'navbar'] : ['navbar']);
+  $: showTopBar = (hasRows && rowOrder.includes('announcement_bar') && topBarType !== 'none') || isStoreBadge;
 </script>
 
 <div class="space-y-6">
-  <!-- 1. Konfigurasi Bilah Atas & Lencana Legalitas -->
-  <HeaderTopBarContent
-    {section}
-    {handlePropChange}
-    {topBarType}
-    {isStoreBadge}
-    {showAnnouncement}
-  />
+  <!-- 1. Konfigurasi Bilah Atas & Lencana Legalitas (Hanya jika didukung layout) -->
+  {#if showTopBar}
+    <HeaderTopBarContent
+      {section}
+      {handlePropChange}
+      {topBarType}
+      {isStoreBadge}
+      {showAnnouncement}
+    />
+  {/if}
 
-  <!-- 2. Pengaturan Konten Kategori Mega Menu (Khusus preset mega_menu_dropdown) -->
+  <!-- 2. Logo Brand & Toko -->
+  {#if navbarOrder.includes('logo')}
+    <HeaderLogoContent {section} {handlePropChange} />
+  {/if}
+
+  <!-- 3. Pengaturan Konten Kategori Mega Menu (Khusus preset mega_menu_dropdown) -->
   {#if activePreset === 'mega_menu_dropdown'}
     <HeaderMegaMenuContent {section} {handlePropChange} />
   {/if}
 
-  <!-- 3. Logo Brand & Toko -->
-  <HeaderLogoContent {section} {handlePropChange} />
+  <!-- 4. Menu Navigasi Toko (Ditampilkan jika layout mendukung nav_links) -->
+  {#if supportsNavLinks && navbarOrder.includes('nav_links')}
+    <div class="p-3 bg-base-200/40 rounded-xl border border-base-200">
+      <NavLinksNodeForm
+        {section}
+        onPropChange={handlePropChange}
+        onSectionUpdate={onUpdate}
+      />
+    </div>
+  {/if}
 
-  <!-- 4. Tombol WhatsApp (CTA) - Hanya ditampilkan jika preset mendukung CTA -->
-  {#if supportsCta}
+  <!-- 5. Tombol WhatsApp (CTA) - Hanya ditampilkan jika preset mendukung CTA dan ada di navbarOrder -->
+  {#if supportsCta && navbarOrder.includes('cta')}
     <div class="space-y-3 p-3 bg-base-200/40 rounded-xl border border-base-200">
       <div class="flex items-center gap-1.5 text-xs font-semibold text-base-content">
         <MessageCircle size={14} class="text-emerald-500" />

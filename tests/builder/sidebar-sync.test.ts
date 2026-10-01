@@ -75,7 +75,6 @@ describe('Sidebar Sync (Left LAPISAN vs Right Tata Letak Inspector)', () => {
         'gradient_mesh_glow',
         'interactive_terminal_code',
         'floating_cards_showcase',
-        'oversized_bold_typography',
         'social_proof_community',
         'dual_product_showcase',
         'badge_ticker_split',

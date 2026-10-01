@@ -2,7 +2,7 @@ import type { ComponentType } from 'svelte';
 import {
   Megaphone, Sparkles, CheckCircle, ShoppingBag, MessageSquare, HelpCircle,
   MapPin, Heading, FileText, Image, MousePointerClick,
-  ListFilter, Clock, Package, Star, User, Search, Navigation, Layers,
+  ListFilter, Clock, Package, Star, Search, Navigation, Layers, Flag,
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
@@ -23,6 +23,20 @@ import {
   getEffectiveCatalogElementOrder,
   getCatalogSlotLabel,
 } from '../sections/catalog/catalogLayout.helpers';
+import {
+  getEffectiveTestimonialsElementOrder,
+  getTestimonialsSlotLabel,
+} from '../sections/testimonials/testimonialsLayout.helpers';
+import { DEFAULT_TESTIMONIALS } from '../sections/testimonials/testimonials.helpers';
+import {
+  getEffectiveFaqElementOrder,
+  getFaqSlotLabel,
+} from '../sections/faq/faqLayout.helpers';
+import { DEFAULT_FAQS } from '../sections/faq/faq.helpers';
+import {
+  getEffectiveMapsElementOrder,
+  getMapsSlotLabel,
+} from '../sections/maps/mapsLayout.helpers';
 
 export const sectionTypeLabels: Record<TemplateSection['type'], string> = {
   header_announcement: 'Header & Pengumuman', hero: 'Banner Utama (Hero)', features: 'Fitur & Keunggulan',
@@ -214,83 +228,50 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
     }
     case 'testimonials': {
       const preset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'masonry_grid';
-      const list: LayerNodeItem[] = [{ id: 'testimonials_header', name: 'Judul & Lencana Testimoni', icon: Heading }];
-
-      if (preset === 'logo_client_cloud') {
-        list[0].name = 'Judul Kemitraan';
-        list.push({ id: 'testi_logo_cloud', name: 'Daftar Logo Kemitraan', icon: Image });
-      } else if (preset === 'single_spotlight' || preset === 'chat_bubble_flow') {
-        list[0].name = 'Judul Seksi Testimoni';
-        list.push({ id: 'testi_spotlight_quote', name: 'Kutipan Ulasan Utama', icon: FileText });
-        list.push({ id: 'testi_spotlight_author', name: 'Identitas Pelanggan', icon: User });
-      } else if (preset === 'split_rating_stats') {
-        list.push({ id: 'testi_stats', name: 'Skor Rating Agregat (Kiri)', icon: Star });
-        list.push({ id: 'testi_split_reviews', name: 'Daftar Ulasan Pelanggan (Kanan)', icon: MessageSquare });
-      } else if (preset === 'infinite_marquee_scroll' || preset === 'carousel_slider') {
-        list[0].name = 'Judul Seksi Testimoni';
-        list.push({ id: 'testi_slider_track', name: 'Alur Slider Ulasan', icon: Sparkles });
-      } else {
-        const items = Array.isArray(section.props?.testimonials) && section.props.testimonials.length > 0
-          ? (section.props.testimonials as TestimonialItem[])
-          : [{ customerName: 'Ulasan #1' }, { customerName: 'Ulasan #2' }, { customerName: 'Ulasan #3' }];
-        items.slice(0, 4).forEach((item: Partial<TestimonialItem>, idx: number) => {
-          list.push({ id: `testi_item_${idx}`, name: item?.customerName ? `${item.customerName}` : `Kartu Ulasan #${idx + 1}`, icon: MessageSquare });
-        });
+      const rawTestis = (Array.isArray(section.props?.testimonials) && section.props.testimonials.length > 0 ? (section.props.testimonials as TestimonialItem[]) : DEFAULT_TESTIMONIALS) as TestimonialItem[];
+      const elementOrder = getEffectiveTestimonialsElementOrder(preset, section.props?.elementOrder, rawTestis, (section.props?.testimonialsPreset as string) || (section.props?.layoutPreset as string) || (section.layoutPreset as string));
+      const TESTI_ICONS: Record<string, ComponentType> = { badge: Sparkles, title: Heading, subtitle: FileText, testi_stats: Star, testi_slider_track: Sparkles, testi_logo_cloud: Image };
+      const list: LayerNodeItem[] = [];
+      for (const slot of elementOrder) {
+        list.push({ id: slot, name: getTestimonialsSlotLabel(slot, preset, rawTestis), icon: slot.startsWith('testi_item_') ? MessageSquare : (TESTI_ICONS[slot] || Sparkles) });
       }
       return list;
     }
     case 'faq': {
       const preset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'accordion_single_col';
+      const rawFaqs = (Array.isArray(section.props?.faqs) && section.props.faqs.length > 0 ? (section.props.faqs as FAQItem[]) : DEFAULT_FAQS) as FAQItem[];
+      const elementOrder = getEffectiveFaqElementOrder(preset, section.props?.elementOrder, rawFaqs);
+      const FAQ_ICONS: Record<string, ComponentType> = { badge: Sparkles, title: Heading, subtitle: FileText, faq_cs_card: MessageSquare, faq_search_bar: Search, faq_tabs: ListFilter };
       const list: LayerNodeItem[] = [];
-
-      if (preset === 'split_faq_sidebar') {
-        list.push({ id: 'faq_cs_card', name: 'Kartu Bantuan CS (Kiri)', icon: MessageSquare });
-      } else if (preset === 'search_filtered_faq') {
-        list.push({ id: 'faq_header', name: 'Judul Pusat Informasi', icon: Heading });
-        list.push({ id: 'faq_search_bar', name: 'Bilah Pencarian Tanya Jawab', icon: Search });
-      } else if (preset === 'categorized_tabs_faq') {
-        list.push({ id: 'faq_header', name: 'Judul Kategori Bantuan', icon: Heading });
-        list.push({ id: 'faq_tabs', name: 'Tab Kategori Pertanyaan', icon: ListFilter });
-      } else {
-        const headerName = preset === 'chat_style_faq' ? 'Judul Percakapan' : preset === 'floating_help_center' ? 'Judul Pusat Informasi' : 'Judul & Deskripsi FAQ';
-        list.push({ id: 'faq_header', name: headerName, icon: Heading });
+      for (const slot of elementOrder) {
+        list.push({ id: slot, name: getFaqSlotLabel(slot, preset, rawFaqs), icon: (slot.startsWith('faq_item_') || slot.startsWith('item_')) ? HelpCircle : (FAQ_ICONS[slot] || Sparkles) });
       }
-
-      const items = Array.isArray(section.props?.faqs) && section.props.faqs.length > 0
-        ? (section.props.faqs as FAQItem[])
-        : [{ question: 'Tanya Jawab #1' }, { question: 'Tanya Jawab #2' }, { question: 'Tanya Jawab #3' }];
-
-      const itemLabel = preset === 'floating_help_center' ? 'Kotak Bantuan' : preset === 'chat_style_faq' ? 'Dialog Q&A' : 'Tanya Jawab';
-      items.slice(0, 4).forEach((item: Partial<FAQItem>, idx: number) => {
-        list.push({ id: `faq_item_${idx}`, name: item?.question ? `${item.question}` : `${itemLabel} #${idx + 1}`, icon: HelpCircle });
-      });
       return list;
     }
     case 'google_maps': {
       const preset = (section.layoutPreset as string) || (section.props?.layoutPreset as string) || (section.styles?.layoutPreset as string) || 'fullwidth_map';
-      if (preset === 'split_map_info' || preset === 'two_column_directions') {
-        const title = preset === 'two_column_directions' ? 'Panduan Rute (Kiri)' : 'Kartu Info Detail (Kiri)';
-        return [{ id: 'maps_info_card', name: title, icon: MapPin }, { id: 'maps_iframe', name: 'Bingkai Peta Interaktif (Kanan)', icon: Image }];
+      const branchMode = (section.props?.branchMode as string) || (preset === 'multi_branch_tabs' ? 'multi' : 'single');
+      const elementOrder = getEffectiveMapsElementOrder(preset, section.props?.elementOrder, branchMode);
+      const MAPS_ICONS: Record<string, ComponentType> = {
+        badge: Sparkles,
+        title: Heading,
+        subtitle: FileText,
+        maps_branch_selector: ListFilter,
+        maps_iframe: Image,
+        maps_info_card: MapPin,
+        maps_cta_button: Navigation,
+        maps_hours_card: Clock,
+        maps_directions_card: Flag,
+      };
+      const list: LayerNodeItem[] = [];
+      for (const slot of elementOrder) {
+        list.push({
+          id: slot,
+          name: getMapsSlotLabel(slot, preset),
+          icon: MAPS_ICONS[slot] || MapPin,
+        });
       }
-      if (preset === 'store_hours_highlight' || preset === 'interactive_route_finder') {
-        const head = preset === 'store_hours_highlight' ? { id: 'maps_hours_badge', name: 'Bilah Status Jam Buka', icon: Clock } : { id: 'maps_header', name: 'Judul Lokasi', icon: Heading };
-        return [head, { id: 'maps_iframe', name: 'Bingkai Peta', icon: Image }, { id: 'maps_cta_button', name: 'Tombol Navigasi Google Maps', icon: Navigation }];
-      }
-      if (preset === 'minimal_framed_map' || preset === 'compact_boxed') {
-        return [{ id: 'maps_header', name: 'Judul Lokasi', icon: Heading }, { id: 'maps_iframe', name: 'Bingkai Peta Bersih', icon: Image }];
-      }
-      if (preset === 'multi_branch_tabs') {
-        return [
-          { id: 'maps_branch_tabs', name: 'Bilah Tab Cabang Gerai', icon: ListFilter },
-          { id: 'maps_info_card', name: 'Detail Alamat Cabang Aktif', icon: MapPin },
-          { id: 'maps_iframe', name: 'Bingkai Peta Cabang', icon: Image },
-        ];
-      }
-      return [
-        { id: 'maps_header', name: 'Judul & Lencana Lokasi', icon: Heading },
-        { id: 'maps_iframe', name: 'Bingkai Peta Utama', icon: Image },
-        { id: 'maps_info_card', name: 'Kartu Informasi Melayang', icon: MapPin },
-      ];
+      return list;
     }
     case 'footer':
       return getFooterLayerNodes(section);

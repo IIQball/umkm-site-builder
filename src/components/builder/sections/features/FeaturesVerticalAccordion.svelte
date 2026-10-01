@@ -2,6 +2,7 @@
   import type { FeatureItem } from '@/types';
   import { ChevronDown } from 'lucide-svelte';
   import { resolveFeatureIcon } from './featureIcons';
+  import { resolveFeatureItemStyle } from './featureStyles.helpers';
   import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
   import { isFeaturesVisualOnLeft } from './featuresLayout.helpers';
 
@@ -10,9 +11,10 @@
   export let subtitle: string = 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga higienitas dan mutu rasa.';
   export let items: FeatureItem[] = [];
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'accordion_list', 'image'];
-  export let mainImageUrl: string = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop&q=80'
+  export let mainImageUrl: string = 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800&auto=format&fit=crop&q=80';
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   let activeIdx: number = 0;
 
@@ -60,6 +62,7 @@
             {activeNodeId}
             {selectNode}
             {elementOrder}
+            {nodeStyles}
             align="left"
             maxWidthClass="max-w-none"
           />
@@ -70,6 +73,7 @@
             {#each items as item, index (item.id || item.title + index)}
             {@const isExpanded = activeIdx === index}
             {@const isItemActive = activeNodeId === `feature_item_${index}`}
+            {@const itemStyle = resolveFeatureItemStyle(item, index, nodeStyles)}
             <div
               data-node="feature_card"
               role="button"
@@ -86,7 +90,7 @@
               style="border-radius: var(--btn-radius, 16px);"
             >
               <h3 data-node="feature_title" class="feature-item-title-compact font-heading flex items-center justify-between gap-4">
-                <span class="flex items-center gap-2.5 min-w-0 {isExpanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-main)]'}">
+                <span class="flex items-center gap-2.5 min-w-0 {isExpanded ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-main)]'}" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
                   <span
                     data-node="feature_icon"
                     class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border"

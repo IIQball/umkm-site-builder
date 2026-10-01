@@ -3,7 +3,6 @@
   import { Button } from '@/components/ui';
   import { makeHandlePropChange } from './content.helpers';
   import HeroImageUploadContent from './hero/HeroImageUploadContent.svelte';
-  import HeroImageStyleSettings from './hero/HeroImageStyleSettings.svelte';
   import HeroCtaLinkSelect from './hero/HeroCtaLinkSelect.svelte';
   import SearchableIconDropdown from '../inspector/SearchableIconDropdown.svelte';
   import {
@@ -14,7 +13,7 @@
     supportsHeroImage,
     supportsHeroCta,
     supportsHeroBadge,
-    isHeroNonBackgroundImage,
+    getEffectiveHeroElementOrder,
   } from '../sections/hero/heroLayout.helpers';
 
   import HeroTrustBadgesContent from './hero/HeroTrustBadgesContent.svelte';
@@ -36,16 +35,19 @@
     section.layoutPreset ||
     'split_left_text';
 
-  $: supportsImage = supportsHeroImage(preset);
-  $: isNonBgImage = isHeroNonBackgroundImage(preset);
-  $: supportsCta = supportsHeroCta(preset);
-  $: supportsBadge = supportsHeroBadge(preset);
+  $: elementOrder = getEffectiveHeroElementOrder(
+    preset,
+    section.props?.elementOrder,
+    section.props?.heroPreset as string
+  );
+
+  $: supportsImage = supportsHeroImage(preset) && elementOrder.includes('image');
+  $: supportsCta = supportsHeroCta(preset) && elementOrder.includes('cta');
+  $: supportsBadge = supportsHeroBadge(preset) && elementOrder.includes('badge');
 
   $: subtitle = (section.props?.subtitle as string) ?? '';
   $: imageUrl = (section.props?.imageUrl as string) ?? '';
   $: badgeIcon = (section.props?.badgeIcon as string) ?? '';
-  $: imageFrame = (section.props?.imageFrame as string) ?? 'none';
-  $: imageShape = (section.props?.imageShape as string) ?? 'rounded';
 </script>
 
 <div class="space-y-4">
@@ -75,34 +77,38 @@
   {/if}
 
   <!-- Judul Utama (H1) -->
-  <div>
-    <label for="hero-title" class="block font-semibold text-xs text-base-content/80 mb-1">
-      Judul Utama (H1)
-    </label>
-    <input
-      id="hero-title"
-      type="text"
-      value={stripEmoji(section.props?.title ?? '')}
-      on:input={(e) => handlePropChange('title', stripEmoji(e.currentTarget.value))}
-      class="input input-bordered input-sm w-full"
-      placeholder="Selamat datang di toko kami"
-    />
-  </div>
+  {#if elementOrder.includes('title')}
+    <div>
+      <label for="hero-title" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Judul Utama (H1)
+      </label>
+      <input
+        id="hero-title"
+        type="text"
+        value={stripEmoji(section.props?.title ?? '')}
+        on:input={(e) => handlePropChange('title', stripEmoji(e.currentTarget.value))}
+        class="input input-bordered input-sm w-full"
+        placeholder="Selamat datang di toko kami"
+      />
+    </div>
+  {/if}
 
   <!-- Subjudul & Deskripsi -->
-  <div>
-    <label for="hero-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">
-      Subjudul & Deskripsi
-    </label>
-    <textarea
-      id="hero-subtitle"
-      value={stripEmoji(subtitle)}
-      on:input={(e) => handlePropChange('subtitle', stripEmoji(e.currentTarget.value))}
-      rows="2"
-      class="textarea textarea-bordered textarea-sm w-full resize-y"
-      placeholder="Produk berkualitas dengan harga terjangkau dan pelayanan terpercaya."
-    ></textarea>
-  </div>
+  {#if elementOrder.includes('subtitle')}
+    <div>
+      <label for="hero-subtitle" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Subjudul & Deskripsi
+      </label>
+      <textarea
+        id="hero-subtitle"
+        value={stripEmoji(subtitle)}
+        on:input={(e) => handlePropChange('subtitle', stripEmoji(e.currentTarget.value))}
+        rows="2"
+        class="textarea textarea-bordered textarea-sm w-full resize-y"
+        placeholder="Produk berkualitas dengan harga terjangkau dan pelayanan terpercaya."
+      ></textarea>
+    </div>
+  {/if}
 
   <!-- Panel Upload Gambar Spanduk / Background - Hanya jika didukung layout -->
   {#if supportsImage}
@@ -111,13 +117,6 @@
         {imageUrl}
         onPropChange={handlePropChange}
       />
-      {#if isNonBgImage}
-        <HeroImageStyleSettings
-          {imageFrame}
-          {imageShape}
-          onPropChange={handlePropChange}
-        />
-      {/if}
     </div>
   {/if}
 
@@ -203,6 +202,8 @@
     <HeroCustomCardContent
       {preset}
       stickerText={(section.props?.stickerText as string) || 'PROMO TERBATAS!'}
+      badgeBgColor={(section.props?.badgeBgColor as string) || ''}
+      cardBgColor={(section.props?.cardBgColor as string) || ''}
       contrastCardBg={(section.props?.contrastCardBg as string) || 'slate-950'}
       contrastBadgeText={(section.props?.contrastBadgeText as string) || 'Pendaftaran Terbatas'}
       contrastTitleText={(section.props?.contrastTitleText as string) || 'Kuota Tersisa 4 Peserta'}

@@ -1,6 +1,8 @@
 <script lang="ts">
   export let preset: string = '';
   export let stickerText: string = 'PROMO TERBATAS!';
+  export let badgeBgColor: string = '';
+  export let cardBgColor: string = '';
   export let contrastCardBg: string = 'slate-950';
   export let contrastBadgeText: string = 'Pendaftaran Terbatas';
   export let contrastTitleText: string = 'Kuota Tersisa 4 Peserta';
@@ -26,18 +28,64 @@
 </script>
 
 {#if preset === 'sticker_badge_playful'}
-  <div class="space-y-2 pt-3 border-t border-base-300">
-    <label for="sticker-text" class="block font-semibold text-xs text-base-content/80 mb-0.5">
-      Teks Stiker Promo Melayang
-    </label>
-    <input
-      id="sticker-text"
-      type="text"
-      value={stickerText}
-      on:input={(e) => onPropChange('stickerText', e.currentTarget.value)}
-      class="input input-bordered input-xs w-full font-bold"
-      placeholder="PROMO TERBATAS!"
-    />
+  <div class="space-y-3 pt-3 border-t border-base-300">
+    <div class="space-y-1">
+      <label for="sticker-text" class="block font-semibold text-xs text-base-content/80 mb-0.5">
+        Teks Stiker Promo Melayang
+      </label>
+      <input
+        id="sticker-text"
+        type="text"
+        value={stickerText}
+        on:input={(e) => onPropChange('stickerText', e.currentTarget.value)}
+        class="input input-bordered input-xs w-full font-bold"
+        placeholder="PROMO TERBATAS!"
+      />
+    </div>
+
+    <div class="space-y-1">
+      <label for="sticker-badge-bg" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Warna Background Badge Stiker (Default: Secondary)
+      </label>
+      <div class="flex items-center gap-2">
+        <input
+          id="sticker-badge-bg"
+          type="color"
+          value={badgeBgColor || '#fbbf24'}
+          on:input={(e) => onPropChange('badgeBgColor', e.currentTarget.value)}
+          class="w-7 h-7 rounded border border-base-300 cursor-pointer bg-transparent"
+        />
+        <input
+          type="text"
+          value={badgeBgColor || '#fbbf24'}
+          on:input={(e) => onPropChange('badgeBgColor', e.currentTarget.value)}
+          class="flex-1 px-2.5 py-1 bg-base-200/50 border border-base-300 rounded text-xs font-mono uppercase"
+          placeholder="#fbbf24"
+        />
+      </div>
+    </div>
+
+    <div class="space-y-1">
+      <label for="hero-card-bg" class="block font-semibold text-xs text-base-content/80 mb-1">
+        Warna Background Card Hero
+      </label>
+      <div class="flex items-center gap-2">
+        <input
+          id="hero-card-bg"
+          type="color"
+          value={cardBgColor || '#f8fafc'}
+          on:input={(e) => onPropChange('cardBgColor', e.currentTarget.value)}
+          class="w-7 h-7 rounded border border-base-300 cursor-pointer bg-transparent"
+        />
+        <input
+          type="text"
+          value={cardBgColor || '#f8fafc'}
+          on:input={(e) => onPropChange('cardBgColor', e.currentTarget.value)}
+          class="flex-1 px-2.5 py-1 bg-base-200/50 border border-base-300 rounded text-xs font-mono uppercase"
+          placeholder="#f8fafc"
+        />
+      </div>
+    </div>
   </div>
 {:else if preset === 'dual_contrast_split'}
   <div class="space-y-3 pt-3 border-t border-base-300">

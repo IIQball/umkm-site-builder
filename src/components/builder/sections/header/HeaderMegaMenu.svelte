@@ -4,7 +4,13 @@
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
-  import { navigateToSection } from './headerNav.helpers';
+  import {
+    navigateToSection,
+    resolveNavFontSize,
+    resolveColorTokenMatch,
+    NAV_COLOR_TOKENS,
+    NAV_HOVER_COLOR_TOKENS,
+  } from './headerNav.helpers';
 
   export let props: HeaderAnnouncementProps = {};
   export let sectionId: string = '';
@@ -22,6 +28,13 @@
   $: hasLogo = navbarOrder.includes('logo');
   $: hasNav = navbarOrder.includes('nav_links');
   $: hasCta = navbarOrder.includes('cta');
+
+  $: navColorVal = (props.navColor as string) || NAV_COLOR_TOKENS[0].value;
+  $: navHoverColorVal = (props.navHoverColor as string) || NAV_HOVER_COLOR_TOKENS[0].value;
+  $: activeNavColor = resolveColorTokenMatch(navColorVal, NAV_COLOR_TOKENS, NAV_COLOR_TOKENS[0].value);
+  $: activeNavHoverColor = resolveColorTokenMatch(navHoverColorVal, NAV_HOVER_COLOR_TOKENS, NAV_HOVER_COLOR_TOKENS[0].value);
+  $: activeFontSize = resolveNavFontSize(props.navTypographyToken as string);
+  $: activeTextTransform = props.navTextTransform || 'none';
 
   let showMegaMenu = false;
 
@@ -65,8 +78,8 @@
         <button
           type="button"
           on:click={() => (showMegaMenu = !showMegaMenu)}
-          style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
-          class="flex items-center gap-1 hover:text-[var(--theme-primary,var(--color-primary))] cursor-pointer py-2 transition-colors"
+          style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform}; color: {activeNavColor}; font-size: {activeFontSize}; text-transform: {activeTextTransform}; font-family: var(--theme-font-body, inherit);"
+          class="builder-header-nav-link flex items-center gap-1 cursor-pointer py-2 transition-colors"
         >
           <span>Kategori Produk</span>
           <ChevronDown size={14} class={`transition-transform duration-150 ${showMegaMenu ? 'rotate-180 text-[var(--theme-primary,var(--color-primary))]' : ''}`} />
@@ -90,11 +103,11 @@
                   navigateToSection(e, cat.href || '#produk');
                 }}
                 style="border-radius: calc(var(--theme-btn-radius, var(--btn-radius, 8px)) * 0.75);"
-                class="p-2.5 hover:bg-[var(--color-nested-base)] transition-colors block cursor-pointer"
+                class="p-2.5 hover:bg-[var(--color-nested-base)] transition-colors block cursor-pointer group/cat"
               >
                 <span
-                  style="font-family: var(--theme-font-heading, inherit); color: var(--theme-text-primary, var(--color-text-main)); font-size: var(--theme-text-caption, 12px); font-weight: var(--text-h3-weight, 600);"
-                  class="block"
+                  style="font-family: var(--theme-font-heading, inherit); color: {activeNavColor}; font-size: {activeFontSize}; text-transform: {activeTextTransform}; font-weight: var(--text-h3-weight, 600);"
+                  class="block transition-colors group-hover/cat:text-[var(--theme-primary,var(--color-primary))]"
                 >{cat.name}</span>
                 {#if cat.description}
                   <span
@@ -112,8 +125,8 @@
         <a
           href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
           on:click={(e) => navigateToSection(e, link)}
-          style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); font-weight: var(--text-body-weight, 500); color: var(--theme-text-primary, var(--color-text-main)); font-family: var(--theme-font-body, inherit);"
-          class="hover:text-[var(--theme-primary,var(--color-primary))] transition-colors cursor-pointer"
+          style="--nav-item-color: {activeNavColor}; --nav-item-hover-color: {activeNavHoverColor}; --nav-item-size: {activeFontSize}; --nav-item-transform: {activeTextTransform};"
+          class="builder-header-nav-link transition-colors cursor-pointer"
         >
           {link}
         </a>
@@ -150,3 +163,17 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .builder-header-nav-link {
+    color: var(--nav-item-color);
+    font-size: var(--nav-item-size);
+    font-weight: 500;
+    font-family: var(--theme-font-body, var(--font-family, inherit));
+    text-transform: var(--nav-item-transform, none);
+    transition: color 0.15s ease, opacity 0.15s ease;
+  }
+  .builder-header-nav-link:hover {
+    color: var(--nav-item-hover-color) !important;
+  }
+</style>

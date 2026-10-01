@@ -1,16 +1,5 @@
-import type { ComponentType } from 'svelte';
-import {
-  MessageSquare,
-  MapPin,
-  ListFilter,
-  FileText,
-  Sparkles,
-  Clock,
-  Send,
-  Share2,
-} from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
-import type { LayerNodeItem, FooterMenuLink, FooterSocialLink } from '@/types';
+import type { FooterMenuLink, FooterSocialLink } from '@/types';
 import { normalizeWhatsAppNumber, getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const DEFAULT_BRAND_NAME = 'Warung Berkah';
@@ -84,69 +73,35 @@ export function formatCopyrightText(customText?: string, storeName?: string): st
   return `© ${year} ${name}. Seluruh Hak Cipta Dilindungi.`;
 }
 
-export function getFooterLayerNodes(section: TemplateSection): LayerNodeItem[] {
-  const preset =
-    (section.layoutPreset as string) ||
-    (section.props?.layoutPreset as string) ||
-    (section.styles?.layoutPreset as string) ||
-    'multi_column';
-
-  switch (preset) {
-    case 'centered_simple':
-    case 'minimal_single_row':
-    case 'giant_wordmark':
-      return [
-        { id: 'footer_brand', name: 'Identitas Toko', icon: Sparkles as unknown as ComponentType },
-        { id: 'footer_contact', name: 'Tautan Sosial / Tombol Kontak', icon: MessageSquare as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Hak Cipta / Wordmark', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'cta_focused':
-      return [
-        { id: 'footer_floating_cta', name: 'Banner Floating CTA', icon: Sparkles as unknown as ComponentType },
-        { id: 'footer_contact', name: 'Ringkasan Alamat & Kontak', icon: MapPin as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'newsletter_centric':
-      return [
-        { id: 'footer_newsletter', name: 'Form Langganan Promo WA', icon: Send as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'live_status_badge':
-      return [
-        { id: 'footer_status_badge', name: 'Bilah Status Operasional Toko', icon: Clock as unknown as ComponentType },
-        { id: 'footer_contact', name: 'Tombol Chat Cepat', icon: MessageSquare as unknown as ComponentType },
-      ];
-
-    case 'split_map_footer':
-      return [
-        { id: 'footer_contact', name: 'Informasi Kontak Toko (Kiri)', icon: MapPin as unknown as ComponentType },
-        { id: 'footer_mini_map', name: 'Frame Peta Mini (Kanan)', icon: MapPin as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'social_links_grid':
-      return [
-        { id: 'footer_socials', name: 'Judul & Ubin Media Sosial', icon: Share2 as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'boxed_card_footer':
-      return [
-        { id: 'footer_brand', name: 'Identitas Toko & Kartu Resmi', icon: Sparkles as unknown as ComponentType },
-        { id: 'footer_contact', name: 'Grup Tombol Aksi', icon: MessageSquare as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-
-    case 'multi_column':
-    default:
-      return [
-        { id: 'footer_brand', name: 'Profil & Deskripsi Toko', icon: Sparkles as unknown as ComponentType },
-        { id: 'footer_contact', name: 'Kontak & Alamat', icon: MapPin as unknown as ComponentType },
-        { id: 'footer_navigation', name: 'Navigasi Menu Cepat', icon: ListFilter as unknown as ComponentType },
-        { id: 'footer_copyright', name: 'Baris Hak Cipta', icon: FileText as unknown as ComponentType },
-      ];
-  }
+export interface FooterAttributionOptions {
+  store?: {
+    id?: string;
+    registeredBy?: string | null;
+    managedByAdmin?: { name: string } | null;
+    registrar?: { name: string } | null;
+  } | null;
+  designerAdminName?: string;
+  isLiveStorefront?: boolean;
 }
+
+export function formatAttributionText(options: FooterAttributionOptions = {}): string {
+  const { store, designerAdminName, isLiveStorefront } = options;
+  if (isLiveStorefront || store?.id) {
+    const adminName = store?.managedByAdmin?.name || store?.registrar?.name;
+    if (adminName && adminName.trim()) {
+      return `Powered by Pinoka | Didampingi oleh ${adminName.trim()}`;
+    }
+    return 'Powered by Pinoka';
+  }
+
+  const previewAdmin = designerAdminName !== undefined && designerAdminName !== null
+    ? designerAdminName.trim()
+    : 'Admin Pendamping';
+
+  if (!previewAdmin) {
+    return 'Powered by Pinoka';
+  }
+  return `Powered by Pinoka | Didampingi oleh ${previewAdmin}`;
+}
+
+export { getFooterLayerNodes } from './footerLayout.helpers';

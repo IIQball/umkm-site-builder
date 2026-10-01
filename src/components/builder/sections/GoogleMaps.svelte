@@ -12,6 +12,7 @@
     buildWhatsAppHelpLink,
     type MapBranchItem,
   } from './maps/maps.helpers';
+  import { getEffectiveMapsElementOrder } from './maps/mapsLayout.helpers';
   import MapsHeader from './maps/MapsHeader.svelte';
   import MapsFullwidth from './maps/MapsFullwidth.svelte';
   import MapsSplitInfo from './maps/MapsSplitInfo.svelte';
@@ -39,18 +40,22 @@
     longitude?: number | null;
   } | null = null;
 
+  let activeBranchIdx = 0;
+
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'fullwidth_map';
+  $: branchMode = ((props?.branchMode as string) || (activePreset === 'multi_branch_tabs' ? 'multi' : 'single')) as 'single' | 'multi';
 
   // Dual-mode data: Tenant DB vs Designer props
   $: rawAddress = store?.address || props?.address || DEFAULT_MAP_ADDRESS;
   $: rawGoogleMapsUrl = store?.googleMapsUrl || props?.googleMapsUrl || '';
   $: rawGoogleMapsEmbedUrl = store?.googleMapsEmbedUrl || (props?.googleMapsEmbedUrl as string) || '';
   $: rawWaNumber = store?.waNumber || props?.whatsappNumber || '';
-  $: storeName = store?.name || (props?.markerTitle as string) || (props?.storeName as string) || DEFAULT_STORE_NAME;
+  $: baseStoreName = store?.name || (props?.markerTitle as string) || (props?.storeName as string) || DEFAULT_STORE_NAME;
   $: lat = store?.latitude ?? (typeof props?.latitude === 'number' ? props.latitude : null);
   $: lng = store?.longitude ?? (typeof props?.longitude === 'number' ? props.longitude : null);
 
-  $: badge = (props?.badge as string) ?? 'Lokasi Gerai Fisik';
+  $: badge = (props?.badgeText as string) || (props?.badge as string) || 'Lokasi Gerai Fisik';
+  $: badgeIcon = (props?.badgeIcon as string) || 'MapPin';
   $: title = (props?.title as string) || DEFAULT_MAP_TITLE;
   $: subtitle = (props?.subtitle as string) ?? '';
   $: storeHours = (props?.storeHours as string) || DEFAULT_STORE_HOURS;
@@ -60,42 +65,61 @@
   $: directionsParking = (props?.directionsParking as string) || 'Lahan parkir aman memuat mobil dan motor dengan pengawasan juru parkir resmi.';
   $: mapHeight = (props?.mapHeight as string) || '380px';
   $: zoom = typeof props?.zoom === 'number' ? props.zoom : 15;
+  $: ctaText = (props?.ctaText as string) || '';
+  $: ctaIcon = (props?.ctaIcon as string) || 'Navigation';
+  $: nodeStyles = ((props?.nodeStyles || styles?.nodeStyles || {}) as unknown) as Record<string, Record<string, string>>;
 
   $: branches = (Array.isArray(props?.branches) && props.branches.length > 0
     ? props.branches
     : DEFAULT_BRANCHES) as MapBranchItem[];
 
-  // Priority hierarchy for embed URL:
-  // 1. Direct embed URL provided
-  // 2. buildMapEmbedUrl using coordinates (lat, lng), URL, or clean address
+  $: safeBranchIdx = activeBranchIdx >= branches.length ? 0 : activeBranchIdx;
+  $: activeBranch = branches[safeBranchIdx] || branches[0];
+
+  $: isMulti = branchMode === 'multi';
+  $: effectiveStoreName = isMulti && activeBranch?.name ? activeBranch.name : baseStoreName;
+  $: effectiveAddress = isMulti && activeBranch?.address ? activeBranch.address : rawAddress;
+  $: effectiveGoogleMapsUrl = isMulti && activeBranch?.googleMapsUrl ? activeBranch.googleMapsUrl : rawGoogleMapsUrl;
+
   $: mapEmbedUrl = (() => {
-    if (rawGoogleMapsEmbedUrl && rawGoogleMapsEmbedUrl.includes('output=embed')) {
+    if (!isMulti && rawGoogleMapsEmbedUrl && rawGoogleMapsEmbedUrl.includes('output=embed')) {
       return rawGoogleMapsEmbedUrl;
     }
-    return buildMapEmbedUrl(rawGoogleMapsUrl || rawAddress, zoom, lat, lng, storeName, rawAddress);
+    return buildMapEmbedUrl(effectiveGoogleMapsUrl || effectiveAddress, zoom, lat, lng, effectiveStoreName, effectiveAddress);
   })();
-  $: directMapsUrl = buildDirectMapsUrl(rawGoogleMapsUrl || rawAddress, lat, lng);
+
+  $: directMapsUrl = buildDirectMapsUrl(effectiveGoogleMapsUrl || effectiveAddress, lat, lng);
   $: whatsappUrl = buildWhatsAppHelpLink(rawWaNumber);
-
-  // Preset 3 and 8 handle their own minimal titles
-  $: showHeader = activePreset !== 'compact_boxed' && activePreset !== 'minimal_framed_map';
-
-  $: defaultOrder = ['badge', 'title', 'subtitle', 'map_view'];
-  $: effectiveOrder = (Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-    ? props.elementOrder
-    : defaultOrder) as string[];
+  $: effectiveOrder = getEffectiveMapsElementOrder(activePreset, props?.elementOrder, branchMode);
+  $: showHeader =
+    activePreset !== 'compact_boxed' &&
+    activePreset !== 'minimal_framed_map' &&
+    (!effectiveOrder.length ||
+      effectiveOrder.includes('badge') ||
+      effectiveOrder.includes('maps_badge') ||
+      effectiveOrder.includes('title') ||
+      effectiveOrder.includes('maps_title') ||
+      effectiveOrder.includes('subtitle') ||
+      effectiveOrder.includes('maps_subtitle'));
 
   const getSlotOrder = (slot: string) => {
     const idx = effectiveOrder.indexOf(slot);
     return idx === -1 ? 99 : idx;
   };
 
-  $: headerMinOrder = Math.min(
-    getSlotOrder('badge'),
-    getSlotOrder('title'),
-    getSlotOrder('subtitle')
+  $: headerMinOrder = Math.min(getSlotOrder('badge'), getSlotOrder('title'), getSlotOrder('subtitle'));
+  $: bodyOrder = Math.min(
+    getSlotOrder('maps_branch_selector'),
+    getSlotOrder('maps_iframe'),
+    getSlotOrder('maps_info_card'),
+    getSlotOrder('maps_cta_button'),
+    getSlotOrder('maps_hours_card'),
+    getSlotOrder('maps_directions_card')
   );
-  $: mapOrder = getSlotOrder('map_view');
+
+  function handleSelectBranch(idx: number) {
+    activeBranchIdx = idx;
+  }
 </script>
 
 <section
@@ -109,94 +133,93 @@
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col">
     {#if showHeader}
       <div style="order: {headerMinOrder};" class="w-full">
-        <MapsHeader {sectionId} {badge} {title} {subtitle} elementOrder={effectiveOrder} />
+        <MapsHeader
+          {sectionId}
+          {badge}
+          badgeText={badge}
+          {badgeIcon}
+          {title}
+          {subtitle}
+          elementOrder={effectiveOrder}
+          {nodeStyles}
+          {isActive}
+        />
       </div>
     {/if}
 
-    <div style="order: {mapOrder};" class="w-full">
+    <div style="order: {bodyOrder};" class="w-full">
       {#if activePreset === 'split_map_info'}
         <MapsSplitInfo
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          {whatsappUrl}
-          {storeName}
-          address={rawAddress}
-          {storeHours}
-          {facilities}
+          {sectionId} {mapEmbedUrl} {directMapsUrl} {whatsappUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {storeHours} {facilities} {branchMode} {branches}
+          activeBranchIdx={safeBranchIdx} onSelectBranch={handleSelectBranch}
+          {ctaText} {ctaIcon} {nodeStyles} elementOrder={effectiveOrder}
         />
       {:else if activePreset === 'compact_boxed'}
         <MapsCompactBoxed
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          {storeName}
-          address={rawAddress}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {branchMode} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else if activePreset === 'floating_address_card'}
         <MapsFloatingCard
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          {storeName}
-          address={rawAddress}
-          {facilities}
-          {mapHeight}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {facilities} {mapHeight} {branchMode} {branches}
+          activeBranchIdx={safeBranchIdx} onSelectBranch={handleSelectBranch}
+          {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else if activePreset === 'two_column_directions'}
         <MapsTwoColumnDirections
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          title={storeName}
-          {directionsLandmark}
-          {directionsParking}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          title={effectiveStoreName} {directionsLandmark} {directionsParking}
+          {branchMode} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else if activePreset === 'store_hours_highlight'}
         <MapsStoreHours
-          {sectionId}
-          {mapEmbedUrl}
-          {whatsappUrl}
-          {storeHoursStatus}
-          {storeHours}
+          {sectionId} {mapEmbedUrl} {whatsappUrl}
+          {storeHoursStatus} {storeHours} {branchMode} {branches}
+          activeBranchIdx={safeBranchIdx} onSelectBranch={handleSelectBranch}
+          {nodeStyles}
         />
       {:else if activePreset === 'interactive_route_finder'}
         <MapsRouteFinder
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          {branchMode} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else if activePreset === 'minimal_framed_map'}
         <MapsMinimalFramed
-          {sectionId}
-          {mapEmbedUrl}
-          {storeName}
-          address={rawAddress}
+          {sectionId} {mapEmbedUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {branchMode} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {nodeStyles}
         />
       {:else if activePreset === 'multi_branch_tabs'}
         <MapsMultiBranch
-          {sectionId}
-          {branches}
+          {sectionId} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {mapEmbedUrl} {directMapsUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else if activePreset === 'card_overlay_bottom'}
         <MapsCardOverlay
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          {storeName}
-          {storeHours}
-          {mapHeight}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          storeName={effectiveStoreName} {storeHours} {mapHeight}
+          {branchMode} {branches} activeBranchIdx={safeBranchIdx}
+          onSelectBranch={handleSelectBranch} {ctaText} {ctaIcon} {nodeStyles}
         />
       {:else}
         <!-- Preset 1 (Default): fullwidth_map -->
         <MapsFullwidth
-          {sectionId}
-          {mapEmbedUrl}
-          {directMapsUrl}
-          {storeName}
-          address={rawAddress}
-          {storeHoursStatus}
-          {mapHeight}
+          {sectionId} {mapEmbedUrl} {directMapsUrl}
+          storeName={effectiveStoreName} address={effectiveAddress}
+          {storeHoursStatus} {mapHeight} {branchMode} {branches}
+          activeBranchIdx={safeBranchIdx} onSelectBranch={handleSelectBranch}
+          {ctaText} {ctaIcon} {nodeStyles} elementOrder={effectiveOrder}
         />
       {/if}
     </div>

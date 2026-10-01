@@ -1,13 +1,15 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
   import { ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah } from '../productCatalog.helpers';
+  import { resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
   export let buyButtonText: string = 'Beli';
   export let cartButtonText: string = 'Keranjang';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -33,6 +35,10 @@
     {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
     {@const aspectClass = aspectRatios[index % aspectRatios.length]}
+    {@const pStyle = resolveProductNodeStyle(product, index, nodeStyles)}
+    {@const currentPrice = Number(product.price ?? 0)}
+    {@const originalPrice = Number(product.originalPrice) || (product.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+    {@const hasDiscount = (product.showOriginalPrice === true || (product.showOriginalPrice !== false && !!product.originalPrice && Number(product.originalPrice) > currentPrice)) && originalPrice > currentPrice}
 
     <div
       data-node={product.id || `product_item_${index}`}
@@ -41,10 +47,11 @@
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
+      style={pStyle.marginStyle}
       class={`bg-card p-3 rounded-2xl border border-light/80 shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between ${
         isCardActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
-          : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
+          : 'hover:shadow-md hover:border-light hover:shadow-md'
       }`}
     >
       <div>
@@ -73,13 +80,16 @@
           {/if}
 
           {#if product.badge}
-            <span class="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+            <span
+              class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
+              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+            >
               {product.badge}
             </span>
           {/if}
         </div>
 
-        <h3 class="font-heading font-bold text-xs text-main line-clamp-2">
+        <h3 class="font-heading font-bold text-xs text-main line-clamp-2" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
           {product.name}
         </h3>
         {#if product.description}
@@ -90,9 +100,16 @@
       </div>
 
       <div class="mt-3 pt-2 border-t border-light/60 flex items-center justify-between">
-        <p class="text-primary font-heading font-black text-xs">
-          {formatRupiah(product.price)}
-        </p>
+        <div class="flex items-baseline gap-1.5 flex-wrap">
+          <p class="text-primary font-heading font-black text-xs">
+            {formatIDR(product.price)}
+          </p>
+          {#if hasDiscount}
+            <span class="text-[10px] text-secondary/60 line-through font-mono">
+              {formatIDR(originalPrice)}
+            </span>
+          {/if}
+        </div>
         <div class="flex gap-1.5">
           <button
             type="button"

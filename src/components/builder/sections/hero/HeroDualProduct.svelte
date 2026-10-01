@@ -133,7 +133,7 @@
           </div>
           <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)] mb-1">{stripEmoji(displayProduct1.name || fallbackProduct1.name)}</h3>
           {#if hasDesc1}
-            <p class="text-xs text-[var(--color-text-secondary)] mb-4 font-sans line-clamp-2">
+            <p class="text-xs text-[var(--color-text-secondary)] mb-4 line-clamp-2">
               {stripEmoji(productCount > 0 ? (displayProduct1.description || '') : fallbackProduct1.description)}
             </p>
           {:else}
@@ -165,7 +165,7 @@
           </div>
           <h3 class="font-heading font-bold text-sm text-[var(--color-text-main)] mb-1">{stripEmoji(displayProduct2.name || fallbackProduct2.name)}</h3>
           {#if hasDesc2}
-            <p class="text-xs text-[var(--color-text-secondary)] mb-4 font-sans line-clamp-2">
+            <p class="text-xs text-[var(--color-text-secondary)] mb-4 line-clamp-2">
               {stripEmoji(productCount > 1 ? (displayProduct2.description || '') : fallbackProduct2.description)}
             </p>
           {:else}

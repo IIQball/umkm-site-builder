@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ArrowRight, MapPin } from 'lucide-svelte';
+  import { resolveFooterNodeStyle } from './footerStyles.helpers';
 
   export let brandName: string;
   export let address: string;
@@ -8,16 +9,28 @@
   export let floatingCtaButtonText: string = 'Chat Sekarang';
   export let whatsappLink: string;
   export let copyrightText: string;
+  export let attributionText: string = 'Powered by Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = ['footer_floating_cta', 'footer_contact', 'footer_copyright'];
+
+  $: styleCta = resolveFooterNodeStyle('footer_floating_cta', nodeStyles);
+  $: styleContact = resolveFooterNodeStyle('footer_contact', nodeStyles);
+  $: styleCopyright = resolveFooterNodeStyle('footer_copyright', nodeStyles);
+
+  $: hasCta = !elementOrder.length || elementOrder.includes('footer_floating_cta');
+  $: hasContact = !elementOrder.length || elementOrder.includes('footer_contact') || elementOrder.includes('contact_info');
+  $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
 </script>
 
 <div class="relative pt-6">
-  <!-- Floating Banner di Atas Kontainer Footer -->
-  <div class="relative z-10 -mb-8">
-    <div
-      class="p-6 rounded-2xl shadow-xl cq-footer-cta-banner cursor-pointer transition-all {activeNodeId === 'footer_floating_cta' ? 'ring-2 ring-[var(--theme-btn-primary-text, white)] ring-offset-2 ring-offset-[var(--theme-primary, var(--color-primary))]' : ''}"
-      style="background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white));"
+  {#if hasCta}
+    <!-- Floating Banner di Atas Kontainer Footer -->
+    <div class="relative z-10 -mb-8">
+      <div
+        class="p-6 rounded-2xl shadow-xl cq-footer-cta-banner cursor-pointer transition-all {activeNodeId === 'footer_floating_cta' ? 'ring-2 ring-[var(--theme-btn-primary-text, white)] ring-offset-2 ring-offset-[var(--theme-primary, var(--color-primary))]' : ''}"
+      style="margin-top: {styleCta.marginTop}; margin-bottom: {styleCta.marginBottom}; background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: {styleCta.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'};"
       on:click={(e) => selectNode(e, 'footer_floating_cta')}
       on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_floating_cta')}
       role="button"
@@ -25,7 +38,7 @@
     >
       <div class="text-left space-y-1">
         <h3
-          style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); color: var(--theme-btn-primary-text, var(--btn-primary-text, white));"
+          style="font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); color: {styleCta.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'};"
         >
           {floatingCtaTitle}
         </h3>
@@ -49,15 +62,19 @@
       </a>
     </div>
   </div>
+  {/if}
 
   <!-- Body Footer Latar Surface -->
+  {#if hasContact || hasCopyright}
   <div
-    class="border border-[var(--color-border)] rounded-3xl shadow-sm pt-14 pb-6 px-6 sm:px-8"
+    class="border border-[var(--color-border)] rounded-3xl shadow-sm {hasCta ? 'pt-14' : 'pt-6'} pb-6 px-6 sm:px-8"
     style="background-color: var(--theme-surface, var(--color-card-base)); color: var(--theme-text-primary, var(--color-text-main));"
   >
     <div class="cq-footer-bottom-bar">
+      {#if hasContact}
       <div
         class="space-y-1 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+        style="margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
         on:click={(e) => selectNode(e, 'footer_contact')}
         on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
         role="button"
@@ -70,27 +87,35 @@
           {brandName}
         </span>
         <p
-          style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
+          style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: {styleContact.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
           class="flex items-center gap-1"
         >
           <MapPin size={12} class="text-[var(--theme-primary, var(--color-primary))] shrink-0" />
           <span>{address}</span>
         </p>
       </div>
+      {/if}
 
+      {#if hasCopyright}
       <div
-        class="p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+        class="p-2 rounded-xl transition-all cursor-pointer space-y-1 {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+        style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
         on:click={(e) => selectNode(e, 'footer_copyright')}
         on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
         role="button"
         tabindex="0"
       >
         <p
-          style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: var(--theme-text-muted, var(--color-text-muted));"
+          style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85);"
         >
           {copyrightText}
         </p>
+        <p style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);">
+          {attributionText}
+        </p>
       </div>
+      {/if}
     </div>
   </div>
+  {/if}
 </div>

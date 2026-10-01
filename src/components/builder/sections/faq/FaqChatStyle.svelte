@@ -2,9 +2,11 @@
   import type { FAQItem } from '@/types';
   import { HelpCircle, MessageCircle } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveFaqItemStyle } from './faqStyles.helpers';
 
   export let sectionId: string = '';
   export let faqs: FAQItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   function selectItem(e: Event, idx: number, item: FAQItem) {
     e.stopPropagation();
@@ -17,10 +19,11 @@
 <div class="max-w-2xl mx-auto flex flex-col gap-4 text-left">
   <div
     class="flex flex-col gap-4 p-5 sm:p-6 shadow-xs"
-    style="background: var(--color-nested-base); border: 1px solid var(--color-border); border-radius: var(--btn-radius, var(--theme-btn-radius, 24px));"
+    style="background: var(--color-nested-base); border: 1px solid var(--color-border); border-radius: var(--theme-btn-border-radius, var(--btn-radius, 24px));"
   >
     {#each faqs as item, index (item.id || index)}
-      {@const isItemActive = $canvasStore.selectedNodeId === (item.id || `faq_item_${index}`)}
+      {@const isItemActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `faq_item_${index}`)}
+      {@const itemStyle = resolveFaqItemStyle(item, index, nodeStyles)}
 
       <div
         role="button"
@@ -32,12 +35,12 @@
             ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 shadow-sm'
             : 'hover:bg-black/5 dark:hover:bg-white/5'
         }`}
-        style="background: {isItemActive ? 'var(--color-card-base)' : 'transparent'};"
+        style="background: {isItemActive ? (itemStyle.backgroundColor || 'var(--theme-surface, var(--color-card-base))') : 'transparent'}; margin-top: {itemStyle.marginTop}; margin-bottom: {itemStyle.marginBottom};"
       >
         <!-- Pertanyaan Pembeli (Kanan) -->
         <div
           class="self-end max-w-[85%] p-3.5 text-xs font-heading font-medium shadow-xs flex items-start gap-2"
-          style="background: var(--theme-primary, var(--color-primary)); color: #ffffff; border-radius: var(--btn-radius, var(--theme-btn-radius, 16px)); border-top-right-radius: 4px;"
+          style="background: var(--theme-btn-primary-bg, var(--color-primary)); color: var(--theme-btn-primary-text, #ffffff); border-radius: var(--theme-btn-border-radius, var(--btn-radius, 16px)); border-top-right-radius: 4px; font-family: var(--theme-heading-font, var(--font-heading));"
         >
           <HelpCircle size={14} class="shrink-0 mt-0.5 text-white/90" />
           <span>{item.question}</span>
@@ -46,7 +49,7 @@
         <!-- Jawaban CS Toko (Kiri) -->
         <div
           class="self-start max-w-[85%] p-3.5 text-xs shadow-xs leading-relaxed flex items-start gap-2"
-          style="background: var(--color-card-base); color: var(--color-text-main); border: 1px solid var(--color-border); border-radius: var(--btn-radius, var(--theme-btn-radius, 16px)); border-top-left-radius: 4px; font-family: var(--font-family);"
+          style="background: var(--theme-surface, var(--color-card-base)); color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; border: 1px solid {itemStyle.borderColor || 'var(--color-border)'}; border-radius: var(--theme-btn-border-radius, var(--btn-radius, 16px)); border-top-left-radius: 4px; font-family: var(--theme-body-font, var(--font-family));"
         >
           <MessageCircle size={14} class="shrink-0 mt-0.5" style="color: var(--theme-primary, var(--color-primary));" />
           <span>{item.answer}</span>

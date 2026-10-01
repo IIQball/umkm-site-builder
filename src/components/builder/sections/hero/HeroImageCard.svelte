@@ -35,6 +35,7 @@
     tabindex="0"
     on:click={(e) => selectNode && selectNode(e, nodeKey)}
     on:keydown={(e) => selectNodeKey && selectNodeKey(e, nodeKey)}
+    style="margin-top: var(--hero-image-mt, 0px); margin-bottom: var(--hero-image-mb, 0px);"
     class={`relative ${maxWidthClass} transition-all cursor-pointer select-none ${
       isActive
         ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100'

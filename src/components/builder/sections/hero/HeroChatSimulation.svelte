@@ -49,7 +49,7 @@
             style={msg.sender === 'in'
               ? 'background-color: var(--color-nested-base); border: 1px solid var(--color-border); color: var(--color-text-main);'
               : 'background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);'}
-            class="chat-bubble shadow-xs text-xs font-sans max-w-[85%]"
+            class="chat-bubble shadow-xs text-xs max-w-[85%]"
           >
             {msg.text}
             {#if msg.time}

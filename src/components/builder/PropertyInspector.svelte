@@ -10,6 +10,13 @@
   import HeaderAnnouncementPanel from './inspector/header/HeaderAnnouncementPanel.svelte';
   import HeaderLogoPanel from './inspector/header/HeaderLogoPanel.svelte';
   import HeaderNavPanel from './inspector/header/HeaderNavPanel.svelte';
+  import HeroElementNodePanel from './inspector/hero/HeroElementNodePanel.svelte';
+  import FeatureElementNodePanel from './inspector/features/FeatureElementNodePanel.svelte';
+  import CatalogElementNodePanel from './inspector/catalog/CatalogElementNodePanel.svelte';
+  import TestimonialsElementNodePanel from './inspector/testimonials/TestimonialsElementNodePanel.svelte';
+  import FaqElementNodePanel from './inspector/faq/FaqElementNodePanel.svelte';
+  import MapsElementNodePanel from './inspector/maps/MapsElementNodePanel.svelte';
+  import FooterElementNodePanel from './inspector/footer/FooterElementNodePanel.svelte';
   import { getNodeLabel } from './inspector/nodeContent.constants';
   import { sectionTypeLabels } from './layer/layerPanel.helpers';
   import type { TemplateSection } from '@/schemas';
@@ -139,6 +146,66 @@
           {:else if section.type === 'header_announcement' && ($activeNodeId === 'nav_links' || $activeNodeId.startsWith('nav_'))}
             <div class="p-4 space-y-4 text-xs text-base-content/80">
               <HeaderNavPanel {section} onConfigChange={handlePropChange} />
+            </div>
+          {:else if section.type === 'hero'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <HeroElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+              />
+            </div>
+          {:else if section.type === 'features'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FeatureElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+              />
+            </div>
+          {:else if section.type === 'product_catalog'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <CatalogElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'testimonials'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <TestimonialsElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'faq'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FaqElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'google_maps'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <MapsElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'footer'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FooterElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
             </div>
           {:else}
             <NodeStylesTab {section} nodeId={$activeNodeId} onUpdate={onSectionUpdate} />

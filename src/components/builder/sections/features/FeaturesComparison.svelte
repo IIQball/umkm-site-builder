@@ -22,6 +22,7 @@
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'before_card', 'after_card'];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
   $: hasBefore = elementOrder.includes('before_card') || elementOrder.includes('features_grid');
@@ -60,6 +61,7 @@
         {activeNodeId}
         {selectNode}
         {elementOrder}
+        {nodeStyles}
         maxWidthClass="max-w-xl"
       />
     </div>

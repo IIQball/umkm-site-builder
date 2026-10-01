@@ -47,18 +47,6 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 4. Oversized Bold Typography (Bawah-Atas, teks raksasa display penuh)
-  if (id === 'oversized_bold_typography') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="95" y="14" width="50" height="6" rx="3" fill="#334155"/>
-      <rect x="20" y="28" width="200" height="24" rx="4" fill="#f8fafc"/>
-      <rect x="36" y="58" width="168" height="20" rx="4" fill="#94a3b8"/>
-      <rect x="64" y="86" width="112" height="6" rx="2" fill="#64748b"/>
-      <rect x="92" y="100" width="56" height="16" rx="8" fill="#3b82f6"/>
-    </svg>`;
-  }
-
   // 5. Social Proof Community (Bawah-Atas, avatar wall di atas judul tengah)
   if (id === 'social_proof_community') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">

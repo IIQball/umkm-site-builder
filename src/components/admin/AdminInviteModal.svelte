@@ -1,18 +1,14 @@
 <script lang="ts">
-  import { UserPlus, Store, ShieldCheck } from 'lucide-svelte'
+  import { UserPlus, Store } from 'lucide-svelte'
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
   import { Button, Input, Modal } from '@/components/ui';
 
   import { authClient } from '@/lib/auth-client';
 
-  export let isOpen = false
-  export let currentUser: { role?: string; id?: string } | null = null
-  export let forceRole: 'tenant' | 'admin' | null = null;
-
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
-  $: selectedRole = forceRole ? forceRole : (currentUser?.role === 'superadmin' ? 'admin' : 'tenant');
+  export let isOpen = false
 
   let newName = '';
   let newEmail = '';
@@ -37,7 +33,7 @@
 
     try {
       const payload = {
-        role: selectedRole,
+        role: 'tenant',
         name: newName, 
         email: newEmail
       };
@@ -58,9 +54,9 @@
         });
 
         if (error) {
-          toast.error(`Akun berhasil dibuat, tetapi gagal mengirim email aktivasi: ${error.message}`);
+          toast.error(`Akun Merchant berhasil dibuat, tetapi gagal mengirim email aktivasi: ${error.message}`);
         } else {
-          toast.success(`Akun ${selectedRole === 'tenant' ? 'Merchant' : 'Admin'} berhasil didaftarkan dan email aktivasi telah dikirim.`);
+          toast.success(`Akun Merchant berhasil didaftarkan dan email aktivasi telah dikirim.`);
         }
 
         resetForm();
@@ -80,7 +76,7 @@
   <svelte:fragment slot="header">
     <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
       <UserPlus size={18} class="text-primary" />
-      <span>Tambah {selectedRole === 'admin' ? 'Admin' : 'Merchant'} Baru</span>
+      <span>Buat Undangan Registrasi Merchant</span>
     </h3>
   </svelte:fragment>
 
@@ -89,12 +85,11 @@
       <div class="space-y-5">
         <div class="flex items-center gap-3 mb-2 pb-4 border-b border-light">
           <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-            {#if selectedRole === 'tenant'}<Store size={20}/>
-            {:else}<ShieldCheck size={20}/>{/if}
+            <Store size={20}/>
           </div>
           <div>
             <p class="text-xs text-muted uppercase tracking-wider font-bold">Mendaftar sebagai</p>
-            <p class="font-bold text-main capitalize">{selectedRole === 'tenant' ? 'Merchant' : selectedRole}</p>
+            <p class="font-bold text-main capitalize">Merchant</p>
           </div>
         </div>
 
@@ -122,7 +117,7 @@
         </div>
 
         <div class="alert alert-info bg-primary/5 border-primary/20 rounded-xl text-xs text-primary/80 font-medium">
-          Sistem akan otomatis membuat akun {selectedRole === 'tenant' ? 'Merchant' : 'Admin'} dan mengirimkan undangan aktivasi ke email <strong>{newEmail || 'yang Anda masukkan'}</strong>. Pengguna dapat mengatur kata sandi mereka sendiri melalui link tersebut.
+          Sistem akan membuat link undangan dengan masa aktif 24 jam dan mengirimkannya ke email <strong>{newEmail || 'yang Anda masukkan'}</strong>.
         </div>
       </div>
     </form>
@@ -143,7 +138,7 @@
         className="font-bold px-6"
       >
         <UserPlus size={16} class="mr-1" />
-        <span>Daftarkan Akun</span>
+        <span>Kirim Undangan</span>
       </Button>
     </div>
   </svelte:fragment>

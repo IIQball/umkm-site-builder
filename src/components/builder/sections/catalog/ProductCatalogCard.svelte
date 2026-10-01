@@ -143,6 +143,8 @@
         className="{imageAspectClass} transition-transform duration-300 hover:scale-105"
         loading="lazy"
         fallbackText="Foto Produk"
+        width={isHorizontalLayout || activePreset === 'list_compact' ? 176 : '100%'}
+        height={isHorizontalLayout || activePreset === 'list_compact' ? 176 : 192}
       />
     {:else}
       <div

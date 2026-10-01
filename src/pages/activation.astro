@@ -1,12 +1,37 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import ResetPasswordForm from "@/components/auth/ResetPasswordForm.svelte";
+import ActivationForm from "@/components/auth/ActivationForm.svelte";
 import Card from "@/components/ui/Card.svelte";
+import { db } from "@/lib/db/client";
+import { verifications } from "@/db/schema";
+import { eq, and, gt } from "drizzle-orm";
 
 const title = "Aktivasi Akun";
 const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktifkan akun Anda.";
 
-// Reuses ResetPasswordForm: it already handles token validation and password reset.
+// Strict Access Control: Token is strictly required.
+// We redirect to login instantly if there is no token.
+const token = Astro.url.searchParams.get("token");
+
+if (!token) {
+  return Astro.redirect("/auth/login?error=invalid_token");
+}
+
+// Check if token exists and has not expired
+const validToken = await db.query.verifications.findFirst({
+  where: and(
+    eq(verifications.identifier, `reset-password:${token}`),
+    gt(verifications.expiresAt, new Date())
+  )
+});
+
+// BetterAuth deletes the token once used. 
+// So if it's missing or expired, it's an invalid/used token.
+if (!validToken) {
+  return Astro.redirect("/auth/login?error=invalid_or_expired_token");
+}
+
+// Uses ActivationForm which handles name, password, and confirmation
 ---
 
 <BaseLayout title={`${title} - UMKM Site Builder`} description={description} hideNavbar={true}>
@@ -15,14 +40,20 @@ const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktif
       <Card variant="elevated" padding="xl" radius="3xl">
         <div class="text-center mb-8">
           <a href="/" class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity w-fit mx-auto mb-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl">
-            <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-heading font-bold text-sm shadow-sm">U</div>
-            <span class="text-heading-md text-main tracking-tight">UMKM Builder</span>
+            <img
+              src="/assets/logo/logo.webp"
+              alt="Pinoka"
+              class="h-8 w-auto object-contain"
+              width="117"
+              height="36"
+              loading="eager"
+            />
           </a>
           <h1 class="text-heading-lg text-main">{title}</h1>
           <p class="text-body-base text-secondary mt-2">{description}</p>
         </div>
 
-        <ResetPasswordForm client:load />
+        <ActivationForm client:load />
       </Card>
     </div>
   </main>

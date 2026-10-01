@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { Card, Button, Input } from '@/components/ui';
   import { Store, ExternalLink, Settings, Package, ShoppingBag, Search } from 'lucide-svelte';
-  import AdminUserAddModal from './AdminUserAddModal.svelte';
   import { getStoreDirectUrl, getMainDomain } from '@/lib/domain';
 
   let mainDomain = 'localhost:4321';
@@ -32,10 +31,8 @@
   }
 
   export let stores: AssistedStoreItem[] = []
-  export let currentUser: { id: string; role?: string } | null = null
 
   let searchQuery = '';
-  let isAddModalOpen = false;
 
   $: filteredStores = stores.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -89,15 +86,6 @@
             </Input>
           </div>
         {/if}
-        <Button
-          variant="primary"
-          size="md"
-          on:click={() => isAddModalOpen = true}
-          class="font-bold whitespace-nowrap w-full sm:w-auto"
-        >
-          <span class="material-symbols-outlined text-white text-base">person_add</span>
-          <span>Tambah Merchant</span>
-        </Button>
       </div>
     </div>
 
@@ -223,13 +211,3 @@
     {/if}
   </Card>
 </div>
-
-<AdminUserAddModal 
-  isOpen={isAddModalOpen} 
-  currentUser={currentUser}
-  on:close={() => isAddModalOpen = false} 
-  on:success={() => {
-    isAddModalOpen = false;
-    window.location.reload();
-  }} 
-/>

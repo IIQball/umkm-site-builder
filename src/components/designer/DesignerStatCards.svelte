@@ -1,6 +1,6 @@
 <script lang="ts">
-  import StatCard from '../ui/StatCard.svelte';
-  import { formatIDR } from '@/lib/utils/format';
+  import { StatCard } from "@/components/ui";
+  import { formatSmartIDR } from "@/lib/currency";
 
   export let balance: number;
   export let availableBalance: number;
@@ -9,36 +9,37 @@
   $: pendingSettlement = Math.max(0, balance - availableBalance);
 
   $: heroCard = {
-    label: 'Total Saldo Dompet',
-    value: formatIDR(balance),
+    label: "Total Saldo Dompet",
+    value: formatSmartIDR(balance),
     rawValue: balance,
-    badge: pendingSettlement > 0 ? 'Ada Dana Hold' : 'Siap Ditarik',
-    icon: 'account_balance_wallet',
-    cardTheme: 'dark' as const,
-    footerText: 'Saldo aktif akun desainer',
-    delayClass: 'delay-100',
+    badge: pendingSettlement > 0 ? "Ada Dana Hold" : "Siap Ditarik",
+    icon: "account_balance_wallet",
+    cardTheme: "dark" as const,
+    footerText: "Saldo aktif akun desainer",
+    delayClass: "delay-100",
   };
 
   $: readyCard = {
-    label: 'Saldo Siap Tarik',
-    value: formatIDR(availableBalance),
+    label: "Saldo Siap Tarik",
+    value: formatSmartIDR(availableBalance),
     rawValue: availableBalance,
-    badge: availableBalance > 0 ? 'Siap Cair' : 'Saldo Nihil',
-    icon: 'check_circle',
-    cardTheme: 'orange' as const,
-    footerText: 'Dapat dicairkan ke bank',
-    delayClass: 'delay-150',
+    badge: availableBalance > 0 ? "Siap Cair" : "Saldo Nihil",
+    icon: "check_circle",
+    cardTheme: "default" as const,
+    footerText: "Dapat dicairkan ke bank",
+    delayClass: "delay-150",
   };
 
   $: holdCard = {
-    label: 'Dana Mengendap',
-    value: formatIDR(pendingSettlement),
+    label: "Dana Mengendap",
+    value: formatSmartIDR(pendingSettlement),
     rawValue: pendingSettlement,
-    badge: pendingSettlement > 0 ? `Hold ${settlementDelayDays || 0} Hari` : 'Nihil',
-    icon: 'hourglass_top',
-    cardTheme: 'default' as const,
+    badge:
+      pendingSettlement > 0 ? `Hold ${settlementDelayDays || 0} Hari` : "Nihil",
+    icon: "hourglass_top",
+    cardTheme: "blue" as const,
     footerText: `Masa hold ${settlementDelayDays || 0} hari`,
-    delayClass: 'delay-200',
+    delayClass: "delay-200",
   };
 </script>
 

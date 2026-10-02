@@ -52,6 +52,7 @@ import {
   getFooterSlotLabel,
   getEffectiveFooterElementOrder,
 } from '../sections/footer/footerLayout.helpers';
+import { getDefaultHeaderNavbarOrder } from '../sections/header/headerLayout.helpers';
 
 export function getAddedSlotDefaultProps(slot: string, sectionType?: string): Record<string, unknown> {
   if (slot === 'badge') return { badge: sectionType === 'features' ? 'FITUR UNGGULAN' : sectionType === 'testimonials' ? 'ULASAN PEMBELI' : 'PROMO SPESIAL', badgeText: sectionType === 'features' ? 'Keunggulan Layanan Kami' : sectionType === 'testimonials' ? 'Ulasan Pembeli' : 'Promo Spesial UMKM' };
@@ -121,6 +122,7 @@ export {
 };
 
 export const DEFAULT_SLOTS_BY_SECTION: Record<string, string[]> = {
+  header_announcement: ['logo', 'nav_links', 'cta'],
   hero: ['badge', 'title', 'subtitle', 'cta', 'image'],
   features: ['badge', 'title', 'subtitle', 'feature_cards'],
   product_catalog: ['badge', 'title', 'subtitle', 'catalog_grid'],
@@ -141,6 +143,7 @@ export function getSectionDefaultSlots(section: {
     (section.props?.layoutPreset as string) ||
     (section.styles?.layoutPreset as string) ||
     '';
+  if (section.type === 'header_announcement') return getDefaultHeaderNavbarOrder(preset || 'default_split');
   if (section.type === 'hero') return getDefaultHeroSlots(preset || 'split_left_text');
   if (section.type === 'features') return getDefaultFeaturesSlots(preset || 'grid_3_cards');
   if (section.type === 'product_catalog') return getDefaultCatalogSlots(preset || 'grid_standard');

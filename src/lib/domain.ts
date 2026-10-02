@@ -105,7 +105,8 @@ export function getMainDomain(rawHost?: string | null): string {
  * - http://kopi-osing.localhost:4321
  * - https://kopi-osing.umkm-web-builder.iqdevmp.workers.dev
  */
-export function getStoreDirectUrl(subdomain: string, rawHost?: string | null, rawProtocol?: string): string {
+export function getStoreDirectUrl(subdomain?: string | null, rawHost?: string | null, rawProtocol?: string): string {
+  if (!subdomain) return '#';
   const mainDomain = getMainDomain(rawHost);
 
   let protocol = rawProtocol;

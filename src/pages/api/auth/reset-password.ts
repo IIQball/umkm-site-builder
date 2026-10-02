@@ -41,6 +41,9 @@ export const POST: APIRoute = async ({ request }) => {
         userEmail = targetUser[0].email;
         userRole = targetUser[0].role;
         
+        // Ensure user status is activated upon setting password
+        await db.update(users).set({ status: 'active' }).where(eq(users.id, uid));
+
         if (name) {
           try {
             // Verify that this uid actually belongs to the person who just reset their password
@@ -52,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
             
             if (signinRes && signinRes.user) {
               // Verification succeeded! Update the name
-              await db.update(users).set({ name }).where(eq(users.id, uid));
+              await db.update(users).set({ name, status: 'active' }).where(eq(users.id, uid));
               
               // Automatically clean up the temporary session created for verification
               await db.delete(sessions).where(eq(sessions.userId, uid));

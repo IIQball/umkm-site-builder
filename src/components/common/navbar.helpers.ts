@@ -32,38 +32,35 @@ export type RoleBadgeMeta = {
   color: string
 }
 
+import { getDashboardHomePath } from '@/components/dashboard/sidebar/sidebar.helpers'
+
 export const getRoleBadge = (role?: string | null): RoleBadgeMeta => {
   switch (role) {
     case 'designer':
       return {
         label: 'Desainer',
-        color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+        color: 'bg-success/15 text-success border-success/30'
       }
     case 'admin':
       return {
         label: 'Admin Pendamping',
-        color: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30'
+        color: 'bg-info/15 text-info border-info/30'
       }
     case 'superadmin':
       return {
         label: 'Super Admin',
-        color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
+        color: 'bg-error/15 text-error border-error/20'
       }
     case 'tenant':
     default:
       return {
         label: 'Merchant',
-        color: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+        color: 'bg-warning/15 text-warning border-warning/30'
       }
   }
 }
 
-export const getDashboardHref = (role?: string | null): string => {
-  if (role === 'designer') return '/designer/wallet'
-  if (role === 'superadmin') return '/superadmin'
-  if (role === 'admin') return '/admin'
-  return '/dashboard'
-}
+export const getDashboardHref = getDashboardHomePath
 
 export const getDashboardLabel = (role?: string | null): string => {
   if (role === 'designer') return 'Studio Desainer'
@@ -80,7 +77,7 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
         { label: 'Kelola Akses Admin', href: '/superadmin/whitelist', icon: Shield },
         { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: Users },
         { label: 'Kurasi Template', href: '/superadmin/templates', icon: Palette },
-        { label: 'Kategori Bisnis', href: '/superadmin/template-categories', icon: Layers },
+        { label: 'Kategori Template', href: '/superadmin/template-categories', icon: Layers },
         { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: Receipt },
         { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: Settings }
       ]

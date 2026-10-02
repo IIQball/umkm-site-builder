@@ -74,11 +74,17 @@
   $: containerStyle = containerWidthMode === 'full'
     ? ''
     : 'max-width: var(--theme-max-width, 1200px);';
-  $: sectionProps = section?.type === 'product_catalog'
-    ? { ...(section.props || {}), storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined), isLiveStorefront }
-    : section?.type === 'hero'
-    ? { ...(section.props || {}), ...(isLiveStorefront ? { selectNode: () => {}, selectNodeKey: () => {}, activeNodeId: null } : {}) }
-    : (section?.props || {});
+  $: baseSectionProps = section?.props || {};
+  $: liveStorefrontOverrides = isLiveStorefront
+    ? { selectNode: () => {}, selectNodeKey: () => {}, activeNodeId: null, isLiveStorefront: true }
+    : {};
+  $: sectionProps = {
+    ...baseSectionProps,
+    ...liveStorefrontOverrides,
+    ...(section?.type === 'product_catalog'
+      ? { storeId: storeId || (typeof section.props?.storeId === 'string' ? section.props.storeId : undefined), isLiveStorefront }
+      : {}),
+  };
 
   // Semantic anchor IDs - match navbar href targets (#beranda, #produk, etc.)
   const SECTION_TYPE_TO_ANCHOR: Record<string, string> = {

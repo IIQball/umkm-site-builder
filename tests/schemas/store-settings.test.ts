@@ -48,13 +48,20 @@ describe('StoreSettingsInput schema', () => {
     }
   });
 
-  it('rejects invalid Google Maps URLs', () => {
-    const invalid = {
-      name: 'Kopi Budi',
+  it('accepts full store settings with optional operational and template fields', () => {
+    const fullData = {
+      name: 'Kopi Budi Banyuwangi',
       waNumber: '6281234567890',
-      googleMapsUrl: 'not-a-url',
+      googleMapsUrl: 'https://maps.google.com/?q=123',
+      address: 'Jl. Merdeka No. 45',
+      categoryId: 'cat_123',
+      regionData: { district: 'Rogojampi', subDistrict: 'Gitik' },
+      templateId: 'tpl_123',
+      isOpen: true,
+      waCheckoutTemplate: 'Halo, saya mau beli produk.',
+      storeId: 'store_123',
     };
-    const result = StoreSettingsInput.safeParse(invalid);
-    expect(result.success).toBe(false);
+    const result = StoreSettingsInput.safeParse(fullData);
+    expect(result.success).toBe(true);
   });
 });

@@ -25,7 +25,6 @@
   $: hasIframe = !elementOrder.length || elementOrder.includes('maps_iframe') || elementOrder.includes('iframe') || elementOrder.includes('map');
   $: hasInfoCard = !elementOrder.length || elementOrder.includes('maps_info_card') || elementOrder.includes('info_card') || elementOrder.includes('card');
   $: hasCta = !elementOrder.length || elementOrder.includes('maps_cta_button') || elementOrder.includes('cta_button') || elementOrder.includes('cta');
-  $: hasBranchSelector = !elementOrder.length || elementOrder.includes('maps_branch_selector') || elementOrder.includes('branch_selector');
 
   $: isIframeSelected = $canvasStore?.selectedNodeId === 'maps_iframe' && $canvasStore?.selectedSectionId === sectionId;
   $: isCardSelected = $canvasStore?.selectedNodeId === 'maps_info_card' && $canvasStore?.selectedSectionId === sectionId;
@@ -52,7 +51,7 @@
   }
 </script>
 
-{#if branchMode === 'multi' && hasBranchSelector}
+{#if branchMode === 'multi'}
   <MapsBranchSwitcher
     {sectionId}
     {branches}

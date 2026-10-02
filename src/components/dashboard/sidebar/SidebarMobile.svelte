@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { getRoleConfig, type NavGroup } from "./sidebar.helpers";
+  import { getRoleConfig, getDashboardHomePath, getSettingsHref, type NavGroup } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -8,6 +8,7 @@
   export let navGroups: NavGroup[] = [];
   export let drawerOpen = false;
   export let currentPath = "";
+  export let isLoggingOut = false;
 
   const dispatch = createEventDispatcher<{
     openDrawer: void;
@@ -17,12 +18,8 @@
 
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
   $: roleCfg = getRoleConfig(user.role);
-  $: homePath =
-    user?.role === "designer"
-      ? "/designer/wallet"
-      : user?.role === "admin" || user?.role === "superadmin"
-        ? "/admin"
-        : "/dashboard";
+  $: homePath = getDashboardHomePath(user?.role);
+  $: settingsHref = getSettingsHref(user?.role);
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;
@@ -172,7 +169,7 @@
         </div>
       </div>
       <a
-        href="/auth/settings"
+        href={settingsHref}
         on:click={() => dispatch("closeDrawer")}
         class="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-card border border-transparent hover:border-light transition-colors flex-shrink-0"
         title="Pengaturan"
@@ -186,10 +183,11 @@
     <button
       type="button"
       on:click={() => dispatch("signOut")}
+      disabled={isLoggingOut}
       class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
     >
-      <span class="material-symbols-outlined text-base">logout</span>
-      <span>Keluar</span>
+      <span class="material-symbols-outlined text-base" class:animate-spin={isLoggingOut}>power_settings_new</span>
+      <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
     </button>
   </div>
 </div>

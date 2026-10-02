@@ -49,11 +49,13 @@
   ].filter(Boolean).join('; ');
 
   const handleNavContainerClick = (e: MouseEvent) => {
+    if (!isActive) return;
     e.stopPropagation();
     editorStore.selectNode(sectionId, 'nav_links');
   };
 
   const handleNavContainerKeyDown = (e: KeyboardEvent) => {
+    if (!isActive) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       editorStore.selectNode(sectionId, 'nav_links');
@@ -91,16 +93,19 @@
   };
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
-  role="button"
-  tabindex="0"
-  aria-label="Header Navigation"
+  role={isActive ? 'button' : undefined}
+  tabindex={isActive ? 0 : undefined}
+  aria-label={isActive ? 'Header Navigation' : undefined}
   on:click={handleNavContainerClick}
   on:keydown={handleNavContainerKeyDown}
-  class={`relative flex items-center justify-end rounded-lg transition-all cursor-pointer ${
-    isNodeActive
-      ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10'
-      : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/40'
+  class={`relative flex items-center justify-end rounded-lg transition-all ${
+    !isActive
+      ? ''
+      : isNodeActive
+        ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10 cursor-pointer'
+        : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/40 cursor-pointer'
   }`}
 >
   <!-- Desktop / Wide Viewport Navigation Links -->

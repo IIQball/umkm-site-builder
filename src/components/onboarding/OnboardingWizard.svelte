@@ -4,13 +4,36 @@
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
   import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
+  import OnboardingStepSettings from './wizard/OnboardingStepSettings.svelte';
+  import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
   import OnboardingStepper from './wizard/OnboardingStepper.svelte';
   import OnboardingSuccessStep from './wizard/OnboardingSuccessStep.svelte';
-  import type { TemplateItem, OnboardingStep } from './onboarding.types';
+  import type {
+    TemplateItem,
+    OnboardingStep,
+    ExistingStoreData,
+    StoreContentCustomization,
+  } from './onboarding.types';
   import { validateSubdomainLocally } from '@/lib/validators/subdomain';
+  import {
+    validateStoreInfo,
+    checkSubdomainAvailability,
+    submitOnboardStore,
+    submitUpdateStore,
+    DEFAULT_WA_CHECKOUT_TEMPLATE,
+    DEFAULT_REGION,
+  } from './onboarding.helpers';
+  import {
+    createDefaultContentCustomization,
+    extractContentCustomizationFromStore,
+    buildTemplateCustomizationPayload,
+  } from './wizard/content/contentCustomization.helpers';
 
   export let categories: Array<{ id: string; name: string }> = [];
   export let templates: TemplateItem[] = [];
+  export let isEdit: boolean = false;
+  export let existingStore: ExistingStoreData | null = null;
+  export let tenantId: string | undefined = undefined;
 
   type ValidationStatus = 'idle' | 'typing' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -30,29 +53,48 @@
   let waNumber = '';
   let googleMapsUrl = '';
   let address = '';
-  let regionData = {
-    province: 'Jawa Timur',
-    city: 'Banyuwangi',
-    district: '',
-    subDistrict: '',
-    hamlet: '',
-    street: '',
-  };
+  let regionData = { ...DEFAULT_REGION };
   let formErrors: Record<string, string> = {};
 
-  // Step 3: Template Selection
+  // Step 3: Template & Settings
   let selectedTemplateId = '';
+  let isOpen = true;
+  let waCheckoutTemplate = '';
 
-  // Step 4: Result
+  // Step 4: Content Customization
+  let contentCustomization: StoreContentCustomization = createDefaultContentCustomization();
+
+  // Step 5: Result
   let submitStatus: SubmitStatus = 'idle';
   let submitError = '';
 
   onMount(() => {
+    if (isEdit && existingStore) {
+      subdomain = existingStore.subdomain || '';
+      subdomainStatus = 'available';
+      storeName = existingStore.name || '';
+      categoryId = existingStore.categoryId || '';
+      waNumber = existingStore.waNumber || '';
+      googleMapsUrl = existingStore.googleMapsUrl || '';
+      address = existingStore.address || '';
+      if (existingStore.regionData) regionData = { ...DEFAULT_REGION, ...existingStore.regionData };
+      selectedTemplateId = existingStore.templateId || (templates[0]?.id ?? '');
+      isOpen = existingStore.isOpen !== false;
+      waCheckoutTemplate = existingStore.waCheckoutTemplate || DEFAULT_WA_CHECKOUT_TEMPLATE;
+      const cat = categories.find((c) => c.id === existingStore?.categoryId)?.name || '';
+      contentCustomization = extractContentCustomizationFromStore(
+        existingStore.customization,
+        storeName,
+        cat
+      );
+      return;
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const state = JSON.parse(saved);
-        currentStep = (state.currentStep && state.currentStep <= 3) ? state.currentStep : 1;
+        currentStep = state.currentStep && state.currentStep <= 4 ? state.currentStep : 1;
         subdomain = state.subdomain || '';
         storeName = state.storeName || '';
         categoryId = state.categoryId || '';
@@ -63,6 +105,7 @@
         if (state.regionData) regionData = state.regionData;
         subdomainStatus = state.subdomainStatus || 'idle';
         subdomainMessage = state.subdomainMessage || '';
+        if (state.contentCustomization) contentCustomization = state.contentCustomization;
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -73,111 +116,21 @@
   });
 
   function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      currentStep,
-      subdomain,
-      storeName,
-      categoryId,
-      waNumber,
-      googleMapsUrl,
-      address,
-      regionData,
-      selectedTemplateId,
-      subdomainStatus,
-      subdomainMessage,
-    }));
+    if (isEdit) return;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        currentStep, subdomain, storeName, categoryId, waNumber, googleMapsUrl,
+        address, regionData, selectedTemplateId, subdomainStatus, subdomainMessage,
+        contentCustomization,
+      })
+    );
   }
 
-  $: isStep1Valid = subdomainStatus === 'available';
-
-  function validateStep2(): boolean {
-    formErrors = {};
-    let isValid = true;
-
-    if (!storeName || storeName.trim().length < 3) {
-      formErrors.storeName = 'Nama toko minimal 3 karakter';
-      isValid = false;
-    }
-
-    if (!categoryId) {
-      formErrors.categoryId = 'Kategori bisnis wajib dipilih';
-      isValid = false;
-    }
-
-    if (!waNumber || !/^628[0-9]{7,12}$/.test(waNumber.trim())) {
-      formErrors.waNumber = 'Nomor WhatsApp tidak valid. Gunakan format 628...';
-      isValid = false;
-    }
-
-    if (!googleMapsUrl || !googleMapsUrl.trim()) {
-      formErrors.googleMapsUrl = 'Link Google Maps wajib diisi';
-      isValid = false;
-    } else {
-      try {
-        new URL(googleMapsUrl.trim());
-      } catch {
-        formErrors.googleMapsUrl = 'URL Google Maps tidak valid';
-        isValid = false;
-      }
-    }
-
-    if (!regionData.district) {
-      formErrors.district = 'Pilih kecamatan';
-      isValid = false;
-    }
-    if (!regionData.subDistrict) {
-      formErrors.subDistrict = 'Pilih kelurahan / desa';
-      isValid = false;
-    }
-    if (!regionData.hamlet?.trim()) {
-      formErrors.hamlet = 'Dusun / lingkungan wajib diisi';
-      isValid = false;
-    }
-    if (!regionData.street?.trim()) {
-      formErrors.street = 'Detail jalan & RT/RW wajib diisi';
-      isValid = false;
-    }
-    if (!address || address.trim().length < 5) {
-      formErrors.address = 'Alamat toko wajib diisi lengkap';
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
-  async function checkAvailability(val: string) {
-    subdomainStatus = 'checking';
-    subdomainMessage = '';
-    try {
-      const res = await fetch('/api/stores/check-subdomain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subdomain: val }),
-      });
-      if (res.status === 401) {
-        window.location.href = '/auth/login';
-        return;
-      }
-      const data = await res.json();
-      if (!data.ok) {
-        subdomainStatus = 'invalid';
-        subdomainMessage = data.error?.message ?? 'Validasi gagal';
-        return;
-      }
-      if (data.data.available) {
-        subdomainStatus = 'available';
-        subdomainMessage = 'Subdomain tersedia';
-      } else {
-        subdomainStatus = 'taken';
-        subdomainMessage = 'Subdomain sudah digunakan';
-      }
-    } catch {
-      subdomainStatus = 'error';
-      subdomainMessage = 'Gagal memeriksa ketersediaan';
-    }
-  }
+  $: isStep1Valid = isEdit ? true : subdomainStatus === 'available';
 
   function onSubdomainInput(e: Event) {
+    if (isEdit) return;
     const input = (e.target || e.currentTarget) as HTMLInputElement | null;
     if (!input) return;
     subdomain = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -195,7 +148,12 @@
     }
     subdomainStatus = 'typing';
     subdomainMessage = '';
-    debounceTimer = setTimeout(() => checkAvailability(subdomain), 300);
+    debounceTimer = setTimeout(async () => {
+      subdomainStatus = 'checking';
+      const res = await checkSubdomainAvailability(subdomain);
+      subdomainStatus = res.status;
+      subdomainMessage = res.message;
+    }, 300);
   }
 
   function nextStep() {
@@ -203,12 +161,21 @@
       currentStep = 2;
       saveState();
     } else if (currentStep === 2) {
-      if (validateStep2()) {
+      const validation = validateStoreInfo({
+        storeName, categoryId, waNumber, googleMapsUrl, address, regionData,
+      });
+      formErrors = validation.errors;
+      if (validation.isValid) {
+        if (!contentCustomization.hero.title || contentCustomization.hero.title === 'Toko Unggulan Anda') {
+          const cat = categories.find((c) => c.id === categoryId)?.name || '';
+          contentCustomization = createDefaultContentCustomization(storeName, cat);
+        }
         currentStep = 3;
         saveState();
       }
     } else if (currentStep === 3) {
-      submitOnboard();
+      currentStep = 4;
+      saveState();
     }
   }
 
@@ -219,64 +186,69 @@
     }
   }
 
-  async function submitOnboard() {
+  async function handleOnboardSubmit() {
     submitStatus = 'submitting';
     submitError = '';
-    try {
-      const res = await fetch('/api/stores/onboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subdomain,
-          name: storeName.trim(),
-          categoryId,
-          waNumber: waNumber.trim(),
-          googleMapsUrl: googleMapsUrl.trim(),
-          address,
-          regionData,
-          templateId: selectedTemplateId,
-        }),
-      });
-      if (res.status === 401) {
-        window.location.href = '/auth/login';
-        return;
-      }
-      const data = await res.json();
-      if (!data.ok) {
-        submitStatus = 'error';
-        submitError = data.error?.message ?? 'Gagal menyimpan profil toko';
-        if (data.error?.code === 'DUPLICATE_KEY') {
-          currentStep = 1;
-          subdomainStatus = 'taken';
-          subdomainMessage = 'Subdomain sudah digunakan, silakan pilih yang lain';
-          saveState();
-        }
-        return;
-      }
-      submitStatus = 'success';
-      currentStep = 4;
-      localStorage.removeItem(STORAGE_KEY);
-      setTimeout(() => {
-        window.location.href = '/dashboard/store-settings';
-      }, 2200);
-    } catch {
+    const custPayload = buildTemplateCustomizationPayload(contentCustomization);
+    const res = await submitOnboardStore({
+      subdomain, name: storeName.trim(), categoryId, waNumber: waNumber.trim(),
+      googleMapsUrl: googleMapsUrl.trim(), address, regionData,
+      templateId: selectedTemplateId, tenantId,
+      customization: custPayload,
+    });
+
+    if (!res.ok) {
       submitStatus = 'error';
-      submitError = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+      submitError = res.error || 'Gagal menyimpan profil toko';
+      if (res.code === 'DUPLICATE_KEY') {
+        currentStep = 1;
+        subdomainStatus = 'taken';
+        subdomainMessage = 'Subdomain sudah digunakan, silakan pilih yang lain';
+        saveState();
+      }
+      return;
     }
+
+    submitStatus = 'success';
+    currentStep = 5;
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  async function handleEditSubmit() {
+    if (!existingStore?.id) return;
+    submitStatus = 'submitting';
+    submitError = '';
+    const custPayload = buildTemplateCustomizationPayload(contentCustomization);
+    const res = await submitUpdateStore({
+      storeId: existingStore.id, name: storeName.trim(), categoryId,
+      waNumber: waNumber.trim(), googleMapsUrl: googleMapsUrl.trim(),
+      address, regionData, templateId: selectedTemplateId,
+      isOpen, waCheckoutTemplate,
+      customization: custPayload,
+    });
+
+    if (!res.ok) {
+      submitStatus = 'error';
+      submitError = res.error || 'Gagal menyimpan pengaturan toko';
+      return;
+    }
+
+    submitStatus = 'success';
+    currentStep = 5;
   }
 </script>
 
-<div class="w-full transition-all duration-300 mx-auto {currentStep === 3 ? 'max-w-5xl' : 'max-w-2xl'}">
-  <!-- Stepper Header Navigation -->
+<div class="w-full transition-all duration-300">
   <OnboardingStepper
     {currentStep}
+    {isEdit}
     onStepClick={(s) => { currentStep = s; }}
   />
 
-  <!-- Step Content Card (Identical variant & padding to dashboard cards) -->
-  <Card padding="lg" variant="bordered" class="transition-all duration-300">
+  <Card padding="lg" variant="bordered" class="w-full transition-all duration-300">
     {#if currentStep === 1}
       <OnboardingStepSubdomain
+        {isEdit}
         bind:subdomain
         {subdomainStatus}
         {subdomainMessage}
@@ -286,6 +258,7 @@
       />
     {:else if currentStep === 2}
       <OnboardingStepStoreInfo
+        {isEdit}
         bind:storeName
         bind:categoryId
         {categories}
@@ -300,21 +273,49 @@
         onNext={nextStep}
       />
     {:else if currentStep === 3}
-      <OnboardingStepTemplate
-        {templates}
-        bind:selectedTemplateId
-        {storeName}
+      {#if isEdit}
+        <OnboardingStepSettings
+          {templates}
+          {subdomain}
+          bind:selectedTemplateId
+          bind:isOpen
+          bind:waCheckoutTemplate
+          {submitStatus}
+          {submitError}
+          onPrev={prevStep}
+          onSave={handleEditSubmit}
+          onNext={nextStep}
+        />
+      {:else}
+        <OnboardingStepTemplate
+          {templates}
+          bind:selectedTemplateId
+          {storeName}
+          {subdomain}
+          {submitStatus}
+          {submitError}
+          onPrev={prevStep}
+          onNext={nextStep}
+        />
+      {/if}
+    {:else if currentStep === 4}
+      <OnboardingStepContent
+        {selectedTemplateId}
         {subdomain}
+        {isEdit}
+        bind:customization={contentCustomization}
         {submitStatus}
         {submitError}
         onPrev={prevStep}
-        onNext={nextStep}
+        onSubmit={isEdit ? handleEditSubmit : handleOnboardSubmit}
       />
-    {:else if currentStep === 4}
+    {:else if currentStep === 5}
       <OnboardingSuccessStep
+        {isEdit}
         {subdomain}
         {storeName}
         {address}
+        onResetStep={() => { currentStep = 1; }}
       />
     {/if}
   </Card>

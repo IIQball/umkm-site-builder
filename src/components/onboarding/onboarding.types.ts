@@ -9,4 +9,78 @@ export interface TemplateItem {
   isOwned?: boolean;
 }
 
-export type OnboardingStep = 1 | 2 | 3 | 4;
+export interface RegionData {
+  province: string;
+  city: string;
+  district: string;
+  subDistrict: string;
+  hamlet: string;
+  street: string;
+}
+
+export interface StoreFeatureItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface StoreFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface StoreContentCustomization {
+  theme: {
+    primaryColor: string;
+    fontFamily: string;
+    typography: {
+      headingFont: string;
+      bodyFont: string;
+    };
+  };
+  header: {
+    logoText: string;
+    announcementText: string;
+  };
+  hero: {
+    title: string;
+    subtitle: string;
+    ctaText: string;
+    badgeText: string;
+    imageUrl: string;
+  };
+  features: {
+    heading: string;
+    subheading: string;
+    items: StoreFeatureItem[];
+  };
+  faq: {
+    heading: string;
+    subheading: string;
+    faqs: StoreFaqItem[];
+  };
+  footer: {
+    brandName: string;
+    tagline: string;
+    address: string;
+  };
+}
+
+export interface ExistingStoreData {
+  id: string;
+  name: string;
+  subdomain: string;
+  categoryId?: string | null;
+  waNumber: string;
+  googleMapsUrl: string;
+  address?: string | null;
+  templateId?: string | null;
+  regionData?: RegionData | null;
+  isOpen?: boolean;
+  waCheckoutTemplate?: string | null;
+  status?: string;
+  registeredByName?: string | null;
+  customization?: Record<string, unknown> | null;
+}
+
+export type OnboardingStep = 1 | 2 | 3 | 4 | 5;

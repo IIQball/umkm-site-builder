@@ -98,6 +98,9 @@ try {
       </div>
     </div>
 
-    <OrderHistoryTable client:load initialOrders={initialOrders} />
+    <!-- Interactive Table (matching designer templates style) -->
+    <div class="animate-fade-in-up delay-300">
+      <OrderHistoryTable client:load initialOrders={initialOrders} />
+    </div>
   </div>
 </DashboardLayout>

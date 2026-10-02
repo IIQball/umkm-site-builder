@@ -1,5 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { auth } from "@/lib/auth";
+import { db, users } from "@/db";
+import { eq } from "drizzle-orm";
 import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 import { extractSubdomain } from "@/lib/domain";
 
@@ -63,8 +65,27 @@ export const onRequest = defineMiddleware(async (context, next) => {
       headers: context.request.headers,
     });
 
-    if (session) {
-      context.locals.user = session.user;
+    if (session?.user) {
+      const sessionUser = session.user as unknown as { role?: string; status?: string };
+      let userRole = sessionUser.role;
+      let userStatus = sessionUser.status;
+
+      if (!userRole) {
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, session.user.id),
+          columns: { role: true, status: true },
+        });
+        if (dbUser) {
+          userRole = dbUser.role;
+          userStatus = userStatus || dbUser.status;
+        }
+      }
+
+      context.locals.user = {
+        ...session.user,
+        role: userRole || 'tenant',
+        status: userStatus || 'active',
+      } as App.User;
       context.locals.session = session.session;
     } else {
       context.locals.user = null;
@@ -77,9 +98,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const user = context.locals.user;
   
-  // Redirect designer from general entry point /dashboard to designer templates
-  if ((pathname === '/dashboard' || pathname === '/dashboard/') && user?.role === 'designer') {
-    return context.redirect('/designer/wallet');
+  // Redirect privileged or designer users from general entry point /dashboard to their respective role homes
+  if (pathname === '/dashboard' || pathname === '/dashboard/') {
+    if (user?.role === 'superadmin') return context.redirect('/superadmin');
+    if (user?.role === 'admin') return context.redirect('/admin');
+    if (user?.role === 'designer') return context.redirect('/designer/wallet');
   }
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan

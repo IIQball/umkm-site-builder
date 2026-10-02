@@ -9,6 +9,10 @@ import {
   clone,
 } from './editorStore.types';
 import { getSectionDefaultSlots } from '../inspector/sectionSlot.helpers';
+import {
+  getDefaultHeaderNavbarOrder,
+  getDefaultHeaderRowOrder,
+} from '../sections/header/headerLayout.helpers';
 
 export const getDefaultLayoutPreset = (type: TemplateSection['type']): string => {
   switch (type) {
@@ -126,7 +130,7 @@ export function applyReorderSectionSlot(
       defaultSlots = ['announcement_bar', 'navbar'];
     } else if (groupKey === 'navbarOrder') {
       const preset = (currentProps.layoutPreset as string) || s.layoutPreset || '';
-      defaultSlots = preset === 'centered_stacked' ? ['logo', 'nav_links'] : ['logo', 'nav_links', 'cta'];
+      defaultSlots = getDefaultHeaderNavbarOrder(preset);
     } else {
       defaultSlots = getSectionDefaultSlots(s);
     }
@@ -253,6 +257,12 @@ export function applyUpdateSectionLayoutPreset(
     } else if (s.type === 'features') {
       nextProps.elementOrder = getSectionDefaultSlots({ ...s, layoutPreset: preset });
       nextProps.featuresPreset = preset;
+    } else if (s.type === 'header_announcement') {
+      const defaultNav = getDefaultHeaderNavbarOrder(preset);
+      const defaultRow = getDefaultHeaderRowOrder(preset);
+      nextProps.navbarOrder = defaultNav;
+      nextProps.rowOrder = defaultRow;
+      nextProps.elementOrder = defaultNav;
     } else {
       nextProps.elementOrder = getSectionDefaultSlots({ ...s, layoutPreset: preset });
     }

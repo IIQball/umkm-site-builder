@@ -1,38 +1,48 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
-import { db } from '@/lib/db/client';
-import { stores, users } from '@/db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { getAuthenticatedUser, isAuthorizedAdmin } from "@/lib/auth";
+import AdminAssistedStores from "@/components/admin/AdminAssistedStores.svelte";
+import StatCard from "@/components/ui/StatCard.svelte";
+import { db } from "@/lib/db/client";
+import { stores, users, tenantInvitations } from "@/db/schema";
+import { eq, and, isNull, desc, notExists } from "drizzle-orm";
+import type { AssistedStoreItem } from "@/types/admin";
 
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user || !isAuthorizedAdmin(user)) {
-  return Astro.redirect('/auth/login?redirect=/admin/merchants');
+  return Astro.redirect("/auth/login?redirect=/admin/merchants");
 }
 
-let assistedStores: Array<{
-  id: string;
-  name: string;
-  subdomain: string;
-  status: string;
-  userId: string;
-  createdAt: string;
-  tenantName: string | null;
-  tenantEmail: string | null;
-  owner: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-}> = [];
+let assistedStores: AssistedStoreItem[] = [];
 
 try {
-  const whereCondition = user.role === 'superadmin'
-    ? and(eq(users.role, 'tenant'), isNull(users.deletedAt))
-    : and(eq(users.registeredBy, user.id), eq(users.role, 'tenant'), isNull(users.deletedAt));
+  const isSuperadmin = user.role === "superadmin";
+  const unacceptedInvitationSubquery = db
+    .select()
+    .from(tenantInvitations)
+    .where(
+      and(
+        eq(tenantInvitations.email, users.email),
+        isNull(tenantInvitations.acceptedAt),
+      ),
+    );
+
+  const whereCondition = isSuperadmin
+    ? and(
+        eq(users.role, "tenant"),
+        eq(users.status, "active"),
+        isNull(users.deletedAt),
+        notExists(unacceptedInvitationSubquery),
+      )
+    : and(
+        eq(users.registeredBy, user.id),
+        eq(users.role, "tenant"),
+        eq(users.status, "active"),
+        isNull(users.deletedAt),
+        notExists(unacceptedInvitationSubquery),
+      );
 
   const rows = await db
     .select({
@@ -46,7 +56,10 @@ try {
       tenantEmail: users.email,
     })
     .from(users)
-    .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
+    .leftJoin(
+      stores,
+      and(eq(stores.userId, users.id), isNull(stores.deletedAt)),
+    )
     .where(whereCondition)
     .orderBy(desc(users.createdAt));
 
@@ -58,32 +71,97 @@ try {
     userId: s.userId,
     tenantName: s.tenantName,
     tenantEmail: s.tenantEmail,
-    createdAt: s.createdAt ? s.createdAt.toISOString() : new Date().toISOString(),
+    createdAt: s.createdAt
+      ? s.createdAt.toISOString()
+      : new Date().toISOString(),
     owner: {
       id: s.userId,
       name: s.tenantName,
-      email: s.tenantEmail ?? '-',
+      email: s.tenantEmail ?? "-",
     },
   }));
 } catch (error) {
-  console.error('[AdminMerchants] Failed to query stores:', error);
+  console.error("[AdminMerchants] Failed to query stores:", error);
   assistedStores = [];
 }
+
+const counts = {
+  total: assistedStores.length,
+  published: assistedStores.filter((s) => s.status === "published" || s.status === "active").length,
+  draft: assistedStores.filter((s) => s.id && s.status !== "published" && s.status !== "active").length,
+  noStore: assistedStores.filter((s) => !s.id).length,
+};
 ---
 
-<DashboardLayout title="Merchant Binaan" breadcrumb="Admin / Merchant">
+<DashboardLayout title="Merchant Binaan" breadcrumb="Merchant Binaan">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+        <h1
+          class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+        >
           <span>Merchant Binaan Anda</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Kelola seluruh toko UMKM yang Anda dampingi dan pantau status publikasinya.
+          Kelola seluruh toko UMKM yang Anda dampingi dan pantau status
+          publikasinya.
         </p>
       </div>
     </div>
 
-    <AdminAssistedStores client:load stores={assistedStores} currentUser={user} />
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard
+        client:load
+        label="Total Merchant"
+        value={counts.total}
+        rawValue={counts.total}
+        icon="storefront"
+        cardTheme="dark"
+        badge="Binaan"
+        footerText="Seluruh merchant terdaftar"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Toko Aktif"
+        value={counts.published}
+        rawValue={counts.published}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Publik"
+        footerText="Toko live & dapat diakses"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Toko Draft"
+        value={counts.draft}
+        rawValue={counts.draft}
+        icon="edit_document"
+        cardTheme="blue"
+        badge="Persiapan"
+        footerText="Tahap perancangan website"
+        delayClass="delay-200"
+      />
+      <StatCard
+        client:load
+        label="Belum Buat Toko"
+        value={counts.noStore}
+        rawValue={counts.noStore}
+        icon="pending"
+        cardTheme="orange"
+        badge="Perlu Setup"
+        footerText="Belum setup template toko"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <!-- Interactive Table (matching designer templates style) -->
+    <div class="animate-fade-in-up delay-300">
+      <AdminAssistedStores client:load stores={assistedStores} />
+    </div>
   </div>
 </DashboardLayout>

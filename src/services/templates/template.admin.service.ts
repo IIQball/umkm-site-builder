@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { templates, designers, users } from '@/db/schema';
+import { templates, designers, users, notifications } from '@/db/schema';
 import { eq, ne, isNull, desc, and } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
 
@@ -75,6 +75,19 @@ export async function reviewTemplate(
     .set(updatePayload)
     .where(eq(templates.id, templateId))
     .returning();
+
+  const notificationMessage = action === 'approve' 
+    ? `Template "${existingTemplate.name}" telah disetujui dan sekarang tersedia di katalog publik.` 
+    : `Template "${existingTemplate.name}" ditolak. Alasan: ${rejectionReason || 'Tidak memenuhi standar'}`;
+
+  await db.insert(notifications).values({
+    id: `notif_${crypto.randomUUID()}`,
+    userId: existingTemplate.designerId,
+    type: 'template_reviewed',
+    title: `Review Template: ${action === 'approve' ? 'Disetujui' : 'Ditolak'}`,
+    message: notificationMessage,
+    metadata: { templateId: existingTemplate.id, action }
+  });
 
   return updatedData;
 }

@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, users, sessions, accounts, verifications, designers, wallets } from "@/db";
+import { db, users, sessions, accounts, verifications, designers, wallets, notifications } from "@/db";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/lib/utils/email";
 
@@ -278,6 +278,24 @@ export const auth = betterAuth({
               userId: user.id,
               balance: 0,
             }).onConflictDoNothing();
+          }
+          
+          // Create notification for superadmins
+          const superAdmins = await db.query.users.findMany({
+            where: eq(users.role, 'superadmin')
+          });
+          
+          if (superAdmins.length > 0) {
+            await db.insert(notifications).values(
+              superAdmins.map((admin) => ({
+                id: `notif_${crypto.randomUUID()}`,
+                userId: admin.id,
+                type: 'user_registered',
+                title: 'Pengguna Baru Terdaftar',
+                message: `Pengguna baru dengan nama ${user.name} (${user.role}) telah mendaftar.`,
+                metadata: { userId: user.id, role: user.role }
+              }) as typeof notifications.$inferInsert)
+            );
           }
         },
       },

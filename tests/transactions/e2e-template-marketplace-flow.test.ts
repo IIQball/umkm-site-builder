@@ -13,14 +13,20 @@ type WalletUpdatePayload = { balance?: number };
 type MutationPayload = { amount?: number; balanceAfter?: number; type?: string };
 
 vi.mock('@/lib/db/client', () => {
+  const chainableSelect = {
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue([{ id: 'sup-1', name: 'Superadmin' }]),
+    orderBy: vi.fn().mockReturnThis(),
+  };
   const mockDb = {
     query: {
       templates: { findFirst: vi.fn() },
       userTemplates: { findFirst: vi.fn() },
       users: { findFirst: vi.fn() },
     },
-    select: vi.fn(),
-    insert: vi.fn(),
+    select: vi.fn().mockReturnValue(chainableSelect),
+    insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
     update: vi.fn(),
   };
   return { db: mockDb, getDb: () => mockDb };

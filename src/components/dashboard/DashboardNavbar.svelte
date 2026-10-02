@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { AuthenticatedUser } from "@/lib/auth";
+  import { getRoleConfig } from "./sidebar/sidebar.helpers";
   import NavbarUserMenu from "@/components/common/NavbarUserMenu.svelte";
+  import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";
 
   export let userJson: string;
@@ -116,17 +118,7 @@
     </div>
 
     <!-- Notification Bell -->
-    <button
-      type="button"
-      class="relative p-2 text-muted hover:text-main hover:bg-nested rounded-full transition-colors active:scale-95 cursor-pointer"
-      aria-label="Notifikasi"
-      title="Notifikasi"
-    >
-      <span class="material-symbols-outlined text-lg">notifications</span>
-      <span
-        class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-card"
-      ></span>
-    </button>
+    <NavbarNotifications {user} />
 
     <!-- Theme Toggle -->
     <button

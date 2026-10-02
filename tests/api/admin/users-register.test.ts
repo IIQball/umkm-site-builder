@@ -18,14 +18,23 @@ vi.mock('@/db/index', () => ({
     insert: vi.fn(() => ({
       values: vi.fn().mockResolvedValue([{}]),
     })),
+    update: vi.fn(() => ({
+      set: vi.fn(() => ({
+        where: vi.fn().mockResolvedValue([{}]),
+      })),
+    })),
   },
   users: {
+    id: 'mock_id',
     email: 'mock_email',
   },
   sessions: {
     userId: 'mock_userId',
   },
   tenantInvitations: {
+    id: 'mock_id',
+  },
+  activityLogs: {
     id: 'mock_id',
   },
 }));

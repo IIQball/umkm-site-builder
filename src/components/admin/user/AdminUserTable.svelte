@@ -1,7 +1,7 @@
 <script lang="ts">
   import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2 } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Badge, Button, Table } from '@/components/ui';
+  import { Badge, Button } from '@/components/ui';
   import { formatDate } from '@/lib/utils/format';
 
   export let users: AdminUserItem[] = [];

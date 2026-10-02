@@ -46,6 +46,7 @@
   "devDependencies": {
     "@astrojs/cloudflare": "^14.3.0",
     "@astrojs/svelte": "^9.0.1",
+    "@axe-core/puppeteer": "^4.13.0",
     "@babel/eslint-parser": "^8.0.1",
     "@types/node": "^24.0.0",
     "@types/ws": "^8.18.1",

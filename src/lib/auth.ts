@@ -357,31 +357,31 @@ export function isDesigner(user: AuthenticatedUser | null): boolean {
   return user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin';
 }
 
-export function isActive(user: AuthenticatedUser | null): boolean {
+export function isActive(user: AuthenticatedUser | null): user is AuthenticatedUser {
   if (!user) return false;
   return user.status === 'active';
 }
 
-export function isAuthorizedDesigner(user: AuthenticatedUser | null): boolean {
+export function isAuthorizedDesigner(user: AuthenticatedUser | null): user is AuthenticatedUser {
   if (!user) return false;
   return user.status === 'active' && (user.role === 'designer' || user.role === 'admin' || user.role === 'superadmin');
 }
 
-export function isAdmin(user: AuthenticatedUser | null): boolean {
+export function isAdmin(user: AuthenticatedUser | null): user is AuthenticatedUser {
   if (!user) return false;
   return user.role === 'admin' || user.role === 'superadmin';
 }
 
-export function isAuthorizedAdmin(user: AuthenticatedUser | null): boolean {
+export function isAuthorizedAdmin(user: AuthenticatedUser | null): user is AuthenticatedUser {
   return isActive(user) && isAdmin(user);
 }
 
-export function isSuperAdmin(user: AuthenticatedUser | null): boolean {
+export function isSuperAdmin(user: AuthenticatedUser | null): user is AuthenticatedUser {
   if (!user) return false;
   return user.role === 'superadmin';
 }
 
-export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): boolean {
+export function isAuthorizedSuperAdmin(user: AuthenticatedUser | null): user is AuthenticatedUser {
   return isActive(user) && isSuperAdmin(user);
 }
 

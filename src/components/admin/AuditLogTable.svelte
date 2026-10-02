@@ -22,7 +22,7 @@
   }> = [];
 
   export let total: number = 0;
-  export let totalPages: number = 1;
+  export let currentPage: number = 1;
   export let initialActionFilter: string = 'all';
   export let initialRoleFilter: string = 'all';
 

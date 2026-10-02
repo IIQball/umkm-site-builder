@@ -10,7 +10,7 @@
     getHeaderTopBarType,
     headerSupportsCta,
     headerSupportsNavLinks,
-    getDefaultHeaderNavbarOrder,
+    getEffectiveHeaderNavbarOrder,
     headerHasRowOrder,
   } from '../sections/header/headerLayout.helpers';
 
@@ -31,12 +31,7 @@
   $: isStoreBadge = activePreset === 'store_badge_highlight';
   $: showAnnouncement = (section.props?.showAnnouncement as boolean) ?? true;
 
-  $: defaultNavbarOrder = getDefaultHeaderNavbarOrder(activePreset);
-  $: navbarOrder = (
-    Array.isArray(section.props?.navbarOrder) && section.props.navbarOrder.length > 0
-      ? section.props.navbarOrder
-      : defaultNavbarOrder
-  ).filter((s: string) => defaultNavbarOrder.includes(s)) as string[];
+  $: navbarOrder = getEffectiveHeaderNavbarOrder(activePreset, section.props?.navbarOrder);
 
   $: hasRows = headerHasRowOrder(activePreset);
   $: rowOrder = (section.props?.rowOrder as string[]) || (hasRows ? ['announcement_bar', 'navbar'] : ['navbar']);

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { signOut } from '@/lib/auth-client';
+  import { signOutAndRedirect } from '@/lib/auth-client';
   import type { AuthenticatedUser } from '@/lib/auth';
   import { onMount } from 'svelte';
   import { getNavGroups } from './sidebar/sidebar.helpers';
@@ -14,6 +14,7 @@
 
   let collapsed = false;
   let drawerOpen = false;
+  let isLoggingOut = false;
 
   onMount(() => {
     collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
@@ -31,8 +32,8 @@
   const closeDrawer = () => { drawerOpen = false; };
 
   const handleSignOut = async () => {
-    await signOut();
-    window.location.href = '/auth/login';
+    isLoggingOut = true;
+    await signOutAndRedirect();
   };
 </script>
 
@@ -50,6 +51,7 @@
   {navGroups}
   {drawerOpen}
   {currentPath}
+  {isLoggingOut}
   on:openDrawer={openDrawer}
   on:closeDrawer={closeDrawer}
   on:signOut={handleSignOut}

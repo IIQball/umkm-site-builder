@@ -132,7 +132,12 @@ export function mergeStoreCustomization(
 
       switch (section.type) {
         case 'header_announcement': {
-          if (!section.props.logoText && storeName) {
+          const customHeader = Array.isArray(cust.sections)
+            ? cust.sections.find((s) => s && typeof s === 'object' && ((s as Record<string, unknown>).id === section.id || (s as Record<string, unknown>).type === 'header_announcement')) as Record<string, unknown> | undefined
+            : undefined;
+          const hasCustomLogoText = Boolean((customHeader?.props as Record<string, unknown> | undefined)?.logoText);
+
+          if (storeName && !hasCustomLogoText) {
             section.props.logoText = storeName;
           }
           if (waNumber) {
@@ -198,7 +203,12 @@ export function mergeStoreCustomization(
         }
 
         case 'footer': {
-          if (!section.props.brandName && storeName) {
+          const customFooter = Array.isArray(cust.sections)
+            ? cust.sections.find((s) => s && typeof s === 'object' && ((s as Record<string, unknown>).id === section.id || (s as Record<string, unknown>).type === 'footer')) as Record<string, unknown> | undefined
+            : undefined;
+          const hasCustomBrandName = Boolean((customFooter?.props as Record<string, unknown> | undefined)?.brandName);
+
+          if (storeName && !hasCustomBrandName) {
             section.props.brandName = storeName;
           }
           if (!section.props.address && address) {

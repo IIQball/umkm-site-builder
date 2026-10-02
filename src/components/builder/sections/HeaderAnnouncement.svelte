@@ -17,7 +17,7 @@
   import { generateWhatsAppLink } from '@/lib/whatsapp';
   import {
     getDefaultHeaderRowOrder,
-    getDefaultHeaderNavbarOrder,
+    getEffectiveHeaderNavbarOrder,
     headerHasRowOrder,
   } from './header/headerLayout.helpers';
 
@@ -27,6 +27,15 @@
   export let isActive: boolean = false;
   export let layoutPreset: string = 'default_split';
   export let categories: Array<{ id?: string; name: string; slug?: string; description?: string; href?: string }> = [];
+  export let store: any = null;
+  export let isLiveStorefront: boolean = false;
+
+  $: isHeaderActive = isActive && !isLiveStorefront;
+  $: activeLogoText = (props?.logoText as string) || store?.name || 'Toko UMKM';
+  $: safeProps = {
+    ...props,
+    logoText: activeLogoText,
+  };
 
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isDesktop = viewMode === 'desktop';
@@ -57,12 +66,7 @@
   $: navbarContainerOrder = rowOrder.indexOf('navbar') !== -1 ? rowOrder.indexOf('navbar') : 1;
 
   // Group 2: Elemen Bilah Navigasi (Horizontal atau Vertikal jika stacked)
-  $: defaultNavbarOrder = getDefaultHeaderNavbarOrder(activePreset);
-  $: navbarOrder = (Array.isArray(props?.navbarOrder) && props.navbarOrder.length > 0
-    ? props.navbarOrder
-    : Array.isArray(props?.elementOrder) && props.elementOrder.length > 0
-      ? props.elementOrder
-      : defaultNavbarOrder).filter((s: string) => defaultNavbarOrder.includes(s)) as string[];
+  $: navbarOrder = getEffectiveHeaderNavbarOrder(activePreset, props?.navbarOrder);
 
   let isMobileMenuOpen = false;
 
@@ -111,7 +115,7 @@
     {/if}
   {:else if hasAnnouncementRow && props?.showAnnouncement !== false && !['compact_inline', 'floating_pill_island', 'transparent_glass_header', 'delivery_order_cta', 'store_badge_highlight', 'promo_countdown_banner'].includes(activePreset)}
     <div data-node="announcement_bar" style="order: {announcementBarOrder};" class="w-full">
-      <AnnouncementBar {props} {sectionId} {isActive} />
+      <AnnouncementBar props={safeProps} {sectionId} isActive={isHeaderActive} />
     </div>
   {/if}
 
@@ -119,7 +123,7 @@
   {#if activePreset === 'floating_pill_island'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderPillIsland
-        {props} {sectionId} {isActive} {navbarOrder}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -127,7 +131,7 @@
   {:else if activePreset === 'delivery_order_cta'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderDeliveryOrder
-        {props} {sectionId} {isActive} {hasAnnouncementRow}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {hasAnnouncementRow}
         {announcementBarOrder} {navbarContainerOrder} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
@@ -136,7 +140,7 @@
   {:else if activePreset === 'store_badge_highlight'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderStoreBadge
-        {props} {sectionId} {isActive} {navbarOrder}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -144,7 +148,7 @@
   {:else if activePreset === 'promo_countdown_banner'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderPromoCountdown
-        {props} {sectionId} {isActive} {hasAnnouncementRow}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {hasAnnouncementRow}
         {announcementBarOrder} {navbarContainerOrder} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
@@ -153,7 +157,7 @@
   {:else if activePreset === 'split_nav_centered_logo'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderSplitNavCenteredLogo
-        {props} {sectionId} {isActive} {navbarOrder}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {navLinks} {waUrl} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -161,7 +165,7 @@
   {:else if activePreset === 'command_search_bar'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderCommandSearch
-        {props} {sectionId} {isActive} {navbarOrder}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -169,7 +173,7 @@
   {:else if activePreset === 'mega_menu_dropdown'}
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderMegaMenu
-        {props} {sectionId} {isActive} {navbarOrder}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} {categories} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -185,11 +189,11 @@
         {#each navbarOrder as slot}
           {#if slot === 'logo'}
             <div data-node="logo" class="flex items-center justify-center">
-              <HeaderLogo {props} {sectionId} {isActive} />
+              <HeaderLogo props={safeProps} {sectionId} isActive={isHeaderActive} />
             </div>
           {:else if slot === 'nav_links'}
             <div data-node="nav_links" class="flex items-center justify-center gap-6">
-              <HeaderNav {props} {sectionId} {isActive} onlyDesktop={true} />
+              <HeaderNav props={safeProps} {sectionId} isActive={isHeaderActive} onlyDesktop={true} />
             </div>
           {/if}
         {/each}
@@ -201,7 +205,7 @@
         style="order: {navbarContainerOrder}; max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); height: 64px; border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
       >
         <div data-node="logo" class="flex items-center flex-shrink-0">
-          <HeaderLogo {props} {sectionId} {isActive} />
+          <HeaderLogo props={safeProps} {sectionId} isActive={isHeaderActive} />
         </div>
         <div class="flex items-center gap-2 flex-shrink-0 ml-auto">
           {#if viewMode === 'tablet'}
@@ -233,7 +237,7 @@
     <!-- Default Split, Compact Inline, Transparent Glass, Top Contact Bar Main Navbar -->
     <div style="order: {navbarContainerOrder};" class="w-full">
       <HeaderDefaultSplit
-        {props} {sectionId} {isActive} {activePreset}
+        props={safeProps} {sectionId} isActive={isHeaderActive} {activePreset}
         {navbarOrder} {waUrl} {ctaText} onToggleMobileMenu={toggleMobileMenu}
       />
     </div>
@@ -243,7 +247,7 @@
   <HeaderMobileDrawer
     isOpen={isMobileMenuOpen}
     onClose={() => (isMobileMenuOpen = false)}
-    {props} {sectionId} {isActive} {activePreset}
+    props={safeProps} {sectionId} isActive={isHeaderActive} {activePreset}
     {waNumber} {ctaText} {storeHours} {address}
     {storeStatus} {categories}
   />

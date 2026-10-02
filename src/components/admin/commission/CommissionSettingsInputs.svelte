@@ -1,10 +1,38 @@
 <script lang="ts">
   import { Input, Button } from '@/components/ui';
+  import { formatCurrencyInput, parseCurrencyInput } from '@/lib/currency';
 
   export let platformFeePercentage: number = 30;
   export let adminServiceFee: number = 5000;
   export let settlementDelayDays: number = 7;
   export let isLoading: boolean = false;
+
+  let displayFee: string = formatCurrencyInput(adminServiceFee) || '0';
+
+  $: {
+    const parsed = parseCurrencyInput(displayFee);
+    if (parsed !== adminServiceFee) {
+      displayFee = adminServiceFee === 0 ? '0' : formatCurrencyInput(adminServiceFee);
+    }
+  }
+
+  const handleFeeInput = (e: Event) => {
+    const nativeEvent = (e as CustomEvent).detail || e;
+    const target = (nativeEvent.target || e.target) as HTMLInputElement;
+    const val = target ? target.value : '';
+    const cleanDigits = val.replace(/\D/g, '');
+    const num = Number(cleanDigits) || 0;
+    adminServiceFee = num;
+    displayFee = cleanDigits ? formatCurrencyInput(cleanDigits) : '';
+    if (target) {
+      target.value = displayFee;
+    }
+  };
+
+  const setFeePreset = (val: number) => {
+    adminServiceFee = val;
+    displayFee = val === 0 ? '0' : formatCurrencyInput(val);
+  };
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -45,7 +73,7 @@
   <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+        <div class="w-7 h-7 rounded-lg bg-info/15 text-info flex items-center justify-center">
           <span class="material-symbols-outlined text-sm">support_agent</span>
         </div>
         <span class="text-xs font-bold text-main font-heading">Fee Pendampingan Admin</span>
@@ -55,7 +83,7 @@
           size="xs"
           variant={adminServiceFee === 0 ? 'primary' : 'secondary'}
           class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 0 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
-          on:click={() => (adminServiceFee = 0)}
+          on:click={() => setFeePreset(0)}
         >
           0
         </Button>
@@ -63,7 +91,7 @@
           size="xs"
           variant={adminServiceFee === 5000 ? 'primary' : 'secondary'}
           class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 5000 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
-          on:click={() => (adminServiceFee = 5000)}
+          on:click={() => setFeePreset(5000)}
         >
           5rb
         </Button>
@@ -71,7 +99,7 @@
           size="xs"
           variant={adminServiceFee === 10000 ? 'primary' : 'secondary'}
           class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {adminServiceFee === 10000 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
-          on:click={() => (adminServiceFee = 10000)}
+          on:click={() => setFeePreset(10000)}
         >
           10rb
         </Button>
@@ -79,13 +107,13 @@
     </div>
     <Input
       id="adminServiceFee"
-      type="number"
-      min="0"
-      step="1000"
-      placeholder="5000"
-      bind:value={adminServiceFee}
+      type="text"
+      inputmode="numeric"
+      placeholder="5.000"
+      value={displayFee}
+      on:input={handleFeeInput}
       disabled={isLoading}
-      className="font-bold text-sm"
+      className="font-bold text-sm font-mono"
       helper="Jasa admin saat membelikan template tenant."
     >
       <span slot="prefix" class="font-bold text-xs text-muted select-none">Rp</span>

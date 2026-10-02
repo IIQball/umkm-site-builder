@@ -1,10 +1,16 @@
 import { db } from '@/lib/db/client';
 import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc, and } from 'drizzle-orm';
+import { eq, ne, isNull, desc, and } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
 
 export async function getTemplatesForAdmin(statusFilter?: string | null) {
-  let conditions = isNull(templates.deletedAt);
+  // Hanya data yang statusnya pending, approved, dan rejected yang masuk kurasi admin.
+  // Draft hanya milik desainer dan tidak boleh tampil di antrean kurasi admin.
+  let conditions = and(
+    isNull(templates.deletedAt),
+    ne(templates.status, 'draft')
+  )!;
+
   if (statusFilter && ['pending', 'approved', 'rejected'].includes(statusFilter)) {
     conditions = and(conditions, eq(templates.status, statusFilter as 'pending' | 'approved' | 'rejected'))!;
   }

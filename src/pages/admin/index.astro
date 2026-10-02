@@ -1,37 +1,24 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
 import AdminBankManager from '@/components/admin/AdminBankManager.svelte';
 import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
 import { db } from '@/lib/db/client';
 import { stores, users } from '@/db/schema';
 import { eq, and, isNull, desc } from 'drizzle-orm';
+import type { AssistedStoreItem } from '@/types/admin';
 
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user || user.role !== 'admin') {
+if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect('/auth/login?redirect=/admin');
 }
 
 const isSuper = user.role === 'superadmin';
 
-let assistedStores: Array<{
-  id: string;
-  name: string;
-  subdomain: string;
-  status: string;
-  userId: string;
-  createdAt: string;
-  tenantName: string | null;
-  tenantEmail: string | null;
-  owner: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-}> = [];
+let assistedStores: AssistedStoreItem[] = [];
 
 if (!isSuper) {
   try {
@@ -145,7 +132,7 @@ const pageTitle = isSuper ? 'Dasbor Super Admin' : 'Dasbor Admin Pendamping';
 
       <!-- Section 2: Toko Binaan Saya (Assisted Stores) -->
       <div>
-        <AdminAssistedStores client:load stores={assistedStores} currentUser={user} />
+        <AdminAssistedStores client:load stores={assistedStores} />
       </div>
 
       <!-- Section 3: Overview Metrik Transaksi & Layanan -->
@@ -154,7 +141,7 @@ const pageTitle = isSuper ? 'Dasbor Super Admin' : 'Dasbor Admin Pendamping';
           <h2 class="text-lg font-bold text-main font-heading">Ringkasan Aktivitas & Layanan</h2>
           <p class="text-xs text-secondary mt-0.5">Monitoring transaksi toko UMKM dan aktivitas sistem.</p>
         </div>
-        <AdminMetricsOverview client:load isSuperAdmin={false} />
+        <AdminMetricsOverview client:load isSuperAdmin={isSuper} />
       </div>
     </div>
   </div>

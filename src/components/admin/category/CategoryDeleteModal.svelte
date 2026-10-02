@@ -11,12 +11,12 @@
 <Modal
   bind:open={showModal}
   title="Konfirmasi Hapus Kategori"
-  size="sm"
+  size="md"
   on:close={onClose}
 >
   <div class="space-y-4">
-    <div class="p-4 rounded-2xl bg-danger/10 border border-danger/20 flex items-start gap-3">
-      <span class="material-symbols-outlined text-danger text-xl mt-0.5">warning</span>
+    <div class="p-4 rounded-2xl bg-error/10 border border-error/20 flex items-start gap-3">
+      <span class="material-symbols-outlined text-error text-xl mt-0.5">warning</span>
       <div class="space-y-1 text-body-sm">
         <p class="font-bold text-main">Apakah Anda yakin ingin menghapus kategori ini?</p>
         <p class="text-secondary">

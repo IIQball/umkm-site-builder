@@ -32,11 +32,13 @@
   ].filter(Boolean).join('; ');
 
   const handleClick = (e: MouseEvent) => {
+    if (!isActive) return;
     e.stopPropagation();
     editorStore.selectNode(sectionId, 'announcement');
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isActive) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       editorStore.selectNode(sectionId, 'announcement');
@@ -45,13 +47,16 @@
 </script>
 
 {#if showAnnouncement && (announcementText || freeShippingText)}
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
-    role="button"
-    tabindex="0"
+    role={isActive ? 'button' : undefined}
+    tabindex={isActive ? 0 : undefined}
     on:click={handleClick}
     on:keydown={handleKeyDown}
     style={containerStyleString}
-    class={`w-full transition-all cursor-pointer box-border ${
+    class={`w-full transition-all box-border ${
+      isActive ? 'cursor-pointer' : ''
+    } ${
       isNodeActive
         ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-inset shadow-inner'
         : 'hover:opacity-95'

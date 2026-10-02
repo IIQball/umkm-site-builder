@@ -7,6 +7,7 @@
   import MapsBranchSwitcher from './MapsBranchSwitcher.svelte';
 
   export let sectionId: string = '';
+  export let branchMode: 'single' | 'multi' = 'multi';
   export let branches: MapBranchItem[] = [];
   export let activeBranchIdx: number = 0;
   export let onSelectBranch: (idx: number) => void = () => {};
@@ -50,14 +51,16 @@
 </script>
 
 <div class="w-full text-left space-y-3">
-  <!-- Bilah Tab Cabang -->
-  <MapsBranchSwitcher
-    {sectionId}
-    {branches}
-    {activeBranchIdx}
-    {onSelectBranch}
-    {nodeStyles}
-  />
+  {#if branchMode === 'multi'}
+    <!-- Bilah Tab Cabang -->
+    <MapsBranchSwitcher
+      {sectionId}
+      {branches}
+      {activeBranchIdx}
+      {onSelectBranch}
+      {nodeStyles}
+    />
+  {/if}
 
   <!-- Detail Info Alamat Cabang Aktif -->
   <div

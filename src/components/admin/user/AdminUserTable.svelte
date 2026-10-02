@@ -1,7 +1,7 @@
 <script lang="ts">
   import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2 } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Badge, Button } from '@/components/ui';
+  import { Badge, Button, Table } from '@/components/ui';
   import { formatDate } from '@/lib/utils/format';
 
   export let users: AdminUserItem[] = [];
@@ -9,7 +9,14 @@
   export let onUnsuspend: (user: AdminUserItem) => void;
   export let onShowDetail: (user: AdminUserItem) => void;
 
-  // Table headers removed since we're using cards
+  const tableHeaders = [
+    { key: 'name', label: 'PENGGUNA' },
+    { key: 'role', label: 'PERAN' },
+    { key: 'email', label: 'EMAIL' },
+    { key: 'createdAt', label: 'TANGGAL' },
+    { key: 'status', label: 'STATUS' },
+    { key: 'actions', label: 'AKSI', align: 'right' as const }
+  ];
 </script>
 
 {#if users.length === 0}
@@ -23,65 +30,48 @@
     </p>
   </div>
 {:else}
-  <div class="flex flex-col gap-3 p-4 sm:p-5 bg-card-base/50">
+  <Table headers={tableHeaders} minWidth="min-w-[640px]">
     {#each users as item (item.id)}
-      <div class="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-card-base rounded-2xl border border-light/60 shadow-xs hover:shadow-sm hover:border-light transition-all duration-300">
-        
-        <!-- Left: User Info -->
-        <div class="flex-1 min-w-0 flex items-start gap-4">
-          <!-- Avatar Placeholder -->
-          <div class="w-11 h-11 rounded-2xl bg-nested/80 text-secondary flex items-center justify-center shrink-0 border border-light/50 shadow-xs">
-            <span class="font-bold text-main uppercase">{item.name.charAt(0)}</span>
-          </div>
-
-          <!-- Info Details -->
-          <div class="flex flex-col gap-1 w-full">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="font-bold text-main font-heading text-[15px] group-hover:text-primary transition-colors truncate max-w-[200px] sm:max-w-xs">
-                {item.name}
-              </span>
-              <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
-                {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Merchant' : item.role === 'admin' ? 'Admin' : item.role}
-              </span>
+      <tr>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-nested/80 text-secondary flex items-center justify-center shrink-0 border border-light/50">
+              <span class="font-bold text-xs uppercase">{item.name.charAt(0)}</span>
             </div>
-            
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[11px] text-secondary font-medium">
-                {item.email}
-              </span>
-              <span class="text-[10px] text-muted">•</span>
-              <span class="text-[11px] text-muted">
-                {item.createdAt ? formatDate(item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
-              </span>
-            </div>
+            <span class="font-medium text-main text-sm">{item.name}</span>
           </div>
-        </div>
-
-        <!-- Right: Status & Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
-          
-          <!-- Status Badge -->
-          <div class="shrink-0 w-32">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
+            {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Merchant' : item.role === 'admin' ? 'Admin' : item.role}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+          {item.email}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
+          {item.createdAt ? formatDate(item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
             {#if item.status === 'active'}
-              <Badge variant="emerald" size="sm" class="w-full justify-center shadow-xs">
+              <Badge variant="emerald" size="sm" class="justify-center shadow-xs">
                 <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
                 Aktif
               </Badge>
             {:else if item.status === 'pending'}
-              <Badge variant="amber" size="sm" class="w-full justify-center shadow-xs">
+              <Badge variant="amber" size="sm" class="justify-center shadow-xs">
                 <AlertCircle size={12} strokeWidth={3} class="mr-1 inline" />
                 Menunggu
               </Badge>
             {:else}
-              <Badge variant="rose" size="sm" class="w-full justify-center shadow-xs">
+              <Badge variant="rose" size="sm" class="justify-center shadow-xs">
                 <Ban size={12} strokeWidth={3} class="mr-1 inline" />
                 Ditangguhkan
               </Badge>
             {/if}
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-1.5 border-t sm:border-t-0 sm:border-l border-light/60 pt-3 sm:pt-0 sm:pl-6 shrink-0">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+          <div class="flex items-center justify-end gap-1.5">
             {#if item.status === 'active'}
               <Button 
                 size="sm"
@@ -117,8 +107,8 @@
               </Button>
             {/if}
           </div>
-        </div>
-      </div>
+        </td>
+      </tr>
     {/each}
-  </div>
+  </Table>
 {/if}

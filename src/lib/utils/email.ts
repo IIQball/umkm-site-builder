@@ -30,7 +30,7 @@ export async function sendEmail(options: SendEmailOptions) {
         authType: 'plain',
       },
       {
-        from: { name: 'UMKM Site Builder', email: user },
+        from: { name: 'Pinoka', email: user },
         to: options.to,
         subject: options.subject,
         text: options.text,

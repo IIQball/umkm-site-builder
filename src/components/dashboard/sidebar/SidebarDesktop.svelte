@@ -138,7 +138,7 @@
               </span>
               {#if !collapsed}
                 <span
-                  class="truncate leading-none {active
+                  class="truncate leading-tight pb-[2px] {active
                     ? 'font-bold text-white'
                     : ''}"
                 >

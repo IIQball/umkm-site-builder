@@ -1,10 +1,12 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import StatCard from '@/components/ui/StatCard.svelte';
+import ChartWidget from '@/components/dashboard/ChartWidget.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getStoreTrafficSeries, type TrafficPoint } from '@/services/analytics.service';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -21,7 +23,39 @@ const store = await db.query.stores.findFirst({
   },
 });
 
+// Data awal grafik (12 bulan) dirender dari server supaya grafik langsung muncul.
+// Jika tabel statistik belum dibuat / query gagal, dashboard tetap tampil tanpa grafik error.
+let initialPoints: TrafficPoint[] = [];
+let initialPointsFailed = false;
+if (store?.id) {
+  try {
+    initialPoints = await getStoreTrafficSeries(store.id, '12m');
+  } catch (error) {
+    initialPointsFailed = true;
+    console.error('[DASHBOARD] gagal memuat data grafik:', error);
+  }
+}
+
 const managedByAdmin = store?.registeredBy && store.registrar ? { name: store.registrar.name } : null;
+
+const storeData = store || {
+  id: '',
+  totalViews: 0,
+  totalWaClicks: 0,
+  customization: {},
+};
+
+const customization = storeData.customization as Record<string, unknown> | undefined;
+const isOnboarded = customization?.isOnboarded === true;
+
+const conversionRate = storeData.totalViews > 0
+  ? ((storeData.totalWaClicks / storeData.totalViews) * 100).toFixed(1)
+  : '0.0';
+
+const engagementScore = Math.min(
+  Math.round((parseInt(conversionRate) / 100) * 100),
+  100
+);
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -38,6 +72,7 @@ if (currentHour >= 4 && currentHour < 11) {
 
 <DashboardLayout title="Dashboard">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
         <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
@@ -51,61 +86,81 @@ if (currentHour >= 4 && currentHour < 11) {
             Didampingi oleh Admin {managedByAdmin.name}
           </span>
         )}
-        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Ringkasan aktivitas dan statistik toko Anda.
+        <p class="text-body-base text-secondary mt-3 max-w-2xl leading-relaxed">
+          Pantau pengunjung toko online dan aktivitas pelanggan Anda secara real-time.
         </p>
       </div>
     </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard 
-          client:load
-          label="Status Toko" 
-          value="—" 
-          icon="storefront" 
-          cardTheme="dark"
-          badge="Aktif"
-          footerText="Kelola informasi toko"
-          delayClass="delay-100"
-        />
-        <StatCard 
-          client:load
-          label="Total Produk" 
-          value="—" 
-          icon="shopping_bag" 
-          cardTheme="default"
-          badge="Inventori"
-          footerText="Produk tersedia di katalog"
-          delayClass="delay-150"
-        />
-        <StatCard 
-          client:load
-          label="Aktivitas Toko" 
-          value="—" 
-          icon="trending_up" 
-          cardTheme="blue"
-          badge="Analytics"
-          footerText="Monitor lalu lintas toko"
-          delayClass="delay-200"
-        />
-      </div>
+    <!-- Analytics Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard 
+        client:load
+        label="Total Views" 
+        value={storeData.totalViews} 
+        rawValue={storeData.totalViews}
+        icon="visibility" 
+        cardTheme="dark"
+        badge="Pengunjung"
+        footerText="Total kunjungan toko"
+        delayClass="delay-100"
+      />
+      <StatCard 
+        client:load
+        label="WhatsApp Clicks" 
+        value={storeData.totalWaClicks} 
+        rawValue={storeData.totalWaClicks}
+        icon="message" 
+        cardTheme="default"
+        badge="Kontak"
+        footerText="Klik hubungi via WhatsApp"
+        delayClass="delay-150"
+      />
+      <StatCard 
+        client:load
+        label="Conversion Rate" 
+        value={`${conversionRate}%`} 
+        rawValue={parseFloat(conversionRate)}
+        icon="trending_up" 
+        cardTheme="orange"
+        badge="Metrik"
+        footerText="Persentase konversi pengunjung"
+        delayClass="delay-200"
+      />
+      <StatCard 
+        client:load
+        label="Engagement Score" 
+        value={engagementScore} 
+        rawValue={engagementScore}
+        icon="poll" 
+        cardTheme="blue"
+        badge="Skor"
+        valueSuffix="/ 100"
+        footerText="Skor engagement toko"
+        delayClass="delay-250"
+      />
+    </div>
 
+    <!-- Chart Widget -->
+    <div class="animate-fade-in-up delay-300">
+      <ChartWidget 
+        client:load 
+        totalViews={storeData.totalViews}
+        totalClicks={storeData.totalWaClicks}
+        isOnboarded={isOnboarded}
+        initialPoints={initialPoints}
+        initialFailed={initialPointsFailed}
+      />
+    </div>
 
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up delay-300">
+    <!-- Store Settings Link -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up delay-500">
       <a href="/dashboard/store" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Pengaturan Toko</h3>
           <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
         </div>
         <p class="text-body-base text-secondary">Kelola informasi toko, subdomain, dan kontak bisnis Anda</p>
-      </a>
-      <a href="/dashboard/analytics" class="group p-6 rounded-3xl bg-card border border-light shadow-xs hover:shadow-md hover:border-primary/40 transition-all">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold uppercase tracking-wider text-muted">Analitik Toko</h3>
-          <span class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors">arrow_forward</span>
-        </div>
-        <p class="text-body-base text-secondary">Monitor pengunjung, klik WhatsApp, dan tingkat konversi toko</p>
       </a>
     </div>
   </div>

@@ -39,7 +39,6 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         title: 'Utama',
         items: [
           { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', group: 'Utama' },
-          { label: 'Analitik & Performa', href: '/dashboard/analytics', icon: 'trending_up', group: 'Utama' },
         ],
       },
       {

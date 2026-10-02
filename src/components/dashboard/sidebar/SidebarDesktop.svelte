@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import type { NavGroup } from "./sidebar.helpers";
+  import { type NavGroup, getDashboardHomePath } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -15,12 +15,7 @@
   }>();
 
   $: sidebarWidth = collapsed ? "76px" : "260px";
-  $: homePath =
-    user?.role === "designer"
-      ? "/designer/wallet"
-      : user?.role === "admin" || user?.role === "superadmin"
-        ? "/admin"
-        : "/dashboard";
+  $: homePath = getDashboardHomePath(user?.role);
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;

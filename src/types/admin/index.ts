@@ -26,3 +26,26 @@ export interface CommissionSettingsData {
   settlementDelayDays: number;
   payoutMinimumBalance: number;
 }
+
+export interface AssistedStoreItem {
+  id: string | null;
+  name: string | null;
+  subdomain: string | null;
+  status: string | null;
+  userId: string;
+  createdAt: string;
+  tenantName?: string | null;
+  tenantEmail?: string | null;
+  totalWaClicks?: number;
+  totalViews?: number;
+  owner?: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
+  category?: {
+    id: string;
+    name: string;
+  } | null;
+}
+

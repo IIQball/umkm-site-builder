@@ -4,6 +4,7 @@
   import AdminUserAddModal from './AdminUserAddModal.svelte';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import { toast } from '@/lib/toast';
+  import { formatDate } from '@/lib/utils/format';
 
   export let invitations: Array<{
     id: string;
@@ -382,7 +383,7 @@
             <td class="px-6 py-4">
               <div class="flex items-center gap-1.5 text-secondary text-sm">
                 <CalendarDays size={14} />
-                <span>{new Date(inv.expiresAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span>{formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
               </div>
             </td>
 
@@ -491,8 +492,8 @@
       {deleteTarget?.message}
     </p>
     {#if deleteTarget?.subMessage}
-      <p class="text-xs text-secondary leading-relaxed p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
-        <span class="text-rose-500 font-bold mr-1">Perhatian:</span>
+      <p class="text-xs text-secondary leading-relaxed p-3 bg-error/5 rounded-xl border border-error/10">
+        <span class="text-error font-bold mr-1">Perhatian:</span>
         {deleteTarget.subMessage}
       </p>
     {/if}

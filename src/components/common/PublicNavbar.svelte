@@ -4,7 +4,7 @@
 
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { signOut } from '@/lib/auth-client'
+  import { signOutAndRedirect } from '@/lib/auth-client'
   import { Sun, Moon, X } from 'lucide-svelte'
   import {
     type NavUser,
@@ -13,7 +13,7 @@
   } from './navbar.helpers'
   import NavbarUserMenu from './NavbarUserMenu.svelte'
   import NavbarMobileDrawer from './NavbarMobileDrawer.svelte'
-  import Button from '@/components/ui/Button.svelte'
+  import { Button } from '@/components/ui'
   import NavbarDropdown from './NavbarDropdown.svelte'
 
   export let user: NavUser | null = null
@@ -123,7 +123,7 @@
 
   const handleSignOut = async () => {
     isLoggingOut = true
-    try { await signOut() } finally { window.location.href = '/auth/login' }
+    await signOutAndRedirect()
   }
 
   $: isSolidBackground = isMobileMenuOpen || openDropdown !== null
@@ -166,7 +166,7 @@
       <a
         href="/umkm"
         class={currentPath.startsWith('/umkm')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         UMKM
@@ -176,7 +176,7 @@
       <a
         href="/templates"
         class={currentPath.startsWith('/templates')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         Template
@@ -217,7 +217,7 @@
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
       <a
         href="/#contact"
-        class="hidden sm:inline-block label-caps tracking-wider text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white font-medium transition-colors shrink-0"
+        class="hidden sm:inline-block label-caps tracking-wider text-secondary hover:text-main dark:text-muted dark:hover:text-white font-medium transition-colors shrink-0"
       >
         KONTAK
       </a>
@@ -239,12 +239,12 @@
         on:click={toggleTheme}
         aria-label="Ubah tema"
         title={isDark ? 'Mode Terang' : 'Mode Gelap'}
-        class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-neutral-200 dark:border-neutral-800 dark:bg-white/5 dark:hover:bg-white/10 text-main dark:text-white shadow-sm shrink-0"
+        class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-light dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-main dark:text-white shadow-sm shrink-0"
       >
         {#if isDark}
-          <Sun size={18} class="text-amber-400 shrink-0" />
+          <Sun size={18} class="text-warning shrink-0" />
         {:else}
-          <Moon size={18} class="text-slate-700 dark:text-white shrink-0" />
+          <Moon size={18} class="text-main dark:text-white shrink-0" />
         {/if}
       </Button>
 
@@ -267,7 +267,7 @@
           variant="ghost"
           on:click={() => (isMobileMenuOpen = !isMobileMenuOpen)}
           aria-label="Toggle Navigation Menu"
-          class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-neutral-200 dark:border-neutral-800 text-main dark:bg-white/5 dark:text-white shadow-sm shrink-0"
+          class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-light dark:border-white/10 text-main dark:bg-white/5 dark:text-white shadow-sm shrink-0"
         >
           {#if isMobileMenuOpen}
             <X size={18} class="shrink-0" />

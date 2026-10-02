@@ -47,40 +47,38 @@
 </script>
 
 <div class="space-y-4 text-left">
-  <!-- 1. Mode Pilihan Cabang Toko (Jika didukung preset) -->
-  {#if elementOrder.includes('maps_branch_selector') || preset === 'multi_branch_tabs'}
-    <div class="p-3 bg-base-200/40 border border-base-300 rounded-xl space-y-2">
-      <span class="block text-xs font-bold text-base-content/80">Jumlah Cabang Toko</span>
-      <div class="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          on:click={() => handlePropChange('branchMode', 'single')}
-          class={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
-            branchMode === 'single' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
-          }`}
-        >
-          1 Cabang Saja
-        </button>
-        <button
-          type="button"
-          on:click={() => handlePropChange('branchMode', 'multi')}
-          class={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
-            branchMode === 'multi' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
-          }`}
-        >
-          Beberapa Cabang (Maks 5)
-        </button>
-      </div>
+  <!-- 1. Mode Pilihan Cabang Toko (Tersedia di Seluruh Layout) -->
+  <div class="p-3 bg-base-200/40 border border-base-300 rounded-xl space-y-2">
+    <span class="block text-xs font-bold text-base-content/80">Jumlah Cabang Toko</span>
+    <div class="grid grid-cols-2 gap-2">
+      <button
+        type="button"
+        on:click={() => handlePropChange('branchMode', 'single')}
+        class={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
+          branchMode === 'single' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
+        }`}
+      >
+        1 Cabang Saja
+      </button>
+      <button
+        type="button"
+        on:click={() => handlePropChange('branchMode', 'multi')}
+        class={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-all ${
+          branchMode === 'multi' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
+        }`}
+      >
+        Beberapa Cabang (Maks 5)
+      </button>
     </div>
+  </div>
 
-    {#if branchMode === 'multi'}
-      <div class="p-3 bg-base-200/30 border border-base-300 rounded-xl">
-        <MapsBranchTabsForm
-          {branches}
-          onPropChange={(prop, val) => handlePropChange(prop, val)}
-        />
-      </div>
-    {/if}
+  {#if branchMode === 'multi'}
+    <div class="p-3 bg-base-200/30 border border-base-300 rounded-xl">
+      <MapsBranchTabsForm
+        {branches}
+        onPropChange={(prop, val) => handlePropChange(prop, val)}
+      />
+    </div>
   {/if}
 
   <!-- 2. Header Section (Hanya jika didukung layout) -->

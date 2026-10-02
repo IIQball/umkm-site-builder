@@ -4,7 +4,6 @@
     Clock,
     XCircle,
     Palette,
-    Receipt,
   } from 'lucide-svelte';
   import { Card, Table, Pagination, Button } from '@/components/ui';
   import TenantOrderRow from './orders/TenantOrderRow.svelte';
@@ -36,6 +35,12 @@
   let currentPage = 1;
   const pageSize = 10;
   let copiedId: string | null = null;
+
+  $: counts = {
+    total: orders.length,
+    paid: orders.filter((o) => o.status === 'paid' || o.status === 'success' || o.status === 'completed').length,
+    pending: orders.filter((o) => o.status === 'pending').length,
+  };
 
   $: filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -117,7 +122,7 @@
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <Receipt size={20} />
+        <span class="material-symbols-outlined text-lg">receipt_long</span>
       </div>
       <div>
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
@@ -142,7 +147,7 @@
       </div>
 
       <!-- Segmented Status Filter -->
-      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
         <button
           type="button"
           on:click={() => (selectedStatus = 'all')}
@@ -150,17 +155,7 @@
             ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
             : 'text-muted hover:text-main'}"
         >
-          Semua ({orders.length})
-        </button>
-        <button
-          type="button"
-          on:click={() => (selectedStatus = 'pending')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'pending'
-            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
-          Menunggu
+          Semua ({counts.total})
         </button>
         <button
           type="button"
@@ -170,7 +165,17 @@
             : 'text-muted hover:text-main'}"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          Lunas
+          Lunas ({counts.paid})
+        </button>
+        <button
+          type="button"
+          on:click={() => (selectedStatus = 'pending')}
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'pending'
+            ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
+            : 'text-muted hover:text-main'}"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          Menunggu ({counts.pending})
         </button>
       </div>
     </div>
@@ -180,10 +185,10 @@
   {#if filteredOrders.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-        <Receipt size={24} />
+        <span class="material-symbols-outlined text-2xl">receipt_long</span>
       </div>
-      <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Riwayat Transaksi</h4>
-      <p class="text-xs text-secondary max-w-sm mx-auto font-sans leading-relaxed">
+      <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Tidak Ada Riwayat Transaksi</h4>
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
         {searchQuery || selectedStatus !== 'all'
           ? 'Tidak ada pesanan yang sesuai dengan kata kunci pencarian Anda.'
           : 'Anda belum pernah melakukan pemesanan template. Pilih tema impian Anda di Galeri Template.'}
@@ -202,7 +207,7 @@
       {/if}
     </div>
   {:else}
-    <Table headers={tableHeaders} minWidth="min-w-[700px]">
+    <Table headers={tableHeaders} minWidth="min-w-[800px]">
       {#each paginatedOrders as order (order.id)}
         {@const statusMeta = getStatusBadge(order.status)}
         {@const displayId = order.externalId || order.id}

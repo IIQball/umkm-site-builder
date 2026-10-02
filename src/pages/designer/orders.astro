@@ -1,48 +1,59 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DesignerOrdersTable from '@/components/designer/DesignerOrdersTable.svelte';
-import StatCard from '@/components/ui/StatCard.svelte';
-import Button from '@/components/ui/Button.svelte';
-import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { transactionService } from '@/services/finance/transaction.service';
-import { formatIDR } from '@/lib/currency';
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import DesignerOrdersTable from "@/components/designer/DesignerOrdersTable.svelte";
+import StatCard from "@/components/ui/StatCard.svelte";
+import Button from "@/components/ui/Button.svelte";
+import { getAuthenticatedUser, isAuthorizedDesigner } from "@/lib/auth";
+import { transactionService } from "@/services/finance/transaction.service";
+import { formatSmartIDR } from "@/lib/currency";
 
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user || !isAuthorizedDesigner(user)) {
-  return Astro.redirect('/auth/login?redirect=/designer/orders');
+  return Astro.redirect("/auth/login?redirect=/designer/orders");
 }
 
-let initialOrders: Awaited<ReturnType<typeof transactionService.getDesignerIncomingOrders>> = [];
+let initialOrders: Awaited<
+  ReturnType<typeof transactionService.getDesignerIncomingOrders>
+> = [];
 try {
   initialOrders = await transactionService.getDesignerIncomingOrders(user.id);
 } catch {
   initialOrders = [];
 }
 
-const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
-const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
-const totalFailedOrders = initialOrders.filter((o) => o.status === 'failed' || o.status === 'expired' || o.status === 'canceled');
-
-const totalNetEarned = totalPaidOrders.reduce(
-  (sum, o) => sum + (o.commission?.designerAmount ?? Math.round(o.amount * 0.7)),
-  0
+const totalPaidOrders = initialOrders.filter((o) => o.status === "success");
+const totalPendingOrders = initialOrders.filter((o) => o.status === "pending");
+const totalFailedOrders = initialOrders.filter(
+  (o) =>
+    o.status === "failed" || o.status === "expired" || o.status === "canceled",
 );
 
-const formattedNetIncome = formatIDR(totalNetEarned);
+const totalNetEarned = totalPaidOrders.reduce(
+  (sum, o) =>
+    sum + (o.commission?.designerAmount ?? Math.round(o.amount * 0.7)),
+  0,
+);
+
+const formattedNetIncome = formatSmartIDR(totalNetEarned);
 ---
 
 <DashboardLayout title="Pesanan Masuk" breadcrumb="Desainer / Pesanan Masuk">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
     <!-- Page Header (matching designer/wallet & designer/templates style) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+        <h1
+          class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+        >
           <span>Pesanan Template Masuk</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pantau seluruh aktivitas transaksi pembelian template toko online Anda oleh tenant UMKM secara real-time.
+          Pantau seluruh aktivitas transaksi pembelian template toko online Anda
+          oleh tenant UMKM secara real-time.
         </p>
       </div>
 
@@ -55,7 +66,9 @@ const formattedNetIncome = formatIDR(totalNetEarned);
           size="md"
           class="font-bold"
         >
-          <span class="material-symbols-outlined text-primary text-base">account_balance_wallet</span>
+          <span class="material-symbols-outlined text-primary text-base"
+            >account_balance_wallet</span
+          >
           <span>Buka Dompet Keuangan</span>
         </Button>
       </div>
@@ -91,7 +104,7 @@ const formattedNetIncome = formatIDR(totalNetEarned);
         value={totalPendingOrders.length}
         rawValue={totalPendingOrders.length}
         icon="hourglass_top"
-        cardTheme="orange"
+        cardTheme="blue"
         badge="Pending"
         footerText="Belum diselesaikan tenant"
         delayClass="delay-200"
@@ -102,7 +115,7 @@ const formattedNetIncome = formatIDR(totalNetEarned);
         value={totalFailedOrders.length}
         rawValue={totalFailedOrders.length}
         icon="cancel"
-        cardTheme="blue"
+        cardTheme="orange"
         badge="Expired"
         footerText="Invoice tidak diselesaikan"
         delayClass="delay-250"

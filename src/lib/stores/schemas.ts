@@ -21,6 +21,7 @@ export const OnboardStoreInput = z.object({
   regionData: z.record(z.any()).optional(),
   templateId: z.string().optional(),
   tenantId: z.string().optional(),
+  customization: z.record(z.any()).optional(),
 });
 
 export const StoreSettingsInput = z.object({
@@ -29,6 +30,12 @@ export const StoreSettingsInput = z.object({
   googleMapsUrl: z.string().url('URL Google Maps tidak valid').optional().or(z.literal('')),
   address: z.string().optional(),
   categoryId: z.string().optional(),
+  regionData: z.record(z.any()).optional(),
+  templateId: z.string().optional(),
+  isOpen: z.boolean().optional(),
+  waCheckoutTemplate: z.string().optional(),
+  storeId: z.string().optional(),
+  customization: z.record(z.any()).optional(),
 });
 
 export const StoreStatusInput = z.object({

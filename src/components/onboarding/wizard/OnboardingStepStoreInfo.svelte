@@ -13,6 +13,7 @@
 
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
+  export let isEdit: boolean = false;
   export let storeName: string = '';
   export let categoryId: string = '';
   export let categories: Array<{ id: string; name: string }> = [];
@@ -78,10 +79,10 @@
           id="business-category"
           bind:value={categoryId}
           class="w-full bg-nested text-main border transition-all duration-150 font-sans text-sm rounded-xl h-10 min-h-[40px] pl-10 pr-10 appearance-none cursor-pointer outline-none focus:bg-card {formErrors.categoryId
-            ? 'border-[var(--color-error)] focus:border-[var(--color-error)] focus:ring-2 focus:ring-[var(--color-error)]/20'
-            : 'border-light focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20'}"
+            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
+            : 'border-light focus:border-primary focus:ring-2 focus:ring-primary/20'}"
         >
-          <option value="" disabled selected={!categoryId} class="italic text-[var(--color-text-light)]">
+          <option value="" disabled selected={!categoryId} class="italic text-muted">
             Pilih kategori bisnis UMKM...
           </option>
           {#each categories as cat (cat.id)}
@@ -98,7 +99,7 @@
         </div>
       </div>
       {#if formErrors.categoryId}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
+        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
           <AlertCircle size={14} class="flex-shrink-0" />
           <span>{formErrors.categoryId}</span>
         </p>
@@ -143,7 +144,7 @@
         errors={formErrors}
       />
       {#if formErrors.address}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-2 font-medium animate-fade-in-up">
+        <p class="text-xs text-error flex items-center gap-1 mt-2 font-medium animate-fade-in-up">
           <AlertCircle size={14} class="flex-shrink-0" />
           <span>{formErrors.address}</span>
         </p>
@@ -152,7 +153,7 @@
   </div>
 
   {#if submitError}
-    <div class="p-3.5 rounded-xl bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 text-xs text-[var(--color-error)] flex items-center gap-2">
+    <div class="p-3.5 rounded-xl bg-error/10 border border-error/20 text-xs text-error flex items-center gap-2">
       <AlertCircle size={16} class="shrink-0" />
       <span class="font-medium">{submitError}</span>
     </div>
@@ -177,7 +178,7 @@
       disabled={submitStatus === 'submitting' || isFormIncomplete}
       on:click={onNext}
     >
-      Lanjut Pilih Template
+      <span>{isEdit ? 'Lanjut ke Pengaturan & Template' : 'Lanjut Pilih Template'}</span>
       <ArrowRight size={16} />
     </Button>
   </div>

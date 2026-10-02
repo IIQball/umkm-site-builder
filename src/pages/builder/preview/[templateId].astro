@@ -47,8 +47,18 @@ if (currentUser && currentUser.role === 'tenant') {
     tenantStoreId = storeRecord.id;
   }
 }
+
+const isEmbed = Astro.url.searchParams.get('embed') === 'true';
+const viewModeParam = Astro.url.searchParams.get('view') as ('desktop' | 'tablet' | 'mobile') | null;
 ---
 
 <BaseLayout title={`Preview: ${templateRecord.name} - Pinoka`} hideNavbar={true}>
-  <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} storeId={tenantStoreId} />
+  <ReadOnlyPreview
+    client:only="svelte"
+    template={previewTemplate}
+    isOwner={isOwner}
+    storeId={tenantStoreId}
+    isEmbed={isEmbed}
+    initialViewMode={viewModeParam || 'desktop'}
+  />
 </BaseLayout>

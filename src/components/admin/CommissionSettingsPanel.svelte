@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import StatCard from '../ui/StatCard.svelte';
-  import { Card, Button } from '@/components/ui';
-  import { addToast } from '@/lib/toast';
-  import { formatIDR } from '@/lib/currency';
-  import CommissionSimulationCard from './commission/CommissionSimulationCard.svelte';
-  import CommissionSettingsInputs from './commission/CommissionSettingsInputs.svelte';
+  import { onMount } from "svelte";
+  import { Card, Button, StatCard } from "@/components/ui";
+  import { addToast } from "@/lib/toast";
+  import { formatIDR } from "@/lib/currency";
+  import CommissionSimulationCard from "./commission/CommissionSimulationCard.svelte";
+  import CommissionSettingsInputs from "./commission/CommissionSettingsInputs.svelte";
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;
@@ -18,7 +17,7 @@
 
   onMount(async () => {
     try {
-      const res = await fetch('/api/admin/settings/commission');
+      const res = await fetch("/api/admin/settings/commission");
       const result = await res.json();
       if (result.ok && result.data) {
         if (result.data.platformFeePercentage !== undefined) {
@@ -39,22 +38,22 @@
   const handleSave = async () => {
     if (platformFeePercentage < 0 || platformFeePercentage > 100) {
       addToast({
-        type: 'error',
-        message: 'Persentase fee harus antara 0% hingga 100%',
+        type: "error",
+        message: "Persentase fee harus antara 0% hingga 100%",
       });
       return;
     }
     if (settlementDelayDays < 0) {
       addToast({
-        type: 'error',
-        message: 'Durasi penahanan settlement tidak boleh negatif',
+        type: "error",
+        message: "Durasi penahanan settlement tidak boleh negatif",
       });
       return;
     }
     if (adminServiceFee < 0) {
       addToast({
-        type: 'error',
-        message: 'Biaya jasa pendampingan admin tidak boleh negatif',
+        type: "error",
+        message: "Biaya jasa pendampingan admin tidak boleh negatif",
       });
       return;
     }
@@ -62,9 +61,9 @@
     isLoading = true;
 
     try {
-      const res = await fetch('/api/admin/settings/commission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/settings/commission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           platformFeePercentage: Number(platformFeePercentage),
           settlementDelayDays: Number(settlementDelayDays),
@@ -73,21 +72,22 @@
       });
       const result = await res.json();
 
-      if (res.ok && (result.ok)) {
+      if (res.ok && result.ok) {
         addToast({
-          type: 'success',
-          message: 'Pengaturan komisi, fee admin & settlement berhasil disimpan!',
+          type: "success",
+          message:
+            "Pengaturan komisi, fee admin & settlement berhasil disimpan!",
         });
       } else {
         addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal menyimpan pengaturan komisi',
+          type: "error",
+          message: result.error?.message || "Gagal menyimpan pengaturan komisi",
         });
       }
     } catch {
       addToast({
-        type: 'error',
-        message: 'Terjadi kesalahan koneksi saat menyimpan',
+        type: "error",
+        message: "Terjadi kesalahan koneksi saat menyimpan",
       });
     } finally {
       isLoading = false;
@@ -96,19 +96,26 @@
 
   $: designerShare = Math.max(0, 100 - Number(platformFeePercentage || 0));
   $: samplePrice = 100000;
-  $: samplePlatformFee = Math.round((samplePrice * Number(platformFeePercentage || 0)) / 100);
+  $: samplePlatformFee = Math.round(
+    (samplePrice * Number(platformFeePercentage || 0)) / 100,
+  );
   $: sampleDesignerShare = samplePrice - samplePlatformFee;
 </script>
 
 <div class="w-full space-y-8 md:space-y-10">
   <!-- Page Header -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+  <div
+    class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+  >
     <div>
-      <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+      <h1
+        class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+      >
         <span>Pengaturan Platform & Komisi</span>
       </h1>
       <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-        Kelola parameter pembagian hasil penjualan template otomatis antara kas platform dan dompet desainer.
+        Kelola parameter pembagian hasil penjualan template otomatis antara kas
+        platform dan dompet desainer.
       </p>
     </div>
 
@@ -119,7 +126,9 @@
         size="md"
         className="font-bold"
       >
-        <span class="material-symbols-outlined text-primary text-base">group</span>
+        <span class="material-symbols-outlined text-primary text-base"
+          >group</span
+        >
         <span>Manajemen Pengguna</span>
       </Button>
     </div>
@@ -171,18 +180,30 @@
 
   <!-- Settings Configuration Card -->
   <div class="animate-fade-in-up delay-300">
-    <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
-      <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <Card
+      variant="bordered"
+      padding="none"
+      radius="2xl"
+      className="shadow-xs overflow-hidden"
+    >
+      <div
+        class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <div
+            class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs"
+          >
             <span class="material-symbols-outlined text-lg">tune</span>
           </div>
           <div>
-            <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+            <h3
+              class="text-heading-md text-main font-bold font-heading leading-tight"
+            >
               Parameter Finansial & Bagi Hasil
             </h3>
             <p class="text-body-sm text-secondary mt-0.5 font-sans">
-              Konfigurasi nilai persentase potongan transaksi, fee pendampingan, dan penahanan dana
+              Konfigurasi nilai persentase potongan transaksi, fee pendampingan,
+              dan penahanan dana
             </p>
           </div>
         </div>
@@ -207,7 +228,9 @@
             {isLoading}
           />
 
-          <div class="pt-4 border-t border-light flex items-center justify-end gap-3">
+          <div
+            class="pt-4 border-t border-light flex items-center justify-end gap-3"
+          >
             <Button
               type="submit"
               variant="primary"
@@ -216,7 +239,10 @@
               disabled={isLoading}
               className="min-w-[180px] shadow-xs active:scale-95 font-bold rounded-2xl"
             >
-              <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">save</span>
+              <span
+                class="material-symbols-outlined text-[18px] mr-1.5 icon-filled"
+                >save</span
+              >
               <span>Simpan Parameter</span>
             </Button>
           </div>

@@ -125,11 +125,25 @@ export function getEffectiveMapsElementOrder(
     }
   }
 
+  const isMulti = branchMode === 'multi' || (preset === 'multi_branch_tabs' && branchMode !== 'single');
   const validSlotsSet = new Set(defaultSlots);
   const result: string[] = [];
 
   for (const slot of normalizedRaw) {
     if (validSlotsSet.has(slot) && !result.includes(slot)) {
+      result.push(slot);
+    }
+  }
+
+  if (isMulti && !result.includes('maps_branch_selector')) {
+    const subtitleIdx = result.indexOf('subtitle');
+    const titleIdx = result.indexOf('title');
+    const insertIdx = subtitleIdx !== -1 ? subtitleIdx + 1 : titleIdx !== -1 ? titleIdx + 1 : 0;
+    result.splice(insertIdx, 0, 'maps_branch_selector');
+  }
+
+  for (const slot of defaultSlots) {
+    if (!result.includes(slot)) {
       result.push(slot);
     }
   }

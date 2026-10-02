@@ -66,9 +66,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           expiresAt: expiresAt,
         });
         
-        // Explicitly set the role and registeredBy in case BetterAuth ignored it
+        // Explicitly set the role, status, and registeredBy in case BetterAuth ignored it
         await db.update(users).set({ 
           role: validated.role,
+          status: 'pending',
           registeredBy: user.id
         }).where(eq(users.id, newUserId));
 

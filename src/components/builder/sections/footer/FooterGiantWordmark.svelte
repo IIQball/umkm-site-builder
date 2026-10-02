@@ -12,6 +12,7 @@
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
   export let nodeStyles: Record<string, Record<string, string>> = {};
   export let elementOrder: string[] = ['footer_brand', 'footer_contact', 'footer_copyright'];
+  export let isLiveStorefront: boolean = false;
 
   $: styleBrand = resolveFooterNodeStyle('footer_brand', nodeStyles);
   $: styleContact = resolveFooterNodeStyle('footer_contact', nodeStyles);
@@ -21,6 +22,10 @@
   $: hasContact = !elementOrder.length || elementOrder.includes('footer_contact') || elementOrder.includes('contact_info');
   $: hasCopyright = !elementOrder.length || elementOrder.includes('footer_copyright') || elementOrder.includes('copyright');
   $: hasTopBar = hasBrand || hasContact;
+
+  $: cleanBrandName = (brandName || 'NAMA TOKO').trim();
+  $: charLength = Math.max(cleanBrandName.length, 6);
+  $: dynamicWordmarkFontSize = `clamp(1rem, calc(86cqi / ${(charLength * 0.58).toFixed(2)}), 6.5rem)`;
 </script>
 
 <div
@@ -34,13 +39,14 @@
     style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: var(--theme-text-muted, var(--color-text-muted));"
   >
     {#if hasBrand}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
-      class="max-w-xs space-y-2 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+      class="max-w-xs space-y-2 p-2 rounded-xl transition-all {isLiveStorefront ? '' : 'cursor-pointer'} {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       style="margin-top: {styleBrand.marginTop}; margin-bottom: {styleBrand.marginBottom};"
-      on:click={(e) => selectNode(e, 'footer_brand')}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
-      role="button"
-      tabindex="0"
+      on:click={(e) => !isLiveStorefront && selectNode(e, 'footer_brand')}
+      on:keydown={(e) => !isLiveStorefront && (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
+      role={isLiveStorefront ? undefined : 'button'}
+      tabindex={isLiveStorefront ? undefined : 0}
     >
       <p
         style="color: {styleBrand.color || 'var(--theme-text-primary, var(--color-text-main))'}; line-height: 1.6;"
@@ -64,13 +70,14 @@
     {/if}
 
     {#if hasContact}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
-      class="flex gap-4 p-2 rounded-xl transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+      class="flex gap-4 p-2 rounded-xl transition-all {isLiveStorefront ? '' : 'cursor-pointer'} {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       style="margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
-      on:click={(e) => selectNode(e, 'footer_contact')}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
-      role="button"
-      tabindex="0"
+      on:click={(e) => !isLiveStorefront && selectNode(e, 'footer_contact')}
+      on:keydown={(e) => !isLiveStorefront && (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
+      role={isLiveStorefront ? undefined : 'button'}
+      tabindex={isLiveStorefront ? undefined : 0}
     >
       <a
         href="#products"
@@ -95,16 +102,20 @@
 
   {#if hasCopyright}
   <!-- Giant Typography Wordmark Container -->
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
-    class="border-t border-[var(--color-border)] pt-4 text-center overflow-hidden select-none cursor-pointer rounded-xl transition-all {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+    class="border-t border-[var(--color-border)] pt-4 text-center overflow-hidden select-none rounded-xl transition-all {isLiveStorefront ? '' : 'cursor-pointer'} {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
     style="margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
-    on:click={(e) => selectNode(e, 'footer_copyright')}
-    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
-    role="button"
-    tabindex="0"
+    on:click={(e) => !isLiveStorefront && selectNode(e, 'footer_copyright')}
+    on:keydown={(e) => !isLiveStorefront && (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
+    role={isLiveStorefront ? undefined : 'button'}
+    tabindex={isLiveStorefront ? undefined : 0}
   >
-    <span class="cq-wordmark-text font-black font-heading text-[var(--color-border)] uppercase tracking-tighter block truncate transition-colors hover:text-[var(--theme-primary, var(--color-primary))]/30">
-      {brandName}
+    <span
+      class="cq-wordmark-text font-black font-heading text-[var(--color-border)] uppercase tracking-tighter block transition-colors hover:text-[var(--theme-primary, var(--color-primary))]/30"
+      style="font-size: {dynamicWordmarkFontSize}; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; overflow: visible;"
+    >
+      {cleanBrandName}
     </span>
     <p
       style="font-family: var(--theme-font-body, var(--font-family, inherit)); font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85);"

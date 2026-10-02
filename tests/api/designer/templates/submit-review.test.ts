@@ -9,8 +9,13 @@ vi.mock('@/lib/db/client', () => {
       templates: {
         findFirst: vi.fn(),
       },
+      users: {
+        findMany: vi.fn().mockResolvedValue([{ id: 'sup-1' }]),
+      },
     },
     update: vi.fn(),
+    insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+    select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'sup-1' }]) }) }) }),
   };
   return { db: mockDb, getDb: () => mockDb };
 });

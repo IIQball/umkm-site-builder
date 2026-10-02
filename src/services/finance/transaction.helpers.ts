@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { transactions, templates, userTemplates, commissions } from '@/db/schema';
+import { transactions, templates, userTemplates, commissions, notifications, users } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { eq, and, desc, inArray } from 'drizzle-orm';
@@ -73,6 +73,19 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
           referenceId: transaction.id,
         });
       }
+      
+      // Send notification to designer
+      const buyer = await db.select().from(users).where(eq(users.id, transaction.userId)).limit(1);
+      const buyerName = buyer.length > 0 ? buyer[0].name : 'Seseorang';
+      
+      await db.insert(notifications).values({
+        id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        userId: template.designerId,
+        type: 'template_purchased',
+        title: 'Template Terjual',
+        message: `${buyerName} telah membeli template "${template.name}". Komisi sebesar Rp${designerAmount.toLocaleString('id-ID')} telah ditambahkan ke saldo Anda.`,
+        metadata: { templateId: template.id, transactionId: transaction.id }
+      });
     }
   }
 }

@@ -24,6 +24,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchas
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
+export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased']);
 
 // ==========================================
 // 2. CORE AUTH TABLES (BETTER-AUTH COMPATIBLE)
@@ -413,6 +414,21 @@ export const platformSettings = pgTable('platform_settings', {
 });
 
 // ==========================================
+// 8. NOTIFICATIONS
+// ==========================================
+
+export const notifications = pgTable('notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: notificationTypeEnum('type').notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  isRead: boolean('is_read').default(false).notNull(),
+  metadata: jsonb('metadata').default({}).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// ==========================================
 // 8. DRIZZLE RELATIONS (Object Mapping)
 // ==========================================
 
@@ -436,6 +452,11 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownedTemplates: many(userTemplates),
   activities: many(activityLogs),
   updatedSettings: many(platformSettings),
+  notifications: many(notifications),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
 
 export const tenantInvitationsRelations = relations(tenantInvitations, ({ one }) => ({

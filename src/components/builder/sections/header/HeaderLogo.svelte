@@ -12,7 +12,7 @@
   $: isMobile = viewMode === 'mobile';
 
   $: logoType = props.logoType || 'image_text';
-  $: logoText = props.logoText ?? 'Toko UMKM';
+  $: logoText = props.logoText || 'Toko UMKM';
   $: logoImageUrl = props.logoImageUrl || '';
   $: logoHeight = Number(props.logoImageHeight) || 40;
   $: logoTextColor = (props.logoTextColor as string) || 'var(--theme-text-primary, var(--color-text-main))';
@@ -35,11 +35,13 @@
   ].filter(Boolean).join('; ');
 
   const handleClick = (e: MouseEvent) => {
+    if (!isActive) return;
     e.stopPropagation();
     editorStore.selectNode(sectionId, 'logo');
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isActive) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       editorStore.selectNode(sectionId, 'logo');
@@ -47,16 +49,19 @@
   };
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
-  role="button"
-  tabindex="0"
+  role={isActive ? 'button' : undefined}
+  tabindex={isActive ? 0 : undefined}
   on:click={handleClick}
   on:keydown={handleKeyDown}
   style="border-radius: 8px;"
-  class={`flex items-center gap-2.5 cursor-pointer transition-all select-none flex-shrink-0 ${
-    isNodeActive
-      ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10'
-      : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-primary/50'
+  class={`flex items-center gap-2.5 transition-all select-none flex-shrink-0 ${
+    !isActive
+      ? ''
+      : isNodeActive
+        ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] bg-[var(--theme-primary,var(--color-primary))]/10 cursor-pointer'
+        : 'hover:opacity-90 hover:outline-dashed hover:outline-1 hover:outline-primary/50 cursor-pointer'
   }`}
 >
   {#if logoType === 'image_only' || logoType === 'image_text'}
@@ -81,7 +86,7 @@
   {#if logoType === 'text_only' || logoType === 'image_text'}
     <span
       style={textInlineStyle}
-      class={`tracking-tight leading-none truncate max-w-[200px] sm:max-w-[320px] ${
+      class={`tracking-tight leading-none truncate max-w-[240px] sm:max-w-[420px] ${
         hideTextOnMobile && isMobile ? 'hidden' : 'inline-block'
       }`}
     >

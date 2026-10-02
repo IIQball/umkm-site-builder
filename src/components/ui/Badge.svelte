@@ -14,15 +14,15 @@
     primary: { dot: 'bg-primary' },
     indigo: { dot: 'bg-primary' },
     secondary: { dot: 'bg-secondary' },
-    slate: { dot: 'bg-slate-400 dark:bg-slate-500' },
-    success: { dot: 'bg-emerald-500' },
-    emerald: { dot: 'bg-emerald-500' },
+    slate: { dot: 'bg-muted' },
+    success: { dot: 'bg-success' },
+    emerald: { dot: 'bg-success' },
     warning: { dot: 'bg-warning' },
     amber: { dot: 'bg-warning' },
-    error: { dot: 'bg-rose-500' },
-    rose: { dot: 'bg-rose-500' },
-    info: { dot: 'bg-sky-500' },
-    sky: { dot: 'bg-sky-500' },
+    error: { dot: 'bg-error' },
+    rose: { dot: 'bg-error' },
+    info: { dot: 'bg-info' },
+    sky: { dot: 'bg-info' },
     violet: { dot: 'bg-accent' },
     orange: { dot: 'bg-orange' }
   }
@@ -35,7 +35,7 @@
 
   $: styleConfig = dotColorStyles[variant] || dotColorStyles.secondary
   $: badgeClasses = [
-    'inline-flex items-center font-medium border rounded-full select-none leading-none bg-slate-100/90 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 border-slate-200/90 dark:border-slate-700/80',
+    'inline-flex items-center font-medium border rounded-full select-none leading-none bg-nested text-secondary dark:text-main border-light',
     sizeStyles[size] || sizeStyles.md,
     uppercase ? 'uppercase tracking-wider text-micro font-bold font-heading' : 'tracking-tight',
     className

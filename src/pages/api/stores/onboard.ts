@@ -85,6 +85,9 @@ export const POST: APIRoute = async ({ request }) => {
       customization: {
         isOnboarded: true,
         ...(regionData ? { region: regionData } : {}),
+        ...(parsedData.customization && typeof parsedData.customization === 'object'
+          ? parsedData.customization
+          : {}),
       },
       registeredBy,
       lastEditedBy,

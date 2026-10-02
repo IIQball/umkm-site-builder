@@ -144,3 +144,20 @@ export function getHeaderSupportedSlots(preset: string): Array<{ id: string; nam
   }
   return slots;
 }
+
+/**
+ * Menghasilkan urutan slot navbar efektif yang sinkron dengan preset header aktif.
+ */
+export function getEffectiveHeaderNavbarOrder(preset: string, rawNavbarOrder?: unknown): string[] {
+  const defaultOrder = getDefaultHeaderNavbarOrder(preset);
+  if (!Array.isArray(rawNavbarOrder) || rawNavbarOrder.length === 0) {
+    return defaultOrder;
+  }
+  const filtered = (rawNavbarOrder as string[]).filter((s) => defaultOrder.includes(s));
+  for (const item of defaultOrder) {
+    if (!filtered.includes(item)) {
+      filtered.push(item);
+    }
+  }
+  return filtered.length > 0 ? filtered : defaultOrder;
+}

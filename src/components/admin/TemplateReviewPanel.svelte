@@ -16,7 +16,13 @@
   import TemplateReviewModals from './review/TemplateReviewModals.svelte';
 
   export let initialTemplatesJson: string = '[]';
-  let templates: AdminTemplateItem[] = JSON.parse(initialTemplatesJson);
+  let allTemplates: AdminTemplateItem[] = [];
+  try {
+    const parsed = JSON.parse(initialTemplatesJson);
+    allTemplates = Array.isArray(parsed) ? parsed.filter((t) => t.status !== 'draft') : [];
+  } catch {
+    allTemplates = [];
+  }
   let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = 'pending';
   let searchQuery = '';
   let isLoading = false;
@@ -31,11 +37,10 @@
   const fetchTemplates = async () => {
     isLoading = true;
     try {
-      const param = activeTab === 'all' ? '' : `?status=${activeTab}`;
-      const res = await fetch(`/api/admin/templates${param}`);
+      const res = await fetch('/api/admin/templates');
       const result = await res.json();
       if (result.ok && Array.isArray(result.data)) {
-        templates = result.data;
+        allTemplates = result.data.filter((t: AdminTemplateItem) => t.status !== 'draft');
       }
     } catch {
       addToast({
@@ -50,7 +55,6 @@
   const handleTabChange = (tab: typeof activeTab) => {
     activeTab = tab;
     currentPage = 1;
-    fetchTemplates();
   };
 
   const openApproveModal = (t: AdminTemplateItem) => {
@@ -118,28 +122,32 @@
     }
   };
 
-  $: filteredTemplates = templates.filter((t) => {
+  $: countPending = allTemplates.filter((t) => t.status === 'pending').length;
+  $: countApproved = allTemplates.filter((t) => t.status === 'approved').length;
+  $: countRejected = allTemplates.filter((t) => t.status === 'rejected').length;
+
+  $: filteredTemplates = allTemplates.filter((t) => {
+    if (t.status === 'draft') return false;
+    const matchesTab = activeTab === 'all' ? true : t.status === activeTab;
+
     const q = searchQuery.toLowerCase().trim();
-    return (
+    const matchesSearch =
       !q ||
       t.name.toLowerCase().includes(q) ||
       (t.designerName && t.designerName.toLowerCase().includes(q)) ||
-      (t.designerEmail && t.designerEmail.toLowerCase().includes(q))
-    );
+      (t.designerEmail && t.designerEmail.toLowerCase().includes(q));
+
+    return matchesTab && matchesSearch;
   });
 
   $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  $: countPending = templates.filter((t) => t.status === 'pending').length;
-  $: countApproved = templates.filter((t) => t.status === 'approved').length;
-  $: countRejected = templates.filter((t) => t.status === 'rejected').length;
 </script>
 
 <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
   <!-- Table Header & Controls -->
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
         <Palette size={20} />
       </div>
       <div>
@@ -173,7 +181,7 @@
           class="!rounded-full !px-3.5 font-bold {activeTab === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('all')}
         >
-          Semua ({templates.length})
+          Semua ({allTemplates.length})
         </Button>
 
         <Button
@@ -182,7 +190,7 @@
           class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'pending' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('pending')}
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
           <span>Menunggu</span>
           {#if countPending > 0}
             <span class="opacity-80 font-mono text-3xs">({countPending})</span>
@@ -195,7 +203,7 @@
           class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'approved' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('approved')}
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
           <span>Disetujui</span>
           {#if countApproved > 0}
             <span class="opacity-80 font-mono text-3xs">({countApproved})</span>
@@ -208,7 +216,7 @@
           class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'rejected' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('rejected')}
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
           <span>Ditolak</span>
           {#if countRejected > 0}
             <span class="opacity-80 font-mono text-3xs">({countRejected})</span>

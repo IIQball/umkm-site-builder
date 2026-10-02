@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import type { AuthenticatedUser } from "@/lib/auth";
   import { getRoleConfig } from "./sidebar/sidebar.helpers";
-  import NavbarUserMenu from "./navbar/NavbarUserMenu.svelte";
+  import NavbarUserMenu from "@/components/common/NavbarUserMenu.svelte";
   import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";
 
@@ -10,19 +10,8 @@
   export let breadcrumb: string | undefined = undefined;
 
   const user: AuthenticatedUser = JSON.parse(userJson);
-  const userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
-  const roleCfg = getRoleConfig(user.role);
-  const homePath = user.role === "designer" ? "/designer/wallet" : "/dashboard";
 
-  let dropdownOpen = false;
   let isDark = false;
-
-  const toggleDropdown = () => {
-    dropdownOpen = !dropdownOpen;
-  };
-  const closeDropdown = () => {
-    dropdownOpen = false;
-  };
 
   onMount(() => {
     isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -44,8 +33,6 @@
     });
   };
 </script>
-
-<svelte:window on:click={closeDropdown} />
 
 <header
   class="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-8
@@ -155,13 +142,6 @@
     </button>
 
     <!-- Profile Chip & Dropdown Component -->
-    <NavbarUserMenu
-      {user}
-      {userInitial}
-      {roleCfg}
-      {homePath}
-      {dropdownOpen}
-      onToggleDropdown={toggleDropdown}
-    />
+    <NavbarUserMenu {user} />
   </div>
 </header>

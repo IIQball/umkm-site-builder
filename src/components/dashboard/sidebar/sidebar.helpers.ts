@@ -27,7 +27,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         title: 'Navigasi',
         items: [
           { label: 'Marketplace Publik', href: '/templates', icon: 'storefront', group: 'Navigasi' },
-          { label: 'Profil Desainer', href: '/auth/settings', icon: 'manage_accounts', group: 'Navigasi' },
+          {label:'Pengaturan Akun', href:'/designer/settings', icon:'account_circle', group:'Navigasi'},
         ],
       },
     ];
@@ -55,7 +55,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Katalog Produk', href: '/dashboard/products', icon: 'inventory_2', group: 'Manajemen Toko' },
           { label: 'Kategori Produk', href: '/dashboard/categories', icon: 'category', group: 'Manajemen Toko' },
-          { label: 'Pengaturan Toko', href: '/dashboard/store', icon: 'store', group: 'Manajemen Toko' },
+          { label: 'Pengaturan Toko', href: '/onboarding', icon: 'store', group: 'Manajemen Toko' },
         ],
       },
     ];
@@ -96,7 +96,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         title: 'Katalog & Template',
         items: [
           { label: 'Kurasi Template', href: '/superadmin/templates', icon: 'palette', group: 'Katalog & Template' },
-          { label: 'Kategori Bisnis', href: '/superadmin/template-categories', icon: 'category', group: 'Katalog & Template' },
+          { label: 'Kategori Template', href: '/superadmin/template-categories', icon: 'category', group: 'Katalog & Template' },
         ],
       },
       {
@@ -133,32 +133,32 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
     badgeLabel: "SUPERADMIN",
     icon: "shield_person",
     subtext: "Akses Penuh Sistem",
-    badgeBg: "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/50",
-    badgeText: "text-rose-700 dark:text-rose-300",
+    badgeBg: "bg-error/10 text-error border-error/20",
+    badgeText: "text-error",
   },
   admin: {
     label: "Admin Platform",
     badgeLabel: "ADMIN",
     icon: "admin_panel_settings",
     subtext: "Operator Platform",
-    badgeBg: "bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900/50",
-    badgeText: "text-amber-800 dark:text-amber-300",
+    badgeBg: "bg-warning/10 text-warning border-warning/20",
+    badgeText: "text-warning",
   },
   designer: {
     label: "Desainer Template",
     badgeLabel: "DESIGNER",
     icon: "palette",
     subtext: "Kreator Terverifikasi",
-    badgeBg: "bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900/50",
-    badgeText: "text-indigo-700 dark:text-indigo-300",
+    badgeBg: "bg-primary/10 text-primary border-primary/20",
+    badgeText: "text-primary",
   },
   tenant: {
     label: "Merchant",
     badgeLabel: "MERCHANT",
     icon: "storefront",
     subtext: "Toko Online Aktif",
-    badgeBg: "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
-    badgeText: "text-slate-700 dark:text-slate-300",
+    badgeBg: "bg-nested text-secondary border-light",
+    badgeText: "text-secondary",
   },
 };
 
@@ -169,12 +169,26 @@ export const getRoleConfig = (role: string): RoleConfig => {
       badgeLabel: role.toUpperCase(),
       icon: "person",
       subtext: "Pengguna Terdaftar",
-      badgeBg: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
-      badgeText: "text-slate-700 dark:text-slate-300",
+      badgeBg: "bg-nested text-secondary border-light",
+      badgeText: "text-secondary",
     }
   );
 };
 
 export const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
   return getNavGroups(role).flatMap((g) => g.items);
+};
+
+export const getDashboardHomePath = (role?: string | null): string => {
+  if (role === 'superadmin') return '/superadmin';
+  if (role === 'admin') return '/admin';
+  if (role === 'designer') return '/designer/wallet';
+  return '/dashboard';
+};
+
+export const getSettingsHref = (role?: string | null): string => {
+  if (role === 'superadmin') return '/superadmin/settings';
+  if (role === 'tenant') return '/onboarding';
+  if (role === 'designer') return '/designer/wallet';
+  return '/admin';
 };

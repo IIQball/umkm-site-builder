@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
-  import { formatIDR, formatCurrencyInput } from '@/lib/currency';
+  import { formatIDR } from '@/lib/currency';
   import TemplateCardPreview from './template-form/TemplateCardPreview.svelte';
   import TemplatePricingSimulator from './template-form/TemplatePricingSimulator.svelte';
   import TemplateBasicDetails from './template-form/TemplateBasicDetails.svelte';
@@ -71,19 +71,6 @@
       ? formatIDR(numericPriceState)
       : 'Gratis';
 
-  /** Auto-format visual masking while typing */
-  const handlePriceInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const rawDigits = target.value.replace(/\D/g, '');
-    target.value = formatCurrencyInput(rawDigits);
-    priceDisplay = target.value;
-    numericPriceState = Number(rawDigits) || 0;
-  };
-
-  const selectPricePreset = (val: number) => {
-    numericPriceState = val;
-    priceDisplay = val > 0 ? formatCurrencyInput(val) : '0';
-  };
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -188,14 +175,12 @@
 
         <!-- Pricing & Income Simulator Sub-Component -->
         <TemplatePricingSimulator
-          {numericPriceState}
-          {priceDisplay}
-          {pricePreview}
+          bind:numericPriceState
+          bind:priceDisplay
+          bind:pricePreview
           {loading}
           {platformFeePercentage}
           {designerPercentage}
-          onPriceInput={handlePriceInput}
-          onSelectPricePreset={selectPricePreset}
         />
 
         <!-- Description / Tagline Input -->

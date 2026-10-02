@@ -200,7 +200,7 @@
         />
       {:else if activePreset === 'multi_branch_tabs'}
         <MapsMultiBranch
-          {sectionId} {branches} activeBranchIdx={safeBranchIdx}
+          {sectionId} {branchMode} {branches} activeBranchIdx={safeBranchIdx}
           onSelectBranch={handleSelectBranch} {mapEmbedUrl} {directMapsUrl}
           storeName={effectiveStoreName} address={effectiveAddress}
           {ctaText} {ctaIcon} {nodeStyles}

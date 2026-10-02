@@ -1,21 +1,23 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
-import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { db } from '@/lib/db/client';
-import { transactions, templates } from '@/db/schema';
-import { eq, or, desc } from 'drizzle-orm';
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import OrderHistoryTable from "@/components/dashboard/OrderHistoryTable.svelte";
+import StatCard from "@/components/ui/StatCard.svelte";
+import { formatSmartIDR } from "@/lib/currency";
+import { getAuthenticatedUser, isAuthorizedAdmin } from "@/lib/auth";
+import { db } from "@/lib/db/client";
+import { transactions, templates } from "@/db/schema";
+import { eq, or, desc } from "drizzle-orm";
 
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user || !isAuthorizedAdmin(user)) {
-  return Astro.redirect('/auth/login?redirect=/admin/transactions');
+  return Astro.redirect("/auth/login?redirect=/admin/transactions");
 }
 
 // Menu transaksi hanya milik Admin pendamping, bukan Superadmin
-if (user.role === 'superadmin') {
-  return Astro.redirect('/admin');
+if (user.role === "superadmin") {
+  return Astro.redirect("/admin");
 }
 
 let initialOrders: Array<{
@@ -39,7 +41,10 @@ let initialOrders: Array<{
 }> = [];
 
 try {
-  const whereCondition = or(eq(transactions.userId, user.id), eq(transactions.assistedBy, user.id));
+  const whereCondition = or(
+    eq(transactions.userId, user.id),
+    eq(transactions.assistedBy, user.id),
+  );
 
   const rows = await db
     .select({
@@ -74,33 +79,106 @@ try {
     externalId: r.externalId,
     paymentGatewayRef: r.paymentGatewayRef,
     paymentChannel: r.paymentChannel,
-    createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
-    template: r.templateName ? {
-      id: r.templateId || '',
-      name: r.templateName,
-      thumbnailUrl: r.templateThumbnail,
-      price: r.templatePrice ? Number(r.templatePrice) : 0,
-    } : null,
+    createdAt: r.createdAt
+      ? r.createdAt.toISOString()
+      : new Date().toISOString(),
+    template: r.templateName
+      ? {
+          id: r.templateId || "",
+          name: r.templateName,
+          thumbnailUrl: r.templateThumbnail,
+          price: r.templatePrice ? Number(r.templatePrice) : 0,
+        }
+      : null,
   }));
 } catch (error) {
-  console.error('[AdminTransactions] Failed to query transactions:', error);
+  console.error("[AdminTransactions] Failed to query transactions:", error);
   initialOrders = [];
 }
+
+const paidOrders = initialOrders.filter(
+  (o) => o.status === "paid" || o.status === "success",
+);
+const pendingOrders = initialOrders.filter((o) => o.status === "pending");
+const totalPaidVolume = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+const formattedPaidVolume = formatSmartIDR(totalPaidVolume);
+
+const counts = {
+  total: initialOrders.length,
+  paid: paidOrders.length,
+  pending: pendingOrders.length,
+};
 ---
 
-<DashboardLayout title="Riwayat Transaksi" breadcrumb="Admin / Transaksi">
+<DashboardLayout title="Riwayat Transaksi" breadcrumb="Riwayat Transaksi">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+        <h1
+          class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+        >
           <span>Riwayat Transaksi & Mutasi</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Daftar seluruh pesanan template, status invoice pembayaran, dan transaksi platform.
+          Daftar seluruh pesanan template, status invoice pembayaran, dan
+          transaksi platform.
         </p>
       </div>
     </div>
 
-    <OrderHistoryTable client:load initialOrders={initialOrders} />
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard
+        client:load
+        label="Total Transaksi"
+        value={counts.total}
+        rawValue={counts.total}
+        icon="receipt_long"
+        cardTheme="dark"
+        badge="Semua Invoice"
+        footerText="Akumulasi seluruh transaksi"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Transaksi Sukses"
+        value={counts.paid}
+        rawValue={counts.paid}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Lunas"
+        footerText="Pembayaran telah diverifikasi"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Total Omset Sukses"
+        value={formattedPaidVolume}
+        rawValue={totalPaidVolume}
+        icon="payments"
+        cardTheme="blue"
+        badge="Volume Lunas"
+        footerText="Akumulasi nominal transaksi lunas"
+        delayClass="delay-200"
+      />
+      <StatCard
+        client:load
+        label="Menunggu Pembayaran"
+        value={counts.pending}
+        rawValue={counts.pending}
+        icon="hourglass_top"
+        cardTheme="orange"
+        badge="Pending"
+        footerText="Menunggu transfer tenant"
+        delayClass="delay-250"
+      />
+    </div>
+
+    <!-- Interactive Table (matching designer templates style) -->
+    <div class="animate-fade-in-up delay-300">
+      <OrderHistoryTable client:load initialOrders={initialOrders} />
+    </div>
   </div>
 </DashboardLayout>

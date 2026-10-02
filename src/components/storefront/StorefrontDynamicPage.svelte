@@ -64,6 +64,8 @@
             ...section,
             props: {
               ...(section.props || {}),
+              logoText: store?.name || section.props?.logoText || 'Toko UMKM',
+              storeName: store?.name || section.props?.storeName,
               categories: categories.length > 0 ? categories : (section.props?.categories || []),
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
               whatsappTemplate: store?.whatsappTemplate || section.props?.whatsappTemplate,
@@ -105,3 +107,52 @@
     {/each}
   </main>
 </div>
+
+<style>
+  /* 
+   * Strict Storefront Presentation Isolation:
+   * Public storefront visitors must NEVER see builder editor artifacts
+   * (hover dashed outlines, selection rings, or builder edit cursors).
+   */
+  :global(.storefront-root [class*="hover:outline"]:hover),
+  :global(.storefront-root [class*="hover:outline-dashed"]:hover),
+  :global(.storefront-root [class*="outline-dashed"]),
+  :global(.storefront-root [class*="outline-dashed"]:hover),
+  :global(.storefront-root [data-node]),
+  :global(.storefront-root [data-node-key]),
+  :global(.storefront-root [data-node]:hover),
+  :global(.storefront-root [data-node-key]:hover) {
+    outline: none !important;
+    outline-offset: 0 !important;
+  }
+
+  /* Suppress builder selection rings and active node backgrounds */
+  :global(.storefront-root [class*="ring-2"]:not(input):not(textarea):not(select):not(button):not(a):not(.keep-ring)),
+  :global(.storefront-root [data-node].ring-2:not(input):not(textarea):not(select)),
+  :global(.storefront-root [data-node-key].ring-2:not(input):not(textarea):not(select)),
+  :global(.storefront-root [role="button"][data-node].ring-2),
+  :global(.storefront-root .footer-card [role="button"].ring-2),
+  :global(.storefront-root .header-nav-container [role="button"].ring-2) {
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    background-color: transparent !important;
+  }
+
+  /* Reset builder selectable wrappers cursor back to default text / arrow cursor */
+  :global(.storefront-root [data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer)),
+  :global(.storefront-root [data-node-key]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer)),
+  :global(.storefront-root [role="button"][data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer)),
+  :global(.storefront-root .footer-card [role="button"]:not(a):not(button):not(.cursor-pointer)),
+  :global(.storefront-root .cq-footer-bottom-bar > div:not(a):not(button):not(.cursor-pointer)) {
+    cursor: default !important;
+  }
+
+  /* Ensure real interactive elements retain pointer cursor */
+  :global(.storefront-root a),
+  :global(.storefront-root button),
+  :global(.storefront-root .builder-header-nav-link),
+  :global(.storefront-root [role="tab"]) {
+    cursor: pointer !important;
+  }
+</style>

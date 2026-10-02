@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
 if (user.role === 'designer') return Astro.redirect('/designer/wallet');
-if (user.role === 'superadmin') return Astro.redirect('/admin/whitelist');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
 if (user.role === 'admin') return Astro.redirect('/admin');
 
 const store = await db.query.stores.findFirst({

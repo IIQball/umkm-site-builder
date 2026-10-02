@@ -2,9 +2,10 @@
  * Formatting utilities
  */
 
-import { formatIDR as curFormatIDR, formatCurrencyInput, parseCurrencyInput } from '../currency';
+import { formatIDR as curFormatIDR, formatSmartIDR as curFormatSmartIDR, formatCurrencyInput, parseCurrencyInput } from '../currency';
 
 export const formatIDR = curFormatIDR;
+export const formatSmartIDR = curFormatSmartIDR;
 
 export function formatCurrency(amount: number): string {
   return formatIDR(amount);

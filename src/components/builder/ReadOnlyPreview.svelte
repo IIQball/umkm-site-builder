@@ -18,13 +18,18 @@
   import { Badge, Button } from '@/components/ui';
   import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
+  import { mergeStoreCustomization } from '@/lib/templates/mergeCustomization';
+  import { clone } from '@/lib/templates/migration';
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
   export let storeId: string | null = null;
+  export let isEmbed: boolean = false;
+  export let initialViewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
 
-  let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+  let viewMode: 'desktop' | 'tablet' | 'mobile' = initialViewMode;
   let isDark = false;
+  let baseTemplateConfig = template?.config ? clone(template.config) : null;
 
   let containerWidth = 0;
   let canvasHeight = 0;
@@ -51,9 +56,41 @@
   onMount(() => {
     if (template) {
       editorStore.init(template);
+      if (!baseTemplateConfig && template.config) {
+        baseTemplateConfig = clone(template.config);
+      }
     }
     editorStore.setViewMode(viewMode);
     isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: 'PREVIEW_READY',
+          config: template?.config,
+        },
+        '*'
+      );
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'UPDATE_PREVIEW' && event.data.customization) {
+        if (!baseTemplateConfig && template?.config) {
+          baseTemplateConfig = clone(template.config);
+        }
+        if (baseTemplateConfig) {
+          const merged = mergeStoreCustomization(baseTemplateConfig, event.data.customization);
+          template = { ...template, config: merged };
+          editorStore.init(template);
+          editorStore.setViewMode(viewMode);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
   });
 
   const toggleTheme = () => {
@@ -66,7 +103,8 @@
 
 <div class="min-h-screen bg-canvas flex flex-col font-sans text-main transition-colors">
   <!-- Top Admin Status & Navigation Banner -->
-  <header class="sticky top-0 z-50 border-b shadow-sm bg-card border-light">
+  {#if !isEmbed}
+    <header class="sticky top-0 z-50 border-b shadow-sm bg-card border-light">
     <!-- Status Specific Color Alert Bar (hanya untuk desainer pemilik template) -->
     {#if isOwner}
       {#if template.status === 'pending'}
@@ -195,6 +233,7 @@
       </div>
     </div>
   </header>
+  {/if}
 
   <!-- Read-Only Canvas Area -->
   <main

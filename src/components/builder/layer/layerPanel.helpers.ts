@@ -11,7 +11,7 @@ import { getAllSectionDefinitions } from '../registry';
 import { getFooterLayerNodes } from '../sections/footer/footer.helpers';
 import {
   headerHasRowOrder,
-  getDefaultHeaderNavbarOrder,
+  getEffectiveHeaderNavbarOrder,
   getHeaderTopBarType,
 } from '../sections/header/headerLayout.helpers';
 import { getEffectiveHeroElementOrder } from '../sections/hero/heroLayout.helpers';
@@ -66,10 +66,7 @@ export function getSectionNodes(section: TemplateSection): LayerNodeItem[] {
         else list.push({ id: 'announcement', name: 'Bar Pengumuman Promo', icon: Megaphone });
       }
 
-      const defaultNav = getDefaultHeaderNavbarOrder(preset);
-      const navbarOrder = (Array.isArray(section.props?.navbarOrder) && section.props.navbarOrder.length > 0
-        ? section.props.navbarOrder
-        : defaultNav).filter((s: string) => defaultNav.includes(s)) as string[];
+      const navbarOrder = getEffectiveHeaderNavbarOrder(preset, section.props?.navbarOrder);
 
       if (navbarOrder.includes('logo')) list.push({ id: 'logo', name: 'Logo & Brand Toko', icon: Image });
       if (navbarOrder.includes('store_badges')) list.push({ id: 'store_badges', name: 'Lencana Legalitas (BPOM / Halal)', icon: CheckCircle });

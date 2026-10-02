@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { db, users } from '@/db/index';
+import { db, users, tenantInvitations } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
-import { desc, inArray, and, eq, ne } from 'drizzle-orm';
+import { desc, inArray, and, eq, ne, isNull, notExists } from 'drizzle-orm';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -11,6 +11,16 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     if (!user || !isAuthorizedAdmin(user)) {
       throw new AppError('Admin access required', 403);
     }
+
+    const unacceptedInvitationSubquery = db
+      .select()
+      .from(tenantInvitations)
+      .where(
+        and(
+          eq(tenantInvitations.email, users.email),
+          isNull(tenantInvitations.acceptedAt),
+        ),
+      );
 
     let query = db.select({
       id: users.id,
@@ -28,14 +38,16 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       // Superadmin can see tenant, designer, and admin (excluding pending)
       query = query.where(and(
         inArray(users.role, ['tenant', 'designer', 'admin']),
-        ne(users.status, 'pending')
+        ne(users.status, 'pending'),
+        notExists(unacceptedInvitationSubquery),
       ));
     } else {
       // Admin can only see tenants that they registered (excluding pending)
       query = query.where(and(
         eq(users.role, 'tenant'), 
         eq(users.registeredBy, user.id),
-        ne(users.status, 'pending')
+        ne(users.status, 'pending'),
+        notExists(unacceptedInvitationSubquery),
       ));
     }
 

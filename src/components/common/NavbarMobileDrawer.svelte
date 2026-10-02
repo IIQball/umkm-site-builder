@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { ChevronDown, Sparkles, LayoutDashboard, LogOut } from 'lucide-svelte'
+  import { ChevronDown, Sparkles } from 'lucide-svelte'
+  import type { NavUser } from './navbar.helpers'
   import {
-    type NavUser,
-    getRoleBadge,
-    getRoleNavLinks,
-    getDashboardHref,
-    getDashboardLabel
-  } from './navbar.helpers'
+    getRoleConfig,
+    getDashboardHomePath,
+    getSettingsHref
+  } from '@/components/dashboard/sidebar/sidebar.helpers'
 
   export let isOpen: boolean = false
   export let user: NavUser | null = null
@@ -17,15 +16,14 @@
   export let isLoggingOut: boolean = false
   export let onClose: () => void = () => {}
 
-  let expandedSection: 'account' | 'beranda' | 'help' | null = user ? 'account' : 'beranda'
+  let expandedSection: 'beranda' | 'help' | null = user ? null : 'beranda'
 
   $: userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')
-  $: roleMeta = getRoleBadge(user?.role)
-  $: roleNavLinks = getRoleNavLinks(user?.role)
-  $: dashboardHref = getDashboardHref(user?.role)
-  $: dashboardLabel = getDashboardLabel(user?.role)
+  $: roleCfg = getRoleConfig(user?.role || 'tenant')
+  $: dashboardHref = getDashboardHomePath(user?.role)
+  $: settingsHref = getSettingsHref(user?.role)
 
-  const toggleSection = (section: 'account' | 'beranda' | 'help') => {
+  const toggleSection = (section: 'beranda' | 'help') => {
     expandedSection = expandedSection === section ? null : section
   }
 
@@ -50,7 +48,7 @@
     {#if user}
       <div class="flex items-center justify-between p-3 rounded-2xl bg-nested/50 dark:bg-white/[0.04] border border-border/80 dark:border-white/10">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-full bg-orange text-white font-heading font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden">
+          <div class="w-9 h-9 rounded-xl bg-neutral text-neutral-content flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden">
             {#if user.image}
               <img src={user.image} alt={user.name || 'User'} class="w-full h-full object-cover" />
             {:else}
@@ -59,12 +57,13 @@
           </div>
           <div class="min-w-0">
             <p class="font-heading font-semibold text-xs text-main dark:text-white truncate">{user.name || 'Pengguna'}</p>
-            <p class="text-2xs font-sans text-muted dark:text-slate-400 truncate">{user.email || '-'}</p>
+            <p class="text-2xs font-sans text-muted dark:text-muted truncate">{user.email || '-'}</p>
           </div>
         </div>
-        {#if roleMeta}
-          <span class="label-caps text-xs-dense px-2 py-0.5 rounded-full border {roleMeta.color}">
-            {roleMeta.label}
+        {#if roleCfg}
+          <span class="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md border {roleCfg.badgeBg} leading-none">
+            <span class="material-symbols-outlined text-[11px] leading-none">{roleCfg.icon}</span>
+            <span>{roleCfg.badgeLabel}</span>
           </span>
         {/if}
       </div>
@@ -76,7 +75,7 @@
         href="/umkm"
         on:click={onClose}
         class={currentPath.startsWith('/umkm')
-          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm'
+          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm'
           : 'flex-1 text-center py-2.5 rounded-full bg-nested/80 dark:bg-white/5 text-main dark:text-white label-caps font-medium tracking-wider border border-border dark:border-white/10'}
       >
         UMKM
@@ -85,45 +84,49 @@
         href="/templates"
         on:click={onClose}
         class={currentPath.startsWith('/templates')
-          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm'
+          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm'
           : 'flex-1 text-center py-2.5 rounded-full bg-nested/80 dark:bg-white/5 text-main dark:text-white label-caps font-medium tracking-wider border border-border dark:border-white/10'}
       >
         Template
       </a>
     </div>
 
-    <!-- Accordion: Dashboard & Akun Menu (Only when logged in) -->
+    <!-- Menu Akun (3 Menu Sesuai Dasbor: Dasbor, Pengaturan Akun, Keluar) -->
     {#if user}
-      <div class="rounded-2xl border border-border/80 dark:border-white/10 bg-nested/40 dark:bg-white/[0.02] overflow-hidden">
+      <div class="rounded-2xl border border-border/80 dark:border-white/10 bg-nested/40 dark:bg-white/[0.02] overflow-hidden p-1.5 space-y-1">
+        <a
+          href={dashboardHref}
+          on:click={onClose}
+          class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-secondary dark:hover:text-main hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="material-symbols-outlined text-base">dashboard</span>
+            <span class="truncate">Dashboard</span>
+          </div>
+          <span class="text-xs text-muted dark:text-muted">&rarr;</span>
+        </a>
+        <a
+          href={settingsHref}
+          on:click={onClose}
+          class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-secondary dark:hover:text-main hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="material-symbols-outlined text-base">manage_accounts</span>
+            <span class="truncate">Pengaturan Akun</span>
+          </div>
+          <span class="text-xs text-muted dark:text-muted">&rarr;</span>
+        </a>
         <button
           type="button"
-          on:click={() => toggleSection('account')}
-          class="w-full flex items-center justify-between p-3.5 text-left cursor-pointer"
+          on:click={onSignOut}
+          disabled={isLoggingOut}
+          class="w-full px-3 py-2 rounded-xl body-sm font-medium text-error hover:bg-error/10 transition-colors flex items-center justify-between text-left cursor-pointer"
         >
-          <span class="label-caps text-main dark:text-white flex items-center gap-1.5 tracking-wider">
-            <LayoutDashboard size={14} class="text-orange" />
-            <span>{dashboardLabel}</span>
-          </span>
-          <ChevronDown size={14} class="text-muted dark:text-white/80 transition-transform duration-200 {expandedSection === 'account' ? 'rotate-180 text-orange' : ''}" />
-        </button>
-
-        {#if expandedSection === 'account'}
-          <div class="px-3 pb-3 pt-1 space-y-1 border-t border-border/60 dark:border-white/5">
-            {#each roleNavLinks as link}
-              <a
-                href={link.href}
-                on:click={onClose}
-                class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
-              >
-                <div class="flex items-center gap-2 min-w-0">
-                  <svelte:component this={link.icon} size={14} class="text-orange shrink-0" />
-                  <span class="truncate">{link.label}</span>
-                </div>
-                <span class="text-xs text-muted dark:text-slate-500">&rarr;</span>
-              </a>
-            {/each}
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="material-symbols-outlined text-base" class:animate-spin={isLoggingOut}>power_settings_new</span>
+            <span>{isLoggingOut ? 'Keluar...' : 'Keluar'}</span>
           </div>
-        {/if}
+        </button>
       </div>
     {/if}
 
@@ -147,10 +150,10 @@
             <a
               href={item.href}
               on:click={(e) => handleLinkClick(item.href, e)}
-              class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
+              class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-secondary dark:hover:text-main hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
             >
               <span>{item.label}</span>
-              <span class="text-xs text-muted dark:text-slate-500">&rarr;</span>
+              <span class="text-xs text-muted dark:text-muted">&rarr;</span>
             </a>
           {/each}
         </div>
@@ -176,10 +179,10 @@
             <a
               href={item.href}
               on:click={(e) => handleLinkClick(item.href, e)}
-              class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
+              class="px-3 py-2 rounded-xl body-sm font-medium text-secondary hover:text-main dark:text-secondary dark:hover:text-main hover:bg-nested/80 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
             >
               <span>{item.label}</span>
-              <span class="text-xs text-muted dark:text-slate-500">&rarr;</span>
+              <span class="text-xs text-muted dark:text-muted">&rarr;</span>
             </a>
           {/each}
         </div>
@@ -191,7 +194,7 @@
       <a
         href="/#contact"
         on:click={(e) => handleLinkClick('/#contact', e)}
-        class="label-caps text-secondary hover:text-main dark:text-slate-300 dark:hover:text-white tracking-wider"
+        class="label-caps text-secondary hover:text-main dark:text-secondary dark:hover:text-main tracking-wider"
       >
         KONTAK
       </a>
@@ -202,15 +205,15 @@
             type="button"
             on:click={onSignOut}
             disabled={isLoggingOut}
-            class="px-3 py-2 rounded-full text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 label-caps font-semibold text-xs tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-2 rounded-full text-error hover:bg-error/10 label-caps font-semibold text-xs tracking-wider transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            <LogOut size={13} />
-            <span>Keluar</span>
+            <span class="material-symbols-outlined text-sm" class:animate-spin={isLoggingOut}>power_settings_new</span>
+            <span>{isLoggingOut ? 'Keluar...' : 'Keluar'}</span>
           </button>
           <a
             href={dashboardHref}
             on:click={onClose}
-            class="px-4 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all flex items-center gap-1.5"
+            class="px-4 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all flex items-center gap-1.5"
           >
             <span>Dashboard</span>
             <span>&rarr;</span>

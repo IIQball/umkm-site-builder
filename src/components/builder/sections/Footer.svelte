@@ -119,14 +119,15 @@
   $: nodeStyles = ((props?.nodeStyles || styles?.nodeStyles || {}) as unknown) as Record<string, Record<string, string>>;
   $: effectiveOrder = getEffectiveFooterElementOrder(activePreset, props?.elementOrder as string[] | undefined);
 
-  $: currentActiveNodeId = (isActive || $canvasStore?.selectedSectionId === sectionId) ? $activeNodeId : null;
+  $: currentActiveNodeId = (!isActive || isLiveStorefront || $canvasStore?.selectedSectionId !== sectionId) ? null : $activeNodeId;
 
-  const handleSelectNode = (e: MouseEvent | KeyboardEvent, key: string) => {
-    e.stopPropagation();
-    if (sectionId) {
-      canvasStore.selectNode(sectionId, key);
-    }
-  };
+  const handleSelectNode = isLiveStorefront
+    ? (_e: MouseEvent | KeyboardEvent, _key: string) => {}
+    : (e: MouseEvent | KeyboardEvent, key: string) => {
+        if (!isActive) return;
+        e.stopPropagation();
+        if (sectionId) canvasStore.selectNode(sectionId, key);
+      };
 </script>
 
 <footer
@@ -189,6 +190,7 @@
         activeNodeId={currentActiveNodeId}
         selectNode={handleSelectNode}
         elementOrder={effectiveOrder}
+        {isLiveStorefront}
       />
     {:else if activePreset === 'newsletter_centric'}
       <FooterNewsletterCentric

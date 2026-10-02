@@ -506,6 +506,18 @@ export const businessCategoriesRelations = relations(businessCategories, ({ one,
   stores: many(stores),
 }));
 
+// Statistik harian per toko (bucket tanggal mengikuti zona waktu WIB, format YYYY-MM-DD).
+// Dipakai untuk grafik garis di dashboard merchant.
+export const storeDailyStats = pgTable('store_daily_stats', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  date: text('date').notNull(),
+  views: integer('views').default(0).notNull(),
+  waClicks: integer('wa_clicks').default(0).notNull(),
+}, (table) => ({
+  storeDateUniqueIdx: uniqueIndex('store_daily_stats_store_date_idx').on(table.storeId, table.date),
+}));
+
 export const storesRelations = relations(stores, ({ one, many }) => ({
   owner: one(users, { fields: [stores.userId], references: [users.id], relationName: 'storeOwner' }),
   registrar: one(users, { fields: [stores.registeredBy], references: [users.id], relationName: 'registeredStores' }),

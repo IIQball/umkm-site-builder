@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UserPlus, Store, ShieldCheck } from 'lucide-svelte'
+  import { UserPlus } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
   import { Button, Input, Modal } from '@/components/ui';

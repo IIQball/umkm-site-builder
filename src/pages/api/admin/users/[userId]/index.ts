@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions, activityLogs } from '@/db/index';
+import { db, users, activityLogs } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 import { eq } from 'drizzle-orm';

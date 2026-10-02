@@ -30,7 +30,7 @@ describe('A11y Audit Direktori UMKM', () => {
       }
       
       // Asumsikan target adalah 0 pelanggaran kritis atau serius
-      const criticalViolations = violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
+      const criticalViolations = violations.filter((v: { impact?: string | null }) => v.impact === 'critical' || v.impact === 'serious');
       expect(criticalViolations.length).toBe(0);
     } catch (e) {
       console.warn('A11y test skipped due to UI state', e);

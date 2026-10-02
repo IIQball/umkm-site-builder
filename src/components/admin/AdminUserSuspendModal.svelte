@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { AdminUserItem } from '@/types';
   import { Modal, Button, Textarea } from '@/components/ui';
   import { CheckCircle2, AlertTriangle } from 'lucide-svelte';
   
   export let isOpen = false;
   export let isUnsuspend = false;
-  export let selectedUser: AdminUserItem | null = null;
+  export let selectedUser: { id: string; name: string } | null = null;
   export let suspendReason = '';
   export let actionLoading = false;
   export let onSubmit: (status: 'active' | 'suspended', reason?: string) => void = () => {};

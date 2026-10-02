@@ -12,7 +12,6 @@
     token: string;
     invitedBy: string;
     expiresAt: string;
-    expiresAt: string;
     acceptedAt: string | null;
     createdAt: string;
     userId: string | null;
@@ -419,7 +418,7 @@
                       variant="destructive"
                       className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
                       title="Tangguhkan"
-                      on:click={() => openSuspendModal(inv.userId, inv.name, false)}
+                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, false)}
                       disabled={isUpdatingUser === inv.userId}
                     >
                       <AlertCircle size={14} class="mr-1" />
@@ -431,7 +430,7 @@
                       variant="primary"
                       className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
                       title="Aktifkan"
-                      on:click={() => openSuspendModal(inv.userId, inv.name, true)}
+                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, true)}
                       disabled={isUpdatingUser === inv.userId}
                     >
                       <CheckCircle2 size={14} class="mr-1" />
@@ -444,7 +443,7 @@
                     variant="ghost"
                     className="h-8 w-8 p-0 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all ml-1"
                     title="Hapus Pengguna Permanen"
-                    on:click={() => openDeleteModal(inv.userId, 'user')}
+                    on:click={() => inv.userId && openDeleteModal(inv.userId, 'user')}
                     disabled={isUpdatingUser === inv.userId}
                   >
                     <Trash2 size={15} />

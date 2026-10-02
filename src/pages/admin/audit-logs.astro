@@ -7,7 +7,7 @@ import { getAuditLogs } from '@/services/audit.service';
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!isAuthorizedAdmin(user)) {
+if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect('/auth/login?redirect=/admin/audit-logs');
 }
 
@@ -18,7 +18,6 @@ const roleFilter = Astro.url.searchParams.get('role') || 'all';
 
 let initialLogs: any[] = [];
 let total = 0;
-let totalPages = 1;
 
 try {
   const result = await getAuditLogs({ 
@@ -35,7 +34,6 @@ try {
     createdAt: log.createdAt ? log.createdAt.toISOString() : new Date().toISOString()
   }));
   total = result.meta.total;
-  totalPages = result.meta.totalPages;
 } catch (error) {
   console.error('[AdminAuditLogs] Failed to query audit logs:', error);
 }
@@ -60,7 +58,6 @@ try {
         initialLogs={initialLogs} 
         total={total}
         currentPage={page}
-        totalPages={totalPages}
         initialActionFilter={actionFilter}
         initialRoleFilter={roleFilter}
       />

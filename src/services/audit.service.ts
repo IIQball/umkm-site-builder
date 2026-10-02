@@ -32,7 +32,7 @@ export async function getAuditLogs(params: GetAuditLogsParams = {}) {
     }
 
     if (params.roleFilter && params.roleFilter !== 'all') {
-      conditions.push(eq(users.role, params.roleFilter as any));
+      conditions.push(eq(users.role, params.roleFilter as typeof users.$inferSelect.role));
     }
 
     const finalWhere = conditions.length > 0 ? and(...conditions) : undefined;

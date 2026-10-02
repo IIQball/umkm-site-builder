@@ -49,6 +49,6 @@ if (currentUser && currentUser.role === 'tenant') {
 }
 ---
 
-<BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
+<BaseLayout title={`Preview: ${templateRecord.name} - Pinoka`} hideNavbar={true}>
   <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} storeId={tenantStoreId} />
 </BaseLayout>

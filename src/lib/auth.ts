@@ -58,28 +58,40 @@ export const auth = betterAuth({
       const isAdmin = role === 'admin' || role === 'superadmin';
       const isActivation = status === 'pending';
 
-      let subject = 'Reset Password Akun UMKM Site Builder';
-      let bodyText = 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+      let subject = 'Reset Password Akun Pinoka';
+      let bodyText = 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka Anda.';
 
       if (isActivation) {
-        subject = isAdmin ? 'Aktivasi Akun Admin UMKM Site Builder' : 'Aktivasi Akun Merchant UMKM Site Builder';
+        subject = isAdmin ? 'Aktivasi Akun Admin Pinoka' : 'Aktivasi Akun Merchant Pinoka';
         bodyText = isAdmin 
           ? 'Akun Admin Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai mengelola platform.'
           : 'Selamat bergabung! Akun Merchant Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai menggunakan layanan kami.';
       } else {
-        subject = isAdmin ? 'Reset Password Akun Admin UMKM Site Builder' : 'Reset Password Akun UMKM Site Builder';
+        subject = isAdmin ? 'Reset Password Akun Admin Pinoka' : 'Reset Password Akun Pinoka';
         bodyText = isAdmin 
           ? 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Admin Anda.'
-          : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun UMKM Site Builder Anda.';
+          : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka Anda.';
       }
       
       let finalUrl = url;
       try {
         const parsedUrl = new URL(url);
-        if (parsedUrl.pathname === '/reset-password') {
-          parsedUrl.pathname = '/activation';
+        
+        // Extract token from BetterAuth API route and bypass it for a cleaner link
+        if (parsedUrl.pathname.includes('/api/auth/reset-password/')) {
+          const token = parsedUrl.pathname.split('/').pop();
+          const callbackURL = parsedUrl.searchParams.get('callbackURL');
+          
+          if (callbackURL && token) {
+            const cleanUrl = new URL(callbackURL, parsedUrl.origin);
+            cleanUrl.searchParams.set('token', token);
+            finalUrl = cleanUrl.toString();
+          }
+        } else if (parsedUrl.pathname === '/reset-password') {
+          // Fallback if it generates a standard non-API URL
+          parsedUrl.pathname = isActivation ? '/activation' : '/auth/reset-password';
+          finalUrl = parsedUrl.toString();
         }
-        finalUrl = parsedUrl.toString();
       } catch {
         // ignore parsing error
       }
@@ -138,14 +150,14 @@ export const auth = betterAuth({
       }
       await sendEmail({
         to: user.email,
-        subject: 'Verifikasi Email UMKM Site Builder',
+        subject: 'Verifikasi Email Pinoka',
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 0; color: #334155; line-height: 1.6;">
             <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin-bottom: 24px;">Verifikasi Email Anda</h1>
             
             <p style="margin-bottom: 16px;">Halo <strong>${user.name}</strong>,</p>
             
-            <p style="margin-bottom: 24px;">Terima kasih telah mendaftar di UMKM Site Builder. Silakan verifikasi alamat email Anda untuk melanjutkan dan mulai menggunakan layanan kami.</p>
+            <p style="margin-bottom: 24px;">Terima kasih telah mendaftar di Pinoka. Silakan verifikasi alamat email Anda untuk melanjutkan dan mulai menggunakan layanan kami.</p>
             
             <div style="background-color: #f0fdfa; border-left: 4px solid #14b8a6; padding: 16px; border-radius: 4px; margin-bottom: 32px;">
               <p style="margin: 0; color: #0f766e; font-size: 14px;">

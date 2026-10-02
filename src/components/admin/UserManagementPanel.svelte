@@ -173,10 +173,10 @@
 
   <!-- User Stats Summary -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-100" />
-    <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-150" />
-    <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="orange" icon="pending_actions" delayClass="delay-175" />
-    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="dark" icon="block" delayClass="delay-200" />
+    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="dark" icon="block" delayClass="delay-100" />
+    <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-150" />
+    <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-175" />
+    <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="orange" icon="pending_actions" delayClass="delay-200" />
   </div>
 
   <div class="flex flex-col gap-4">

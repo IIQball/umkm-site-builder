@@ -20,7 +20,7 @@ function env(key: string): string {
 
 export const config = {
   app: {
-    name: 'UMKM Site Builder',
+    name: 'Pinoka',
     version: '0.0.1',
     environment: import.meta.env.MODE || 'development',
     isDev: import.meta.env.DEV,

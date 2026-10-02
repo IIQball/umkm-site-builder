@@ -25,11 +25,11 @@ export const POST: APIRoute = async ({ request }) => {
 
     await sendEmail({
       to: email,
-      subject: 'Kode Verifikasi (OTP) - UMKM Site Builder',
+      subject: 'Kode Verifikasi (OTP) - Pinoka',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           <h2 style="color: #0f172a;">Kode Verifikasi Anda</h2>
-          <p>Gunakan kode OTP berikut untuk melanjutkan registrasi akun UMKM Site Builder Anda:</p>
+          <p>Gunakan kode OTP berikut untuk melanjutkan registrasi akun Pinoka Anda:</p>
           <div style="${['font-size: 32px', 'font-weight: bold', 'letter-spacing: 4px', 'color: #36C6FD', 'padding: 16px 0'].join(String.fromCharCode(59) + ' ')}">
             ${otp}
           </div>

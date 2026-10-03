@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { getRoleConfig } from "./sidebar/sidebar.helpers";
   import NavbarUserMenu from "@/components/common/NavbarUserMenu.svelte";
   import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";

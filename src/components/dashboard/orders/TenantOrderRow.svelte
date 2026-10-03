@@ -3,16 +3,27 @@
     CreditCard,
     Palette,
     ShoppingBag,
+    FileText,
+    User,
+    Store,
   } from 'lucide-svelte';
   import { Badge, Button } from '@/components/ui';
-  import { formatCurrency, formatDate } from '@/lib/utils';
+  import { formatIDR } from '@/lib/currency';
+  import { formatDate } from '@/lib/utils/format';
 
   export let order: any;
   export let statusMeta: { variant: any; label: string };
   export let displayId: string;
   export let copiedId: string | null;
+  export let isAdmin: boolean = false;
   export let onCopyId: (id: string) => void;
   export let getPaymentUrl: (order: any) => string;
+  export let onOpenInvoice: (order: any) => void = () => {};
+
+  $: basePrice = order.basePrice !== undefined 
+    ? Number(order.basePrice) 
+    : Math.max(0, Number(order.amount) - Number(order.adminFee || 0));
+  $: adminFee = Number(order.adminFee || 0);
 </script>
 
 <tr class="hover:bg-nested/40 transition-colors group">
@@ -22,11 +33,11 @@
       <button
         type="button"
         on:click={() => onCopyId(displayId)}
-        class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+        class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-border rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
         title="Salin ID Invoice"
       >
         <span class="truncate max-w-[120px]">{displayId}</span>
-        <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-emerald-500' : 'text-muted'}">
+        <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-success' : 'text-muted'}">
           {copiedId === displayId ? 'check' : 'content_copy'}
         </span>
       </button>
@@ -35,6 +46,27 @@
       {formatDate(order.createdAt)}
     </span>
   </td>
+
+  <!-- Merchant & Store Info (Admin View Only) -->
+  {#if isAdmin}
+    <td class="px-4 py-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-1.5 font-bold text-xs text-main">
+          <User size={13} class="text-primary flex-shrink-0" />
+          <span class="truncate max-w-[140px]">{order.merchantName || 'Merchant'}</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-3xs text-secondary">
+          <Store size={12} class="flex-shrink-0" />
+          <span class="truncate max-w-[140px]">{order.storeName || 'Toko Merchant'}</span>
+        </div>
+        {#if order.assistedBy}
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded-md bg-warning/10 text-warning text-3xs font-semibold">
+            Binaan
+          </span>
+        {/if}
+      </div>
+    </td>
+  {/if}
 
   <!-- Template Details -->
   <td class="px-4 py-4">
@@ -61,12 +93,30 @@
     </div>
   </td>
 
-  <!-- Amount -->
-  <td class="px-4 py-4 text-right whitespace-nowrap">
-    <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-main bg-nested/90 px-2.5 py-1 rounded-xl border border-light">
-      {formatCurrency(order.amount)}
-    </span>
-  </td>
+  <!-- Amount & Fee Breakdown -->
+  {#if isAdmin}
+    <td class="px-4 py-4 text-right whitespace-nowrap">
+      <div class="space-y-1">
+        <div class="font-mono text-xs font-black text-main">
+          {formatIDR(order.amount)}
+        </div>
+        <div class="text-3xs text-secondary flex items-center justify-end gap-1.5 font-mono">
+          <span>Tpl: {formatIDR(basePrice)}</span>
+          {#if adminFee > 0}
+            <span class="text-success font-bold bg-success/10 px-1.5 py-0.5 rounded">
+              Fee: +{formatIDR(adminFee)}
+            </span>
+          {/if}
+        </div>
+      </div>
+    </td>
+  {:else}
+    <td class="px-4 py-4 text-right whitespace-nowrap">
+      <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-main bg-nested/90 px-2.5 py-1 rounded-xl border border-light">
+        {formatIDR(order.amount)}
+      </span>
+    </td>
+  {/if}
 
   <!-- Status Badge -->
   <td class="px-4 py-4 text-center">
@@ -78,37 +128,38 @@
   </td>
 
   <!-- Actions -->
-  <td class="px-6 py-4 text-right">
-    <div class="flex items-center justify-end gap-2">
+  <td class="px-6 py-4 text-right whitespace-nowrap">
+    <div class="flex items-center justify-end gap-2 whitespace-nowrap">
       {#if order.status === 'pending'}
         <Button
           href={getPaymentUrl(order)}
           variant="orange"
           size="sm"
-          className="font-bold"
+          class="font-bold whitespace-nowrap min-w-[136px] justify-center px-4"
         >
-          <CreditCard size={14} />
-          <span>Bayar Sekarang</span>
+          <CreditCard size={14} class="shrink-0" />
+          <span class="whitespace-nowrap">Bayar Sekarang</span>
         </Button>
       {:else if order.status === 'paid' || order.status === 'success' || order.status === 'completed'}
         <Button
-          href="/dashboard/templates"
-          variant="dark"
+          type="button"
+          variant="secondary"
           size="sm"
-          className="font-bold"
+          class="font-bold whitespace-nowrap min-w-[136px] justify-center border-light hover:border-primary/40 active:scale-95 transition-all text-xs px-3.5"
+          on:click={() => onOpenInvoice(order)}
         >
-          <Palette size={14} />
-          <span>Terapkan</span>
+          <FileText size={14} class="text-primary shrink-0" />
+          <span class="whitespace-nowrap">Unduh Invoice</span>
         </Button>
       {:else}
         <Button
           href="/templates"
           variant="secondary"
           size="sm"
-          className="font-bold"
+          class="font-bold whitespace-nowrap min-w-[136px] justify-center px-4"
         >
-          <ShoppingBag size={14} />
-          <span>Beli Ulang</span>
+          <ShoppingBag size={14} class="shrink-0" />
+          <span class="whitespace-nowrap">Beli Ulang</span>
         </Button>
       {/if}
     </div>

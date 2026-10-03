@@ -4,6 +4,7 @@ import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import type { TransactionRecord } from '@/types';
+import { formatIDR } from '@/lib/currency';
 
 export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): TransactionRecord {
   return {
@@ -75,17 +76,21 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       }
       
       // Send notification to designer
-      const buyer = await db.select().from(users).where(eq(users.id, transaction.userId)).limit(1);
-      const buyerName = buyer.length > 0 ? buyer[0].name : 'Seseorang';
-      
-      await db.insert(notifications).values({
-        id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        userId: template.designerId,
-        type: 'template_purchased',
-        title: 'Template Terjual',
-        message: `${buyerName} telah membeli template "${template.name}". Komisi sebesar Rp${designerAmount.toLocaleString('id-ID')} telah ditambahkan ke saldo Anda.`,
-        metadata: { templateId: template.id, transactionId: transaction.id }
-      });
+      try {
+        const buyer = await db.select().from(users).where(eq(users.id, transaction.userId)).limit(1);
+        const buyerName = buyer.length > 0 ? buyer[0].name : 'Seseorang';
+        
+        await db.insert(notifications).values({
+          id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          userId: template.designerId,
+          type: 'template_purchased',
+          title: 'Template Terjual',
+          message: `${buyerName} telah membeli template "${template.name}". Komisi sebesar ${formatIDR(designerAmount)} telah ditambahkan ke saldo Anda.`,
+          metadata: { templateId: template.id, transactionId: transaction.id }
+        });
+      } catch {
+        // Non-blocking notification dispatch
+      }
     }
   }
 }

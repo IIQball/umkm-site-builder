@@ -5,7 +5,7 @@ import StatCard from "@/components/ui/StatCard.svelte";
 import { formatSmartIDR } from "@/lib/currency";
 import { getAuthenticatedUser, isAuthorizedAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
-import { transactions, templates } from "@/db/schema";
+import { transactions, templates, stores, users } from "@/db/schema";
 import { eq, or, desc } from "drizzle-orm";
 
 export const prerender = false;
@@ -25,13 +25,19 @@ let initialOrders: Array<{
   userId: string;
   type: string;
   amount: number;
+  adminFee?: number;
+  basePrice?: number;
   status: string;
   storeId?: string | null;
   templateId?: string | null;
+  assistedBy?: string | null;
   externalId?: string | null;
   paymentGatewayRef?: string | null;
   paymentChannel?: string | null;
   createdAt: string;
+  merchantName?: string | null;
+  merchantEmail?: string | null;
+  storeName?: string | null;
   template?: {
     id: string;
     name: string;
@@ -52,9 +58,11 @@ try {
       userId: transactions.userId,
       type: transactions.type,
       amount: transactions.amount,
+      adminFee: transactions.adminFee,
       status: transactions.status,
       storeId: transactions.storeId,
       templateId: transactions.templateId,
+      assistedBy: transactions.assistedBy,
       externalId: transactions.externalId,
       paymentGatewayRef: transactions.paymentGatewayRef,
       paymentChannel: transactions.paymentChannel,
@@ -62,46 +70,64 @@ try {
       templateName: templates.name,
       templateThumbnail: templates.thumbnailUrl,
       templatePrice: templates.price,
+      merchantName: users.name,
+      merchantEmail: users.email,
+      storeName: stores.name,
     })
     .from(transactions)
     .leftJoin(templates, eq(transactions.templateId, templates.id))
+    .leftJoin(users, eq(transactions.userId, users.id))
+    .leftJoin(stores, eq(transactions.storeId, stores.id))
     .where(whereCondition)
     .orderBy(desc(transactions.createdAt));
 
-  initialOrders = (rows || []).map((r) => ({
-    id: r.id,
-    userId: r.userId,
-    type: r.type,
-    amount: Number(r.amount),
-    status: r.status,
-    storeId: r.storeId,
-    templateId: r.templateId,
-    externalId: r.externalId,
-    paymentGatewayRef: r.paymentGatewayRef,
-    paymentChannel: r.paymentChannel,
-    createdAt: r.createdAt
-      ? r.createdAt.toISOString()
-      : new Date().toISOString(),
-    template: r.templateName
-      ? {
-          id: r.templateId || "",
-          name: r.templateName,
-          thumbnailUrl: r.templateThumbnail,
-          price: r.templatePrice ? Number(r.templatePrice) : 0,
-        }
-      : null,
-  }));
+  initialOrders = (rows || []).map((r) => {
+    const adminFee = Number(r.adminFee || 0);
+    const amount = Number(r.amount);
+    const basePrice = Math.max(0, amount - adminFee);
+    return {
+      id: r.id,
+      userId: r.userId,
+      type: r.type,
+      amount,
+      adminFee,
+      basePrice,
+      status: r.status,
+      storeId: r.storeId,
+      templateId: r.templateId,
+      assistedBy: r.assistedBy,
+      externalId: r.externalId,
+      paymentGatewayRef: r.paymentGatewayRef,
+      paymentChannel: r.paymentChannel,
+      createdAt: r.createdAt
+        ? r.createdAt.toISOString()
+        : new Date().toISOString(),
+      merchantName: r.merchantName || r.merchantEmail || "Merchant",
+      merchantEmail: r.merchantEmail,
+      storeName: r.storeName || "Toko Merchant",
+      template: r.templateName
+        ? {
+            id: r.templateId || "",
+            name: r.templateName,
+            thumbnailUrl: r.templateThumbnail,
+            price: r.templatePrice ? Number(r.templatePrice) : basePrice,
+          }
+        : null,
+    };
+  });
 } catch (error) {
   console.error("[AdminTransactions] Failed to query transactions:", error);
   initialOrders = [];
 }
 
 const paidOrders = initialOrders.filter(
-  (o) => o.status === "paid" || o.status === "success",
+  (o) => o.status === "paid" || o.status === "success" || o.status === "completed",
 );
 const pendingOrders = initialOrders.filter((o) => o.status === "pending");
 const totalPaidVolume = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+const totalAdminFeeEarned = paidOrders.reduce((sum, o) => sum + (o.adminFee || 0), 0);
 const formattedPaidVolume = formatSmartIDR(totalPaidVolume);
+const formattedAdminFee = formatSmartIDR(totalAdminFeeEarned);
 
 const counts = {
   total: initialOrders.length,
@@ -119,11 +145,10 @@ const counts = {
         <h1
           class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
         >
-          <span>Riwayat Transaksi & Mutasi</span>
+          <span>Riwayat Transaksi & Pembelian Template</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Daftar seluruh pesanan template, status invoice pembayaran, dan
-          transaksi platform.
+          Daftar seluruh pesanan template toko merchant binaan, rincian biaya lisensi, fee jasa pendampingan, dan faktur resmi.
         </p>
       </div>
     </div>
@@ -154,13 +179,13 @@ const counts = {
       />
       <StatCard
         client:load
-        label="Total Omset Sukses"
-        value={formattedPaidVolume}
-        rawValue={totalPaidVolume}
+        label="Fee Pendampingan"
+        value={formattedAdminFee}
+        rawValue={totalAdminFeeEarned}
         icon="payments"
         cardTheme="blue"
-        badge="Volume Lunas"
-        footerText="Akumulasi nominal transaksi lunas"
+        badge="Fee Bersih"
+        footerText={`Dari omset ${formattedPaidVolume}`}
         delayClass="delay-200"
       />
       <StatCard
@@ -171,14 +196,14 @@ const counts = {
         icon="hourglass_top"
         cardTheme="orange"
         badge="Pending"
-        footerText="Menunggu transfer tenant"
+        footerText="Menunggu pembayaran merchant"
         delayClass="delay-250"
       />
     </div>
 
-    <!-- Interactive Table (matching designer templates style) -->
+    <!-- Interactive Table (Admin View with rich merchant, store, fee breakdown) -->
     <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load initialOrders={initialOrders} />
+      <OrderHistoryTable client:load initialOrders={initialOrders} isAdmin={true} />
     </div>
   </div>
 </DashboardLayout>

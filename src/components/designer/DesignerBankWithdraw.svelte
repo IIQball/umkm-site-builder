@@ -1,37 +1,26 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
-  import { formatIDR } from '@/lib/currency';
+  import { formatIDR, parseCurrencyInput } from '@/lib/currency';
   import DesignerBankCard from './DesignerBankCard.svelte';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
   import DesignerPayoutHistoryTable from './DesignerPayoutHistoryTable.svelte';
   import DesignerPerformanceCards from './DesignerPerformanceCards.svelte';
+  import DesignerPayoutInfoCard from './DesignerPayoutInfoCard.svelte';
+  import AdminMerchantGrowthChart from '@/components/admin/growth/AdminMerchantGrowthChart.svelte';
+  import type { MerchantGrowthSummary } from '@/components/admin/growth/merchantGrowth.types';
 
-  export let balance: number;
-  export let availableBalance: number;
-  export let totalNetIncome = 0;
-  export let totalTemplatesSold = 0;
-  export let settlementDelayDays = 7;
+  export let balance: number, availableBalance: number;
+  export let totalNetIncome = 0, totalTemplatesSold = 0, settlementDelayDays = 7;
+  export let showPerformanceCards = true, accountType: 'designer' | 'admin' = 'designer';
+  export let merchantGrowthData: MerchantGrowthSummary | undefined = undefined;
 
-  let bankAccount: BankAccount | null = null;
-  let bankAccounts: BankAccount[] = [];
-  let selectedAccountId = '';
-
-  let showBankModal = false;
-  let showWithdrawModal = false;
-  let inputBankName = 'BCA';
-  let inputAccountNumber = '';
-  let inputHolderName = '';
-  let withdrawAmount = '';
-  let withdrawError = '';
-  let isWithdrawing = false;
-  let withdrawSuccess = false;
-  let isLoading = false;
-  let apiError = '';
-  let payoutHistory: PayoutHistoryItem[] = [];
-  let isLoadingPayouts = false;
-  let minPayoutLimit = 50000;
+  let bankAccount: BankAccount | null = null, bankAccounts: BankAccount[] = [], selectedAccountId = '';
+  let showBankModal = false, showWithdrawModal = false, isWithdrawing = false, withdrawSuccess = false;
+  let inputBankName = 'BCA', inputAccountNumber = '', inputHolderName = '', apiError = '', isLoading = false;
+  let withdrawAmount = '', withdrawError = '', minPayoutLimit = 50000;
+  let payoutHistory: PayoutHistoryItem[] = [], isLoadingPayouts = false;
   let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   async function fetchPayoutHistory() {
@@ -141,11 +130,8 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bankCode: inputBankName,
-          bankName: inputBankName,
-          accountNumber: inputAccountNumber,
-          accountHolder: inputHolderName,
-          holderName: inputHolderName,
+          bankCode: inputBankName, bankName: inputBankName, accountNumber: inputAccountNumber,
+          accountHolder: inputHolderName, holderName: inputHolderName,
         }),
       });
 
@@ -179,21 +165,19 @@
 
   const handleDeleteAccount = async (accountId: string) => {
     try {
-      const res = await fetch(`/api/designer/bank-account?id=${accountId}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/designer/bank-account?id=${accountId}`, { method: 'DELETE' });
       if (res.ok) await fetchBankAccounts();
     } catch (err) {
       console.error('Failed to delete bank account:', err);
     }
   };
 
-  const handleWithdraw = async (targetBankAccountId: string) => {
+  const handleWithdraw = async (targetBankAccountId: string, amountOverride?: number) => {
     const targetAccount = bankAccounts.find((a) => a.id === targetBankAccountId) || bankAccount;
     if (!targetAccount) return;
 
-    const amountNum = Number(withdrawAmount);
-    if (isNaN(amountNum) || amountNum < minPayoutLimit) {
+    const amountNum = amountOverride ?? parseCurrencyInput(withdrawAmount);
+    if (!amountNum || amountNum < minPayoutLimit) {
       withdrawError = `Jumlah penarikan minimal ${formatIDR(minPayoutLimit)}`;
       return;
     }
@@ -252,13 +236,15 @@
   };
 </script>
 
-<!-- Row 2: Performance Stats & Multiple Bank Accounts Card -->
+<!-- Bank Account & Optional Performance Cards, Growth Chart, or Info Card -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch mb-6">
-  <div class="lg:col-span-1 h-full">
-    <DesignerPerformanceCards {totalNetIncome} {totalTemplatesSold} />
-  </div>
+  {#if showPerformanceCards}
+    <div class="lg:col-span-1 h-full">
+      <DesignerPerformanceCards {totalNetIncome} {totalTemplatesSold} />
+    </div>
+  {/if}
 
-  <div class="lg:col-span-2 h-full">
+  <div class="{showPerformanceCards || accountType === 'admin' ? 'lg:col-span-2' : 'lg:col-span-3'} h-full">
     <DesignerBankCard
       {bankAccount}
       {bankAccounts}
@@ -275,35 +261,34 @@
       onSelectAccount={(id) => (selectedAccountId = id)}
     />
   </div>
+
+  {#if accountType === 'admin'}
+    <div class="lg:col-span-1 h-full">
+      {#if merchantGrowthData}
+        <AdminMerchantGrowthChart growthData={merchantGrowthData} />
+      {:else}
+        <DesignerPayoutInfoCard {minPayoutLimit} {settlementDelayDays} />
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <!-- Modals -->
 <DesignerBankModal
   showModal={showBankModal}
-  {bankAccount}
-  bind:inputBankName
-  bind:inputAccountNumber
-  bind:inputHolderName
-  {isLoading}
-  {apiError}
+  {bankAccount} {isLoading} {apiError}
+  bind:inputBankName bind:inputAccountNumber bind:inputHolderName
   onSave={saveBankAccount}
   onClose={() => (showBankModal = false)}
 />
 
 <DesignerWithdrawModal
   showModal={showWithdrawModal}
-  {withdrawSuccess}
-  {bankAccount}
-  {bankAccounts}
+  {withdrawSuccess} {bankAccount} {bankAccounts}
   bind:selectedBankAccountId={selectedAccountId}
-  {balance}
-  {availableBalance}
-  bind:withdrawAmount
-  {withdrawError}
-  {isWithdrawing}
-  {minPayoutLimit}
-  onWithdraw={handleWithdraw}
-  onClose={closeWithdrawModal}
+  {balance} {availableBalance} {isWithdrawing} {minPayoutLimit}
+  bind:withdrawAmount bind:withdrawError
+  onWithdraw={handleWithdraw} onClose={closeWithdrawModal}
 />
 
 <!-- Payout History Table -->

@@ -4,6 +4,7 @@
   import DesignerMutationTable from './DesignerMutationTable.svelte';
   import DesignerBankWithdraw from './DesignerBankWithdraw.svelte';
   import DesignerWeeklyChart from './wallet/DesignerWeeklyChart.svelte';
+  import type { MerchantGrowthSummary } from '@/components/admin/growth/merchantGrowth.types';
   import { buildWeeklyData, buildDistribution } from './wallet/wallet.helpers';
 
   export let walletSummary: {
@@ -19,10 +20,15 @@
       createdAt: Date | string;
     }>;
   };
-  export let totalNetIncome: number;
-  export let totalTemplatesSold: number;
+  export let totalNetIncome = 0;
+  export let totalTemplatesSold = 0;
   export let settlementDelayDays = 7;
   export let platformFeePercentage = 30;
+  export let showPerformanceCards = true;
+  export let showCharts = true;
+  export let accountType: 'designer' | 'admin' = 'designer';
+  export let totalEarnedCommission = 0;
+  export let merchantGrowthData: MerchantGrowthSummary | undefined = undefined;
 
   type WalletMutation = (typeof walletSummary.mutations)[number];
 
@@ -69,6 +75,8 @@
     balance={walletSummary.balance}
     availableBalance={walletSummary.availableBalance}
     {settlementDelayDays}
+    {accountType}
+    {totalEarnedCommission}
   />
 
   <!-- Row 2: Performance Stats stacked 1-col beside Bank Card & Full Width Payout History -->
@@ -78,15 +86,20 @@
     {totalNetIncome}
     {totalTemplatesSold}
     {settlementDelayDays}
+    {showPerformanceCards}
+    {accountType}
+    {merchantGrowthData}
   />
 
   <!-- Analytics Grid -->
-  <DesignerWeeklyChart
-    {weeklyData}
-    {maxWeekly}
-    {topTemplates}
-    {platformFeePercentage}
-  />
+  {#if showCharts}
+    <DesignerWeeklyChart
+      {weeklyData}
+      {maxWeekly}
+      {topTemplates}
+      {platformFeePercentage}
+    />
+  {/if}
 
   <!-- Ledger Mutation Table -->
   <DesignerMutationTable mutations={walletSummary.mutations} />

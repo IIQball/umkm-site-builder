@@ -44,36 +44,51 @@ export async function getOrCreateWallet(designerId: string, client: DbExecutor) 
 }
 
 /**
- * Calculates the designer's matured/eligible balance.
+ * Calculates the designer or admin's matured/eligible balance.
  */
-export async function calculateEligibleBalance(designerId: string, client: DbExecutor = db): Promise<number> {
+export async function calculateEligibleBalance(userId: string, client: DbExecutor = db): Promise<number> {
   const settingsList = await client.select().from(platformSettings).limit(1);
   const delayDays = settingsList && settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - delayDays);
 
-  const [commissionSum] = await client
+  // 1. Matured designer sales commissions
+  const [designerSum] = await client
     .select({ total: sum(commissions.designerAmount) })
     .from(commissions)
     .where(
       and(
-        eq(commissions.designerId, designerId),
+        eq(commissions.designerId, userId),
         lte(commissions.createdAt, cutoffDate)
       )
     );
-  const totalCommission = Number(commissionSum?.total || 0);
+  const totalDesignerCommission = Number(designerSum?.total || 0);
+
+  // 2. Matured admin assistance fees
+  const [adminSum] = await client
+    .select({ total: sum(commissions.adminAmount) })
+    .from(commissions)
+    .where(
+      and(
+        eq(commissions.adminId, userId),
+        lte(commissions.createdAt, cutoffDate)
+      )
+    );
+  const totalAdminCommission = Number(adminSum?.total || 0);
+
+  const totalEligibleCommission = totalDesignerCommission + totalAdminCommission;
 
   const [payoutSum] = await client
     .select({ total: sum(payoutRequests.amount) })
     .from(payoutRequests)
     .where(
       and(
-        eq(payoutRequests.userId, designerId),
+        eq(payoutRequests.userId, userId),
         inArray(payoutRequests.status, ['processing', 'completed'])
       )
     );
   const totalPayout = Number(payoutSum?.total || 0);
 
-  return Math.max(0, totalCommission - totalPayout);
+  return Math.max(0, totalEligibleCommission - totalPayout);
 }

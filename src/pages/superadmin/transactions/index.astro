@@ -3,8 +3,8 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { transactions, templates } from '@/db/schema';
-import { eq, or, desc } from 'drizzle-orm';
+import { transactions, templates, users, stores } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -18,13 +18,19 @@ let initialOrders: Array<{
   userId: string;
   type: string;
   amount: number;
+  adminFee?: number;
+  basePrice?: number;
   status: string;
   storeId?: string | null;
   templateId?: string | null;
+  assistedBy?: string | null;
   externalId?: string | null;
   paymentGatewayRef?: string | null;
   paymentChannel?: string | null;
   createdAt: string;
+  merchantName?: string | null;
+  merchantEmail?: string | null;
+  storeName?: string | null;
   template?: {
     id: string;
     name: string;
@@ -34,19 +40,17 @@ let initialOrders: Array<{
 }> = [];
 
 try {
-  const whereCondition = user.role === 'superadmin'
-    ? undefined
-    : or(eq(transactions.userId, user.id), eq(transactions.assistedBy, user.id));
-
   const rows = await db
     .select({
       id: transactions.id,
       userId: transactions.userId,
       type: transactions.type,
       amount: transactions.amount,
+      adminFee: transactions.adminFee,
       status: transactions.status,
       storeId: transactions.storeId,
       templateId: transactions.templateId,
+      assistedBy: transactions.assistedBy,
       externalId: transactions.externalId,
       paymentGatewayRef: transactions.paymentGatewayRef,
       paymentChannel: transactions.paymentChannel,
@@ -54,31 +58,46 @@ try {
       templateName: templates.name,
       templateThumbnail: templates.thumbnailUrl,
       templatePrice: templates.price,
+      merchantName: users.name,
+      merchantEmail: users.email,
+      storeName: stores.name,
     })
     .from(transactions)
     .leftJoin(templates, eq(transactions.templateId, templates.id))
-    .where(whereCondition)
+    .leftJoin(users, eq(transactions.userId, users.id))
+    .leftJoin(stores, eq(transactions.storeId, stores.id))
     .orderBy(desc(transactions.createdAt));
 
-  initialOrders = (rows || []).map((r) => ({
-    id: r.id,
-    userId: r.userId,
-    type: r.type,
-    amount: Number(r.amount),
-    status: r.status,
-    storeId: r.storeId,
-    templateId: r.templateId,
-    externalId: r.externalId,
-    paymentGatewayRef: r.paymentGatewayRef,
-    paymentChannel: r.paymentChannel,
-    createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
-    template: r.templateName ? {
-      id: r.templateId || '',
-      name: r.templateName,
-      thumbnailUrl: r.templateThumbnail,
-      price: r.templatePrice ? Number(r.templatePrice) : 0,
-    } : null,
-  }));
+  initialOrders = (rows || []).map((r) => {
+    const adminFee = Number(r.adminFee || 0);
+    const amount = Number(r.amount);
+    const basePrice = Math.max(0, amount - adminFee);
+    return {
+      id: r.id,
+      userId: r.userId,
+      type: r.type,
+      amount,
+      adminFee,
+      basePrice,
+      status: r.status,
+      storeId: r.storeId,
+      templateId: r.templateId,
+      assistedBy: r.assistedBy,
+      externalId: r.externalId,
+      paymentGatewayRef: r.paymentGatewayRef,
+      paymentChannel: r.paymentChannel,
+      createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
+      merchantName: r.merchantName || r.merchantEmail || 'Merchant',
+      merchantEmail: r.merchantEmail,
+      storeName: r.storeName || 'Toko Merchant',
+      template: r.templateName ? {
+        id: r.templateId || '',
+        name: r.templateName,
+        thumbnailUrl: r.templateThumbnail,
+        price: r.templatePrice ? Number(r.templatePrice) : basePrice,
+      } : null,
+    };
+  });
 } catch (error) {
   console.error('[AdminTransactions] Failed to query transactions:', error);
   initialOrders = [];
@@ -90,17 +109,17 @@ try {
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
         <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
-          <span>Riwayat Transaksi & Mutasi</span>
+          <span>Riwayat Transaksi & Pembelian Global</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Daftar seluruh pesanan template, status invoice pembayaran, dan transaksi platform.
+          Daftar seluruh pesanan template platform, rincian pembayaran merchant, fee pendampingan admin, dan status invoice.
         </p>
       </div>
     </div>
 
-    <!-- Interactive Table (matching designer templates style) -->
+    <!-- Interactive Table (Superadmin view with full merchant, store, fee breakdown) -->
     <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load initialOrders={initialOrders} />
+      <OrderHistoryTable client:load initialOrders={initialOrders} isAdmin={true} />
     </div>
   </div>
 </DashboardLayout>

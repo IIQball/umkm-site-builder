@@ -47,6 +47,7 @@ One pack. Never a second. No emojis as substitutes.
 | Modal | src/components/ui/Modal.svelte | modal, modal-open, modal-box, modal-backdrop, modal-action, teleport, lucide icons | open, title, description, size, closeOnEsc, closeOnBackdrop, showCloseButton, bodyPadding, borderless, class |
 | ImageUpload | src/components/shared/ImageUpload.svelte | card, btn, alert, progress, lucide icons | folder, maxFiles, maxSizeMB, existingUrls, onUpload |
 | TrafficWidget | src/components/dashboard/TrafficWidget.svelte | card, btn, alert, progress, lucide icons (TrendingUp, Users, MessageCircle, Loader2) | storeId |
+| SearchableSelect | src/components/ui/SearchableSelect.svelte | combobox, popover, search input, lucide icons (Search, ChevronDown, Check, X) | value, options, placeholder, searchPlaceholder, emptyText, size, clearable, disabled |
 
 ## 4. Established patterns
 

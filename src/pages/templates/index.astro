@@ -4,12 +4,14 @@ import PublicTemplateMarketplace from '@/components/public/PublicTemplateMarketp
 import LandingFooter from '@/components/landing/LandingFooter.svelte';
 import { db } from '@/lib/db/client';
 import { templates, templateCategories, userTemplates, designers, users, stores } from '@/db/schema';
-import { eq, and, isNull, desc, asc } from 'drizzle-orm';
+import { eq, and, isNull, desc, asc, inArray } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getAdminServiceFee } from '@/services/finance/commission.service';
 
 export const prerender = false;
 
 const currentUser = await getAuthenticatedUser(Astro.request);
+const adminServiceFee = await getAdminServiceFee();
 
 // Fetch all approved templates with category and designer data
 const rawTemplates = await db
@@ -57,7 +59,15 @@ if (currentUser) {
 }
 
 // Fetch assisted tenants if admin
-let assistedTenants: Array<{ id: string; name: string; storeName: string; storeId: string }> = [];
+let assistedTenants: Array<{
+  id: string;
+  name: string;
+  storeName: string;
+  storeId: string;
+  currentTemplateId: string | null;
+  ownedTemplateIds: string[];
+}> = [];
+
 if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
   const adminStores = await db.query.stores.findMany({
     where: and(
@@ -72,12 +82,35 @@ if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'supera
     orderBy: [desc(stores.createdAt)],
   });
 
-  assistedTenants = adminStores.map((s) => ({
-    id: s.userId,
-    name: s.owner?.name || s.owner?.email || 'Tenant',
-    storeName: s.name,
-    storeId: s.id,
-  }));
+  const tenantUserIds = adminStores.map((s) => s.userId);
+  const tenantOwnedRecords = tenantUserIds.length > 0
+    ? await db
+        .select({
+          userId: userTemplates.userId,
+          templateId: userTemplates.templateId,
+        })
+        .from(userTemplates)
+        .where(inArray(userTemplates.userId, tenantUserIds))
+    : [];
+
+  assistedTenants = adminStores.map((s) => {
+    const ownedForThisUser = tenantOwnedRecords
+      .filter((r) => r.userId === s.userId)
+      .map((r) => r.templateId);
+
+    if (s.templateId && !ownedForThisUser.includes(s.templateId)) {
+      ownedForThisUser.push(s.templateId);
+    }
+
+    return {
+      id: s.userId,
+      name: s.owner?.name || s.owner?.email || 'Tenant',
+      storeName: s.name,
+      storeId: s.id,
+      currentTemplateId: s.templateId,
+      ownedTemplateIds: ownedForThisUser,
+    };
+  });
 }
 
 const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
@@ -107,6 +140,7 @@ const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
         currentUserId={currentUser?.id || null}
         isLoggedIn={!!currentUser}
         userRole={currentUser?.role || null}
+        {adminServiceFee}
       />
     </main>
 

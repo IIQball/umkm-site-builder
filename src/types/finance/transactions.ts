@@ -101,6 +101,11 @@ export interface CheckoutPageData {
   invoiceId: string;
   amount: number;
   amountFormatted: string;
+  baseAmount?: number;
+  adminFee?: number;
+  assistedBy?: string | null;
+  assistedMerchantName?: string | null;
+  assistedStoreName?: string | null;
   paymentUrl: string;
   status: PaymentStatus;
   expiresAt: string;
@@ -110,3 +115,4 @@ export interface CheckoutPageData {
   designerName?: string | null;
   templateDescription?: string | null;
 }
+

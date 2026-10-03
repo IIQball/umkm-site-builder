@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Palette, Eye, ShoppingCart, CheckCircle2 } from 'lucide-svelte';
   import { Button, Badge } from '@/components/ui';
-  import { formatCurrency } from '@/lib/utils';
+  import { formatIDR } from '@/lib/currency';
   import type { PublicTemplate } from '../marketplace.types';
 
   export let tpl: PublicTemplate;
@@ -9,10 +9,18 @@
   export let isPurchasing: boolean = false;
   export let isTenantOrGuest: boolean = true;
   export let userRole: string | null = null;
+  export let adminServiceFee: number = 0;
+  export let hasSelectedTenant: boolean = false;
+  export let isOwnedBySelectedTenant: boolean = false;
   export let onPurchase: (tpl: PublicTemplate) => void;
+
+  $: isAdmin = userRole === 'admin' || userRole === 'superadmin';
+  $: displayPrice = (isAdmin && hasSelectedTenant && tpl.price > 0)
+    ? tpl.price + adminServiceFee
+    : tpl.price;
 </script>
 
-<div class="bg-card border border-light hover:border-slate-300 dark:hover:border-slate-700 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group relative">
+<div class="bg-card border border-light hover:border-border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group relative">
   <!-- Thumbnail Frame -->
   <div class="relative h-52 w-full flex items-center justify-center overflow-hidden">
     {#if tpl.thumbnailUrl}
@@ -48,9 +56,16 @@
           Gratis
         </span>
       {:else}
-        <span class="inline-flex items-center gap-1 bg-card/95 backdrop-blur-md text-main font-mono font-black px-3 py-1 rounded-full text-xs shadow-xs border border-light">
-          {formatCurrency(tpl.price)}
-        </span>
+        <div class="flex flex-col items-end gap-0.5">
+          <span class="inline-flex items-center gap-1 bg-card/95 backdrop-blur-md text-main font-mono font-black px-3 py-1 rounded-full text-xs shadow-xs border border-light">
+            {formatIDR(displayPrice)}
+          </span>
+          {#if isAdmin && hasSelectedTenant && adminServiceFee > 0}
+            <span class="text-2xs font-semibold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.2 rounded-md">
+              Termasuk Fee
+            </span>
+          {/if}
+        </div>
       {/if}
     </div>
   </div>
@@ -66,6 +81,13 @@
       <p class="text-body-xs text-secondary line-clamp-2 leading-relaxed">
         {tpl.description || 'Desain website siap pakai untuk mempercantik storefront toko online Anda.'}
       </p>
+
+      {#if isAdmin && hasSelectedTenant && tpl.price > 0}
+        <div class="mt-2 px-2.5 py-1.5 rounded-xl bg-primary/5 border border-primary/15 text-xs-dense text-secondary flex items-center justify-between">
+          <span>Fee Pendampingan:</span>
+          <span class="font-mono font-bold text-primary">+{formatIDR(adminServiceFee)}</span>
+        </div>
+      {/if}
     </div>
 
     <div class="pt-4 border-t border-light/60 flex items-center justify-between gap-2">
@@ -86,23 +108,24 @@
           target="_blank"
           variant="secondary"
           size="sm"
-          className="rounded-xl font-bold"
+          class="rounded-xl font-bold"
           title="Buka Demo Template"
         >
           <Eye size={14} />
           <span>Demo</span>
         </Button>
 
-        {#if isOwned}
+        {#if !isAdmin && isOwned}
           <Badge variant="success" size="lg" dot={false} class="gap-1.5">
             <CheckCircle2 size={13} />
             Dimiliki
           </Badge>
-        {:else if isTenantOrGuest || userRole === 'admin'}
+        {:else if isTenantOrGuest || isAdmin}
+          {@const isAdminInstall = isAdmin && (isOwnedBySelectedTenant || (tpl.price === 0 && !hasSelectedTenant))}
           <Button
-            variant={tpl.price === 0 ? 'secondary' : 'primary'}
+            variant={isAdminInstall ? 'primary' : (tpl.price === 0 ? 'secondary' : 'primary')}
             size="sm"
-            className="rounded-xl font-bold {tpl.price === 0 ? '!bg-success hover:!bg-success/90 !text-success-content' : ''}"
+            class="rounded-xl font-bold {(!isAdmin && tpl.price === 0) ? '!bg-success hover:!bg-success/90 !text-success-content' : ''}"
             loading={isPurchasing}
             disabled={isPurchasing}
             on:click={() => onPurchase(tpl)}
@@ -110,7 +133,11 @@
             {#if !isPurchasing}
               <ShoppingCart size={14} />
             {/if}
-            <span>{userRole === 'admin' ? (tpl.price === 0 ? 'Pasang ke Tenant' : 'Beli untuk Tenant') : (tpl.price === 0 ? 'Gunakan' : 'Beli')}</span>
+            <span>
+              {isAdmin
+                ? (isAdminInstall ? 'Pasang ke Tenant' : 'Beli untuk Merchant')
+                : (tpl.price === 0 ? 'Gunakan' : 'Beli')}
+            </span>
           </Button>
         {/if}
       </div>

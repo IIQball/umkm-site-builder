@@ -15,7 +15,7 @@
   export let withdrawError = '';
   export let isWithdrawing = false;
   export let minPayoutLimit = 50000;
-  export let onWithdraw: (targetAccountId: string) => void = () => {};
+  export let onWithdraw: (targetAccountId: string, amount?: number) => void = () => {};
   export let onClose: () => void = () => {};
 
   $: accountsList = bankAccounts.length > 0 ? bankAccounts : (bankAccount ? [bankAccount] : []);
@@ -27,6 +27,7 @@
   }
 
   function handleInputChange(e: CustomEvent<Event> | Event) {
+    withdrawError = '';
     const detail = (e as CustomEvent).detail;
     const target = (detail?.target || e.target) as HTMLInputElement | null;
     const rawVal = target ? target.value : withdrawAmount;
@@ -47,6 +48,7 @@
   }
 
   function setPresetAmount(ratio: number) {
+    withdrawError = '';
     const amount = Math.floor(availableBalance * ratio);
     withdrawAmount = formatPriceInput(amount);
   }
@@ -89,7 +91,7 @@
 
   {#if withdrawSuccess}
     <div class="text-center py-4 space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto shadow-2xs">
+      <div class="w-14 h-14 rounded-2xl bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto shadow-2xs">
         <CheckCircle2 size={28} />
       </div>
       <div class="space-y-1">
@@ -109,7 +111,7 @@
         <Button
           variant="orange"
           size="md"
-          className="w-full justify-center font-bold"
+          class="w-full justify-center font-bold"
           on:click={onClose}
         >
           Selesai
@@ -119,14 +121,14 @@
   {:else}
     <div class="space-y-4">
       <!-- Balance Status Bar -->
-      <div class="grid grid-cols-2 gap-3 bg-slate-900 text-white rounded-2xl p-3.5 text-center shadow-sm">
+      <div class="grid grid-cols-2 gap-3 bg-main text-canvas rounded-2xl p-3.5 text-center shadow-sm">
         <div class="space-y-0.5">
-          <span class="text-[10px] text-white/60 font-bold uppercase tracking-wider font-heading block">Total Saldo</span>
-          <p class="text-xs sm:text-sm font-black text-white font-mono">{formatIDR(balance)}</p>
+          <span class="text-2xs text-canvas/70 font-bold uppercase tracking-wider font-heading block">Total Saldo</span>
+          <p class="text-xs sm:text-sm font-black text-canvas font-mono">{formatIDR(balance)}</p>
         </div>
-        <div class="space-y-0.5 border-l border-white/15">
-          <span class="text-[10px] text-orange-light font-bold uppercase tracking-wider font-heading block">Siap Dicairkan</span>
-          <p class="text-xs sm:text-sm font-black text-orange-light font-mono">{formatIDR(availableBalance)}</p>
+        <div class="space-y-0.5 border-l border-light">
+          <span class="text-2xs text-orange font-bold uppercase tracking-wider font-heading block">Siap Dicairkan</span>
+          <p class="text-xs sm:text-sm font-black text-orange font-mono">{formatIDR(availableBalance)}</p>
         </div>
       </div>
 
@@ -160,7 +162,7 @@
                     <div class="flex items-center gap-2">
                       <span class="text-xs font-bold text-main font-mono">{acc.bankName}</span>
                       {#if acc.isPrimary}
-                        <span class="text-3xs font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <span class="text-3xs font-bold px-1.5 py-0.5 rounded-full bg-success/10 text-success">
                           Utama
                         </span>
                       {/if}
@@ -183,7 +185,7 @@
               <span class="text-xs font-bold font-mono text-main">{activeAccount.bankName} ({activeAccount.accountNumber})</span>
               <p class="text-2xs text-secondary font-mono mt-0.5">{activeAccount.accountHolder || activeAccount.holderName}</p>
             </div>
-            <span class="text-3xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+            <span class="text-3xs font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">
               Terverifikasi
             </span>
           </div>
@@ -199,7 +201,7 @@
           on:input={handleInputChange}
           disabled={isWithdrawing}
           error={validationMessage}
-          className="font-mono font-bold text-base"
+          class="font-mono font-bold text-base"
         >
           <span slot="prefix" class="text-xs font-bold text-muted select-none">Rp</span>
         </Input>
@@ -209,7 +211,7 @@
             <button
               type="button"
               on:click={() => setPresetAmount(0.5)}
-              class="text-xs font-bold bg-nested border border-light text-main hover:bg-slate-900 hover:text-white dark:hover:bg-primary px-3.5 py-1.5 rounded-xl cursor-pointer transition-all active:scale-[0.98] font-heading shadow-2xs"
+              class="text-xs font-bold bg-nested border border-light text-main hover:bg-main hover:text-canvas dark:hover:bg-primary px-3.5 py-1.5 rounded-xl cursor-pointer transition-all active:scale-[0.98] font-heading shadow-2xs"
             >
               50%
             </button>
@@ -237,7 +239,7 @@
         size="sm"
         disabled={isConfirmDisabled}
         loading={isWithdrawing}
-        on:click={() => onWithdraw(selectedBankAccountId || activeAccount?.id || '')}
+        on:click={() => onWithdraw(selectedBankAccountId || activeAccount?.id || '', parsedAmount)}
       >
         <span class="material-symbols-outlined text-sm">payments</span>
         <span>Konfirmasi Penarikan</span>

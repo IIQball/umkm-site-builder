@@ -8,11 +8,9 @@ import { handleApiRoute, validate, AppError } from '@/lib/utils';
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
-    // Read webhook secret with fallback chain (Cloudflare, import.meta.env, process.env)
-    const runtimeEnv = ((context.locals as unknown as Record<string, unknown>)?.runtime as Record<string, unknown>)?.env as Record<string, string> | undefined;
+    // Read webhook secret safely without accessing removed Astro.locals.runtime.env
     const expectedToken = (
-      runtimeEnv?.XENDIT_WEBHOOK_SECRET ||
-      import.meta.env.XENDIT_WEBHOOK_SECRET ||
+      (import.meta.env.XENDIT_WEBHOOK_SECRET as string | undefined) ||
       process.env.XENDIT_WEBHOOK_SECRET ||
       ''
     ).trim();

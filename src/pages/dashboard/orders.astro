@@ -6,6 +6,11 @@ import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services/finance/transaction.service';
 import { formatIDR } from '@/lib/currency';
+import { db } from '@/lib/db/client';
+import { stores } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
@@ -23,7 +28,18 @@ try {
   initialOrders = [];
 }
 
-const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
+const tenantStore = await db.query.stores.findFirst({
+  where: eq(stores.userId, user.id),
+  columns: { name: true },
+});
+
+const ordersWithMerchant = initialOrders.map((o) => ({
+  ...o,
+  merchantName: user.name || user.email,
+  storeName: tenantStore?.name || 'Toko Saya',
+}));
+
+const totalPaidOrders = initialOrders.filter((o) => o.status === 'success' || o.status === 'paid' || o.status === 'completed');
 const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
 
 const totalSpent = totalPaidOrders.reduce((sum, o) => sum + o.amount, 0);
@@ -39,7 +55,7 @@ const formattedTotalSpent = formatIDR(totalSpent);
           <span>Riwayat Pesanan & Tagihan</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, atau terapkan tema yang telah lunas.
+          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, dan unduh bukti faktur resmi.
         </p>
       </div>
 
@@ -78,8 +94,8 @@ const formattedTotalSpent = formatIDR(totalSpent);
         rawValue={totalPaidOrders.length}
         icon="check_circle"
         cardTheme="default"
-        badge="Siap Pakai"
-        footerText="Dapat langsung diterapkan"
+        badge="Lunas"
+        footerText="Faktur resmi tersedia"
         delayClass="delay-150"
       />
       <StatCard
@@ -108,7 +124,7 @@ const formattedTotalSpent = formatIDR(totalSpent);
 
     <!-- Interactive Table Card -->
     <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load {initialOrders} />
+      <OrderHistoryTable client:load initialOrders={ordersWithMerchant} isAdmin={false} />
     </div>
   </div>
 </DashboardLayout>

@@ -4,7 +4,7 @@ import { withTransaction } from '@/lib/db/transaction';
 import { wallets, walletMutations, payoutRequests, platformSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
+import { calculateEligibleBalance, createXenditDisbursement, getOrCreateWallet } from '@/services/finance';
 import { payoutSchema } from '@/schemas';
 import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { formatIDR } from '@/lib/currency';
@@ -70,11 +70,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let newPayout;
     try {
       newPayout = await withTransaction(async (tx) => {
-        const walletList = await tx.select().from(wallets).where(eq(wallets.userId, user.id)).limit(1);
-        if (walletList.length === 0) {
-          throw new Error('WALLET_NOT_FOUND');
-        }
-        const wallet = walletList[0];
+        const wallet = await getOrCreateWallet(user.id, tx);
         const currentBalance = Number(wallet.balance);
 
         if (currentBalance < amount) {

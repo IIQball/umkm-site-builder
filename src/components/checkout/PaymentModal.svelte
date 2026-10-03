@@ -19,14 +19,15 @@
   {open}
   size="xl"
   bodyPadding={false}
+  scrollable={false}
   showCloseButton={true}
   on:close={closeModal}
-  class="max-w-3xl w-full h-[85vh] max-h-[750px]"
+  class="max-w-3xl w-full h-[85vh] max-h-[750px] !overflow-hidden"
 >
   <svelte:fragment slot="header">
     <div class="flex items-center gap-2.5 text-sm font-bold text-main font-heading">
-      <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-[18px]">verified_user</span>
+      <div class="w-8 h-8 rounded-xl bg-success/10 text-success flex items-center justify-center">
+        <span class="material-symbols-outlined text-lg">verified_user</span>
       </div>
       <span>Kanal Pembayaran Terenkripsi</span>
     </div>

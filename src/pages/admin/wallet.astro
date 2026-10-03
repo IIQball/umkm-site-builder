@@ -1,0 +1,120 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getDesignerWalletSummary } from '@/services';
+import { db } from '@/lib/db/client';
+import { platformSettings, transactions } from '@/db/schema';
+import { or, eq } from 'drizzle-orm';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedAdmin(user)) {
+  return Astro.redirect('/auth/login?redirect=/admin/wallet');
+}
+
+if (user.role === 'superadmin') {
+  return Astro.redirect('/superadmin');
+}
+
+let walletSummary = {
+  balance: 0,
+  availableBalance: 0,
+  mutations: [] as Array<{
+    id: string;
+    amount: number;
+    balanceAfter: number;
+    type: 'CREDIT' | 'DEBIT';
+    description: string;
+    referenceId: string | null;
+    createdAt: Date | string;
+  }>,
+};
+let settlementDelayDays = 7;
+let totalEarnedCommission = 0;
+
+try {
+  walletSummary = await getDesignerWalletSummary(user.id);
+
+  const settingsList = await db.select().from(platformSettings).limit(1);
+  if (settingsList.length > 0) {
+    settlementDelayDays = settingsList[0].settlementDelayDays;
+  }
+
+  const whereCondition = or(
+    eq(transactions.userId, user.id),
+    eq(transactions.assistedBy, user.id),
+  );
+
+  const txRows = await db
+    .select({
+      adminFee: transactions.adminFee,
+      status: transactions.status,
+    })
+    .from(transactions)
+    .where(whereCondition);
+
+  const isPaid = (status: string) => {
+    const s = (status || '').toLowerCase().trim();
+    return s === 'paid' || s === 'success' || s === 'completed';
+  };
+
+  totalEarnedCommission = txRows
+    .filter((t) => isPaid(t.status))
+    .reduce((sum, t) => sum + Number(t.adminFee || 0), 0);
+} catch (error) {
+  console.error('[AdminWallet] Gagal memuat data dompet admin:', error);
+}
+---
+
+<DashboardLayout title="Dompet & Payout" breadcrumb="Dompet & Payout">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>Dompet & Payout Admin</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat pengelolaan rekening bank pencairan, monitoring saldo fee pendampingan UMKM, pengajuan penarikan dana, dan riwayat mutasi keuangan.
+        </p>
+      </div>
+
+      <!-- Quick Action Navigation -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <Button
+          href="/admin"
+          variant="secondary"
+          size="md"
+        >
+          <span class="material-symbols-outlined text-base">dashboard</span>
+          <span>Overview Dasbor</span>
+        </Button>
+
+        <Button
+          href="/admin/transactions"
+          variant="secondary"
+          size="md"
+        >
+          <span class="material-symbols-outlined text-base">receipt_long</span>
+          <span>Riwayat Faktur</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Financial Suite: Statcards, Bank Card & Withdraw, Payout History, Mutation Ledger -->
+    <div>
+      <DesignerWalletOverview
+        client:load
+        walletSummary={walletSummary}
+        settlementDelayDays={settlementDelayDays}
+        showPerformanceCards={false}
+        showCharts={false}
+        accountType="admin"
+        totalEarnedCommission={totalEarnedCommission}
+      />
+    </div>
+  </div>
+</DashboardLayout>

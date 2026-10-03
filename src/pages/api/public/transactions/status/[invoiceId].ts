@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { transactionService } from '@/services';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatIDR } from '@/lib/currency';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
@@ -23,11 +23,16 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       paymentUrl = await transactionService.getInvoiceUrl(transaction.externalId) || undefined;
     }
 
+    const adminFee = Number(transaction.adminFee || 0);
+    const baseAmount = Math.max(0, transaction.amount - adminFee);
+
     return jsonSuccess({
       invoiceId: transaction.externalId,
       status: transaction.status,
       amount: transaction.amount,
-      amountFormatted: formatCurrency(transaction.amount),
+      amountFormatted: formatIDR(transaction.amount),
+      baseAmount,
+      adminFee,
       paymentMethod: transaction.paymentChannel,
       paymentUrl,
     });

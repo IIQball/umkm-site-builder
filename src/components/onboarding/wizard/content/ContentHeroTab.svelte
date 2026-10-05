@@ -1,11 +1,18 @@
 <script lang="ts">
+  import ImageUpload from '@/components/shared/ImageUpload.svelte';
   import { HERO_IMAGE_PRESETS } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let onUpdate: (() => void) | undefined = undefined;
+
+  function handleHeroUpload(urls: string[]) {
+    customization.hero.imageUrl = urls[0] || '';
+    onUpdate?.();
+  }
 </script>
 
-<div class="space-y-4">
+<div class="space-y-4 text-left">
   <!-- Badge Teks -->
   <div>
     <label for="hero-badge-input" class="block text-xs font-bold text-main font-heading mb-1.5">
@@ -15,8 +22,9 @@
       id="hero-badge-input"
       type="text"
       bind:value={customization.hero.badgeText}
+      on:input={() => onUpdate?.()}
       placeholder="Contoh: Koleksi Resmi 2026 / Promo Terbatas"
-      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
     />
   </div>
 
@@ -29,6 +37,7 @@
       id="hero-title-input"
       type="text"
       bind:value={customization.hero.title}
+      on:input={() => onUpdate?.()}
       placeholder="Nama toko atau slogan utama"
       class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
     />
@@ -42,9 +51,10 @@
     <textarea
       id="hero-subtitle-input"
       bind:value={customization.hero.subtitle}
+      on:input={() => onUpdate?.()}
       rows="2"
       placeholder="Jelaskan produk atau keunggulan toko Anda..."
-      class="w-full bg-card text-main border border-light rounded-xl p-3 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+      class="w-full bg-card text-main border border-light rounded-xl p-3 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none leading-relaxed"
     ></textarea>
   </div>
 
@@ -57,24 +67,35 @@
       id="hero-cta-input"
       type="text"
       bind:value={customization.hero.ctaText}
+      on:input={() => onUpdate?.()}
       placeholder="Contoh: Pesan Sekarang / Hubungi Penjual"
       class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
     />
   </div>
 
   <!-- Gambar Banner Hero -->
-  <div>
-    <label for="hero-image-url-input" class="block text-xs font-bold text-main font-heading mb-1.5">
-      Gambar Banner Hero
-    </label>
+  <div class="space-y-2 pt-2 border-t border-light">
+    <div class="flex items-center justify-between">
+      <span class="block text-xs font-bold text-main font-heading">
+        Gambar Banner Hero
+      </span>
+      {#if customization.hero.imageUrl}
+        <span class="text-3xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+          Gambar Terpasang
+        </span>
+      {/if}
+    </div>
 
     <!-- Presets -->
     <div class="grid grid-cols-2 gap-2 mb-2">
       {#each HERO_IMAGE_PRESETS as preset}
         <button
           type="button"
-          on:click={() => (customization.hero.imageUrl = preset.url)}
-          class="flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all {customization.hero.imageUrl === preset.url
+          on:click={() => {
+            customization.hero.imageUrl = preset.url;
+            onUpdate?.();
+          }}
+          class="flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all cursor-pointer {customization.hero.imageUrl === preset.url
             ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
             : 'border-light bg-card hover:bg-nested/40'}"
         >
@@ -88,13 +109,18 @@
       {/each}
     </div>
 
-    <!-- Custom URL Input -->
-    <input
-      id="hero-image-url-input"
-      type="url"
-      bind:value={customization.hero.imageUrl}
-      placeholder="Atau tempel URL gambar kustom (https://...)"
-      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-    />
+    <!-- Direct Component Upload -->
+    <div class="pt-1">
+      <p class="text-3xs text-secondary mb-1.5 font-sans">
+        Atau unggah foto banner sendiri (PNG, JPG, atau WebP):
+      </p>
+      <ImageUpload
+        folder="stores"
+        maxFiles={1}
+        maxSizeMB={5}
+        existingUrls={customization.hero.imageUrl ? [customization.hero.imageUrl] : []}
+        onUpload={handleHeroUpload}
+      />
+    </div>
   </div>
 </div>

@@ -29,7 +29,7 @@
     : DEFAULT_FAQS) as (FAQItem & { category?: string; iconName?: string })[];
 
   $: title = (props?.title as string) || (props?.heading as string) || 'Pertanyaan yang Sering Diajukan';
-  $: subtitle = (props?.subtitle as string) || 'Temukan solusi cepat dan informasi penting seputar layanan serta produk kami.';
+  $: subtitle = (props?.subtitle as string) || (props?.subheading as string) || 'Temukan solusi cepat dan informasi penting seputar layanan serta produk kami.';
   $: badgeText = (props?.badgeText as string) || 'Pusat Bantuan Konsumen';
   $: waNumber = (props?.whatsappNumber as string) || (props?.waNumber as string) || '';
 

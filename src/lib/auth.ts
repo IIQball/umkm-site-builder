@@ -413,6 +413,7 @@ export async function getAuthenticatedUser(request: Request): Promise<Authentica
         email: user.email,
         role: user.role as AuthenticatedUser['role'],
         status: user.status as AuthenticatedUser['status'],
+        createdAt: user.createdAt,
       };
     }
 
@@ -432,6 +433,7 @@ export async function getAuthenticatedUser(request: Request): Promise<Authentica
         email: user.email,
         role: user.role as AuthenticatedUser['role'],
         status: user.status as AuthenticatedUser['status'],
+        createdAt: user.createdAt,
       };
     }
 
@@ -486,6 +488,6 @@ export function canManageStore(
 }
 
 export function getRedirectUrlForRole(role?: string | null): string {
-  if (role === 'designer') return '/designer/wallet';
+  if (role === 'designer') return '/designer';
   return '/dashboard';
 }

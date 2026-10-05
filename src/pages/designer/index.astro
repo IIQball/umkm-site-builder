@@ -1,0 +1,139 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
+import Button from '@/components/ui/Button.svelte';
+import DesignerOverviewDashboard from '@/components/designer/dashboard/DesignerOverviewDashboard.svelte';
+import { getDesignerWalletSummary } from '@/services';
+import { db } from '@/lib/db/client';
+import { templates, templateCategories, commissions } from '@/db/schema';
+import { eq, and, isNull, desc } from 'drizzle-orm';
+import type { DesignerTemplateRecord, DesignerCommissionRecord } from '@/components/designer/dashboard/designerDashboard.types';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedDesigner(user)) {
+  return Astro.redirect('/auth/login?redirect=/designer');
+}
+
+let availableBalance = 0;
+let templateRows: DesignerTemplateRecord[] = [];
+let commissionRows: DesignerCommissionRecord[] = [];
+
+try {
+  const wallet = await getDesignerWalletSummary(user.id);
+  availableBalance = wallet.availableBalance;
+
+  const rawTemplates = await db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      slug: templates.slug,
+      price: templates.price,
+      thumbnailUrl: templates.thumbnailUrl,
+      status: templates.status,
+      createdAt: templates.createdAt,
+      categoryName: templateCategories.name,
+    })
+    .from(templates)
+    .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
+    .where(and(eq(templates.designerId, user.id), isNull(templates.deletedAt)))
+    .orderBy(desc(templates.createdAt));
+
+  templateRows = rawTemplates.map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    price: Number(t.price || 0),
+    thumbnailUrl: t.thumbnailUrl,
+    status: t.status,
+    createdAt: t.createdAt.toISOString(),
+    categoryName: t.categoryName || 'Tanpa Kategori',
+  }));
+
+  const rawCommissions = await db
+    .select({
+      id: commissions.id,
+      templateId: commissions.templateId,
+      totalAmount: commissions.totalAmount,
+      designerAmount: commissions.designerAmount,
+      platformFee: commissions.platformFee,
+      createdAt: commissions.createdAt,
+    })
+    .from(commissions)
+    .where(eq(commissions.designerId, user.id))
+    .orderBy(desc(commissions.createdAt));
+
+  commissionRows = rawCommissions.map((c) => ({
+    id: c.id,
+    templateId: c.templateId,
+    totalAmount: Number(c.totalAmount || 0),
+    designerAmount: Number(c.designerAmount || 0),
+    platformFee: Number(c.platformFee || 0),
+    createdAt: c.createdAt.toISOString(),
+  }));
+} catch (error) {
+  console.error('[DesignerDashboard] Gagal memuat data overview dasbor:', error);
+}
+
+const userCreatedYear = user.createdAt
+  ? new Date(user.createdAt).getFullYear()
+  : new Date().getFullYear();
+
+const currentHour = new Date().getHours();
+let greeting = 'Selamat Datang';
+if (currentHour >= 4 && currentHour < 11) {
+  greeting = 'Selamat Pagi';
+} else if (currentHour >= 11 && currentHour < 15) {
+  greeting = 'Selamat Siang';
+} else if (currentHour >= 15 && currentHour < 18.5) {
+  greeting = 'Selamat Sore';
+} else {
+  greeting = 'Selamat Malam';
+}
+---
+
+<DashboardLayout title="Overview Dasbor" breadcrumb="Dashboard">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Desainer'}!</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat monitoring performa pembuatan template, tren penjualan ke merchant, dan performa karya desain Anda.
+        </p>
+      </div>
+
+      <!-- Quick Action Navigation -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <Button href="/designer/wallet" variant="secondary" size="md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/>
+            <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>
+          </svg>
+          <span>Dompet & Finansial</span>
+        </Button>
+
+        <Button href="/builder/new" variant="primary" size="md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 12h8"/>
+            <path d="M12 8v8"/>
+          </svg>
+          <span>Buat Template Baru</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Master Overview Dashboard (Filter Periode, StatCard, Grafik Pertumbuhan & Performa Template) -->
+    <DesignerOverviewDashboard
+      client:load
+      allTemplates={templateRows}
+      allCommissions={commissionRows}
+      availableBalance={availableBalance}
+      userCreatedYear={userCreatedYear}
+    />
+  </div>
+</DashboardLayout>

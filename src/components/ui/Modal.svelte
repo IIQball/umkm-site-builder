@@ -9,6 +9,7 @@
   export let closeOnBackdrop: boolean = true;
   export let showCloseButton: boolean = true;
   export let bodyPadding: boolean = true;
+  export let scrollable: boolean = true;
   export let borderless: boolean = false;
   let className: string = '';
   export { className as class };
@@ -119,7 +120,7 @@
       {/if}
 
       <!-- Modal Body -->
-      <div class="px-6 sm:px-7 flex-1 min-h-0 overflow-y-auto {bodyPadding ? (borderless ? 'pb-6' : 'py-6') : 'py-0'}">
+      <div class="{bodyPadding ? (borderless ? 'px-6 sm:px-7 pb-6' : 'px-6 sm:px-7 py-6') : 'p-0'} {scrollable ? 'overflow-y-auto' : 'overflow-hidden'} flex-1 min-h-0">
         <slot />
       </div>
 

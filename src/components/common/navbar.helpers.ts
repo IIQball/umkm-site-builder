@@ -85,11 +85,13 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
       return [
         { label: 'Overview Dashboard', href: '/admin', icon: LayoutDashboard },
         { label: 'Merchant Anda', href: '/admin/merchants', icon: Store },
+        { label: 'Dompet & Payout', href: '/admin/wallet', icon: Wallet },
         { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: Receipt },
         { label: 'Marketplace Template', href: '/templates', icon: Palette }
       ]
     case 'designer':
       return [
+        { label: 'Overview Dasbor', href: '/designer', icon: LayoutDashboard },
         { label: 'Dompet & Finansial', href: '/designer/wallet', icon: Wallet },
         { label: 'Koleksi Template', href: '/designer/templates', icon: Palette },
         { label: 'Pesanan Masuk', href: '/designer/orders', icon: ShoppingBag },

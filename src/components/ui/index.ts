@@ -15,3 +15,4 @@ export { default as StatCard } from './StatCard.svelte';
 export { default as ToastContainer } from './ToastContainer.svelte';
 export { default as WhatsAppIcon } from './WhatsAppIcon.svelte';
 export { default as ImageFallback } from './ImageFallback.svelte';
+export { default as SearchableSelect } from './SearchableSelect.svelte';

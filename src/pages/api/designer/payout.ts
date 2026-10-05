@@ -4,7 +4,7 @@ import { withTransaction } from '@/lib/db/transaction';
 import { wallets, walletMutations, payoutRequests, platformSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
+import { calculateEligibleBalance, createXenditDisbursement, getOrCreateWallet } from '@/services/finance';
 import { payoutSchema } from '@/schemas';
 import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { formatIDR } from '@/lib/currency';
@@ -70,11 +70,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let newPayout;
     try {
       newPayout = await withTransaction(async (tx) => {
-        const walletList = await tx.select().from(wallets).where(eq(wallets.userId, user.id)).limit(1);
-        if (walletList.length === 0) {
-          throw new Error('WALLET_NOT_FOUND');
-        }
-        const wallet = walletList[0];
+        const wallet = await getOrCreateWallet(user.id, tx);
         const currentBalance = Number(wallet.balance);
 
         if (currentBalance < amount) {
@@ -99,19 +95,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           })
           .where(eq(wallets.id, wallet.id));
 
-        // Record DEBIT mutation
-        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        await tx.insert(walletMutations)
-          .values({
-            id: mutationId,
-            walletId: wallet.id,
-            type: 'DEBIT',
-            amount,
-            balanceAfter,
-            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
-            createdAt: new Date(),
-          });
-
         // Create payoutRequests record with status 'processing'
         const payoutId = `po_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
         const [record] = await tx.insert(payoutRequests)
@@ -125,6 +108,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
             updatedAt: new Date(),
           })
           .returning();
+
+        // Record DEBIT mutation with payout referenceId
+        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        await tx.insert(walletMutations)
+          .values({
+            id: mutationId,
+            walletId: wallet.id,
+            type: 'DEBIT',
+            amount,
+            balanceAfter,
+            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
+            referenceId: payoutId,
+            createdAt: new Date(),
+          });
 
         return record;
       });

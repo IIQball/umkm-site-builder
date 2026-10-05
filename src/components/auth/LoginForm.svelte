@@ -43,7 +43,7 @@
       toast.success("Berhasil masuk!");
       const role = data?.user?.role;
       if (role === 'designer') {
-        window.location.href = '/designer/wallet';
+        window.location.href = '/designer';
       } else if (role === 'superadmin') {
         window.location.href = '/superadmin';
       } else if (role === 'admin') {

@@ -18,6 +18,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Workspace',
         items: [
+          { label: 'Overview Dasbor', href: '/designer', icon: 'dashboard', group: 'Workspace' },
           { label: 'Dompet & Finansial', href: '/designer/wallet', icon: 'account_balance_wallet', group: 'Workspace' },
           { label: 'Koleksi Template', href: '/designer/templates', icon: 'grid_view', group: 'Workspace' },
           { label: 'Pesanan Masuk', href: '/designer/orders', icon: 'shopping_bag', group: 'Workspace' },
@@ -73,6 +74,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Transaksi & Layanan',
         items: [
+          { label: 'Dompet & Payout', href: '/admin/wallet', icon: 'account_balance_wallet', group: 'Transaksi & Layanan' },
           { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: 'receipt_long', group: 'Transaksi & Layanan' },
           { label: 'Marketplace Template', href: '/templates', icon: 'palette', group: 'Transaksi & Layanan' },
           { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'history', group: 'Transaksi & Layanan' },
@@ -179,9 +181,10 @@ export const getNavItems = (role: AuthenticatedUser['role']): NavItem[] => {
 };
 
 export const getDashboardHomePath = (role?: string | null): string => {
-  if (role === 'superadmin') return '/superadmin';
-  if (role === 'admin') return '/admin';
-  if (role === 'designer') return '/designer/wallet';
+  const r = (role || '').toLowerCase().trim();
+  if (r === 'superadmin') return '/superadmin';
+  if (r === 'admin') return '/admin';
+  if (r === 'designer') return '/designer';
   return '/dashboard';
 };
 

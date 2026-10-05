@@ -20,3 +20,12 @@ export type CategoryItem = {
   icon?: string | null;
   description?: string | null;
 };
+
+export type AssistedTenant = {
+  id: string;
+  name: string;
+  storeName: string;
+  storeId: string;
+  currentTemplateId?: string | null;
+  ownedTemplateIds?: string[];
+};

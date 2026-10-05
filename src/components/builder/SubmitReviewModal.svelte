@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import {
     Send,
     AlertCircle,
     Info,
-    CheckCircle2,
-    Lock,
-    Coins,
+    RefreshCw,
   } from 'lucide-svelte';
-  import { Modal, Button, Badge } from '@/components/ui';
+  import { Modal, Button } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
 
   export let isOpen: boolean = false;
@@ -23,6 +21,7 @@
   let isLoadingFee: boolean = false;
   let isSubmitting: boolean = false;
   let errorMessage: string | null = null;
+  let wasOpen: boolean = false;
 
   $: designerPercentage = Math.max(0, 100 - platformFeePercentage);
 
@@ -37,7 +36,13 @@
   const fetchCommissionSettings = async () => {
     try {
       isLoadingFee = true;
-      const res = await fetch('/api/public/commission');
+      const res = await fetch(`/api/public/commission?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache',
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.ok && typeof data.data?.platformFeePercentage === 'number') {
@@ -45,18 +50,36 @@
         }
       }
     } catch {
-      // Keep default or initialPlatformFeePercentage
+      // Keep current fee on network error
     } finally {
       isLoadingFee = false;
     }
   };
 
+  const handleWindowFocus = () => {
+    if (isOpen) {
+      fetchCommissionSettings();
+    }
+  };
+
   onMount(() => {
-    fetchCommissionSettings();
+    window.addEventListener('focus', handleWindowFocus);
+  });
+
+  onDestroy(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('focus', handleWindowFocus);
+    }
   });
 
   $: if (isOpen) {
     errorMessage = null;
+    if (!wasOpen) {
+      wasOpen = true;
+      fetchCommissionSettings();
+    }
+  } else {
+    wasOpen = false;
   }
 
   const handleClose = () => {
@@ -86,101 +109,79 @@
   size="md"
   on:close={handleClose}
 >
-  <div class="space-y-4">
+  <div class="space-y-4 text-xs font-sans">
     <!-- Error Alert if any -->
     {#if errorMessage}
       <div class="alert alert-error text-xs rounded-xl shadow-xs py-2.5 px-3 flex items-start gap-2">
         <AlertCircle size={16} class="shrink-0 mt-0.5" />
-        <span class="leading-relaxed font-sans">{errorMessage}</span>
+        <span class="leading-relaxed">{errorMessage}</span>
       </div>
     {/if}
 
-    <!-- Notice & Curation Process Card -->
-    <div class="bg-nested/50 rounded-2xl p-4 border border-light space-y-2.5">
-      <div class="flex items-center gap-2 text-xs font-semibold text-main">
+    <!-- Curation Flow Note -->
+    <div class="rounded-xl bg-nested/50 border border-light p-3.5 space-y-1.5">
+      <div class="flex items-center gap-1.5 font-semibold text-main">
         <Info size={14} class="text-primary shrink-0" />
-        <span class="font-heading">Alur Proses Kurasi & Peninjauan</span>
+        <span>Ketentuan Peninjauan Desain</span>
       </div>
-
-      <ul class="text-xs text-secondary space-y-1.5 pl-1.5 font-sans">
-        <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
-          <span>Status template akan beralih menjadi <strong>"Menunggu Review"</strong>.</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
-          <span>Tim Admin akan meninjau kelayakan desain, tata letak responsif, dan konten template.</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 shrink-0"></span>
-          <span class="flex items-center gap-1">
-            <span>Selama peninjauan, template akan dikunci untuk pengeditan.</span>
-            <Lock size={11} class="text-warning inline shrink-0" />
-          </span>
-        </li>
-      </ul>
+      <p class="text-secondary leading-relaxed pl-5">
+        Template akan ditinjau tim kurator sebelum terbit ke katalog publik. Konfigurasi template akan dikunci sementara selama peninjauan berlangsung.
+      </p>
     </div>
 
-    <!-- Dynamic Platform Commission Breakdown Card -->
-    <div class="bg-nested/30 rounded-2xl p-4 border border-light shadow-xs">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <Coins size={16} class="text-primary" />
-          <h4 class="text-xs font-bold text-main uppercase tracking-wider font-heading">
-            Skema Komisi Penjualan
-          </h4>
-        </div>
-        {#if isLoadingFee}
-          <span class="loading loading-spinner loading-xs text-primary"></span>
-        {:else}
-          <Badge variant="sky" size="sm">
-            Dinamis Aktif
-          </Badge>
-        {/if}
+    <!-- Clean Commission Breakdown Card -->
+    <div class="rounded-xl border border-light bg-card p-4 space-y-3">
+      <div class="flex items-center justify-between pb-1">
+        <span class="font-semibold text-main text-xs">
+          Rincian Pembagian Hasil
+        </span>
+        <button
+          type="button"
+          class="text-xs text-muted hover:text-primary transition-colors flex items-center gap-1.5 p-1 -mr-1 rounded hover:bg-nested disabled:opacity-50 cursor-pointer"
+          disabled={isLoadingFee}
+          on:click={fetchCommissionSettings}
+          title="Sinkronkan data komisi terbaru"
+        >
+          <RefreshCw size={12} class={isLoadingFee ? 'animate-spin text-primary' : ''} />
+          <span>{isLoadingFee ? 'Memperbarui...' : 'Sinkronkan'}</span>
+        </button>
       </div>
 
-      <!-- Split Percentages Grid -->
-      <div class="grid grid-cols-2 gap-2 text-center mb-3">
-        <div class="bg-card p-2.5 rounded-xl border border-light">
-          <p class="text-xs text-muted font-medium font-sans">Potongan Fee Platform</p>
-          <p class="text-base font-extrabold text-warning mt-0.5 font-mono">
-            {platformFeePercentage}%
-          </p>
+      <!-- Ratio Indicator -->
+      <div class="grid grid-cols-2 gap-2 text-center">
+        <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
+          <span class="text-xs-dense text-muted block">Fee Platform</span>
+          <span class="text-sm font-bold text-main font-mono">{platformFeePercentage}%</span>
         </div>
-        <div class="bg-card p-2.5 rounded-xl border border-success/30">
-          <p class="text-xs text-success font-semibold font-sans">Hak Bersih Desainer</p>
-          <p class="text-base font-extrabold text-success mt-0.5 font-mono">
-            {designerPercentage}%
-          </p>
+        <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
+          <span class="text-xs-dense text-muted block">Hak Desainer</span>
+          <span class="text-sm font-bold text-success font-mono">{designerPercentage}%</span>
         </div>
       </div>
 
-      <!-- Financial Calculation Simulation -->
-      <div class="bg-card rounded-xl p-3 border border-light text-xs space-y-1.5 font-sans">
-        <div class="flex justify-between items-center text-xs text-secondary">
-          <span>Harga Jual Template:</span>
-          <span class="font-bold text-main font-mono">
+      <!-- Line items -->
+      <div class="pt-1 border-t border-light/80 space-y-1.5">
+        <div class="flex justify-between items-center text-secondary">
+          <span>Harga Jual Template</span>
+          <span class="font-semibold text-main font-mono">
             {templatePrice > 0 ? formatIDR(templatePrice) : 'Gratis (Rp 0)'}
           </span>
         </div>
 
         {#if templatePrice > 0}
-          <div class="flex justify-between items-center text-xs text-muted">
-            <span>Fee Platform ({platformFeePercentage}%):</span>
-            <span class="text-warning font-mono">-{formatIDR(platformFeeAmount)}</span>
+          <div class="flex justify-between items-center text-muted">
+            <span>Potongan Fee ({platformFeePercentage}%)</span>
+            <span class="font-mono">-{formatIDR(platformFeeAmount)}</span>
           </div>
-          <div class="border-t border-light pt-1.5 flex justify-between items-center font-bold text-xs">
-            <span class="text-success flex items-center gap-1">
-              <CheckCircle2 size={13} />
-              Estimasi Pendapatan Desainer:
-            </span>
-            <span class="text-success font-extrabold font-mono">
+          <div class="border-t border-light/80 pt-2 flex justify-between items-center">
+            <span class="font-medium text-main">Estimasi Diterima Desainer</span>
+            <span class="font-bold text-success font-mono text-sm">
               {formatIDR(designerAmount)}
             </span>
           </div>
         {:else}
-          <p class="text-xs text-muted italic pt-1">
-            *Template gratis tidak dikenakan potongan biaya platform.
+          <p class="text-muted italic pt-0.5 text-xs-dense">
+            *Template gratis tidak dikenakan potongan fee platform.
           </p>
         {/if}
       </div>
@@ -209,4 +210,3 @@
     </Button>
   </svelte:fragment>
 </Modal>
-

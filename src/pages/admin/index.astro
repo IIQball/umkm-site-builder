@@ -1,13 +1,12 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
-import AdminBankManager from '@/components/admin/AdminBankManager.svelte';
-import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
+import Button from '@/components/ui/Button.svelte';
+import AdminOverviewDashboard from '@/components/admin/dashboard/AdminOverviewDashboard.svelte';
+import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
-import { stores, users } from '@/db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
-import type { AssistedStoreItem } from '@/types/admin';
+import { users, stores, transactions, templates, tenantInvitations } from '@/db/schema';
+import { eq, and, or, isNull, desc, notExists, ne } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -16,48 +15,136 @@ if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect('/auth/login?redirect=/admin');
 }
 
-const isSuper = user.role === 'superadmin';
-
-let assistedStores: AssistedStoreItem[] = [];
-
-if (!isSuper) {
-  try {
-    const rows = await db
-      .select({
-        id: stores.id,
-        name: stores.name,
-        subdomain: stores.subdomain,
-        status: stores.status,
-        userId: stores.userId,
-        createdAt: stores.createdAt,
-        tenantName: users.name,
-        tenantEmail: users.email,
-      })
-      .from(stores)
-      .leftJoin(users, eq(stores.userId, users.id))
-      .where(and(eq(stores.registeredBy, user.id), isNull(stores.deletedAt)))
-      .orderBy(desc(stores.createdAt));
-
-    assistedStores = (rows || []).map((s) => ({
-      id: s.id,
-      name: s.name,
-      subdomain: s.subdomain,
-      status: s.status,
-      userId: s.userId,
-      tenantName: s.tenantName,
-      tenantEmail: s.tenantEmail,
-      createdAt: s.createdAt ? s.createdAt.toISOString() : new Date().toISOString(),
-      owner: {
-        id: s.userId,
-        name: s.tenantName,
-        email: s.tenantEmail ?? '-',
-      },
-    }));
-  } catch (error) {
-    console.error('[AdminDashboard] Failed to query assisted stores:', error);
-    assistedStores = [];
-  }
+if (user.role === 'superadmin') {
+  return Astro.redirect('/superadmin');
 }
+
+let availableBalance = 0;
+let tenantRows: Array<{
+  id: string;
+  name: string | null;
+  email: string;
+  createdAt: string;
+  storeId?: string | null;
+  storeName?: string | null;
+  storeStatus?: string | null;
+}> = [];
+
+let transactionRows: Array<{
+  id: string;
+  externalId?: string | null;
+  amount: number;
+  adminFee: number | null;
+  status: string;
+  type: string;
+  createdAt: string;
+  templateId?: string | null;
+  templateName: string | null;
+  templateThumbnailUrl?: string | null;
+  merchantName: string | null;
+  storeName: string | null;
+}> = [];
+
+try {
+  const wallet = await getDesignerWalletSummary(user.id);
+  availableBalance = wallet.availableBalance;
+
+  const unacceptedInvitationSubquery = db
+    .select()
+    .from(tenantInvitations)
+    .where(
+      and(
+        eq(tenantInvitations.email, users.email),
+        isNull(tenantInvitations.acceptedAt),
+      ),
+    );
+
+  const rawTenants = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+      storeId: stores.id,
+      storeName: stores.name,
+      storeStatus: stores.status,
+    })
+    .from(users)
+    .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
+    .where(
+      and(
+        eq(users.registeredBy, user.id),
+        eq(users.role, 'tenant'),
+        ne(users.status, 'pending'),
+        isNull(users.deletedAt),
+        notExists(unacceptedInvitationSubquery),
+      ),
+    )
+    .orderBy(desc(users.createdAt));
+
+  tenantRows = rawTenants.map((t) => ({
+    id: t.id,
+    name: t.name,
+    email: t.email,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+    storeId: t.storeId,
+    storeName: t.storeName,
+    storeStatus: t.storeStatus,
+  }));
+
+  const whereCondition = or(
+    eq(transactions.userId, user.id),
+    eq(transactions.assistedBy, user.id),
+  );
+
+  const rawTransactions = await db
+    .select({
+      id: transactions.id,
+      externalId: transactions.externalId,
+      amount: transactions.amount,
+      adminFee: transactions.adminFee,
+      status: transactions.status,
+      type: transactions.type,
+      createdAt: transactions.createdAt,
+      templateId: templates.id,
+      templateName: templates.name,
+      templateThumbnailUrl: templates.thumbnailUrl,
+      merchantName: users.name,
+      merchantEmail: users.email,
+      storeName: stores.name,
+    })
+    .from(transactions)
+    .leftJoin(templates, eq(transactions.templateId, templates.id))
+    .leftJoin(users, eq(transactions.userId, users.id))
+    .leftJoin(
+      stores,
+      or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
+    )
+    .where(whereCondition)
+    .orderBy(desc(transactions.createdAt));
+
+  transactionRows = rawTransactions.map((t) => ({
+    id: t.id,
+    externalId: t.externalId,
+    amount: Number(t.amount),
+    adminFee: Number(t.adminFee || 0),
+    status: t.status,
+    type: t.type,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+    templateId: t.templateId,
+    templateName: t.templateName,
+    templateThumbnailUrl: t.templateThumbnailUrl,
+    merchantName: t.merchantName || '—',
+    merchantEmail: t.merchantEmail || null,
+    storeName: t.storeName || 'Belum Membuat Toko',
+  }));
+} catch (error) {
+  console.error('[AdminDashboard] Gagal memuat data overview dasbor:', error);
+}
+
+const userCreatedYear = user.createdAt
+  ? new Date(user.createdAt).getFullYear()
+  : new Date().getFullYear();
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -70,79 +157,42 @@ if (currentHour >= 4 && currentHour < 11) {
 } else {
   greeting = 'Selamat Malam';
 }
-
-const pageTitle = isSuper ? 'Dasbor Super Admin' : 'Dasbor Admin Pendamping';
 ---
 
-<DashboardLayout title={pageTitle} breadcrumb="Dashboard">
-  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <!-- Header Section with Distinct Role Badges -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-light">
+<DashboardLayout title="Overview Dasbor" breadcrumb="Dashboard">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-heading-lg text-main font-bold tracking-tight">
-            <span>{greeting}, {user.name ? user.name.split(' ')[0] : (isSuper ? 'Super Admin' : 'Admin')}!</span>
-          </h1>
-          {isSuper ? (
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-extrabold tracking-wider uppercase bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-2xs">
-              <span class="material-symbols-outlined text-xs">shield_person</span>
-              <span>Super Admin</span>
-            </span>
-          ) : (
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-extrabold tracking-wider uppercase bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shadow-2xs">
-              <span class="material-symbols-outlined text-xs">admin_panel_settings</span>
-              <span>Admin Pendamping</span>
-            </span>
-          )}
-        </div>
-        <p class="text-body-base text-secondary mt-1.5 max-w-3xl leading-relaxed">
-          {isSuper
-            ? 'Pusat kendali ekosistem platform: kurasi template, kelola akses admin, manajemen pengguna, dan ringkasan metrik global.'
-            : 'Pusat aktivitas operasional pendampingan UMKM, pengelolaan rekening pencairan komisi, dan monitoring toko binaan Anda.'}
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Admin'}!</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat monitoring performa pendampingan UMKM, tren pertumbuhan merchant, dan metrik bisnis operasional Anda.
         </p>
       </div>
 
-      <!-- Quick Action Badges -->
-      <div class="flex items-center gap-2 flex-shrink-0">
-        {isSuper ? (
-          <a
-            href="/admin/whitelist"
-            class="px-4 py-2 rounded-2xl bg-nested border border-light text-main text-xs font-bold hover:bg-card hover:border-primary/40 transition-all flex items-center gap-2 shadow-2xs"
-          >
-            <span class="material-symbols-outlined text-base text-primary">admin_panel_settings</span>
-            <span>Akses Whitelist</span>
-          </a>
-        ) : (
-          <a
-            href="/admin/merchants"
-            class="px-4 py-2 rounded-2xl bg-orange text-white text-xs font-bold hover:bg-orange/90 transition-all flex items-center gap-2 shadow-xs"
-          >
-            <span class="material-symbols-outlined text-base">storefront</span>
-            <span>Kelola Merchant</span>
-          </a>
-        )}
+      <!-- Quick Action Navigation -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <Button href="/templates" variant="secondary" size="md">
+          <span class="material-symbols-outlined text-base">storefront</span>
+          <span>Beli Template</span>
+        </Button>
+
+        <Button href="/admin/merchants" variant="primary" size="md">
+          <span class="material-symbols-outlined text-base">groups</span>
+          <span>Kelola Merchant</span>
+        </Button>
       </div>
     </div>
 
-    <div class="space-y-8">
-      <!-- Section 1: Bank Accounts Manager (Admin can add up to 3 bank accounts like designer) -->
-      <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-4">
-        <AdminBankManager client:load />
-      </div>
-
-      <!-- Section 2: Toko Binaan Saya (Assisted Stores) -->
-      <div>
-        <AdminAssistedStores client:load stores={assistedStores} />
-      </div>
-
-      <!-- Section 3: Overview Metrik Transaksi & Layanan -->
-      <div class="pt-2">
-        <div class="mb-4">
-          <h2 class="text-lg font-bold text-main font-heading">Ringkasan Aktivitas & Layanan</h2>
-          <p class="text-xs text-secondary mt-0.5">Monitoring transaksi toko UMKM dan aktivitas sistem.</p>
-        </div>
-        <AdminMetricsOverview client:load isSuperAdmin={isSuper} />
-      </div>
-    </div>
+    <!-- Master Overview Dashboard (Filter Tahun & Bulan, Statcard, Grafik & Tabel Terkini) -->
+    <AdminOverviewDashboard
+      client:load
+      allTenants={tenantRows}
+      allTransactions={transactionRows}
+      availableBalance={availableBalance}
+      userCreatedYear={userCreatedYear}
+    />
   </div>
 </DashboardLayout>

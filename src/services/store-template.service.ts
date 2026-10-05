@@ -115,6 +115,7 @@ export async function validateTemplateOwnership(
     .select({
       id: stores.id,
       userId: stores.userId,
+      registeredBy: stores.registeredBy,
       templateId: stores.templateId,
     })
     .from(stores)
@@ -124,7 +125,10 @@ export async function validateTemplateOwnership(
     throw new AppError('Toko tidak ditemukan', 404, undefined, 'STORE_NOT_FOUND');
   }
 
-  if (store.userId !== userId) {
+  const isOwner = store.userId === userId;
+  const isAssistingAdmin = Boolean(store.registeredBy && store.registeredBy === userId);
+
+  if (!isOwner && !isAssistingAdmin) {
     throw new AppError('Anda tidak memiliki akses ke toko ini', 403, undefined, 'STORE_FORBIDDEN');
   }
 
@@ -162,7 +166,7 @@ export async function validateTemplateOwnership(
       .from(userTemplates)
       .where(
         and(
-          eq(userTemplates.userId, userId),
+          eq(userTemplates.userId, store.userId),
           eq(userTemplates.templateId, templateId)
         )
       );

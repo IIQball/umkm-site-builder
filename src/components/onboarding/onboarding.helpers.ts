@@ -1,4 +1,4 @@
-import type { RegionData } from './onboarding.types';
+import type { RegionData, SavedOnboardingState } from './onboarding.types';
 
 export const DEFAULT_WA_CHECKOUT_TEMPLATE =
   'Halo, saya ingin bertanya seputar produk di toko Anda. Boleh minta informasi lebih lanjut?';
@@ -197,5 +197,33 @@ export async function submitUpdateStore(payload: UpdateStorePayload): Promise<{
     return { ok: true };
   } catch {
     return { ok: false, error: 'Terjadi kesalahan sistem. Silakan coba lagi.' };
+  }
+}
+
+export const ONBOARDING_STORAGE_KEY = 'onboarding_state';
+
+export function loadSavedOnboardingState(): SavedOnboardingState | null {
+  try {
+    const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    return saved ? (JSON.parse(saved) as SavedOnboardingState) : null;
+  } catch {
+    localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    return null;
+  }
+}
+
+export function saveOnboardingState(data: SavedOnboardingState): void {
+  try {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore storage quota/security errors
+  }
+}
+
+export function clearOnboardingState(): void {
+  try {
+    localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors
   }
 }

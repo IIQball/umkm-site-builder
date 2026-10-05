@@ -107,6 +107,10 @@ if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl
   }
 }
 
+const storeCustomization = (store.customization as Record<string, unknown>) || {};
+const branchMode = (storeCustomization.maps as any)?.branchMode || (storeCustomization as any).branchMode || 'single';
+const branches = (storeCustomization.maps as any)?.branches || (storeCustomization as any).branches || [];
+
 const finalConfig = mergeStoreCustomization(normalizedConfig, store.customization, {
   id: store.id,
   name: store.name,
@@ -118,6 +122,8 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
   categoryName: store.category?.name || undefined,
   latitude: store.latitude,
   longitude: store.longitude,
+  branchMode,
+  branches,
 });
 
 // 5. Dynamic Theme Tokens & Google Fonts Injection
@@ -129,7 +135,7 @@ const fontNames = [
 ];
 const googleFontsUrl = buildGoogleFontsUrl(fontNames);
 
-const customization = (store.customization as Record<string, unknown>) || {};
+const customization = storeCustomization;
 const isOpen = customization.isOpen !== false;
 const storeLogo = (customization.logoUrl as string) || storeProducts[0]?.image || '/og-image.png';
 
@@ -151,6 +157,8 @@ const safeStore = {
   latitude: store.latitude,
   longitude: store.longitude,
   status: store.status,
+  branchMode,
+  branches,
   category: store.category ? { id: store.category.id, name: store.category.name, slug: store.category.slug } : null,
   managedByAdmin: store.registeredBy && store.registrar?.name ? { name: store.registrar.name } : null,
 };

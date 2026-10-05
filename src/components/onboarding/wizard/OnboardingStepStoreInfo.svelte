@@ -6,10 +6,11 @@
     Phone,
     ArrowLeft,
     ArrowRight,
-    Briefcase
   } from 'lucide-svelte';
-  import { Button, Input } from '@/components/ui';
+  import { Button, Input, SearchableSelect } from '@/components/ui';
   import RegionAddressSelector from './RegionAddressSelector.svelte';
+  import StoreBranchesManager from './StoreBranchesManager.svelte';
+  import type { StoreBranchItem } from '../onboarding.types';
 
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -20,6 +21,8 @@
   export let waNumber: string = '';
   export let googleMapsUrl: string = '';
   export let address: string = '';
+  export let branchMode: 'single' | 'multi' = 'single';
+  export let branches: StoreBranchItem[] = [];
   export let regionData = {
     province: 'Jawa Timur',
     city: 'Banyuwangi',
@@ -69,42 +72,22 @@
       <Store slot="prefix" size={16} class="text-muted" />
     </Input>
 
-    <!-- Kategori Bisnis Dropdown -->
-    <div class="form-control w-full">
-      <label for="business-category" class="block text-label-caps text-muted mb-1.5">
-        Kategori Bisnis <span class="text-error ml-0.5">*</span>
-      </label>
-      <div class="relative flex items-center w-full">
-        <select
-          id="business-category"
-          bind:value={categoryId}
-          class="w-full bg-nested text-main border transition-all duration-150 font-sans text-sm rounded-xl h-10 min-h-[40px] pl-10 pr-10 appearance-none cursor-pointer outline-none focus:bg-card {formErrors.categoryId
-            ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20'
-            : 'border-light focus:border-primary focus:ring-2 focus:ring-primary/20'}"
-        >
-          <option value="" disabled selected={!categoryId} class="italic text-muted">
-            Pilih kategori bisnis UMKM...
-          </option>
-          {#each categories as cat (cat.id)}
-            <option value={cat.id}>{cat.name}</option>
-          {/each}
-        </select>
-        <div class="absolute left-3 flex items-center justify-center pointer-events-none text-muted">
-          <Briefcase size={16} />
-        </div>
-        <div class="absolute right-3.5 pointer-events-none text-muted flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </div>
-      </div>
-      {#if formErrors.categoryId}
-        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
-          <AlertCircle size={14} class="flex-shrink-0" />
-          <span>{formErrors.categoryId}</span>
-        </p>
-      {/if}
-    </div>
+    <!-- Kategori Bisnis Dropdown (Searchable Combobox) -->
+    <SearchableSelect
+      id="business-category"
+      label="Kategori Bisnis"
+      required
+      value={categoryId}
+      options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+      placeholder="Pilih kategori bisnis UMKM..."
+      searchPlaceholder="Cari kategori UMKM..."
+      error={formErrors.categoryId ?? ''}
+      fullWidth
+      size="md"
+      on:change={(e) => {
+        categoryId = String(e.detail.value);
+      }}
+    />
 
     <!-- Nomor WhatsApp -->
     <Input
@@ -150,6 +133,15 @@
         </p>
       {/if}
     </div>
+
+    <!-- Pilihan 1 atau Beberapa Cabang Toko (Maks 5) -->
+    <StoreBranchesManager
+      bind:branchMode
+      bind:branches
+      primaryStoreName={storeName}
+      primaryAddress={address}
+      primaryMapsUrl={googleMapsUrl}
+    />
   </div>
 
   {#if submitError}

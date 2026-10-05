@@ -15,6 +15,7 @@ const KNOWN_GOOGLE_FONTS: Record<string, string> = {
   'merriweather': 'Merriweather:wght@300;400;700',
   'montserrat': 'Montserrat:wght@400;500;600;700;800',
   'roboto': 'Roboto:wght@300;400;500;700',
+  'open sans': 'Open+Sans:wght@400;500;600;700',
   'jetbrains mono': 'JetBrains+Mono:wght@400;500;700',
 };
 

@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
 import { withTransaction } from '@/lib/db/transaction';
-import { payoutRequests, bankAccounts } from '@/db/schema';
+import { payoutRequests, bankAccounts, walletMutations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
 import { creditWallet } from '@/services/finance/wallet.service';
@@ -50,6 +50,18 @@ export async function createXenditDisbursement(payoutRequestId: string): Promise
         updatedAt: new Date(),
       })
       .where(eq(payoutRequests.id, payout.id));
+
+    // Update walletMutations referenceId to match the Xendit payout id
+    try {
+      await db
+        .update(walletMutations)
+        .set({
+          referenceId: result.id || payout.id,
+        })
+        .where(eq(walletMutations.referenceId, payout.id));
+    } catch {
+      // Non-blocking fallback; getDesignerWalletSummary dynamically synchronizes referenceId
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Disbursement creation failed';
     await db

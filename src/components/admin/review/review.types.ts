@@ -6,8 +6,9 @@ export type AdminTemplateItem = {
   price: number;
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   rejectionReason: string | null;
-  createdAt: string;
+  createdAt: string | Date;
   designerId: string;
   designerName: string | null;
   designerEmail: string | null;
 };
+

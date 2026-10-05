@@ -1,11 +1,9 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import DesignerOrdersTable from "@/components/designer/DesignerOrdersTable.svelte";
-import StatCard from "@/components/ui/StatCard.svelte";
+import DesignerOrdersOverview from "@/components/designer/DesignerOrdersOverview.svelte";
 import Button from "@/components/ui/Button.svelte";
 import { getAuthenticatedUser, isAuthorizedDesigner } from "@/lib/auth";
 import { transactionService } from "@/services/finance/transaction.service";
-import { formatSmartIDR } from "@/lib/currency";
 
 export const prerender = false;
 
@@ -22,21 +20,6 @@ try {
 } catch {
   initialOrders = [];
 }
-
-const totalPaidOrders = initialOrders.filter((o) => o.status === "success");
-const totalPendingOrders = initialOrders.filter((o) => o.status === "pending");
-const totalFailedOrders = initialOrders.filter(
-  (o) =>
-    o.status === "failed" || o.status === "expired" || o.status === "canceled",
-);
-
-const totalNetEarned = totalPaidOrders.reduce(
-  (sum, o) =>
-    sum + (o.commission?.designerAmount ?? Math.round(o.amount * 0.7)),
-  0,
-);
-
-const formattedNetIncome = formatSmartIDR(totalNetEarned);
 ---
 
 <DashboardLayout title="Pesanan Masuk" breadcrumb="Desainer / Pesanan Masuk">
@@ -66,65 +49,17 @@ const formattedNetIncome = formatSmartIDR(totalNetEarned);
           size="md"
           class="font-bold"
         >
-          <span class="material-symbols-outlined text-primary text-base"
-            >account_balance_wallet</span
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0" aria-hidden="true">
+            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/>
+            <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>
+          </svg>
           <span>Buka Dompet Keuangan</span>
         </Button>
       </div>
     </div>
 
-    <!-- Statcards Grid (animated on client load) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
-      <StatCard
-        client:load
-        label="Total Pesanan"
-        value={initialOrders.length}
-        rawValue={initialOrders.length}
-        icon="receipt_long"
-        cardTheme="dark"
-        badge="Semua Tagihan"
-        footerText="Akumulasi seluruh pesanan"
-        delayClass="delay-100"
-      />
-      <StatCard
-        client:load
-        label="Hak Komisi Lunas"
-        value={formattedNetIncome}
-        rawValue={totalNetEarned}
-        icon="payments"
-        cardTheme="default"
-        badge="Lunas"
-        footerText="Total pendapatan bersih"
-        delayClass="delay-150"
-      />
-      <StatCard
-        client:load
-        label="Menunggu Pembayaran"
-        value={totalPendingOrders.length}
-        rawValue={totalPendingOrders.length}
-        icon="hourglass_top"
-        cardTheme="blue"
-        badge="Pending"
-        footerText="Belum diselesaikan tenant"
-        delayClass="delay-200"
-      />
-      <StatCard
-        client:load
-        label="Batal / Kedaluwarsa"
-        value={totalFailedOrders.length}
-        rawValue={totalFailedOrders.length}
-        icon="cancel"
-        cardTheme="orange"
-        badge="Expired"
-        footerText="Invoice tidak diselesaikan"
-        delayClass="delay-250"
-      />
-    </div>
-
-    <!-- Interactive Table Card -->
-    <div class="animate-fade-in-up delay-300">
-      <DesignerOrdersTable client:load {initialOrders} />
-    </div>
+    <!-- Master Designer Orders Overview (Period Filter, Statcards & Interactive Table) -->
+    <DesignerOrdersOverview client:load allOrders={initialOrders} />
   </div>
 </DashboardLayout>
+

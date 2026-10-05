@@ -1,37 +1,19 @@
-import type {
-  MerchantRegistrationRecord,
-  MerchantGrowthPoint,
-  MerchantGrowthSummary,
-  GrowthFilter,
-} from './merchantGrowth.types';
-
+import type { GrowthPoint, DesignerGrowthSummary, GrowthFilter } from './designerDashboard.types';
 import { INDONESIAN_MONTHS } from '@/lib/utils/format';
 
-export function calculateMerchantGrowth(
-  records: MerchantRegistrationRecord[],
-  filterOrMonthsOrRef: GrowthFilter | number | Date = 12,
-  refDateArg: Date = new Date()
-): MerchantGrowthSummary {
-  let targetYear = refDateArg.getFullYear();
-  let targetMonth: number | 'all' = 'all';
+export function calculateDesignerGrowth(
+  records: Array<{ createdAt: string | Date }>,
+  filter: GrowthFilter = { year: new Date().getFullYear(), month: 'all' }
+): DesignerGrowthSummary {
+  const targetYear = filter.year || new Date().getFullYear();
+  const targetMonth = filter.month ?? 'all';
 
-  if (filterOrMonthsOrRef instanceof Date) {
-    targetYear = filterOrMonthsOrRef.getFullYear();
-    targetMonth = 'all';
-  } else if (typeof filterOrMonthsOrRef === 'number') {
-    targetYear = refDateArg.getFullYear();
-    targetMonth = 'all';
-  } else if (filterOrMonthsOrRef && typeof filterOrMonthsOrRef === 'object') {
-    targetYear = filterOrMonthsOrRef.year;
-    targetMonth = filterOrMonthsOrRef.month ?? 'all';
-  }
+  const parsedRecords = records.map((r) => ({
+    date: r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt),
+  }));
 
-  const totalMerchants = records.length;
-  const parsedDates = records.map((r) =>
-    r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt)
-  );
-
-  const points: MerchantGrowthPoint[] = [];
+  const totalCount = parsedRecords.length;
+  const points: GrowthPoint[] = [];
   const filterMode: 'month' | 'day' = targetMonth === 'all' ? 'month' : 'day';
 
   let periodLabel = `Tahun ${targetYear}`;
@@ -39,17 +21,17 @@ export function calculateMerchantGrowth(
 
   if (targetMonth === 'all') {
     const startOfYear = new Date(targetYear, 0, 1, 0, 0, 0, 0);
-    let runningCumulative = parsedDates.filter((d) => d < startOfYear).length;
+    let runningCumulative = parsedRecords.filter((r) => r.date < startOfYear).length;
 
     for (let month = 0; month < 12; month++) {
       const startOfMonth = new Date(targetYear, month, 1, 0, 0, 0, 0);
       const endOfMonth = new Date(targetYear, month + 1, 0, 23, 59, 59, 999);
 
-      const newInMonth = parsedDates.filter(
-        (d) => d >= startOfMonth && d <= endOfMonth
+      const countInMonth = parsedRecords.filter(
+        (r) => r.date >= startOfMonth && r.date <= endOfMonth
       ).length;
 
-      runningCumulative += newInMonth;
+      runningCumulative += countInMonth;
 
       const label = INDONESIAN_MONTHS[month];
       const fullLabel = `${INDONESIAN_MONTHS[month]} ${targetYear}`;
@@ -59,7 +41,7 @@ export function calculateMerchantGrowth(
         monthKey,
         label,
         fullLabel,
-        newCount: newInMonth,
+        count: countInMonth,
         cumulative: runningCumulative,
         x: 0,
         y: 0,
@@ -72,7 +54,7 @@ export function calculateMerchantGrowth(
     const monthIndex = targetMonth - 1;
     const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
     const startOfMonth = new Date(targetYear, monthIndex, 1, 0, 0, 0, 0);
-    let runningCumulative = parsedDates.filter((d) => d < startOfMonth).length;
+    let runningCumulative = parsedRecords.filter((r) => r.date < startOfMonth).length;
 
     periodLabel = `${INDONESIAN_MONTHS[monthIndex]} ${targetYear}`;
 
@@ -80,11 +62,11 @@ export function calculateMerchantGrowth(
       const startOfDay = new Date(targetYear, monthIndex, day, 0, 0, 0, 0);
       const endOfDay = new Date(targetYear, monthIndex, day, 23, 59, 59, 999);
 
-      const newInDay = parsedDates.filter(
-        (d) => d >= startOfDay && d <= endOfDay
+      const countInDay = parsedRecords.filter(
+        (r) => r.date >= startOfDay && r.date <= endOfDay
       ).length;
 
-      runningCumulative += newInDay;
+      runningCumulative += countInDay;
 
       const label = String(day);
       const fullLabel = `${day} ${INDONESIAN_MONTHS[monthIndex]} ${targetYear}`;
@@ -94,7 +76,7 @@ export function calculateMerchantGrowth(
         monthKey,
         label,
         fullLabel,
-        newCount: newInDay,
+        count: countInDay,
         cumulative: runningCumulative,
         x: 0,
         y: 0,
@@ -112,7 +94,7 @@ export function calculateMerchantGrowth(
 
   const svgWidth = 850;
   const svgHeight = 280;
-  const padLeft = 40;
+  const padLeft = 48;
   const padRight = 32;
   const padTop = 28;
   const padBottom = 40;
@@ -151,22 +133,22 @@ export function calculateMerchantGrowth(
     svgAreaPath = `${svgLinePath} L ${last.x},${baselineY} L ${first.x},${baselineY} Z`;
   }
 
-  const thisMonthNew = points[activeIdx]?.newCount ?? 0;
-  const lastMonthNew = activeIdx > 0 ? (points[activeIdx - 1]?.newCount ?? 0) : 0;
+  const thisMonthCount = points[activeIdx]?.count ?? 0;
+  const lastMonthCount = activeIdx > 0 ? (points[activeIdx - 1]?.count ?? 0) : 0;
 
   let growthPercentage = 0;
-  if (lastMonthNew > 0) {
-    growthPercentage = Math.round(((thisMonthNew - lastMonthNew) / lastMonthNew) * 100);
-  } else if (thisMonthNew > 0) {
+  if (lastMonthCount > 0) {
+    growthPercentage = Math.round(((thisMonthCount - lastMonthCount) / lastMonthCount) * 100);
+  } else if (thisMonthCount > 0) {
     growthPercentage = 100;
   }
 
-  const isPositiveGrowth = thisMonthNew >= lastMonthNew;
+  const isPositiveGrowth = thisMonthCount >= lastMonthCount;
 
   return {
-    totalMerchants,
-    thisMonthNew,
-    lastMonthNew,
+    totalCount,
+    thisMonthCount,
+    lastMonthCount,
     growthPercentage,
     isPositiveGrowth,
     points,

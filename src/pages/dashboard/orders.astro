@@ -1,13 +1,11 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
-import StatCard from '@/components/ui/StatCard.svelte';
+import TenantOrdersOverview from '@/components/dashboard/TenantOrdersOverview.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services/finance/transaction.service';
-import { formatIDR } from '@/lib/currency';
 import { db } from '@/lib/db/client';
-import { stores } from '@/db/schema';
+import { stores, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const prerender = false;
@@ -33,17 +31,40 @@ const tenantStore = await db.query.stores.findFirst({
   columns: { name: true },
 });
 
-const ordersWithMerchant = initialOrders.map((o) => ({
-  ...o,
-  merchantName: user.name || user.email,
-  storeName: tenantStore?.name || 'Toko Saya',
-}));
+const tenantUser = await db.query.users.findFirst({
+  where: eq(users.id, user.id),
+  columns: { name: true, email: true, registeredBy: true },
+});
 
-const totalPaidOrders = initialOrders.filter((o) => o.status === 'success' || o.status === 'paid' || o.status === 'completed');
-const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
+let registeringAdmin: { name: string; email: string } | null = null;
+if (tenantUser?.registeredBy) {
+  const adminRec = await db.query.users.findFirst({
+    where: eq(users.id, tenantUser.registeredBy),
+    columns: { name: true, email: true },
+  });
+  if (adminRec) {
+    registeringAdmin = adminRec;
+  }
+}
 
-const totalSpent = totalPaidOrders.reduce((sum, o) => sum + o.amount, 0);
-const formattedTotalSpent = formatIDR(totalSpent);
+const ordersWithMerchant = initialOrders.map((o) => {
+  const isRegisteredByAdmin = Boolean(tenantUser?.registeredBy);
+  const adminName = isRegisteredByAdmin
+    ? (o.assistant?.name || registeringAdmin?.name || null)
+    : null;
+  const adminEmail = isRegisteredByAdmin
+    ? (o.assistant?.email || registeringAdmin?.email || null)
+    : null;
+
+  return {
+    ...o,
+    merchantName: tenantUser?.name || user.name || user.email,
+    merchantEmail: tenantUser?.email || user.email,
+    storeName: tenantStore?.name || 'Belum Membuat Toko',
+    adminName,
+    adminEmail,
+  };
+});
 ---
 
 <DashboardLayout title="Riwayat Pesanan Template" breadcrumb="Dashboard / Riwayat Pesanan">
@@ -68,63 +89,20 @@ const formattedTotalSpent = formatIDR(totalSpent);
           size="md"
           class="font-bold"
         >
-          <span class="material-symbols-outlined text-primary text-base">palette</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0" aria-hidden="true">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+          </svg>
           <span>Galeri Template Toko</span>
         </Button>
       </div>
     </div>
 
-    <!-- Statcards Grid (animated on client load) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
-      <StatCard
-        client:load
-        label="Total Pesanan"
-        value={initialOrders.length}
-        rawValue={initialOrders.length}
-        icon="receipt_long"
-        cardTheme="dark"
-        badge="Semua Transaksi"
-        footerText="Riwayat seluruh invoice"
-        delayClass="delay-100"
-      />
-      <StatCard
-        client:load
-        label="Template Lunas"
-        value={totalPaidOrders.length}
-        rawValue={totalPaidOrders.length}
-        icon="check_circle"
-        cardTheme="default"
-        badge="Lunas"
-        footerText="Faktur resmi tersedia"
-        delayClass="delay-150"
-      />
-      <StatCard
-        client:load
-        label="Menunggu Pembayaran"
-        value={totalPendingOrders.length}
-        rawValue={totalPendingOrders.length}
-        icon="hourglass_top"
-        cardTheme="orange"
-        badge="Pending"
-        footerText="Selesaikan tagihan pembayaran"
-        delayClass="delay-200"
-      />
-      <StatCard
-        client:load
-        label="Total Pengeluaran"
-        value={formattedTotalSpent}
-        rawValue={totalSpent}
-        icon="payments"
-        cardTheme="blue"
-        badge="Akumulasi"
-        footerText="Total pembelian template lunas"
-        delayClass="delay-250"
-      />
-    </div>
-
-    <!-- Interactive Table Card -->
-    <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load initialOrders={ordersWithMerchant} isAdmin={false} />
-    </div>
+    <!-- Master Tenant Orders Overview (Period Filter, Statcards & Interactive Table) -->
+    <TenantOrdersOverview client:load allOrders={ordersWithMerchant} />
   </div>
 </DashboardLayout>
+

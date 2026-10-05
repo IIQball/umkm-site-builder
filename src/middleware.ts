@@ -102,7 +102,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
     if (user?.role === 'superadmin') return context.redirect('/superadmin');
     if (user?.role === 'admin') return context.redirect('/admin');
-    if (user?.role === 'designer') return context.redirect('/designer/wallet');
+    if (user?.role === 'designer') return context.redirect('/designer');
   }
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan

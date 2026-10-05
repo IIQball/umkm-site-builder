@@ -116,3 +116,63 @@ export interface CheckoutPageData {
   templateDescription?: string | null;
 }
 
+export interface OrderTransactionItem {
+  id: string;
+  userId: string;
+  type: string;
+  amount: number;
+  adminFee?: number;
+  basePrice?: number;
+  status: string;
+  storeId?: string | null;
+  templateId?: string | null;
+  assistedBy?: string | null;
+  externalId?: string | null;
+  paymentGatewayRef?: string | null;
+  paymentChannel?: string | null;
+  createdAt: string | Date;
+  merchantName?: string | null;
+  merchantEmail?: string | null;
+  storeName?: string | null;
+  adminName?: string | null;
+  adminEmail?: string | null;
+  template?: {
+    id: string;
+    name: string;
+    thumbnailUrl?: string | null;
+    price: number;
+  } | null;
+}
+
+export interface DesignerOrderItem {
+  id: string;
+  userId: string;
+  type: string;
+  amount: number;
+  status: string;
+  storeId?: string | null;
+  templateId?: string | null;
+  externalId?: string | null;
+  paymentGatewayRef?: string | null;
+  paymentChannel?: string | null;
+  createdAt: string | Date;
+  template?: {
+    id: string;
+    name: string;
+    thumbnailUrl?: string | null;
+    price: number;
+  } | null;
+  user?: {
+    id: string;
+    name?: string | null;
+    email: string;
+    image?: string | null;
+  } | null;
+  commission?: {
+    id: string;
+    totalAmount?: number | null;
+    designerAmount?: number | null;
+    platformFee?: number | null;
+  } | null;
+}
+

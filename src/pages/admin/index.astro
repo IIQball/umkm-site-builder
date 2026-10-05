@@ -116,7 +116,10 @@ try {
     .from(transactions)
     .leftJoin(templates, eq(transactions.templateId, templates.id))
     .leftJoin(users, eq(transactions.userId, users.id))
-    .leftJoin(stores, eq(transactions.storeId, stores.id))
+    .leftJoin(
+      stores,
+      or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
+    )
     .where(whereCondition)
     .orderBy(desc(transactions.createdAt));
 
@@ -131,8 +134,9 @@ try {
     templateId: t.templateId,
     templateName: t.templateName,
     templateThumbnailUrl: t.templateThumbnailUrl,
-    merchantName: t.merchantName || t.merchantEmail || 'Merchant',
-    storeName: t.storeName || 'Toko Merchant',
+    merchantName: t.merchantName || '—',
+    merchantEmail: t.merchantEmail || null,
+    storeName: t.storeName || 'Belum Membuat Toko',
   }));
 } catch (error) {
   console.error('[AdminDashboard] Gagal memuat data overview dasbor:', error);

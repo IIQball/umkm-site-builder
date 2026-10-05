@@ -51,7 +51,15 @@
     pending: invitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
   };
 
-  $: filteredInvitations = invitations.filter((i) => {
+  // Deduplicate invitations by email (keep newest by createdAt)
+  $: uniqueInvitations = Object.values(invitations.reduce((acc, current) => {
+    if (!acc[current.email] || new Date(current.createdAt) > new Date(acc[current.email].createdAt)) {
+      acc[current.email] = current;
+    }
+    return acc;
+  }, {} as Record<string, typeof invitations[0]>)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  $: filteredInvitations = uniqueInvitations.filter((i) => {
     // Text search
     const matchesSearch = !searchQuery.trim() || 
       i.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -383,7 +391,13 @@
             <td class="px-6 py-4">
               <div class="flex items-center gap-1.5 text-secondary text-sm">
                 <CalendarDays size={14} />
-                <span>{formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span>
+                  {#if inv.acceptedAt}
+                    -
+                  {:else}
+                    {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {/if}
+                </span>
               </div>
             </td>
 

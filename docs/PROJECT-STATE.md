@@ -11,6 +11,12 @@ Keep it short and current. This is a checkpoint, not a changelog.
 
 ## Where the work stands
 
+- **Session Token Cleanup & Active Profile Indicator**:
+  - Implemented standalone cleanup script `scripts/cleanup-sessions.ts` via Drizzle ORM to hard-delete expired sessions (`expiresAt < now()`) efficiently from the database without touching core platform APIs.
+  - Upgraded frontend profile settings dropdown (`src/components/common/NavbarUserMenu.svelte`) with a clear, pulsing green "Sesi Aktif" badge replacing the generic "Aktif" text to clearly indicate current session validity to the user.
+  - Successfully ran validation loop (`type-check`, `lint`, `build` all passing 100%). Fixed a minor unused `getRoleConfig` import in `DashboardNavbar.svelte` and installed missing `apexcharts` types for `ChartWidget.svelte`.
+  - Did not touch Template Builder, preserving 100% component parity.
+
 - **Marketplace Template Purchase Endpoint Fix**:
   - Fixed 404 error on marketplace checkout by updating [`src/components/public/PublicTemplateMarketplace.svelte`](file:///e:/POLIWANGI/SEMESTER%207/MAGANG/PROJEK/umkm-site-builder/src/components/public/PublicTemplateMarketplace.svelte) from non-existent `/api/checkout/create` and `/api/tenant/template/apply` to the canonical transaction endpoint `/api/tenant/transactions/template-purchase`.
   - Seamlessly handles both free template claims (`isFree: true`) and paid checkout redirections (`/checkout/${result.data.externalId}`).

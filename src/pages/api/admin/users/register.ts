@@ -57,6 +57,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 24);
         
+        // Clean up any orphaned invitations for this email to prevent duplicates
+        await db.delete(tenantInvitations).where(eq(tenantInvitations.email, validated.email));
+
         await db.insert(tenantInvitations).values({
           id: invId,
           name: validated.name,

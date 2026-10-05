@@ -132,7 +132,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     { prefix: '/onboarding', roles: ['tenant', 'admin', 'superadmin'] },
     { prefix: '/builder', roles: ['designer', 'tenant', 'admin', 'superadmin'] },
     { prefix: '/designer', roles: ['designer', 'admin', 'superadmin'] },
-    { prefix: '/checkout', roles: ['tenant'] } // Hanya tenant yang bisa checkout
+    { prefix: '/checkout', roles: ['tenant'] }, // Hanya tenant yang bisa checkout
+    { prefix: '/settings', roles: ['tenant', 'designer', 'admin', 'superadmin'] }
   ];
 
   // 2. Cek apakah rute saat ini termasuk dalam daftar proteksi

@@ -59,18 +59,18 @@ export const auth = betterAuth({
       const isActivation = status === 'pending';
 
       let subject = 'Reset Password Akun Pinoka';
-      let bodyText = 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka Anda.';
+      let bodyText = 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka kamu.';
 
       if (isActivation) {
-        subject = isAdmin ? 'Aktivasi Akun Admin Pinoka' : 'Aktivasi Akun Merchant Pinoka';
+        subject = isAdmin ? 'Akses Akun Admin Pinoka Kamu Sudah Siap' : 'Akses Akun Merchant Pinoka Kamu Sudah Siap';
         bodyText = isAdmin 
-          ? 'Akun Admin Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai mengelola platform.'
-          : 'Selamat bergabung! Akun Merchant Anda telah berhasil didaftarkan. Silakan klik tautan di bawah ini untuk mengaktifkan akun Anda dan mulai menggunakan layanan kami.';
+          ? 'Akun admin kamu di Pinoka sudah berhasil dibuat. Sekarang kamu sudah bisa masuk untuk mulai mendampingi UMKM dan mengelola platform.'
+          : 'Akun merchant kamu di Pinoka sudah berhasil dibuat. Sekarang kamu sudah bisa masuk untuk mulai mengelola tokomu.';
       } else {
         subject = isAdmin ? 'Reset Password Akun Admin Pinoka' : 'Reset Password Akun Pinoka';
         bodyText = isAdmin 
-          ? 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Admin Anda.'
-          : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka Anda.';
+          ? 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Admin kamu.'
+          : 'Kami menerima permintaan untuk mengatur ulang kata sandi akun Pinoka kamu.';
       }
       
       let finalUrl = url;
@@ -86,6 +86,11 @@ export const auth = betterAuth({
             const cleanUrl = new URL(callbackURL, parsedUrl.origin);
             cleanUrl.searchParams.set('token', token);
             finalUrl = cleanUrl.toString();
+          } else if (token) {
+            // Ensure unified route is used if callbackURL is missing
+            const cleanUrl = new URL(isActivation ? '/activation' : '/auth/reset-password', parsedUrl.origin);
+            cleanUrl.searchParams.set('token', token);
+            finalUrl = cleanUrl.toString();
           }
         } else if (parsedUrl.pathname === '/reset-password') {
           // Fallback if it generates a standard non-API URL
@@ -97,44 +102,70 @@ export const auth = betterAuth({
       }
 
       const calloutText = isActivation
-        ? 'Tautan aktivasi ini bersifat rahasia dan hanya berlaku selama 24 jam sejak email ini dikirimkan.'
-        : 'Tautan reset kata sandi ini bersifat rahasia dan hanya berlaku selama 24 jam sejak email ini dikirimkan.';
+        ? 'Demi keamanan, tautan ini hanya berlaku selama 24 jam.'
+        : 'Demi keamanan, tautan reset kata sandi ini hanya berlaku selama 24 jam.';
 
-      const btnText = isActivation ? 'Aktifkan Akun Sekarang' : 'Atur Ulang Kata Sandi';
+      const btnText = isActivation ? 'Aktifkan Akun' : 'Atur Ulang Kata Sandi';
 
       await sendEmail({
         to: user.email,
         subject,
         html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 0; color: #334155; line-height: 1.6;">
-            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin-bottom: 24px;">${subject}</h1>
-            
-            <p style="margin-bottom: 16px;">Halo <strong>${user.name}</strong>,</p>
-            
-            <p style="margin-bottom: 24px;">${bodyText}</p>
-            
-            <div style="background-color: #f0fdfa; border-left: 4px solid #14b8a6; padding: 16px; border-radius: 4px; margin-bottom: 32px;">
-              <p style="margin: 0; color: #0f766e; font-size: 14px;">
-                <strong style="display: flex; align-items: center; gap: 8px;">
-                  ⚠️ Informasi Penting:
-                </strong>
-                <br>
-                ${calloutText}
-              </p>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { margin: 0; padding: 0; background-color: #F9FAFB; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+              .wrapper { width: 100%; table-layout: fixed; background-color: #F9FAFB; padding: 48px 0; }
+              .container { max-width: 520px; margin: 0 auto; width: 100%; }
+              .card { background-color: #ffffff; border: 1px solid #E5E7EB; border-radius: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04); padding: 48px; margin: 0 20px; }
+              .logo-container { text-align: center; margin-bottom: 32px; }
+              .logo { height: 36px; width: auto; color: #0F172A; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-decoration: none; }
+              .heading { margin: 0 0 16px; font-size: 22px; font-weight: 600; color: #111827; letter-spacing: -0.4px; line-height: 1.3; text-align: center; }
+              .text { margin: 0 0 20px; font-size: 15px; color: #4B5563; line-height: 1.6; text-align: center; }
+              .btn-wrapper { margin: 32px 0; text-align: center; }
+              .btn { display: inline-block; width: 100%; text-align: center; padding: 14px 24px; background: linear-gradient(180deg, #0284C7 0%, #0369A1 100%); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 15px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1); border: 1px solid #075985; box-sizing: border-box; }
+              .warning-box { margin-top: 32px; padding: 16px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; text-align: center; }
+              .warning-text { font-size: 13.5px; color: #64748B; line-height: 1.5; margin: 0; }
+              .footer { padding: 32px 20px; text-align: center; }
+              .fallback-text { margin: 0 0 8px; font-size: 13px; color: #6B7280; line-height: 1.5; }
+              .fallback-link { display: inline-block; font-size: 13px; color: #0284C7; word-break: break-all; text-decoration: underline; margin-bottom: 24px; }
+              .footer-text { margin: 0 0 8px; font-size: 13px; color: #9CA3AF; }
+            </style>
+          </head>
+          <body>
+            <div class="wrapper">
+              <div class="container">
+                <div class="card">
+                  <div class="logo-container">
+                    <img src="${authBaseUrl}/assets/logo/logo.webp" alt="Pinoka" class="logo" />
+                  </div>
+                  <h2 class="heading">${subject}</h2>
+                  <p class="text" style="color: #111827;">Halo <strong>${user.name}</strong>,</p>
+                  <p class="text">${bodyText}</p>
+                  
+                  <div class="btn-wrapper">
+                    <a href="${finalUrl}" class="btn">${btnText}</a>
+                  </div>
+
+                  <div class="warning-box">
+                    <p class="warning-text">⚠️ &nbsp; ${calloutText}</p>
+                  </div>
+                </div>
+                
+                <div class="footer">
+                  <p class="fallback-text">Jika tombol di atas tidak bisa diklik, salin tautan berikut ke peramban (browser) kamu:</p>
+                  <a href="${finalUrl}" class="fallback-link">${finalUrl}</a>
+                  
+                  <p class="footer-text">Butuh bantuan? Silakan hubungi tim kami di support@pinoka.id</p>
+                  <p class="footer-text">&copy; 2026 Pinoka. Hak cipta dilindungi undang-undang.</p>
+                </div>
+              </div>
             </div>
-            
-            <div style="text-align: center; margin-bottom: 32px;">
-              <a href="${finalUrl}" style="display: inline-block; padding: 14px 28px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(54, 198, 253, 0.2);">
-                ${btnText}
-              </a>
-            </div>
-            
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 24px;">
-              <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jika tombol di atas tidak berfungsi, Anda dapat menyalin dan menempelkan tautan berikut ke browser Anda:</p>
-              <p style="font-size: 13px; color: #3b82f6; word-break: break-all; margin-top: 0;">${finalUrl}</p>
-              <p style="font-size: 13px; color: #94a3b8; margin-top: 24px;">Jika Anda tidak merasa melakukan tindakan ini, abaikan saja email ini.</p>
-            </div>
-          </div>
+          </body>
+          </html>
         `
       });
     },
@@ -152,35 +183,63 @@ export const auth = betterAuth({
         to: user.email,
         subject: 'Verifikasi Email Pinoka',
         html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 0; color: #334155; line-height: 1.6;">
-            <h1 style="color: #0f172a; font-size: 24px; font-weight: 700; margin-bottom: 24px;">Verifikasi Email Anda</h1>
-            
-            <p style="margin-bottom: 16px;">Halo <strong>${user.name}</strong>,</p>
-            
-            <p style="margin-bottom: 24px;">Terima kasih telah mendaftar di Pinoka. Silakan verifikasi alamat email Anda untuk melanjutkan dan mulai menggunakan layanan kami.</p>
-            
-            <div style="background-color: #f0fdfa; border-left: 4px solid #14b8a6; padding: 16px; border-radius: 4px; margin-bottom: 32px;">
-              <p style="margin: 0; color: #0f766e; font-size: 14px;">
-                <strong style="display: flex; align-items: center; gap: 8px;">
-                  🔐 Kode OTP Anda:
-                </strong>
-                <br>
-                Gunakan kode berikut jika aplikasi memintanya: <strong style="font-size: 18px; color: #0f172a;">${token}</strong>
-              </p>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { margin: 0; padding: 0; background-color: #F9FAFB; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+              .wrapper { width: 100%; table-layout: fixed; background-color: #F9FAFB; padding: 48px 0; }
+              .container { max-width: 520px; margin: 0 auto; width: 100%; }
+              .card { background-color: #ffffff; border: 1px solid #E5E7EB; border-radius: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04); padding: 48px; margin: 0 20px; }
+              .logo-container { text-align: center; margin-bottom: 32px; }
+              .logo { height: 36px; width: auto; color: #0F172A; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-decoration: none; }
+              .heading { margin: 0 0 16px; font-size: 22px; font-weight: 600; color: #111827; letter-spacing: -0.4px; line-height: 1.3; text-align: center; }
+              .text { margin: 0 0 20px; font-size: 15px; color: #4B5563; line-height: 1.6; text-align: center; }
+              .btn-wrapper { margin: 32px 0; text-align: center; }
+              .btn { display: inline-block; width: 100%; text-align: center; padding: 14px 24px; background: linear-gradient(180deg, #0284C7 0%, #0369A1 100%); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 15px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1); border: 1px solid #075985; box-sizing: border-box; }
+              .otp-box { margin-top: 32px; padding: 24px; background-color: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 12px; text-align: center; }
+              .otp-text { margin: 0 0 12px; font-size: 14px; color: #64748B; }
+              .otp-code { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0369A1; }
+              .footer { padding: 32px 20px; text-align: center; }
+              .fallback-text { margin: 0 0 8px; font-size: 13px; color: #6B7280; line-height: 1.5; }
+              .fallback-link { display: inline-block; font-size: 13px; color: #0284C7; word-break: break-all; text-decoration: underline; margin-bottom: 24px; }
+              .footer-text { margin: 0 0 8px; font-size: 13px; color: #9CA3AF; }
+            </style>
+          </head>
+          <body>
+            <div class="wrapper">
+              <div class="container">
+                <div class="card">
+                  <div class="logo-container">
+                    <img src="${authBaseUrl}/assets/logo/logo.webp" alt="Pinoka" class="logo" />
+                  </div>
+                  <h2 class="heading">Verifikasi Email Kamu</h2>
+                  <p class="text" style="color: #111827;">Halo <strong>${user.name}</strong>,</p>
+                  <p class="text">Terima kasih telah mendaftar di Pinoka. Silakan verifikasi alamat email kamu untuk mulai menggunakan layanan kami.</p>
+                  
+                  <div class="btn-wrapper">
+                    <a href="${url}" class="btn">Verifikasi Email Sekarang</a>
+                  </div>
+
+                  <div class="otp-box">
+                    <p class="otp-text">Atau masukkan kode OTP berikut:</p>
+                    <p class="otp-code">${token}</p>
+                  </div>
+                </div>
+                
+                <div class="footer">
+                  <p class="fallback-text">Jika tombol di atas tidak bisa diklik, salin tautan berikut ke peramban (browser) kamu:</p>
+                  <a href="${url}" class="fallback-link">${url}</a>
+                  
+                  <p class="footer-text">Butuh bantuan? Silakan hubungi tim kami di support@pinoka.id</p>
+                  <p class="footer-text">&copy; 2026 Pinoka. Hak cipta dilindungi undang-undang.</p>
+                </div>
+              </div>
             </div>
-            
-            <div style="text-align: center; margin-bottom: 32px;">
-              <a href="${url}" style="display: inline-block; padding: 14px 28px; background-color: #36C6FD; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(54, 198, 253, 0.2);">
-                Verifikasi Email Sekarang
-              </a>
-            </div>
-            
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 24px;">
-              <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jika tombol di atas tidak berfungsi, Anda dapat menyalin dan menempelkan tautan berikut ke browser Anda:</p>
-              <p style="font-size: 13px; color: #3b82f6; word-break: break-all; margin-top: 0;">${url}</p>
-              <p style="font-size: 13px; color: #94a3b8; margin-top: 24px;">Tautan ini hanya berlaku untuk 1 kali penggunaan. Jika Anda tidak merasa mendaftar, abaikan saja email ini.</p>
-            </div>
-          </div>
+          </body>
+          </html>
         `
       });
     }

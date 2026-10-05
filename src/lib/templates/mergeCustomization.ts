@@ -13,6 +13,8 @@ export interface StoreProfileData {
   categoryName?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  branchMode?: 'single' | 'multi';
+  branches?: unknown[];
 }
 
 /**
@@ -143,7 +145,7 @@ export function mergeStoreCustomization(
           if (waNumber) {
             section.props.whatsappNumber = waNumber;
           }
-          if (address && !section.props.address) {
+          if (address) {
             section.props.address = address;
           }
           break;
@@ -172,8 +174,18 @@ export function mergeStoreCustomization(
           break;
         }
 
+        case 'faq': {
+          if (waNumber) {
+            section.props.whatsappNumber = waNumber;
+          }
+          if (storeName) {
+            section.props.storeName = storeName;
+          }
+          break;
+        }
+
         case 'google_maps': {
-          if (!section.props.address && address) {
+          if (address) {
             section.props.address = address;
           }
           if (mapsUrl) {
@@ -194,9 +206,15 @@ export function mergeStoreCustomization(
           if (storeName) {
             section.props.storeName = storeName;
           }
-          // Support multi-branch configured in customization
-          if (Array.isArray(cust.branches) && cust.branches.length > 0) {
-            section.props.branches = cust.branches;
+          // Support multi-branch configured in customization or storeData
+          const branches = (Array.isArray(cust.branches) && cust.branches.length > 0)
+            ? (cust.branches as unknown[])
+            : (Array.isArray(storeData?.branches) && storeData.branches.length > 0)
+              ? storeData.branches
+              : [];
+          if (branches.length > 0) {
+            section.props.branches = branches;
+            section.props.branchMode = (cust.branchMode as string) || storeData?.branchMode || 'multi';
             section.layoutPreset = 'multi_branch_tabs';
           }
           break;
@@ -211,11 +229,19 @@ export function mergeStoreCustomization(
           if (storeName && !hasCustomBrandName) {
             section.props.brandName = storeName;
           }
-          if (!section.props.address && address) {
+          if (address) {
             section.props.address = address;
           }
           if (waNumber) {
             section.props.whatsappNumber = waNumber;
+          }
+          if (mapsUrl) {
+            section.props.googleMapsUrl = mapsUrl;
+          }
+          const headerSec = config.sections.find((s) => s.type === 'header_announcement');
+          const headerLogo = headerSec?.props?.logoImageUrl as string | undefined;
+          if (headerLogo && !section.props.logoImageUrl) {
+            section.props.logoImageUrl = headerLogo;
           }
           break;
         }

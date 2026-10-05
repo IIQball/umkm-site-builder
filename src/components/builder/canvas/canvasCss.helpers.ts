@@ -16,8 +16,16 @@ export const buildCanvasCssVars = (
 
   const primaryColor = colors.primary || (isDarkPreview ? '#00A3EF' : '#36C6FD')
   const secondaryColor = colors.secondary || (isDarkPreview ? '#B90162' : '#FC018B')
-  const headingFont = typography.headingFont || "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif"
-  const bodyFont = typography.bodyFont || "'Poppins', system-ui, -apple-system, sans-serif"
+  const defaultHeadingFont = "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif"
+  const defaultBodyFont = "'Poppins', system-ui, -apple-system, sans-serif"
+  const formatFont = (f?: string, fallback = 'sans-serif') => {
+    if (!f) return fallback;
+    const clean = f.trim();
+    if (clean.includes(',')) return clean;
+    return `'${clean.replace(/^['"]+|['"]+$/g, '')}', ${fallback}`;
+  };
+  const headingFont = formatFont(typography.headingFont, defaultHeadingFont)
+  const bodyFont = formatFont(typography.bodyFont, defaultBodyFont)
 
   // Active Layout Dimensions
   const activeSafeZone = viewMode === 'mobile'

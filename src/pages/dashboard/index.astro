@@ -10,7 +10,7 @@ import { getStoreTrafficSeries, type TrafficPoint } from '@/services/analytics.s
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
-if (user.role === 'designer') return Astro.redirect('/designer/wallet');
+if (user.role === 'designer') return Astro.redirect('/designer');
 if (user.role === 'superadmin') return Astro.redirect('/superadmin');
 if (user.role === 'admin') return Astro.redirect('/admin');
 
@@ -79,7 +79,7 @@ if (currentHour >= 4 && currentHour < 11) {
           <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Pengguna'}!</span>
         </h1>
         {managedByAdmin && (
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>

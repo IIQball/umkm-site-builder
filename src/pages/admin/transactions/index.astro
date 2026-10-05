@@ -1,12 +1,12 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import OrderHistoryTable from "@/components/dashboard/OrderHistoryTable.svelte";
-import StatCard from "@/components/ui/StatCard.svelte";
-import { formatSmartIDR } from "@/lib/currency";
+import AdminTransactionsOverview from "@/components/admin/transactions/AdminTransactionsOverview.svelte";
 import { getAuthenticatedUser, isAuthorizedAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { transactions, templates, stores, users } from "@/db/schema";
-import { eq, or, desc } from "drizzle-orm";
+import { eq, or, desc, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import type { OrderTransactionItem } from "@/types/finance";
 
 export const prerender = false;
 
@@ -20,31 +20,9 @@ if (user.role === "superadmin") {
   return Astro.redirect("/admin");
 }
 
-let initialOrders: Array<{
-  id: string;
-  userId: string;
-  type: string;
-  amount: number;
-  adminFee?: number;
-  basePrice?: number;
-  status: string;
-  storeId?: string | null;
-  templateId?: string | null;
-  assistedBy?: string | null;
-  externalId?: string | null;
-  paymentGatewayRef?: string | null;
-  paymentChannel?: string | null;
-  createdAt: string;
-  merchantName?: string | null;
-  merchantEmail?: string | null;
-  storeName?: string | null;
-  template?: {
-    id: string;
-    name: string;
-    thumbnailUrl?: string | null;
-    price: number;
-  } | null;
-}> = [];
+const adminUsers = alias(users, "adminUsers");
+
+let initialOrders: OrderTransactionItem[] = [];
 
 try {
   const whereCondition = or(
@@ -72,12 +50,22 @@ try {
       templatePrice: templates.price,
       merchantName: users.name,
       merchantEmail: users.email,
+      registeredBy: users.registeredBy,
       storeName: stores.name,
+      adminName: adminUsers.name,
+      adminEmail: adminUsers.email,
     })
     .from(transactions)
     .leftJoin(templates, eq(transactions.templateId, templates.id))
     .leftJoin(users, eq(transactions.userId, users.id))
-    .leftJoin(stores, eq(transactions.storeId, stores.id))
+    .leftJoin(
+      stores,
+      or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
+    )
+    .leftJoin(
+      adminUsers,
+      eq(adminUsers.id, sql`COALESCE(${transactions.assistedBy}, ${users.registeredBy})`),
+    )
     .where(whereCondition)
     .orderBy(desc(transactions.createdAt));
 
@@ -85,6 +73,7 @@ try {
     const adminFee = Number(r.adminFee || 0);
     const amount = Number(r.amount);
     const basePrice = Math.max(0, amount - adminFee);
+    const hasAdmin = Boolean(r.assistedBy || r.registeredBy);
     return {
       id: r.id,
       userId: r.userId,
@@ -95,16 +84,18 @@ try {
       status: r.status,
       storeId: r.storeId,
       templateId: r.templateId,
-      assistedBy: r.assistedBy,
+      assistedBy: r.assistedBy || r.registeredBy || null,
       externalId: r.externalId,
       paymentGatewayRef: r.paymentGatewayRef,
       paymentChannel: r.paymentChannel,
       createdAt: r.createdAt
         ? r.createdAt.toISOString()
         : new Date().toISOString(),
-      merchantName: r.merchantName || r.merchantEmail || "Merchant",
-      merchantEmail: r.merchantEmail,
-      storeName: r.storeName || "Toko Merchant",
+      merchantName: r.merchantName || "—",
+      merchantEmail: r.merchantEmail || null,
+      storeName: r.storeName || "Belum Membuat Toko",
+      adminName: hasAdmin ? (r.adminName || null) : null,
+      adminEmail: hasAdmin ? (r.adminEmail || null) : null,
       template: r.templateName
         ? {
             id: r.templateId || "",
@@ -120,20 +111,6 @@ try {
   initialOrders = [];
 }
 
-const paidOrders = initialOrders.filter(
-  (o) => o.status === "paid" || o.status === "success" || o.status === "completed",
-);
-const pendingOrders = initialOrders.filter((o) => o.status === "pending");
-const totalPaidVolume = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
-const totalAdminFeeEarned = paidOrders.reduce((sum, o) => sum + (o.adminFee || 0), 0);
-const formattedPaidVolume = formatSmartIDR(totalPaidVolume);
-const formattedAdminFee = formatSmartIDR(totalAdminFeeEarned);
-
-const counts = {
-  total: initialOrders.length,
-  paid: paidOrders.length,
-  pending: pendingOrders.length,
-};
 ---
 
 <DashboardLayout title="Riwayat Transaksi" breadcrumb="Riwayat Transaksi">
@@ -153,57 +130,8 @@ const counts = {
       </div>
     </div>
 
-    <!-- Statcards Grid (animated on client load) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard
-        client:load
-        label="Total Transaksi"
-        value={counts.total}
-        rawValue={counts.total}
-        icon="receipt_long"
-        cardTheme="dark"
-        badge="Semua Invoice"
-        footerText="Akumulasi seluruh transaksi"
-        delayClass="delay-100"
-      />
-      <StatCard
-        client:load
-        label="Transaksi Sukses"
-        value={counts.paid}
-        rawValue={counts.paid}
-        icon="check_circle"
-        cardTheme="default"
-        badge="Lunas"
-        footerText="Pembayaran telah diverifikasi"
-        delayClass="delay-150"
-      />
-      <StatCard
-        client:load
-        label="Fee Pendampingan"
-        value={formattedAdminFee}
-        rawValue={totalAdminFeeEarned}
-        icon="payments"
-        cardTheme="blue"
-        badge="Fee Bersih"
-        footerText={`Dari omset ${formattedPaidVolume}`}
-        delayClass="delay-200"
-      />
-      <StatCard
-        client:load
-        label="Menunggu Pembayaran"
-        value={counts.pending}
-        rawValue={counts.pending}
-        icon="hourglass_top"
-        cardTheme="orange"
-        badge="Pending"
-        footerText="Menunggu pembayaran merchant"
-        delayClass="delay-250"
-      />
-    </div>
-
-    <!-- Interactive Table (Admin View with rich merchant, store, fee breakdown) -->
-    <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load initialOrders={initialOrders} isAdmin={true} />
-    </div>
+    <!-- Master Admin Transactions Overview (Period Filter, Statcards & Interactive Table) -->
+    <AdminTransactionsOverview client:load allTransactions={initialOrders} />
   </div>
 </DashboardLayout>
+

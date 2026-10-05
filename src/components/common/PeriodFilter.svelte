@@ -1,11 +1,19 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { Calendar } from 'lucide-svelte';
   import { Badge, SearchableSelect } from '@/components/ui';
-  import { INDONESIAN_MONTHS } from '../growth/merchantGrowth.helpers';
+  import { INDONESIAN_MONTHS } from '@/lib/utils/format';
 
   export let availableYears: number[] = [new Date().getFullYear()];
   export let selectedYear: number = new Date().getFullYear();
   export let selectedMonth: number | 'all' = 'all';
+  export let title: string = 'Filter Periode Data';
+  export let description: string = 'Sesuaikan statistik, grafik pertumbuhan, dan data transaksi berdasarkan periode waktu.';
+  export let activeBadgePrefix: string = '';
+
+  const dispatch = createEventDispatcher<{
+    change: { year: number; month: number | 'all' };
+  }>();
 
   $: monthOptions = [
     { value: 'all', label: 'Semua Bulan (Setahun Penuh)', sublabel: '12 Bulan' },
@@ -16,7 +24,7 @@
     })),
   ];
 
-  $: yearOptions = availableYears.map((y) => ({
+  $: yearOptions = (availableYears.length > 0 ? availableYears : [new Date().getFullYear()]).map((y) => ({
     value: y,
     label: `Tahun ${y}`,
     sublabel: y === new Date().getFullYear() ? 'Tahun Ini' : undefined,
@@ -25,16 +33,18 @@
   function handleMonthChange(event: CustomEvent<{ value: string | number }>) {
     const val = event.detail.value;
     selectedMonth = val === 'all' ? 'all' : parseInt(String(val), 10);
+    dispatch('change', { year: selectedYear, month: selectedMonth });
   }
 
   function handleYearChange(event: CustomEvent<{ value: string | number }>) {
     selectedYear = parseInt(String(event.detail.value), 10);
+    dispatch('change', { year: selectedYear, month: selectedMonth });
   }
 
   $: activeFilterBadge =
     selectedMonth === 'all'
-      ? `Tahun ${selectedYear} (12 Bulan Penuh)`
-      : `${INDONESIAN_MONTHS[(selectedMonth as number) - 1]} ${selectedYear} (Harian)`;
+      ? `${activeBadgePrefix ? activeBadgePrefix + ' ' : ''}Tahun ${selectedYear} (12 Bulan Penuh)`
+      : `${activeBadgePrefix ? activeBadgePrefix + ' ' : ''}${INDONESIAN_MONTHS[(selectedMonth as number) - 1]} ${selectedYear}`;
 </script>
 
 <div
@@ -50,14 +60,14 @@
     <div>
       <div class="flex items-center gap-2">
         <h3 class="text-heading-xs text-main font-bold font-heading">
-          Filter Periode Data
+          {title}
         </h3>
         <Badge variant="primary" size="sm" dot>
           <span>{activeFilterBadge}</span>
         </Badge>
       </div>
       <p class="text-2xs text-secondary mt-0.5 font-sans">
-        Sesuaikan statistik, grafik pertumbuhan, dan data transaksi berdasarkan periode waktu.
+        {description}
       </p>
     </div>
   </div>

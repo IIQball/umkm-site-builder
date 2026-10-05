@@ -103,6 +103,9 @@ export async function queryTenantOrders(userId: string) {
     ),
     with: {
       template: true,
+      assistant: {
+        columns: { id: true, name: true, email: true },
+      },
     },
     orderBy: [desc(transactions.createdAt)],
   });

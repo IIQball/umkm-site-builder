@@ -95,19 +95,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           })
           .where(eq(wallets.id, wallet.id));
 
-        // Record DEBIT mutation
-        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        await tx.insert(walletMutations)
-          .values({
-            id: mutationId,
-            walletId: wallet.id,
-            type: 'DEBIT',
-            amount,
-            balanceAfter,
-            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
-            createdAt: new Date(),
-          });
-
         // Create payoutRequests record with status 'processing'
         const payoutId = `po_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
         const [record] = await tx.insert(payoutRequests)
@@ -121,6 +108,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
             updatedAt: new Date(),
           })
           .returning();
+
+        // Record DEBIT mutation with payout referenceId
+        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        await tx.insert(walletMutations)
+          .values({
+            id: mutationId,
+            walletId: wallet.id,
+            type: 'DEBIT',
+            amount,
+            balanceAfter,
+            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
+            referenceId: payoutId,
+            createdAt: new Date(),
+          });
 
         return record;
       });

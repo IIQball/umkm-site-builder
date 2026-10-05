@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AdminPeriodFilter from './AdminPeriodFilter.svelte';
+  import PeriodFilter from '@/components/common/PeriodFilter.svelte';
   import AdminKeyMetrics from './AdminKeyMetrics.svelte';
   import AdminMerchantGrowthChart from '../growth/AdminMerchantGrowthChart.svelte';
   import AdminFeeRevenueChart from '../growth/AdminFeeRevenueChart.svelte';
@@ -7,6 +7,7 @@
   import AdminRecentMerchantsCard from './AdminRecentMerchantsCard.svelte';
   import { calculateMerchantGrowth } from '../growth/merchantGrowth.helpers';
   import { calculateFeeRevenueGrowth } from '../growth/feeRevenue.helpers';
+  import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
 
   export let allTenants: Array<{
     id: string;
@@ -40,42 +41,25 @@
   let selectedYear: number = currentYear;
   let selectedMonth: number | 'all' = 'all';
 
-  $: availableYears = (() => {
-    let earliest = userCreatedYear || currentYear;
-    for (const t of allTenants) {
-      const y = new Date(t.createdAt).getFullYear();
-      if (!isNaN(y) && y < earliest && y >= 2020) earliest = y;
-    }
-    for (const tx of allTransactions) {
-      const y = new Date(tx.createdAt).getFullYear();
-      if (!isNaN(y) && y < earliest && y >= 2020) earliest = y;
-    }
-    const years: number[] = [];
-    for (let y = earliest; y <= currentYear; y++) {
-      years.push(y);
-    }
-    return years.sort((a, b) => b - a);
-  })();
+  $: availableYears = computeAvailableYears(
+    [...allTenants, ...allTransactions],
+    (i) => i.createdAt,
+    userCreatedYear
+  );
 
-  $: startPeriod =
-    selectedMonth === 'all'
-      ? new Date(selectedYear, 0, 1, 0, 0, 0, 0)
-      : new Date(selectedYear, (selectedMonth as number) - 1, 1, 0, 0, 0, 0);
+  $: filteredTenants = filterByPeriod(
+    allTenants,
+    selectedYear,
+    selectedMonth,
+    (t) => t.createdAt
+  );
 
-  $: endPeriod =
-    selectedMonth === 'all'
-      ? new Date(selectedYear, 11, 31, 23, 59, 59, 999)
-      : new Date(selectedYear, selectedMonth as number, 0, 23, 59, 59, 999);
-
-  $: filteredTenants = allTenants.filter((t) => {
-    const d = new Date(t.createdAt);
-    return d >= startPeriod && d <= endPeriod;
-  });
-
-  $: filteredTransactions = allTransactions.filter((t) => {
-    const d = new Date(t.createdAt);
-    return d >= startPeriod && d <= endPeriod;
-  });
+  $: filteredTransactions = filterByPeriod(
+    allTransactions,
+    selectedYear,
+    selectedMonth,
+    (t) => t.createdAt
+  );
 
   $: isPaid = (status: string) => {
     const s = (status || '').toLowerCase().trim();
@@ -140,7 +124,7 @@
 
 <div class="space-y-8">
   <!-- Baris 0: Filter Bar Periode (Tahun & Bulan) -->
-  <AdminPeriodFilter
+  <PeriodFilter
     {availableYears}
     bind:selectedYear
     bind:selectedMonth

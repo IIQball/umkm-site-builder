@@ -91,6 +91,7 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
       ]
     case 'designer':
       return [
+        { label: 'Overview Dasbor', href: '/designer', icon: LayoutDashboard },
         { label: 'Dompet & Finansial', href: '/designer/wallet', icon: Wallet },
         { label: 'Koleksi Template', href: '/designer/templates', icon: Palette },
         { label: 'Pesanan Masuk', href: '/designer/orders', icon: ShoppingBag },

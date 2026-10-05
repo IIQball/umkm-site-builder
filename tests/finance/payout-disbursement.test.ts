@@ -79,8 +79,8 @@ describe('Payout Service (Xendit Payouts & Webhook processing)', () => {
         status: 'PENDING',
       });
 
-      // 4. Mock update payoutRequests
-      mockUpdate.mockReturnValueOnce({
+      // 4. Mock update payoutRequests and walletMutations
+      mockUpdate.mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([
             {
@@ -102,6 +102,7 @@ describe('Payout Service (Xendit Payouts & Webhook processing)', () => {
       });
 
       expect(mockUpdate).toHaveBeenCalledWith(payoutRequests);
+      expect(mockUpdate).toHaveBeenCalledWith(walletMutations);
     });
 
     it('records error message on Xendit API failure', async () => {

@@ -4,7 +4,7 @@ import type {
   FeeRevenueSummary,
   GrowthFilter,
 } from './feeRevenue.types';
-import { INDONESIAN_MONTHS } from './merchantGrowth.helpers';
+import { INDONESIAN_MONTHS } from '@/lib/utils/format';
 
 export function calculateFeeRevenueGrowth(
   records: FeeRevenueRecord[],
@@ -116,7 +116,7 @@ export function calculateFeeRevenueGrowth(
 
   const svgWidth = 850;
   const svgHeight = 280;
-  const padLeft = 40;
+  const padLeft = 76;
   const padRight = 32;
   const padTop = 28;
   const padBottom = 40;

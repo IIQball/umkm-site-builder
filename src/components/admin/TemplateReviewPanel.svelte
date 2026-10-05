@@ -8,6 +8,7 @@
     CheckCircle2,
     Clock,
     XCircle,
+    Search,
   } from 'lucide-svelte';
   import { Card, Pagination, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
@@ -15,13 +16,19 @@
   import TemplateReviewTable from './review/TemplateReviewTable.svelte';
   import TemplateReviewModals from './review/TemplateReviewModals.svelte';
 
+  export let initialTemplates: AdminTemplateItem[] | undefined = undefined;
   export let initialTemplatesJson: string = '[]';
   let allTemplates: AdminTemplateItem[] = [];
-  try {
-    const parsed = JSON.parse(initialTemplatesJson);
-    allTemplates = Array.isArray(parsed) ? parsed.filter((t) => t.status !== 'draft') : [];
-  } catch {
-    allTemplates = [];
+
+  $: if (initialTemplates !== undefined) {
+    allTemplates = initialTemplates.filter((t) => t.status !== 'draft');
+  } else {
+    try {
+      const parsed = JSON.parse(initialTemplatesJson);
+      allTemplates = Array.isArray(parsed) ? parsed.filter((t) => t.status !== 'draft') : [];
+    } catch {
+      allTemplates = [];
+    }
   }
   let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = 'pending';
   let searchQuery = '';
@@ -164,7 +171,7 @@
     <div class="flex flex-wrap items-center gap-2.5">
       <!-- Search Input Capsule -->
       <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <input
           type="text"
           bind:value={searchQuery}

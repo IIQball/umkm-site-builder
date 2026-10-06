@@ -1,4 +1,5 @@
 import { formatIDR } from './currency';
+import { trackAnalyticsEvent } from './analytics/track';
 
 export const DEFAULT_DEMO_WA_NUMBER = '6281234567890';
 
@@ -43,4 +44,26 @@ export function generateWhatsAppOrderUrl(phone: string, productName: string, pro
 
   return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
 }
+
+/**
+ * Open WhatsApp link and track wa_click event for analytics.
+ * Call this instead of window.open() for WhatsApp links in live storefronts.
+ */
+export function openWhatsAppWithTracking(
+  waLink: string,
+  storeId?: string
+): void {
+  // Fire tracking event without waiting (fire-and-forget)
+  if (storeId && typeof window !== 'undefined') {
+    trackAnalyticsEvent(storeId, 'wa_click').catch(() => {
+      // Silently fail if tracking doesn't work
+    });
+  }
+  
+  // Open WhatsApp immediately
+  if (typeof window !== 'undefined') {
+    window.open(waLink, '_blank');
+  }
+}
+
 

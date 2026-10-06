@@ -205,15 +205,20 @@
     />
   </div>
   <!-- Content -->
-  <Card padding="lg" className="animate-fade-in-up delay-300">
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-light pb-6">
-      <div>
-        <h2 class="text-heading-md text-main font-bold font-heading leading-tight">
-          Daftar Kategori Produk
-        </h2>
-        <p class="text-body-sm text-secondary mt-0.5 font-sans">
-          Kelola grup pengkategorian untuk mengorganisir katalog produk Anda
-        </p>
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-300">
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">category</span>
+        </div>
+        <div>
+          <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+            Daftar Kategori Produk
+          </h3>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">
+            Kelola grup pengkategorian untuk mengorganisir katalog produk Anda
+          </p>
+        </div>
       </div>
     </div>
     {#if isLoading}
@@ -221,15 +226,24 @@
         <span class="loading loading-spinner loading-lg text-primary"></span>
       </div>
     {:else if categories.length === 0}
-      <div class="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-sm mx-auto animate-fade-in">
-        <div class="w-16 h-16 rounded-full bg-nested flex items-center justify-center mb-4 text-muted border border-light">
-          <span class="material-symbols-outlined text-3xl">category</span>
+      <div class="py-16 px-8 flex flex-col items-center text-center">
+        <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
+          <span class="material-symbols-outlined text-2xl">category</span>
         </div>
-        <h3 class="text-heading-md font-bold text-main tracking-tight mb-1">Belum ada kategori</h3>
-        <p class="text-body-sm text-secondary mb-6">Kelompokkan produk Anda dengan menambahkan kategori pertama.</p>
-        <Button variant="dark" size="sm" className="font-bold" on:click={openAddModal}>
-          Buat Kategori
-        </Button>
+        <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Belum Ada Kategori</h4>
+        <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
+          Kelompokkan produk Anda dengan menambahkan kategori pertama.
+        </p>
+        <div class="mt-2">
+          <Button
+            variant="primary"
+            size="sm"
+            on:click={openAddModal}
+          >
+            <span class="material-symbols-outlined text-base">add</span>
+            <span>Buat Kategori</span>
+          </Button>
+        </div>
       </div>
     {:else}
       <Table 

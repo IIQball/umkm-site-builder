@@ -20,27 +20,36 @@
   };
 </script>
 
-<div class="mb-3">
+<div class="space-y-1.5 mb-4">
+  <label for="prod_name" class="text-xs font-bold text-main block font-heading">
+    Nama Produk <span class="text-rose-500">*</span>
+  </label>
   <Input
-    label="Nama Produk"
+    id="prod_name"
     placeholder="contoh: Kaos Polos Katun Combed 30s"
     bind:value={name}
     error={fieldErrors.name}
   />
 </div>
 
-<div class="mb-3">
+<div class="space-y-1.5 mb-4">
+  <label for="prod_category" class="text-xs font-bold text-main block font-heading">
+    Kategori <span class="text-rose-500">*</span>
+  </label>
   <Select
-    label="Kategori"
+    id="prod_category"
     bind:value={categoryId}
     error={fieldErrors.categoryId}
     options={categories.length === 0 ? [{value: "", label: "Belum ada kategori", disabled: true}] : categories.map(cat => ({ value: cat.id, label: cat.name }))}
   />
 </div>
 
-<div class="mb-3">
+<div class="space-y-1.5 mb-4">
+  <label for="prod_price" class="text-xs font-bold text-main block font-heading">
+    Harga Dasar <span class="text-rose-500">*</span>
+  </label>
   <Input
-    label="Harga Dasar"
+    id="prod_price"
     type="text"
     placeholder="0"
     value={formatCurrencyInput(basePrice)}
@@ -49,10 +58,14 @@
   />
 </div>
 
-<div class="mb-3">
+<div class="space-y-1.5 mb-4">
+  <label for="prod_desc" class="text-xs font-bold text-main block font-heading">
+    Deskripsi Singkat (Opsional)
+  </label>
   <Textarea
-    label="Deskripsi"
+    id="prod_desc"
     placeholder="contoh: Kaos berbahan katun 100% yang lembut, mudah menyerap keringat, dan sangat nyaman dipakai beraktivitas sehari-hari..."
     bind:value={description}
+    className="text-xs font-sans"
   />
 </div>

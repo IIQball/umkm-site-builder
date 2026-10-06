@@ -40,12 +40,12 @@
 
 <div class="mb-4">
   <div class="flex items-center justify-between mb-3">
-    <span class="block text-label-caps text-muted mb-0">
+    <div class="text-xs font-bold text-main block font-heading mb-0">
       Varian Produk
       {#if variantGroups.length > 0}
         <span class="badge badge-sm bg-nested border-none ml-1 text-main font-sans">{variantGroups.length}/5 grup</span>
       {/if}
-    </span>
+    </div>
     {#if variantGroups.length < 5}
       <button
         type="button"

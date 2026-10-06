@@ -1,4 +1,4 @@
-import { derived } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import {
   type EditorTemplate,
   type CanvasState,
@@ -17,6 +17,7 @@ export { ensureValidConfig, initialCanvasState, initialDocumentState, initialSta
 export { canvasStore, createCanvasStore, documentStore, createDocumentStore };
 
 export const editorStore = documentStore;
+export const maxStoreBranchesStore = writable<number>(5);
 
 export const activeSection = derived(
   [documentStore, canvasStore],

@@ -3,6 +3,7 @@
   import { getStoreDirectUrl } from '@/lib/domain';
   import type { AssistedStoreItem } from '@/types/admin';
 
+  export let rowNumber: number = 1;
   export let store: AssistedStoreItem;
   export let mainDomain: string = 'localhost:4321';
   export let copiedId: string | null = null;
@@ -20,6 +21,10 @@
 </script>
 
 <tr class="transition-colors group hover:bg-nested/40">
+  <!-- Sequence Number (#) -->
+  <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+    {rowNumber}
+  </td>
   <!-- Store & Merchant Info -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-3.5">

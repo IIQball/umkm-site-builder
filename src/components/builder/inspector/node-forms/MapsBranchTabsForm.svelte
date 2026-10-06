@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { Button } from '@/components/ui';
+  import { Button, Badge } from '@/components/ui';
   import type { MapBranchItem } from '../../sections/maps/maps.helpers';
+  import { maxStoreBranchesStore } from '../../stores/editorStore';
 
   export let branches: MapBranchItem[] = [];
+  export let maxBranches: number = 5;
   export let onPropChange: (prop: string, val: unknown) => void;
 
-  const MAX_BRANCHES = 5;
+  $: effectiveMaxBranches = maxBranches || $maxStoreBranchesStore || 5;
 
   function updateBranchField(idx: number, field: keyof MapBranchItem, value: string) {
     const updated = branches.map((item, i) => (i === idx ? { ...item, [field]: value } : item));
@@ -13,7 +15,7 @@
   }
 
   function addBranch() {
-    if (branches.length >= MAX_BRANCHES) return;
+    if (branches.length >= effectiveMaxBranches) return;
     const newBranch: MapBranchItem = {
       id: `branch_${Date.now()}`,
       name: `Cabang Baru #${branches.length + 1}`,
@@ -33,17 +35,17 @@
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-1.5">
       <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">
-        Daftar Cabang Toko ({branches.length}/{MAX_BRANCHES})
+        Daftar Cabang Toko ({branches.length}/{effectiveMaxBranches})
       </h4>
-      {#if branches.length >= MAX_BRANCHES}
-        <span class="badge badge-warning badge-xs text-[10px]">Maks 5 Cabang</span>
+      {#if branches.length >= effectiveMaxBranches}
+        <Badge variant="warning" size="sm" dot={false}>Maks {effectiveMaxBranches} Cabang</Badge>
       {/if}
     </div>
     <Button
       type="button"
       size="xs"
       variant="ghost"
-      disabled={branches.length >= MAX_BRANCHES}
+      disabled={branches.length >= effectiveMaxBranches}
       on:click={addBranch}
       class="!px-2 !py-0.5 !h-auto !min-h-0 text-xs text-primary font-bold hover:underline disabled:opacity-40"
     >
@@ -51,7 +53,7 @@
     </Button>
   </div>
 
-  {#each branches.slice(0, MAX_BRANCHES) as branch, idx}
+  {#each branches.slice(0, effectiveMaxBranches) as branch, idx}
     <div class="p-3 bg-base-200/50 border border-base-300 rounded-xl space-y-2">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold text-base-content">Cabang #{idx + 1}</span>

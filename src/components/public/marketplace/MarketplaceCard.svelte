@@ -2,6 +2,7 @@
   import { Palette, Eye, ShoppingCart, CheckCircle2 } from 'lucide-svelte';
   import { Button, Badge } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
   import type { PublicTemplate } from '../marketplace.types';
 
   export let tpl: PublicTemplate;
@@ -18,6 +19,7 @@
   $: displayPrice = (isAdmin && hasSelectedTenant && tpl.price > 0)
     ? tpl.price + adminServiceFee
     : tpl.price;
+  $: optimizedThumbnail = getOptimizedCloudinaryUrl(tpl.thumbnailUrl, 500);
 </script>
 
 <div class="bg-card border border-light hover:border-border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group relative">
@@ -25,9 +27,10 @@
   <div class="relative h-52 w-full flex items-center justify-center overflow-hidden">
     {#if tpl.thumbnailUrl}
       <img
-        src={tpl.thumbnailUrl}
+        src={optimizedThumbnail}
         alt={tpl.name}
         class="w-full h-full object-cover"
+        loading="lazy"
       />
     {:else}
       <div class="flex flex-col items-center justify-center text-muted gap-2 p-6 text-center w-full h-full bg-nested/40">

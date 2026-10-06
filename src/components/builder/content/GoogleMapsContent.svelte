@@ -8,10 +8,12 @@
   import MapsBranchTabsForm from '../inspector/node-forms/MapsBranchTabsForm.svelte';
   import MapsHeaderNodeForm from '../inspector/node-forms/MapsHeaderNodeForm.svelte';
   import MapsInfoCardNodeForm from '../inspector/node-forms/MapsInfoCardNodeForm.svelte';
+  import { maxStoreBranchesStore } from '../stores/editorStore';
 
   export let section: TemplateSection;
   export let onUpdate: (section: TemplateSection) => void;
 
+  $: maxBranches = $maxStoreBranchesStore || 5;
   $: handlePropChange = makeHandlePropChange(section, onUpdate);
 
   $: preset = (section.layoutPreset || section.props?.layoutPreset || 'fullwidth_map') as string;
@@ -67,7 +69,7 @@
           branchMode === 'multi' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
         }`}
       >
-        Beberapa Cabang (Maks 5)
+        Beberapa Cabang (Maks {maxBranches})
       </button>
     </div>
   </div>
@@ -76,6 +78,7 @@
     <div class="p-3 bg-base-200/30 border border-base-300 rounded-xl">
       <MapsBranchTabsForm
         {branches}
+        {maxBranches}
         onPropChange={(prop, val) => handlePropChange(prop, val)}
       />
     </div>

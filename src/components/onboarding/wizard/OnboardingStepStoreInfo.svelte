@@ -23,6 +23,7 @@
   export let address: string = '';
   export let branchMode: 'single' | 'multi' = 'single';
   export let branches: StoreBranchItem[] = [];
+  export let maxStoreBranches: number = 5;
   export let regionData = {
     province: 'Jawa Timur',
     city: 'Banyuwangi',
@@ -134,10 +135,11 @@
       {/if}
     </div>
 
-    <!-- Pilihan 1 atau Beberapa Cabang Toko (Maks 5) -->
+    <!-- Pilihan 1 atau Beberapa Cabang Toko (Maks Cabang Dinamis) -->
     <StoreBranchesManager
       bind:branchMode
       bind:branches
+      maxBranches={maxStoreBranches}
       primaryStoreName={storeName}
       primaryAddress={address}
       primaryMapsUrl={googleMapsUrl}

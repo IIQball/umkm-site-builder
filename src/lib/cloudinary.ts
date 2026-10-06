@@ -139,3 +139,24 @@ export async function deleteFromCloudinary(publicId: string) {
     console.error("CLOUDINARY_DELETE_ERROR", error);
   }
 }
+
+/**
+ * Automatically injects Cloudinary transformations (f_auto, q_auto, w_<width>)
+ * into Cloudinary URLs to optimize bandwidth and rendering.
+ */
+export function getOptimizedCloudinaryUrl(url?: string | null, width: number = 500): string {
+  if (!url || typeof url !== 'string') return '';
+  if (!url.includes('cloudinary.com') || !url.includes('/image/upload/')) {
+    return url;
+  }
+  if (
+    url.includes('/image/upload/f_auto') ||
+    url.includes('/image/upload/q_auto') ||
+    url.includes('/image/upload/w_') ||
+    url.includes('/image/upload/c_')
+  ) {
+    return url;
+  }
+  const transform = `f_auto,q_auto,w_${width}`;
+  return url.replace('/image/upload/', `/image/upload/${transform}/`);
+}

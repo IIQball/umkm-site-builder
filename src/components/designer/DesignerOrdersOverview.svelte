@@ -5,8 +5,10 @@
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
   import { formatSmartIDR } from '@/lib/currency';
   import type { DesignerOrderItem } from '@/types/finance';
+  import type { PaginatedResult } from '@/types/common';
 
   export let allOrders: DesignerOrderItem[] = [];
+  export let pagination: PaginatedResult<any> | undefined = undefined;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -96,6 +98,6 @@
 
   <!-- Interactive Table Card -->
   <div class="animate-fade-in-up delay-300">
-    <DesignerOrdersTable initialOrders={filteredOrders} />
+    <DesignerOrdersTable initialOrders={pagination ? pagination.data : filteredOrders} {pagination} />
   </div>
 </div>

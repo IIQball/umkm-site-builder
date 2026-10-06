@@ -6,15 +6,22 @@
   import { formatDate } from "@/lib/utils/format";
   import { getMainDomain } from "@/lib/domain";
   import type { AssistedStoreItem } from "@/types/admin";
+  import type { PaginatedResult } from "@/types/common";
 
   export let stores: AssistedStoreItem[] = [];
+  export let pagination: PaginatedResult<any> | undefined = undefined;
 
   let searchQuery = "";
   let activeFilter: "all" | "published" | "draft" | "nostore" = "all";
   let copiedId: string | null = null;
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let mainDomain = "localhost:4321";
+
+  $: activePage = pagination ? pagination.currentPage : currentPage;
+  $: activePageSize = pagination ? pagination.pageSize : pageSize;
+  $: activeTotalItems = pagination ? pagination.totalItems : filteredStores.length;
 
   onMount(() => {
     mainDomain = getMainDomain();
@@ -77,15 +84,18 @@
   $: {
     searchQuery;
     activeFilter;
-    currentPage = 1;
+    if (!pagination) currentPage = 1;
   }
 
-  $: paginatedStores = filteredStores.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
+  $: paginatedStores = pagination
+    ? stores
+    : filteredStores.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize,
+      );
 
   $: tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: "Merchant & Toko", align: "left" as const },
     { label: "Subdomain Toko", align: "left" as const, width: "w-56" },
     { label: "Status Toko", align: "left" as const, width: "w-36" },
@@ -210,8 +220,9 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[760px]">
-      {#each paginatedStores as store (store.userId)}
+      {#each paginatedStores as store, idx (store.userId)}
         <AdminStoreRow
+          rowNumber={(activePage - 1) * activePageSize + idx + 1}
           {store}
           {mainDomain}
           {copiedId}
@@ -222,11 +233,11 @@
     </Table>
   {/if}
 
-  {#if filteredStores.length > 0}
+  {#if activeTotalItems > 0}
     <Pagination
-      bind:currentPage
-      totalItems={filteredStores.length}
-      {pageSize}
+      bind:currentPage={currentPage}
+      totalItems={activeTotalItems}
+      pageSize={activePageSize}
     />
   {/if}
 </Card>

@@ -8,6 +8,9 @@ import { eq, desc, or, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { OrderTransactionItem } from '@/types/finance';
 
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
+import type { PaginatedResult } from '@/types/common';
+
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -16,11 +19,19 @@ if (!user || user.role !== 'superadmin') {
 }
 
 const adminUsers = alias(users, 'adminUsers');
+const { page } = getPaginationParams(Astro.url);
 
 let initialOrders: OrderTransactionItem[] = [];
+let paginationResult: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
 
 try {
-  const rows = await db
+  const queryBuilder = db
     .select({
       id: transactions.id,
       userId: transactions.userId,
@@ -58,7 +69,9 @@ try {
     )
     .orderBy(desc(transactions.createdAt));
 
-  initialOrders = (rows || []).map((r) => {
+  paginationResult = await paginate(db, transactions, queryBuilder, undefined, page);
+
+  initialOrders = (paginationResult.data || []).map((r: any) => {
     const adminFee = Number(r.adminFee || 0);
     const amount = Number(r.amount);
     const basePrice = Math.max(0, amount - adminFee);
@@ -111,7 +124,7 @@ try {
     </div>
 
     <!-- Master Superadmin Transactions Overview with Period Filter, Statcards & Table -->
-    <SuperadminTransactionsOverview client:load allTransactions={initialOrders} />
+    <SuperadminTransactionsOverview client:load allTransactions={initialOrders} pagination={paginationResult} />
   </div>
 </DashboardLayout>
 

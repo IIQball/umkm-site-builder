@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowUpRight, Mail, Store, User } from 'lucide-svelte';
-  import { Card, Table, Badge } from '@/components/ui';
+  import { Card, Table, Badge, Pagination } from '@/components/ui';
   import { formatDate } from '@/lib/utils/format';
 
   export let merchants: Array<{
@@ -12,8 +12,13 @@
     storeStatus?: string | null;
     storeId?: string | null;
   }> = [];
+  export let currentPage: number = 1;
+  export let totalItems: number = merchants.length;
+  export let pageSize: number = 10;
+  export let pageParam: string = 'merchantPage';
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'Tenant & Toko', align: 'left' as const, width: '30%' },
     { label: 'Email Merchant', align: 'left' as const, width: '28%' },
     { label: 'Tanggal Daftar', align: 'left' as const, width: '22%' },
@@ -66,8 +71,12 @@
       </div>
     {:else}
       <Table headers={tableHeaders} minWidth="min-w-[600px]" dense>
-        {#each merchants as m (m.id)}
+        {#each merchants as m, idx (m.id)}
           <tr class="hover:bg-nested/40 transition-colors group">
+            <!-- Sequence Number (#) -->
+            <td class="px-3 py-3.5 text-center font-mono text-2xs text-secondary font-bold">
+              {(currentPage - 1) * pageSize + idx + 1}
+            </td>
             <!-- Tenant & Toko -->
             <td class="px-5 py-3.5">
               <div class="space-y-0.5">
@@ -113,9 +122,21 @@
     {/if}
   </div>
 
+  {#if totalItems > pageSize}
+    <Pagination
+      bind:currentPage
+      {totalItems}
+      {pageSize}
+      {pageParam}
+      size="xs"
+      showInfo={false}
+      class="px-4 py-2.5"
+    />
+  {/if}
+
   <!-- Card Footer -->
   <div class="px-5 py-3 sm:px-6 bg-nested/50 border-t border-light flex items-center justify-between text-2xs text-secondary">
     <span>Data sinkron langsung dari sistem onboarding</span>
-    <span class="font-mono font-bold text-main">{merchants.length} Data Terbaru</span>
+    <span class="font-mono font-bold text-main">{totalItems} Total Merchant</span>
   </div>
 </Card>

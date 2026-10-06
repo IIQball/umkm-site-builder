@@ -19,6 +19,17 @@ if (!templateId) {
 
 const templateRecord = await db.query.templates.findFirst({
   where: eq(templates.id, templateId),
+  columns: {
+    id: true,
+    name: true,
+    description: true,
+    thumbnailUrl: true,
+    price: true,
+    status: true,
+    rejectionReason: true,
+    config: true,
+    designerId: true,
+  },
 });
 
 if (!templateRecord) {
@@ -42,6 +53,9 @@ let tenantStoreId: string | null = null;
 if (currentUser && currentUser.role === 'tenant') {
   const storeRecord = await db.query.stores.findFirst({
     where: eq(stores.userId, currentUser.id),
+    columns: {
+      id: true,
+    },
   });
   if (storeRecord) {
     tenantStoreId = storeRecord.id;

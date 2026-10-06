@@ -15,6 +15,7 @@
   import type { OrderTransactionItem } from '@/types/finance';
   import { formatIDR } from '@/lib/currency';
   import { formatDate } from '@/lib/utils/format';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
   export let order: OrderTransactionItem;
   export let statusMeta: { variant: BadgeVariant; label: string };
@@ -23,6 +24,7 @@
   export let isAdmin: boolean = false;
   export let isReadOnly: boolean = false;
   export let hasAdminAssistant: boolean = false;
+  export let rowNumber: number | undefined = undefined;
   export let onCopyId: (id: string) => void;
   export let getPaymentUrl: (order: OrderTransactionItem) => string;
   export let onOpenInvoice: (order: OrderTransactionItem) => void = () => {};
@@ -35,6 +37,11 @@
 </script>
 
 <tr class="hover:bg-nested/40 transition-colors group">
+  {#if rowNumber !== undefined}
+    <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
+      {rowNumber}
+    </td>
+  {/if}
   <!-- Invoice ID & Created At -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-3">
@@ -131,9 +138,10 @@
     <div class="flex items-center gap-3">
       {#if order.template?.thumbnailUrl}
         <img
-          src={order.template.thumbnailUrl}
+          src={getOptimizedCloudinaryUrl(order.template.thumbnailUrl, 160)}
           alt={order.template.name}
           class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
+          loading="lazy"
         />
       {:else}
         <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">

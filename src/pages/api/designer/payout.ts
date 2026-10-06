@@ -18,13 +18,37 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const records = await db.query.payoutRequests.findMany({
       where: (payoutRequests, { eq }) => eq(payoutRequests.userId, user.id),
+      columns: {
+        id: true,
+        userId: true,
+        amount: true,
+        status: true,
+        bankAccountId: true,
+        xenditPayoutId: true,
+        gatewayReference: true,
+        gatewayMessage: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       with: {
-        bankAccount: true,
+        bankAccount: {
+          columns: {
+            id: true,
+            bankCode: true,
+            bankName: true,
+            accountNumber: true,
+            accountHolder: true,
+          },
+        },
       },
       orderBy: (payoutRequests, { desc }) => [desc(payoutRequests.createdAt)],
+      limit: 10,
     });
 
-    const settingsList = await db.select().from(platformSettings).limit(1);
+    const settingsList = await db
+      .select({ payoutMinimumBalance: platformSettings.payoutMinimumBalance })
+      .from(platformSettings)
+      .limit(1);
     const minBalance = settingsList.length > 0 ? settingsList[0].payoutMinimumBalance : 50000;
 
     return jsonSuccess({
@@ -54,7 +78,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     // 2. Verify amount is >= payoutMinimumBalance
-    const settingsList = await db.select().from(platformSettings).limit(1);
+    const settingsList = await db
+      .select({ payoutMinimumBalance: platformSettings.payoutMinimumBalance })
+      .from(platformSettings)
+      .limit(1);
     const minBalance = settingsList.length > 0 ? settingsList[0].payoutMinimumBalance : 50000;
     if (amount < minBalance) {
       throw new AppError(`Nominal penarikan minimal ${formatIDR(minBalance)}`, 400, undefined, 'VALIDATION_ERROR');

@@ -7,6 +7,8 @@ import { db } from "@/lib/db/client";
 import { stores, users, tenantInvitations } from "@/db/schema";
 import { eq, and, isNull, desc, notExists } from "drizzle-orm";
 import type { AssistedStoreItem } from "@/types/admin";
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import type { PaginatedResult } from "@/types/common";
 
 export const prerender = false;
 
@@ -15,12 +17,27 @@ if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect("/auth/login?redirect=/admin/merchants");
 }
 
+const { page } = getPaginationParams(Astro.url);
 let assistedStores: AssistedStoreItem[] = [];
+let pagination: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
+let counts = {
+  total: 0,
+  published: 0,
+  draft: 0,
+  noStore: 0,
+};
 
 try {
   const isSuperadmin = user.role === "superadmin";
   const unacceptedInvitationSubquery = db
-    .select()
+    .select({ id: tenantInvitations.id })
     .from(tenantInvitations)
     .where(
       and(
@@ -44,26 +61,51 @@ try {
         notExists(unacceptedInvitationSubquery),
       );
 
-  const rows = await db
-    .select({
-      id: stores.id,
-      name: stores.name,
-      subdomain: stores.subdomain,
-      status: stores.status,
-      userId: users.id,
-      createdAt: users.createdAt,
-      tenantName: users.name,
-      tenantEmail: users.email,
-    })
-    .from(users)
-    .leftJoin(
-      stores,
-      and(eq(stores.userId, users.id), isNull(stores.deletedAt)),
-    )
-    .where(whereCondition)
-    .orderBy(desc(users.createdAt));
+  const [countRows, paginatedRes] = await Promise.all([
+    db
+      .select({
+        id: stores.id,
+        status: stores.status,
+      })
+      .from(users)
+      .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
+      .where(whereCondition),
+    paginate(
+      db,
+      users,
+      db
+        .select({
+          id: stores.id,
+          name: stores.name,
+          subdomain: stores.subdomain,
+          status: stores.status,
+          userId: users.id,
+          createdAt: users.createdAt,
+          tenantName: users.name,
+          tenantEmail: users.email,
+        })
+        .from(users)
+        .leftJoin(
+          stores,
+          and(eq(stores.userId, users.id), isNull(stores.deletedAt)),
+        )
+        .where(whereCondition)
+        .orderBy(desc(users.createdAt)),
+      whereCondition,
+      page
+    ),
+  ]);
 
-  assistedStores = (rows || []).map((s) => ({
+  pagination = paginatedRes;
+
+  counts = {
+    total: countRows.length,
+    published: countRows.filter((s) => s.status === "active").length,
+    draft: countRows.filter((s) => s.id && s.status !== "active").length,
+    noStore: countRows.filter((s) => !s.id).length,
+  };
+
+  assistedStores = (pagination.data || []).map((s: any) => ({
     id: s.id,
     name: s.name,
     subdomain: s.subdomain,
@@ -84,13 +126,6 @@ try {
   console.error("[AdminMerchants] Failed to query stores:", error);
   assistedStores = [];
 }
-
-const counts = {
-  total: assistedStores.length,
-  published: assistedStores.filter((s) => s.status === "published" || s.status === "active").length,
-  draft: assistedStores.filter((s) => s.id && s.status !== "published" && s.status !== "active").length,
-  noStore: assistedStores.filter((s) => !s.id).length,
-};
 ---
 
 <DashboardLayout title="Merchant Binaan" breadcrumb="Merchant Binaan">
@@ -161,7 +196,7 @@ const counts = {
 
     <!-- Interactive Table (matching designer templates style) -->
     <div class="animate-fade-in-up delay-300">
-      <AdminAssistedStores client:load stores={assistedStores} />
+      <AdminAssistedStores client:load stores={assistedStores} pagination={pagination} />
     </div>
   </div>
 </DashboardLayout>

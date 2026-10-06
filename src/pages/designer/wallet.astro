@@ -27,7 +27,10 @@ const [soldInfo] = await db
   .where(eq(commissions.designerId, user.id));
 const totalTemplatesSold = soldInfo?.count || 0;
 
-const settingsList = await db.select().from(platformSettings).limit(1);
+const settingsList = await db
+  .select({ settlementDelayDays: platformSettings.settlementDelayDays })
+  .from(platformSettings)
+  .limit(1);
 const settlementDelayDays = settingsList.length > 0 ? settingsList[0].settlementDelayDays : 7;
 ---
 

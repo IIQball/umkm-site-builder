@@ -43,6 +43,13 @@
       "when": 1790871944357,
       "tag": "0005_windy_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790872000000,
+      "tag": "0006_dynamic_max_branches",
+      "breakpoints": true
     }
   ]
 }

@@ -7,11 +7,13 @@
   import MapsBranchTabsForm from './MapsBranchTabsForm.svelte';
   import MapsHeaderNodeForm from './MapsHeaderNodeForm.svelte';
   import MapsInfoCardNodeForm from './MapsInfoCardNodeForm.svelte';
+  import { maxStoreBranchesStore } from '../../stores/editorStore';
 
   export let section: TemplateSection;
   export let nodeId: string | null = null;
   export let onPropChange: (prop: string, val: unknown) => void;
 
+  $: maxBranches = $maxStoreBranchesStore || 5;
   $: props = section.props || {};
   $: branches = (Array.isArray(props.branches) && props.branches.length > 0
     ? props.branches
@@ -71,12 +73,12 @@
               branchMode === 'multi' ? 'bg-primary text-primary-content border-primary shadow-xs' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'
             }`}
           >
-            Beberapa Cabang (Maks 5)
+            Beberapa Cabang (Maks {maxBranches})
           </button>
         </div>
       </div>
       {#if branchMode === 'multi'}
-        <MapsBranchTabsForm {branches} {onPropChange} />
+        <MapsBranchTabsForm {branches} {maxBranches} {onPropChange} />
       {/if}
     </div>
 

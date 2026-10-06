@@ -19,9 +19,18 @@ if (!isAuthorizedSuperAdmin(user)) {
 let initialFeePercentage = 30;
 let initialSettlementDelayDays = 7;
 let initialAdminServiceFee = 5000;
+let initialMaxStoreBranches = 5;
 
 try {
-  const records = await db.select().from(platformSettings).limit(1);
+  const records = await db
+    .select({
+      platformFeePercentage: platformSettings.platformFeePercentage,
+      settlementDelayDays: platformSettings.settlementDelayDays,
+      adminServiceFee: platformSettings.adminServiceFee,
+      maxStoreBranches: platformSettings.maxStoreBranches,
+    })
+    .from(platformSettings)
+    .limit(1);
   if (records.length > 0) {
     if (typeof records[0].platformFeePercentage === 'number') {
       initialFeePercentage = records[0].platformFeePercentage;
@@ -32,11 +41,15 @@ try {
     if (typeof records[0].adminServiceFee === 'number') {
       initialAdminServiceFee = records[0].adminServiceFee;
     }
+    if (typeof records[0].maxStoreBranches === 'number') {
+      initialMaxStoreBranches = records[0].maxStoreBranches;
+    }
   }
 } catch {
   initialFeePercentage = 30;
   initialSettlementDelayDays = 7;
   initialAdminServiceFee = 5000;
+  initialMaxStoreBranches = 5;
 }
 ---
 
@@ -47,6 +60,7 @@ try {
       {initialFeePercentage}
       {initialSettlementDelayDays}
       {initialAdminServiceFee}
+      {initialMaxStoreBranches}
     />
   </div>
 </DashboardLayout>

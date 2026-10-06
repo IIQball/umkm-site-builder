@@ -38,7 +38,10 @@ let totalEarnedCommission = 0;
 try {
   walletSummary = await getDesignerWalletSummary(user.id);
 
-  const settingsList = await db.select().from(platformSettings).limit(1);
+  const settingsList = await db
+    .select({ settlementDelayDays: platformSettings.settlementDelayDays })
+    .from(platformSettings)
+    .limit(1);
   if (settingsList.length > 0) {
     settlementDelayDays = settingsList[0].settlementDelayDays;
   }

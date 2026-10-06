@@ -174,5 +174,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Jika bukan rute yang diproteksi, biarkan Astro yang menangani (termasuk 404)
-  return next();
+  const response = await next();
+  if (
+    pathname.startsWith('/_astro/') ||
+    pathname.startsWith('/images/') ||
+    pathname.startsWith('/assets/') ||
+    pathname.startsWith('/fonts/')
+  ) {
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  return response;
 });

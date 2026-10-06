@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { authClient } from "@/lib/auth-client";
+  import { toast } from "@/lib/toast";
 
   export let userJson: string;
   let user = JSON.parse(userJson);

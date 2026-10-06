@@ -93,7 +93,7 @@ export const auth = betterAuth({
       const isDesigner = userRole === 'designer';
 
       const subject = isActivation 
-        ? 'Akses Akun Pinoka Anda Sudah Siap'
+        ? 'Undangan Aktivasi Akun Pinoka'
         : 'Pemulihan Akses Akun Pinoka Anda';
 
       // Portal name & role label formatting

@@ -6,14 +6,12 @@ export const prerender = false;
 
 export const GET: APIRoute = async (): Promise<Response> => {
   return handleApiRoute(async () => {
-    const platformFeePercentage = await getPlatformFeePercentage();
     const maxStoreBranches = await getMaxStoreBranches();
-    const designerPercentage = Math.max(0, 100 - platformFeePercentage);
+    const platformFeePercentage = await getPlatformFeePercentage();
 
     const res = jsonSuccess({
-      platformFeePercentage,
-      designerPercentage,
       maxStoreBranches,
+      platformFeePercentage,
     });
 
     res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
@@ -22,4 +20,3 @@ export const GET: APIRoute = async (): Promise<Response> => {
     return res;
   });
 };
-

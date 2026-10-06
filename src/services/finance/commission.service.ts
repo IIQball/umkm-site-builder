@@ -8,11 +8,13 @@ export type { CommissionCalculation, PlatformSettings };
 
 export const DEFAULT_PLATFORM_FEE_PERCENTAGE = 30;
 export const DEFAULT_ADMIN_SERVICE_FEE = 5000;
+export const DEFAULT_MAX_STORE_BRANCHES = 5;
 export const DEFAULT_SETTINGS = {
   platformFeePercentage: 30,
   adminServiceFee: 5000,
   payoutMinimumBalance: 50000,
   settlementDelayDays: 7,
+  maxStoreBranches: 5,
 };
 
 /**
@@ -21,8 +23,22 @@ export const DEFAULT_SETTINGS = {
 export async function getPlatformSettings(
   dbClient: typeof db = db
 ): Promise<PlatformSettings> {
-  const settingsList = await dbClient.select().from(platformSettings).limit(1);
-  if (settingsList.length === 0) {
+  try {
+    const settingsList = await dbClient.select().from(platformSettings).limit(1);
+    if (settingsList.length === 0) {
+      return {
+        id: '',
+        ...DEFAULT_SETTINGS,
+        updatedAt: new Date(),
+        updatedBy: null,
+      };
+    }
+    const current = settingsList[0];
+    return {
+      ...current,
+      maxStoreBranches: current.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
+    };
+  } catch {
     return {
       id: '',
       ...DEFAULT_SETTINGS,
@@ -30,7 +46,6 @@ export async function getPlatformSettings(
       updatedBy: null,
     };
   }
-  return settingsList[0];
 }
 
 /**
@@ -42,6 +57,7 @@ export async function updatePlatformSettings(
     adminServiceFee?: number;
     payoutMinimumBalance?: number;
     settlementDelayDays?: number;
+    maxStoreBranches?: number;
   },
   userId: string,
   dbClient: typeof db = db
@@ -55,6 +71,9 @@ export async function updatePlatformSettings(
   if (data.settlementDelayDays !== undefined && data.settlementDelayDays < 0) {
     throw new AppError('Settlement delay days cannot be negative', 400, undefined, 'INVALID_DELAY_DAYS');
   }
+  if (data.maxStoreBranches !== undefined && (data.maxStoreBranches < 1 || data.maxStoreBranches > 50)) {
+    throw new AppError('Maksimal cabang toko harus antara 1 dan 50', 400, undefined, 'INVALID_MAX_BRANCHES');
+  }
 
   const existingList = await dbClient.select().from(platformSettings).limit(1);
 
@@ -67,6 +86,7 @@ export async function updatePlatformSettings(
         adminServiceFee: data.adminServiceFee ?? DEFAULT_SETTINGS.adminServiceFee,
         payoutMinimumBalance: data.payoutMinimumBalance ?? DEFAULT_SETTINGS.payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays ?? DEFAULT_SETTINGS.settlementDelayDays,
+        maxStoreBranches: data.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
         updatedBy: userId,
         updatedAt: new Date(),
       })
@@ -80,6 +100,7 @@ export async function updatePlatformSettings(
         adminServiceFee: data.adminServiceFee !== undefined ? data.adminServiceFee : existingList[0].adminServiceFee,
         payoutMinimumBalance: data.payoutMinimumBalance !== undefined ? data.payoutMinimumBalance : existingList[0].payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays !== undefined ? data.settlementDelayDays : existingList[0].settlementDelayDays,
+        maxStoreBranches: data.maxStoreBranches !== undefined ? data.maxStoreBranches : existingList[0].maxStoreBranches,
         updatedBy: userId,
         updatedAt: new Date(),
       })
@@ -141,6 +162,33 @@ export async function getPlatformFeePercentage(
   }
 
   return DEFAULT_PLATFORM_FEE_PERCENTAGE;
+}
+
+/**
+ * Retrieves the current active maximum store branches from platform settings.
+ *
+ * @param dbClient Optional database client
+ * @returns Active max store branches (defaults to 5)
+ */
+export async function getMaxStoreBranches(
+  dbClient: typeof db = db
+): Promise<number> {
+  try {
+    const settings = await dbClient
+      .select({
+        maxStoreBranches: platformSettings.maxStoreBranches,
+      })
+      .from(platformSettings)
+      .limit(1);
+
+    if (settings.length > 0 && typeof settings[0].maxStoreBranches === 'number') {
+      return settings[0].maxStoreBranches;
+    }
+  } catch {
+    // Fallback to default if table is not seeded or query fails
+  }
+
+  return DEFAULT_MAX_STORE_BRANCHES;
 }
 
 /**

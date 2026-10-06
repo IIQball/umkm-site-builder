@@ -4,6 +4,7 @@ import { stores, templates } from '@db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { OnboardStoreInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getMaxStoreBranches } from '@/services/finance';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 
@@ -46,6 +47,12 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     const parsedData = OnboardStoreInput.parse(body);
     const { subdomain, name, categoryId, waNumber, googleMapsUrl, address, regionData, templateId, tenantId } = parsedData;
+
+    const maxBranches = await getMaxStoreBranches();
+    const mapsCustomization = (parsedData.customization as Record<string, unknown> | undefined)?.maps as { branches?: unknown[] } | undefined;
+    if (Array.isArray(mapsCustomization?.branches) && mapsCustomization.branches.length > maxBranches) {
+      return jsonError(`Jumlah cabang toko melebihi batas maksimal (${maxBranches} cabang)`, 400, undefined, 'MAX_BRANCHES_EXCEEDED');
+    }
 
     const targetUserId = (isAdminOrSuper && tenantId) ? tenantId : user.id;
     const registeredBy = isAdminOrSuper ? user.id : null;

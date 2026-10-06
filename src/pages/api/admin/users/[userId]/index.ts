@@ -38,6 +38,13 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
       }
     }
 
+    // Delete related activity logs first to avoid foreign key constraint violations
+    await db.delete(activityLogs).where(eq(activityLogs.userId, userId));
+    
+    // Also delete any tenant invitations sent by this user
+    const { tenantInvitations } = await import('@/db/schema');
+    await db.delete(tenantInvitations).where(eq(tenantInvitations.invitedBy, userId));
+    
     await db.delete(users).where(eq(users.id, userId));
 
     await db.insert(activityLogs).values({

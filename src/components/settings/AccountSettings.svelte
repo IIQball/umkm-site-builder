@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { authClient } from "@/lib/auth-client";
-  import { toast } from "@/lib/toast";
+  import { onMount } from "svelte";
 
   export let userJson: string;
   let user = JSON.parse(userJson);
@@ -16,6 +15,49 @@
   let showCurrentPassword = false;
   let showNewPassword = false;
   let showConfirmPassword = false;
+
+  // Konfigurasi Cooldown Keamanan (1 hari = 24 jam)
+  const PASSWORD_COOLDOWN_HOURS = 24;
+  const PASSWORD_COOLDOWN_MS = PASSWORD_COOLDOWN_HOURS * 60 * 60 * 1000;
+  const STORAGE_KEY = `last_password_change_${user.id}`;
+
+  let remainingCooldownMs = 0;
+
+  function calculateRemainingCooldown(): number {
+    if (typeof window === "undefined") return 0;
+    const lastChange = localStorage.getItem(STORAGE_KEY);
+    if (!lastChange) return 0;
+
+    const lastTimestamp = parseInt(lastChange, 10);
+    if (isNaN(lastTimestamp)) return 0;
+
+    const elapsed = Date.now() - lastTimestamp;
+    return Math.max(0, PASSWORD_COOLDOWN_MS - elapsed);
+  }
+
+  function formatCooldownTime(ms: number): string {
+    const totalMinutes = Math.ceil(ms / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      return `${hours} jam ${minutes} menit`;
+    }
+    return `${minutes} menit`;
+  }
+
+  function refreshCooldownState() {
+    remainingCooldownMs = calculateRemainingCooldown();
+  }
+
+  onMount(() => {
+    refreshCooldownState();
+    const interval = setInterval(refreshCooldownState, 60000);
+    return () => clearInterval(interval);
+  });
+
+  $: isCooldownActive = remainingCooldownMs > 0;
+  $: cooldownFormatted = formatCooldownTime(remainingCooldownMs);
 
   async function handleUpdateName(e: Event) {
     e.preventDefault();
@@ -49,6 +91,13 @@
 
   async function handleUpdatePassword(e: Event) {
     e.preventDefault();
+    refreshCooldownState();
+
+    if (isCooldownActive) {
+      toast.error(`Perubahan kata sandi dibatasi 1x dalam 24 jam. Silakan coba lagi dalam ${cooldownFormatted}.`);
+      return;
+    }
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error("Semua kolom kata sandi wajib diisi.");
       return;
@@ -72,7 +121,13 @@
       
       if (error) throw error;
       
-      toast.success("Kata sandi berhasil diperbarui!");
+      // Catat timestamp perubahan kata sandi untuk batas waktu 24 jam
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
+      }
+      refreshCooldownState();
+
+      toast.success("Kata sandi berhasil diperbarui! Anda dapat mengubah kata sandi lagi dalam 24 jam.");
       currentPassword = "";
       newPassword = "";
       confirmPassword = "";
@@ -154,6 +209,18 @@
     
     <form on:submit={handleUpdatePassword} class="flex flex-col flex-grow">
       <div class="p-5 sm:p-6 space-y-5 flex-grow">
+        {#if isCooldownActive}
+          <div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 text-xs sm:text-sm flex items-start gap-3 shadow-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-600 shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+            <div>
+              <p class="font-semibold text-amber-900">Batas Waktu Perubahan Kata Sandi (Cooldown)</p>
+              <p class="text-amber-800 mt-1 leading-relaxed">
+                Demi keamanan akun dan mencegah spamming, kata sandi hanya dapat diperbarui **1 kali dalam 24 jam**. Silakan tunggu <span class="font-bold text-amber-900 underline decoration-amber-400">{cooldownFormatted}</span> sebelum melakukan pembaruan berikutnya.
+              </p>
+            </div>
+          </div>
+        {/if}
+
         <!-- Current Password -->
         <div class="form-control w-full">
           <label class="label pb-1.5" for="currentPassword">
@@ -163,15 +230,17 @@
             <input
               type={showCurrentPassword ? "text" : "password"}
               id="currentPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out"
+              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
               bind:value={currentPassword}
               placeholder="Masukkan kata sandi saat ini"
+              disabled={isCooldownActive}
               required
             />
             <button 
               type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
               on:click={() => showCurrentPassword = !showCurrentPassword}
+              disabled={isCooldownActive}
               tabindex="-1"
             >
               {#if showCurrentPassword}
@@ -192,16 +261,18 @@
             <input
               type={showNewPassword ? "text" : "password"}
               id="newPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out"
+              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
               bind:value={newPassword}
               placeholder="Min. 8 karakter"
               minlength="8"
+              disabled={isCooldownActive}
               required
             />
             <button 
               type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
               on:click={() => showNewPassword = !showNewPassword}
+              disabled={isCooldownActive}
               tabindex="-1"
             >
               {#if showNewPassword}
@@ -222,16 +293,18 @@
             <input
               type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out"
+              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
               bind:value={confirmPassword}
               placeholder="Ketik ulang kata sandi baru"
               minlength="8"
+              disabled={isCooldownActive}
               required
             />
             <button 
               type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
               on:click={() => showConfirmPassword = !showConfirmPassword}
+              disabled={isCooldownActive}
               tabindex="-1"
             >
               {#if showConfirmPassword}
@@ -251,7 +324,7 @@
         <button 
           type="submit" 
           class="btn btn-primary active:scale-[0.97] transition-all duration-150 ease-out shadow-sm w-full sm:w-auto" 
-          disabled={isUpdatingPassword}
+          disabled={isUpdatingPassword || isCooldownActive}
         >
           {#if isUpdatingPassword}
             <span class="loading loading-spinner loading-sm"></span>

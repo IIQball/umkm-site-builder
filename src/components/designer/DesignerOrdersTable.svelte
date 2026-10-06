@@ -11,8 +11,10 @@
   import DesignerOrderRow from './orders/DesignerOrderRow.svelte';
   import { addToast } from '@/lib/toast';
   import type { DesignerOrderItem } from '@/types/finance';
+  import type { PaginatedResult } from '@/types/common';
 
   export let initialOrders: DesignerOrderItem[] = [];
+  export let pagination: PaginatedResult<any> | undefined = undefined;
 
   let orders = [...initialOrders];
   $: orders = [...initialOrders];
@@ -20,8 +22,13 @@
   let searchQuery = '';
   let selectedStatus: 'all' | 'paid' | 'pending' | 'failed' = 'all';
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let copiedId: string | null = null;
+
+  $: activePage = pagination ? pagination.currentPage : currentPage;
+  $: activePageSize = pagination ? pagination.pageSize : pageSize;
+  $: activeTotalItems = pagination ? pagination.totalItems : filteredOrders.length;
 
   $: filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -48,10 +55,12 @@
   $: {
     searchQuery;
     selectedStatus;
-    currentPage = 1;
+    if (!pagination) currentPage = 1;
   }
 
-  $: paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedOrders = pagination
+    ? orders
+    : filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -87,6 +96,7 @@
   };
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'ID Invoice & Tanggal' },
     { label: 'Template Dibeli', width: 'w-64' },
     { label: 'Pembeli (Tenant)', width: 'w-52' },
@@ -181,11 +191,12 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[840px]">
-      {#each paginatedOrders as order (order.id)}
+      {#each paginatedOrders as order, idx (order.id)}
         {@const statusMeta = getStatusBadge(order.status)}
         {@const designerShare = order.commission?.designerAmount ?? Math.round(order.amount * 0.7)}
         {@const displayId = order.externalId || order.id}
         <DesignerOrderRow
+          rowNumber={(activePage - 1) * activePageSize + idx + 1}
           {order}
           {statusMeta}
           {designerShare}
@@ -197,10 +208,12 @@
     </Table>
 
     <!-- DaisyUI Pagination Footer -->
-    <Pagination
-      bind:currentPage
-      totalItems={filteredOrders.length}
-      {pageSize}
-    />
+    {#if activeTotalItems > 0}
+      <Pagination
+        bind:currentPage={currentPage}
+        totalItems={activeTotalItems}
+        pageSize={activePageSize}
+      />
+    {/if}
   {/if}
 </Card>

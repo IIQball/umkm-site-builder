@@ -59,11 +59,11 @@
   $: headerLogoText = (headerSection?.props?.logoText as string) || '';
   $: headerLogoImageUrl = (headerSection?.props?.logoImageUrl as string) || '';
 
-  // Dual-mode data fallback: Tenant DB vs Header SSOT vs Designer Props
-  $: brandName = store?.name || headerLogoText || props?.brandName || props?.logoText || DEFAULT_BRAND_NAME;
-  $: logoImageUrl = headerLogoImageUrl || (props?.logoImageUrl as string) || '';
-  $: tagline = store?.customization?.tagline || props?.tagline || props?.description || DEFAULT_TAGLINE;
-  $: address = store?.customization?.address || store?.address || props?.address || DEFAULT_ADDRESS;
+  // Dual-mode data fallback: Customized Props vs Tenant DB vs Header SSOT
+  $: brandName = props?.brandName || props?.logoText || store?.name || headerLogoText || DEFAULT_BRAND_NAME;
+  $: logoImageUrl = (props?.logoImageUrl as string) || headerLogoImageUrl || '';
+  $: tagline = props?.tagline || props?.description || store?.customization?.tagline || DEFAULT_TAGLINE;
+  $: address = store?.address || props?.address || store?.customization?.address || DEFAULT_ADDRESS;
   $: storeHours = store?.customization?.storeHours || store?.storeHours || (props?.storeHours as string) || DEFAULT_STORE_HOURS;
   $: rawWaNumber = store?.waNumber || props?.whatsappNumber || DEFAULT_WA_NUMBER;
   $: whatsappNumber = rawWaNumber;

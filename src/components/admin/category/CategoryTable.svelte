@@ -11,10 +11,13 @@
     icon?: string | null;
     createdAt?: string | Date;
   }> = [];
+  export let currentPage: number = 1;
+  export let pageSize: number = 10;
   export let onEdit: (cat: any) => void;
   export let onDelete: (cat: any) => void;
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: 'w-12' },
     { label: 'Kategori Bisnis' },
     { label: 'Slug URL', width: 'w-48' },
     { label: 'Ikon UI', align: 'center' as const, width: 'w-28' },
@@ -24,8 +27,12 @@
 </script>
 
 <Table headers={tableHeaders} minWidth="min-w-[700px]">
-  {#each paginatedCategories as cat (cat.id)}
+  {#each paginatedCategories as cat, i (cat.id)}
     <tr class="hover:bg-nested/40 transition-colors group">
+      <!-- Sequence Number (#) -->
+      <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
+        {(currentPage - 1) * pageSize + i + 1}
+      </td>
       <!-- Name + Description -->
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">

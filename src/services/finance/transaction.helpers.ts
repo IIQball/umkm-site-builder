@@ -77,8 +77,12 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       
       // Send notification to designer
       try {
-        const buyer = await db.select().from(users).where(eq(users.id, transaction.userId)).limit(1);
-        const buyerName = buyer.length > 0 ? buyer[0].name : 'Seseorang';
+        const buyer = await db
+          .select({ name: users.name })
+          .from(users)
+          .where(eq(users.id, transaction.userId))
+          .limit(1);
+        const buyerName = buyer.length > 0 && buyer[0].name ? buyer[0].name : 'Seseorang';
         
         await db.insert(notifications).values({
           id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -95,23 +99,47 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
   }
 }
 
-export async function queryTenantOrders(userId: string) {
+export async function queryTenantOrders(userId: string, limit: number = 10, offset: number = 0) {
   return db.query.transactions.findMany({
     where: and(
       eq(transactions.userId, userId),
       eq(transactions.type, 'template_purchase')
     ),
+    columns: {
+      id: true,
+      userId: true,
+      type: true,
+      amount: true,
+      adminFee: true,
+      status: true,
+      storeId: true,
+      templateId: true,
+      assistedBy: true,
+      externalId: true,
+      paymentGatewayRef: true,
+      paymentChannel: true,
+      createdAt: true,
+    },
     with: {
-      template: true,
+      template: {
+        columns: {
+          id: true,
+          name: true,
+          thumbnailUrl: true,
+          price: true,
+        },
+      },
       assistant: {
         columns: { id: true, name: true, email: true },
       },
     },
     orderBy: [desc(transactions.createdAt)],
+    limit,
+    offset,
   });
 }
 
-export async function queryDesignerIncomingOrders(designerId: string) {
+export async function queryDesignerIncomingOrders(designerId: string, limit: number = 10, offset: number = 0) {
   const designerTemplates = await db.query.templates.findMany({
     where: eq(templates.designerId, designerId),
     columns: { id: true },
@@ -126,13 +154,44 @@ export async function queryDesignerIncomingOrders(designerId: string) {
       inArray(transactions.templateId, templateIds),
       eq(transactions.type, 'template_purchase')
     ),
+    columns: {
+      id: true,
+      userId: true,
+      type: true,
+      amount: true,
+      adminFee: true,
+      status: true,
+      storeId: true,
+      templateId: true,
+      assistedBy: true,
+      externalId: true,
+      paymentGatewayRef: true,
+      paymentChannel: true,
+      createdAt: true,
+    },
     with: {
-      template: true,
+      template: {
+        columns: {
+          id: true,
+          name: true,
+          thumbnailUrl: true,
+          price: true,
+        },
+      },
       user: {
         columns: { id: true, name: true, email: true, image: true },
       },
-      commission: true,
+      commission: {
+        columns: {
+          id: true,
+          designerAmount: true,
+          platformFee: true,
+          totalAmount: true,
+        },
+      },
     },
     orderBy: [desc(transactions.createdAt)],
+    limit,
+    offset,
   });
 }

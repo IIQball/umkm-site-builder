@@ -51,6 +51,7 @@
   $: paginatedPayouts = filteredPayouts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'Pencairan', align: 'left' as const },
     { label: 'Keterangan', align: 'left' as const },
     { label: 'Reference / Payout ID', align: 'left' as const },
@@ -147,8 +148,12 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[700px]">
-      {#each paginatedPayouts as payout}
+      {#each paginatedPayouts as payout, idx (payout.id || idx)}
         <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Sequence Number (#) -->
+          <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+            {(currentPage - 1) * pageSize + idx + 1}
+          </td>
           <!-- Status Icon + Badge -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
@@ -230,6 +235,7 @@
       bind:currentPage
       totalItems={filteredPayouts.length}
       {pageSize}
+      pageParam="payoutPage"
     />
   {/if}
 </Card>

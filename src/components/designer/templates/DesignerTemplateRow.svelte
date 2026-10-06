@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Badge, Button } from '@/components/ui';
   import { formatCurrency } from '@/lib/utils/format';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  export let rowNumber: number = 1;
   export let tpl: any;
   export let copiedId: string | null = null;
   export let badge: { label: string; variant: any; dot: boolean; pulse: boolean };
@@ -35,12 +37,17 @@
     {/if}
   </td>
 
+  <!-- Sequence Number (#) -->
+  <td class="px-2 py-4 text-center font-mono text-2xs text-secondary font-bold">
+    {rowNumber}
+  </td>
+
   <!-- Template Info + Thumbnail -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-3.5">
       <div class="w-14 h-9 rounded-xl bg-nested border border-light overflow-hidden flex-shrink-0 relative shadow-2xs">
         {#if tpl.thumbnailUrl}
-          <img src={tpl.thumbnailUrl} alt={tpl.name} class="w-full h-full object-cover" />
+          <img src={getOptimizedCloudinaryUrl(tpl.thumbnailUrl, 160)} alt={tpl.name} class="w-full h-full object-cover" loading="lazy" />
         {:else}
           <div class="w-full h-full bg-nested flex items-center justify-center text-muted">
             <span class="material-symbols-outlined text-base">palette</span>

@@ -2,6 +2,7 @@
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard.svelte";
 import { getAuthenticatedUser, canManageStore } from "@/lib/auth";
+import { getMaxStoreBranches } from "@/services/finance";
 import { db } from "@/db";
 import {
   stores,
@@ -112,17 +113,19 @@ const categories = await db
   .orderBy(asc(businessCategories.name));
 
 // Fetch templates owned by target tenant
+const templateSelectShape = {
+  id: templates.id,
+  name: templates.name,
+  description: templates.description,
+  thumbnailUrl: templates.thumbnailUrl,
+  price: templates.price,
+  slug: templates.slug,
+  categoryName: templateCategories.name,
+  config: templates.config,
+};
+
 const ownedTemplates = await db
-  .select({
-    id: templates.id,
-    name: templates.name,
-    description: templates.description,
-    thumbnailUrl: templates.thumbnailUrl,
-    price: templates.price,
-    slug: templates.slug,
-    categoryName: templateCategories.name,
-    isOwned: sql<boolean>`true`,
-  })
+  .select({ ...templateSelectShape, isOwned: sql<boolean>`true` })
   .from(userTemplates)
   .innerJoin(templates, eq(userTemplates.templateId, templates.id))
   .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
@@ -138,16 +141,7 @@ if (
   !availableTemplates.some((t) => t.id === store.templateId)
 ) {
   const [activeTpl] = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      slug: templates.slug,
-      categoryName: templateCategories.name,
-      isOwned: sql<boolean>`true`,
-    })
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`true` })
     .from(templates)
     .leftJoin(
       templateCategories,
@@ -164,16 +158,7 @@ if (
 // Fallback to free or approved templates if none owned
 if (availableTemplates.length === 0) {
   const freeTemplates = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      slug: templates.slug,
-      categoryName: templateCategories.name,
-      isOwned: sql<boolean>`false`,
-    })
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`false` })
     .from(templates)
     .leftJoin(
       templateCategories,
@@ -194,16 +179,7 @@ if (availableTemplates.length === 0) {
 
 if (availableTemplates.length === 0) {
   const anyTemplates = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      slug: templates.slug,
-      categoryName: templateCategories.name,
-      isOwned: sql<boolean>`false`,
-    })
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`false` })
     .from(templates)
     .leftJoin(
       templateCategories,
@@ -224,6 +200,8 @@ const heading = isEdit ? "Pengaturan Toko" : "Setup Toko Baru";
 const subheading = isEdit
   ? "Kelola alamat subdomain, informasi profil usaha, kontak WhatsApp, dan preferensi template toko online Anda."
   : "Lengkapi langkah berikut untuk mengatur subdomain, identitas toko, alamat fisik, dan desain template toko online Anda.";
+
+const maxStoreBranches = await getMaxStoreBranches();
 ---
 
 <DashboardLayout title={pageTitle} breadcrumb={breadcrumb}>
@@ -243,7 +221,7 @@ const subheading = isEdit
 
     {
       managedByAdmin && (
-        <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 flex items-center gap-3 text-blue-900 dark:text-blue-300 animate-fade-in">
+        <div class="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center gap-3 text-main animate-fade-in">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -254,7 +232,7 @@ const subheading = isEdit
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="text-blue-600 dark:text-blue-400 shrink-0"
+            class="text-primary shrink-0"
             aria-hidden="true"
           >
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -275,6 +253,7 @@ const subheading = isEdit
         templates={availableTemplates}
         isEdit={isEdit}
         existingStore={existingStoreData}
+        {maxStoreBranches}
         tenantId={!isEdit && targetUserId !== user.id
           ? targetUserId
           : undefined}

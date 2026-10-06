@@ -159,10 +159,17 @@ export async function debitWallet({
  */
 export async function getDesignerWalletSummary(
   designerId: string,
-  client: DbExecutor = db
+  client: DbExecutor = db,
+  limit: number = 10,
+  offset: number = 0
 ): Promise<WalletSummary> {
   const existingWallets = await client
-    .select()
+    .select({
+      id: wallets.id,
+      userId: wallets.userId,
+      balance: wallets.balance,
+      availableBalance: wallets.availableBalance,
+    })
     .from(wallets)
     .where(eq(wallets.userId, designerId))
     .limit(1);
@@ -193,18 +200,41 @@ export async function getDesignerWalletSummary(
     eligible = Number(wallet.availableBalance || 0);
   }
 
-  const mutations = await client
-    .select()
+  const mutationsQuery = client
+    .select({
+      id: walletMutations.id,
+      walletId: walletMutations.walletId,
+      amount: walletMutations.amount,
+      balanceAfter: walletMutations.balanceAfter,
+      type: walletMutations.type,
+      description: walletMutations.description,
+      referenceId: walletMutations.referenceId,
+      createdAt: walletMutations.createdAt,
+    })
     .from(walletMutations)
     .where(eq(walletMutations.walletId, wallet.id))
     .orderBy(desc(walletMutations.createdAt));
 
+  type PaginatedMutationsQuery = {
+    limit: (l: number) => { offset: (o: number) => Promise<Array<typeof walletMutations.$inferSelect>> };
+  };
+  const queryWithPagination = mutationsQuery as unknown as PaginatedMutationsQuery;
+  const mutations = typeof queryWithPagination.limit === 'function'
+    ? await queryWithPagination.limit(limit).offset(offset)
+    : await (mutationsQuery as unknown as Promise<Array<typeof walletMutations.$inferSelect>>);
+
   let userPayouts: Array<typeof payoutRequests.$inferSelect> = [];
   try {
-    userPayouts = await client
-      .select()
+    userPayouts = (await client
+      .select({
+        id: payoutRequests.id,
+        userId: payoutRequests.userId,
+        amount: payoutRequests.amount,
+        xenditPayoutId: payoutRequests.xenditPayoutId,
+        gatewayReference: payoutRequests.gatewayReference,
+      })
       .from(payoutRequests)
-      .where(eq(payoutRequests.userId, designerId));
+      .where(eq(payoutRequests.userId, designerId))) as Array<typeof payoutRequests.$inferSelect>;
   } catch {
     userPayouts = [];
   }

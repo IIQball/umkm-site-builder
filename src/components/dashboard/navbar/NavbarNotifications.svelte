@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
+  import Button from "@/components/ui/Button.svelte";
+  import Modal from "@/components/ui/Modal.svelte";
   
   export let user: any = null;
   let notifications: any[] = [];
@@ -8,6 +10,7 @@
   let isOpen = false;
   let isLoading = true;
   let activeTab = 'all'; // 'all', 'template', 'users'
+  let notificationToDelete: string | null = null;
 
   const toggleDropdown = () => {
     isOpen = !isOpen;
@@ -70,8 +73,8 @@
 
   onMount(() => {
     fetchNotifications();
-    // Poll every 5 seconds for near real-time notifications
-    const interval = setInterval(fetchNotifications, 5000); 
+    // Poll every 60 seconds to avoid dev server log spam
+    const interval = setInterval(fetchNotifications, 60000); 
     return () => clearInterval(interval);
   });
 
@@ -105,14 +108,15 @@
   }
 </script>
 
-<svelte:window on:click={() => { if (isOpen) isOpen = false; }} />
+<svelte:window on:click={() => { if (isOpen && !notificationToDelete) isOpen = false; }} />
 
 <div class="relative">
   <!-- Notification Bell -->
-  <button
-    type="button"
-    on:click|stopPropagation={toggleDropdown}
-    class="relative p-2 text-muted hover:text-main hover:bg-nested rounded-full transition-colors active:scale-95 cursor-pointer"
+  <Button
+    variant="ghost"
+    size="icon"
+    on:click={(e) => { e.detail?.stopPropagation?.(); toggleDropdown(); }}
+    class="relative rounded-full text-muted hover:text-main"
     aria-label="Notifikasi"
     title="Notifikasi"
   >
@@ -122,13 +126,12 @@
         {unreadCount > 99 ? '99+' : unreadCount}
       </span>
     {/if}
-  </button>
+  </Button>
 
   <!-- Dropdown -->
   {#if isOpen}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div
+      role="presentation"
       in:fade={{ duration: 150 }}
       out:fade={{ duration: 150 }}
       class="absolute right-0 top-full mt-2 w-[400px] max-w-[calc(100vw-2rem)] bg-card border border-light rounded-xl shadow-xl z-50 overflow-hidden flex flex-col"
@@ -137,45 +140,49 @@
       <!-- Header -->
       <div class="px-4 py-3 border-b border-light flex items-center justify-between">
         <h3 class="text-base font-bold text-main tracking-tight">Notifikasi</h3>
-        <button on:click={fetchNotifications} class="text-muted hover:text-main transition-colors" title="Refresh">
+        <Button variant="ghost" size="icon" on:click={fetchNotifications} class="h-8 w-8 min-h-[32px] min-w-[32px] text-muted hover:text-main" title="Refresh">
           <span class="material-symbols-outlined text-[18px]" class:animate-spin={isLoading}>sync</span>
-        </button>
+        </Button>
       </div>
 
       <!-- Tabs -->
       <div class="px-4 py-2 border-b border-light">
         <div class="flex items-center gap-1">
-          <button 
+          <Button 
+            variant="ghost" size="sm"
             on:click={() => activeTab = 'all'} 
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {activeTab === 'all' ? 'bg-nested text-main' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            class="text-sm rounded-lg {activeTab === 'all' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
           >
             Semua
             <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{allCount}</span>
-          </button>
-          <button 
+          </Button>
+          <Button 
+            variant="ghost" size="sm"
             on:click={() => activeTab = 'template'} 
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {activeTab === 'template' ? 'bg-nested text-main' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            class="text-sm rounded-lg {activeTab === 'template' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
           >
             Template
             <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{templateCount}</span>
-          </button>
+          </Button>
           
           {#if user?.role === 'superadmin'}
-            <button 
+            <Button 
+              variant="ghost" size="sm"
               on:click={() => activeTab = 'users'} 
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {activeTab === 'users' ? 'bg-nested text-main' : 'text-muted hover:text-main hover:bg-nested/50'}"
+              class="text-sm rounded-lg {activeTab === 'users' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
             >
               Pengguna
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{usersCount}</span>
-            </button>
+            </Button>
           {:else if user?.role === 'designer'}
-            <button 
+            <Button 
+              variant="ghost" size="sm"
               on:click={() => activeTab = 'sales'} 
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {activeTab === 'sales' ? 'bg-nested text-main' : 'text-muted hover:text-main hover:bg-nested/50'}"
+              class="text-sm rounded-lg {activeTab === 'sales' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
             >
               Penjualan
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{salesCount}</span>
-            </button>
+            </Button>
           {/if}
         </div>
       </div>
@@ -208,14 +215,14 @@
               {#if !notif.isRead}
                 <div class="w-1.5 h-1.5 rounded-full bg-error flex-shrink-0 mt-1.5 shadow-sm"></div>
               {/if}
-              <button 
-                type="button" 
-                class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-7 h-7 rounded-md hover:bg-error/10 text-muted hover:text-error shrink-0"
-                on:click|preventDefault|stopPropagation={() => deleteNotification(notif.id)}
+              <Button 
+                variant="ghost" size="icon"
+                class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 min-w-[28px] min-h-[28px] rounded-md hover:bg-error/10 text-muted hover:text-error shrink-0"
+                on:click={(e) => { e.detail?.preventDefault?.(); e.detail?.stopPropagation?.(); notificationToDelete = notif.id; }}
                 title="Hapus notifikasi"
               >
                 <span class="material-symbols-outlined text-[16px]">delete</span>
-              </button>
+              </Button>
             </a>
           {/each}
         {/if}
@@ -223,22 +230,47 @@
       
       <!-- Footer -->
       <div class="p-4 border-t border-light flex items-center justify-center bg-card">
-        <button 
+        <Button 
+          variant="tertiary"
           on:click={markAllAsRead}
-          class="text-sm font-medium text-muted hover:text-main transition-colors {unreadCount === 0 ? 'opacity-50 cursor-not-allowed' : 'underline underline-offset-4 decoration-muted/40 hover:decoration-main'}"
           disabled={unreadCount === 0}
         >
           Tandai semua dibaca
-        </button>
+        </Button>
       </div>
     </div>
     
     <!-- Backdrop for mobile/clicking outside -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div 
-      class="fixed inset-0 z-40 bg-transparent" 
+    <button
+      type="button"
+      tabindex="-1"
+      class="fixed inset-0 z-40 w-full h-full bg-transparent border-none cursor-default outline-none" 
       on:click={closeDropdown}
-    ></div>
+      aria-label="Tutup dropdown"
+    ></button>
   {/if}
 </div>
+
+<Modal
+  open={!!notificationToDelete}
+  title="Hapus Notifikasi?"
+  size="xs"
+  borderless
+  on:close={() => notificationToDelete = null}
+>
+  <p class="text-sm text-secondary leading-relaxed">
+    Apakah Anda yakin ingin menghapus notifikasi ini? Tindakan ini tidak dapat dibatalkan.
+  </p>
+  <svelte:fragment slot="footer">
+    <Button variant="secondary" on:click={() => notificationToDelete = null}>Batal</Button>
+    <Button 
+      variant="destructive" 
+      on:click={() => { 
+        if (notificationToDelete) deleteNotification(notificationToDelete); 
+        notificationToDelete = null; 
+      }}
+    >
+      Ya, Hapus
+    </Button>
+  </svelte:fragment>
+</Modal>

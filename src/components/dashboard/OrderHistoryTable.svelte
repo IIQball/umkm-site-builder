@@ -12,6 +12,7 @@
   export let isReadOnly: boolean = false;
   export let tableTitle: string = 'Riwayat Tagihan & Pembelian';
   export let tableSubtitle: string = '';
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
   let orders = [...initialOrders];
   $: orders = [...initialOrders];
@@ -19,6 +20,7 @@
   let searchQuery = '';
   let selectedStatus: 'all' | 'pending' | 'paid' | 'failed' = 'all';
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let copiedId: string | null = null;
   let selectedInvoiceOrder: (typeof initialOrders)[0] | null = null;
@@ -61,10 +63,13 @@
   $: {
     searchQuery;
     selectedStatus;
-    currentPage = 1;
+    if (!pagination) currentPage = 1;
   }
 
-  $: paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedOrders = pagination
+    ? filteredOrders
+    : filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: totalItems = pagination ? pagination.totalItems : filteredOrders.length;
 
   const getStatusBadge = (status: string) => {
     if (status === 'paid' || status === 'success' || status === 'completed') return { variant: 'success' as const, label: 'Lunas', icon: CheckCircle2 };
@@ -94,31 +99,34 @@
     isInvoiceModalOpen = true;
   };
 
-  $: tableHeaders = isAdmin
-    ? [
-        { label: 'ID Invoice & Waktu' },
-        { label: 'Merchant & Toko', width: 'w-80' },
-        { label: 'Template Desain', width: 'w-56' },
-        { label: 'Rincian Biaya', align: 'right' as const, width: 'w-44' },
-        { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
-        { label: 'Aksi', align: 'right' as const, width: 'w-48' },
-      ]
-    : hasAdminAssistant
-    ? [
-        { label: 'ID Invoice & Waktu' },
-        { label: 'Template Desain', width: 'w-56' },
-        { label: 'Admin Pembeli', width: 'w-48' },
-        { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
-        { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
-        { label: 'Aksi', align: 'right' as const, width: 'w-44' },
-      ]
-    : [
-        { label: 'ID Invoice & Waktu' },
-        { label: 'Template Desain', width: 'w-64' },
-        { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
-        { label: 'Status Tagihan', align: 'center' as const, width: 'w-36' },
-        { label: 'Aksi', align: 'right' as const, width: 'w-48' },
-      ];
+  $: tableHeaders = [
+    { label: '#', align: 'center' as const, width: 'w-12' },
+    ...(isAdmin
+      ? [
+          { label: 'ID Invoice & Waktu' },
+          { label: 'Merchant & Toko', width: 'w-80' },
+          { label: 'Template Desain', width: 'w-56' },
+          { label: 'Rincian Biaya', align: 'right' as const, width: 'w-44' },
+          { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
+          { label: 'Aksi', align: 'right' as const, width: 'w-48' },
+        ]
+      : hasAdminAssistant
+      ? [
+          { label: 'ID Invoice & Waktu' },
+          { label: 'Template Desain', width: 'w-56' },
+          { label: 'Admin Pembeli', width: 'w-48' },
+          { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
+          { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
+          { label: 'Aksi', align: 'right' as const, width: 'w-44' },
+        ]
+      : [
+          { label: 'ID Invoice & Waktu' },
+          { label: 'Template Desain', width: 'w-64' },
+          { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
+          { label: 'Status Tagihan', align: 'center' as const, width: 'w-36' },
+          { label: 'Aksi', align: 'right' as const, width: 'w-48' },
+        ]),
+  ];
 </script>
 
 <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
@@ -222,11 +230,12 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth={isAdmin ? "min-w-[950px]" : "min-w-[800px]"}>
-      {#each paginatedOrders as order (order.id)}
+      {#each paginatedOrders as order, i (order.id)}
         {@const statusMeta = getStatusBadge(order.status)}
         {@const displayId = order.externalId || order.id}
         <TenantOrderRow
           {order}
+          rowNumber={(currentPage - 1) * pageSize + i + 1}
           {statusMeta}
           {displayId}
           {copiedId}
@@ -243,7 +252,7 @@
     <!-- DaisyUI Pagination Footer -->
     <Pagination
       bind:currentPage
-      totalItems={filteredOrders.length}
+      {totalItems}
       {pageSize}
     />
   {/if}

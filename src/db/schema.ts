@@ -409,6 +409,7 @@ export const platformSettings = pgTable('platform_settings', {
   adminServiceFee: bigint('admin_service_fee', { mode: 'number' }).default(5000).notNull(),
   payoutMinimumBalance: bigint('payout_minimum_balance', { mode: 'number' }).default(50000).notNull(),
   settlementDelayDays: integer('settlement_delay_days').default(7).notNull(),
+  maxStoreBranches: integer('max_store_branches').default(5).notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.id),
 });

@@ -1,18 +1,20 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Card, Button, StatCard } from "@/components/ui";
+  import { Card, Button } from "@/components/ui";
   import { addToast } from "@/lib/toast";
-  import { formatIDR } from "@/lib/currency";
   import CommissionSimulationCard from "./commission/CommissionSimulationCard.svelte";
   import CommissionSettingsInputs from "./commission/CommissionSettingsInputs.svelte";
+  import CommissionStatsGrid from "./commission/CommissionStatsGrid.svelte";
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;
   export let initialAdminServiceFee: number = 5000;
+  export let initialMaxStoreBranches: number = 5;
 
   let platformFeePercentage: number = initialFeePercentage;
   let settlementDelayDays: number = initialSettlementDelayDays;
   let adminServiceFee: number = initialAdminServiceFee;
+  let maxStoreBranches: number = initialMaxStoreBranches;
   let isLoading = false;
 
   onMount(async () => {
@@ -28,6 +30,9 @@
         }
         if (result.data.adminServiceFee !== undefined) {
           adminServiceFee = Number(result.data.adminServiceFee);
+        }
+        if (result.data.maxStoreBranches !== undefined) {
+          maxStoreBranches = Number(result.data.maxStoreBranches);
         }
       }
     } catch {
@@ -57,6 +62,13 @@
       });
       return;
     }
+    if (maxStoreBranches < 1 || maxStoreBranches > 50) {
+      addToast({
+        type: "error",
+        message: "Maksimal cabang toko harus antara 1 hingga 50 cabang",
+      });
+      return;
+    }
 
     isLoading = true;
 
@@ -68,6 +80,7 @@
           platformFeePercentage: Number(platformFeePercentage),
           settlementDelayDays: Number(settlementDelayDays),
           adminServiceFee: Number(adminServiceFee),
+          maxStoreBranches: Number(maxStoreBranches),
         }),
       });
       const result = await res.json();
@@ -76,12 +89,12 @@
         addToast({
           type: "success",
           message:
-            "Pengaturan komisi, fee admin & settlement berhasil disimpan!",
+            "Pengaturan komisi, fee admin, settlement & batas cabang berhasil disimpan!",
         });
       } else {
         addToast({
           type: "error",
-          message: result.error?.message || "Gagal menyimpan pengaturan komisi",
+          message: result.error?.message || "Gagal menyimpan pengaturan platform",
         });
       }
     } catch {
@@ -134,49 +147,16 @@
     </div>
   </div>
 
-  <!-- Stat Cards Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-    <StatCard
-      label="Fee Platform"
-      value="{platformFeePercentage}%"
-      rawValue={platformFeePercentage}
-      icon="percent"
-      cardTheme="dark"
-      badge="Kas SaaS"
-      footerText="Potongan otomatis per transaksi"
-      delayClass="delay-100"
-    />
-    <StatCard
-      label="Bagian Desainer"
-      value="{designerShare}%"
-      rawValue={designerShare}
-      icon="brush"
-      cardTheme="default"
-      badge="Hak Desainer"
-      footerText="Masuk langsung ke dompet kreator"
-      delayClass="delay-150"
-    />
-    <StatCard
-      label="Fee Pendampingan Admin"
-      value={formatIDR(Number(adminServiceFee || 0))}
-      rawValue={adminServiceFee}
-      icon="support_agent"
-      cardTheme="blue"
-      badge="Jasa Pendamping"
-      footerText="Biaya bantuan transaksi tenant"
-      delayClass="delay-200"
-    />
-    <StatCard
-      label="Penahanan Settlement"
-      value="{settlementDelayDays} Hari"
-      rawValue={settlementDelayDays}
-      icon="hourglass_top"
-      cardTheme="orange"
-      badge="Proteksi Fraud"
-      footerText="Jeda saldo sebelum withdrawal"
-      delayClass="delay-250"
-    />
-  </div>
+  <!-- Stat Cards Layout (1 Full di Kiri, 4 Sub di Kanan sesuai Frame 1100) -->
+  <CommissionStatsGrid
+    {platformFeePercentage}
+    {designerShare}
+    {adminServiceFee}
+    {settlementDelayDays}
+    {maxStoreBranches}
+    {samplePrice}
+    {samplePlatformFee}
+  />
 
   <!-- Settings Configuration Card -->
   <div class="animate-fade-in-up delay-300">
@@ -199,11 +179,11 @@
             <h3
               class="text-heading-md text-main font-bold font-heading leading-tight"
             >
-              Parameter Finansial & Bagi Hasil
+              Parameter Finansial & Toko
             </h3>
             <p class="text-body-sm text-secondary mt-0.5 font-sans">
               Konfigurasi nilai persentase potongan transaksi, fee pendampingan,
-              dan penahanan dana
+              penahanan dana, dan batas cabang toko
             </p>
           </div>
         </div>
@@ -225,6 +205,7 @@
             bind:platformFeePercentage
             bind:adminServiceFee
             bind:settlementDelayDays
+            bind:maxStoreBranches
             {isLoading}
           />
 

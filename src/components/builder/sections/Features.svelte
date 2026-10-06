@@ -38,6 +38,13 @@
   $: nodeStyles = (props?.nodeStyles || {}) as Record<string, Record<string, string>>;
   $: currentActiveNodeId = (isActive && $canvasStore?.selectedSectionId === sectionId) ? $activeNodeId : null;
 
+  $: effectiveTitle = (typeof props?.title === 'string' && props.title.trim())
+    ? props.title
+    : ((props?.heading as string) || undefined);
+  $: effectiveSubtitle = (typeof props?.subtitle === 'string' && props.subtitle.trim())
+    ? props.subtitle
+    : ((props?.subheading as string) || undefined);
+
   $: customBgColor = styles?.bgColorToken
     ? `var(--theme-${styles.bgColorToken === 'textPrimary' ? 'text-primary' : styles.bgColorToken === 'textMuted' ? 'text-muted' : styles.bgColorToken})`
     : styles?.backgroundColor;
@@ -79,8 +86,8 @@
     {#if activePreset === 'horizontal_list'}
       <FeaturesHorizontalList
         badgeText={props?.badgeText ?? 'Standar Kualitas'}
-        title={props?.title ?? 'Komitmen Terbaik di Setiap Pesanan'}
-        subtitle={props?.subtitle ?? 'Kami memastikan setiap tahapan dari kebun hingga ke tangan Anda melewati proses kurasi ketat.'}
+        title={effectiveTitle ?? 'Komitmen Terbaik di Setiap Pesanan'}
+        subtitle={effectiveSubtitle ?? 'Kami memastikan setiap tahapan dari kebun hingga ke tangan Anda melewati proses kurasi ketat.'}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -91,8 +98,8 @@
     {:else if activePreset === 'banner_inline_bar'}
       <FeaturesBannerInlineBar
         badgeText={props?.badgeText ?? ''}
-        title={props?.title ?? ''}
-        subtitle={props?.subtitle ?? ''}
+        title={effectiveTitle ?? ''}
+        subtitle={effectiveSubtitle ?? ''}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -103,8 +110,8 @@
     {:else if activePreset === 'bento_grid_asymmetric'}
       <FeaturesBentoGrid
         badgeText={props?.badgeText ?? 'Benefit Utama'}
-        title={props?.title ?? 'Dirancang Khusus untuk Kebutuhan Harian'}
-        subtitle={props?.subtitle ?? 'Setiap detail kami perhitungkan demi kenyamanan penggunaan produk jangka panjang.'}
+        title={effectiveTitle ?? 'Dirancang Khusus untuk Kebutuhan Harian'}
+        subtitle={effectiveSubtitle ?? 'Setiap detail kami perhitungkan demi kenyamanan penggunaan produk jangka panjang.'}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -116,8 +123,8 @@
     {:else if activePreset === 'alternating_zigzag_rows'}
       <FeaturesAlternatingZigzag
         badgeText={props?.badgeText ?? 'Proses Produksi'}
-        title={props?.title ?? 'Proses Produksi Berkualitas'}
-        subtitle={props?.subtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga mutu terbaik.'}
+        title={effectiveTitle ?? 'Proses Produksi Berkualitas'}
+        subtitle={effectiveSubtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga mutu terbaik.'}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -128,8 +135,8 @@
     {:else if activePreset === 'interactive_tabs'}
       <FeaturesInteractiveTabs
         badgeText={props?.badgeText ?? 'Varian Unggulan'}
-        title={props?.title ?? 'Eksplorasi Varian Rasa Favorit'}
-        subtitle={props?.subtitle ?? 'Pilih varian untuk melihat detail rasa, keunggulan, dan bahan baku.'}
+        title={effectiveTitle ?? 'Eksplorasi Varian Rasa Favorit'}
+        subtitle={effectiveSubtitle ?? 'Pilih varian untuk melihat detail rasa, keunggulan, dan bahan baku.'}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -140,8 +147,8 @@
     {:else if activePreset === 'vertical_accordion_showcase'}
       <FeaturesVerticalAccordion
         badgeText={props?.badgeText ?? 'Proses Teliti'}
-        title={props?.title ?? 'Kualitas Diperiksa Langkah demi Langkah'}
-        subtitle={props?.subtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga higienitas dan mutu rasa.'}
+        title={effectiveTitle ?? 'Kualitas Diperiksa Langkah demi Langkah'}
+        subtitle={effectiveSubtitle ?? 'Setiap tahapan pengolahan dipantau secara berkala untuk menjaga higienitas dan mutu rasa.'}
         {items}
         {elementOrder}
         {nodeStyles}
@@ -153,8 +160,8 @@
     {:else if activePreset === 'sticky_scroll_highlight'}
       <FeaturesStickyScroll
         badgeText={typeof props?.badgeText === 'string' ? props.badgeText : 'Nilai Tambah Kami'}
-        title={typeof props?.title === 'string' ? props.title : 'Pelayanan Nyaman Dari Awal Hingga Selesai'}
-        subtitle={typeof props?.subtitle === 'string' ? props.subtitle : 'Kami tidak sekadar menjual barang, melainkan memberikan pengalaman belanja yang transparan dan amanah.'}
+        title={typeof effectiveTitle === 'string' ? effectiveTitle : 'Pelayanan Nyaman Dari Awal Hingga Selesai'}
+        subtitle={typeof effectiveSubtitle === 'string' ? effectiveSubtitle : 'Kami tidak sekadar menjual barang, melainkan memberikan pengalaman belanja yang transparan dan amanah.'}
         {items}
         ctaText={typeof props?.ctaText === 'string' ? props.ctaText : 'Hubungi Kami Langsung'}
         ctaLink={typeof props?.ctaLink === 'string' ? props.ctaLink : '#'}
@@ -167,8 +174,8 @@
     {:else if activePreset === 'dense_icon_matrix'}
       <FeaturesDenseMatrix
         badgeText={props?.badgeText ?? 'Ringkasan Keunggulan'}
-        title={props?.title ?? 'Semua Kebaikan Dalam Satu Kemasan'}
-        subtitle={props?.subtitle ?? 'Ringkasan keunggulan formula herbal alami kami untuk kesehatan harian.'}
+        title={effectiveTitle ?? 'Semua Kebaikan Dalam Satu Kemasan'}
+        subtitle={effectiveSubtitle ?? 'Ringkasan keunggulan formula herbal alami kami untuk kesehatan harian.'}
         items={denseItems}
         {elementOrder}
         {nodeStyles}
@@ -179,8 +186,8 @@
     {:else if activePreset === 'before_after_comparison'}
       <FeaturesComparison
         badgeText={props?.badgeText ?? 'Komparasi Kualitas'}
-        title={props?.title ?? 'Bandingkan Kualitasnya'}
-        subtitle={props?.subtitle ?? 'Mengapa beralih ke produk olahan tangan UMKM kami jauh lebih menguntungkan?'}
+        title={effectiveTitle ?? 'Bandingkan Kualitasnya'}
+        subtitle={effectiveSubtitle ?? 'Mengapa beralih ke produk olahan tangan UMKM kami jauh lebih menguntungkan?'}
         beforeTitle={props?.beforeTitle !== undefined ? props.beforeTitle : 'Produk Pasaran Biasa'}
         beforeItems={props?.beforeItems || [
           'Memakai minyak curah berulang kali',
@@ -205,8 +212,8 @@
       <!-- Preset 1 (Default): grid_3_cards -->
       <FeaturesGrid3Cards
         badgeText={props?.badgeText ?? 'Keunggulan Layanan Kami'}
-        title={props?.title ?? 'Kenapa Memilih Produk UMKM Kami?'}
-        subtitle={props?.subtitle ?? 'Kami memadukan bahan baku lokal pilihan dengan proses produksi higienis bersertifikasi resmi.'}
+        title={effectiveTitle ?? 'Kenapa Memilih Produk UMKM Kami?'}
+        subtitle={effectiveSubtitle ?? 'Kami memadukan bahan baku lokal pilihan dengan proses produksi higienis bersertifikasi resmi.'}
         {items}
         {isActive}
         activeNodeId={currentActiveNodeId}

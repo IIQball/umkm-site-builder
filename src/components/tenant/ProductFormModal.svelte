@@ -156,8 +156,22 @@
   open={showModal}
   on:close={closeModal}
   size="lg"
-  title={editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
 >
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">{editingProduct ? 'edit_note' : 'inventory_2'}</span>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          {editingProduct ? 'Ubah Produk' : 'Tambah Produk Baru'}
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          {editingProduct ? 'Perbarui informasi dan detail produk' : 'Tambahkan produk baru ke etalase toko Anda'}
+        </p>
+      </div>
+    </div>
+  </svelte:fragment>
   {#if errorMessage}
     <div class="alert alert-error mb-4 shadow-xs">
       <svg
@@ -186,8 +200,10 @@
     {fieldErrors}
   />
 
-  <div class="w-full mb-5 mt-4">
-    <div class="block text-label-caps text-muted mb-1.5">Gambar Produk</div>
+  <div class="space-y-1.5 mb-4">
+    <div class="text-xs font-bold text-main block font-heading">
+      Gambar Produk <span class="text-rose-500">*</span>
+    </div>
     <div
       class="border rounded-2xl p-2 bg-nested"
       class:border-error={fieldErrors.imageUrls}
@@ -213,9 +229,10 @@
     {fieldErrors}
   />
 
-  <div class="mb-3">
+  <div class="space-y-1.5 mb-4">
+    <label for="prod_sort" class="text-xs font-bold text-main block font-heading">Urutan Tampil</label>
     <Input
-      label="Urutan Tampil"
+      id="prod_sort"
       type="text"
       inputmode="numeric"
       value={sortOrder}
@@ -223,36 +240,27 @@
     />
   </div>
 
-  <div class="form-control mb-4">
-    <label class="label cursor-pointer justify-start gap-4">
-      <span class="block text-label-caps text-muted mb-0">Tersedia</span>
-      <input
-        id="product-avail"
-        type="checkbox"
-        class="toggle toggle-success toggle-sm"
-        bind:checked={isAvailable}
-      />
-    </label>
-  </div>
+
 
   <svelte:fragment slot="footer">
     <Button
       variant="secondary"
       size="sm"
+      className="rounded-xl font-bold"
       disabled={formLoading}
       on:click={closeModal}
     >
       Batal
     </Button>
     <Button
-      variant="dark"
+      variant="primary"
       size="sm"
+      className="rounded-xl font-bold"
       on:click={handleSaveProduct}
       disabled={formLoading}
       loading={formLoading}
-      className="font-bold"
     >
-      Simpan
+      {formLoading ? 'Menyimpan...' : editingProduct ? 'Simpan Perubahan' : 'Tambah Produk'}
     </Button>
   </svelte:fragment>
 </Modal>

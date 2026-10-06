@@ -25,6 +25,7 @@ export const commissionSettingsSchema = z.object({
   adminServiceFee: z.number().int().min(0).optional(),
   payoutMinimumBalance: z.number().int().min(0).optional(),
   settlementDelayDays: z.number().int().min(0).optional(),
+  maxStoreBranches: z.number().int().min(1).max(50).optional(),
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;

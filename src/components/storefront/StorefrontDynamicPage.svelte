@@ -3,7 +3,7 @@
   import type { TemplateConfig, TemplateSection } from '@/schemas';
   import type { ProductItem } from '@/types';
   import SectionRenderer from '@/components/builder/sections/SectionRenderer.svelte';
-  import { editorStore } from '@/components/builder/stores/editorStore';
+  import { editorStore, canvasStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
   import { trackAnalyticsEvent } from '@/lib/analytics/track';
 
@@ -12,25 +12,34 @@
   export let products: ProductItem[] = [];
   export let categories: Array<{ id: string; name: string; slug: string }> = [];
   export let isOpen: boolean = true;
+  export let viewModeOverride: 'desktop' | 'tablet' | 'mobile' | undefined = undefined;
+  export let isPreview: boolean = false;
 
   $: sections = (config?.sections || []) as TemplateSection[];
 
+  $: if (store && config) {
+    editorStore.init({
+      id: store.templateId || 'storefront',
+      name: store.name || 'Store',
+      config,
+    });
+    if (viewModeOverride) {
+      editorStore.setViewMode(viewModeOverride);
+      canvasStore.setViewMode(viewModeOverride);
+    }
+  }
+
+  $: if (viewModeOverride) {
+    editorStore.setViewMode(viewModeOverride);
+    canvasStore.setViewMode(viewModeOverride);
+  }
+
   onMount(() => {
-    // 1. Initialize editorStore document state so sub-components (like Footer reading $documentStore) work seamlessly
-    if (store && config) {
-      editorStore.init({
-        id: store.templateId || 'storefront',
-        name: store.name || 'Store',
-        config: config,
-      });
+    if (viewModeOverride) {
+      editorStore.setViewMode(viewModeOverride);
+      return;
     }
 
-    // 2. Track store view event
-    if (store?.id) {
-      trackAnalyticsEvent(store.id, 'store_view');
-    }
-
-    // 3. Responsive viewport viewMode detector for builder components reading $canvasStore.viewMode
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) {
@@ -70,11 +79,30 @@
             ...section,
             props: {
               ...(section.props || {}),
-              logoText: store?.name || section.props?.logoText || 'Toko UMKM',
+              logoText: section.props?.logoText || store?.name || 'Toko UMKM',
               storeName: store?.name || section.props?.storeName,
+              address: store?.address || section.props?.address,
               categories: categories.length > 0 ? categories : (section.props?.categories || []),
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
               whatsappTemplate: store?.whatsappTemplate || section.props?.whatsappTemplate,
+            }
+          }
+        : section.type === 'hero'
+        ? {
+            ...section,
+            props: {
+              ...(section.props || {}),
+              whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
+              storeName: store?.name || section.props?.storeName,
+            }
+          }
+        : section.type === 'faq'
+        ? {
+            ...section,
+            props: {
+              ...(section.props || {}),
+              whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
+              storeName: store?.name || section.props?.storeName,
             }
           }
         : section.type === 'google_maps'
@@ -89,6 +117,10 @@
               longitude: store?.longitude ?? section.props?.longitude,
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
               storeName: store?.name || section.props?.storeName,
+              branches: (Array.isArray(section.props?.branches) && section.props.branches.length > 0)
+                ? section.props.branches
+                : (store?.branches || []),
+              branchMode: section.props?.branchMode || store?.branchMode || 'single',
             }
           }
         : section.type === 'footer'
@@ -96,7 +128,8 @@
             ...section,
             props: {
               ...(section.props || {}),
-              brandName: store?.name || section.props?.brandName,
+              brandName: section.props?.brandName || section.props?.logoText || store?.name,
+              logoImageUrl: section.props?.logoImageUrl || config.sections.find((s) => s.type === 'header_announcement')?.props?.logoImageUrl || store?.logoUrl,
               address: store?.address || section.props?.address,
               whatsappNumber: store?.waNumber || section.props?.whatsappNumber,
               googleMapsUrl: store?.googleMapsUrl || section.props?.googleMapsUrl,
@@ -108,7 +141,7 @@
         isActive={false}
         storeId={store?.id || null}
         {store}
-        isLiveStorefront={true}
+        isLiveStorefront={!isPreview}
       />
     {/each}
   </main>

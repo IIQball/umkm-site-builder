@@ -6,6 +6,8 @@
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
 
   export let allTemplates: AdminTemplateItem[] = [];
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
+  export let initialCounts: { all: number; pending: number; approved: number; rejected: number } | undefined = undefined;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -20,12 +22,14 @@
     (t) => t.createdAt
   );
 
-  $: counts = {
-    all: filteredTemplates.length,
-    pending: filteredTemplates.filter((t) => t.status === 'pending').length,
-    approved: filteredTemplates.filter((t) => t.status === 'approved').length,
-    rejected: filteredTemplates.filter((t) => t.status === 'rejected').length,
-  };
+  $: counts = initialCounts && selectedMonth === 'all' && selectedYear === currentYear
+    ? initialCounts
+    : {
+        all: filteredTemplates.length,
+        pending: filteredTemplates.filter((t) => t.status === 'pending').length,
+        approved: filteredTemplates.filter((t) => t.status === 'approved').length,
+        rejected: filteredTemplates.filter((t) => t.status === 'rejected').length,
+      };
 </script>
 
 <div class="space-y-8 md:space-y-10">
@@ -84,6 +88,6 @@
 
   <!-- Interactive Review Panel & Table -->
   <div class="animate-fade-in-up delay-300">
-    <TemplateReviewPanel initialTemplates={filteredTemplates} />
+    <TemplateReviewPanel initialTemplates={filteredTemplates} {pagination} />
   </div>
 </div>

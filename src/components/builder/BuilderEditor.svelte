@@ -6,10 +6,15 @@
   import Canvas from './Canvas.svelte';
   import PropertyInspector from './PropertyInspector.svelte';
   import { Button } from '@/components/ui';
-  import { editorStore, canvasStore, activeSection } from './stores/editorStore';
+  import { editorStore, canvasStore, activeSection, maxStoreBranchesStore } from './stores/editorStore';
 
   export let templateId: string;
   export let platformFeePercentage: number = 30;
+  export let maxStoreBranches: number = 5;
+
+  $: if (maxStoreBranches) {
+    maxStoreBranchesStore.set(maxStoreBranches);
+  }
 
   let loading = true;
   let fetchError: string | null = null;
@@ -52,7 +57,18 @@
     }
   };
 
-  onMount(() => {
+  onMount(async () => {
+    maxStoreBranchesStore.set(maxStoreBranches);
+    try {
+      const res = await fetch('/api/public/platform-settings');
+      const result = await res.json();
+      if (result.ok && result.data && typeof result.data.maxStoreBranches === 'number') {
+        maxStoreBranches = result.data.maxStoreBranches;
+        maxStoreBranchesStore.set(result.data.maxStoreBranches);
+      }
+    } catch {
+      // Keep prop value
+    }
     fetchTemplate();
   });
 
@@ -118,24 +134,23 @@
 <div
   data-theme={$canvasStore.editorTheme}
   data-builder-shell
-  class={`builder-root h-screen w-full flex flex-col transition-colors overflow-hidden ${
-    $canvasStore.editorTheme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'
+  class={`builder-root h-screen w-full flex flex-col font-sans transition-colors overflow-hidden ${
+    $canvasStore.editorTheme === 'dark' ? 'dark bg-canvas text-main' : 'bg-canvas text-main'
   }`}
-  style="font-family: var(--font-ui-sans, 'Poppins', system-ui, -apple-system, sans-serif);"
 >
   {#if loading}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">
-      <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-      <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Memuat workspace template...</p>
+      <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-xs font-medium text-secondary">Memuat workspace template...</p>
     </div>
   {:else if fetchError || $editorStore.error && !$editorStore.template}
     <div class="flex flex-col items-center justify-center h-full w-full gap-4 p-8 text-center">
-      <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center text-xl font-bold">
+      <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center text-xl font-bold">
         !
       </div>
       <div>
-        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Gagal Memuat Template</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">{fetchError || $editorStore.error}</p>
+        <h2 class="text-base font-bold text-main">Gagal Memuat Template</h2>
+        <p class="text-xs text-secondary mt-1 max-w-md">{fetchError || $editorStore.error}</p>
       </div>
       <Button
         variant="primary"
@@ -182,10 +197,10 @@
           variant="secondary"
           size="xs"
           on:click={() => canvasStore.toggleLeftSidebar()}
-          class="!absolute top-3 left-3 z-30 shadow-md bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800"
+          class="!absolute top-3 left-3 z-30 shadow-md bg-card hover:bg-nested border border-light"
           title="Buka Sidebar Kiri (Layers Tree) - Ctrl+\"
         >
-          <PanelLeft size={14} class="text-blue-500" />
+          <PanelLeft size={14} class="text-primary" />
           <span class="hidden sm:inline">Layers</span>
         </Button>
       {/if}
@@ -211,10 +226,10 @@
           variant="secondary"
           size="xs"
           on:click={() => canvasStore.toggleRightSidebar()}
-          class="!absolute top-3 right-3 z-30 shadow-md bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800"
+          class="!absolute top-3 right-3 z-30 shadow-md bg-card hover:bg-nested border border-light"
           title="Buka Sidebar Kanan (Inspector) - Ctrl+/"
         >
-          <Sliders size={14} class="text-blue-500" />
+          <Sliders size={14} class="text-primary" />
           <span class="hidden sm:inline">Inspector</span>
           <PanelRight size={14} />
         </Button>

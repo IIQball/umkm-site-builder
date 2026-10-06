@@ -79,7 +79,7 @@
           baseTemplateConfig = clone(template.config);
         }
         if (baseTemplateConfig) {
-          const merged = mergeStoreCustomization(baseTemplateConfig, event.data.customization);
+          const merged = mergeStoreCustomization(baseTemplateConfig, event.data.customization, event.data.storeData);
           template = { ...template, config: merged };
           editorStore.init(template);
           editorStore.setViewMode(viewMode);

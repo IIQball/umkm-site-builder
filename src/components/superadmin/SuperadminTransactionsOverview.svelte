@@ -5,8 +5,10 @@
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
   import { formatSmartIDR } from '@/lib/currency';
   import type { OrderTransactionItem } from '@/types/finance';
+  import type { PaginatedResult } from '@/types/common';
 
   export let allTransactions: OrderTransactionItem[] = [];
+  export let pagination: PaginatedResult<any> | undefined = undefined;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -95,6 +97,7 @@
   <div class="animate-fade-in-up delay-300">
     <OrderHistoryTable
       initialOrders={filteredTransactions}
+      {pagination}
       isAdmin={true}
       isReadOnly={true}
       tableTitle="Riwayat Transaksi Pembelian Template"

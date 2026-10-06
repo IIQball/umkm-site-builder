@@ -2,6 +2,7 @@
   import { Handshake, Store, Palette, ArrowRight } from 'lucide-svelte';
   import { Modal, Button, Badge } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
   import type { PublicTemplate } from '../marketplace.types';
 
   export let open: boolean = false;
@@ -19,6 +20,7 @@
   $: basePrice = isAlreadyOwned ? 0 : (template ? template.price : 0);
   $: applicableFee = isAdmin && selectedTenant && !isAlreadyOwned ? adminServiceFee : 0;
   $: totalPrice = basePrice + applicableFee;
+  $: optimizedThumbnail = template ? getOptimizedCloudinaryUrl(template.thumbnailUrl, 160) : '';
 </script>
 
 <Modal
@@ -59,7 +61,7 @@
       <div class="p-3.5 rounded-2xl bg-nested border border-light flex items-center gap-3.5">
         <div class="w-16 h-16 rounded-xl overflow-hidden bg-card border border-light shrink-0 flex items-center justify-center">
           {#if template.thumbnailUrl}
-            <img src={template.thumbnailUrl} alt={template.name} class="w-full h-full object-cover" />
+            <img src={optimizedThumbnail} alt={template.name} class="w-full h-full object-cover" loading="lazy" />
           {:else}
             <Palette size={24} class="text-muted" />
           {/if}

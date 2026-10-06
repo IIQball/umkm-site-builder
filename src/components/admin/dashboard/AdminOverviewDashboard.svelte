@@ -8,6 +8,7 @@
   import { calculateMerchantGrowth } from '../growth/merchantGrowth.helpers';
   import { calculateFeeRevenueGrowth } from '../growth/feeRevenue.helpers';
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
+  import type { PaginatedResult } from '@/types/common';
 
   export let allTenants: Array<{
     id: string;
@@ -36,6 +37,8 @@
 
   export let availableBalance: number = 0;
   export let userCreatedYear: number = new Date().getFullYear();
+  export let txPagination: PaginatedResult<any> | undefined = undefined;
+  export let merchantPagination: PaginatedResult<any> | undefined = undefined;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -97,7 +100,7 @@
     { year: selectedYear, month: selectedMonth }
   );
 
-  $: recentMerchants = filteredTenants.slice(0, 5).map((t) => ({
+  $: recentMerchants = (merchantPagination ? merchantPagination.data : filteredTenants.slice(0, 5)).map((t: any) => ({
     id: t.id,
     name: t.name,
     email: t.email,
@@ -107,7 +110,7 @@
     storeId: t.storeId || null,
   }));
 
-  $: recentTransactions = filteredTransactions.slice(0, 5).map((t) => ({
+  $: recentTransactions = (txPagination ? txPagination.data : filteredTransactions.slice(0, 5)).map((t: any) => ({
     id: t.id,
     externalId: t.externalId,
     amount: Number(t.amount),
@@ -145,9 +148,21 @@
     <AdminFeeRevenueChart revenueData={feeRevenueData} />
   </div>
 
-  <!-- Baris 3: Aktivitas Terkini (5 Data Terbaru Sesuai Periode Terpilih) -->
+  <!-- Baris 3: Aktivitas Terkini (Sesuai Periode & Pagination Terpilih) -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-    <AdminRecentTransactionsCard transactions={recentTransactions} />
-    <AdminRecentMerchantsCard merchants={recentMerchants} />
+    <AdminRecentTransactionsCard
+      transactions={recentTransactions}
+      currentPage={txPagination?.currentPage || 1}
+      totalItems={txPagination?.totalItems || filteredTransactions.length}
+      pageSize={txPagination?.pageSize || 10}
+      pageParam="txPage"
+    />
+    <AdminRecentMerchantsCard
+      merchants={recentMerchants}
+      currentPage={merchantPagination?.currentPage || 1}
+      totalItems={merchantPagination?.totalItems || filteredTenants.length}
+      pageSize={merchantPagination?.pageSize || 10}
+      pageParam="merchantPage"
+    />
   </div>
 </div>

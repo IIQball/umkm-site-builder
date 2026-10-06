@@ -7,6 +7,8 @@ import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
 import { users, stores, transactions, templates, tenantInvitations } from '@/db/schema';
 import { eq, and, or, isNull, desc, notExists, ne } from 'drizzle-orm';
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
+import type { PaginatedResult } from '@/types/common';
 
 export const prerender = false;
 
@@ -18,6 +20,9 @@ if (!user || !isAuthorizedAdmin(user)) {
 if (user.role === 'superadmin') {
   return Astro.redirect('/superadmin');
 }
+
+const { page: txPage } = getPaginationParams(Astro.url, 'txPage');
+const { page: merchantPage } = getPaginationParams(Astro.url, 'merchantPage');
 
 let availableBalance = 0;
 let tenantRows: Array<{
@@ -45,12 +50,15 @@ let transactionRows: Array<{
   storeName: string | null;
 }> = [];
 
+let txPagination: PaginatedResult<any> | undefined = undefined;
+let merchantPagination: PaginatedResult<any> | undefined = undefined;
+
 try {
   const wallet = await getDesignerWalletSummary(user.id);
   availableBalance = wallet.availableBalance;
 
   const unacceptedInvitationSubquery = db
-    .select()
+    .select({ id: tenantInvitations.id })
     .from(tenantInvitations)
     .where(
       and(
@@ -59,7 +67,15 @@ try {
       ),
     );
 
-  const rawTenants = await db
+  const tenantsWhereCondition = and(
+    eq(users.registeredBy, user.id),
+    eq(users.role, 'tenant'),
+    ne(users.status, 'pending'),
+    isNull(users.deletedAt),
+    notExists(unacceptedInvitationSubquery),
+  );
+
+  const tenantsQueryBuilder = db
     .select({
       id: users.id,
       name: users.name,
@@ -71,18 +87,18 @@ try {
     })
     .from(users)
     .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
-    .where(
-      and(
-        eq(users.registeredBy, user.id),
-        eq(users.role, 'tenant'),
-        ne(users.status, 'pending'),
-        isNull(users.deletedAt),
-        notExists(unacceptedInvitationSubquery),
-      ),
-    )
+    .where(tenantsWhereCondition)
     .orderBy(desc(users.createdAt));
 
-  tenantRows = rawTenants.map((t) => ({
+  merchantPagination = await paginate(
+    db,
+    users,
+    tenantsQueryBuilder,
+    tenantsWhereCondition,
+    merchantPage
+  );
+
+  tenantRows = (merchantPagination.data || []).map((t: any) => ({
     id: t.id,
     name: t.name,
     email: t.email,
@@ -92,12 +108,12 @@ try {
     storeStatus: t.storeStatus,
   }));
 
-  const whereCondition = or(
+  const txWhereCondition = or(
     eq(transactions.userId, user.id),
     eq(transactions.assistedBy, user.id),
   );
 
-  const rawTransactions = await db
+  const txQueryBuilder = db
     .select({
       id: transactions.id,
       externalId: transactions.externalId,
@@ -120,10 +136,18 @@ try {
       stores,
       or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
     )
-    .where(whereCondition)
+    .where(txWhereCondition)
     .orderBy(desc(transactions.createdAt));
 
-  transactionRows = rawTransactions.map((t) => ({
+  txPagination = await paginate(
+    db,
+    transactions,
+    txQueryBuilder,
+    txWhereCondition,
+    txPage
+  );
+
+  transactionRows = (txPagination.data || []).map((t: any) => ({
     id: t.id,
     externalId: t.externalId,
     amount: Number(t.amount),
@@ -193,6 +217,8 @@ if (currentHour >= 4 && currentHour < 11) {
       allTransactions={transactionRows}
       availableBalance={availableBalance}
       userCreatedYear={userCreatedYear}
+      txPagination={txPagination}
+      merchantPagination={merchantPagination}
     />
   </div>
 </DashboardLayout>

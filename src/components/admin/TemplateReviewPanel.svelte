@@ -18,6 +18,7 @@
 
   export let initialTemplates: AdminTemplateItem[] | undefined = undefined;
   export let initialTemplatesJson: string = '[]';
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
   let allTemplates: AdminTemplateItem[] = [];
 
   $: if (initialTemplates !== undefined) {
@@ -30,7 +31,7 @@
       allTemplates = [];
     }
   }
-  let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = 'pending';
+  let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = pagination ? 'all' : 'pending';
   let searchQuery = '';
   let isLoading = false;
   let selectedTemplate: AdminTemplateItem | null = null;
@@ -39,6 +40,7 @@
   let rejectionReason = '';
   let actionLoading = false;
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
 
   const fetchTemplates = async () => {
@@ -147,7 +149,10 @@
     return matchesTab && matchesSearch;
   });
 
-  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedTemplates = pagination
+    ? filteredTemplates
+    : filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: totalItems = pagination ? pagination.totalItems : filteredTemplates.length;
 </script>
 
 <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
@@ -262,13 +267,15 @@
   {:else}
     <TemplateReviewTable
       {paginatedTemplates}
+      {currentPage}
+      {pageSize}
       onApprove={openApproveModal}
       onReject={openRejectModal}
     />
 
     <Pagination
       bind:currentPage
-      totalItems={filteredTemplates.length}
+      {totalItems}
       {pageSize}
     />
   {/if}

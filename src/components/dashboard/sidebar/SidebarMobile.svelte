@@ -19,7 +19,7 @@
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
   $: roleCfg = getRoleConfig(user.role);
   $: homePath = getDashboardHomePath(user?.role);
-  $: settingsHref = getSettingsHref(user?.role);
+  $: settingsHref = getSettingsHref();
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;

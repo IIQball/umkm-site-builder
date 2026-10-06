@@ -28,7 +28,7 @@ vi.mock('@/db', () => ({
 
 describe('Notifications API', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/notifications', () => {

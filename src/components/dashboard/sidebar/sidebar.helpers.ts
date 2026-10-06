@@ -188,9 +188,6 @@ export const getDashboardHomePath = (role?: string | null): string => {
   return '/dashboard';
 };
 
-export const getSettingsHref = (role?: string | null): string => {
-  if (role === 'superadmin') return '/superadmin/settings';
-  if (role === 'tenant') return '/onboarding';
-  if (role === 'designer') return '/designer/wallet';
-  return '/admin';
+export const getSettingsHref = (): string => {
+  return '/settings/account';
 };

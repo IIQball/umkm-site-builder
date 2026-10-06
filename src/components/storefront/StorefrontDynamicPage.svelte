@@ -5,6 +5,7 @@
   import SectionRenderer from '@/components/builder/sections/SectionRenderer.svelte';
   import { editorStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
+  import { trackAnalyticsEvent } from '@/lib/analytics/track';
 
   export let config: TemplateConfig;
   export let store: any;
@@ -24,7 +25,12 @@
       });
     }
 
-    // 2. Responsive viewport viewMode detector for builder components reading $canvasStore.viewMode
+    // 2. Track store view event
+    if (store?.id) {
+      trackAnalyticsEvent(store.id, 'store_view');
+    }
+
+    // 3. Responsive viewport viewMode detector for builder components reading $canvasStore.viewMode
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) {

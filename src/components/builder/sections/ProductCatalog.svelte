@@ -3,7 +3,8 @@
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { ShoppingCart } from 'lucide-svelte';
   import { formatIDR } from '@/lib/currency';
-  import { generateWhatsAppLink, getEffectiveWhatsAppNumber } from '@/lib/whatsapp';
+  import { generateWhatsAppLink, getEffectiveWhatsAppNumber, openWhatsAppWithTracking } from '@/lib/whatsapp';
+  import { trackAnalyticsEvent } from '@/lib/analytics/track';
   import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
   import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
@@ -163,7 +164,7 @@
     cart = cart.filter((_, i) => i !== idx);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!form.name || !form.phone || !form.address) {
       alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.');
       return;
@@ -173,7 +174,14 @@
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
     const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
-    window.open(generateWhatsAppLink(effectiveWaNumber, message), "_blank");
+    const waLink = generateWhatsAppLink(effectiveWaNumber, message);
+    
+    // Debug log
+    console.log('🔵 [handleCheckout] storeId:', effectiveStoreId);
+    console.log('🔵 [handleCheckout] opening WhatsApp with tracking');
+    
+    // Open WhatsApp with tracking
+    await openWhatsAppWithTracking(waLink, effectiveStoreId);
   };
 </script>
 

@@ -7,14 +7,17 @@ import { templates, templateCategories, userTemplates, designers, users, stores 
 import { eq, and, isNull, desc, asc, inArray } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { getAdminServiceFee } from '@/services/finance/commission.service';
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
 
 export const prerender = false;
 
 const currentUser = await getAuthenticatedUser(Astro.request);
 const adminServiceFee = await getAdminServiceFee();
+const { page } = getPaginationParams(Astro.url);
+const whereConditions = and(eq(templates.status, 'approved'), isNull(templates.deletedAt));
 
-// Fetch all approved templates with category and designer data
-const rawTemplates = await db
+// Fetch approved templates paginated at database level (max 10)
+const queryBuilder = db
   .select({
     id: templates.id,
     name: templates.name,
@@ -33,8 +36,11 @@ const rawTemplates = await db
   .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
   .leftJoin(designers, eq(templates.designerId, designers.userId))
   .leftJoin(users, eq(designers.userId, users.id))
-  .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+  .where(whereConditions)
   .orderBy(desc(templates.createdAt));
+
+const paginatedResult = await paginate(db, templates, queryBuilder, whereConditions, page);
+const rawTemplates = paginatedResult.data;
 
 // Fetch all master template categories
 const categories = await db
@@ -133,6 +139,7 @@ const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
       <PublicTemplateMarketplace
         client:load
         initialTemplates={rawTemplates}
+        pagination={paginatedResult}
         {categories}
         {ownedTemplateIds}
         {assistedTenants}

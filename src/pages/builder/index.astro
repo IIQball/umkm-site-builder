@@ -1,0 +1,22 @@
+---
+/**
+ * pages/builder/index.astro
+ * Fallback redirect for /builder route.
+ */
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (user.role === 'designer') {
+  return Astro.redirect('/designer/templates');
+}
+
+if (user.role === 'superadmin' || user.role === 'admin') {
+  return Astro.redirect('/superadmin/templates');
+}
+
+return Astro.redirect('/templates');
+---

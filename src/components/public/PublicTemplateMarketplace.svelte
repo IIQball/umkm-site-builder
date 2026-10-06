@@ -18,11 +18,13 @@
   export let isLoggedIn: boolean = false;
   export let userRole: string | null = null;
   export let adminServiceFee: number = 5000;
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
   $: isAdmin = userRole === 'admin' || userRole === 'superadmin';
   $: isTenantOrGuest = !isLoggedIn || userRole === 'tenant';
 
   let templates = [...initialTemplates];
+  $: templates = [...initialTemplates];
   let searchQuery = '';
   let selectedCategorySlug: string = 'all';
   let selectedPriceFilter: 'all' | 'free' | 'paid' | 'under50' | '50to100' | 'above100' = 'all';
@@ -43,7 +45,7 @@
   let selectedPurchaseTemplate: PublicTemplate | null = null;
   let isSubmittingPurchase = false;
   let currentPage = 1;
-  const pageSize = 9;
+  const pageSize = 10;
 
   $: filteredTemplates = filterTemplates(
     templates,
@@ -53,9 +55,11 @@
     selectedSort
   );
 
-  $: if (searchQuery !== undefined || selectedCategorySlug || selectedPriceFilter || selectedSort) currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
 
-  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedTemplates = pagination
+    ? filteredTemplates
+    : filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const resetFilters = () => {
     searchQuery = '';
@@ -264,12 +268,12 @@
       {/each}
     </div>
 
-    {#if filteredTemplates.length > pageSize}
+    {#if pagination ? pagination.totalItems > pagination.pageSize : filteredTemplates.length > pageSize}
       <div class="pt-6 flex justify-center">
         <Pagination
-          bind:currentPage
-          totalItems={filteredTemplates.length}
-          {pageSize}
+          bind:currentPage={currentPage}
+          totalItems={pagination ? pagination.totalItems : filteredTemplates.length}
+          pageSize={pagination ? pagination.pageSize : pageSize}
         />
       </div>
     {/if}

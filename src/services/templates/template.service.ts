@@ -16,8 +16,12 @@ export type { PublicTemplateItem };
 
 export { getTemplatesForAdmin, reviewTemplate } from './template.admin.service';
 
-export async function getPublicTemplates(): Promise<PublicTemplateItem[]> {
+export async function getPublicTemplates(page: number = 1, pageSize: number = 10): Promise<PublicTemplateItem[]> {
   try {
+    const safePage = Math.max(1, Math.floor(page) || 1);
+    const safePageSize = Math.max(1, Math.floor(pageSize) || 10);
+    const offset = (safePage - 1) * safePageSize;
+
     const records = await db
       .select({
         id: templates.id,
@@ -38,7 +42,9 @@ export async function getPublicTemplates(): Promise<PublicTemplateItem[]> {
           eq(templates.status, 'approved')
         )
       )
-      .orderBy(desc(templates.createdAt));
+      .orderBy(desc(templates.createdAt))
+      .limit(safePageSize)
+      .offset(offset);
 
     return records.map((r) => ({
       id: r.id,

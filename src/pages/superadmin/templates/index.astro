@@ -3,7 +3,12 @@ import DashboardLayout from "@/layouts/DashboardLayout.astro";
 import TemplateReviewDashboard from "@/components/admin/TemplateReviewDashboard.svelte";
 import Button from "@/components/ui/Button.svelte";
 import { getAuthenticatedUser, isAuthorizedSuperAdmin } from "@/lib/auth";
-import { getTemplatesForAdmin } from "@/services";
+import { db } from "@/lib/db/client";
+import { templates, designers, users } from "@/db/schema";
+import { eq, ne, isNull, desc, and, count } from "drizzle-orm";
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import type { AdminTemplateItem } from "@/components/admin/review/review.types";
+import type { PaginatedResult } from "@/types/common";
 
 export const prerender = false;
 
@@ -16,11 +21,56 @@ if (!isAuthorizedSuperAdmin(user)) {
   return Astro.redirect("/403");
 }
 
-let initialTemplates: Awaited<ReturnType<typeof getTemplatesForAdmin>> = [];
+const { page } = getPaginationParams(Astro.url);
+const baseConditions = and(isNull(templates.deletedAt), ne(templates.status, "draft"));
+
+let paginatedResult: PaginatedResult<AdminTemplateItem> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
+let statusCounts = { all: 0, pending: 0, approved: 0, rejected: 0 };
+
 try {
-  initialTemplates = await getTemplatesForAdmin();
-} catch {
-  initialTemplates = [];
+  const queryBuilder = db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      description: templates.description,
+      thumbnailUrl: templates.thumbnailUrl,
+      price: templates.price,
+      status: templates.status,
+      rejectionReason: templates.rejectionReason,
+      createdAt: templates.createdAt,
+      designerId: templates.designerId,
+      designerName: users.name,
+      designerEmail: users.email,
+    })
+    .from(templates)
+    .leftJoin(designers, eq(templates.designerId, designers.userId))
+    .leftJoin(users, eq(designers.userId, users.id))
+    .where(baseConditions)
+    .orderBy(desc(templates.createdAt));
+
+  const [pResult, pendingC, approvedC, rejectedC] = await Promise.all([
+    paginate<AdminTemplateItem>(db, templates, queryBuilder, baseConditions, page),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "pending"))),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "approved"))),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "rejected"))),
+  ]);
+
+  paginatedResult = pResult;
+  statusCounts = {
+    all: pResult.totalItems,
+    pending: Number(pendingC[0]?.total ?? 0),
+    approved: Number(approvedC[0]?.total ?? 0),
+    rejected: Number(rejectedC[0]?.total ?? 0),
+  };
+} catch (error) {
+  console.error("[SuperadminTemplates] Query error:", error);
 }
 ---
 
@@ -65,7 +115,7 @@ try {
     </div>
 
     <!-- Master Template Review Dashboard (Period Filter, Statcards & Interactive Panel) -->
-    <TemplateReviewDashboard client:load allTemplates={initialTemplates} />
+    <TemplateReviewDashboard client:load allTemplates={paginatedResult.data} pagination={paginatedResult} initialCounts={statusCounts} />
   </div>
 </DashboardLayout>
 

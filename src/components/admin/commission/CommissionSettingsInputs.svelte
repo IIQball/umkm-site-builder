@@ -5,6 +5,7 @@
   export let platformFeePercentage: number = 30;
   export let adminServiceFee: number = 5000;
   export let settlementDelayDays: number = 7;
+  export let maxStoreBranches: number = 5;
   export let isLoading: boolean = false;
 
   let displayFee: string = formatCurrencyInput(adminServiceFee) || '0';
@@ -35,7 +36,7 @@
   };
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
   <!-- Platform Fee Input -->
   <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
     <div class="flex items-center gap-2">
@@ -168,6 +169,58 @@
       helper="Jeda saldo sebelum dapat di-withdraw."
     >
       <span slot="suffix" class="font-bold text-xs text-muted select-none">Hari</span>
+    </Input>
+  </div>
+
+  <!-- Max Store Branches Input -->
+  <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-sm">store</span>
+        </div>
+        <span class="text-xs font-bold text-main font-heading">Maksimal Cabang Toko</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <Button
+          size="xs"
+          variant={maxStoreBranches === 3 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {maxStoreBranches === 3 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
+          on:click={() => (maxStoreBranches = 3)}
+        >
+          3
+        </Button>
+        <Button
+          size="xs"
+          variant={maxStoreBranches === 5 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {maxStoreBranches === 5 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
+          on:click={() => (maxStoreBranches = 5)}
+        >
+          5
+        </Button>
+        <Button
+          size="xs"
+          variant={maxStoreBranches === 10 ? 'primary' : 'secondary'}
+          class="!px-2 !py-0.5 !rounded-full !h-auto !min-h-0 text-3xs font-bold {maxStoreBranches === 10 ? 'shadow-2xs' : 'bg-nested text-muted border-light'}"
+          on:click={() => (maxStoreBranches = 10)}
+        >
+          10
+        </Button>
+      </div>
+    </div>
+    <Input
+      id="maxStoreBranches"
+      type="number"
+      min="1"
+      max="50"
+      step="1"
+      placeholder="5"
+      bind:value={maxStoreBranches}
+      disabled={isLoading}
+      className="font-bold text-sm"
+      helper="Batas cabang Toko."
+    >
+      <span slot="suffix" class="font-bold text-xs text-muted select-none">Cabang</span>
     </Input>
   </div>
 </div>

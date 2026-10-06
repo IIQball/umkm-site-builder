@@ -7,6 +7,8 @@ import { getAuthenticatedUser, isAuthorizedSuperAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { templateCategories } from "@/db/schema";
 import { desc } from "drizzle-orm";
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import type { PaginatedResult } from "@/types/common";
 
 export const prerender = false;
 
@@ -19,14 +21,38 @@ if (!isAuthorizedSuperAdmin(user)) {
   return Astro.redirect("/403");
 }
 
-let initialCategories: (typeof templateCategories.$inferSelect)[] = [];
+const { page } = getPaginationParams(Astro.url);
+let categoryResult: PaginatedResult<typeof templateCategories.$inferSelect> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
 try {
-  initialCategories = await db
-    .select()
+  const categoryQueryBuilder = db
+    .select({
+      id: templateCategories.id,
+      name: templateCategories.name,
+      slug: templateCategories.slug,
+      description: templateCategories.description,
+      icon: templateCategories.icon,
+      createdAt: templateCategories.createdAt,
+      updatedAt: templateCategories.updatedAt,
+    })
     .from(templateCategories)
     .orderBy(desc(templateCategories.createdAt));
+
+  categoryResult = await paginate(
+    db,
+    templateCategories,
+    categoryQueryBuilder,
+    undefined,
+    page
+  );
 } catch {
-  initialCategories = [];
+  categoryResult.data = [];
 }
 ---
 
@@ -71,8 +97,8 @@ try {
       <StatCard
         client:load
         label="Total Kategori"
-        value={initialCategories.length}
-        rawValue={initialCategories.length}
+        value={categoryResult.totalItems}
+        rawValue={categoryResult.totalItems}
         icon="category"
         cardTheme="dark"
         badge="Master Data"
@@ -82,8 +108,8 @@ try {
       <StatCard
         client:load
         label="Kategori Aktif"
-        value={initialCategories.length}
-        rawValue={initialCategories.length}
+        value={categoryResult.totalItems}
+        rawValue={categoryResult.totalItems}
         icon="check_circle"
         cardTheme="default"
         badge="Aktif"
@@ -105,7 +131,7 @@ try {
 
     <!-- Interactive Table Panel -->
     <div class="animate-fade-in-up delay-300">
-      <TemplateCategoryManager client:load {initialCategories} />
+      <TemplateCategoryManager client:load initialCategories={categoryResult.data} pagination={categoryResult} />
     </div>
   </div>
 

@@ -17,12 +17,14 @@
     icon?: string | null;
     createdAt?: string | Date;
   }> = [];
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
   let categories = [...initialCategories];
   let searchQuery = '';
   let loading = false;
   let isSaving = false;
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
 
   // Modal State
@@ -52,10 +54,13 @@
 
   $: {
     searchQuery;
-    currentPage = 1;
+    if (!pagination) currentPage = 1;
   }
 
-  $: paginatedCategories = filteredCategories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedCategories = pagination
+    ? filteredCategories
+    : filteredCategories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: totalItems = pagination ? pagination.totalItems : filteredCategories.length;
 
   const handleNameInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -246,13 +251,15 @@
   {:else}
     <CategoryTable
       {paginatedCategories}
+      {currentPage}
+      {pageSize}
       onEdit={openEditModal}
       onDelete={openDeleteConfirm}
     />
 
     <Pagination
       bind:currentPage
-      totalItems={filteredCategories.length}
+      {totalItems}
       {pageSize}
     />
   {/if}

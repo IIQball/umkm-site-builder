@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowUpRight, Palette, Store, User } from 'lucide-svelte';
-  import { Card, Table, Badge } from '@/components/ui';
+  import { Card, Table, Badge, Pagination } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
   import { formatDate } from '@/lib/utils/format';
 
@@ -17,6 +17,10 @@
     merchantName?: string | null;
     storeName?: string | null;
   }> = [];
+  export let currentPage: number = 1;
+  export let totalItems: number = transactions.length;
+  export let pageSize: number = 10;
+  export let pageParam: string = 'txPage';
 
   let copiedId: string | null = null;
 
@@ -47,9 +51,10 @@
   }
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'Invoice & Tanggal', align: 'left' as const, width: '24%' },
     { label: 'Merchant & Toko', align: 'left' as const, width: '24%' },
-    { label: 'Template Toko', align: 'left' as const, width: '26%' },
+    { label: 'Template Toko', align: 'left' as const, width: '24%' },
     { label: 'Fee Diterima', align: 'right' as const, width: '16%' },
     { label: 'Status', align: 'center' as const, width: '10%' },
   ];
@@ -100,10 +105,14 @@
       </div>
     {:else}
       <Table headers={tableHeaders} minWidth="min-w-[650px]" dense>
-        {#each transactions as trx (trx.id)}
+        {#each transactions as trx, idx (trx.id)}
           {@const displayId = trx.externalId || trx.id}
           {@const statusMeta = getStatusMeta(trx.status)}
           <tr class="hover:bg-nested/40 transition-colors group">
+            <!-- Sequence Number (#) -->
+            <td class="px-3 py-3.5 text-center font-mono text-2xs text-secondary font-bold">
+              {(currentPage - 1) * pageSize + idx + 1}
+            </td>
             <!-- Invoice ID & Tanggal -->
             <td class="px-5 py-3.5">
               <div class="flex items-center gap-2">
@@ -187,9 +196,21 @@
     {/if}
   </div>
 
+  {#if totalItems > pageSize}
+    <Pagination
+      bind:currentPage
+      {totalItems}
+      {pageSize}
+      {pageParam}
+      size="xs"
+      showInfo={false}
+      class="px-4 py-2.5"
+    />
+  {/if}
+
   <!-- Card Footer -->
   <div class="px-5 py-3 sm:px-6 bg-nested/50 border-t border-light flex items-center justify-between text-2xs text-secondary">
     <span>Diperbarui otomatis saat transaksi lunas</span>
-    <span class="font-mono font-bold text-main">{transactions.length} Data Terbaru</span>
+    <span class="font-mono font-bold text-main">{totalItems} Total Transaksi</span>
   </div>
 </Card>

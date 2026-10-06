@@ -2,13 +2,17 @@
   import { Eye, Check, X } from 'lucide-svelte';
   import { Badge, Table, Button } from '@/components/ui';
   import { formatCurrency, formatDate } from '@/lib/utils';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
   import type { AdminTemplateItem } from './review.types';
 
   export let paginatedTemplates: AdminTemplateItem[] = [];
+  export let currentPage: number = 1;
+  export let pageSize: number = 10;
   export let onApprove: (t: AdminTemplateItem) => void;
   export let onReject: (t: AdminTemplateItem) => void;
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: 'w-12' },
     { label: 'Informasi Template' },
     { label: 'Kreator Desainer', width: 'w-48' },
     { label: 'Harga Jual', align: 'right' as const, width: 'w-36' },
@@ -32,17 +36,22 @@
 </script>
 
 <Table headers={tableHeaders} minWidth="min-w-[850px]">
-  {#each paginatedTemplates as tpl (tpl.id)}
+  {#each paginatedTemplates as tpl, i (tpl.id)}
     {@const statusMeta = getStatusBadge(tpl.status)}
     <tr class="hover:bg-nested/40 transition-colors group">
+      <!-- Sequence Number (#) -->
+      <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
+        {(currentPage - 1) * pageSize + i + 1}
+      </td>
       <!-- Thumbnail & Name -->
       <td class="px-6 py-4">
         <div class="flex items-center gap-3.5">
           {#if tpl.thumbnailUrl}
             <img
-              src={tpl.thumbnailUrl}
+              src={getOptimizedCloudinaryUrl(tpl.thumbnailUrl, 160)}
               alt={tpl.name}
               class="w-12 h-8 rounded-lg object-cover border border-light flex-shrink-0 shadow-2xs"
+              loading="lazy"
             />
           {:else}
             <div class="w-12 h-8 rounded-lg bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0">
@@ -119,7 +128,7 @@
             <Button
               variant="outline"
               size="xs"
-              className="rounded-lg font-bold text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10"
+              className="rounded-lg font-bold text-success border-success/30 hover:bg-success/10"
               title="Setujui Template"
               on:click={() => onApprove(tpl)}
             >
@@ -129,7 +138,7 @@
             <Button
               variant="outline"
               size="xs"
-              className="rounded-lg font-bold text-rose-600 border-rose-500/30 hover:bg-rose-500/10"
+              className="rounded-lg font-bold text-error border-error/30 hover:bg-error/10"
               title="Tolak Template"
               on:click={() => onReject(tpl)}
             >

@@ -164,7 +164,7 @@
     cart = cart.filter((_, i) => i !== idx);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!form.name || !form.phone || !form.address) {
       alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.');
       return;
@@ -176,12 +176,7 @@
     const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     const waLink = generateWhatsAppLink(effectiveWaNumber, message);
     
-    // Debug log
-    console.log('🔵 [handleCheckout] storeId:', effectiveStoreId);
-    console.log('🔵 [handleCheckout] opening WhatsApp with tracking');
-    
-    // Open WhatsApp with tracking
-    await openWhatsAppWithTracking(waLink, effectiveStoreId);
+    openWhatsAppWithTracking(waLink, effectiveStoreId);
   };
 </script>
 

@@ -9,13 +9,9 @@ export async function trackAnalyticsEvent(
   storeId: string,
   eventType: EventType
 ): Promise<void> {
-  if (!storeId) {
-    console.warn('[trackAnalyticsEvent] storeId is empty, skipping');
-    return;
-  }
+  if (!storeId) return;
 
   try {
-    console.log(`📊 [trackAnalyticsEvent] Sending ${eventType} for store ${storeId}`);
     const response = await fetch('/api/analytics/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,15 +19,10 @@ export async function trackAnalyticsEvent(
       body: JSON.stringify({ storeId, eventType }),
     });
 
-    const resText = await response.text();
-    console.log(`📊 [trackAnalyticsEvent] Response status: ${response.status}, body: ${resText}`);
-
     if (!response.ok) {
-      console.warn(`⚠️ [trackAnalyticsEvent] Failed to track ${eventType}:`, response.statusText);
-    } else {
-      console.log(`✅ [trackAnalyticsEvent] Successfully tracked ${eventType}`);
+      console.warn(`[Analytics] Failed to track ${eventType}:`, response.statusText);
     }
   } catch (error) {
-    console.warn(`❌ [trackAnalyticsEvent] Error tracking ${eventType}:`, error);
+    console.warn(`[Analytics] Error tracking ${eventType}:`, error);
   }
 }

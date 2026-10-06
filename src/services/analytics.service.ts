@@ -2,6 +2,11 @@ import { db } from "@/lib/db/client";
 import { stores, storeDailyStats } from "@/db/schema";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { AppError } from "@/lib/utils/api-handler";
+import {
+  hasVisitorEventToday,
+  recordVisitorEvent,
+  type EventType as VisitorEventType,
+} from "@/services/visitorLimit.service";
 
 export type EventType = "wa_click" | "store_view";
 
@@ -10,11 +15,13 @@ export interface TrackEventResult {
   eventType: EventType;
   totalWaClicks: number;
   totalViews: number;
+  limited?: boolean;
 }
 
 export async function trackEvent(
   storeId: string,
   eventType: EventType,
+  visitorIp?: string,
 ): Promise<TrackEventResult> {
   const store = await db.query.stores.findFirst({
     where: eq(stores.id, storeId),
@@ -27,6 +34,23 @@ export async function trackEvent(
       undefined,
       "STORE_NOT_FOUND",
     );
+  }
+
+  const today = wibDateKey(new Date());
+  const visitorEventType: VisitorEventType = eventType === "store_view" ? "view" : "click";
+
+  // Check daily limit per visitor IP
+  if (visitorIp) {
+    const alreadyDone = await hasVisitorEventToday(storeId, visitorIp, visitorEventType, today);
+    if (alreadyDone) {
+      return {
+        storeId,
+        eventType,
+        totalWaClicks: store.totalWaClicks,
+        totalViews: store.totalViews,
+        limited: true,
+      };
+    }
   }
 
   const updateData: Record<string, unknown> = {
@@ -70,7 +94,7 @@ export async function trackEvent(
       .values({
         id: `sds_${crypto.randomUUID()}`,
         storeId,
-        date: wibDateKey(new Date()),
+        date: today,
         views: eventType === "store_view" ? 1 : 0,
         waClicks: eventType === "wa_click" ? 1 : 0,
       })
@@ -80,6 +104,15 @@ export async function trackEvent(
       });
   } catch (error) {
     console.error("[ANALYTICS] daily stats upsert failed:", error);
+  }
+
+  // Record visitor limit
+  if (visitorIp) {
+    try {
+      await recordVisitorEvent(storeId, visitorIp, visitorEventType, today);
+    } catch (error) {
+      console.error("[ANALYTICS] visitor limit record failed:", error);
+    }
   }
 
   return {
@@ -161,20 +194,17 @@ export async function getStoreTrafficSeries(
         waClicks: storeDailyStats.waClicks,
       })
       .from(storeDailyStats)
-      .where(
-        and(
-          eq(storeDailyStats.storeId, storeId),
-          gte(storeDailyStats.date, `${months[0]}-01`),
-        ),
-      );
+      .where(eq(storeDailyStats.storeId, storeId));
 
     const agg = new Map<string, { views: number; waClicks: number }>();
     for (const r of rows) {
       const k = r.date.slice(0, 7);
-      const cur = agg.get(k) ?? { views: 0, waClicks: 0 };
-      cur.views += r.views;
-      cur.waClicks += r.waClicks;
-      agg.set(k, cur);
+      if (months.includes(k)) {
+        const cur = agg.get(k) ?? { views: 0, waClicks: 0 };
+        cur.views += r.views;
+        cur.waClicks += r.waClicks;
+        agg.set(k, cur);
+      }
     }
 
     return months.map((key) => {

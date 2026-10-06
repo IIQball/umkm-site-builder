@@ -49,16 +49,18 @@ export function generateWhatsAppOrderUrl(phone: string, productName: string, pro
  * Open WhatsApp link and track wa_click event for analytics.
  * Call this instead of window.open() for WhatsApp links in live storefronts.
  */
-export async function openWhatsAppWithTracking(
+export function openWhatsAppWithTracking(
   waLink: string,
   storeId?: string
-): Promise<void> {
-  // Track event if storeId is provided
+): void {
+  // Fire tracking event without waiting (fire-and-forget)
   if (storeId && typeof window !== 'undefined') {
-    await trackAnalyticsEvent(storeId, 'wa_click');
+    trackAnalyticsEvent(storeId, 'wa_click').catch(() => {
+      // Silently fail if tracking doesn't work
+    });
   }
   
-  // Open WhatsApp
+  // Open WhatsApp immediately
   if (typeof window !== 'undefined') {
     window.open(waLink, '_blank');
   }

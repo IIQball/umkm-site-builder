@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { Plus, Trash2, MapPin, Building2, Store } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import type { StoreBranchItem } from '../onboarding.types';
@@ -8,8 +9,19 @@
   export let primaryStoreName: string = '';
   export let primaryAddress: string = '';
   export let primaryMapsUrl: string = '';
+  export let maxBranches: number = 5;
 
-  const MAX_BRANCHES = 5;
+  onMount(async () => {
+    try {
+      const res = await fetch('/api/public/platform-settings');
+      const result = await res.json();
+      if (result.ok && result.data && typeof result.data.maxStoreBranches === 'number') {
+        maxBranches = result.data.maxStoreBranches;
+      }
+    } catch {
+      // Keep prop value
+    }
+  });
 
   function ensureInitialBranch() {
     if (branches.length === 0) {
@@ -32,7 +44,7 @@
   }
 
   function addBranch() {
-    if (branches.length >= MAX_BRANCHES) return;
+    if (branches.length >= maxBranches) return;
     const nextIdx = branches.length + 1;
     const newBranch: StoreBranchItem = {
       id: `branch_${Date.now()}`,
@@ -60,7 +72,7 @@
       <span class="block text-xs font-bold text-main font-heading">
         Jumlah Cabang / Lokasi Toko
       </span>
-      <span class="text-3xs text-secondary font-mono">Maks 5 Cabang</span>
+      <span class="text-3xs text-secondary font-mono">Maks {maxBranches} Cabang</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
@@ -83,7 +95,7 @@
           : 'bg-card text-secondary border-light hover:text-main'}"
       >
         <Building2 size={14} />
-        <span>Beberapa Cabang (Maks 5)</span>
+        <span>Beberapa Cabang (Maks {maxBranches})</span>
       </button>
     </div>
   </div>
@@ -93,13 +105,13 @@
     <div class="space-y-3 animate-in fade-in duration-200">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold text-main font-heading">
-          Daftar Cabang Toko ({branches.length}/{MAX_BRANCHES})
+          Daftar Cabang Toko ({branches.length}/{maxBranches})
         </span>
         <Button
           type="button"
           size="sm"
           variant="ghost"
-          disabled={branches.length >= MAX_BRANCHES}
+          disabled={branches.length >= maxBranches}
           on:click={addBranch}
           class="text-primary font-bold text-xs !px-2.5 !py-1 !h-auto gap-1"
         >

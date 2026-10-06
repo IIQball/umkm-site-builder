@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Building2 } from 'lucide-svelte';
-  import { canvasStore } from '../../stores/editorStore';
+  import { canvasStore, maxStoreBranchesStore } from '../../stores/editorStore';
   import type { MapBranchItem } from './maps.helpers';
   import { resolveMapsNodeStyle } from './mapsStyles.helpers';
 
@@ -53,7 +53,7 @@
   }`}
   style="margin-top: {style.marginTop}; margin-bottom: {style.marginBottom};"
 >
-  {#each branches.slice(0, 5) as branch, idx}
+  {#each branches.slice(0, $maxStoreBranchesStore || 5) as branch, idx}
     <button
       type="button"
       on:click={(e) => handleBranchClick(e, idx)}

@@ -39,6 +39,7 @@
   export let isEdit: boolean = false;
   export let existingStore: ExistingStoreData | null = null;
   export let tenantId: string | undefined = undefined;
+  export let maxStoreBranches: number = 5;
 
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -251,7 +252,7 @@
       <OnboardingStepStoreInfo
         {isEdit} bind:storeName bind:categoryId {categories}
         bind:waNumber bind:googleMapsUrl bind:address bind:regionData
-        bind:branchMode bind:branches
+        bind:branchMode bind:branches {maxStoreBranches}
         {formErrors} {submitStatus} {submitError}
         onPrev={prevStep} onNext={nextStep}
       />

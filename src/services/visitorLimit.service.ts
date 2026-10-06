@@ -61,7 +61,7 @@ export async function recordVisitorEvent(
   });
 
   if (existingRecord) {
-    const updateData: Record<string, any> = { updatedAt: new Date() };
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (eventType === 'view') updateData.viewedAt = new Date();
     if (eventType === 'click') updateData.clickedAt = new Date();
 
@@ -70,7 +70,7 @@ export async function recordVisitorEvent(
       .set(updateData)
       .where(eq(visitorDailyLimit.id, existingRecord.id));
   } else {
-    const newRecord: Record<string, any> = {
+    const newRecord: Record<string, unknown> = {
       id: `vdl_${crypto.randomUUID()}`,
       storeId,
       visitorIp,

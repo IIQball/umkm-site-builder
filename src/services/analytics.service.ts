@@ -82,7 +82,7 @@ export async function trackEvent(
   // Catat juga ke statistik harian untuk grafik. Kegagalan di sini tidak boleh
   // membuat tracking utama gagal.
   try {
-    const updateSet: Record<string, any> = {};
+    const updateSet: Record<string, unknown> = {};
     if (eventType === "store_view") {
       updateSet.views = sql`${storeDailyStats.views} + 1`;
     } else if (eventType === "wa_click") {

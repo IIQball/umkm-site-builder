@@ -18,7 +18,7 @@ export interface AddBankAccountInput {
  */
 export async function ensureUserFinanceProfile(userId: string): Promise<void> {
   const existingDesigner = await db
-    .select()
+    .select({ userId: designers.userId })
     .from(designers)
     .where(eq(designers.userId, userId))
     .limit(1);
@@ -43,7 +43,16 @@ export async function ensureUserFinanceProfile(userId: string): Promise<void> {
  */
 export async function getUserBankAccounts(userId: string): Promise<BankAccount[]> {
   const records = await db
-    .select()
+    .select({
+      id: bankAccounts.id,
+      bankCode: bankAccounts.bankCode,
+      bankName: bankAccounts.bankName,
+      accountNumber: bankAccounts.accountNumber,
+      accountHolder: bankAccounts.accountHolder,
+      isPrimary: bankAccounts.isPrimary,
+      isVerified: bankAccounts.isVerified,
+      createdAt: bankAccounts.createdAt,
+    })
     .from(bankAccounts)
     .where(eq(bankAccounts.userId, userId))
     .orderBy(desc(bankAccounts.isPrimary), desc(bankAccounts.createdAt));
@@ -72,7 +81,11 @@ export async function addUserBankAccount(
   await ensureUserFinanceProfile(userId);
 
   const existingAccounts = await db
-    .select()
+    .select({
+      id: bankAccounts.id,
+      bankCode: bankAccounts.bankCode,
+      accountNumber: bankAccounts.accountNumber,
+    })
     .from(bankAccounts)
     .where(eq(bankAccounts.userId, userId));
 
@@ -142,7 +155,10 @@ export async function deleteUserBankAccount(
   accountId: string
 ): Promise<void> {
   const existing = await db
-    .select()
+    .select({
+      id: bankAccounts.id,
+      isPrimary: bankAccounts.isPrimary,
+    })
     .from(bankAccounts)
     .where(and(eq(bankAccounts.id, accountId), eq(bankAccounts.userId, userId)))
     .limit(1);
@@ -160,7 +176,7 @@ export async function deleteUserBankAccount(
   // If deleted account was primary, set the first remaining account to primary
   if (wasPrimary) {
     const remaining = await db
-      .select()
+      .select({ id: bankAccounts.id })
       .from(bankAccounts)
       .where(eq(bankAccounts.userId, userId))
       .orderBy(desc(bankAccounts.createdAt))
@@ -183,7 +199,7 @@ export async function setPrimaryBankAccount(
   accountId: string
 ): Promise<BankAccount> {
   const existing = await db
-    .select()
+    .select({ id: bankAccounts.id })
     .from(bankAccounts)
     .where(and(eq(bankAccounts.id, accountId), eq(bankAccounts.userId, userId)))
     .limit(1);

@@ -38,7 +38,8 @@ try {
     .from(templates)
     .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
     .where(and(eq(templates.designerId, user.id), isNull(templates.deletedAt)))
-    .orderBy(desc(templates.createdAt));
+    .orderBy(desc(templates.createdAt))
+    .limit(10);
 
   templateRows = rawTemplates.map((t) => ({
     id: t.id,
@@ -62,7 +63,8 @@ try {
     })
     .from(commissions)
     .where(eq(commissions.designerId, user.id))
-    .orderBy(desc(commissions.createdAt));
+    .orderBy(desc(commissions.createdAt))
+    .limit(10);
 
   commissionRows = rawCommissions.map((c) => ({
     id: c.id,

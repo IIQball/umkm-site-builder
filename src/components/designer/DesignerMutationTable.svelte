@@ -46,6 +46,7 @@
   $: paginatedMutations = filteredMutations.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'Transaksi', align: 'left' as const },
     { label: 'Keterangan', align: 'left' as const },
     { label: 'Reference ID', align: 'left' as const },
@@ -90,16 +91,16 @@
         <button
           type="button"
           on:click={() => activeFilter = 'ALL'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'ALL' ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-2xs' : 'text-muted hover:text-main'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'ALL' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
           Semua ({mutations.length})
         </button>
         <button
           type="button"
           on:click={() => activeFilter = 'CREDIT'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'CREDIT' ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-2xs' : 'text-muted hover:text-main'}"
+          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'CREDIT' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
           Masuk
         </button>
         <button
@@ -126,12 +127,16 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[700px]">
-      {#each paginatedMutations as mut}
+      {#each paginatedMutations as mut, idx (mut.id || idx)}
         <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Sequence Number (#) -->
+          <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+            {(currentPage - 1) * pageSize + idx + 1}
+          </td>
           <!-- Type Icon + Badge -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs {mut.type === 'CREDIT' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-orange/10 text-orange border border-orange/20'}">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs {mut.type === 'CREDIT' ? 'bg-success/10 text-success border border-success/20' : 'bg-orange/10 text-orange border border-orange/20'}">
                 <span class="material-symbols-outlined text-base">
                   {mut.type === 'CREDIT' ? 'south_west' : 'north_east'}
                 </span>
@@ -155,11 +160,11 @@
               <button
                 type="button"
                 on:click={() => copyToClipboard(mut.referenceId ?? '')}
-                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-primary rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                 title="Salin Reference ID"
               >
                 <span class="inline-block truncate max-w-[110px] align-middle">{mut.referenceId}</span>
-                <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === mut.referenceId ? 'text-emerald-500' : ''}">
+                <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === mut.referenceId ? 'text-success' : ''}">
                   {copiedId === mut.referenceId ? 'check' : 'content_copy'}
                 </span>
               </button>
@@ -176,7 +181,7 @@
           <!-- Amount with High-Contrast Pill -->
           <td class="px-4 py-4 text-right whitespace-nowrap">
             {#if mut.type === 'CREDIT'}
-              <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+              <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-success bg-success/10 px-2.5 py-1 rounded-xl border border-success/20">
                 +{formatCurrency(mut.amount)}
               </span>
             {:else}
@@ -201,6 +206,7 @@
       bind:currentPage
       totalItems={filteredMutations.length}
       {pageSize}
+      pageParam="mutPage"
     />
   {/if}
 </Card>

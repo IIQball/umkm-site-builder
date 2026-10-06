@@ -4,6 +4,11 @@ import DesignerOrdersOverview from "@/components/designer/DesignerOrdersOverview
 import Button from "@/components/ui/Button.svelte";
 import { getAuthenticatedUser, isAuthorizedDesigner } from "@/lib/auth";
 import { transactionService } from "@/services/finance/transaction.service";
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import { db } from "@/lib/db/client";
+import { templates, transactions } from "@/db/schema";
+import { eq, inArray, and, desc } from "drizzle-orm";
+import type { PaginatedResult } from "@/types/common";
 
 export const prerender = false;
 
@@ -12,11 +17,84 @@ if (!user || !isAuthorizedDesigner(user)) {
   return Astro.redirect("/auth/login?redirect=/designer/orders");
 }
 
+const { page } = getPaginationParams(Astro.url);
+
 let initialOrders: Awaited<
   ReturnType<typeof transactionService.getDesignerIncomingOrders>
 > = [];
+
+let pagination: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
 try {
-  initialOrders = await transactionService.getDesignerIncomingOrders(user.id);
+  const designerTemplates = await db.query.templates.findMany({
+    where: eq(templates.designerId, user.id),
+    columns: { id: true },
+  });
+  const templateIds = designerTemplates.map((t) => t.id);
+
+  if (templateIds.length > 0) {
+    const whereCondition = and(
+      inArray(transactions.templateId, templateIds),
+      eq(transactions.type, "template_purchase"),
+    );
+
+    pagination = await paginate<any>(
+      db,
+      transactions,
+      (limit, offset) =>
+        db.query.transactions.findMany({
+          where: whereCondition,
+          columns: {
+            id: true,
+            userId: true,
+            type: true,
+            amount: true,
+            adminFee: true,
+            status: true,
+            storeId: true,
+            templateId: true,
+            assistedBy: true,
+            externalId: true,
+            paymentGatewayRef: true,
+            paymentChannel: true,
+            createdAt: true,
+          },
+          with: {
+            template: {
+              columns: {
+                id: true,
+                name: true,
+                thumbnailUrl: true,
+                price: true,
+              },
+            },
+            user: {
+              columns: { id: true, name: true, email: true, image: true },
+            },
+            commission: {
+              columns: {
+                id: true,
+                designerAmount: true,
+                platformFee: true,
+                totalAmount: true,
+              },
+            },
+          },
+          orderBy: [desc(transactions.createdAt)],
+          limit,
+          offset,
+        }),
+      whereCondition,
+      page,
+    );
+    initialOrders = pagination.data;
+  }
 } catch {
   initialOrders = [];
 }
@@ -59,7 +137,7 @@ try {
     </div>
 
     <!-- Master Designer Orders Overview (Period Filter, Statcards & Interactive Table) -->
-    <DesignerOrdersOverview client:load allOrders={initialOrders} />
+    <DesignerOrdersOverview client:load allOrders={initialOrders} pagination={pagination} />
   </div>
 </DashboardLayout>
 

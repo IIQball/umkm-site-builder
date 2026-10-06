@@ -1,7 +1,9 @@
 <script lang="ts">
   import { formatCurrency, formatDate } from '@/lib/utils/format';
   import { Badge, Button } from '@/components/ui';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  export let rowNumber: number = 1;
   export let template: {
     id: string;
     name: string;
@@ -71,8 +73,8 @@
 </script>
 
 <div
-  class={`template-card bg-card border rounded-3xl overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col group relative ${
-    isSelected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-light'
+  class={`template-card bg-card border rounded-3xl overflow-hidden shadow-xs hover:border-primary/50 transition-all duration-200 flex flex-col group relative ${
+    isSelected ? 'border-primary ring-2 ring-primary/40' : 'border-light'
   }`}
   data-status={template.status}
   data-name={template.name.toLowerCase()}
@@ -98,9 +100,16 @@
       </div>
     {/if}
 
+    <!-- Sequence Number Badge -->
+    <div class="absolute {template.status === 'draft' && onToggleSelect ? 'top-3 left-11' : 'top-3 left-3'} z-20">
+      <span class="px-2 py-0.5 rounded-lg bg-card/90 border border-light font-mono text-2xs font-bold text-secondary shadow-xs backdrop-blur-xs">
+        #{rowNumber}
+      </span>
+    </div>
+
     {#if template.thumbnailUrl}
       <img
-        src={template.thumbnailUrl}
+        src={getOptimizedCloudinaryUrl(template.thumbnailUrl, 500)}
         alt={template.name}
         class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
         loading="lazy"

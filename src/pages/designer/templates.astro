@@ -8,6 +8,9 @@ import DesignerTemplateTable from "@/components/designer/DesignerTemplateTable.s
 import StatCard from "@/components/ui/StatCard.svelte";
 import Button from "@/components/ui/Button.svelte";
 
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import type { PaginatedResult } from "@/types/common";
+
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -15,40 +18,82 @@ if (!user || !isAuthorizedDesigner(user)) {
   return Astro.redirect("/auth/login?redirect=/designer/templates");
 }
 
-const templatesList = await db
-  .select({
-    id: templates.id,
-    name: templates.name,
-    description: templates.description,
-    price: templates.price,
-    thumbnailUrl: templates.thumbnailUrl,
-    status: templates.status,
-    rejectionReason: templates.rejectionReason,
-    createdAt: templates.createdAt,
-    totalSold: sql<number>`count(${commissions.id})`.mapWith(Number),
-  })
-  .from(templates)
-  .leftJoin(commissions, eq(templates.id, commissions.templateId))
-  .where(and(eq(templates.designerId, user.id), isNull(templates.deletedAt)))
-  .groupBy(
-    templates.id,
-    templates.name,
-    templates.description,
-    templates.price,
-    templates.thumbnailUrl,
-    templates.status,
-    templates.rejectionReason,
-    templates.createdAt,
-  )
-  .orderBy(desc(templates.createdAt));
+const { page } = getPaginationParams(Astro.url);
+const whereCondition = and(eq(templates.designerId, user.id), isNull(templates.deletedAt));
 
-const counts = {
-  all: templatesList.length,
-  draft: templatesList.filter((t) => t.status === "draft").length,
-  pending: templatesList.filter((t) => t.status === "pending").length,
-  approved: templatesList.filter((t) => t.status === "approved").length,
-  rejected: templatesList.filter((t) => t.status === "rejected").length,
+let templatesList: Array<any> = [];
+let pagination: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
 };
+
+let counts = {
+  all: 0,
+  draft: 0,
+  pending: 0,
+  approved: 0,
+  rejected: 0,
+};
+
+try {
+  const [countsRows, paginatedRes] = await Promise.all([
+    db
+      .select({
+        id: templates.id,
+        status: templates.status,
+      })
+      .from(templates)
+      .where(whereCondition),
+    paginate(
+      db,
+      templates,
+      db
+        .select({
+          id: templates.id,
+          name: templates.name,
+          description: templates.description,
+          price: templates.price,
+          thumbnailUrl: templates.thumbnailUrl,
+          status: templates.status,
+          rejectionReason: templates.rejectionReason,
+          createdAt: templates.createdAt,
+          totalSold: sql<number>`count(${commissions.id})`.mapWith(Number),
+        })
+        .from(templates)
+        .leftJoin(commissions, eq(templates.id, commissions.templateId))
+        .where(whereCondition)
+        .groupBy(
+          templates.id,
+          templates.name,
+          templates.description,
+          templates.price,
+          templates.thumbnailUrl,
+          templates.status,
+          templates.rejectionReason,
+          templates.createdAt,
+        )
+        .orderBy(desc(templates.createdAt)),
+      whereCondition,
+      page
+    ),
+  ]);
+
+  pagination = paginatedRes;
+  templatesList = pagination.data || [];
+
+  counts = {
+    all: countsRows.length,
+    draft: countsRows.filter((t) => t.status === "draft").length,
+    pending: countsRows.filter((t) => t.status === "pending").length,
+    approved: countsRows.filter((t) => t.status === "approved").length,
+    rejected: countsRows.filter((t) => t.status === "rejected").length,
+  };
+} catch (error) {
+  console.error("[DesignerTemplates] Failed to query templates:", error);
+}
 ---
 
 <DashboardLayout title="Template Saya" breadcrumb="Template Saya">
@@ -130,7 +175,7 @@ const counts = {
 
     <!-- Interactive Template Table (matching Riwayat Mutasi & Transaksi style) -->
     <div class="animate-fade-in-up delay-300">
-      <DesignerTemplateTable client:load templates={templatesList} />
+      <DesignerTemplateTable client:load templates={templatesList} pagination={pagination} />
     </div>
   </div>
 </DashboardLayout>

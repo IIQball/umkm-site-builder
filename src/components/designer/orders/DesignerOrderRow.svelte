@@ -2,7 +2,9 @@
   import { Palette } from 'lucide-svelte';
   import { Badge } from '@/components/ui';
   import { formatCurrency, formatDate } from '@/lib/utils';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  export let rowNumber: number = 1;
   export let order: any;
   export let statusMeta: { variant: any; label: string };
   export let designerShare: number;
@@ -12,17 +14,21 @@
 </script>
 
 <tr class="hover:bg-nested/40 transition-colors group">
+  <!-- Sequence Number (#) -->
+  <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+    {rowNumber}
+  </td>
   <!-- Invoice ID & Created At -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-2.5">
       <button
         type="button"
         on:click={() => onCopyId(displayId)}
-        class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+        class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-main bg-nested/80 border border-light hover:border-primary rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
         title="Salin ID Tagihan"
       >
         <span class="inline-block truncate max-w-[110px] align-middle">{displayId}</span>
-        <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-emerald-500' : 'text-muted'}">
+        <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === displayId ? 'text-success' : 'text-muted'}">
           {copiedId === displayId ? 'check' : 'content_copy'}
         </span>
       </button>
@@ -37,9 +43,10 @@
     <div class="flex items-center gap-3">
       {#if order.template?.thumbnailUrl}
         <img
-          src={order.template.thumbnailUrl}
+          src={getOptimizedCloudinaryUrl(order.template.thumbnailUrl, 160)}
           alt={order.template.name}
           class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
+          loading="lazy"
         />
       {:else}
         <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
@@ -83,7 +90,7 @@
 
   <!-- Net Designer Commission -->
   <td class="px-4 py-4 text-right whitespace-nowrap">
-    <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+    <span class="inline-flex items-center font-mono text-xs sm:text-sm font-black text-success bg-success/10 px-2.5 py-1 rounded-xl border border-success/20">
       +{formatCurrency(designerShare)}
     </span>
   </td>

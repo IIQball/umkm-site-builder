@@ -7,6 +7,7 @@
   import type { OrderTransactionItem } from '@/types/finance';
 
   export let allOrders: OrderTransactionItem[] = [];
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -91,6 +92,7 @@
   <div class="animate-fade-in-up delay-300">
     <OrderHistoryTable
       initialOrders={filteredOrders}
+      {pagination}
       isAdmin={false}
       isReadOnly={false}
       tableTitle="Riwayat Tagihan & Pembelian"

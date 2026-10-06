@@ -1,11 +1,15 @@
 <script lang="ts">
   import { Palette, ArrowUpRight, ShoppingBag, Plus } from 'lucide-svelte';
-  import { Card, Badge, Button } from '@/components/ui';
+  import { Card, Badge, Button, Pagination } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
   import type { DesignerTemplateRecord, DesignerCommissionRecord } from './designerDashboard.types';
 
   export let templates: DesignerTemplateRecord[] = [];
   export let commissions: DesignerCommissionRecord[] = [];
+
+  let currentPage = 1;
+  const pageSize = 10;
 
   $: approvedTemplates = templates.filter((t) => t.status === 'approved');
 
@@ -19,6 +23,11 @@
       totalEarned,
     };
   }).sort((a, b) => b.salesCount - a.salesCount || b.totalEarned - a.totalEarned);
+
+  $: paginatedStats = templateStats.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   $: totalApprovedSales = templateStats.reduce((sum, t) => sum + t.salesCount, 0);
   $: totalApprovedRevenue = templateStats.reduce((sum, t) => sum + t.totalEarned, 0);
@@ -84,17 +93,21 @@
       </div>
     {:else}
       <div class="space-y-4">
-        {#each templateStats as tpl, idx}
+        {#each paginatedStats as tpl, idx (tpl.id)}
           {@const sharePct = totalApprovedSales > 0 ? Math.round((tpl.salesCount / totalApprovedSales) * 100) : 0}
           <div class="p-3.5 sm:p-4 rounded-2xl bg-nested/40 border border-light hover:border-border transition-all">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
               <!-- Template Info -->
               <div class="flex items-center gap-3 min-w-0">
+                <span class="w-6 h-6 rounded-lg bg-nested border border-light flex items-center justify-center font-mono text-2xs font-bold text-secondary flex-shrink-0">
+                  #{(currentPage - 1) * pageSize + idx + 1}
+                </span>
                 {#if tpl.thumbnailUrl}
                   <img
-                    src={tpl.thumbnailUrl}
+                    src={getOptimizedCloudinaryUrl(tpl.thumbnailUrl, 160)}
                     alt={tpl.name}
                     class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
+                    loading="lazy"
                   />
                 {:else}
                   <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
@@ -159,6 +172,16 @@
       </div>
     {/if}
   </div>
+
+  {#if templateStats.length > pageSize}
+    <Pagination
+      bind:currentPage
+      totalItems={templateStats.length}
+      {pageSize}
+      size="xs"
+      class="border-t border-light px-5 py-3"
+    />
+  {/if}
 
   <!-- Card Footer -->
   <div class="px-5 py-3.5 sm:px-6 bg-nested/50 border-t border-light flex flex-wrap items-center justify-between gap-4 text-xs">

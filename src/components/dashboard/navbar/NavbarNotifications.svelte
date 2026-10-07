@@ -83,6 +83,7 @@
     if (activeTab === 'users') return n.type === 'user_registered';
     if (activeTab === 'sales') return n.type === 'template_purchased';
     if (activeTab === 'template') return ['template_submitted', 'template_reviewed'].includes(n.type);
+    if (activeTab === 'store') return ['store_managed_by_admin', 'template_purchased'].includes(n.type);
     return true;
   });
 
@@ -90,12 +91,14 @@
   $: templateCount = notifications.filter(n => ['template_submitted', 'template_reviewed'].includes(n.type) && !n.isRead).length;
   $: usersCount = notifications.filter(n => n.type === 'user_registered' && !n.isRead).length;
   $: salesCount = notifications.filter(n => n.type === 'template_purchased' && !n.isRead).length;
+  $: storeCount = notifications.filter(n => ['store_managed_by_admin', 'template_purchased'].includes(n.type) && !n.isRead).length;
 
   function getIcon(type: string) {
     if (type === 'user_registered') return 'person_add';
     if (type === 'template_submitted') return 'palette';
     if (type === 'template_reviewed') return 'fact_check';
     if (type === 'template_purchased') return 'shopping_cart';
+    if (type === 'store_managed_by_admin') return 'storefront';
     return 'notifications';
   }
 
@@ -103,7 +106,8 @@
     if (type === 'user_registered') return '/superadmin/users';
     if (type === 'template_submitted') return '/superadmin/templates';
     if (type === 'template_reviewed') return '/designer/templates';
-    if (type === 'template_purchased') return '/designer/wallet';
+    if (type === 'template_purchased') return user?.role === 'tenant' ? '/tenant/store' : '/designer/wallet';
+    if (type === 'store_managed_by_admin') return '/tenant/store';
     return '#';
   }
 </script>
@@ -182,6 +186,15 @@
             >
               Penjualan
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{salesCount}</span>
+            </Button>
+          {:else if user?.role === 'tenant'}
+            <Button 
+              variant="ghost" size="sm"
+              on:click={() => activeTab = 'store'} 
+              class="text-sm rounded-lg {activeTab === 'store' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            >
+              Toko
+              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{storeCount}</span>
             </Button>
           {/if}
         </div>

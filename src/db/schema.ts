@@ -24,7 +24,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchas
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
-export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased']);
+export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased', 'store_managed_by_admin']);
 
 // ==========================================
 // 2. CORE AUTH TABLES (BETTER-AUTH COMPATIBLE)

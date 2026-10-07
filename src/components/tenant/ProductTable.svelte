@@ -8,7 +8,7 @@
   import ProductDeleteModal from "./ProductDeleteModal.svelte";
   import ProductTableRow from "./ProductTableRow.svelte";
 
-  import { StatCard, Card, Table, Input, Button } from "@/components/ui";
+  import { StatCard, Card, Table, Input, Button, Pagination } from "@/components/ui";
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
 
@@ -26,6 +26,20 @@
     const catName = categories.find((c) => c.id === p.categoryId)?.name || "";
     return catName.toLowerCase().includes(searchCategoryName.toLowerCase());
   });
+
+  let currentPage = 1;
+  const itemsPerPage = 5;
+  
+  // Reset pagination on search change
+  $: if (searchCategoryName !== undefined) {
+    currentPage = 1;
+  }
+
+  $: totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+  $: paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   $: displayedCategories = categories.filter(
     (c) =>
@@ -349,14 +363,14 @@
           { label: "Aksi", align: "right" },
         ]}
       >
-        {#if filteredProducts.length === 0}
+        {#if paginatedProducts.length === 0}
           <tr>
             <td colspan="6" class="text-center py-8 text-secondary">
               Tidak ada produk di kategori ini.
             </td>
           </tr>
         {:else}
-          {#each filteredProducts as product}
+          {#each paginatedProducts as product}
             <ProductTableRow
               {product}
               {categories}
@@ -367,6 +381,17 @@
           {/each}
         {/if}
       </Table>
+      
+      {#if totalPages > 1}
+        <div class="px-6 py-4 border-t border-light flex justify-center">
+          <Pagination
+            {currentPage}
+            totalItems={filteredProducts.length}
+            pageSize={itemsPerPage}
+            on:pageChange={(e) => (currentPage = e.detail)}
+          />
+        </div>
+      {/if}
     {/if}
   </Card>
 

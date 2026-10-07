@@ -1,8 +1,10 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser } from '@/lib/auth';
-import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
-import AdminLocationMap from '@/components/admin/AdminLocationMap.svelte';
+import SuperadminOverviewDashboard from '@/components/superadmin/dashboard/SuperadminOverviewDashboard.svelte';
+import { db } from '@/lib/db/client';
+import { users, transactions, templates, activityLogs } from '@/db/schema';
+import { isNull, desc, count, eq, and } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -10,6 +12,105 @@ const user = await getAuthenticatedUser(Astro.request);
 if (!user || user.role !== 'superadmin') {
   return Astro.redirect('/auth/login?redirect=/superadmin');
 }
+
+let userRows: Array<{
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  createdAt: string;
+}> = [];
+
+let transactionRows: Array<{
+  id: string;
+  amount: number;
+  adminFee: number | null;
+  status: string;
+  createdAt: string;
+}> = [];
+
+let pendingTemplatesCount = 0;
+let activityRows: Array<{
+  id: string;
+  action: string;
+  userName: string | null;
+  createdAt: string;
+}> = [];
+
+try {
+  const [rawUsers, rawTransactions, pendingCountResult, rawActivities] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(isNull(users.deletedAt))
+      .orderBy(desc(users.createdAt)),
+
+    db
+      .select({
+        id: transactions.id,
+        amount: transactions.amount,
+        adminFee: transactions.adminFee,
+        status: transactions.status,
+        createdAt: transactions.createdAt,
+      })
+      .from(transactions)
+      .orderBy(desc(transactions.createdAt)),
+
+    db
+      .select({ total: count() })
+      .from(templates)
+      .where(and(isNull(templates.deletedAt), eq(templates.status, 'pending'))),
+
+    db
+      .select({
+        id: activityLogs.id,
+        action: activityLogs.action,
+        userName: users.name,
+        createdAt: activityLogs.createdAt,
+      })
+      .from(activityLogs)
+      .leftJoin(users, eq(activityLogs.userId, users.id))
+      .orderBy(desc(activityLogs.createdAt))
+      .limit(10),
+  ]);
+
+  userRows = rawUsers.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    createdAt: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
+  }));
+
+  transactionRows = rawTransactions.map((t) => ({
+    id: t.id,
+    amount: Number(t.amount || 0),
+    adminFee: Number(t.adminFee || 0),
+    status: t.status,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+  }));
+
+  pendingTemplatesCount = Number(pendingCountResult[0]?.total ?? 0);
+
+  activityRows = rawActivities.map((a) => ({
+    id: a.id,
+    action: a.action,
+    userName: a.userName || null,
+    createdAt: a.createdAt ? a.createdAt.toISOString() : new Date().toISOString(),
+  }));
+} catch (error) {
+  console.error('[SuperadminDashboard] Gagal memuat data overview dasbor:', error);
+}
+
+const userCreatedYear = user.createdAt
+  ? new Date(user.createdAt).getFullYear()
+  : new Date().getFullYear();
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -24,45 +125,28 @@ if (currentHour >= 4 && currentHour < 11) {
 }
 ---
 
-<DashboardLayout title="Super Admin Dashboard" breadcrumb="Super Admin / Dashboard">
-  <div class="min-h-full pb-10 flex flex-col">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<DashboardLayout title="Overview Dasbor Super Admin" breadcrumb="Super Admin / Dashboard">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
-          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Super Admin'}!</span>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Owner'}!</span>
         </h1>
-        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Berikut adalah metrik operasional, pendapatan platform, dan manajemen pengguna sistem.
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat monitoring performa operasional platform, statistik pendapatan fee, pertumbuhan pengguna, dan kurasi template sistem.
         </p>
       </div>
     </div>
 
-    <!-- Map & Location Quick Actions -->
-    <div class="bg-card-base border border-light/60 rounded-3xl p-5 shadow-xs flex flex-col lg:flex-row gap-6 mt-6 mb-12">
-      <!-- Map Preview -->
-      <div class="w-full lg:w-2/3 rounded-2xl overflow-hidden relative shadow-inner group">
-        <AdminLocationMap client:load />
-      </div>
-      
-      <!-- Actions -->
-      <div class="w-full lg:w-1/3 flex flex-col justify-center gap-3">
-        <h3 class="text-lg font-bold text-main font-heading flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          Peta & Titik UMKM
-        </h3>
-        <p class="text-sm text-secondary leading-relaxed">
-          Pantau UMKM di sekitar Anda. Titik pink menunjukkan UMKM yang sudah terdaftar.
-        </p>
-        <div class="mt-3 flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3">
-          <a href="/umkm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm shadow-primary/20 hover:scale-105 active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
-            Buka Direktori
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Metrik Sistem & Transaksi -->
-    <AdminMetricsOverview client:load />
+    <!-- Master Superadmin Overview Dashboard (Filter Periode, Statcard, Dua Grafik Analytics, Map, & Aktivitas) -->
+    <SuperadminOverviewDashboard
+      client:load
+      allUsers={userRows}
+      allTransactions={transactionRows}
+      pendingTemplatesCount={pendingTemplatesCount}
+      recentActivities={activityRows}
+      userCreatedYear={userCreatedYear}
+    />
   </div>
 </DashboardLayout>

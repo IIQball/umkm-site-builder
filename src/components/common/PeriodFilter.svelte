@@ -7,8 +7,8 @@
   export let availableYears: number[] = [new Date().getFullYear()];
   export let selectedYear: number = new Date().getFullYear();
   export let selectedMonth: number | 'all' = 'all';
-  export let title: string = 'Filter Periode Data';
-  export let description: string = 'Sesuaikan statistik, grafik pertumbuhan, dan data transaksi berdasarkan periode waktu.';
+  export let title: string = 'Filter Periode';
+  export let description: string = 'Tampilkan data dan statistik berdasarkan kurun waktu.';
   export let activeBadgePrefix: string = '';
 
   const dispatch = createEventDispatcher<{
@@ -16,18 +16,16 @@
   }>();
 
   $: monthOptions = [
-    { value: 'all', label: 'Semua Bulan (Setahun Penuh)', sublabel: '12 Bulan' },
+    { value: 'all', label: 'Semua Bulan' },
     ...INDONESIAN_MONTHS.map((m, i) => ({
       value: i + 1,
       label: m,
-      sublabel: `Bulan ke-${i + 1}`,
     })),
   ];
 
   $: yearOptions = (availableYears.length > 0 ? availableYears : [new Date().getFullYear()]).map((y) => ({
     value: y,
-    label: `Tahun ${y}`,
-    sublabel: y === new Date().getFullYear() ? 'Tahun Ini' : undefined,
+    label: `${y}`,
   }));
 
   function handleMonthChange(event: CustomEvent<{ value: string | number }>) {
@@ -43,7 +41,7 @@
 
   $: activeFilterBadge =
     selectedMonth === 'all'
-      ? `${activeBadgePrefix ? activeBadgePrefix + ' ' : ''}Tahun ${selectedYear} (12 Bulan Penuh)`
+      ? `${activeBadgePrefix ? activeBadgePrefix + ' ' : ''}${selectedYear}`
       : `${activeBadgePrefix ? activeBadgePrefix + ' ' : ''}${INDONESIAN_MONTHS[(selectedMonth as number) - 1]} ${selectedYear}`;
 </script>
 

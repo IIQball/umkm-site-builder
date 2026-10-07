@@ -81,6 +81,6 @@ export async function recordVisitorEvent(
     if (eventType === 'view') newRecord.viewedAt = new Date();
     if (eventType === 'click') newRecord.clickedAt = new Date();
 
-    await db.insert(visitorDailyLimit).values(newRecord);
+    await db.insert(visitorDailyLimit).values(newRecord as any);
   }
 }

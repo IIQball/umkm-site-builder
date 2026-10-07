@@ -45,8 +45,7 @@ const storeData = store || {
   customization: {},
 };
 
-const customization = storeData.customization as Record<string, unknown> | undefined;
-const isOnboarded = customization?.isOnboarded === true;
+const isOnboarded = store ? true : false;
 
 const conversionRate = storeData.totalViews > 0
   ? ((storeData.totalWaClicks / storeData.totalViews) * 100).toFixed(1)
@@ -122,7 +121,7 @@ if (currentHour >= 4 && currentHour < 11) {
         value={`${conversionRate}%`} 
         rawValue={parseFloat(conversionRate)}
         icon="trending_up" 
-        cardTheme="orange"
+        cardTheme="blue"
         badge="Metrik"
         footerText="Persentase konversi pengunjung"
         delayClass="delay-200"
@@ -133,7 +132,7 @@ if (currentHour >= 4 && currentHour < 11) {
         value={engagementScore} 
         rawValue={engagementScore}
         icon="poll" 
-        cardTheme="blue"
+        cardTheme="orange"
         badge="Skor"
         valueSuffix="/ 100"
         footerText="Skor engagement toko"

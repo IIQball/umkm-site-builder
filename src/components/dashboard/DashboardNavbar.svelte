@@ -8,7 +8,7 @@
   export let userJson: string;
   export let breadcrumb: string | undefined = undefined;
 
-  const user: AuthenticatedUser = JSON.parse(userJson);
+  $: user = JSON.parse(userJson) as AuthenticatedUser;
 
   let isDark = false;
 

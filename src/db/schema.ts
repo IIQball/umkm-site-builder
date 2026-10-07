@@ -540,6 +540,20 @@ export const storeDailyStats = pgTable('store_daily_stats', {
   storeDateUniqueIdx: uniqueIndex('store_daily_stats_store_date_idx').on(table.storeId, table.date),
 }));
 
+// Daily visitor tracking untuk anti-spam: 1 visitor IP per toko per hari max 1x view + 1x click
+export const visitorDailyLimit = pgTable('visitor_daily_limit', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  visitorIp: text('visitor_ip').notNull(),
+  date: text('date').notNull(),
+  viewedAt: timestamp('viewed_at'),
+  clickedAt: timestamp('clicked_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  storeIpDateUniqueIdx: uniqueIndex('visitor_daily_limit_store_ip_date_idx').on(table.storeId, table.visitorIp, table.date),
+}));
+
 export const storesRelations = relations(stores, ({ one, many }) => ({
   owner: one(users, { fields: [stores.userId], references: [users.id], relationName: 'storeOwner' }),
   registrar: one(users, { fields: [stores.registeredBy], references: [users.id], relationName: 'registeredStores' }),

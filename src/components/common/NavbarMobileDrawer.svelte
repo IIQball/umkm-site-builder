@@ -21,7 +21,7 @@
   $: userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')
   $: roleCfg = getRoleConfig(user?.role || 'tenant')
   $: dashboardHref = getDashboardHomePath(user?.role)
-  $: settingsHref = getSettingsHref(user?.role)
+  $: settingsHref = getSettingsHref()
 
   const toggleSection = (section: 'beranda' | 'help') => {
     expandedSection = expandedSection === section ? null : section

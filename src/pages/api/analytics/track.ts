@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { handleApiRoute, jsonSuccess } from '@/lib/utils/api-handler';
 import { validate } from '@/lib/utils/validation';
 import { trackEvent } from '@/services/analytics.service';
+import { getVisitorIp } from '@/services/visitorLimit.service';
 import { z } from 'zod';
 
 const TrackEventSchema = z.object({
@@ -15,8 +16,9 @@ export const POST: APIRoute = async ({ request }) => {
   return handleApiRoute(async () => {
     const body = await request.json();
     const { storeId, eventType } = validate(TrackEventSchema, body);
+    const visitorIp = getVisitorIp(request);
 
-    const result = await trackEvent(storeId, eventType);
+    const result = await trackEvent(storeId, eventType, visitorIp);
 
     return jsonSuccess(result, 200);
   });

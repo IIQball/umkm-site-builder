@@ -22,7 +22,7 @@
       : "U";
   $: roleCfg = getRoleConfig(user?.role || "tenant");
   $: homePath = getDashboardHomePath(user?.role);
-  $: settingsHref = getSettingsHref(user?.role);
+  $: settingsHref = getSettingsHref();
 
   const handleSignOutClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -133,10 +133,11 @@
           </span>
 
           <span
-            class="inline-flex items-center gap-1.5 text-2xs text-muted font-medium"
+            class="inline-flex items-center gap-1.5 text-2xs text-success font-medium bg-success/10 px-2 py-0.5 rounded-full border border-success/20"
+            title="Sesi Anda saat ini sedang aktif"
           >
-            <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-            <span>Aktif</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+            <span>Sesi Aktif</span>
           </span>
         </div>
       </div>

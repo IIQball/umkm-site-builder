@@ -51,7 +51,15 @@
     pending: invitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
   };
 
-  $: filteredInvitations = invitations.filter((i) => {
+  // Deduplicate invitations by email (keep newest by createdAt)
+  $: uniqueInvitations = Object.values(invitations.reduce((acc, current) => {
+    if (!acc[current.email] || new Date(current.createdAt) > new Date(acc[current.email].createdAt)) {
+      acc[current.email] = current;
+    }
+    return acc;
+  }, {} as Record<string, typeof invitations[0]>)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  $: filteredInvitations = uniqueInvitations.filter((i) => {
     // Text search
     const matchesSearch = !searchQuery.trim() || 
       i.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -277,7 +285,7 @@
     <!-- Header -->
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-2xs">
           <Link2 size={20} />
         </div>
         <div>
@@ -363,12 +371,12 @@
             
             <td class="px-6 py-4">
               {#if inv.userStatus === 'active'}
-                <Badge variant="emerald" size="sm" class="shadow-xs">
+                <Badge variant="success" size="sm" class="shadow-xs">
                   <CheckCircle2 size={12} strokeWidth={3} class="mr-1" />
                   Aktif
                 </Badge>
               {:else if inv.userStatus === 'suspended'}
-                <Badge variant="rose" size="sm" class="shadow-xs">
+                <Badge variant="error" size="sm" class="shadow-xs">
                   <AlertCircle size={12} strokeWidth={3} class="mr-1" />
                   Ditangguhkan
                 </Badge>
@@ -383,7 +391,13 @@
             <td class="px-6 py-4">
               <div class="flex items-center gap-1.5 text-secondary text-sm">
                 <CalendarDays size={14} />
-                <span>{formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span>
+                  {#if inv.acceptedAt}
+                    -
+                  {:else}
+                    {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {/if}
+                </span>
               </div>
             </td>
 

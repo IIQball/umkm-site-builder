@@ -52,15 +52,13 @@ try {
       </div>
     </div>
 
-    <div class="bg-card-base border border-light rounded-2xl shadow-sm overflow-hidden">
-      <AuditLogTable 
-        client:load 
-        initialLogs={initialLogs} 
-        total={total}
-        currentPage={page}
-        initialActionFilter={actionFilter}
-        initialRoleFilter={roleFilter}
-      />
-    </div>
+    <AuditLogTable 
+      client:load 
+      initialLogs={initialLogs} 
+      total={total}
+      currentPage={page}
+      initialActionFilter={actionFilter}
+      initialRoleFilter={roleFilter}
+    />
   </div>
 </DashboardLayout>

@@ -1,9 +1,6 @@
 <script lang="ts">
-  import Pagination from '@/components/ui/Pagination.svelte';
-  import Badge from '@/components/ui/Badge.svelte';
-  import Select from '@/components/ui/Select.svelte';
-  import Table from '@/components/ui/Table.svelte';
-  import { History, Filter, ChevronDown, User, Monitor } from 'lucide-svelte';
+  import { Pagination, Badge, Select, Table, Modal, Button } from '@/components/ui';
+  import { History, Filter, User, Monitor, Info } from 'lucide-svelte';
 
   export let initialLogs: Array<{
     id: string;
@@ -29,6 +26,10 @@
   let logs = initialLogs;
   let actionFilter = initialActionFilter;
   let roleFilter = initialRoleFilter;
+
+  let selectedLog: any = null;
+  const openDetailModal = (log: any) => { selectedLog = log; };
+  const closeDetailModal = () => { selectedLog = null; };
 
   const handleFilterChange = () => {
     const params = new URLSearchParams(window.location.search);
@@ -77,7 +78,7 @@
 
 <div class="space-y-4">
   <!-- Filters Section -->
-  <div class="bg-card-base rounded-2xl border border-light p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-end sm:items-center">
+  <div class="bg-card rounded-2xl border border-light p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-end sm:items-center">
     <div class="flex items-center gap-2 text-main font-bold text-sm mr-2 shrink-0">
       <Filter size={16} />
       <span>Filter:</span>
@@ -100,32 +101,38 @@
     </div>
   </div>
 
-  {#if logs.length === 0}
-    <div class="py-24 flex flex-col items-center justify-center bg-card-base rounded-3xl border border-light/50 shadow-sm">
-      <div class="w-20 h-20 rounded-full bg-nested/50 text-muted flex items-center justify-center mb-5 ring-[12px] ring-nested/30">
-        <History size={40} strokeWidth={1.5} />
-      </div>
-      <h3 class="text-heading-sm font-bold text-main mb-2">Tidak Ada Aktivitas</h3>
-      <p class="text-body-sm text-secondary max-w-sm text-center leading-relaxed">
-        Belum ada aktivitas sistem yang tercatat untuk saat ini.
-      </p>
+  <div class="bg-card rounded-2xl border border-light shadow-sm overflow-hidden mt-6">
+    <div class="px-6 py-5 border-b border-light flex justify-between items-center bg-nested/20">
+      <h3 class="font-bold text-main text-sm leading-none pt-2.5">Daftar Log Aktivitas</h3>
+      <span class="badge badge-sm badge-outline text-xs font-semibold">{total} Aktivitas</span>
     </div>
-  {:else}
-    <Table
-      headers={[
-        { label: 'PENGGUNA & TOKO' },
-        { label: 'AKSI' },
-        { label: 'TANGGAL' },
-        { label: 'DETAIL PAYLOAD' }
-      ]}
-      minWidth="min-w-[900px]"
-    >
+
+    {#if logs.length === 0}
+      <div class="py-16 flex flex-col items-center justify-center">
+        <div class="w-16 h-16 rounded-full bg-nested/50 text-muted flex items-center justify-center mb-4 ring-8 ring-nested/30">
+          <History size={32} strokeWidth={1.5} />
+        </div>
+        <h3 class="font-bold text-main mb-1">Tidak Ada Aktivitas</h3>
+        <p class="text-xs text-secondary max-w-sm text-center leading-relaxed">
+          Belum ada aktivitas sistem yang sesuai dengan filter.
+        </p>
+      </div>
+    {:else}
+      <Table
+        headers={[
+          { label: 'Pengguna & Toko' },
+          { label: 'Aksi' },
+          { label: 'Tanggal' },
+          { label: 'Detail Payload', align: 'center' }
+        ]}
+        minWidth="min-w-[900px]"
+      >
       {#each logs as log (log.id)}
         <tr>
           <!-- Column: Pengguna -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-xs border border-light/50 {log.user ? 'bg-indigo-600 text-white' : 'bg-nested/60 text-muted'}">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-2xs border border-light/50 {log.user ? 'bg-primary/10 text-primary' : 'bg-nested/60 text-muted'}">
                 {#if log.user}
                   <User size={18} strokeWidth={2.5} />
                 {:else}
@@ -158,27 +165,27 @@
           </td>
 
           <!-- Column: Detail Payload -->
-          <td class="px-6 py-4">
+          <td class="px-6 py-4 text-center">
             {#if log.details && Object.keys(log.details).length > 0}
-              <details class="group/details w-full max-w-sm">
-                <summary class="flex items-center gap-1.5 cursor-pointer list-none text-[11px] font-bold tracking-wider text-muted hover:text-primary uppercase py-1 select-none">
-                  <span>Lihat Payload</span>
-                  <ChevronDown size={14} class="transition-transform duration-200 group-open/details:rotate-180" />
-                </summary>
-                <div class="mt-2 rounded-xl bg-[#0F172A] border border-[#1E293B] shadow-inner p-3 overflow-x-auto custom-scrollbar">
-                  <pre class="text-xs text-slate-300 font-mono leading-relaxed"><code>{JSON.stringify(log.details, null, 2)}</code></pre>
-                </div>
-              </details>
+              <Button
+                variant="secondary"
+                size="xs"
+                on:click={() => openDetailModal(log)}
+                title="Lihat Detail Payload"
+              >
+                <Info size={14} class="mr-1" />
+                Detail
+              </Button>
             {:else}
-              <span class="text-xs text-muted">-</span>
+              <span class="text-xs text-muted font-medium">-</span>
             {/if}
           </td>
         </tr>
       {/each}
-    </Table>
-  {/if}
+      </Table>
+    {/if}
+  </div>
 
-  {#if total > 10}
     <div class="pt-4 flex justify-center">
       <Pagination 
         {currentPage} 
@@ -191,5 +198,26 @@
         }} 
       />
     </div>
-  {/if}
 </div>
+
+<Modal
+  open={!!selectedLog}
+  title="Detail Payload Aktivitas"
+  description="Data teknis lengkap dari aktivitas yang direkam oleh sistem."
+  size="md"
+  on:close={closeDetailModal}
+>
+  {#if selectedLog}
+    <div class="mt-4 rounded-xl bg-nested border border-light shadow-inner p-4 overflow-x-auto custom-scrollbar max-h-[400px]">
+      <pre class="text-xs text-main font-mono leading-relaxed"><code>{JSON.stringify(selectedLog.details, null, 2)}</code></pre>
+    </div>
+  {/if}
+  
+  <svelte:fragment slot="footer">
+    <div class="flex justify-end w-full">
+      <Button variant="secondary" size="md" class="font-bold px-6" on:click={closeDetailModal}>
+        Tutup
+      </Button>
+    </div>
+  </svelte:fragment>
+</Modal>

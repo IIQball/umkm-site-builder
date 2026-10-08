@@ -82,3 +82,60 @@
     max-width: 22rem;
   }
 }
+
+/* Glass Card Styling for Floating Maps Cards */
+.cq-floating-card-bottom,
+.cq-floating-card-corner,
+.cq-overlay-bottom {
+  background-color: var(--color-card-base, #ffffff);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+html[data-theme="dark"] .cq-floating-card-bottom,
+html[data-theme="dark"] .cq-floating-card-corner,
+html[data-theme="dark"] .cq-overlay-bottom,
+[data-theme="dark"] .cq-floating-card-bottom,
+[data-theme="dark"] .cq-floating-card-corner,
+[data-theme="dark"] .cq-overlay-bottom,
+.dark .cq-floating-card-bottom,
+.dark .cq-floating-card-corner,
+.dark .cq-overlay-bottom {
+  background-color: rgba(17, 24, 39, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .cq-floating-card-bottom h3,
+html[data-theme="dark"] .cq-floating-card-bottom h4,
+html[data-theme="dark"] .cq-floating-card-corner h3,
+html[data-theme="dark"] .cq-floating-card-corner h4,
+html[data-theme="dark"] .cq-overlay-bottom h3,
+html[data-theme="dark"] .cq-overlay-bottom h4,
+[data-theme="dark"] .cq-floating-card-bottom h3,
+[data-theme="dark"] .cq-floating-card-bottom h4,
+[data-theme="dark"] .cq-floating-card-corner h3,
+[data-theme="dark"] .cq-floating-card-corner h4,
+[data-theme="dark"] .cq-overlay-bottom h3,
+[data-theme="dark"] .cq-overlay-bottom h4,
+.dark .cq-floating-card-bottom h3,
+.dark .cq-floating-card-bottom h4,
+.dark .cq-floating-card-corner h3,
+.dark .cq-floating-card-corner h4,
+.dark .cq-overlay-bottom h3,
+.dark .cq-overlay-bottom h4 {
+  color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .cq-floating-card-bottom p,
+html[data-theme="dark"] .cq-floating-card-corner p,
+html[data-theme="dark"] .cq-overlay-bottom p,
+[data-theme="dark"] .cq-floating-card-bottom p,
+[data-theme="dark"] .cq-floating-card-corner p,
+[data-theme="dark"] .cq-overlay-bottom p,
+.dark .cq-floating-card-bottom p,
+.dark .cq-floating-card-corner p,
+.dark .cq-overlay-bottom p {
+  color: #94a3b8 !important;
+}

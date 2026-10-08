@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MapPin } from 'lucide-svelte';
+  import { MapPin, Check } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import type { MapBranchItem } from './maps.helpers';
   import { resolveMapIcon } from './mapsIcons';
@@ -85,32 +85,33 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`cq-floating-card-corner bg-[var(--theme-surface,var(--color-card-base))]/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border border-[var(--color-border)] text-left space-y-2.5 transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+    class={`cq-floating-card-corner bg-card/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border border-light text-left space-y-2.5 transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
     style={`border-radius: ${cardStyle.borderRadius || '1rem'}; padding: ${cardStyle.padding || ''}; ${cardStyle.backgroundColor ? `background-color: ${cardStyle.backgroundColor} !important;` : ''} ${cardStyle.borderColor ? `border-color: ${cardStyle.borderColor} !important;` : ''}`}
   >
     <div class="flex items-start gap-2">
-      <MapPin size={16} class="text-[var(--theme-primary,var(--color-primary))] mt-0.5 shrink-0" />
+      <MapPin size={16} class="text-primary mt-0.5 shrink-0" />
       <div>
         <h4
-          class="font-heading font-bold text-[var(--theme-text-primary,var(--color-text-main))]"
+          class="font-heading font-bold text-main"
           style={`font-size: ${cardStyle.fontSize || 'var(--theme-text-body, var(--text-body-size, 16px))'}; ${cardStyle.color ? `color: ${cardStyle.color} !important;` : ''}`}
         >
           {storeName}
         </h4>
         <p
-          class="text-[var(--theme-text-muted,var(--color-text-muted))] font-sans mt-0.5 leading-relaxed"
+          class="text-muted font-sans mt-0.5 leading-relaxed"
           style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.85);"
         >
           {address}
         </p>
         {#if facilities}
           <p
-            class="text-emerald-600 dark:text-emerald-400 font-sans mt-1"
+            class="text-success font-sans mt-1 flex items-center gap-1"
             style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));"
           >
-            ✓ {facilities}
+            <Check size={11} class="shrink-0" />
+            <span>{facilities}</span>
           </p>
         {/if}
       </div>
@@ -127,7 +128,7 @@
       on:click={(e) => selectNode(e, 'maps_cta_button')}
       on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
       class={`inline-flex items-center justify-center gap-1.5 w-full h-8 px-3 font-heading font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
-        isCtaSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+        isCtaSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
       }`}
       style={`border-radius: ${ctaStyle.borderRadius || 'var(--theme-btn-radius,var(--btn-radius,12px))'}; background-color: ${ctaStyle.backgroundColor || 'var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))'}; color: ${ctaStyle.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'}; font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.85);`}
     >

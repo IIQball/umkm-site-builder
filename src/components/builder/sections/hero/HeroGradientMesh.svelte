@@ -35,17 +35,17 @@
       tabindex="0"
       on:click={(e) => selectNode && selectNode(e, 'hero_trust_badges')}
       on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_trust_badges')}
-      class={`w-full max-w-md p-6 rounded-2xl bg-[var(--color-card-base)]/80 backdrop-blur-md border border-[var(--color-border)] shadow-xl flex flex-col items-center gap-4 transition-all cursor-pointer ${
+      class={`w-full max-w-md p-6 rounded-2xl bg-card/80 backdrop-blur-md border border-light shadow-xl flex flex-col items-center gap-4 transition-all cursor-pointer ${
         isBadgesActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 bg-primary/10'
           : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
-      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-[var(--color-text-secondary)]">
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-secondary">
         {#each activeBadges as badge}
           {@const IconComp = resolveFeatureIcon(badge.icon || 'CheckCircle2') || CheckCircle2}
           <span class="flex items-center gap-1.5">
-            <svelte:component this={IconComp} size={14} style="color: var(--color-primary);" />
+            <svelte:component this={IconComp} size={14} class="text-primary" />
             <span>{stripEmoji(badge.text)}</span>
           </span>
         {/each}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Search, MessageCircle, Menu, X, Store } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { editorStore, canvasStore } from '../../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
@@ -250,6 +251,9 @@
           <Search size={18} />
         </button>
       {/if}
+
+      <!-- Theme Toggle (Sebelum tombol CTA) -->
+      <TemplateThemeToggle size="sm" />
 
       <!-- Desktop CTA -->
       {#if hasCta && isDesktop}

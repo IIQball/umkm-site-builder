@@ -5,7 +5,6 @@
   import SectionRenderer from '@/components/builder/sections/SectionRenderer.svelte';
   import { editorStore, canvasStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
-  import { trackAnalyticsEvent } from '@/lib/analytics/track';
 
   export let config: TemplateConfig;
   export let store: any;

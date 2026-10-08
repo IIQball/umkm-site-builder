@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    Loader2,
-    Palette,
-    Sparkles,
-    ShoppingBag,
-    Store,
-    Check,
-    ChevronLeft,
-    ChevronRight,
-  } from 'lucide-svelte';
+  import { Loader2, Palette, Sparkles, ShoppingBag, Store, Check, ChevronLeft, ChevronRight } from 'lucide-svelte';
   import ConfirmTemplateModal from './ConfirmTemplateModal.svelte';
   import { Badge, Button } from '@/components/ui';
   import { toast } from '@/lib/toast';
@@ -213,7 +204,7 @@
                 {/if}
                 <div class="pt-1 flex items-center justify-between text-2xs text-secondary font-medium">
                   <span>Kreator: <strong class="text-main font-semibold">{tpl.designerName}</strong></span>
-                  <span class="text-emerald-600 dark:text-emerald-400 font-bold">Lisensi Aktif</span>
+                  <span class="text-success font-bold">Lisensi Aktif</span>
                 </div>
               </div>
 
@@ -227,7 +218,7 @@
                     disabled
                     className="font-bold text-xs"
                   >
-                    <Check size={14} class="text-emerald-500" />
+                    <Check size={14} class="text-success" />
                     <span>Sedang Aktif di Toko</span>
                   </Button>
                 {:else}

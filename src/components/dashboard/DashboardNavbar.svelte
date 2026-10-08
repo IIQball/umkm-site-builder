@@ -1,19 +1,25 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import type { AuthenticatedUser } from "@/lib/auth";
   import NavbarUserMenu from "@/components/common/NavbarUserMenu.svelte";
   import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";
+  import { sanitizeSearchInput } from "@/components/builder/sections/header/headerSearch.helpers";
 
   export let userJson: string;
-  export let breadcrumb: string | undefined = undefined;
 
   $: user = JSON.parse(userJson) as AuthenticatedUser;
 
   let isDark = false;
+  let rawSearchQuery = "";
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   onMount(() => {
     isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  });
+
+  onDestroy(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
   });
 
   const toggleTheme = () => {
@@ -31,6 +37,33 @@
       month: "short",
     });
   };
+
+  const handleSearchInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const { cleanQuery } = sanitizeSearchInput(target.value);
+    rawSearchQuery = cleanQuery;
+
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent("dashboard-search", { detail: { query: cleanQuery } }),
+      );
+    }, 300);
+  };
+
+  const handleClearSearch = () => {
+    rawSearchQuery = "";
+    if (debounceTimer) clearTimeout(debounceTimer);
+    window.dispatchEvent(
+      new CustomEvent("dashboard-search", { detail: { query: "" } }),
+    );
+  };
+
+  const handleSearchKeydown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      handleClearSearch();
+    }
+  };
 </script>
 
 <header
@@ -39,10 +72,9 @@
 >
   <!-- Left: search bar capsule + date pill badge -->
   <div class="flex items-center gap-3 flex-1 min-w-0 max-w-md">
-    <label
+    <div
       class="flex items-center gap-2.5 w-full bg-card border border-light rounded-full
-             px-4 py-2 cursor-text hover:border-main/40 hover:bg-card transition-all shadow-xs group"
-      for="navbar-search"
+             px-4 py-2 hover:border-main/40 hover:bg-card transition-all shadow-xs group"
     >
       <span
         class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors flex-shrink-0"
@@ -54,20 +86,23 @@
         placeholder="Cari fitur, template, mutasi..."
         class="bg-transparent border-none outline-none text-xs text-main
                placeholder:text-muted w-full min-w-0"
-        readonly
-        on:focus|preventDefault={() => {}}
+        value={rawSearchQuery}
+        on:input={handleSearchInput}
+        on:keydown={handleSearchKeydown}
+        autocomplete="off"
+        spellcheck="false"
       />
-      <span class="hidden sm:flex items-center gap-0.5 flex-shrink-0">
-        <kbd
-          class="text-3xs font-semibold text-muted bg-nested border border-light rounded-md px-1.5 py-0.5 leading-none"
-          >⌘</kbd
+      {#if rawSearchQuery}
+        <button
+          type="button"
+          on:click={handleClearSearch}
+          class="text-muted hover:text-main text-xs p-0.5 rounded-full hover:bg-nested transition-colors"
+          title="Hapus pencarian (Esc)"
         >
-        <kbd
-          class="text-3xs font-semibold text-muted bg-nested border border-light rounded-md px-1.5 py-0.5 leading-none"
-          >K</kbd
-        >
-      </span>
-    </label>
+          <span class="material-symbols-outlined text-xs block">close</span>
+        </button>
+      {/if}
+    </div>
 
     <!-- Date pill badge -->
     <div
@@ -84,38 +119,8 @@
     </div>
   </div>
 
-  <!-- Right: breadcrumb (mobile), actions, profile chip -->
+  <!-- Right: notifications, theme toggle, and user dropdown -->
   <div class="flex items-center gap-2.5 flex-shrink-0 ml-3">
-    <!-- Breadcrumb (mobile only) -->
-    {#if breadcrumb}
-      <span class="text-xs font-medium text-muted md:hidden truncate max-w-[100px]">
-        {breadcrumb}
-      </span>
-    {/if}
-
-    <!-- Quick Navigation Links (Desktop) -->
-    <div class="hidden sm:flex items-center gap-1">
-      <a
-        href="/templates"
-        target="_blank"
-        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-secondary hover:text-main hover:bg-nested rounded-full transition-all border border-transparent hover:border-light"
-        title="Buka Marketplace Template Publik"
-      >
-        <span class="material-symbols-outlined text-sm text-primary">storefront</span>
-        <span>Marketplace</span>
-      </a>
-
-      {#if user.role === "designer"}
-        <a
-          href="/builder/new"
-          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-full transition-all border border-primary/20"
-        >
-          <span class="material-symbols-outlined text-sm">add</span>
-          <span>Template Baru</span>
-        </a>
-      {/if}
-    </div>
-
     <!-- Notification Bell -->
     <NavbarNotifications {user} />
 

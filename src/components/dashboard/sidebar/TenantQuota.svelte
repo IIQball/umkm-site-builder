@@ -1,14 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Modal from '../../ui/Modal.svelte';
+  import Input from '../../ui/Input.svelte';
+  import Button from '../../ui/Button.svelte';
+  import { toast } from '@/lib/toast';
   
   export let collapsed = false;
 
   let products = 0;
   let categories = 0;
   let showUpgradeModal = false;
-  const MAX_PRODUCTS = 10;
-  const MAX_CATEGORIES = 5;
+  let requestProducts = 0;
+  let requestCategories = 0;
+  let isSubmitting = false;
+  let maxProducts = 15;
+  let maxCategories = 5;
 
   async function fetchQuota() {
     try {
@@ -17,9 +23,44 @@
       if (res.ok && data.ok) {
         products = data.data.products;
         categories = data.data.categories;
+        maxProducts = data.data.maxProducts ?? 15;
+        maxCategories = data.data.maxCategories ?? 5;
       }
     } catch (e) {
       // silent fail
+    }
+  }
+
+  async function submitUpgradeRequest() {
+    if (requestProducts === 0 && requestCategories === 0) {
+      toast.error('Silakan isi jumlah slot tambahan yang dibutuhkan');
+      return;
+    }
+    
+    isSubmitting = true;
+    try {
+      const res = await fetch('/api/tenant/quota/request-upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categorySlots: Number(requestCategories),
+          productSlots: Number(requestProducts)
+        })
+      });
+      
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        toast.success(data.message || 'Permintaan berhasil dikirim');
+        showUpgradeModal = false;
+        requestProducts = 0;
+        requestCategories = 0;
+      } else {
+        toast.error(data.error?.message || 'Gagal mengirim permintaan');
+      }
+    } catch (e) {
+      toast.error('Terjadi kesalahan sistem');
+    } finally {
+      isSubmitting = false;
     }
   }
 
@@ -28,15 +69,13 @@
     window.addEventListener('quota-updated', fetchQuota);
     return () => window.removeEventListener('quota-updated', fetchQuota);
   });
-
-  // Variables removed
 </script>
 
 <div class="py-4 mt-auto border-t border-light flex flex-col gap-3 w-full shrink-0 {collapsed ? 'px-2 items-center' : 'px-4'}">
   {#if collapsed}
     <div 
       class="w-10 h-10 rounded-xl flex items-center justify-center text-primary hover:bg-nested transition-colors cursor-pointer" 
-      title="Produk: {products}/{MAX_PRODUCTS} | Kategori: {categories}/{MAX_CATEGORIES}"
+      title="Produk: {products}/{maxProducts} | Kategori: {categories}/{maxCategories}"
     >
       <span class="material-symbols-outlined text-xl icon-filled">cloud</span>
     </div>
@@ -51,13 +90,13 @@
         <!-- Products Progress -->
         <div>
           <div class="flex justify-between items-end text-[10px] font-bold mb-1">
-            <span class="text-main">{products} / {MAX_PRODUCTS} <span class="text-muted font-normal ml-0.5">Produk</span></span>
-            <span class="text-primary">{Math.round((products / MAX_PRODUCTS) * 100)}%</span>
+            <span class="text-main">{products} / {maxProducts} <span class="text-muted font-normal ml-0.5">Produk</span></span>
+            <span class="text-primary">{Math.round((products / maxProducts) * 100)}%</span>
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full transition-all duration-500 {products >= MAX_PRODUCTS ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {Math.min(Math.round((products / MAX_PRODUCTS) * 100), 100)}%"
+              class="h-1.5 rounded-full transition-all duration-500 {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'}" 
+              style="width: {Math.min(Math.round((products / maxProducts) * 100), 100)}%"
             ></div>
           </div>
         </div>
@@ -65,13 +104,13 @@
         <!-- Categories Progress -->
         <div>
           <div class="flex justify-between items-end text-[10px] font-bold mb-1">
-            <span class="text-main">{categories} / {MAX_CATEGORIES} <span class="text-muted font-normal ml-0.5">Kategori</span></span>
-            <span class="text-primary">{Math.round((categories / MAX_CATEGORIES) * 100)}%</span>
+            <span class="text-main">{categories} / {maxCategories} <span class="text-muted font-normal ml-0.5">Kategori</span></span>
+            <span class="text-primary">{Math.round((categories / maxCategories) * 100)}%</span>
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full transition-all duration-500 {categories >= MAX_CATEGORIES ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {Math.min(Math.round((categories / MAX_CATEGORIES) * 100), 100)}%"
+              class="h-1.5 rounded-full transition-all duration-500 {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'}" 
+              style="width: {Math.min(Math.round((categories / maxCategories) * 100), 100)}%"
             ></div>
           </div>
         </div>
@@ -87,23 +126,36 @@
   {/if}
 </div>
 
-<Modal bind:open={showUpgradeModal} size="sm">
-  <div class="flex flex-col items-center justify-center py-4 text-center">
-    <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-      <span class="material-symbols-outlined text-3xl">rocket_launch</span>
-    </div>
-    <h3 class="text-heading-sm font-bold text-main mb-2">Segera Hadir!</h3>
-    <p class="text-body-sm text-secondary">
-      Fitur ini sedang dalam tahap pengembangan dan akan segera hadir untuk Anda.
+<Modal bind:open={showUpgradeModal} size="sm" title="Tingkatkan Kuota" on:close={() => { showUpgradeModal = false; requestProducts = 0; requestCategories = 0; }}>
+  <div class="flex flex-col gap-4 -mt-2 pb-2">
+    <p class="text-sm text-secondary leading-relaxed">
+      Kirim permintaan ke admin untuk menambahkan batas maksimal produk dan kategori di toko Anda.
     </p>
+    
+    <div class="space-y-4 mt-1">
+      <Input
+        type="number"
+        label="Tambahan Kuota Produk"
+        min={0}
+        placeholder="Contoh: 10"
+        bind:value={requestProducts}
+      />
+      <Input
+        type="number"
+        label="Tambahan Kuota Kategori"
+        min={0}
+        placeholder="Contoh: 5"
+        bind:value={requestCategories}
+      />
+    </div>
   </div>
   
   <svelte:fragment slot="footer">
-    <button 
-      class="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-sm font-bold transition-all active:scale-[0.98]" 
-      on:click={() => showUpgradeModal = false}
-    >
-      Mengerti
-    </button>
+    <Button variant="secondary" on:click={() => showUpgradeModal = false} disabled={isSubmitting}>
+      Batal
+    </Button>
+    <Button variant="primary" on:click={submitUpgradeRequest} disabled={isSubmitting} loading={isSubmitting}>
+      Kirim Permintaan
+    </Button>
   </svelte:fragment>
 </Modal>

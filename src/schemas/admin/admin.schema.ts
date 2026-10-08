@@ -26,6 +26,7 @@ export const commissionSettingsSchema = z.object({
   payoutMinimumBalance: z.number().int().min(0).optional(),
   settlementDelayDays: z.number().int().min(0).optional(),
   maxStoreBranches: z.number().int().min(1).max(50).optional(),
+  maxTemplateRevisions: z.number().int().min(1).max(20).optional(),
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;

@@ -9,12 +9,14 @@ export type { CommissionCalculation, PlatformSettings };
 export const DEFAULT_PLATFORM_FEE_PERCENTAGE = 30;
 export const DEFAULT_ADMIN_SERVICE_FEE = 5000;
 export const DEFAULT_MAX_STORE_BRANCHES = 5;
+export const DEFAULT_MAX_TEMPLATE_REVISIONS = 3;
 export const DEFAULT_SETTINGS = {
   platformFeePercentage: 30,
   adminServiceFee: 5000,
   payoutMinimumBalance: 50000,
   settlementDelayDays: 7,
   maxStoreBranches: 5,
+  maxTemplateRevisions: 3,
 };
 
 /**
@@ -37,6 +39,7 @@ export async function getPlatformSettings(
     return {
       ...current,
       maxStoreBranches: current.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
+      maxTemplateRevisions: current.maxTemplateRevisions ?? DEFAULT_SETTINGS.maxTemplateRevisions,
     };
   } catch {
     return {
@@ -58,6 +61,7 @@ export async function updatePlatformSettings(
     payoutMinimumBalance?: number;
     settlementDelayDays?: number;
     maxStoreBranches?: number;
+    maxTemplateRevisions?: number;
   },
   userId: string,
   dbClient: typeof db = db
@@ -74,6 +78,9 @@ export async function updatePlatformSettings(
   if (data.maxStoreBranches !== undefined && (data.maxStoreBranches < 1 || data.maxStoreBranches > 50)) {
     throw new AppError('Maksimal cabang toko harus antara 1 dan 50', 400, undefined, 'INVALID_MAX_BRANCHES');
   }
+  if (data.maxTemplateRevisions !== undefined && (data.maxTemplateRevisions < 1 || data.maxTemplateRevisions > 20)) {
+    throw new AppError('Batas revisi template harus antara 1 dan 20', 400, undefined, 'INVALID_MAX_REVISIONS');
+  }
 
   const existingList = await dbClient.select().from(platformSettings).limit(1);
 
@@ -87,6 +94,7 @@ export async function updatePlatformSettings(
         payoutMinimumBalance: data.payoutMinimumBalance ?? DEFAULT_SETTINGS.payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays ?? DEFAULT_SETTINGS.settlementDelayDays,
         maxStoreBranches: data.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
+        maxTemplateRevisions: data.maxTemplateRevisions ?? DEFAULT_SETTINGS.maxTemplateRevisions,
         updatedBy: userId,
         updatedAt: new Date(),
       })
@@ -101,6 +109,7 @@ export async function updatePlatformSettings(
         payoutMinimumBalance: data.payoutMinimumBalance !== undefined ? data.payoutMinimumBalance : existingList[0].payoutMinimumBalance,
         settlementDelayDays: data.settlementDelayDays !== undefined ? data.settlementDelayDays : existingList[0].settlementDelayDays,
         maxStoreBranches: data.maxStoreBranches !== undefined ? data.maxStoreBranches : existingList[0].maxStoreBranches,
+        maxTemplateRevisions: data.maxTemplateRevisions !== undefined ? data.maxTemplateRevisions : existingList[0].maxTemplateRevisions,
         updatedBy: userId,
         updatedAt: new Date(),
       })
@@ -189,6 +198,30 @@ export async function getMaxStoreBranches(
   }
 
   return DEFAULT_MAX_STORE_BRANCHES;
+}
+
+/**
+ * Retrieves the dynamic max template revisions from platform settings.
+ */
+export async function getMaxTemplateRevisions(
+  dbClient: typeof db = db
+): Promise<number> {
+  try {
+    const settings = await dbClient
+      .select({
+        maxTemplateRevisions: platformSettings.maxTemplateRevisions,
+      })
+      .from(platformSettings)
+      .limit(1);
+
+    if (settings.length > 0 && typeof settings[0].maxTemplateRevisions === 'number') {
+      return settings[0].maxTemplateRevisions;
+    }
+  } catch {
+    // Fallback to default if table is not seeded or query fails
+  }
+
+  return DEFAULT_MAX_TEMPLATE_REVISIONS;
 }
 
 /**

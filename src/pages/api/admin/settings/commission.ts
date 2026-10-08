@@ -22,6 +22,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       payoutMinimumBalance: settings.payoutMinimumBalance,
       settlementDelayDays: settings.settlementDelayDays,
       maxStoreBranches: settings.maxStoreBranches ?? 5,
+      maxTemplateRevisions: settings.maxTemplateRevisions ?? 3,
     });
   });
 };

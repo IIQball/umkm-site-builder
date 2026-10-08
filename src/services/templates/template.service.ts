@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
-import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc, and, inArray } from 'drizzle-orm';
+import { templates } from '@/db/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { AppError, validate, generateSlug, slugify } from '@/lib/utils';
 import {
   TemplateConfigSchema,
@@ -10,56 +10,14 @@ import {
   type TemplateConfig,
 } from '@/schemas';
 import { migrateTemplateConfig } from '@/lib/templates';
+import { getMaxTemplateRevisions } from '@/services/finance';
 import type { PublicTemplateItem } from '@/types';
 
 export type { PublicTemplateItem };
 
 export { getTemplatesForAdmin, reviewTemplate } from './template.admin.service';
 
-export async function getPublicTemplates(page: number = 1, pageSize: number = 10): Promise<PublicTemplateItem[]> {
-  try {
-    const safePage = Math.max(1, Math.floor(page) || 1);
-    const safePageSize = Math.max(1, Math.floor(pageSize) || 10);
-    const offset = (safePage - 1) * safePageSize;
-
-    const records = await db
-      .select({
-        id: templates.id,
-        name: templates.name,
-        description: templates.description,
-        price: templates.price,
-        thumbnailUrl: templates.thumbnailUrl,
-        status: templates.status,
-        createdAt: templates.createdAt,
-        userName: users.name,
-      })
-      .from(templates)
-      .leftJoin(designers, eq(templates.designerId, designers.userId))
-      .leftJoin(users, eq(designers.userId, users.id))
-      .where(
-        and(
-          isNull(templates.deletedAt),
-          eq(templates.status, 'approved')
-        )
-      )
-      .orderBy(desc(templates.createdAt))
-      .limit(safePageSize)
-      .offset(offset);
-
-    return records.map((r) => ({
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      price: r.price,
-      thumbnailUrl: r.thumbnailUrl,
-      status: r.status,
-      createdAt: r.createdAt,
-      designerName: r.userName || 'Desainer Komunitas',
-    }));
-  } catch {
-    return [];
-  }
-}
+export { getPublicTemplates } from './template.public.service';
 
 export async function getTemplateById(templateId: string, userId: string, userRole: string) {
   const template = await db.query.templates.findFirst({
@@ -182,7 +140,8 @@ export async function submitTemplateForReview(
     thumbnailUrl?: string | null;
     price: number;
     config: TemplateConfig;
-  }
+  },
+  revisionNotes?: string
 ) {
   const template = await db.query.templates.findFirst({
     where: eq(templates.id, templateId),
@@ -198,8 +157,24 @@ export async function submitTemplateForReview(
     throw new AppError('Access denied: You do not have permission', 403, undefined, 'FORBIDDEN');
   }
 
-  if (template.status !== 'draft' && !isPrivileged) {
-    throw new AppError('Template must be in draft status to submit', 400);
+  if (template.status !== 'draft' && template.status !== 'rejected' && !isPrivileged) {
+    throw new AppError('Template must be in draft or rejected status to submit', 400);
+  }
+
+  const isRejected = template.status === 'rejected';
+  let nextRevisionCount = template.revisionCount ?? 0;
+
+  if (isRejected) {
+    const maxRevisions = await getMaxTemplateRevisions();
+    if (nextRevisionCount >= maxRevisions) {
+      throw new AppError(
+        `Batas maksimal pengajuan revisi telah tercapai (${maxRevisions} kali). Template tidak dapat diajukan ulang.`,
+        400,
+        undefined,
+        'MAX_REVISIONS_REACHED'
+      );
+    }
+    nextRevisionCount += 1;
   }
 
   const configToValidate = migrateTemplateConfig(patchData ? patchData.config : template.config);
@@ -209,6 +184,13 @@ export async function submitTemplateForReview(
     status: 'pending',
     updatedAt: new Date(),
   };
+
+  if (isRejected) {
+    updatePayload.revisionCount = nextRevisionCount;
+    if (revisionNotes && revisionNotes.trim()) {
+      updatePayload.revisionNotes = revisionNotes.trim();
+    }
+  }
 
   if (patchData) {
     updatePayload.name = patchData.name;

@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../db';
-import { stores, products, storeCategories } from '../../../db/schema';
+import { db } from '@/db';
+import { stores, products, storeCategories } from '@/db/schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
-import { getAuthenticatedUser } from '../../../lib/auth';
+import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ request }) => {
     
     // Tenant yang belum onboarding belum punya toko: kuota terpakai 0, bukan error
     if (!store) {
-      return jsonSuccess({ products: 0, categories: 0 }, 200);
+      return jsonSuccess({ products: 0, categories: 0, maxProducts: 15, maxCategories: 5 }, 200);
     }
 
     const [productCount] = await db.select({ count: sql`count(*)` })
@@ -29,7 +29,9 @@ export const GET: APIRoute = async ({ request }) => {
 
     return jsonSuccess({
       products: Number(productCount.count),
-      categories: Number(categoryCount.count)
+      categories: Number(categoryCount.count),
+      maxProducts: store.maxProducts,
+      maxCategories: store.maxCategories
     }, 200);
   } catch (error: unknown) {
     console.error('[QUOTA] fetch error:', error);

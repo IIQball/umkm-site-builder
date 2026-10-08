@@ -24,7 +24,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchas
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
-export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased', 'store_managed_by_admin']);
+export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased', 'store_managed_by_admin', 'quota_upgrade_request']);
 
 // ==========================================
 // 2. CORE AUTH TABLES (BETTER-AUTH COMPATIBLE)
@@ -321,6 +321,9 @@ export const stores = pgTable('stores', {
   status: storeStatusEnum('status').default('active').notNull(),
   suspendReason: text('suspend_reason'),
   deleteReason: text('delete_reason'),
+
+  maxProducts: integer('max_products').default(15).notNull(),
+  maxCategories: integer('max_categories').default(5).notNull(),
 
   customization: jsonb('customization').default({}).notNull(),
   totalWaClicks: integer('total_wa_clicks').default(0).notNull(),

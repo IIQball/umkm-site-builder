@@ -85,6 +85,7 @@
     if (activeTab === 'sales') return n.type === 'template_purchased';
     if (activeTab === 'template') return ['template_submitted', 'template_reviewed'].includes(n.type);
     if (activeTab === 'store') return ['store_managed_by_admin', 'template_purchased'].includes(n.type);
+    if (activeTab === 'quota') return ['quota_upgrade_request'].includes(n.type);
     return true;
   });
 
@@ -93,6 +94,7 @@
   $: usersCount = notifications.filter(n => n.type === 'user_registered' && !n.isRead).length;
   $: salesCount = notifications.filter(n => n.type === 'template_purchased' && !n.isRead).length;
   $: storeCount = notifications.filter(n => ['store_managed_by_admin', 'template_purchased'].includes(n.type) && !n.isRead).length;
+  $: quotaCount = notifications.filter(n => ['quota_upgrade_request'].includes(n.type) && !n.isRead).length;
 
   function getIcon(type: string) {
     if (type === 'user_registered') return 'person_add';
@@ -100,6 +102,7 @@
     if (type === 'template_reviewed') return 'fact_check';
     if (type === 'template_purchased') return 'shopping_cart';
     if (type === 'store_managed_by_admin') return 'storefront';
+    if (type === 'quota_upgrade_request') return 'rocket_launch';
     return 'notifications';
   }
 
@@ -109,6 +112,7 @@
     if (type === 'template_reviewed') return '/designer/templates';
     if (type === 'template_purchased') return user?.role === 'tenant' ? '/tenant/store' : '/designer/wallet';
     if (type === 'store_managed_by_admin') return '/tenant/store';
+    if (type === 'quota_upgrade_request') return '/superadmin/users';
     return '#';
   }
 </script>
@@ -152,11 +156,11 @@
 
       <!-- Tabs -->
       <div class="px-4 py-2 border-b border-light">
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 -mb-1">
           <Button 
             variant="ghost" size="sm"
             on:click={() => activeTab = 'all'} 
-            class="text-sm rounded-lg {activeTab === 'all' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            class="text-sm rounded-lg shrink-0 {activeTab === 'all' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
           >
             Semua
             <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{allCount}</span>
@@ -164,7 +168,7 @@
           <Button 
             variant="ghost" size="sm"
             on:click={() => activeTab = 'template'} 
-            class="text-sm rounded-lg {activeTab === 'template' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            class="text-sm rounded-lg shrink-0 {activeTab === 'template' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
           >
             Template
             <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{templateCount}</span>
@@ -174,7 +178,7 @@
             <Button 
               variant="ghost" size="sm"
               on:click={() => activeTab = 'users'} 
-              class="text-sm rounded-lg {activeTab === 'users' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+              class="text-sm rounded-lg shrink-0 {activeTab === 'users' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
             >
               Pengguna
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{usersCount}</span>
@@ -183,7 +187,7 @@
             <Button 
               variant="ghost" size="sm"
               on:click={() => activeTab = 'sales'} 
-              class="text-sm rounded-lg {activeTab === 'sales' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+              class="text-sm rounded-lg shrink-0 {activeTab === 'sales' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
             >
               Penjualan
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{salesCount}</span>
@@ -192,10 +196,21 @@
             <Button 
               variant="ghost" size="sm"
               on:click={() => activeTab = 'store'} 
-              class="text-sm rounded-lg {activeTab === 'store' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+              class="text-sm rounded-lg shrink-0 {activeTab === 'store' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
             >
               Toko
               <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{storeCount}</span>
+            </Button>
+          {/if}
+
+          {#if user?.role === 'superadmin' || user?.role === 'tenant'}
+            <Button 
+              variant="ghost" size="sm"
+              on:click={() => activeTab = 'quota'} 
+              class="text-sm rounded-lg shrink-0 {activeTab === 'quota' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+            >
+              Kuota
+              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{quotaCount}</span>
             </Button>
           {/if}
         </div>

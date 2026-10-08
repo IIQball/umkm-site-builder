@@ -135,6 +135,7 @@ export const TemplateDraftSubmitSchema = z.object({
 
 export const SubmitReviewSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),
+  revisionNotes: z.string().max(1000).optional(),
 });
 
 export type TemplateStyles = z.infer<typeof TemplateStylesSchema>;

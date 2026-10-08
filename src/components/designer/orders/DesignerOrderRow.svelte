@@ -33,7 +33,7 @@
         </span>
       </button>
     </div>
-    <span class="text-3xs text-secondary mt-1 block font-mono">
+    <span class="text-xs text-secondary mt-1 block font-mono">
       {formatDate(order.createdAt)}
     </span>
   </td>
@@ -57,7 +57,7 @@
         <span class="font-bold text-xs text-main block truncate font-sans">
           {order.template?.name || 'Template Desain Toko'}
         </span>
-        <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
+        <span class="text-xs text-muted block uppercase font-mono mt-0.5">
           ID: #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
         </span>
       </div>
@@ -74,7 +74,7 @@
         <span class="font-bold text-xs text-main block truncate font-sans">
           {order.user?.name || 'Tenant UMKM'}
         </span>
-        <span class="text-3xs text-secondary block truncate font-mono mt-0.5">
+        <span class="text-xs text-secondary block truncate font-mono mt-0.5">
           {order.user?.email}
         </span>
       </div>

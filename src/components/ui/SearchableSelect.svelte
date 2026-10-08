@@ -3,25 +3,12 @@
   import { Search, ChevronDown, Check, X } from 'lucide-svelte';
 
   export let value: string | number = '';
-  export let options: Array<{
-    value: string | number;
-    label: string;
-    sublabel?: string;
-    disabled?: boolean;
-  }> = [];
-  export let label: string = '';
-  export let placeholder: string = 'Pilih opsi...';
-  export let searchPlaceholder: string = 'Cari opsi...';
-  export let emptyText: string = 'Tidak ada hasil yang cocok';
-  export let error: string = '';
-  export let helper: string = '';
-  export let disabled: boolean = false;
-  export let required: boolean = false;
-  export let id: string = '';
-  export let name: string = '';
-  export let fullWidth: boolean = true;
-  export let size: 'sm' | 'md' | 'lg' = 'md';
-  export let clearable: boolean = true;
+  export let options: Array<{ value: string | number; label: string; sublabel?: string; disabled?: boolean; }> = [];
+  export let label: string = '', placeholder: string = 'Pilih opsi...', searchPlaceholder: string = 'Cari opsi...';
+  export let emptyText: string = 'Tidak ada hasil yang cocok', error: string = '', helper: string = '';
+  export let disabled: boolean = false, required: boolean = false, id: string = '', name: string = '';
+  export let fullWidth: boolean = true, size: 'sm' | 'md' | 'lg' = 'md', clearable: boolean = true;
+  export let align: 'left' | 'right' = 'left', popoverWidth: string = '', searchable: boolean = true;
   let className: string = '';
   export { className as class };
 
@@ -55,10 +42,32 @@
     return matchLabel || matchSublabel;
   });
 
-  $: if (isOpen && searchInputRef) {
+  $: if (isOpen && searchInputRef && searchable) {
     setTimeout(() => {
       searchInputRef?.focus();
     }, 40);
+  }
+
+  let computedAlign: 'left' | 'right' = align === 'right' ? 'right' : 'left';
+
+  function updateAlignment() {
+    if (align === 'right') {
+      computedAlign = 'right';
+      return;
+    }
+    if (typeof window !== 'undefined' && containerRef) {
+      const rect = containerRef.getBoundingClientRect();
+      const estimatedWidth = popoverWidth ? 160 : 240;
+      if (rect.left + estimatedWidth > window.innerWidth - 16) {
+        computedAlign = 'right';
+      } else {
+        computedAlign = 'left';
+      }
+    }
+  }
+
+  $: if (isOpen) {
+    updateAlignment();
   }
 
   const toggleDropdown = () => {
@@ -140,7 +149,7 @@
 
 <div
   bind:this={containerRef}
-  class="relative {fullWidth ? 'w-full' : 'inline-block'} font-sans {className}"
+  class="relative {isOpen ? 'z-40' : ''} {fullWidth ? 'w-full' : 'inline-block'} font-sans {className}"
   role="none"
 >
   {#if name}
@@ -199,33 +208,35 @@
   <!-- Dropdown Popover -->
   {#if isOpen}
     <div
-      class="absolute left-0 top-full mt-1.5 z-50 min-w-full w-max max-w-[calc(100vw-2rem)] sm:max-w-md bg-card border border-light rounded-xl shadow-lg overflow-hidden animate-fade-in-up"
+      class="absolute {computedAlign === 'right' ? 'right-0' : 'left-0'} top-full mt-1.5 z-50 {popoverWidth || 'min-w-full w-full sm:min-w-[220px] max-w-[calc(100vw-2rem)] sm:max-w-md'} bg-card border border-light rounded-2xl shadow-xl overflow-hidden animate-fade-in-up"
       role="listbox"
       aria-label={label || placeholder}
     >
       <!-- Search Input Header -->
-      <div class="p-2 border-b border-light bg-nested/40">
-        <div class="relative flex items-center">
-          <Search size={13} class="absolute left-2.5 text-muted pointer-events-none" />
-          <input
-            bind:this={searchInputRef}
-            type="text"
-            bind:value={searchQuery}
-            placeholder={searchPlaceholder}
-            class="w-full pl-7 pr-7 py-1.5 text-xs bg-card text-main border border-light rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 placeholder:text-muted placeholder:italic font-sans"
-            on:keydown|stopPropagation={handleKeyDown}
-          />
-          {#if searchQuery}
-            <button
-              type="button"
-              class="absolute right-2 text-muted hover:text-main p-0.5 rounded cursor-pointer"
-              on:click={() => (searchQuery = '')}
-            >
-              <X size={12} />
-            </button>
-          {/if}
+      {#if searchable}
+        <div class="p-2 border-b border-light bg-nested/40">
+          <div class="relative flex items-center">
+            <Search size={13} class="absolute left-2.5 text-muted pointer-events-none" />
+            <input
+              bind:this={searchInputRef}
+              type="text"
+              bind:value={searchQuery}
+              placeholder={searchPlaceholder}
+              class="w-full pl-7 pr-7 py-1.5 text-xs bg-card text-main border border-light rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 placeholder:text-muted placeholder:italic font-sans"
+              on:keydown|stopPropagation={handleKeyDown}
+            />
+            {#if searchQuery}
+              <button
+                type="button"
+                class="absolute right-2 text-muted hover:text-main p-0.5 rounded cursor-pointer"
+                on:click={() => (searchQuery = '')}
+              >
+                <X size={12} />
+              </button>
+            {/if}
+          </div>
         </div>
-      </div>
+      {/if}
 
       <!-- Options List -->
       <div class="max-h-56 overflow-y-auto p-1 divide-y divide-light/40">

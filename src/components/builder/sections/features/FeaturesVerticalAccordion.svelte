@@ -100,7 +100,7 @@
                   </span>
                   <span class="truncate">{`0${index + 1}. `}{item.title}</span>
                   {#if item.badge}
-                    <span class="inline-block px-2 py-0.5 rounded-full text-3xs font-heading font-medium shrink-0" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-heading font-medium shrink-0" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
                       {item.badge}
                     </span>
                   {/if}

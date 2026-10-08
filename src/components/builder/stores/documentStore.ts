@@ -49,6 +49,9 @@ export function createDocumentStore() {
         thumbnailUrl: rawTemplate.thumbnailUrl || null,
         price: typeof rawTemplate.price === 'number' ? rawTemplate.price : 0,
         status: rawTemplate.status || 'draft',
+        rejectionReason: rawTemplate.rejectionReason || null,
+        revisionCount: typeof rawTemplate.revisionCount === 'number' ? rawTemplate.revisionCount : 0,
+        revisionNotes: rawTemplate.revisionNotes || null,
         config: validConfig,
       };
       set({ ...initialDocumentState, template });
@@ -242,8 +245,8 @@ export function createDocumentStore() {
       await applySave(get({ subscribe }), update);
     },
 
-    async submitReview(): Promise<boolean> {
-      return await applySubmitReview(get({ subscribe }), update);
+    async submitReview(revisionNotes?: string): Promise<boolean> {
+      return await applySubmitReview(get({ subscribe }), update, revisionNotes);
     },
 
     // Backward-compatibility delegators for canvas visual state

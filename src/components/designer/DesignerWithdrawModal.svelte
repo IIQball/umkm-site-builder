@@ -138,7 +138,7 @@
           <span class="text-xs font-bold text-main font-heading block">
             Rekening Bank Tujuan (1 Rekening)
           </span>
-          <span class="text-3xs font-bold text-orange bg-orange/10 px-2 py-0.5 rounded-full">
+          <span class="text-xs font-bold text-orange bg-orange/10 px-2 py-0.5 rounded-full">
             1 Penarikan = 1 Rekening
           </span>
         </div>
@@ -162,7 +162,7 @@
                     <div class="flex items-center gap-2">
                       <span class="text-xs font-bold text-main font-mono">{acc.bankName}</span>
                       {#if acc.isPrimary}
-                        <span class="text-3xs font-bold px-1.5 py-0.5 rounded-full bg-success/10 text-success">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-success/10 text-success">
                           Utama
                         </span>
                       {/if}
@@ -181,11 +181,11 @@
         {:else if activeAccount}
           <div class="p-3 bg-nested/80 border border-light rounded-2xl flex items-center justify-between">
             <div>
-              <span class="text-3xs text-muted uppercase font-bold tracking-wider block">Rekening Terdaftar</span>
+              <span class="text-xs text-muted uppercase font-bold tracking-wider block">Rekening Terdaftar</span>
               <span class="text-xs font-bold font-mono text-main">{activeAccount.bankName} ({activeAccount.accountNumber})</span>
               <p class="text-2xs text-secondary font-mono mt-0.5">{activeAccount.accountHolder || activeAccount.holderName}</p>
             </div>
-            <span class="text-3xs font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">
+            <span class="text-xs font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">
               Terverifikasi
             </span>
           </div>
@@ -223,7 +223,7 @@
               100% (Semua)
             </button>
           </div>
-          <span class="text-3xs text-muted font-mono font-bold">Min: {formatIDR(minPayoutLimit)}</span>
+          <span class="text-xs text-muted font-mono font-bold">Min: {formatIDR(minPayoutLimit)}</span>
         </div>
       </div>
     </div>

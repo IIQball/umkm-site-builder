@@ -25,7 +25,7 @@
 <Modal {open} size="sm" on:close={handleCancel}>
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-warning/15 border border-warning/25 text-warning flex items-center justify-center flex-shrink-0 shadow-2xs">
         <AlertTriangle size={20} />
       </div>
       <div>

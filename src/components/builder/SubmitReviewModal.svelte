@@ -13,16 +13,23 @@
   export let templateId: string = '';
   export let templateName: string = 'Template';
   export let templatePrice: number = 0;
+  export let status: string = 'draft';
+  export let rejectionReason: string | null | undefined = undefined;
+  export let revisionCount: number = 0;
   export let initialPlatformFeePercentage: number = 30;
   export let onClose: () => void = () => {};
-  export let onConfirm: () => Promise<boolean | void> = async () => {};
+  export let onConfirm: (revisionNotes?: string) => Promise<boolean | void> = async () => {};
 
   let platformFeePercentage: number = initialPlatformFeePercentage;
+  let maxRevisions: number = 3;
+  let revisionNotes: string = '';
   let isLoadingFee: boolean = false;
   let isSubmitting: boolean = false;
   let errorMessage: string | null = null;
   let wasOpen: boolean = false;
 
+  $: isRejected = status === 'rejected' || Boolean(rejectionReason);
+  $: isLimitReached = isRejected && revisionCount >= maxRevisions;
   $: designerPercentage = Math.max(0, 100 - platformFeePercentage);
 
   $: platformFeeAmount = templatePrice > 0
@@ -45,8 +52,13 @@
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.ok && typeof data.data?.platformFeePercentage === 'number') {
-          platformFeePercentage = data.data.platformFeePercentage;
+        if (data.ok && data.data) {
+          if (typeof data.data.platformFeePercentage === 'number') {
+            platformFeePercentage = data.data.platformFeePercentage;
+          }
+          if (typeof data.data.maxTemplateRevisions === 'number') {
+            maxRevisions = data.data.maxTemplateRevisions;
+          }
         }
       }
     } catch {
@@ -76,6 +88,7 @@
     errorMessage = null;
     if (!wasOpen) {
       wasOpen = true;
+      revisionNotes = '';
       fetchCommissionSettings();
     }
   } else {
@@ -90,10 +103,18 @@
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    if (isLimitReached) {
+      errorMessage = `Batas pengajuan revisi telah tercapai (maksimal ${maxRevisions} kali). Template tidak dapat diajukan ulang.`;
+      return;
+    }
+    if (isRejected && revisionNotes.trim().length < 5) {
+      errorMessage = 'Mohon berikan penjelasan perbaikan yang telah Anda buat (minimal 5 karakter).';
+      return;
+    }
     isSubmitting = true;
     errorMessage = null;
     try {
-      await onConfirm();
+      await onConfirm(isRejected ? revisionNotes.trim() : undefined);
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Gagal mengajukan template untuk kurasi';
     } finally {
@@ -104,7 +125,7 @@
 
 <Modal
   bind:open={isOpen}
-  title="Ajukan Template untuk Kurasi"
+  title={isRejected ? 'Ajukan Ulang Revisi Template' : 'Ajukan Template untuk Kurasi'}
   description={templateId ? `${templateName} (ID: ${templateId})` : templateName}
   size="md"
   on:close={handleClose}
@@ -115,6 +136,46 @@
       <div class="alert alert-error text-xs rounded-xl shadow-xs py-2.5 px-3 flex items-start gap-2">
         <AlertCircle size={16} class="shrink-0 mt-0.5" />
         <span class="leading-relaxed">{errorMessage}</span>
+      </div>
+    {/if}
+
+    <!-- Previous Rejection Alert -->
+    {#if isRejected && rejectionReason}
+      <div class="rounded-xl bg-rose-500/10 border border-rose-500/25 p-3.5 space-y-1.5">
+        <div class="flex items-center justify-between gap-1.5 font-bold text-rose-600 dark:text-rose-400">
+          <div class="flex items-center gap-1.5">
+            <AlertCircle size={14} class="shrink-0" />
+            <span>Alasan Penolakan Kurator</span>
+          </div>
+          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-rose-500/15">
+            Revisi ke-{revisionCount + 1}/{maxRevisions}
+          </span>
+        </div>
+        <p class="text-secondary leading-relaxed pl-5 whitespace-pre-wrap">
+          {rejectionReason}
+        </p>
+      </div>
+    {/if}
+
+    <!-- Revision Notes Form Input -->
+    {#if isRejected}
+      <div class="rounded-xl border border-light bg-card p-3.5 space-y-2">
+        <label for="revision-notes-input" class="block font-semibold text-main text-xs">
+          Penjelasan Perbaikan Desain <span class="text-rose-500">*</span>
+        </label>
+        <textarea
+          id="revision-notes-input"
+          bind:value={revisionNotes}
+          disabled={isSubmitting || isLimitReached}
+          rows="3"
+          class="w-full bg-nested border border-light rounded-xl p-3 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition-all resize-none"
+          placeholder="Jelaskan perbaikan apa saja yang telah Anda buat berdasarkan catatan kurator di atas..."
+          maxlength="500"
+        ></textarea>
+        <div class="flex justify-between items-center text-xs text-muted">
+          <span>Wajib diisi minimal 5 karakter</span>
+          <span class="font-mono">{revisionNotes.length}/500</span>
+        </div>
       </div>
     {/if}
 
@@ -202,11 +263,11 @@
       variant="primary"
       size="sm"
       loading={isSubmitting}
-      disabled={isSubmitting}
+      disabled={isSubmitting || isLimitReached}
       on:click={handleSubmit}
     >
       <Send size={13} class="mr-1" />
-      <span>Ya, Ajukan Sekarang</span>
+      <span>{isRejected ? 'Kirim Revisi Sekarang' : 'Ya, Ajukan Sekarang'}</span>
     </Button>
   </svelte:fragment>
 </Modal>

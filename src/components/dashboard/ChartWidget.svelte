@@ -5,6 +5,7 @@
   export let totalViews = 0;
   export let totalClicks = 0;
   export let isOnboarded = true;
+  void isOnboarded;
   // Data 12 bulan yang sudah dirender server (opsional)
   export let initialPoints: TrafficPoint[] = [];
   export let initialFailed = false;
@@ -76,9 +77,6 @@
     
     // Hide markers for longer ranges to reduce clutter
     const showMarkers = range === '7d';
-    
-    // Show grid lines for all ranges, sparse for 30d via tickAmount
-    const xaxisLines = true;
 
     return {
       chart: {
@@ -147,7 +145,6 @@
         xaxis: { 
           lines: { 
             show: true,
-            interval: range === '30d' ? Math.floor(points.length / 5) : undefined,
           } 
         },
         yaxis: { lines: { show: false } },
@@ -177,7 +174,7 @@
   }
 
   function buildPieOptions(): ApexCharts.ApexOptions {
-    const { text, main } = themeColors();
+    const { main } = themeColors();
 
     return {
       chart: {

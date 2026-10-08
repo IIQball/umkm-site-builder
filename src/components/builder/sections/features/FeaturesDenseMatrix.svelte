@@ -77,7 +77,7 @@
               {item.title}
             </h3>
             {#if item.badge}
-              <span class="inline-block px-1.5 py-0.5 rounded text-3xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+              <span class="inline-block px-1.5 py-0.5 rounded text-xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
                 {item.badge}
               </span>
             {/if}
@@ -88,7 +88,7 @@
             </p>
           {/if}
           {#if item.statLabel || item.linkUrl}
-            <span class="text-3xs font-heading font-semibold text-[var(--color-primary)] block mt-1.5">
+            <span class="text-xs font-heading font-semibold text-[var(--color-primary)] block mt-1.5">
               {item.statLabel || 'Cek Detail →'}
             </span>
           {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Pagination, Badge, Select, Table, Modal, Button } from '@/components/ui';
   import { History, Filter, User, Monitor, Info } from 'lucide-svelte';
+  import { formatDate } from '@/lib/utils/format';
 
   export let initialLogs: Array<{
     id: string;
@@ -55,16 +56,6 @@
     { value: 'designer', label: 'Designer' },
     { value: 'superadmin', label: 'Super Admin' }
   ];
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const getActionColor = (action: string) => {
     const act = action.toLowerCase();

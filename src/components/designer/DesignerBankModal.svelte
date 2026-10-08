@@ -188,7 +188,7 @@
               <span>{validationError}</span>
             </div>
           {:else}
-            <span class="text-3xs text-muted">
+            <span class="text-xs text-muted">
               Minimal 10 digit. Nama pemilik akan terisi otomatis setelah rekening terverifikasi.
             </span>
           {/if}
@@ -213,7 +213,7 @@
       {#if isVerified && nameMismatch}
         <div class="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-2 text-amber-600 dark:text-amber-400">
           <span class="material-symbols-outlined text-sm flex-shrink-0 mt-0.5">warning</span>
-          <span class="text-3xs font-medium leading-relaxed">
+          <span class="text-xs font-medium leading-relaxed">
             {nameMismatchWarning || 'Nama pemilik rekening berbeda dengan nama profil Anda. Pastikan Anda menggunakan rekening pribadi untuk pencairan komisi.'}
           </span>
         </div>
@@ -224,7 +224,7 @@
         <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-between gap-2 text-blue-600 dark:text-blue-400">
           <div class="flex items-center gap-1.5 min-w-0">
             <span class="material-symbols-outlined text-sm flex-shrink-0">support_agent</span>
-            <span class="text-3xs font-medium leading-tight">
+            <span class="text-xs font-medium leading-tight">
               Rekening Anda belum terdeteksi? Hubungi Admin untuk verifikasi rekening manual.
             </span>
           </div>
@@ -232,7 +232,7 @@
             href="https://wa.me/6281234567890?text=Halo%20Admin%2C%20saya%20butuh%20bantuan%20verifikasi%20rekening%20bank%20manual"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-3xs font-bold transition-colors shadow-2xs flex-shrink-0"
+            class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-2xs flex-shrink-0"
           >
             <span>Hubungi Admin</span>
             <span class="material-symbols-outlined text-2xs">open_in_new</span>
@@ -244,7 +244,7 @@
     <!-- Security Trust Note -->
     <div class="p-3 bg-nested/80 border border-light rounded-2xl flex items-center gap-2.5">
       <span class="material-symbols-outlined text-xs text-muted flex-shrink-0">lock</span>
-      <span class="text-3xs text-secondary font-medium leading-relaxed">
+      <span class="text-xs text-secondary font-medium leading-relaxed">
         Data rekening terenkripsi secara aman dan hanya digunakan untuk penyaluran komisi penjualan template.
       </span>
     </div>

@@ -111,7 +111,7 @@
                 {/if}
                 {#if tpl.categoryName}
                   <span
-                    class="text-3xs font-semibold px-2 py-0.5 rounded-md bg-nested text-muted border border-light"
+                    class="text-xs font-semibold px-2 py-0.5 rounded-md bg-nested text-muted border border-light"
                   >
                     {tpl.categoryName}
                   </span>

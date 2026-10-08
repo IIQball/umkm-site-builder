@@ -136,7 +136,7 @@
 
               <!-- Tag Pill -->
               {#if preset.tag}
-                <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-slate-700/60 backdrop-blur-xs">
+                <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-light backdrop-blur-xs">
                   {preset.tag}
                 </span>
               {/if}
@@ -168,7 +168,7 @@
 
               <!-- Action button inside card -->
               <div class="pt-2 border-t border-light/50 flex items-center justify-between">
-                <span class="text-3xs font-mono text-muted">Preset ID: {preset.id}</span>
+                <span class="text-xs font-mono text-muted">Preset ID: {preset.id}</span>
                 <Button
                   type="button"
                   size="xs"

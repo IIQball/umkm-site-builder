@@ -80,7 +80,7 @@
         Gambar Banner Hero
       </span>
       {#if customization.hero.imageUrl}
-        <span class="text-3xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+        <span class="text-xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
           Gambar Terpasang
         </span>
       {/if}
@@ -104,14 +104,14 @@
             alt={preset.name}
             class="w-9 h-7 rounded object-cover shrink-0"
           />
-          <span class="text-3xs font-semibold text-main truncate font-sans">{preset.name}</span>
+          <span class="text-xs font-semibold text-main truncate font-sans">{preset.name}</span>
         </button>
       {/each}
     </div>
 
     <!-- Direct Component Upload -->
     <div class="pt-1">
-      <p class="text-3xs text-secondary mb-1.5 font-sans">
+      <p class="text-xs text-secondary mb-1.5 font-sans">
         Atau unggah foto banner sendiri (PNG, JPG, atau WebP):
       </p>
       <ImageUpload

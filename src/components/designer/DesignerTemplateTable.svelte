@@ -6,8 +6,6 @@
   import DesignerDeleteDraftModal from './templates/DesignerDeleteDraftModal.svelte';
   import { addToast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
-  import type { PaginatedResult } from '@/types/common';
-
   export let templates: Array<{
     id: string;
     name: string;
@@ -18,22 +16,21 @@
     rejectionReason: string | null;
     createdAt: Date | string;
     totalSold: number;
+    categoryId?: string | null;
+    revisionCount?: number;
+    revisionNotes?: string | null;
   }> = [];
-  export let pagination: PaginatedResult<any> | undefined = undefined;
+  export let categories: Array<{ id: string; name: string; slug: string }> = [];
 
   let searchQuery = '';
   let activeFilter: 'all' | 'draft' | 'pending' | 'approved' | 'rejected' = 'all';
+  let selectedCategory: string = 'all';
   // Default tampilan card/grid sesuai permintaan user
   let viewMode: 'table' | 'grid' = 'grid';
-  let selectedRejection: { name: string; reason: string } | null = null;
+  let selectedRejection: { id: string; name: string; reason: string; revisionCount: number } | null = null;
   let copiedId: string | null = null;
   let currentPage = 1;
-  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
-
-  $: activePage = pagination ? pagination.currentPage : currentPage;
-  $: activePageSize = pagination ? pagination.pageSize : pageSize;
-  $: activeTotalItems = pagination ? pagination.totalItems : filteredTemplates.length;
 
   // Batch Selection & Hard Delete Modal State
   let selectedDraftIds: string[] = [];
@@ -55,6 +52,16 @@
     }
   };
 
+  let prevQuery = '';
+  let prevFilter = '';
+  let prevCat = '';
+  $: if (searchQuery !== prevQuery || activeFilter !== prevFilter || selectedCategory !== prevCat) {
+    prevQuery = searchQuery;
+    prevFilter = activeFilter;
+    prevCat = selectedCategory;
+    currentPage = 1;
+  }
+
   $: counts = {
     all: templates.length,
     draft: templates.filter(t => t.status === 'draft').length,
@@ -65,23 +72,23 @@
 
   $: filteredTemplates = templates.filter(t => {
     const matchesFilter = activeFilter === 'all' || t.status === activeFilter;
+    const matchesCategory = selectedCategory === 'all' || t.categoryId === selectedCategory;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q ||
       t.name.toLowerCase().includes(q) ||
       (t.description && t.description.toLowerCase().includes(q)) ||
       t.id.toLowerCase().includes(q);
-    return matchesFilter && matchesSearch;
+    return matchesFilter && matchesCategory && matchesSearch;
   });
 
-  $: {
-    searchQuery;
-    activeFilter;
-    if (!pagination) currentPage = 1;
-  }
+  $: totalPages = Math.max(1, Math.ceil(filteredTemplates.length / pageSize));
+  $: if (currentPage > totalPages) currentPage = totalPages;
 
-  $: paginatedTemplates = pagination
-    ? templates
-    : filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: activePage = currentPage;
+  $: activePageSize = pageSize;
+  $: activeTotalItems = filteredTemplates.length;
+
+  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Draft Selection Helpers
   $: visibleDraftTemplates = paginatedTemplates.filter(t => t.status === 'draft');
@@ -99,7 +106,7 @@
   const toggleSelectAllVisibleDrafts = () => {
     if (allVisibleDraftsSelected) {
       const visibleIds = new Set(visibleDraftTemplates.map(t => t.id));
-      selectedDraftIds = selectedDraftIds.filter(id => !visibleIds.has(id));
+      selectedDraftIds = selectedDraftIds.filter((id: string) => !visibleIds.has(id));
     } else {
       const newIds = new Set([...selectedDraftIds, ...visibleDraftTemplates.map(t => t.id)]);
       selectedDraftIds = Array.from(newIds);
@@ -128,7 +135,7 @@
     if (targetsToDelete.length === 0) return;
     try {
       isDeletingDraft = true;
-      const ids = targetsToDelete.map(t => t.id);
+      const ids: string[] = targetsToDelete.map((t: { id: string }) => t.id);
 
       const res = await fetch('/api/designer/templates/draft', {
         method: 'DELETE',
@@ -140,27 +147,18 @@
       if (res.ok) {
         const deletedSet = new Set(ids);
         templates = templates.filter(t => !deletedSet.has(t.id));
-        selectedDraftIds = selectedDraftIds.filter(id => !deletedSet.has(id));
+        selectedDraftIds = selectedDraftIds.filter((id: string) => !deletedSet.has(id));
         deleteModalOpen = false;
         targetsToDelete = [];
-
         addToast({
           type: 'success',
-          message: ids.length > 1
-            ? `${ids.length} draf template berhasil dihapus permanen!`
-            : 'Draf template berhasil dihapus permanen!',
+          message: ids.length > 1 ? `${ids.length} draf template berhasil dihapus permanen!` : 'Draf template berhasil dihapus permanen!',
         });
       } else {
-        addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal menghapus draf template',
-        });
+        addToast({ type: 'error', message: result.error?.message || 'Gagal menghapus draf template' });
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Terjadi kesalahan koneksi saat menghapus draf',
-      });
+      addToast({ type: 'error', message: 'Terjadi kesalahan koneksi saat menghapus draf' });
     } finally {
       isDeletingDraft = false;
     }
@@ -194,7 +192,9 @@
   <DesignerTemplateTableToolbar
     bind:searchQuery
     bind:activeFilter
+    bind:selectedCategory
     bind:viewMode
+    {categories}
     {counts}
     {selectedDraftIds}
     {allVisibleDraftsSelected}
@@ -238,7 +238,7 @@
           onToggleSelect={toggleDraftSelect}
           onDeleteDraft={openDeleteModalForSingle}
           onCopyId={copyToClipboard}
-          onShowRejection={(t) => selectedRejection = { name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.' }}
+          onShowRejection={(t) => selectedRejection = { id: t.id, name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.', revisionCount: t.revisionCount || 0 }}
         />
       {/each}
     </Table>
@@ -252,6 +252,7 @@
           isSelected={selectedDraftIds.includes(tpl.id)}
           onToggleSelect={toggleDraftSelect}
           onDeleteDraft={openDeleteModalForSingle}
+          onShowRejection={(t) => selectedRejection = { id: t.id, name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.', revisionCount: t.revisionCount || 0 }}
         />
       {/each}
     </div>

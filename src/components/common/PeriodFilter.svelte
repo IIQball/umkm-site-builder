@@ -71,9 +71,9 @@
   </div>
 
   <!-- Right Side: Searchable Year & Month Dropdowns -->
-  <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+  <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3">
     <!-- Searchable Dropdown Bulan -->
-    <div class="w-full sm:w-auto sm:min-w-[240px]">
+    <div class="w-full sm:w-auto sm:min-w-[190px] md:min-w-[210px]">
       <SearchableSelect
         value={selectedMonth}
         options={monthOptions}
@@ -82,12 +82,13 @@
         clearable={false}
         size="sm"
         fullWidth={true}
+        popoverWidth="w-full min-w-full sm:min-w-[210px] sm:max-w-[240px]"
         on:change={handleMonthChange}
       />
     </div>
 
     <!-- Searchable Dropdown Tahun -->
-    <div class="w-full sm:w-auto sm:min-w-[130px]">
+    <div class="w-full sm:w-auto sm:min-w-[110px] md:min-w-[120px]">
       <SearchableSelect
         value={selectedYear}
         options={yearOptions}
@@ -95,7 +96,10 @@
         searchPlaceholder="Cari tahun..."
         clearable={false}
         size="sm"
+        align="right"
         fullWidth={true}
+        searchable={yearOptions.length > 5}
+        popoverWidth="w-full min-w-full sm:w-36 sm:min-w-[120px]"
         on:change={handleYearChange}
       />
     </div>

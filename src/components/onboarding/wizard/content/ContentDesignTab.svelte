@@ -14,7 +14,7 @@
       <label for="custom-hex-input" class="block text-xs font-bold text-main font-heading mb-1">
         Pilihan Warna Brand Utama
       </label>
-      <p class="text-3xs text-secondary font-sans leading-relaxed">
+      <p class="text-xs text-secondary font-sans leading-relaxed">
         Pilih warna identitas toko Anda atau masukkan kode HEX kustom.
       </p>
     </div>
@@ -66,7 +66,7 @@
       <Sparkles size={13} class="text-primary" />
       <span>Simulasi Tampilan Warna di Halaman</span>
     </div>
-    <p class="text-3xs text-secondary font-sans leading-relaxed">
+    <p class="text-xs text-secondary font-sans leading-relaxed">
       Warna ini otomatis diselaraskan ke berbagai elemen visual landing page:
     </p>
 

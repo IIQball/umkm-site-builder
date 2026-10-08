@@ -81,7 +81,7 @@
       <div class="p-3.5 bg-card rounded-xl border border-light space-y-2.5 shadow-2xs">
         <div class="flex items-center justify-between gap-2 border-b border-light/60 pb-2">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xs shrink-0 font-mono">
+            <span class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 font-mono">
               Q{idx + 1}
             </span>
             <span class="text-xs font-bold text-main truncate font-heading">
@@ -103,7 +103,7 @@
 
         <div class="space-y-2">
           <div>
-            <label for={`faq-q-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">
+            <label for={`faq-q-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
               Pertanyaan
             </label>
             <input
@@ -117,7 +117,7 @@
           </div>
 
           <div>
-            <label for={`faq-a-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">
+            <label for={`faq-a-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
               Jawaban
             </label>
             <textarea

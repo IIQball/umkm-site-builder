@@ -15,6 +15,7 @@ export interface PlatformSettings {
   payoutMinimumBalance: number;
   settlementDelayDays: number;
   maxStoreBranches: number;
+  maxTemplateRevisions?: number;
   updatedAt: Date;
   updatedBy: string | null;
 }

@@ -59,7 +59,7 @@
       <div class="min-w-0 max-w-[240px]">
         <div class="flex items-center gap-2">
           <a
-            href={`/builder/${tpl.id}`}
+            href={tpl.status === 'draft' || tpl.status === 'rejected' ? `/builder/new?id=${tpl.id}` : `/builder/preview/${tpl.id}`}
             class="font-bold text-xs text-main hover:text-primary transition-colors truncate block leading-tight font-sans"
             title="Buka di Editor"
           >
@@ -68,7 +68,7 @@
           <button
             type="button"
             on:click={() => onCopyId(tpl.id)}
-            class="text-3xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95"
+            class="text-xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95"
             title="Salin ID Template"
           >
             <span>#{tpl.id.slice(0, 6)}</span>
@@ -124,7 +124,7 @@
           <span>Hapus</span>
         </Button>
         <Button
-          href={`/builder/${tpl.id}`}
+          href={`/builder/new?id=${tpl.id}`}
           variant="dark"
           size="sm"
           className="rounded-xl font-bold"
@@ -145,7 +145,7 @@
           <span>Alasan</span>
         </Button>
         <Button
-          href={`/builder/${tpl.id}`}
+          href={`/builder/new?id=${tpl.id}`}
           variant="primary"
           size="sm"
           className="rounded-xl font-bold"

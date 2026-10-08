@@ -128,7 +128,7 @@
                   </span>
                 </button>
               </div>
-              <span class="text-3xs text-secondary mt-1 block font-mono">
+              <span class="text-xs text-secondary mt-1 block font-mono">
                 {formatDate(trx.createdAt)}
               </span>
             </td>
@@ -140,7 +140,7 @@
                   <User size={13} class="text-primary flex-shrink-0" />
                   <span class="truncate max-w-[130px] font-sans">{trx.merchantName || 'Merchant'}</span>
                 </div>
-                <div class="flex items-center gap-1.5 text-3xs text-secondary">
+                <div class="flex items-center gap-1.5 text-xs text-secondary">
                   <Store size={12} class="flex-shrink-0" />
                   <span class="truncate max-w-[130px] font-sans">{trx.storeName || 'Toko UMKM'}</span>
                 </div>
@@ -165,7 +165,7 @@
                   <span class="font-bold text-xs text-main block truncate font-sans">
                     {trx.templateName || 'Template Desain'}
                   </span>
-                  <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
+                  <span class="text-xs text-muted block uppercase font-mono mt-0.5">
                     ID: #{trx.templateId ? trx.templateId.slice(0, 8) : '—'}
                   </span>
                 </div>
@@ -178,7 +178,7 @@
                 <span class="font-mono text-xs font-black text-success block">
                   +{formatIDR(Number(trx.adminFee || 0))}
                 </span>
-                <span class="text-3xs text-muted block font-mono">
+                <span class="text-xs text-muted block font-mono">
                   Total {formatIDR(Number(trx.amount || 0))}
                 </span>
               </div>

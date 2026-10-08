@@ -175,7 +175,7 @@
 
   <!-- Drag Spacing Value Tooltip Overlay -->
   {#if isDraggingSpacing && currentDragTooltip}
-    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white font-mono font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl border border-white/20 animate-pulse pointer-events-none flex items-center gap-2">
+    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-main text-canvas font-mono font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl border border-light animate-pulse pointer-events-none flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-orange"></span>
       <span>{currentDragTooltip}</span>
     </div>
@@ -191,9 +191,9 @@
     "
   >
     <!-- Viewport Header Indicator -->
-    <div class="w-full flex items-center justify-between px-3 py-1.5 mb-2 bg-card border border-light rounded-t-xl text-3xs font-mono text-secondary shadow-xs">
+    <div class="w-full flex items-center justify-between px-3 py-1.5 mb-2 bg-card border border-light rounded-t-xl text-xs font-mono text-secondary shadow-xs">
       <div class="flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="w-2 h-2 rounded-full bg-success"></span>
         <span class="font-bold text-main uppercase font-heading">{viewMode}</span>
         <span>•</span>
         <span>{targetWidth}px</span>

@@ -15,13 +15,15 @@
   export let templatePrice: number = 0;
   export let platformFeePercentage: number = 30;
   export let status: string = 'draft';
+  export let rejectionReason: string | null | undefined = undefined;
+  export let revisionCount: number = 0;
   export let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   export let isDirty: boolean = false;
   export let saving: boolean = false;
   export let saveSuccess: boolean = false;
   export let onViewModeChange: (mode: 'desktop' | 'tablet' | 'mobile') => void;
   export let onSave: () => void;
-  export let onSubmit: () => Promise<boolean | void> = async () => {};
+  export let onSubmit: (revisionNotes?: string) => Promise<boolean | void> = async () => {};
 
   let isSubmitModalOpen = false;
   let isEditingName = false;
@@ -60,9 +62,9 @@
   <!-- Left info & Editable Title -->
   <div class="flex items-center gap-2.5 min-w-0">
     <a
-      href="/designer/templates"
+      href={templateId ? `/builder/new?id=${templateId}` : '/designer/templates'}
       class="text-xs font-semibold text-secondary hover:text-main transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-nested hover:bg-nested/80 border border-light"
-      title="Kembali ke Template"
+      title="Kembali ke Studio Inisialisasi Template"
     >
       <ArrowLeft size={13} />
       <span class="hidden sm:inline">Kembali</span>
@@ -112,7 +114,7 @@
       loading={saving}
       disabled={saving}
       on:click={onSave}
-      class={saveSuccess ? '!bg-emerald-500/10 !text-emerald-600 dark:!text-emerald-400 !border-emerald-500/20' : ''}
+      class={saveSuccess ? '!bg-success/10 !text-success !border-success/20' : ''}
       title={isDirty ? 'Ada perubahan belum disimpan (Ctrl+S)' : 'Semua perubahan tersimpan'}
     >
       {#if !saving}
@@ -148,10 +150,13 @@
   {templateId}
   {templateName}
   {templatePrice}
+  {status}
+  {rejectionReason}
+  {revisionCount}
   initialPlatformFeePercentage={platformFeePercentage}
   onClose={() => (isSubmitModalOpen = false)}
-  onConfirm={async () => {
-    const res = await onSubmit();
+  onConfirm={async (notes) => {
+    const res = await onSubmit(notes);
     isSubmitModalOpen = false;
     return res;
   }}

@@ -40,7 +40,7 @@
             class="object-cover w-full h-full"
           />
         {:else}
-          <span class="text-3xs text-muted font-bold uppercase tracking-wider"
+          <span class="text-xs text-muted font-bold uppercase tracking-wider"
             >Img</span
           >
         {/if}

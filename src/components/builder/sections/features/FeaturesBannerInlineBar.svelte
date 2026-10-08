@@ -76,7 +76,7 @@
             </div>
             <div class="min-w-0 flex-1">
               {#if item.badge}
-                <span class="inline-block px-1.5 py-0.5 rounded text-3xs font-heading font-medium mb-0.5" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-heading font-medium mb-0.5" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
                   {item.badge}
                 </span>
               {/if}

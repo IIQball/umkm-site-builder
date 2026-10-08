@@ -168,13 +168,15 @@
       templatePrice={$editorStore.template.price}
       {platformFeePercentage}
       status={$editorStore.template.status}
+      rejectionReason={$editorStore.template.rejectionReason}
+      revisionCount={$editorStore.template.revisionCount ?? 0}
       viewMode={$canvasStore.viewMode}
       isDirty={$editorStore.isDirty}
       saving={$editorStore.isSaving}
       saveSuccess={$editorStore.saveSuccess}
       onViewModeChange={(mode) => canvasStore.setViewMode(mode)}
       onSave={() => editorStore.save()}
-      onSubmit={() => editorStore.submitReview()}
+      onSubmit={(notes) => editorStore.submitReview(notes)}
     />
 
     <!-- Main Workspace: Left Sidebar, Canvas, Right Sidebar -->

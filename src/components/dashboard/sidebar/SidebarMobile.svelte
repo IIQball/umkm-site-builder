@@ -123,10 +123,10 @@
               {#if active}
                 <span class="relative flex h-2 w-2">
                   <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-75"
                   ></span>
                   <span
-                    class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"
+                    class="relative inline-flex rounded-full h-2 w-2 bg-orange"
                   ></span>
                 </span>
               {/if}
@@ -154,7 +154,7 @@
           {userInitial}
         </div>
         <span
-          class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-card"
+          class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-success rounded-full ring-2 ring-card"
           title="Online"
         ></span>
       </div>

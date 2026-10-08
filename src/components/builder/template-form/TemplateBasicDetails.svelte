@@ -16,7 +16,7 @@
     <label for="tmpl-name" class="text-label-caps text-muted font-bold">
       Nama Template Desain <span class="text-error">*</span>
     </label>
-    <span class="text-3xs text-muted font-mono">{name.length}/60 karakter</span>
+    <span class="text-xs text-muted font-mono">{name.length}/60 karakter</span>
   </div>
   <Input
     id="tmpl-name"

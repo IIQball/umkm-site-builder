@@ -38,6 +38,6 @@
     style:height={typeof height === 'number' ? `${height}px` : height}
   >
     <ImageOff size={24} class="mb-1.5 opacity-50 text-muted" />
-    <span class="text-3xs font-medium text-muted">{fallbackText}</span>
+    <span class="text-xs font-medium text-muted">{fallbackText}</span>
   </div>
 {/if}

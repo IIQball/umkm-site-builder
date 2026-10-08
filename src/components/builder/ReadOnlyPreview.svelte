@@ -248,17 +248,17 @@
         bind:clientHeight={canvasHeight}
         style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
         class={`transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
-          isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
+          isDark ? 'theme-dark bg-canvas text-main' : 'theme-light bg-card text-main'
         } ${
           viewMode === 'desktop'
-            ? 'min-h-[800px] border border-base-300'
+            ? 'min-h-[800px] border border-light'
             : viewMode === 'tablet'
-            ? 'min-h-[800px] border border-base-300'
-            : 'min-h-[667px] border border-base-300'
+            ? 'min-h-[800px] border border-light'
+            : 'min-h-[667px] border border-light'
         }`}
       >
         {#if sections.length === 0}
-          <div class="p-16 text-center text-slate-400">
+          <div class="p-16 text-center text-muted">
             <p class="text-sm">Belum ada section yang dikonfigurasi.</p>
           </div>
         {:else}

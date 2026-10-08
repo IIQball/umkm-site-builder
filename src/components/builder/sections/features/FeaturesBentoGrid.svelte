@@ -180,7 +180,7 @@
                 <svelte:component this={resolveFeatureIcon(item1.icon || item1.iconName || 'sparkles')} size={20} />
               </div>
               {#if item1.badge}
-                <span class="inline-block px-2 py-0.5 rounded-full text-3xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent); color: var(--color-secondary);">
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent); color: var(--color-secondary);">
                   {item1.badge}
                 </span>
               {/if}
@@ -222,7 +222,7 @@
               <svelte:component this={resolveFeatureIcon(item2.icon || item2.iconName || 'leaf')} size={20} />
             </div>
             {#if item2.badge}
-              <span class="inline-block px-2 py-0.5 rounded-full text-3xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+              <span class="inline-block px-2 py-0.5 rounded-full text-xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
                 {item2.badge}
               </span>
             {/if}
@@ -268,7 +268,7 @@
                   {item3.title}
                 </h3>
                 {#if item3.badge}
-                  <span class="inline-block px-2 py-0.5 rounded-full text-3xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                  <span class="inline-block px-2 py-0.5 rounded-full text-xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
                     {item3.badge}
                   </span>
                 {/if}

@@ -4,8 +4,10 @@
     Send,
     CheckCircle2,
     ArrowLeft,
+    Sun,
+    Moon,
   } from 'lucide-svelte';
-  import { editorStore } from './stores/editorStore';
+  import { editorStore, canvasStore } from './stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
   import TopBarViewportControls from './topbar/TopBarViewportControls.svelte';
   import { Badge, Button } from '@/components/ui';
@@ -107,6 +109,23 @@
 
   <!-- Right actions -->
   <div class="flex items-center gap-2">
+    <!-- Theme Toggle -->
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      on:click={() => canvasStore.toggleEditorTheme()}
+      class="!p-2 !h-auto !min-h-0 rounded-lg text-secondary hover:text-main hover:bg-nested border border-light transition-colors"
+      aria-label="Ubah tema editor"
+      title={$canvasStore.editorTheme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
+    >
+      {#if $canvasStore.editorTheme === 'dark'}
+        <Sun size={14} class="text-warning" />
+      {:else}
+        <Moon size={14} class="text-secondary" />
+      {/if}
+    </Button>
+
     <!-- Save Status / Button -->
     <Button
       variant={saveSuccess ? 'secondary' : isDirty ? 'primary' : 'secondary'}

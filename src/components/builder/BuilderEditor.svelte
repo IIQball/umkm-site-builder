@@ -7,6 +7,7 @@
   import PropertyInspector from './PropertyInspector.svelte';
   import { Button } from '@/components/ui';
   import { editorStore, canvasStore, activeSection, maxStoreBranchesStore } from './stores/editorStore';
+  import { applyTheme } from '@/lib/utils/theme';
 
   export let templateId: string;
   export let platformFeePercentage: number = 30;
@@ -20,12 +21,7 @@
   let fetchError: string | null = null;
 
   $: if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-theme', $canvasStore.editorTheme);
-    if ($canvasStore.editorTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    applyTheme($canvasStore.editorTheme);
   }
 
   const fetchTemplate = async () => {
@@ -58,6 +54,7 @@
   };
 
   onMount(async () => {
+    canvasStore.initEditorTheme();
     maxStoreBranchesStore.set(maxStoreBranches);
     try {
       const res = await fetch('/api/public/platform-settings');

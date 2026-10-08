@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
+  import { PlusSquare } from 'lucide-svelte';
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
   import CanvasSpacingHandles from './canvas/CanvasSpacingHandles.svelte';
@@ -52,7 +53,7 @@
   $: scaleRatio = Number(Math.min(1, Math.max(0.1, autoScale * userZoom)).toFixed(4));
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
-  $: isDarkPreview = $canvasStore.previewTheme === 'dark';
+  $: isDarkPreview = $canvasStore.editorTheme === 'dark' || $canvasStore.previewTheme === 'dark' || theme?.colorMode === 'dark';
   $: canvasCssVars = buildCanvasCssVars(theme, isDarkPreview, viewMode);
   $: {
     loadDynamicGoogleFonts(theme?.typography?.headingFont, theme?.typography?.bodyFont);
@@ -208,7 +209,9 @@
     <div
       id="canvas-frame"
       bind:clientHeight={canvasHeight}
-      class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible builder-canvas-viewport"
+      class="w-full bg-canvas text-main rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible builder-canvas-viewport"
+      class:dark={isDarkPreview}
+      data-theme={isDarkPreview ? 'dark' : 'light'}
       style="{canvasCssVars};"
       on:click|stopPropagation
       role="region"
@@ -224,7 +227,7 @@
       {#if sections.length === 0}
         <div class="py-24 px-8 text-center flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mb-4 shadow-2xs">
-            <span class="material-symbols-outlined text-3xl">add_box</span>
+            <PlusSquare size={32} class="text-primary/70" />
           </div>
           <h3 class="text-base font-bold text-main font-heading mb-1">Canvas Masih Kosong</h3>
           <p class="text-xs text-secondary max-w-sm font-sans mb-4 leading-relaxed">

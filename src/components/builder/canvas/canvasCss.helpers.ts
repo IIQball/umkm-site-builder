@@ -2,8 +2,8 @@ import type { TemplateTheme } from '@/schemas'
 import { calculateGoldenRatioTypography } from '@/lib/utils/designMath'
 
 export const buildCanvasCssVars = (
-  theme: TemplateTheme,
-  isDarkPreview: boolean,
+  theme: Partial<TemplateTheme> = {},
+  isDarkPreview: boolean = false,
   viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop'
 ): string => {
   const colors = theme?.colors || {}
@@ -54,7 +54,7 @@ export const buildCanvasCssVars = (
   const btnPrimaryBg = primaryColor
   const btnPrimaryText = buttons.primary?.textColor || '#ffffff'
   const btnSecondaryBg = 'transparent'
-  const btnSecondaryBorder = isDarkPreview ? 'rgba(248, 250, 252, 0.2)' : 'rgba(15, 23, 42, 0.2)'
+  const btnSecondaryBorder = isDarkPreview ? 'rgba(255, 255, 255, 0.15)' : 'rgba(15, 23, 42, 0.15)'
   const btnSecondaryText = buttons.secondary?.textColor || buttons.outline?.textColor || (isDarkPreview ? '#f8fafc' : '#0f172a')
   const btnOutlineBorder = btnSecondaryBorder
   const btnOutlineText = btnSecondaryText
@@ -72,8 +72,10 @@ export const buildCanvasCssVars = (
     `--color-text-main: ${isDarkPreview ? '#f8fafc' : (colors.textPrimary || '#0f172a')}`,
     `--color-text-secondary: ${isDarkPreview ? '#cbd5e1' : '#334155'}`,
     `--color-text-muted: ${isDarkPreview ? '#94a3b8' : (colors.textMuted || '#64748b')}`,
-    `--color-border: ${isDarkPreview ? 'rgba(248, 250, 252, 0.07)' : 'rgba(15, 23, 42, 0.08)'}`,
-    `--color-border-light: ${isDarkPreview ? 'rgba(248, 250, 252, 0.04)' : 'rgba(15, 23, 42, 0.05)'}`,
+    `--color-border: ${isDarkPreview ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+    `--color-border-light: ${isDarkPreview ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)'}`,
+    `--color-border-rgb: ${isDarkPreview ? '255 255 255' : '15 23 42'}`,
+    `--color-border-light-rgb: ${isDarkPreview ? '255 255 255' : '15 23 42'}`,
 
     // 2. Font Family Tokens
     `--font-heading: ${headingFont}`,
@@ -138,3 +140,29 @@ export const buildCanvasCssVars = (
     `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
   ].join(String.fromCharCode(59) + ' ')
 }
+
+/**
+ * Generates full CSS rules for storefront pages based on theme colorMode.
+ * Supports 'auto' (prefers-color-scheme + html[data-theme]), 'light', or 'dark'.
+ */
+export const buildStorefrontCssTheme = (theme: Partial<TemplateTheme> = {}): string => {
+  const mode = theme?.colorMode || 'auto';
+  const lightVars = buildCanvasCssVars(theme, false, 'desktop');
+  const darkVars = buildCanvasCssVars(theme, true, 'desktop');
+
+  if (mode === 'light') {
+    return `:root { ${lightVars}; }`;
+  }
+
+  if (mode === 'dark') {
+    return `:root { ${darkVars}; }`;
+  }
+
+  return [
+    `:root { ${lightVars}; }`,
+    `@media (prefers-color-scheme: dark) { :root { ${darkVars}; } }`,
+    `html[data-theme="dark"] { ${darkVars}; }`,
+    `html[data-theme="light"] { ${lightVars}; }`,
+  ].join('\n');
+};
+

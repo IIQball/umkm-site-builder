@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCanvasCssVars } from '@/components/builder/canvas/canvasCss.helpers';
+import { buildCanvasCssVars, buildStorefrontCssTheme } from '@/components/builder/canvas/canvasCss.helpers';
 import { buildUpdatedTheme } from '@/components/builder/stores/documentStore.actions';
 import { extractFontNames, buildGoogleFontsUrl } from '@/components/builder/canvas/fontLoader.helpers';
 import { DEFAULT_TEMPLATE_THEME } from '@/schemas';
@@ -73,6 +73,33 @@ describe('Global Design System & Reactive Canvas CSS Engine', () => {
       expect(darkVars).toContain('--color-bg-base: #0b0f19');
       expect(darkVars).toContain('--color-card-base: #111827');
       expect(darkVars).toContain('--color-text-main: #f8fafc');
+    });
+  });
+
+  describe('buildStorefrontCssTheme', () => {
+    it('generates responsive dual-theme CSS rules by default (auto)', () => {
+      const css = buildStorefrontCssTheme(DEFAULT_TEMPLATE_THEME);
+      expect(css).toContain(':root {');
+      expect(css).toContain('@media (prefers-color-scheme: dark) { :root {');
+      expect(css).toContain('html[data-theme="dark"] {');
+      expect(css).toContain('--color-bg-base: #ffffff');
+      expect(css).toContain('--color-bg-base: #0b0f19');
+    });
+
+    it('generates light-only CSS rules when colorMode is light', () => {
+      const lightTheme = { ...DEFAULT_TEMPLATE_THEME, colorMode: 'light' as const };
+      const css = buildStorefrontCssTheme(lightTheme);
+      expect(css).toContain(':root {');
+      expect(css).not.toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('--color-bg-base: #ffffff');
+    });
+
+    it('generates dark-only CSS rules when colorMode is dark', () => {
+      const darkTheme = { ...DEFAULT_TEMPLATE_THEME, colorMode: 'dark' as const };
+      const css = buildStorefrontCssTheme(darkTheme);
+      expect(css).toContain(':root {');
+      expect(css).not.toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('--color-bg-base: #0b0f19');
     });
   });
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance, type Mock } from 'vitest';
 import { transactionService } from '@/services';
+import { fulfillPaidTransaction } from '@/services/finance/transaction.helpers';
 import type { TransactionInitiateInput } from '@/types';
 import { db } from '@/lib/db/client';
 import { xenditClient } from '@/lib/finance/xendit';
@@ -25,6 +26,10 @@ vi.mock('@/lib/db/client', () => {
       },
       templates: {
         findMany: vi.fn(),
+        findFirst: vi.fn(),
+      },
+      userTemplates: {
+        findFirst: vi.fn(),
       },
     },
   };
@@ -42,6 +47,10 @@ describe('TransactionService', () => {
       },
       templates: {
         findMany: Mock;
+        findFirst: Mock;
+      },
+      userTemplates: {
+        findFirst: Mock;
       },
     };
   };
@@ -58,6 +67,8 @@ describe('TransactionService', () => {
     mockDb.update.mockReset();
     mockDb.query.transactions.findMany.mockReset();
     mockDb.query.templates.findMany.mockReset();
+    mockDb.query.templates.findFirst.mockReset();
+    mockDb.query.userTemplates.findFirst.mockReset();
 
     // Suppress console output during tests
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -168,6 +179,105 @@ describe('TransactionService', () => {
       await expect(
         transactionService.initiateTransaction('user_123', input, 'http://localhost:3000')
       ).rejects.toThrow(/Payment already in progress/);
+    });
+  });
+
+  describe('purchaseTemplate', () => {
+    it('should successfully add free template and trigger notifications if assistedBy admin', async () => {
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com', name: 'Budi' }]),
+          }),
+        }),
+      });
+
+      mockDb.query.templates.findFirst.mockResolvedValueOnce({
+        id: 'tpl_free',
+        price: 0,
+        status: 'approved',
+        designerId: 'designer_1',
+        name: 'Basic Free'
+      });
+
+      mockDb.query.userTemplates.findFirst.mockResolvedValueOnce(null); // Not owned yet
+
+      const result = await transactionService.purchaseTemplate('user_123', 'tpl_free', 'http://localhost:3000', 'admin_456');
+      
+      expect(result.isFree).toBe(true);
+      expect(mockDb.insert).toHaveBeenCalledTimes(3); // 1 for userTemplates, 2 for notifications (designer & tenant)
+    });
+
+    it('should successfully create invoice for paid template and pass assistedBy metadata', async () => {
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com', name: 'Budi' }]),
+          }),
+        }),
+      });
+
+      mockDb.query.templates.findFirst.mockResolvedValueOnce({
+        id: 'tpl_paid',
+        price: 50000,
+        status: 'approved',
+        designerId: 'designer_1',
+        name: 'Premium Paid'
+      });
+
+      mockDb.query.userTemplates.findFirst.mockResolvedValueOnce(null);
+
+      (xenditClient.createInvoice as Mock).mockResolvedValueOnce({
+        id: 'xendit_123',
+        invoiceNum: 'INV-user_123-123',
+        invoiceUrl: 'https://xendit.co/invoices/xyz',
+      });
+
+      const result = await transactionService.purchaseTemplate('user_123', 'tpl_paid', 'http://localhost:3000', 'admin_456');
+      
+      expect(result.isFree).toBe(false);
+      expect(xenditClient.createInvoice).toHaveBeenCalledWith(expect.objectContaining({
+        metadata: expect.objectContaining({
+          assistedBy: 'admin_456'
+        })
+      }));
+    });
+  });
+
+  describe('fulfillPaidTransaction', () => {
+    it('should trigger notification to tenant if transaction was assisted by admin', async () => {
+      mockDb.query.templates.findFirst.mockResolvedValueOnce({
+        id: 'tmpl_1',
+        name: 'Paid Template',
+        designerId: 'designer_1'
+      });
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'tenant_1', name: 'Budi' }]),
+          }),
+        }),
+      });
+
+      await fulfillPaidTransaction({
+        id: 'txn_paid_assisted',
+        userId: 'tenant_1',
+        templateId: 'tmpl_1',
+        type: 'template_purchase',
+        amount: 50000,
+        status: 'success',
+        adminFee: 0,
+        assistedBy: 'admin_123', // Assisted by admin
+        externalId: 'ext_1',
+        paymentGatewayRef: null,
+        paymentChannel: null,
+        storeId: null,
+        createdAt: new Date(),
+      });
+
+      // db.insert is called for: userTemplates, commission, creditWallet (designer), creditWallet (admin), notification (designer), notification (tenant)
+      expect(mockDb.insert).toHaveBeenCalledTimes(6);
     });
   });
 
@@ -338,7 +448,7 @@ describe('TransactionService', () => {
           userId: 'user_123',
           type: 'template_purchase',
           amount: 50000,
-          status: 'paid',
+          status: 'success',
           template: { id: 'tmpl_1', name: 'Warung Kopi Theme' },
           createdAt: new Date(),
         },
@@ -376,7 +486,7 @@ describe('TransactionService', () => {
           userId: 'tenant_1',
           type: 'template_purchase',
           amount: 100000,
-          status: 'paid',
+          status: 'success',
           templateId: 'tmpl_1',
           template: { id: 'tmpl_1', name: 'Resto Theme', price: 100000 },
           user: { id: 'tenant_1', name: 'Budi Tenant', email: 'budi@tenant.id' },

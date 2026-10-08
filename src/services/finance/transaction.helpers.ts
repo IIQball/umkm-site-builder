@@ -92,6 +92,17 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
           message: `${buyerName} telah membeli template "${template.name}". Komisi sebesar ${formatIDR(designerAmount)} telah ditambahkan ke saldo Anda.`,
           metadata: { templateId: template.id, transactionId: transaction.id }
         });
+
+        if (transaction.assistedBy) {
+          await db.insert(notifications).values({
+            id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
+            userId: transaction.userId,
+            type: 'template_purchased',
+            title: 'Template Berhasil Dibeli',
+            message: `Admin telah membantu membelikan template "${template.name}" untuk toko Anda.`,
+            metadata: { templateId: template.id, transactionId: transaction.id }
+          });
+        }
       } catch {
         // Non-blocking notification dispatch
       }

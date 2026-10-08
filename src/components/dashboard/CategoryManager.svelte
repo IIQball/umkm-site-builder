@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button, Card, Table, StatCard } from '@/components/ui';
+  import { Button, Card, Table, StatCard, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import { slugify } from '@/lib/utils';
   import TenantCategoryFormModal from './category/TenantCategoryFormModal.svelte';
@@ -22,7 +22,14 @@
   let isSaving = false;
   let error: string | null = null;
 
+  let currentPage = 1;
+  const itemsPerPage = 5;
 
+  $: totalPages = Math.ceil(categories.length / itemsPerPage) || 1;
+  $: paginatedCategories = categories.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   // Modal state
   let isModalOpen = false;
   let editingCategory: Category | null = null;
@@ -253,7 +260,7 @@
           { label: 'Aksi', align: 'right', width: '120px' }
         ]}
       >
-        {#each categories as category}
+        {#each paginatedCategories as category}
           <tr class="group hover:bg-nested/40 transition-colors">
             <td class="px-6 py-4 align-top">
               <p class="text-xs font-bold text-main font-sans">{category.name}</p>
@@ -285,6 +292,17 @@
           </tr>
         {/each}
       </Table>
+
+      {#if totalPages > 1}
+        <div class="px-6 py-4 border-t border-light flex justify-center">
+          <Pagination
+            {currentPage}
+            totalItems={categories.length}
+            pageSize={itemsPerPage}
+            on:pageChange={(e) => (currentPage = e.detail)}
+          />
+        </div>
+      {/if}
     {/if}
   </Card>
 

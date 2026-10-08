@@ -79,6 +79,18 @@ export const PUT: APIRoute = async (context) => {
       })
       .where(eq(stores.id, existingStore.id));
 
+    if (user.id !== existingStore.userId) {
+      const { notifications } = await import('@/db/schema');
+      await db.insert(notifications).values({
+        id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        userId: existingStore.userId,
+        type: 'store_managed_by_admin',
+        title: 'Toko Diperbarui',
+        message: 'Admin telah memperbarui pengaturan toko Anda.',
+        metadata: { storeId: existingStore.id }
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true, success: true, data: { message: 'Settings updated successfully' } }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

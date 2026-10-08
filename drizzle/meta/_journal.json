@@ -54,8 +54,8 @@
     {
       "idx": 7,
       "version": "7",
-      "when": 1791294468715,
-      "tag": "0007_add_visitor_daily_limit",
+      "when": 1791291297764,
+      "tag": "0007_slim_metal_master",
       "breakpoints": true
     }
   ]

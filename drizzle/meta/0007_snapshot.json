@@ -1,5 +1,5 @@
 {
-  "id": "fde9bdf1-4435-4129-a8d3-1e836c8193e8",
+  "id": "fa8b322f-48ff-4ab1-9eec-fec70878fd1e",
   "prevId": "eaa844b2-8f67-45b9-aecc-88d0b34d1313",
   "version": "7",
   "dialect": "postgresql",
@@ -2988,7 +2988,8 @@
         "user_registered",
         "template_submitted",
         "template_reviewed",
-        "template_purchased"
+        "template_purchased",
+        "store_managed_by_admin"
       ]
     },
     "public.payment_status": {

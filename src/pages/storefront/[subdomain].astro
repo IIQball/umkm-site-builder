@@ -6,7 +6,7 @@ import { stores, products, storeCategories } from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { migrateTemplateConfig } from "@/lib/templates/migration";
 import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
-import { buildCanvasCssVars } from "@/components/builder/canvas/canvasCss.helpers";
+import { buildStorefrontCssTheme } from "@/components/builder/canvas/canvasCss.helpers";
 import { extractFontNames, buildGoogleFontsUrl } from "@/components/builder/canvas/fontLoader.helpers";
 import { firstProductImageUrl } from "@/lib/products/image";
 import { deserializeVariants } from "@/components/tenant/product/productForm.helpers";
@@ -127,7 +127,7 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
 });
 
 // 5. Dynamic Theme Tokens & Google Fonts Injection
-const cssVars = buildCanvasCssVars(finalConfig.theme ?? {}, false, "desktop");
+const themeCss = buildStorefrontCssTheme(finalConfig.theme ?? {});
 
 const fontNames = [
   ...extractFontNames(finalConfig.theme?.typography?.headingFont || ""),
@@ -170,7 +170,7 @@ const safeStore = {
   image={storeLogo}
 >
   {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
-  <style is:inline set:html={`:root { ${cssVars} }`} />
+  <style is:inline set:html={themeCss} />
 
   <StorefrontDynamicPage
     client:load

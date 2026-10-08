@@ -21,7 +21,7 @@ const maxStoreBranches = await getMaxStoreBranches();
 ---
 
 <BaseLayout title="Template Builder" hideNavbar={true}>
-  <div class="h-screen w-full bg-base-100 overflow-hidden flex flex-col">
+  <div class="h-screen w-full bg-canvas text-main overflow-hidden flex flex-col">
     <BuilderEditor client:only="svelte" {templateId} {platformFeePercentage} {maxStoreBranches} />
   </div>
 </BaseLayout>

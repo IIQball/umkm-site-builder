@@ -5,6 +5,7 @@
   import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";
   import { sanitizeSearchInput } from "@/components/builder/sections/header/headerSearch.helpers";
+  import { getStoredTheme, applyTheme } from "@/lib/utils/theme";
 
   export let userJson: string;
 
@@ -15,7 +16,7 @@
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   onMount(() => {
-    isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    isDark = getStoredTheme() === "dark";
   });
 
   onDestroy(() => {
@@ -23,11 +24,8 @@
   });
 
   const toggleTheme = () => {
-    const next = isDark ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-    localStorage.setItem("theme", next);
-    isDark = next === "dark";
+    isDark = !isDark;
+    applyTheme(isDark ? "dark" : "light");
   };
 
   const getTodayFormatted = () => {

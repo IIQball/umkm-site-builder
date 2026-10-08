@@ -25,10 +25,10 @@
     { value: '12m', label: '12 Bulan' },
   ];
 
-  // Warna mengikuti gambar referensi
+  // Warna mengikuti gambar referensi - lebih kontras
   const COLORS = {
-    views: '#66A6DC',
-    clicks: '#5EA69B',
+    views: '#2563EB',
+    clicks: '#10B981',
     conversion: '#F2E845',
   };
 
@@ -38,7 +38,9 @@
   let errorMessage = '';
 
   let chartEl: HTMLDivElement;
+  let pieChartEl: HTMLDivElement;
   let chart: ApexCharts | null = null;
+  let pieChart: ApexCharts | null = null;
   let ApexCtor: typeof ApexCharts | null = null;
   let abortCtrl: AbortController | null = null;
   let themeObserver: MutationObserver | null = null;
@@ -47,6 +49,16 @@
   $: periodViews = points.reduce((sum, p) => sum + p.views, 0);
   $: periodClicks = points.reduce((sum, p) => sum + p.waClicks, 0);
   $: periodConversion = periodViews > 0 ? ((periodClicks / periodViews) * 100).toFixed(1) : '0.0';
+  
+  // Update chart when points change
+  $: if (chart && points.length > 0 && !loading) {
+    renderChart();
+  }
+
+  // Update pie chart when period data changes
+  $: if (pieChart && points.length > 0 && !loading) {
+    renderPieChart();
+  }
 
   function themeColors() {
     const style = getComputedStyle(document.documentElement);
@@ -59,10 +71,19 @@
     const { text, main } = themeColors();
     const nf = (v: number) => Math.round(v).toLocaleString('id-ID');
 
+    // Determine tick amount based on range to reduce crowding
+    const tickAmount = range === '7d' ? 6 : range === '30d' ? 5 : 5;
+    
+    // Hide markers for longer ranges to reduce clutter
+    const showMarkers = range === '7d';
+    
+    // Show grid lines for all ranges, sparse for 30d via tickAmount
+    const xaxisLines = true;
+
     return {
       chart: {
         type: 'line',
-        height: 360,
+        height: 300,
         background: 'transparent',
         fontFamily: 'inherit',
         toolbar: { show: false },
@@ -77,9 +98,9 @@
       colors: [COLORS.views, COLORS.clicks, COLORS.conversion],
       stroke: { curve: 'straight', width: 4, lineCap: 'round' },
       markers: {
-        size: 7,
+        size: showMarkers ? 7 : 0,
         strokeWidth: 0,
-        hover: { size: 9 },
+        hover: { size: showMarkers ? 9 : 0 },
       },
       xaxis: {
         categories: points.map((p) => p.label),
@@ -87,6 +108,8 @@
         axisTicks: { show: false },
         tooltip: { enabled: false },
         tickPlacement: 'on',
+        tickAmount,
+        type: range === '30d' ? 'numeric' : 'category',
         labels: {
           rotate: 0,
           hideOverlappingLabels: true,
@@ -121,7 +144,12 @@
         show: true,
         borderColor: main,
         strokeDashArray: 4,
-        xaxis: { lines: { show: true } },
+        xaxis: { 
+          lines: { 
+            show: true,
+            interval: range === '30d' ? Math.floor(points.length / 5) : undefined,
+          } 
+        },
         yaxis: { lines: { show: false } },
         padding: { left: 8, right: 8 },
       },
@@ -148,6 +176,63 @@
     };
   }
 
+  function buildPieOptions(): ApexCharts.ApexOptions {
+    const { text, main } = themeColors();
+
+    return {
+      chart: {
+        type: 'pie',
+        height: 300,
+        background: 'transparent',
+        fontFamily: 'inherit',
+        toolbar: { show: false },
+        animations: { enabled: true, speed: 500 },
+      },
+      series: [periodViews, periodClicks],
+      labels: ['Pengunjung', 'Klik WhatsApp'],
+      colors: [COLORS.views, COLORS.clicks],
+      stroke: { show: false },
+      plotOptions: {
+        pie: {
+          dataLabels: {
+            offset: -5,
+          },
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: string, opts?: { seriesIndex: number }) => {
+          const value = opts?.seriesIndex === 0 ? periodViews : periodClicks;
+          const percentage = parseFloat(val);
+          return `${percentage.toFixed(1)}%\n${Math.round(value).toLocaleString('id-ID')}`;
+        },
+        style: {
+          fontSize: '12px',
+          fontWeight: 600,
+          colors: ['#ffffff'],
+        },
+      },
+      legend: {
+        show: true,
+        position: 'bottom',
+        horizontalAlign: 'center',
+        fontSize: '11px',
+        fontWeight: 600,
+        labels: { colors: main },
+        markers: { size: 6, strokeWidth: 0 },
+        itemMargin: { horizontal: 8, vertical: 4 },
+      },
+      tooltip: {
+        enabled: true,
+        theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+        y: {
+          formatter: (v: number) => Math.round(v).toLocaleString('id-ID'),
+        },
+      },
+      noData: { text: 'Memuat data...' },
+    };
+  }
+
   async function renderChart() {
     if (!chartEl || !ApexCtor) return;
     const options = buildOptions();
@@ -156,6 +241,17 @@
     } else {
       chart = new ApexCtor(chartEl, options);
       await chart.render();
+    }
+  }
+
+  async function renderPieChart() {
+    if (!pieChartEl || !ApexCtor) return;
+    const options = buildPieOptions();
+    if (pieChart) {
+      await pieChart.updateOptions(options, true, true);
+    } else {
+      pieChart = new ApexCtor(pieChartEl, options);
+      await pieChart.render();
     }
   }
 
@@ -182,12 +278,13 @@
         throw new Error(json?.error?.message || json?.message || 'Gagal memuat grafik');
       }
       points = json.data.points as TrafficPoint[];
-      loading = false;
       await renderChart();
+      loading = false;
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       loading = false;
       errorMessage = (err as Error).message || 'Gagal memuat grafik';
+      console.error('[CHART] loadData error:', err);
     }
   }
 
@@ -206,6 +303,7 @@
       points = initialPoints;
       loading = false;
       await renderChart();
+      await renderPieChart();
     } else {
       await loadData(range);
     }
@@ -213,6 +311,7 @@
     // Perbarui warna chart saat tema light/dark berganti
     themeObserver = new MutationObserver(() => {
       if (chart && points.length) renderChart();
+      if (pieChart && points.length) renderPieChart();
     });
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
   });
@@ -222,11 +321,13 @@
     themeObserver?.disconnect();
     chart?.destroy();
     chart = null;
+    pieChart?.destroy();
+    pieChart = null;
   });
 </script>
 
 <div
-  class="rounded-3xl bg-card border border-light shadow-xs overflow-hidden {!isOnboarded ? 'opacity-50 pointer-events-none' : ''}"
+  class="rounded-3xl bg-card border border-light shadow-xs overflow-hidden"
 >
   <div class="p-6 border-b border-light flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
@@ -276,7 +377,17 @@
   </div>
 
   <div class="relative p-4 md:p-6">
-    <div bind:this={chartEl} class="min-h-[360px]" aria-label="Grafik garis tren kunjungan dan konversi"></div>
+    <div class="grid grid-cols-10 gap-4">
+      <!-- Line Chart: 60% -->
+      <div class="col-span-6">
+        <div bind:this={chartEl} class="min-h-[300px]" aria-label="Grafik garis tren kunjungan dan konversi"></div>
+      </div>
+
+      <!-- Pie Chart: 40% -->
+      <div class="col-span-4">
+        <div bind:this={pieChartEl} class="min-h-[300px]" aria-label="Grafik pie distribusi pengunjung dan klik"></div>
+      </div>
+    </div>
 
     {#if loading}
       <div class="absolute inset-0 flex items-center justify-center bg-card/70 backdrop-blur-[1px]">

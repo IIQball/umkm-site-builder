@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Card, Button, Input, StatCard, Select, Badge, Modal, Table } from '@/components/ui';
-  import { Mail, Clock, CheckCircle, RefreshCcw, Link2, Search, XCircle, FileText, UserPlus, AlertCircle, CheckCircle2, Trash2, CalendarDays } from 'lucide-svelte';
+  import { Card, Button, Badge, Modal, Table, Pagination } from '@/components/ui';
+  import { Clock, CheckCircle, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import { toast } from '@/lib/toast';
@@ -37,13 +37,6 @@
   let actionLoading = false;
 
   let statusFilter = 'all';
-  const statusOptions = [
-    { value: 'all', label: 'Semua Status' },
-    { value: 'active', label: 'Aktif / Terdaftar' },
-    { value: 'suspended', label: 'Ditangguhkan' },
-    { value: 'pending', label: 'Menunggu' },
-    { value: 'expired', label: 'Kedaluwarsa' }
-  ];
 
   $: stats = {
     total: invitations.length,
@@ -76,6 +69,10 @@
     
     return matchesSearch && matchesStatus;
   });
+
+  let currentPage = 1;
+  const pageSize = 10;
+  $: paginatedInvitations = filteredInvitations.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExtend = async (id: string) => {
     isExtending = id;
@@ -250,52 +247,19 @@
     </div>
   </div>
 
-  <!-- Stat Cards with Premium Look -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-    <StatCard 
-      label="Total Undangan" 
-      value={stats.total} 
-      icon="mail" 
-      cardTheme="default" 
-      description="Keseluruhan link yang dibuat" 
-      delayClass="delay-75" 
-    />
-    <StatCard 
-      label="Aktif" 
-      value={stats.registered} 
-      icon="check_circle" 
-      cardTheme="blue" 
-      description="Akun yang telah berhasil daftar" 
-      delayClass="delay-100" 
-      badge="Verified" 
-      badgeCls="border-white/20 text-white" 
-    />
-    <StatCard 
-      label="Menunggu" 
-      value={stats.pending} 
-      icon="pending_actions" 
-      cardTheme="orange" 
-      description="Menunggu aktivasi link" 
-      delayClass="delay-125" 
-    />
-  </div>
-
   <!-- Main Table Panel -->
-  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-150">
-    <!-- Header -->
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-75">
+    <!-- Header & Controls -->
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-2xs">
-          <Link2 size={20} />
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">link</span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
               Daftar Undangan {targetRoleName}
             </h3>
-            <span class="badge badge-primary badge-outline font-bold text-xs hidden sm:inline-flex">
-              {invitations.length} Undangan
-            </span>
           </div>
           <p class="text-body-sm text-secondary mt-0.5 font-sans">
             Kelola link registrasi untuk calon {targetRoleName.toLowerCase()} binaan Anda.
@@ -303,27 +267,52 @@
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-        {#if invitations.length > 0}
-          <div class="w-full sm:w-48 shrink-0">
-            <Select 
-              bind:value={statusFilter}
-              options={statusOptions}
-            />
-          </div>
-          <div class="w-full sm:w-64">
-            <Input
-              id="search-invites"
-              placeholder="Cari nama / email..."
-              bind:value={searchQuery}
-              className="text-xs"
-            >
-              <span slot="prefix" class="text-muted">
-                <Search size={14} />
-              </span>
-            </Input>
-          </div>
-        {/if}
+      <!-- Actions & Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Cari nama / email..."
+            class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
+          />
+        </div>
+
+        <!-- Segmented Status Filter -->
+        <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
+          <button
+            type="button"
+            on:click={() => (statusFilter = "all")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {statusFilter === 'all' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            Semua ({stats.total})
+          </button>
+          <button
+            type="button"
+            on:click={() => (statusFilter = "active")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'active' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+            Aktif ({stats.registered})
+          </button>
+          <button
+            type="button"
+            on:click={() => (statusFilter = "pending")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'pending' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+            Menunggu ({stats.pending})
+          </button>
+          <button
+            type="button"
+            on:click={() => (statusFilter = "suspended")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'suspended' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+            Ditangguhkan
+          </button>
+        </div>
       </div>
     </div>
 
@@ -347,121 +336,130 @@
     {:else}
       <Table 
         headers={[
-          { label: 'NAMA & EMAIL' },
-          { label: 'STATUS' },
-          { label: 'TANGGAL KEDALUWARSA' },
-          { label: 'AKSI', align: 'right' }
+          { label: '#', align: 'center' as const, width: '40px' },
+          { label: 'Nama & Email', align: 'left' as const },
+          { label: 'Status', align: 'left' as const, width: 'w-36' },
+          { label: 'Tanggal Kedaluwarsa', align: 'left' as const, width: 'w-48' },
+          { label: 'Aksi', align: 'right' as const, width: 'w-64' }
         ]} 
-        minWidth="min-w-[800px]"
+        minWidth="min-w-[760px]"
       >
-        {#each filteredInvitations as inv (inv.id)}
+        {#each paginatedInvitations as inv, i (inv.id)}
           {@const status = getStatus(inv)}
-          <tr>
+          <tr class="hover:bg-nested/40 transition-colors group">
+            <!-- Sequence Number (#) -->
+            <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+              {(currentPage - 1) * pageSize + i + 1}
+            </td>
+            
+            <!-- Nama & Email -->
             <td class="px-6 py-4">
               <div class="flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-nested/50 text-secondary flex items-center justify-center shrink-0 border border-light/50">
-                  <Mail size={18} strokeWidth={2.5} />
+                <div class="w-10 h-10 rounded-xl bg-nested border border-light flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <span class="material-symbols-outlined text-lg text-primary">mail</span>
                 </div>
-                <div class="flex flex-col">
-                  <div class="font-bold text-main font-heading text-sm">{inv.name}</div>
-                  <div class="text-xs text-secondary mt-0.5">{inv.email}</div>
+                <div class="min-w-0 max-w-[280px]">
+                  <div class="font-bold text-xs text-main truncate block leading-tight font-heading">
+                    {inv.name}
+                  </div>
+                  <div class="text-xs text-secondary mt-0.5 truncate max-w-[200px] font-sans">
+                    {inv.email}
+                  </div>
                 </div>
               </div>
             </td>
             
-            <td class="px-6 py-4">
+            <!-- Status Badge -->
+            <td class="px-4 py-4 whitespace-nowrap">
               {#if inv.userStatus === 'active'}
-                <Badge variant="success" size="sm" class="shadow-xs">
-                  <CheckCircle2 size={12} strokeWidth={3} class="mr-1" />
+                <Badge variant="success" dot={true} size="sm">
                   Aktif
                 </Badge>
               {:else if inv.userStatus === 'suspended'}
-                <Badge variant="error" size="sm" class="shadow-xs">
-                  <AlertCircle size={12} strokeWidth={3} class="mr-1" />
+                <Badge variant="error" dot={true} size="sm">
                   Ditangguhkan
                 </Badge>
               {:else}
-                <span class="badge {status.color} badge-outline badge-sm text-[10px] uppercase font-bold tracking-wider shadow-xs">
-                  <svelte:component this={status.icon} size={12} class="mr-1" />
-                  <span>{status.label}</span>
-                </span>
+                <Badge variant={status.color === 'badge-success' ? 'success' : status.color === 'badge-error' ? 'error' : 'warning'} dot={true} size="sm">
+                  {status.label}
+                </Badge>
               {/if}
             </td>
 
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-1.5 text-secondary text-sm">
-                <CalendarDays size={14} />
-                <span>
-                  {#if inv.acceptedAt}
-                    -
-                  {:else}
-                    {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
-                  {/if}
-                </span>
-              </div>
+            <!-- Tanggal -->
+            <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
+              {#if inv.acceptedAt}
+                -
+              {:else}
+                {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
+              {/if}
             </td>
 
-            <td class="px-6 py-4 text-right">
+            <!-- Aksi Buttons -->
+            <td class="px-6 py-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
                 {#if !inv.acceptedAt}
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 rounded-lg text-primary hover:bg-primary/10 transition-all"
+                    className="rounded-xl font-bold text-xs"
                     title="Perpanjang Masa Aktif"
                     on:click={() => handleExtend(inv.id)}
                     disabled={isExtending === inv.id || isDeleting === inv.id}
                     loading={isExtending === inv.id}
                   >
-                    <RefreshCcw size={15} />
+                    <span class="material-symbols-outlined text-xs">refresh</span>
+                    <span>Perpanjang</span>
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="destructive"
                     size="sm"
-                    className="h-8 w-8 p-0 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all"
+                    className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
                     title="Hapus Undangan"
                     on:click={() => openDeleteModal(inv.id, 'invitation')}
                     disabled={isExtending === inv.id || isDeleting === inv.id}
                     loading={isDeleting === inv.id}
                   >
-                    <Trash2 size={15} />
+                    <span class="material-symbols-outlined text-xs">delete</span>
+                    <span>Hapus</span>
                   </Button>
                 {:else if inv.userId}
                   {#if inv.userStatus === 'active'}
                     <Button
-                      size="sm"
                       variant="destructive"
-                      className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
+                      size="sm"
+                      className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
                       title="Tangguhkan"
                       on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, false)}
                       disabled={isUpdatingUser === inv.userId}
                     >
-                      <AlertCircle size={14} class="mr-1" />
-                      Suspend
+                      <span class="material-symbols-outlined text-xs">block</span>
+                      <span>Suspend</span>
                     </Button>
                   {:else if inv.userStatus === 'suspended'}
                     <Button
-                      size="sm"
                       variant="primary"
-                      className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
+                      size="sm"
+                      className="rounded-xl font-bold text-xs"
                       title="Aktifkan"
                       on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, true)}
                       disabled={isUpdatingUser === inv.userId}
                     >
-                      <CheckCircle2 size={14} class="mr-1" />
-                      Unsuspend
+                      <span class="material-symbols-outlined text-xs">check_circle</span>
+                      <span>Aktifkan</span>
                     </Button>
                   {/if}
                   
                   <Button
+                    variant="destructive"
                     size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all ml-1"
+                    className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs ml-1"
                     title="Hapus Pengguna Permanen"
                     on:click={() => inv.userId && openDeleteModal(inv.userId, 'user')}
                     disabled={isUpdatingUser === inv.userId}
                   >
-                    <Trash2 size={15} />
+                    <span class="material-symbols-outlined text-xs">delete_forever</span>
+                    <span>Hapus Akun</span>
                   </Button>
                 {/if}
               </div>
@@ -469,6 +467,13 @@
           </tr>
         {/each}
       </Table>
+      {#if filteredInvitations.length > 0}
+        <Pagination
+          bind:currentPage={currentPage}
+          totalItems={filteredInvitations.length}
+          pageSize={pageSize}
+        />
+      {/if}
     {/if}
   </Card>
 </div>

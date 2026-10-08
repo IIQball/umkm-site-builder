@@ -5,17 +5,19 @@
   import { formatDate } from '@/lib/utils/format';
 
   export let users: AdminUserItem[] = [];
+  export let startIndex: number = 0;
   export let onSuspend: (user: AdminUserItem) => void;
   export let onUnsuspend: (user: AdminUserItem) => void;
   export let onShowDetail: (user: AdminUserItem) => void;
 
   const tableHeaders = [
-    { key: 'name', label: 'PENGGUNA' },
-    { key: 'role', label: 'PERAN' },
-    { key: 'email', label: 'EMAIL' },
-    { key: 'createdAt', label: 'TANGGAL' },
-    { key: 'status', label: 'STATUS' },
-    { key: 'actions', label: 'AKSI', align: 'right' as const }
+    { label: '#', align: 'center' as const, width: 'w-12' },
+    { label: 'Pengguna' },
+    { label: 'Peran', width: 'w-32' },
+    { label: 'Email', width: 'w-48' },
+    { label: 'Tanggal Daftar', width: 'w-40' },
+    { label: 'Status', align: 'center' as const, width: 'w-32' },
+    { label: 'Aksi', align: 'right' as const, width: 'w-32' }
   ];
 </script>
 
@@ -30,80 +32,96 @@
     </p>
   </div>
 {:else}
-  <Table headers={tableHeaders} minWidth="min-w-[640px]">
-    {#each users as item (item.id)}
-      <tr>
-        <td class="px-6 py-4 whitespace-nowrap">
+  <Table headers={tableHeaders} minWidth="min-w-[700px]">
+    {#each users as item, i (item.id)}
+      <tr class="hover:bg-nested/40 transition-colors group">
+        <!-- Sequence Number (#) -->
+        <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
+          {startIndex + i + 1}
+        </td>
+
+        <!-- Name -->
+        <td class="px-6 py-4">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-nested/80 text-secondary flex items-center justify-center shrink-0 border border-light/50">
-              <span class="font-bold text-xs uppercase">{item.name.charAt(0)}</span>
+            <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 shadow-2xs font-bold font-sans uppercase">
+              {item.name.charAt(0)}
             </div>
-            <span class="font-medium text-main text-sm">{item.name}</span>
+            <div class="min-w-0">
+              <span class="font-bold text-xs text-main block font-sans truncate">
+                {item.name}
+              </span>
+            </div>
           </div>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
+
+        <!-- Role -->
+        <td class="px-4 py-4">
+          <span class="font-mono text-2xs font-bold text-secondary bg-nested/80 px-2 py-1 rounded-lg border border-light uppercase">
             {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Merchant' : item.role === 'admin' ? 'Admin' : item.role}
           </span>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-          {item.email}
+
+        <!-- Email -->
+        <td class="px-4 py-4">
+          <span class="font-sans text-xs text-secondary truncate block max-w-xs">{item.email}</span>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
-          {item.createdAt ? formatDate(item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+
+        <!-- Created Date -->
+        <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
+          {item.createdAt ? formatDate(item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
         </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            {#if item.status === 'active'}
-              <Badge variant="emerald" size="sm" class="justify-center shadow-xs">
-                <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
-                Aktif
-              </Badge>
-            {:else if item.status === 'pending'}
-              <Badge variant="amber" size="sm" class="justify-center shadow-xs">
-                <AlertCircle size={12} strokeWidth={3} class="mr-1 inline" />
-                Menunggu
-              </Badge>
-            {:else}
-              <Badge variant="rose" size="sm" class="justify-center shadow-xs">
-                <Ban size={12} strokeWidth={3} class="mr-1 inline" />
-                Ditangguhkan
-              </Badge>
-            {/if}
+
+        <!-- Status -->
+        <td class="px-4 py-4 text-center">
+          {#if item.status === 'active'}
+            <Badge variant="emerald" size="sm" class="justify-center shadow-xs">
+              <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
+              Aktif
+            </Badge>
+          {:else if item.status === 'pending'}
+            <Badge variant="amber" size="sm" class="justify-center shadow-xs">
+              <AlertCircle size={12} strokeWidth={3} class="mr-1 inline" />
+              Menunggu
+            </Badge>
+          {:else}
+            <Badge variant="rose" size="sm" class="justify-center shadow-xs">
+              <Ban size={12} strokeWidth={3} class="mr-1 inline" />
+              Ditangguhkan
+            </Badge>
+          {/if}
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right">
+
+        <!-- Actions -->
+        <td class="px-6 py-4 text-right whitespace-nowrap">
           <div class="flex items-center justify-end gap-1.5">
             {#if item.status === 'active'}
-              <Button 
-                size="sm"
+              <Button
                 variant="destructive"
+                size="icon"
+                className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
                 on:click={() => onSuspend(item)}
                 title="Tangguhkan Pengguna"
-                className="h-8 px-3 rounded-xl font-bold text-xs hover:scale-105 transition-all"
               >
-                <AlertCircle size={13} class="mr-1" />
-                <span>Suspend</span>
+                <AlertCircle size={13} />
               </Button>
             {:else if item.status === 'suspended'}
               {#if item.suspendReason}
-                <Button 
-                  size="sm"
-                  variant="ghost"
+                <Button
+                  variant="secondary"
+                  size="icon"
                   title="Lihat Alasan"
                   on:click={() => onShowDetail(item)}
-                  className="h-8 w-8 p-0 rounded-xl text-secondary hover:bg-nested hover:scale-105 transition-all"
                 >
-                  <FileText size={14} />
+                  <FileText size={13} />
                 </Button>
               {/if}
-              <Button 
-                size="sm"
+              <Button
                 variant="primary"
+                size="icon"
                 on:click={() => onUnsuspend(item)}
                 title="Aktifkan Pengguna"
-                className="h-8 px-3 rounded-xl font-bold text-xs hover:scale-105 transition-all"
               >
-                <CheckCircle2 size={13} class="mr-1" />
-                <span>Unsuspend</span>
+                <CheckCircle2 size={13} />
               </Button>
             {/if}
           </div>
@@ -112,3 +130,4 @@
     {/each}
   </Table>
 {/if}
+

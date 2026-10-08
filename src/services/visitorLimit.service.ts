@@ -70,7 +70,7 @@ export async function recordVisitorEvent(
       .set(updateData)
       .where(eq(visitorDailyLimit.id, existingRecord.id));
   } else {
-    const newRecord: Record<string, unknown> = {
+    const newRecord: typeof visitorDailyLimit.$inferInsert = {
       id: `vdl_${crypto.randomUUID()}`,
       storeId,
       visitorIp,
@@ -81,6 +81,6 @@ export async function recordVisitorEvent(
     if (eventType === 'view') newRecord.viewedAt = new Date();
     if (eventType === 'click') newRecord.clickedAt = new Date();
 
-    await db.insert(visitorDailyLimit).values(newRecord as any);
+    await db.insert(visitorDailyLimit).values(newRecord);
   }
 }

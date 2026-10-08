@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { authClient } from "@/lib/auth-client";
   import { toast } from "@/lib/toast";
+  import { Card, Button, Input } from "@/components/ui";
 
   export let userJson: string;
   let user = JSON.parse(userJson);
@@ -141,199 +142,175 @@
   }
 </script>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
-  
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-10">
   <!-- Profil Akun Card -->
-  <section class="border border-base-200 rounded-xl overflow-hidden bg-base-100 shadow-sm transition-all flex flex-col">
-    <div class="border-b border-base-200 p-5 sm:p-6 bg-base-50/30">
-      <h2 class="text-lg font-semibold text-base-content tracking-tight">Profil Akun</h2>
-      <p class="text-sm text-base-content/60 mt-1">Kelola informasi publik dan data pribadi Anda.</p>
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden flex flex-col h-full">
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">person</span>
+        </div>
+        <div>
+          <h3 class="text-heading-md text-main font-bold font-heading leading-tight">Profil Akun</h3>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">Kelola informasi publik dan data pribadi Anda.</p>
+        </div>
+      </div>
     </div>
     
     <form on:submit={handleUpdateName} class="flex flex-col flex-grow">
-      <div class="p-5 sm:p-6 space-y-5 flex-grow">
-        <!-- Email (Disabled) -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="email">
-            <span class="label-text font-medium text-base-content/90">Alamat Email</span>
-          </label>
-          <input
-            type="email"
-            id="email"
-            class="input input-bordered w-full bg-base-200/50 text-base-content/60 cursor-not-allowed focus:outline-none transition-colors"
-            value={user.email}
-            disabled
-            title="Email tidak dapat diubah"
-          />
-          <p class="text-xs text-base-content/50 mt-2 flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            Email digunakan untuk login dan tidak dapat diganti.
-          </p>
-        </div>
+      <div class="p-6 md:p-8 space-y-6 flex-grow">
+        <Input
+          id="email"
+          type="email"
+          label="Alamat Email"
+          value={user.email}
+          disabled={true}
+          helper="Email digunakan untuk login dan tidak dapat diganti."
+          title="Email tidak dapat diubah"
+        />
 
-        <!-- Name -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="name">
-            <span class="label-text font-medium text-base-content/90">Nama Lengkap</span>
-          </label>
-          <input
-            type="text"
-            id="name"
-            class="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out"
-            bind:value={newName}
-            placeholder="Masukkan nama lengkap Anda"
-            required
-          />
-        </div>
+        <Input
+          id="name"
+          type="text"
+          label="Nama Lengkap"
+          placeholder="Masukkan nama lengkap Anda"
+          bind:value={newName}
+          required={true}
+        />
       </div>
 
-      <div class="border-t border-base-200 p-4 sm:px-6 bg-base-50/30 flex justify-end mt-auto">
-        <button 
+      <div class="p-4 sm:px-6 py-4 border-t border-light flex justify-end mt-auto bg-card">
+        <Button 
           type="submit" 
-          class="btn btn-primary active:scale-[0.97] transition-all duration-150 ease-out shadow-sm w-full sm:w-auto" 
+          variant="primary"
+          size="md"
+          className="shadow-xs font-bold rounded-2xl w-full sm:w-auto"
+          loading={isUpdatingName}
           disabled={isUpdatingName || newName === user.name}
         >
-          {#if isUpdatingName}
-            <span class="loading loading-spinner loading-sm"></span>
-          {/if}
-          Simpan Perubahan
-        </button>
+          <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">save</span>
+          <span>Simpan Perubahan</span>
+        </Button>
       </div>
     </form>
-  </section>
+  </Card>
 
   <!-- Ubah Kata Sandi Card -->
-  <section class="border border-base-200 rounded-xl overflow-hidden bg-base-100 shadow-sm transition-all flex flex-col">
-    <div class="border-b border-base-200 p-5 sm:p-6 bg-base-50/30">
-      <h2 class="text-lg font-semibold text-base-content tracking-tight">Keamanan & Kata Sandi</h2>
-      <p class="text-sm text-base-content/60 mt-1">Pastikan akun Anda menggunakan kata sandi yang kuat agar tetap aman.</p>
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden flex flex-col h-full">
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">lock</span>
+        </div>
+        <div>
+          <h3 class="text-heading-md text-main font-bold font-heading leading-tight">Keamanan & Kata Sandi</h3>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">Pastikan akun Anda menggunakan kata sandi yang kuat.</p>
+        </div>
+      </div>
     </div>
     
     <form on:submit={handleUpdatePassword} class="flex flex-col flex-grow">
-      <div class="p-5 sm:p-6 space-y-5 flex-grow">
+      <div class="p-6 md:p-8 space-y-6 flex-grow">
         {#if isCooldownActive}
-          <div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 text-xs sm:text-sm flex items-start gap-3 shadow-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-600 shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          <div class="p-4 rounded-xl bg-orange/10 border border-orange/20 text-orange-dark dark:text-orange-light text-xs sm:text-sm flex items-start gap-3 shadow-2xs mb-6">
+            <span class="material-symbols-outlined text-orange shrink-0 mt-0.5">warning</span>
             <div>
-              <p class="font-semibold text-amber-900">Batas Waktu Perubahan Kata Sandi (Cooldown)</p>
-              <p class="text-amber-800 mt-1 leading-relaxed">
-                Demi keamanan akun dan mencegah spamming, kata sandi hanya dapat diperbarui **1 kali dalam 24 jam**. Silakan tunggu <span class="font-bold text-amber-900 underline decoration-amber-400">{cooldownFormatted}</span> sebelum melakukan pembaruan berikutnya.
+              <p class="font-bold font-heading">Batas Waktu Perubahan Kata Sandi (Cooldown)</p>
+              <p class="mt-1 leading-relaxed opacity-90">
+                Demi keamanan akun dan mencegah spamming, kata sandi hanya dapat diperbarui <strong>1 kali dalam 24 jam</strong>. Silakan tunggu <span class="font-bold underline decoration-orange/40">{cooldownFormatted}</span> sebelum melakukan pembaruan berikutnya.
               </p>
             </div>
           </div>
         {/if}
 
-        <!-- Current Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="currentPassword">
-            <span class="label-text font-medium text-base-content/90">Kata Sandi Saat Ini</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showCurrentPassword ? "text" : "password"}
-              id="currentPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
-              bind:value={currentPassword}
-              placeholder="Masukkan kata sandi saat ini"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
-              on:click={() => showCurrentPassword = !showCurrentPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-            >
-              {#if showCurrentPassword}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-              {:else}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="currentPassword"
+          type={showCurrentPassword ? "text" : "password"}
+          label="Kata Sandi Saat Ini"
+          placeholder="Masukkan kata sandi saat ini"
+          bind:value={currentPassword}
+          disabled={isCooldownActive}
+          required={true}
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showCurrentPassword = !showCurrentPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showCurrentPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
 
-        <!-- New Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="newPassword">
-            <span class="label-text font-medium text-base-content/90">Kata Sandi Baru</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showNewPassword ? "text" : "password"}
-              id="newPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
-              bind:value={newPassword}
-              placeholder="Min. 8 karakter"
-              minlength="8"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
-              on:click={() => showNewPassword = !showNewPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-            >
-              {#if showNewPassword}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-              {:else}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="newPassword"
+          type={showNewPassword ? "text" : "password"}
+          label="Kata Sandi Baru"
+          placeholder="Min. 8 karakter"
+          bind:value={newPassword}
+          disabled={isCooldownActive}
+          required={true}
+          minlength="8"
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showNewPassword = !showNewPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showNewPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
 
-        <!-- Confirm Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="confirmPassword">
-            <span class="label-text font-medium text-base-content/90">Konfirmasi Kata Sandi</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              class="input input-bordered w-full pr-10 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 ease-out disabled:bg-base-200/50 disabled:cursor-not-allowed"
-              bind:value={confirmPassword}
-              placeholder="Ketik ulang kata sandi baru"
-              minlength="8"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content active:scale-95 transition-all outline-none disabled:opacity-50"
-              on:click={() => showConfirmPassword = !showConfirmPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-            >
-              {#if showConfirmPassword}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-              {:else}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="confirmPassword"
+          type={showConfirmPassword ? "text" : "password"}
+          label="Konfirmasi Kata Sandi"
+          placeholder="Ketik ulang kata sandi baru"
+          bind:value={confirmPassword}
+          disabled={isCooldownActive}
+          required={true}
+          minlength="8"
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showConfirmPassword = !showConfirmPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showConfirmPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
       </div>
 
-      <div class="border-t border-base-200 p-4 sm:px-6 bg-base-50/30 flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-auto">
-        <a href="/auth/forgot-password" class="text-sm text-primary hover:text-primary-focus hover:underline font-medium active:scale-95 transition-all duration-150 ease-out">
-          Lupa kata sandi lama?
+      <div class="p-4 sm:px-6 py-4 border-t border-light flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-auto bg-card">
+        <a href="/auth/forgot-password" class="text-label-caps font-bold text-primary hover:text-primary-focus hover:underline active:scale-95 transition-all duration-150 ease-out">
+          LUPA KATA SANDI LAMA?
         </a>
-        <button 
+        <Button 
           type="submit" 
-          class="btn btn-primary active:scale-[0.97] transition-all duration-150 ease-out shadow-sm w-full sm:w-auto" 
+          variant="primary"
+          size="md"
+          className="shadow-xs font-bold rounded-2xl w-full sm:w-auto"
+          loading={isUpdatingPassword}
           disabled={isUpdatingPassword || isCooldownActive}
         >
-          {#if isUpdatingPassword}
-            <span class="loading loading-spinner loading-sm"></span>
-          {/if}
-          Perbarui Kata Sandi
-        </button>
+          <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">lock_reset</span>
+          <span>Perbarui Kata Sandi</span>
+        </Button>
       </div>
     </form>
-  </section>
+  </Card>
 </div>

@@ -3,6 +3,7 @@
   import { fade } from "svelte/transition";
   import Button from "@/components/ui/Button.svelte";
   import Modal from "@/components/ui/Modal.svelte";
+  import { formatDate } from "@/lib/utils/format";
   
   export let user: any = null;
   let notifications: any[] = [];
@@ -221,8 +222,8 @@
               <div class="flex-1 min-w-0">
                 <p class="text-[13px] {notif.isRead ? 'font-medium text-secondary' : 'font-semibold text-main'} leading-tight">{notif.title}</p>
                 <p class="text-[11.5px] leading-[1.4] {notif.isRead ? 'text-muted' : 'text-secondary'} line-clamp-2 mt-0.5">{notif.message}</p>
-                <p class="text-3xs text-muted mt-1 opacity-60">
-                  {new Date(notif.createdAt).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                <p class="text-xs text-muted mt-1 opacity-60">
+                  {formatDate(notif.createdAt, { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
               {#if !notif.isRead}

@@ -40,7 +40,7 @@
           <button
             type="button"
             on:click={() => onCopyId(store.userId)}
-            class="text-3xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95 flex-shrink-0"
+            class="text-xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95 flex-shrink-0"
             title="Salin ID Tenant"
           >
             <span>#{store.userId.slice(0, 6)}</span>
@@ -53,7 +53,7 @@
           <span class="text-2xs text-secondary font-medium truncate max-w-[120px] font-sans">
             {store.tenantName || store.owner?.name || 'Tanpa Nama'}
           </span>
-          <span class="text-3xs text-muted">•</span>
+          <span class="text-xs text-muted">•</span>
           <span class="text-2xs text-muted font-mono truncate max-w-[140px]">
             {store.tenantEmail || store.owner?.email || '-'}
           </span>
@@ -75,7 +75,7 @@
         <span class="material-symbols-outlined text-xs">open_in_new</span>
       </a>
     {:else}
-      <span class="text-3xs font-mono text-muted bg-nested/50 px-2 py-0.5 rounded-md border border-light/60">
+      <span class="text-xs font-mono text-muted bg-nested/50 px-2 py-0.5 rounded-md border border-light/60">
         Belum Ada Subdomain
       </span>
     {/if}

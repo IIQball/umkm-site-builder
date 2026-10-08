@@ -59,7 +59,7 @@
         {/if}
       </button>
     </div>
-    <span class="text-3xs text-secondary mt-1 block font-mono">
+    <span class="text-xs text-secondary mt-1 block font-mono">
       {formatDate(order.createdAt)}
     </span>
   </td>
@@ -80,7 +80,7 @@
               {order.adminName || 'Admin Pendamping'}
             </div>
             {#if order.adminEmail}
-              <div class="text-3xs text-secondary font-mono truncate" title={order.adminEmail}>
+              <div class="text-xs text-secondary font-mono truncate" title={order.adminEmail}>
                 {order.adminEmail}
               </div>
             {/if}
@@ -99,11 +99,11 @@
               {order.merchantName || '—'}
             </div>
             {#if order.merchantEmail}
-              <div class="text-3xs text-secondary font-mono truncate" title={order.merchantEmail}>
+              <div class="text-xs text-secondary font-mono truncate" title={order.merchantEmail}>
                 {order.merchantEmail}
               </div>
             {/if}
-            <div class="flex items-center gap-1 text-3xs text-muted truncate pt-0.5" title={order.storeName}>
+            <div class="flex items-center gap-1 text-xs text-muted truncate pt-0.5" title={order.storeName}>
               <Store size={11} class="text-muted shrink-0" />
               <span class="truncate">{order.storeName || 'Belum Membuat Toko'}</span>
             </div>
@@ -120,11 +120,11 @@
             {order.merchantName || '—'}
           </div>
           {#if order.merchantEmail}
-            <div class="text-3xs text-secondary font-mono truncate" title={order.merchantEmail}>
+            <div class="text-xs text-secondary font-mono truncate" title={order.merchantEmail}>
               {order.merchantEmail}
             </div>
           {/if}
-          <div class="flex items-center gap-1 text-3xs text-muted truncate pt-0.5" title={order.storeName}>
+          <div class="flex items-center gap-1 text-xs text-muted truncate pt-0.5" title={order.storeName}>
             <Store size={11} class="text-muted shrink-0" />
             <span class="truncate">{order.storeName || 'Belum Membuat Toko'}</span>
           </div>
@@ -152,7 +152,7 @@
         <span class="font-bold text-xs text-main block truncate font-sans">
           {order.template?.name || 'Template Desain Toko'}
         </span>
-        <span class="text-3xs text-muted block uppercase font-mono mt-0.5">
+        <span class="text-xs text-muted block uppercase font-mono mt-0.5">
           ID: #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
         </span>
       </div>
@@ -169,7 +169,7 @@
             <span class="truncate max-w-[140px]">{order.adminName || 'Admin Pendamping'}</span>
           </div>
           {#if order.adminEmail}
-            <span class="text-3xs text-secondary truncate max-w-[140px] block font-mono pl-4">
+            <span class="text-xs text-secondary truncate max-w-[140px] block font-mono pl-4">
               {order.adminEmail}
             </span>
           {/if}
@@ -190,7 +190,7 @@
         <div class="font-mono text-xs font-black text-main">
           {formatIDR(order.amount)}
         </div>
-        <div class="text-3xs text-secondary flex items-center justify-end gap-1.5 font-mono">
+        <div class="text-xs text-secondary flex items-center justify-end gap-1.5 font-mono">
           <span>Tpl: {formatIDR(basePrice)}</span>
           {#if adminFee > 0}
             <span class="text-success font-bold bg-success/10 px-1.5 py-0.5 rounded">

@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { VariantGroup } from '../../../schemas/product-variant.schema';
   import { formatPriceAdjustment, parsePriceAdjustment } from './productForm.helpers';
+  import Badge from '../../ui/Badge.svelte';
+  import Button from '../../ui/Button.svelte';
+  import { Trash2, X } from 'lucide-svelte';
 
   export let variantGroups: VariantGroup[] = [];
   export let fieldErrors: Record<string, string> = {};
@@ -43,17 +46,19 @@
     <div class="text-xs font-bold text-main block font-heading mb-0">
       Varian Produk
       {#if variantGroups.length > 0}
-        <span class="badge badge-sm bg-nested border-none ml-1 text-main font-sans">{variantGroups.length}/5 grup</span>
+        <Badge size="sm" variant="secondary" dot={false}>{variantGroups.length}/5 grup</Badge>
       {/if}
     </div>
     {#if variantGroups.length < 5}
-      <button
+      <Button
         type="button"
-        class="btn btn-xs btn-ghost text-primary font-medium"
+        variant="ghost"
+        size="xs"
+        class="text-primary font-medium"
         on:click={addVariantGroup}
       >
         + Tambah Grup
-      </button>
+      </Button>
     {/if}
   </div>
 
@@ -75,16 +80,16 @@
           bind:value={group.groupName}
           placeholder="Nama grup (contoh: Ukuran, Warna)"
         />
-        <button
+        <Button
           type="button"
-          class="btn btn-xs btn-ghost hover:bg-error/10 hover:text-error text-error/70"
+          variant="ghost"
+          size="xs"
+          class="hover:bg-error/10 hover:text-error text-error/70 p-1.5 h-auto min-h-0"
           on:click={() => removeVariantGroup(gi)}
-          title="Hapus grup"
+          ariaLabel="Hapus grup"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
+          <Trash2 size={16} />
+        </Button>
       </div>
       {#if fieldErrors[`variantGroup_${gi}`]}
         <span class="text-error text-xs mb-2 block">{fieldErrors[`variantGroup_${gi}`]}</span>
@@ -120,16 +125,16 @@
               bind:checked={option.isAvailable}
               title={option.isAvailable ? "Tersedia" : "Tidak tersedia"}
             />
-            <button
+            <Button
               type="button"
-              class="btn btn-xs btn-ghost text-base-content/40 hover:text-error"
+              variant="ghost"
+              size="xs"
+              class="text-base-content/40 hover:text-error p-1.5 h-auto min-h-0"
               on:click={() => removeVariantOption(gi, oi)}
-              title="Hapus opsi"
+              ariaLabel="Hapus opsi"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              <X size={14} />
+            </Button>
           </div>
           {#if fieldErrors[`variantOption_${gi}_${oi}`]}
             <span class="text-error text-xs">{fieldErrors[`variantOption_${gi}_${oi}`]}</span>
@@ -138,13 +143,15 @@
       </div>
 
       {#if group.options.length < 20}
-        <button
+        <Button
           type="button"
-          class="btn btn-xs btn-ghost text-primary/70 mt-2 font-normal"
+          variant="ghost"
+          size="xs"
+          class="text-primary/70 mt-2 font-normal"
           on:click={() => addVariantOption(gi)}
         >
           + Tambah Opsi
-        </button>
+        </Button>
       {/if}
       <div class="text-xs text-base-content/40 mt-1">
         {group.options.length}/20 opsi

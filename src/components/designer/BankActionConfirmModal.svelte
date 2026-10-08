@@ -21,7 +21,7 @@
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
       {#if isPrimaryAction}
-        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <div class="w-10 h-10 rounded-2xl bg-warning/10 border border-warning/20 text-warning flex items-center justify-center flex-shrink-0 shadow-2xs">
           <span class="material-symbols-outlined text-xl">star</span>
         </div>
         <div>
@@ -33,7 +33,7 @@
           </p>
         </div>
       {:else}
-        <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <div class="w-10 h-10 rounded-2xl bg-error/10 border border-error/20 text-error flex items-center justify-center flex-shrink-0 shadow-2xs">
           <span class="material-symbols-outlined text-xl">delete</span>
         </div>
         <div>
@@ -54,14 +54,14 @@
       <div class="p-3.5 rounded-2xl bg-nested/70 border border-light space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-main font-mono">{account.bankName}</span>
-          <span class="text-3xs font-mono font-bold px-2 py-0.5 rounded-full bg-card border border-light text-secondary">
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-card border border-light text-secondary">
             •••• {lastFour}
           </span>
         </div>
         <p class="text-xs font-semibold text-main uppercase font-mono tracking-wide">
           {holderName}
         </p>
-        <p class="text-3xs font-mono text-muted">
+        <p class="text-xs font-mono text-muted">
           Nomor: {account.accountNumber}
         </p>
       </div>

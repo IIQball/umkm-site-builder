@@ -68,16 +68,16 @@
             class="absolute -top-3 transform -translate-x-1/2 pointer-events-none bg-main/95 backdrop-blur-md text-canvas px-3 py-2 rounded-xl shadow-xl border border-border z-30 transition-all duration-150 flex flex-col items-center gap-0.5"
             style="left: {(hoveredPoint.x / (revenueData.svgWidth || 850)) * 100}%;"
           >
-            <span class="text-3xs font-semibold text-canvas/70 uppercase tracking-wider">
+            <span class="text-xs font-semibold text-canvas/70 uppercase tracking-wider">
               {hoveredPoint.fullLabel}
             </span>
             <div class="flex items-baseline gap-1.5">
               <span class="font-mono text-sm font-black text-canvas">
                 {formatIDR(hoveredPoint.cumulative)}
               </span>
-              <span class="text-3xs text-canvas/70">Kumulatif</span>
+              <span class="text-xs text-canvas/70">Kumulatif</span>
             </div>
-            <span class="text-3xs font-bold text-success">
+            <span class="text-xs font-bold text-success">
               +{formatIDR(hoveredPoint.amount)} {revenueData.filterMode === 'day' ? 'hari ini' : 'bulan ini'}
             </span>
           </div>
@@ -185,7 +185,7 @@
               x={p.x}
               y={revenueData.baselineY + 22}
               text-anchor="middle"
-              class="text-3xs sm:text-2xs font-bold font-heading transition-colors select-none {hoveredIndex === i
+              class="text-xs sm:text-2xs font-bold font-heading transition-colors select-none {hoveredIndex === i
                 ? 'fill-success font-black'
                 : 'fill-secondary'}"
             >
@@ -201,7 +201,7 @@
   <div class="px-5 py-3.5 sm:px-6 bg-nested/50 border-t border-light flex items-center justify-between gap-4">
     <div class="flex items-center gap-4 sm:gap-6 text-xs">
       <div>
-        <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block">
           Total Fee Diterima
         </span>
         <span class="font-mono font-bold text-main">
@@ -210,7 +210,7 @@
       </div>
       <div class="h-6 w-px bg-light"></div>
       <div>
-        <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block">
           {revenueData.filterMode === 'day' ? 'Hari Ini' : 'Bulan Ini'}
         </span>
         <span class="font-mono font-bold text-success">

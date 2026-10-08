@@ -119,7 +119,7 @@ export const berandaItems = [
 ]
 
 export const helpCenterItems = [
-  { label: 'Pusat Bantuan', href: '/#faq', desc: 'Tanya jawab & kontak tim via WhatsApp' },
+  { label: 'Pusat Bantuan', href: '/help', desc: 'Tanya jawab & kontak tim via WhatsApp' },
   { label: 'Syarat & Ketentuan', href: '/terms', desc: 'Aturan layanan & hak kekayaan intelektual' },
   { label: 'Kebijakan Privasi', href: '/privacy', desc: 'Perlindungan data pribadi & keamanan' }
 ]

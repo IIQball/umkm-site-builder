@@ -40,7 +40,7 @@
     {
       title: 'Bantuan',
       links: [
-        { label: 'Pusat Bantuan', href: '/#faq' },
+        { label: 'Pusat Bantuan', href: '/help' },
         { label: 'Tanya Jawab FAQ', href: '/#faq' },
         { label: 'Panduan Tenant', href: '/#features' },
         { label: 'Ajukan Fitur', href: 'mailto:halo@umkm-web-builder.iqdevmp.workers.dev' }

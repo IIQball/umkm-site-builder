@@ -1,0 +1,44 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import PublicNavbar from "@/components/common/PublicNavbar.svelte"
+import LandingMarquee from "@/components/landing/LandingMarquee.svelte"
+import PublicContactSection from "@/components/landing/PublicContactSection.svelte"
+import LandingFooter from "@/components/landing/LandingFooter.svelte"
+
+const user = Astro.locals.user
+const currentPath = Astro.url.pathname
+---
+
+<BaseLayout
+  title="Pusat Bantuan & Kontak | Pinoka"
+  description="Hubungi tim Pinoka melalui formulir atau WhatsApp untuk bantuan dan pertanyaan seputar platform digitalisasi UMKM."
+  hideNavbar={true}
+>
+  <div class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200 min-h-screen flex flex-col">
+    <!-- Fixed Global Architectural Top Marquee & Capsule Navbar -->
+    <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none flex flex-col">
+      <LandingMarquee client:load />
+      <PublicNavbar
+        client:idle
+        user={user
+          ? {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              image: user.image
+            }
+          : null}
+        currentPath={currentPath}
+      />
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full pt-20 sm:pt-24 md:pt-28 flex flex-col">
+      <PublicContactSection client:visible />
+    </main>
+
+    <!-- Footer -->
+    <LandingFooter client:visible />
+  </div>
+</BaseLayout>

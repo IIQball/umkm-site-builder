@@ -157,7 +157,7 @@
         label="PUSAT BANTUAN"
         items={helpCenterItems}
         isOpen={openDropdown === 'help'}
-        isActive={currentPath === '/terms' || currentPath === '/privacy'}
+        isActive={currentPath === '/help' || currentPath === '/terms' || currentPath === '/privacy'}
         onToggle={() => toggleDropdown('help')}
         onClose={closeDropdowns}
       />

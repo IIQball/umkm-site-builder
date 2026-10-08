@@ -84,23 +84,23 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`cq-overlay-bottom bg-[var(--theme-surface,var(--color-card-base))]/95 backdrop-blur-md text-[var(--theme-text-primary,var(--color-text-main))] border-t border-[var(--color-border)] p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 text-left transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+    class={`cq-overlay-bottom bg-card/95 backdrop-blur-md text-main border-t border-main p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 text-left transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
     style={`padding: ${cardStyle.padding || ''}; ${cardStyle.backgroundColor ? `background-color: ${cardStyle.backgroundColor} !important;` : ''} ${cardStyle.borderColor ? `border-color: ${cardStyle.borderColor} !important;` : ''}`}
   >
     <div>
       <h3
-        class="font-heading text-[var(--theme-text-primary,var(--color-text-main))]"
+        class="font-heading text-main"
         style={`font-size: ${cardStyle.fontSize || 'var(--theme-text-h3, var(--text-h3-size, 20px))'}; font-weight: ${cardStyle.fontWeight || 'var(--theme-text-h3-weight, var(--text-h3-weight, 600))'}; ${cardStyle.color ? `color: ${cardStyle.color} !important;` : ''}`}
       >
         {storeName}
       </h3>
       <p
-        class="text-[var(--theme-text-muted,var(--color-text-muted))] font-sans mt-0.5 flex items-center gap-1.5"
+        class="text-muted font-sans mt-0.5 flex items-center gap-1.5"
         style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
       >
-        <Clock size={12} class="text-emerald-500 shrink-0" />
+        <Clock size={12} class="text-success shrink-0" />
         <span>{storeHours}</span>
       </p>
     </div>
@@ -116,7 +116,7 @@
       on:click={(e) => selectNode(e, 'maps_cta_button')}
       on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
       class={`h-9 px-5 font-heading font-bold hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all outline-none shadow-xs ${
-        isCtaSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+        isCtaSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
       }`}
       style={`border-radius: ${ctaStyle.borderRadius || 'var(--theme-btn-radius,var(--btn-radius,16px))'}; background-color: ${ctaStyle.backgroundColor || 'var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))'}; color: ${ctaStyle.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'}; font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.9);`}
     >

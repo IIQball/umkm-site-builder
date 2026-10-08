@@ -10,6 +10,8 @@
 
   $: videoItems = Array.isArray(testimonials) && testimonials.length > 0 ? testimonials : [];
 
+  let playingIndex: number | null = null;
+
   function selectCard(e: Event, idx: number, item: any) {
     e.stopPropagation();
     if (sectionId) {
@@ -21,6 +23,15 @@
     e.stopPropagation();
     if (sectionId) {
       canvasStore.selectNode(sectionId, `testi_avatar_${idx}`);
+    }
+  }
+
+  function togglePlayVideo(e: Event, idx: number, item: any) {
+    e.stopPropagation();
+    if (item.videoUrl) {
+      playingIndex = playingIndex === idx ? null : idx;
+    } else {
+      selectCard(e, idx, item);
     }
   }
 </script>
@@ -43,45 +54,63 @@
           : 'hover:shadow-xl'
       }`}
     >
-      <div
-        role="button"
-        tabindex="0"
-        on:click={(e) => selectAvatar(e, index)}
-        on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
-        class={`absolute inset-0 cursor-pointer ${isAvatarActive ? 'ring-2 ring-primary' : ''}`}
-      >
-        <img
-          src={coverImg}
-          alt={item.customerName}
-          class="w-full h-full object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-      </div>
-
-      <!-- Play Button Overlay -->
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="w-12 h-12 rounded-full bg-white/95 text-slate-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform pl-0.5">
-          <Play size={20} class="fill-slate-950 text-slate-950" />
+      {#if playingIndex === index && item.videoUrl}
+        <video
+          src={item.videoUrl}
+          controls
+          autoplay
+          playsinline
+          class="w-full h-full object-cover relative z-20"
+          on:ended={() => (playingIndex = null)}
+        >
+          <track kind="captions" />
+        </video>
+      {:else}
+        <div
+          role="button"
+          tabindex="0"
+          on:click={(e) => selectAvatar(e, index)}
+          on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
+          class={`absolute inset-0 cursor-pointer ${isAvatarActive ? 'ring-2 ring-primary' : ''}`}
+        >
+          <img
+            src={coverImg}
+            alt={item.customerName}
+            class="w-full h-full object-cover opacity-85 transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
         </div>
-      </div>
+
+        <!-- Play Button Overlay -->
+        <button
+          type="button"
+          on:click={(e) => togglePlayVideo(e, index, item)}
+          class="absolute inset-0 flex items-center justify-center bg-transparent border-0 cursor-pointer z-10"
+          aria-label={`Putar video ulasan ${item.customerName}`}
+        >
+          <div class="w-12 h-12 rounded-full bg-white/95 text-slate-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform pl-0.5">
+            <Play size={20} class="fill-slate-950 text-slate-950" />
+          </div>
+        </button>
+      {/if}
 
       <!-- Bottom Card Info -->
       <div class="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white pointer-events-none space-y-1">
-        <div class="flex items-center gap-0.5 text-amber-400">
+        <div class="flex items-center gap-0.5 text-warning">
           {#each Array(item.rating || 5) as _}
-            <Star size={11} class="fill-amber-400 text-amber-400" />
+            <Star size={11} class="fill-warning text-warning" />
           {/each}
         </div>
         <h4
-          class="font-heading font-bold text-xs sm:text-sm line-clamp-2"
-          style="{itemStyle.color ? `color: ${itemStyle.color};` : 'color: #ffffff;'}"
+          class="font-heading font-bold text-xs sm:text-sm line-clamp-2 text-white"
+          style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
         >
           "{item.comment || 'Ulasan Pembeli'}"
         </h4>
-        <div class="flex items-center gap-1.5 text-[11px] text-slate-300">
+        <div class="flex items-center gap-1.5 text-[11px] text-white/80">
           <span class="font-semibold text-white truncate">{item.customerName}</span>
           {#if item.verified !== false}
-            <span class="text-emerald-400 flex items-center gap-0.5 text-[10px] shrink-0">
+            <span class="text-success flex items-center gap-0.5 text-[10px] shrink-0 font-medium">
               <CheckCircle2 size={10} />
               <span>{item.verifiedText || 'Terverifikasi'}</span>
             </span>

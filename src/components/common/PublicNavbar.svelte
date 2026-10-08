@@ -15,6 +15,7 @@
   import NavbarMobileDrawer from './NavbarMobileDrawer.svelte'
   import { Button } from '@/components/ui'
   import NavbarDropdown from './NavbarDropdown.svelte'
+  import { getStoredTheme, applyTheme } from '@/lib/utils/theme'
 
   export let user: NavUser | null = null
   export let currentPath: string = ''
@@ -81,9 +82,7 @@
   }
 
   onMount(() => {
-    const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+    isDark = getStoredTheme() === 'dark'
 
     if (!currentPath && typeof window !== 'undefined') {
       currentPath = window.location.pathname
@@ -107,18 +106,7 @@
 
   const toggleTheme = () => {
     isDark = !isDark
-    applyTheme(isDark)
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
-  }
-
-  const applyTheme = (dark: boolean) => {
-    const themeName = dark ? 'dark' : 'light'
-    document.documentElement.setAttribute('data-theme', themeName)
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    applyTheme(isDark ? 'dark' : 'light')
   }
 
   const handleSignOut = async () => {

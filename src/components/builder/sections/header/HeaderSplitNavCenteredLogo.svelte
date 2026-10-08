@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Menu, MessageCircle } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import {
@@ -86,6 +87,9 @@
         {/each}
       </div>
     {/if}
+
+    <!-- Theme Toggle (Sebelum tombol CTA) -->
+    <TemplateThemeToggle size="sm" />
 
     {#if hasCta && (isDesktop || viewMode === 'tablet')}
       <a

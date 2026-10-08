@@ -2,6 +2,7 @@
   import type { TemplateSection } from '@/schemas';
   import type { SectionStyles } from '@/types';
   import { getSectionDefinition } from '../registry';
+  import { isDarkColor } from '@/lib/utils/designMath';
 
   export let section: TemplateSection;
   export let isActive: boolean = false;
@@ -9,23 +10,13 @@
   export let store: any = null;
   export let isLiveStorefront: boolean = false;
 
-  const isDarkColor = (color?: unknown): boolean => {
-    if (typeof color !== 'string' || !color || color === 'transparent') return false;
-    if (color.startsWith('#')) {
-      const hex = color.replace('#', '');
-      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;
-      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16) || 0;
-      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16) || 0;
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      return brightness < 128;
-    }
-    return false;
-  };
-
   const buildStyle = (styles: SectionStyles = {}, fullBleed = false): string => {
     const s = styles || {};
     const rules: string[] = [];
-    const defaultTextColor = isDarkColor(s.backgroundColor || '#ffffff') ? '#f8fafc' : '#0f172a';
+    const hasCustomBg = !!s.backgroundColor && s.backgroundColor !== 'transparent';
+    const defaultTextColor = hasCustomBg
+      ? (isDarkColor(s.backgroundColor) ? '#f8fafc' : '#0f172a')
+      : 'var(--theme-text-primary, var(--color-text-main, inherit))';
 
     const defaultPadding = '0px';
     rules.push(`background-color: ${s.backgroundColor || 'transparent'}`);

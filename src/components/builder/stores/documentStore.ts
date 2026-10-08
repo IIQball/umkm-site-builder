@@ -259,36 +259,18 @@ export function createDocumentStore() {
     deselectAll() {
       canvasStore.deselectAll();
     },
-    setViewMode(viewMode: 'desktop' | 'tablet' | 'mobile') {
-      canvasStore.setViewMode(viewMode);
-    },
-    setActiveMargin(activeMargin: '16px' | '24px' | '32px' | '48px') {
-      canvasStore.setActiveMargin(activeMargin);
-    },
-    setCanvasMargin(canvasMargin: '16px' | '24px' | '32px' | '48px') {
-      canvasStore.setCanvasMargin(canvasMargin);
-    },
-    toggleColumnGrid() {
-      canvasStore.toggleColumnGrid();
-    },
-    togglePixelGrid() {
-      canvasStore.togglePixelGrid();
-    },
-    togglePreviewTheme() {
-      canvasStore.togglePreviewTheme();
-    },
-    setPreviewTheme(previewTheme: 'light' | 'dark') {
-      canvasStore.setPreviewTheme(previewTheme);
-    },
-    toggleLeftSidebar() {
-      canvasStore.toggleLeftSidebar();
-    },
-    toggleRightSidebar() {
-      canvasStore.toggleRightSidebar();
-    },
-    toggleEditorTheme() {
-      canvasStore.toggleEditorTheme();
-    },
+    setViewMode: (mode: 'desktop' | 'tablet' | 'mobile') => canvasStore.setViewMode(mode),
+    setActiveMargin: (m: '16px' | '24px' | '32px' | '48px') => canvasStore.setActiveMargin(m),
+    setCanvasMargin: (m: '16px' | '24px' | '32px' | '48px') => canvasStore.setCanvasMargin(m),
+    toggleColumnGrid: () => canvasStore.toggleColumnGrid(),
+    togglePixelGrid: () => canvasStore.togglePixelGrid(),
+    togglePreviewTheme: () => canvasStore.togglePreviewTheme(),
+    setPreviewTheme: (theme: 'light' | 'dark') => canvasStore.setPreviewTheme(theme),
+    toggleLeftSidebar: () => canvasStore.toggleLeftSidebar(),
+    toggleRightSidebar: () => canvasStore.toggleRightSidebar(),
+    toggleEditorTheme: () => canvasStore.toggleEditorTheme(),
+    setEditorTheme: (theme: 'light' | 'dark') => canvasStore.setEditorTheme(theme),
+    initEditorTheme: () => canvasStore.initEditorTheme(),
   };
 }
 

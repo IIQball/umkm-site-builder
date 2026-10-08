@@ -3,6 +3,7 @@ import type { TemplateTheme, TemplateSection, TemplateConfig } from './template.
 export const CURRENT_SCHEMA_VERSION = 1
 
 export const DEFAULT_TEMPLATE_THEME: TemplateTheme = {
+  colorMode: 'auto',
   primaryColor: '#36C6FD',
   fontFamily: 'Inter, sans-serif',
   colors: {

@@ -47,6 +47,15 @@
     });
   };
 
+  const updateColorMode = (mode: 'auto' | 'light' | 'dark') => {
+    editorStore.updateGlobalTheme({ colorMode: mode });
+    if (mode === 'dark') {
+      editorStore.setPreviewTheme('dark');
+    } else if (mode === 'light') {
+      editorStore.setPreviewTheme('light');
+    }
+  };
+
   const updateTypography = (key: string, value: unknown) => {
     const valStr = String(value);
     if (key === 'headingFont') setCanvasCssVar({ '--theme-font-heading': valStr, '--font-heading': valStr });
@@ -142,7 +151,11 @@
 
   <div class="flex-1 overflow-y-auto p-4 space-y-4">
     {#if activeTab === 'colors'}
-      <ThemeColorsTab {theme} onColorChange={updateColorOptimistic} />
+      <ThemeColorsTab
+        {theme}
+        onColorChange={updateColorOptimistic}
+        onColorModeChange={updateColorMode}
+      />
     {:else if activeTab === 'typography'}
       <ThemeTypographyTab
         {theme}

@@ -12,6 +12,7 @@
   import HeaderDeliveryOrder from './header/HeaderDeliveryOrder.svelte';
   import HeaderStoreBadge from './header/HeaderStoreBadge.svelte';
   import HeaderPromoCountdown from './header/HeaderPromoCountdown.svelte';
+  import TemplateThemeToggle from './header/TemplateThemeToggle.svelte';
   import { Clock, MapPin, Menu } from 'lucide-svelte';
   import { canvasStore } from '../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
@@ -183,9 +184,12 @@
       <!-- Desktop Stacked (Logo vs Nav Links in custom order) -->
       <div
         id={`section-header-nav-${sectionId}`}
-        class="header-nav-container w-full mx-auto flex flex-col items-center justify-center py-4 gap-3 box-border overflow-visible"
+        class="header-nav-container w-full mx-auto flex flex-col items-center justify-center py-4 gap-3 box-border overflow-visible relative"
         style="order: {navbarContainerOrder}; max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
       >
+        <div class="absolute right-4 top-4">
+          <TemplateThemeToggle size="sm" />
+        </div>
         {#each navbarOrder as slot}
           {#if slot === 'logo'}
             <div data-node="logo" class="flex items-center justify-center">
@@ -208,6 +212,7 @@
           <HeaderLogo props={safeProps} {sectionId} isActive={isHeaderActive} />
         </div>
         <div class="flex items-center gap-2 flex-shrink-0 ml-auto">
+          <TemplateThemeToggle size="sm" />
           {#if viewMode === 'tablet'}
             <a
               href={waUrl}

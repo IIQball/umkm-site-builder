@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     }
 
     // 4. Generate signed params
-    const params = await generateSignedUploadParams(result.data.folder);
+    const params = await generateSignedUploadParams(result.data.folder, result.data.resourceType);
 
     return jsonSuccess(params, 200);
   } catch (error: unknown) {

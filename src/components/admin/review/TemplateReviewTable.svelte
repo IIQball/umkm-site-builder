@@ -10,6 +10,7 @@
   export let pageSize: number = 10;
   export let onApprove: (t: AdminTemplateItem) => void;
   export let onReject: (t: AdminTemplateItem) => void;
+  export let onViewRevisionNotes: (t: AdminTemplateItem) => void = () => {};
 
   const tableHeaders = [
     { label: '#', align: 'center' as const, width: 'w-12' },
@@ -59,11 +60,19 @@
             </div>
           {/if}
           <div class="min-w-0">
-            <span class="font-bold text-xs text-main block font-sans truncate max-w-xs">
-              {tpl.name}
-            </span>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs text-main block font-sans truncate max-w-xs">
+                {tpl.name}
+              </span>
+              {#if tpl.revisionCount && tpl.revisionCount > 0}
+                <span class="inline-flex items-center gap-1 font-mono text-xs font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex-shrink-0">
+                  <span class="material-symbols-outlined text-[10px]">history_edu</span>
+                  <span>Revisi #{tpl.revisionCount}</span>
+                </span>
+              {/if}
+            </div>
             {#if tpl.description}
-              <span class="text-3xs text-secondary block truncate font-sans max-w-xs mt-0.5">
+              <span class="text-xs text-secondary block truncate font-sans max-w-xs mt-0.5">
                 {tpl.description}
               </span>
             {/if}
@@ -74,14 +83,14 @@
       <!-- Designer Info -->
       <td class="px-4 py-4">
         <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-3xs font-bold font-mono flex-shrink-0">
+          <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold font-mono flex-shrink-0">
             {(tpl.designerName || tpl.designerEmail || 'D').slice(0, 1).toUpperCase()}
           </div>
           <div class="min-w-0">
             <span class="font-bold text-xs text-main block font-sans truncate">
               {tpl.designerName || 'Desainer Kreator'}
             </span>
-            <span class="text-3xs text-secondary block truncate font-mono mt-0.5">
+            <span class="text-xs text-secondary block truncate font-mono mt-0.5">
               {tpl.designerEmail || '—'}
             </span>
           </div>
@@ -114,7 +123,6 @@
         <div class="flex items-center justify-end gap-1.5">
           <Button
             href={`/builder/preview/${tpl.id}`}
-            target="_blank"
             variant="secondary"
             size="xs"
             className="rounded-lg font-bold"
@@ -124,11 +132,24 @@
             <span>Demo</span>
           </Button>
 
-          {#if tpl.status === 'pending'}
+          {#if tpl.revisionNotes || (tpl.revisionCount && tpl.revisionCount > 0)}
             <Button
               variant="outline"
               size="xs"
-              className="rounded-lg font-bold text-success border-success/30 hover:bg-success/10"
+              className="rounded-lg font-bold text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+              title="Lihat Catatan & Balasan Revisi"
+              on:click={() => onViewRevisionNotes(tpl)}
+            >
+              <span class="material-symbols-outlined text-[13px]">notes</span>
+              <span>Catatan</span>
+            </Button>
+          {/if}
+
+          {#if tpl.status === 'pending'}
+            <Button
+              variant="primary"
+              size="xs"
+              className="rounded-lg font-bold"
               title="Setujui Template"
               on:click={() => onApprove(tpl)}
             >
@@ -136,9 +157,9 @@
               <span>Setujui</span>
             </Button>
             <Button
-              variant="outline"
+              variant="destructive"
               size="xs"
-              className="rounded-lg font-bold text-error border-error/30 hover:bg-error/10"
+              className="rounded-lg font-bold"
               title="Tolak Template"
               on:click={() => onReject(tpl)}
             >

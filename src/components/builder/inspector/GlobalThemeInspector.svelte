@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Palette, Type, MousePointerClick, Layout, Sparkles } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import { editorStore } from '../stores/editorStore';
   import type { TemplateTheme } from '@/schemas';
   import ThemeColorsTab from './theme/ThemeColorsTab.svelte';
@@ -27,7 +28,12 @@
 
   const updateColorOptimistic = (key: string, value: string) => {
     const cssMap: Record<string, Record<string, string>> = {
-      primary: { '--theme-primary': value, '--color-primary': value },
+      primary: {
+        '--theme-primary': value,
+        '--color-primary': value,
+        '--theme-btn-primary-bg': value,
+        '--btn-primary-bg': value,
+      },
       secondary: { '--theme-secondary': value, '--color-secondary': value },
       background: { '--theme-bg': value, '--color-bg-base': value },
       surface: { '--theme-surface': value, '--color-card-base': value },
@@ -39,6 +45,15 @@
       colors: { [key]: value },
       ...(key === 'primary' ? { primaryColor: value } : {}),
     });
+  };
+
+  const updateColorMode = (mode: 'auto' | 'light' | 'dark') => {
+    editorStore.updateGlobalTheme({ colorMode: mode });
+    if (mode === 'dark') {
+      editorStore.setPreviewTheme('dark');
+    } else if (mode === 'light') {
+      editorStore.setPreviewTheme('light');
+    }
   };
 
   const updateTypography = (key: string, value: unknown) => {
@@ -65,14 +80,22 @@
   };
 
   const updateButtonVariantOptimistic = (variantKey: string, key: string, value: string) => {
-    if (variantKey === 'primary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-primary-bg': value, '--btn-primary-bg': value });
-    if (variantKey === 'primary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-primary-text': value, '--btn-primary-text': value });
-    if (variantKey === 'secondary' && key === 'backgroundColor') setCanvasCssVar({ '--theme-btn-secondary-bg': value, '--btn-secondary-bg': value });
-    if (variantKey === 'secondary' && key === 'textColor') setCanvasCssVar({ '--theme-btn-secondary-text': value, '--btn-secondary-text': value });
-    if (variantKey === 'outline' && key === 'borderColor') setCanvasCssVar({ '--theme-btn-outline-border': value, '--btn-outline-border': value });
-    if (variantKey === 'outline' && key === 'textColor') setCanvasCssVar({ '--theme-btn-outline-text': value, '--btn-outline-text': value });
+    if (variantKey === 'primary' && key === 'textColor') {
+      setCanvasCssVar({ '--theme-btn-primary-text': value, '--btn-primary-text': value });
+    }
+    if ((variantKey === 'secondary' || variantKey === 'outline') && key === 'textColor') {
+      setCanvasCssVar({
+        '--theme-btn-secondary-text': value,
+        '--btn-secondary-text': value,
+        '--theme-btn-outline-text': value,
+        '--btn-outline-text': value,
+      });
+    }
+    if (variantKey === 'tertiary' && key === 'textColor') {
+      setCanvasCssVar({ '--theme-btn-tertiary-text': value, '--btn-tertiary-text': value });
+    }
 
-    const variant = variantKey as 'primary' | 'secondary' | 'outline';
+    const variant = variantKey as 'primary' | 'secondary' | 'outline' | 'tertiary';
     const current = (theme.buttons || {})[variant] || {};
     editorStore.updateGlobalTheme({
       buttons: { [variant]: { ...current, [key]: value } },
@@ -94,8 +117,8 @@
 </script>
 
 <div class="flex flex-col h-full overflow-hidden text-xs text-base-content/80">
-  <div class="p-3.5 border-b border-base-200 dark:border-slate-800 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-transparent">
-    <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">
+  <div class="p-3.5 border-b border-base-200 bg-gradient-to-r from-primary/10 via-secondary/10 to-transparent">
+    <div class="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
       <Sparkles size={14} />
       <span>Global Design System</span>
     </div>
@@ -104,29 +127,35 @@
     </p>
   </div>
 
-  <div class="grid grid-cols-4 border-b border-base-200 dark:border-slate-800 bg-base-200/50 p-1 gap-0.5 text-[11px]">
+  <div class="grid grid-cols-4 border-b border-base-200 bg-base-200/50 p-1 gap-0.5 text-[11px]">
     {#each [
       { id: 'colors', label: 'Warna', icon: Palette },
       { id: 'typography', label: 'Font', icon: Type },
       { id: 'buttons', label: 'Tombol', icon: MousePointerClick },
       { id: 'layout', label: 'Layout', icon: Layout }
     ] as tab}
-      <button
+      <Button
         type="button"
+        size="xs"
+        variant={activeTab === tab.id ? 'primary' : 'ghost'}
         on:click={() => { activeTab = tab.id === 'colors' || tab.id === 'typography' || tab.id === 'buttons' || tab.id === 'layout' ? tab.id : 'colors'; }}
-        class={`flex flex-col items-center gap-1 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
-          activeTab === tab.id ? 'bg-base-100 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'
+        class={`!flex !flex-col !items-center !gap-1 !py-1.5 !h-auto !min-h-0 rounded-md font-medium transition-all ${
+          activeTab === tab.id ? 'bg-base-100 text-primary font-bold shadow-sm' : 'text-base-content/60 hover:text-base-content'
         }`}
       >
         <svelte:component this={tab.icon} size={13} />
         <span>{tab.label}</span>
-      </button>
+      </Button>
     {/each}
   </div>
 
   <div class="flex-1 overflow-y-auto p-4 space-y-4">
     {#if activeTab === 'colors'}
-      <ThemeColorsTab {theme} onColorChange={updateColorOptimistic} />
+      <ThemeColorsTab
+        {theme}
+        onColorChange={updateColorOptimistic}
+        onColorModeChange={updateColorMode}
+      />
     {:else if activeTab === 'typography'}
       <ThemeTypographyTab
         {theme}

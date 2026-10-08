@@ -3,11 +3,11 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import CheckoutSummaryCard from '@/components/checkout/CheckoutSummaryCard.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { transactionService } from '@/services';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatIDR } from '@/lib/currency';
 import type { CheckoutPageData } from '@/types';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { templates, users } from '@/db/schema';
+import { templates, users, stores } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const { invoiceId } = Astro.params;
@@ -35,10 +35,11 @@ try {
   if (!transaction) {
     error = 'Tagihan tidak ditemukan atau telah kedaluwarsa';
   } else {
-    // Ownership check: only transaction owner or admin can view
+    // Ownership check: transaction owner, admin, or assisted admin can view
     const isOwner = transaction.userId === currentUser.id;
+    const isAssistant = Boolean(transaction.assistedBy && transaction.assistedBy === currentUser.id);
     const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
-    if (!isOwner && !isAdmin) {
+    if (!isOwner && !isAdmin && !isAssistant) {
       accessDenied = true;
     } else {
       if (transaction.templateId) {
@@ -67,10 +68,38 @@ try {
         paymentUrl = (await transactionService.getInvoiceUrl(transaction.externalId)) || '';
       }
 
+      let assistedMerchantName = '';
+      let assistedStoreName = '';
+      if (transaction.assistedBy || transaction.userId !== currentUser.id) {
+        const tenantUser = await db.query.users.findFirst({
+          where: eq(users.id, transaction.userId),
+          columns: { name: true, email: true },
+        });
+        if (tenantUser) {
+          assistedMerchantName = tenantUser.name || tenantUser.email;
+        }
+
+        const tenantStore = await db.query.stores.findFirst({
+          where: eq(stores.userId, transaction.userId),
+          columns: { name: true },
+        });
+        if (tenantStore) {
+          assistedStoreName = tenantStore.name;
+        }
+      }
+
+      const adminFee = Number(transaction.adminFee || 0);
+      const baseAmount = Math.max(0, transaction.amount - adminFee);
+
       pageData = {
         invoiceId: transaction.externalId,
         amount: transaction.amount,
-        amountFormatted: formatCurrency(transaction.amount),
+        amountFormatted: formatIDR(transaction.amount),
+        baseAmount,
+        adminFee,
+        assistedBy: transaction.assistedBy || null,
+        assistedMerchantName: assistedMerchantName || null,
+        assistedStoreName: assistedStoreName || null,
         paymentUrl,
         status: transaction.status,
         expiresAt: '',
@@ -89,7 +118,7 @@ try {
 
 const isTemplatePurchase = true;
 const checkoutTitle = 'Pembayaran Template';
-const checkoutMetaTitle = `Pembelian Template - ${templateName || 'UMKM Site Builder'}`;
+const checkoutMetaTitle = `Pembelian Template - ${templateName || 'Pinoka'}`;
 const checkoutDescription = 'Selesaikan pembayaran untuk menerapkan template desain toko UMKM Anda';
 const lineItemTitle = `Pembelian Template "${templateName || 'Desain UMKM'}"`;
 const lineItemSubtitle = 'Desain Template Website UMKM Siap Pakai';
@@ -100,7 +129,7 @@ const lineItemSubtitle = 'Desain Template Website UMKM Siap Pakai';
     <!-- Ambient Background Lighting -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
     <div class="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
-    <div class="absolute top-1/3 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    <div class="absolute top-1/3 left-0 w-80 h-80 bg-success/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
     <div class="w-full max-w-4xl relative z-10">
 

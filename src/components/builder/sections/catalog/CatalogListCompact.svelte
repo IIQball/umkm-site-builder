@@ -1,13 +1,19 @@
 <script lang="ts">
+  import { formatIDR } from '@/lib/currency';
   import type { ProductItem } from '@/types';
-  import { ShoppingBag } from 'lucide-svelte';
+  import { ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { formatRupiah } from '../productCatalog.helpers';
+  import { resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Pesan';
+  export let cartButtonText: string = 'Keranjang';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
+
+  $: isMobile = $canvasStore?.viewMode === 'mobile';
 
   function selectCard(e: Event, idx: number, prod: ProductItem) {
     e.stopPropagation();
@@ -28,26 +34,39 @@
   {#each products as product, index (product.id || product.name + index)}
     {@const isCardActive = $canvasStore.selectedNodeId === (product.id || `product_item_${index}`)}
     {@const isImgActive = $canvasStore.selectedNodeId === `product_image_${index}`}
+    {@const pStyle = resolveProductNodeStyle(product, index, nodeStyles)}
+    {@const currentPrice = Number(product.price ?? 0)}
+    {@const originalPrice = Number(product.originalPrice) || (product.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+    {@const hasDiscount = (product.showOriginalPrice === true || (product.showOriginalPrice !== false && !!product.originalPrice && Number(product.originalPrice) > currentPrice)) && originalPrice > currentPrice}
 
     <div
+      data-node={product.id || `product_item_${index}`}
+      data-node-id={product.id || `product_item_${index}`}
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, index, product)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, product); }}
-      class={`p-4 rounded-2xl border border-light/80 bg-card cq-compact-row text-left transition-all duration-200 cursor-pointer ${
+      style={pStyle.marginStyle}
+      class={`p-4 rounded-2xl border border-light/80 bg-card cq-compact-row text-left transition-all duration-200 cursor-pointer flex ${
+        isMobile
+          ? 'flex-col gap-3'
+          : 'flex-col sm:flex-row sm:items-center sm:justify-between gap-4'
+      } ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-          : 'hover:shadow-xs hover:border-slate-300 dark:hover:border-slate-700'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
+          : 'hover:shadow-xs hover:border-light hover:shadow-md'
       }`}
     >
-      <div class="flex items-center gap-3 min-w-0">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
         <div
+          data-node={`product_image_${index}`}
+          data-node-id={`product_image_${index}`}
           role="button"
           tabindex="0"
           on:click={(e) => selectImage(e, index)}
           on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
           class={`w-14 h-14 rounded-xl overflow-hidden bg-nested shrink-0 relative group/img cursor-pointer ${
-            isImgActive ? 'ring-2 ring-blue-500' : ''
+            isImgActive ? 'ring-2 ring-primary' : ''
           }`}
         >
           {#if product.imageUrl}
@@ -62,9 +81,17 @@
               <ShoppingBag size={18} />
             </div>
           {/if}
+          {#if product.badge}
+            <span
+              class="absolute top-1 left-1 text-[9px] font-heading font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
+              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+            >
+              {product.badge}
+            </span>
+          {/if}
         </div>
         <div class="min-w-0">
-          <h3 class="font-heading font-bold text-xs sm:text-sm text-main truncate">
+          <h3 class="font-heading font-bold text-xs sm:text-sm text-main truncate" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
             {product.name}
           </h3>
           {#if product.description}
@@ -75,24 +102,40 @@
         </div>
       </div>
 
-      <div class="cq-compact-action">
-        <span class="font-heading font-black text-xs sm:text-sm text-primary">
-          {formatRupiah(product.price)}
-        </span>
-        <div class="flex gap-2">
+      <div
+        class={`cq-compact-action flex items-center ${
+          isMobile
+            ? 'justify-between gap-4 pt-2 border-t border-light/60 w-full'
+            : 'justify-between sm:justify-end gap-5 shrink-0'
+        }`}
+      >
+        <div class="flex items-baseline gap-1.5 flex-wrap">
+          <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
+            {formatIDR(product.price)}
+          </span>
+          {#if hasDiscount}
+            <span class="text-2xs text-secondary/60 line-through font-mono">
+              {formatIDR(originalPrice)}
+            </span>
+          {/if}
+        </div>
+        <div class="flex items-center gap-2">
           <button
             type="button"
             on:click|stopPropagation={() => onAddToCart(product, {})}
-            class="h-8 px-3 rounded-xl bg-nested hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-main text-xs font-semibold transition-all"
+            class="h-8 px-3 border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem));"
           >
-            Keranjang
+            <ShoppingCart size={13} />
+            <span>{cartButtonText || 'Keranjang'}</span>
           </button>
           <button
             type="button"
             on:click|stopPropagation={() => onBuyNow(product, {})}
-            class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white text-xs font-bold transition-all"
+            class="h-8 px-4 active:scale-[0.98] text-xs font-heading font-bold transition-all cursor-pointer shadow-xs hover:opacity-90 flex items-center justify-center"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
-            Pesan
+            {buyButtonText || 'Pesan'}
           </button>
         </div>
       </div>

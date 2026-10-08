@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { AdminUserItem } from '@/types';
   import { Modal, Button, Textarea } from '@/components/ui';
   import { CheckCircle2, AlertTriangle } from 'lucide-svelte';
   
   export let isOpen = false;
   export let isUnsuspend = false;
-  export let selectedUser: AdminUserItem | null = null;
+  export let selectedUser: { id: string; name: string } | null = null;
   export let suspendReason = '';
   export let actionLoading = false;
   export let onSubmit: (status: 'active' | 'suspended', reason?: string) => void = () => {};
@@ -27,7 +26,7 @@
 >
   {#if isUnsuspend}
     <div class="flex flex-col items-center text-center pt-6">
-      <div class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 ring-8 ring-emerald-500/5">
+      <div class="w-16 h-16 rounded-full bg-success/10 text-success flex items-center justify-center mb-5 ring-8 ring-success/5">
         <CheckCircle2 size={32} strokeWidth={2.5} />
       </div>
       <h3 class="text-heading-sm font-bold text-main mb-2">Aktifkan Pengguna</h3>
@@ -37,7 +36,7 @@
     </div>
   {:else}
     <div class="flex flex-col items-center text-center pt-6">
-      <div class="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-5 ring-8 ring-rose-500/5">
+      <div class="w-16 h-16 rounded-full bg-error/10 text-error flex items-center justify-center mb-5 ring-8 ring-error/5">
         <AlertTriangle size={32} strokeWidth={2.5} />
       </div>
       <h3 class="text-heading-sm font-bold text-main mb-2">Tangguhkan Pengguna</h3>
@@ -80,7 +79,7 @@
       {:else}
         <Button
           variant="destructive"
-          class="flex-1 font-bold shadow-md shadow-rose-500/20"
+          class="flex-1 font-bold shadow-md shadow-error/20"
           size="md"
           loading={actionLoading}
           disabled={suspendReason.trim().length < 5}

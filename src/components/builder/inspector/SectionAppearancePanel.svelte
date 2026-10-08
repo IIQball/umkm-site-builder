@@ -32,7 +32,7 @@
     { value: 'transparent', label: 'Transparan' },
     { value: 'var(--theme-bg, #ffffff)', label: 'Background Kanvas (Canvas)' },
     { value: 'var(--theme-surface, #f8fafc)', label: 'Surface / Card Background' },
-    { value: 'var(--theme-primary, #2563eb)', label: 'Primary Brand (Warna Utama)' },
+    { value: 'var(--theme-primary, var(--color-primary))', label: 'Primary Brand (Warna Utama)' },
     { value: 'var(--theme-secondary, #3b82f6)', label: 'Secondary / Accent' },
   ];
 </script>
@@ -40,8 +40,8 @@
 <div class="space-y-6">
   <!-- 1. Animation -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <Sparkles size={13} class="text-[var(--theme-primary,#2563eb)]" />
+    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 pb-1.5">
+      <Sparkles size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
       <span>Animasi Entrance & Transisi</span>
     </div>
 
@@ -54,7 +54,7 @@
         value={section.styles?.animation || 'none'}
         on:change={(e) => onStyleChange('animation', e.currentTarget.value)}
         on:input={(e) => onStyleChange('animation', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each animationOptions as a}
           <option value={a.value}>{a.label}</option>
@@ -73,7 +73,7 @@
             value={section.styles?.animationDuration || '600ms'}
             on:change={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
             on:input={(e) => onStyleChange('animationDuration', e.currentTarget.value)}
-            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+            class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
           >
             {#each durationOptions as d}
               <option value={d.value}>{d.label}</option>
@@ -89,7 +89,7 @@
             value={section.styles?.animationDelay || '0ms'}
             on:change={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
             on:input={(e) => onStyleChange('animationDelay', e.currentTarget.value)}
-            class="w-full px-2 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+            class="w-full px-2 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
           >
             {#each delayOptions as del}
               <option value={del.value}>{del.label}</option>
@@ -102,8 +102,8 @@
 
   <!-- 2. Token-Based Background Color -->
   <div class="space-y-3">
-    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 dark:border-slate-800 pb-1.5">
-      <PaintBucket size={13} class="text-[var(--theme-primary,#2563eb)]" />
+    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70 border-b border-base-200 pb-1.5">
+      <PaintBucket size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
       <span>Warna Background (Token Sistem)</span>
     </div>
 
@@ -116,7 +116,7 @@
         value={section.styles?.backgroundColor || 'transparent'}
         on:change={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
         on:input={(e) => onStyleChange('backgroundColor', e.currentTarget.value)}
-        class="w-full px-2.5 py-1.5 bg-base-200/50 dark:bg-slate-950 border border-base-300 dark:border-slate-800 rounded-lg text-xs text-base-content focus:outline-none focus:border-blue-500"
+        class="w-full px-2.5 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs text-base-content focus:outline-none focus:border-primary"
       >
         {#each bgTokenOptions as bg}
           <option value={bg.value}>{bg.label}</option>

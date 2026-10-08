@@ -1,7 +1,16 @@
 <script lang="ts">
-  import { formatCurrency } from '@/lib/utils/format';
+  import { formatCurrency, formatDate } from '@/lib/utils/format';
   import type { PayoutHistoryItem } from '@/types';
-  import { Card, Badge, Table, Pagination } from '@/components/ui';
+  import { Card, Badge, Table, Pagination, Button } from '@/components/ui';
+  import {
+    Landmark,
+    Search,
+    CheckCircle2,
+    RefreshCw,
+    XCircle,
+    Check,
+    Copy,
+  } from 'lucide-svelte';
 
   export let payoutHistory: PayoutHistoryItem[] = [];
   export let isLoading = false;
@@ -21,12 +30,6 @@
       // clipboard not available
     }
   };
-
-  const formatDate = (d: Date | string): string =>
-    new Date(d).toLocaleString('id-ID', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
 
   $: filteredPayouts = (payoutHistory || []).filter(p => {
     const matchesFilter = activeFilter === 'ALL' || p.status === activeFilter;
@@ -48,6 +51,7 @@
   $: paginatedPayouts = filteredPayouts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'Pencairan', align: 'left' as const },
     { label: 'Keterangan', align: 'left' as const },
     { label: 'Reference / Payout ID', align: 'left' as const },
@@ -60,8 +64,8 @@
   <!-- Table Header & Controls -->
   <div class="px-6 md:px-7 py-5 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <span class="material-symbols-outlined text-lg">account_balance</span>
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <Landmark size={20} />
       </div>
       <div>
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
@@ -77,48 +81,52 @@
     <div class="flex flex-wrap items-center gap-2.5">
       <!-- Search Input Capsule -->
       <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <input
           type="text"
           bind:value={searchQuery}
           placeholder="Cari keterangan / Ref ID..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Segmented Status Filter -->
       <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeFilter === 'ALL' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold {activeFilter === 'ALL' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => activeFilter = 'ALL'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'ALL' ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-2xs' : 'text-muted hover:text-main'}"
         >
           Semua ({payoutHistory.length})
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={activeFilter === 'completed' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeFilter === 'completed' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => activeFilter = 'completed'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'completed' ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          Selesai
-        </button>
-        <button
-          type="button"
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          <span>Selesai</span>
+        </Button>
+        <Button
+          size="xs"
+          variant={activeFilter === 'processing' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeFilter === 'processing' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => activeFilter = 'processing'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'processing' ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-          Diproses
-        </button>
-        <button
-          type="button"
+          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          <span>Diproses</span>
+        </Button>
+        <Button
+          size="xs"
+          variant={activeFilter === 'rejected' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeFilter === 'rejected' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => activeFilter = 'rejected'}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'rejected' ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
-          Ditolak
-        </button>
+          <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+          <span>Ditolak</span>
+        </Button>
       </div>
     </div>
   </div>
@@ -131,24 +139,32 @@
   {:else if filteredPayouts.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center mb-4 text-muted">
-        <span class="material-symbols-outlined text-3xl">account_balance</span>
+        <Landmark size={32} />
       </div>
-      <h4 class="text-heading-md font-bold text-main mb-1.5">Tidak Ada Riwayat Penarikan</h4>
-      <p class="text-body-sm text-secondary max-w-xs leading-relaxed">
+      <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Tidak Ada Riwayat Penarikan</h4>
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed font-sans">
         {searchQuery ? 'Tidak ada penarikan dana yang cocok dengan kata kunci pencarian Anda.' : 'Pengajuan penarikan dana ke rekening bank akan tercatat secara otomatis di sini.'}
       </p>
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[700px]">
-      {#each paginatedPayouts as payout}
+      {#each paginatedPayouts as payout, idx (payout.id || idx)}
         <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Sequence Number (#) -->
+          <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+            {(currentPage - 1) * pageSize + idx + 1}
+          </td>
           <!-- Status Icon + Badge -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs {payout.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : payout.status === 'processing' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'}">
-                <span class="material-symbols-outlined text-base {payout.status === 'processing' ? 'animate-spin' : ''}">
-                  {payout.status === 'completed' ? 'check_circle' : payout.status === 'processing' ? 'sync' : 'cancel'}
-                </span>
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs {payout.status === 'completed' ? 'bg-success/10 text-success border border-success/20' : payout.status === 'processing' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-error/10 text-error border border-error/20'}">
+                {#if payout.status === 'completed'}
+                  <CheckCircle2 size={18} />
+                {:else if payout.status === 'processing'}
+                  <RefreshCw size={18} class="animate-spin" />
+                {:else}
+                  <XCircle size={18} />
+                {/if}
               </div>
               <div>
                 {#if payout.status === 'processing'}
@@ -156,15 +172,15 @@
                     Diproses
                   </Badge>
                 {:else if payout.status === 'completed'}
-                  <Badge variant="emerald" dot size="sm">
+                  <Badge variant="success" dot size="sm">
                     Selesai
                   </Badge>
                 {:else if payout.status === 'rejected'}
-                  <Badge variant="rose" dot size="sm">
+                  <Badge variant="error" dot size="sm">
                     Ditolak
                   </Badge>
                 {:else}
-                  <Badge variant="amber" size="sm">
+                  <Badge variant="slate" size="sm">
                     {payout.status}
                   </Badge>
                 {/if}
@@ -179,18 +195,20 @@
 
           <!-- Reference ID -->
           <td class="px-4 py-4">
-            {#if payout.xenditPayoutId || payout.gatewayReference}
-              {@const refText = payout.xenditPayoutId || payout.gatewayReference || ''}
+            {#if payout.xenditPayoutId || payout.gatewayReference || payout.id}
+              {@const refText = payout.xenditPayoutId || payout.gatewayReference || payout.id || ''}
               <button
                 type="button"
                 on:click={() => copyToClipboard(refText)}
-                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-slate-400 dark:hover:border-slate-500 rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+                class="inline-flex items-center gap-1.5 font-mono text-2xs font-bold text-secondary bg-nested/80 border border-light hover:border-border rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                 title="Salin Payout Reference"
               >
-                <span class="truncate max-w-[110px]">{refText}</span>
-                <span class="material-symbols-outlined text-xs flex-shrink-0 {copiedId === refText ? 'text-emerald-500' : ''}">
-                  {copiedId === refText ? 'check' : 'content_copy'}
-                </span>
+                <span class="inline-block truncate max-w-[110px] align-middle">{refText}</span>
+                {#if copiedId === refText}
+                  <Check size={12} class="text-success shrink-0" />
+                {:else}
+                  <Copy size={12} class="text-muted shrink-0" />
+                {/if}
               </button>
             {:else}
               <span class="text-xs text-muted font-mono">—</span>
@@ -217,6 +235,7 @@
       bind:currentPage
       totalItems={filteredPayouts.length}
       {pageSize}
+      pageParam="payoutPage"
     />
   {/if}
 </Card>

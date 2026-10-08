@@ -1,0 +1,132 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
+import DesignerWalletOverview from '@/components/designer/DesignerWalletOverview.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getDesignerWalletSummary } from '@/services';
+import { db } from '@/lib/db/client';
+import { platformSettings, transactions } from '@/db/schema';
+import { or, eq } from 'drizzle-orm';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isAuthorizedAdmin(user)) {
+  return Astro.redirect('/auth/login?redirect=/admin/wallet');
+}
+
+if (user.role === 'superadmin') {
+  return Astro.redirect('/superadmin');
+}
+
+let walletSummary = {
+  balance: 0,
+  availableBalance: 0,
+  mutations: [] as Array<{
+    id: string;
+    amount: number;
+    balanceAfter: number;
+    type: 'CREDIT' | 'DEBIT';
+    description: string;
+    referenceId: string | null;
+    createdAt: Date | string;
+  }>,
+};
+let settlementDelayDays = 7;
+let totalEarnedCommission = 0;
+
+try {
+  walletSummary = await getDesignerWalletSummary(user.id);
+
+  const settingsList = await db
+    .select({ settlementDelayDays: platformSettings.settlementDelayDays })
+    .from(platformSettings)
+    .limit(1);
+  if (settingsList.length > 0) {
+    settlementDelayDays = settingsList[0].settlementDelayDays;
+  }
+
+  const whereCondition = or(
+    eq(transactions.userId, user.id),
+    eq(transactions.assistedBy, user.id),
+  );
+
+  const txRows = await db
+    .select({
+      adminFee: transactions.adminFee,
+      status: transactions.status,
+    })
+    .from(transactions)
+    .where(whereCondition);
+
+  const isPaid = (status: string) => {
+    const s = (status || '').toLowerCase().trim();
+    return s === 'paid' || s === 'success' || s === 'completed';
+  };
+
+  totalEarnedCommission = txRows
+    .filter((t) => isPaid(t.status))
+    .reduce((sum, t) => sum + Number(t.adminFee || 0), 0);
+} catch (error) {
+  console.error('[AdminWallet] Gagal memuat data dompet admin:', error);
+}
+---
+
+<DashboardLayout title="Dompet & Payout" breadcrumb="Dompet & Payout">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>Dompet & Payout Admin</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat pengelolaan rekening bank pencairan, monitoring saldo fee pendampingan UMKM, pengajuan penarikan dana, dan riwayat mutasi keuangan.
+        </p>
+      </div>
+
+      <!-- Quick Action Navigation -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <Button
+          href="/admin"
+          variant="secondary"
+          size="md"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="7" height="9" x="3" y="3" rx="1"/>
+            <rect width="7" height="5" x="14" y="3" rx="1"/>
+            <rect width="7" height="9" x="14" y="12" rx="1"/>
+            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span>Overview Dasbor</span>
+        </Button>
+
+        <Button
+          href="/admin/transactions"
+          variant="secondary"
+          size="md"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+            <path d="M14 8H8"/>
+            <path d="M16 12H8"/>
+            <path d="M13 16H8"/>
+          </svg>
+          <span>Riwayat Faktur</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Financial Suite: Statcards, Bank Card & Withdraw, Payout History, Mutation Ledger -->
+    <div>
+      <DesignerWalletOverview
+        client:load
+        walletSummary={walletSummary}
+        settlementDelayDays={settlementDelayDays}
+        showPerformanceCards={false}
+        accountType="admin"
+        totalEarnedCommission={totalEarnedCommission}
+      />
+    </div>
+  </div>
+</DashboardLayout>

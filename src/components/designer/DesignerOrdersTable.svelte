@@ -4,49 +4,31 @@
     CheckCircle2,
     XCircle,
     ShoppingBag,
+    Receipt,
+    Search,
   } from 'lucide-svelte';
-  import { Card, Table, Pagination } from '@/components/ui';
+  import { Card, Table, Pagination, Button } from '@/components/ui';
   import DesignerOrderRow from './orders/DesignerOrderRow.svelte';
   import { addToast } from '@/lib/toast';
+  import type { DesignerOrderItem } from '@/types/finance';
+  import type { PaginatedResult } from '@/types/common';
 
-  export let initialOrders: Array<{
-    id: string;
-    userId: string;
-    type: string;
-    amount: number;
-    status: 'pending' | 'paid' | 'failed' | 'expired' | string;
-    storeId?: string | null;
-    templateId?: string | null;
-    externalId?: string | null;
-    paymentGatewayRef?: string | null;
-    paymentChannel?: string | null;
-    createdAt: string | Date;
-    template?: {
-      id: string;
-      name: string;
-      thumbnailUrl?: string | null;
-      price: number;
-    } | null;
-    user?: {
-      id: string;
-      name?: string | null;
-      email: string;
-      image?: string | null;
-    } | null;
-    commission?: {
-      id: string;
-      totalAmount?: number | null;
-      designerAmount?: number | null;
-      platformFee?: number | null;
-    } | null;
-  }> = [];
+  export let initialOrders: DesignerOrderItem[] = [];
+  export let pagination: PaginatedResult<any> | undefined = undefined;
 
   let orders = [...initialOrders];
+  $: orders = [...initialOrders];
+
   let searchQuery = '';
   let selectedStatus: 'all' | 'paid' | 'pending' | 'failed' = 'all';
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let copiedId: string | null = null;
+
+  $: activePage = pagination ? pagination.currentPage : currentPage;
+  $: activePageSize = pagination ? pagination.pageSize : pageSize;
+  $: activeTotalItems = pagination ? pagination.totalItems : filteredOrders.length;
 
   $: filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -73,10 +55,12 @@
   $: {
     searchQuery;
     selectedStatus;
-    currentPage = 1;
+    if (!pagination) currentPage = 1;
   }
 
-  $: paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: paginatedOrders = pagination
+    ? orders
+    : filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -112,6 +96,7 @@
   };
 
   const tableHeaders = [
+    { label: '#', align: 'center' as const, width: '40px' },
     { label: 'ID Invoice & Tanggal' },
     { label: 'Template Dibeli', width: 'w-64' },
     { label: 'Pembeli (Tenant)', width: 'w-52' },
@@ -125,8 +110,8 @@
   <!-- Table Header & Controls -->
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <span class="material-symbols-outlined text-lg">receipt_long</span>
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <Receipt size={20} />
       </div>
       <div>
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
@@ -141,56 +126,52 @@
     <!-- Actions & Filter Pills -->
     <div class="flex flex-wrap items-center gap-2.5">
       <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <input
           type="text"
           bind:value={searchQuery}
           placeholder="Cari invoice / pembeli..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-56"
         />
       </div>
 
       <!-- Segmented Status Filter -->
       <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={selectedStatus === 'all' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold {selectedStatus === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = 'all')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {selectedStatus === 'all'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
           Semua ({orders.length})
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="xs"
+          variant={selectedStatus === 'paid' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'paid' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = 'paid')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'paid'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          Lunas
-        </button>
-        <button
-          type="button"
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          <span>Lunas</span>
+        </Button>
+        <Button
+          size="xs"
+          variant={selectedStatus === 'pending' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'pending' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = 'pending')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'pending'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
-          Menunggu
-        </button>
-        <button
-          type="button"
+          <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+          <span>Menunggu</span>
+        </Button>
+        <Button
+          size="xs"
+          variant={selectedStatus === 'failed' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'failed' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = 'failed')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {selectedStatus === 'failed'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-          Batal
-        </button>
+          <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+          <span>Batal</span>
+        </Button>
       </div>
     </div>
   </div>
@@ -210,11 +191,12 @@
     </div>
   {:else}
     <Table headers={tableHeaders} minWidth="min-w-[840px]">
-      {#each paginatedOrders as order (order.id)}
+      {#each paginatedOrders as order, idx (order.id)}
         {@const statusMeta = getStatusBadge(order.status)}
         {@const designerShare = order.commission?.designerAmount ?? Math.round(order.amount * 0.7)}
         {@const displayId = order.externalId || order.id}
         <DesignerOrderRow
+          rowNumber={(activePage - 1) * activePageSize + idx + 1}
           {order}
           {statusMeta}
           {designerShare}
@@ -226,10 +208,12 @@
     </Table>
 
     <!-- DaisyUI Pagination Footer -->
-    <Pagination
-      bind:currentPage
-      totalItems={filteredOrders.length}
-      {pageSize}
-    />
+    {#if activeTotalItems > 0}
+      <Pagination
+        bind:currentPage={currentPage}
+        totalItems={activeTotalItems}
+        pageSize={activePageSize}
+      />
+    {/if}
   {/if}
 </Card>

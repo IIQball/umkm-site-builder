@@ -1,14 +1,9 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { TestimonialItem } from '@/types';
-  import { Upload, X, Loader2, Star } from 'lucide-svelte';
+  import { Star, CheckCircle2 } from 'lucide-svelte';
+  import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
   import {
-    compressToWebP,
-    uploadToCloudinary,
-    deleteOldImage,
-  } from '../imageUpload.helpers';
-  import {
-    isTestimonialsImageSupported,
     DEFAULT_TESTIMONIALS,
     DEFAULT_CLIENT_LOGOS,
     type ClientLogoItem,
@@ -17,9 +12,6 @@
   export let section: TemplateSection;
   export let nodeId: string;
   export let onPropChange: (key: string, value: unknown) => void = () => {};
-
-  $: activePreset = (section.layoutPreset || section.props?.layoutPreset || section.styles?.layoutPreset || 'masonry_grid') as string;
-  $: hasImageSupport = isTestimonialsImageSupported(activePreset);
 
   $: testimonials = (Array.isArray(section.props?.testimonials) && section.props.testimonials.length > 0
     ? (section.props.testimonials as TestimonialItem[])
@@ -37,15 +29,14 @@
     if (nodeId.startsWith('testi_item_')) return parseInt(nodeId.replace('testi_item_', ''), 10);
     if (nodeId.startsWith('testi_avatar_')) return parseInt(nodeId.replace('testi_avatar_', ''), 10);
     if (nodeId.startsWith('testi_logo_')) return parseInt(nodeId.replace('testi_logo_', ''), 10);
+    if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
+    const foundIdx = testimonials.findIndex((t) => t.id === nodeId);
+    if (foundIdx !== -1) return foundIdx;
     return 0;
   })();
 
   $: currentTesti = testimonials[itemIndex] || testimonials[0];
   $: currentLogo = logos[itemIndex] || logos[0];
-
-  let isUploading = false;
-  let errorMessage = '';
-  let fileInput: HTMLInputElement;
 
   function updateTestiField(field: keyof TestimonialItem, value: any) {
     const updated = [...testimonials];
@@ -54,48 +45,21 @@
       onPropChange('testimonials', updated);
     }
   }
-
-  async function handleAvatarUpload(e: Event) {
-    const target = e.currentTarget as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    errorMessage = '';
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!allowed.includes(file.type)) {
-      errorMessage = 'Format file wajib JPG, JPEG, atau PNG';
-      return;
-    }
-
-    try {
-      isUploading = true;
-      const webpBlob = await compressToWebP(file, 400, 400);
-      const url = await uploadToCloudinary(webpBlob, 'testimonials', `${Date.now()}_testi_${itemIndex}.webp`);
-
-      const oldUrl = currentTesti?.avatar;
-      if (oldUrl && oldUrl !== url) {
-        await deleteOldImage(oldUrl);
-      }
-      updateTestiField('avatar', url);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Upload gambar gagal';
-    } finally {
-      isUploading = false;
-      if (fileInput) fileInput.value = '';
-    }
-  }
-
-  async function handleRemoveAvatar() {
-    const oldUrl = currentTesti?.avatar;
-    updateTestiField('avatar', '');
-    if (oldUrl) {
-      await deleteOldImage(oldUrl);
-    }
-  }
 </script>
 
-{#if nodeId === 'testimonials_header' || nodeId === 'header'}
+{#if nodeId === 'testimonials_header' || nodeId === 'header' || nodeId === 'testimonials_container' || nodeId === 'testimonials_grid'}
   <div class="space-y-3 text-left">
+    <div class="space-y-1">
+      <label class="font-semibold text-xs text-base-content" for="testi-header-badge">Teks Lencana (Badge)</label>
+      <input
+        id="testi-header-badge"
+        type="text"
+        value={badgeText}
+        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Ulasan Pembeli"
+      />
+    </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-header-title">Judul Section Testimoni (H2)</label>
       <input
@@ -103,7 +67,7 @@
         type="text"
         value={title}
         on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
         placeholder="Kata Mereka yang Sudah Mencoba"
       />
     </div>
@@ -114,97 +78,59 @@
         rows="2"
         value={subtitle}
         on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
         placeholder="Ulasan kepuasan pelanggan..."
       ></textarea>
     </div>
-    <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="testi-header-badge">Teks Badge Ulasan</label>
-      <input
-        id="testi-header-badge"
-        type="text"
-        value={badgeText}
-        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
-        placeholder="Ulasan Pembeli"
-      />
-    </div>
+  </div>
+{:else if nodeId === 'title'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-title-node">Judul Utama Testimoni (H2)</label>
+    <input
+      id="testi-title-node"
+      type="text"
+      value={title}
+      on:input={(e) => onPropChange('title', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
+      placeholder="Kata Mereka yang Sudah Mencoba"
+    />
+  </div>
+{:else if nodeId === 'subtitle'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-subtitle-node">Deskripsi Subjudul</label>
+    <textarea
+      id="testi-subtitle-node"
+      rows="3"
+      value={subtitle}
+      on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Ulasan kepuasan pelanggan..."
+    ></textarea>
+  </div>
+{:else if nodeId === 'badge'}
+  <div class="space-y-1 text-left">
+    <label class="font-semibold text-xs text-base-content" for="testi-badge-node">Teks Lencana (Badge)</label>
+    <input
+      id="testi-badge-node"
+      type="text"
+      value={badgeText}
+      on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+      placeholder="Ulasan Pembeli"
+    />
   </div>
 {:else if nodeId.startsWith('testi_avatar_')}
-  {#if hasImageSupport}
-    <div class="space-y-4 text-left">
-      <div class="space-y-1.5">
-        <label class="font-semibold text-xs text-base-content" for="testi-avatar-upload">
-          Foto Avatar: {currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}
-        </label>
-        {#if currentTesti?.avatar}
-          <div class="relative group rounded-xl overflow-hidden border border-base-300 dark:border-slate-800 bg-base-200/50 p-2 flex items-center gap-3">
-            <img
-              src={currentTesti.avatar}
-              alt="Avatar Preview"
-              class="w-12 h-12 object-cover rounded-full border border-base-300 dark:border-slate-700 bg-white"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold truncate text-base-content">{currentTesti.customerName || 'Avatar'}</p>
-              <p class="text-[10px] text-base-content/60">Cloudinary WebP</p>
-            </div>
-            <button
-              type="button"
-              on:click={handleRemoveAvatar}
-              class="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors cursor-pointer"
-              title="Hapus Foto"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        {:else}
-          <button
-            type="button"
-            on:click={() => fileInput?.click()}
-            disabled={isUploading}
-            class="w-full border-2 border-dashed border-base-300 dark:border-slate-800 hover:border-primary/50 rounded-xl p-5 text-center cursor-pointer transition-colors bg-base-200/30 flex flex-col items-center gap-1.5"
-          >
-            {#if isUploading}
-              <Loader2 size={18} class="animate-spin text-primary" />
-              <span class="text-xs text-primary font-medium">Mengunggah...</span>
-            {:else}
-              <Upload size={18} class="text-base-content/50" />
-              <span class="text-xs font-medium text-base-content">Pilih Foto Avatar (PNG/JPG)</span>
-              <span class="text-[10px] text-base-content/60">Kompresi otomatis WebP</span>
-            {/if}
-          </button>
-        {/if}
-        <input
-          id="testi-avatar-upload"
-          type="file"
-          accept="image/png, image/jpeg, image/jpg"
-          bind:this={fileInput}
-          on:change={handleAvatarUpload}
-          class="hidden"
-        />
-        {#if errorMessage}
-          <p class="text-[11px] text-error font-medium">{errorMessage}</p>
-        {/if}
-      </div>
-
-      <div class="space-y-1">
-        <label class="font-semibold text-xs text-base-content" for="testi-avatar-url">URL Foto Manual</label>
-        <input
-          id="testi-avatar-url"
-          type="text"
-          value={currentTesti?.avatar || ''}
-          on:input={(e) => updateTestiField('avatar', e.currentTarget.value)}
-          class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
-          placeholder="https://images.unsplash.com/..."
-        />
-      </div>
-    </div>
-  {:else}
-    <p class="text-xs text-base-content/60 italic p-3 bg-base-200/40 rounded-xl text-left">
-      Preset tata letak ini tidak menggunakan ilustrasi avatar gambar.
-    </p>
-  {/if}
-{:else if nodeId.startsWith('testi_item_')}
+  <div class="space-y-3 text-left">
+    <ImageUploadDropzone
+      imageUrl={currentTesti?.avatar || ''}
+      onImageChange={(url) => updateTestiField('avatar', url)}
+      label={`Foto Avatar: ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
+      maxWidth={400}
+      maxHeight={400}
+      folder="testimonials"
+    />
+  </div>
+{:else if nodeId.startsWith('testi_item_') || nodeId.startsWith('item_') || testimonials.some(t => t.id === nodeId)}
   <div class="space-y-3 text-left">
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-name">Nama Pengulas</label>
@@ -213,7 +139,7 @@
         type="text"
         value={currentTesti?.customerName || ''}
         on:input={(e) => updateTestiField('customerName', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -223,25 +149,29 @@
         type="text"
         value={currentTesti?.role || ''}
         on:input={(e) => updateTestiField('role', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
-        placeholder="Pembeli Terverifikasi • Banyuwangi"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
+        placeholder="Pelanggan Setia • Banyuwangi"
       />
     </div>
     <div class="space-y-1">
-      <label class="font-semibold text-xs text-base-content" for="testi-rating">Bintang Rating (1-5)</label>
+      <label class="font-semibold text-xs text-base-content" for="testi-rating">
+        Jumlah Bintang Rating: {currentTesti?.rating || 5} / 5
+      </label>
       <div class="flex items-center gap-2">
         <input
           id="testi-rating"
-          type="number"
+          type="range"
           min="1"
           max="5"
+          step="1"
           value={currentTesti?.rating || 5}
           on:input={(e) => updateTestiField('rating', parseInt(e.currentTarget.value, 10) || 5)}
-          class="w-20 px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-mono"
+          class="range range-xs range-warning flex-1 cursor-pointer"
+          aria-label="Jumlah Bintang Rating"
         />
-        <div class="flex items-center gap-0.5 text-amber-400">
+        <div class="flex items-center gap-0.5 text-amber-400 shrink-0">
           {#each Array(currentTesti?.rating || 5) as _}
-            <Star size={13} class="fill-amber-400 text-amber-400" />
+            <Star size={12} class="fill-current text-amber-400" />
           {/each}
         </div>
       </div>
@@ -253,8 +183,45 @@
         rows="3"
         value={currentTesti?.comment || ''}
         on:input={(e) => updateTestiField('comment', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       ></textarea>
+    </div>
+
+    <!-- Verified Badge Setting -->
+    <div class="p-2.5 bg-base-200/60 border border-base-300 rounded-lg space-y-1.5">
+      <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-base-content">
+        <input
+          type="checkbox"
+          checked={currentTesti?.verified !== false}
+          on:change={(e) => updateTestiField('verified', e.currentTarget.checked)}
+          class="checkbox checkbox-primary checkbox-xs rounded"
+        />
+        <span class="flex items-center gap-1 text-emerald-600">
+          <CheckCircle2 size={12} />
+          <span>Status Pembeli Terverifikasi</span>
+        </span>
+      </label>
+      {#if currentTesti?.verified !== false}
+        <input
+          type="text"
+          value={currentTesti?.verifiedText ?? 'Pembeli Terverifikasi'}
+          on:input={(e) => updateTestiField('verifiedText', e.currentTarget.value)}
+          class="w-full px-2.5 py-1 bg-base-100 border border-base-300 rounded text-2xs text-base-content focus:outline-none focus:border-primary"
+          placeholder="Teks lencana terverifikasi"
+        />
+      {/if}
+    </div>
+
+    <!-- Foto Avatar -->
+    <div class="space-y-1 pt-1">
+      <span class="block font-semibold text-xs text-base-content">Foto Avatar Pengulas</span>
+      <ImageUploadDropzone
+        imageUrl={currentTesti?.avatar || ''}
+        onImageChange={(url) => updateTestiField('avatar', url)}
+        label={`Foto ${currentTesti?.customerName || `Pengulas #${itemIndex + 1}`}`}
+        folder="testimonials"
+        compact={true}
+      />
     </div>
   </div>
 {:else if nodeId === 'testi_spotlight_quote'}
@@ -265,7 +232,7 @@
       rows="4"
       value={currentTesti?.comment || ''}
       on:input={(e) => updateTestiField('comment', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
     ></textarea>
   </div>
 {:else if nodeId === 'testi_spotlight_author'}
@@ -277,7 +244,7 @@
         type="text"
         value={currentTesti?.customerName || ''}
         on:input={(e) => updateTestiField('customerName', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs font-bold"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
       />
     </div>
     <div class="space-y-1">
@@ -287,7 +254,7 @@
         type="text"
         value={currentTesti?.role || ''}
         on:input={(e) => updateTestiField('role', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 dark:bg-slate-900 border border-base-300 dark:border-slate-800 rounded-lg text-xs"
+        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
       />
     </div>
   </div>

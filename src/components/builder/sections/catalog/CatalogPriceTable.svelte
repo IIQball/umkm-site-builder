@@ -2,9 +2,12 @@
   import type { ProductItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { formatIDR } from '@/lib/currency';
+  import { resolveProductNodeStyle } from '../productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
+  export let buyButtonText: string = 'Pesan';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
   function selectRows(e: Event) {
@@ -29,7 +32,7 @@
   on:click={selectRows}
   on:keydown={(e) => { if (e.key === 'Enter') selectRows(e); }}
   class={`w-full overflow-x-auto rounded-3xl border border-light/80 shadow-xs bg-card text-left transition-all duration-200 cursor-pointer ${
-    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : ''
+    $canvasStore.selectedNodeId === 'catalog_price_rows' ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
   }`}
 >
   <table class="w-full text-xs text-left">
@@ -44,29 +47,50 @@
     <tbody class="divide-y divide-light">
       {#each products as product, idx (product.id || product.name + idx)}
         {@const isItemActive = $canvasStore.selectedNodeId === (product.id || `product_item_${idx}`)}
+        {@const pStyle = resolveProductNodeStyle(product, idx, nodeStyles)}
+        {@const currentPrice = Number(product.price ?? 0)}
+        {@const originalPrice = Number(product.originalPrice) || (product.showOriginalPrice === true && currentPrice > 0 ? Math.round(currentPrice * 1.3) : 0)}
+        {@const hasDiscount = (product.showOriginalPrice === true || (product.showOriginalPrice !== false && !!product.originalPrice && Number(product.originalPrice) > currentPrice)) && originalPrice > currentPrice}
         <tr
+          data-node={product.id || `product_item_${idx}`}
+          data-node-id={product.id || `product_item_${idx}`}
           tabindex="0"
           on:click={(e) => selectCard(e, idx, product)}
           on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
           class={`hover:bg-nested/40 transition-colors cursor-pointer ${isItemActive ? 'bg-blue-50/60 dark:bg-blue-950/40' : ''}`}
         >
-          <td class="p-4 font-heading font-bold text-main">
+          <td class="p-4 font-heading font-bold text-main" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
             {product.name}
           </td>
           <td class="p-4 text-secondary max-w-xs truncate hidden sm:table-cell">
-            {product.description || (product.badge ? `${product.badge}` : 'Stok Tersedia')}
+            <div class="flex items-center gap-2">
+              {#if product.badge}
+                <span class="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, #0f172a);">
+                  {product.badge}
+                </span>
+              {/if}
+              <span class="truncate">{product.description || 'Stok Tersedia'}</span>
+            </div>
           </td>
 
           <td class="p-4 font-heading font-black text-primary">
-            {formatIDR(product.price)}
+            <div class="flex items-baseline gap-1.5 flex-wrap">
+              <span>{formatIDR(product.price)}</span>
+              {#if hasDiscount}
+                <span class="text-xs text-secondary line-through font-normal opacity-70">
+                  {formatIDR(originalPrice)}
+                </span>
+              {/if}
+            </div>
           </td>
           <td class="p-4 text-right">
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
-              class="h-8 px-4 rounded-xl bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-bold text-xs transition-all"
+              class="h-8 px-4 active:scale-[0.98] font-heading font-bold text-xs transition-all shadow-xs hover:opacity-90 cursor-pointer flex items-center justify-center"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
             >
-              Pesan
+              <span>{buyButtonText || 'Pesan'}</span>
             </button>
           </td>
         </tr>

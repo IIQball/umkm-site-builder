@@ -1,31 +1,14 @@
 <script lang="ts">
-  import { Star, Sparkles } from 'lucide-svelte';
+  import { Star, Sparkles, CheckCircle2 } from 'lucide-svelte';
   import type { TestimonialItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveTestimonialItemStyle } from './testimonialStyles.helpers';
 
   export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
-  $: displayCards = testimonials.length >= 3 ? testimonials.slice(0, 3) : [
-    {
-      customerName: 'Rudi Hermawan',
-      rating: 5,
-      comment: 'Harga sangat bersahabat untuk kualitas bahan baku asli tanpa pengawet.',
-      role: 'Pelanggan Toko',
-    },
-    {
-      customerName: 'PT Solusi Dinamika',
-      rating: 5,
-      comment: 'Sudah jadi langganan tetap kantor kami untuk hidangan rapat bulanan. Selalu rapi dan higienis!',
-      role: 'Klien Korporat',
-    },
-    {
-      customerName: 'Maria Latupono',
-      rating: 5,
-      comment: 'Packing aman sampai Papua tanpa ada kemasan yang pecah atau bocor.',
-      role: 'Pelanggan Luar Pulau',
-    },
-  ];
+  $: displayCards = Array.isArray(testimonials) && testimonials.length > 0 ? testimonials : [];
 
   function selectCard(e: Event, idx: number, item: any) {
     e.stopPropagation();
@@ -33,12 +16,21 @@
       canvasStore.selectNode(sectionId, item.id || `testi_item_${idx}`);
     }
   }
+
+  function selectAvatar(e: Event, idx: number) {
+    e.stopPropagation();
+    if (sectionId) {
+      canvasStore.selectNode(sectionId, `testi_avatar_${idx}`);
+    }
+  }
 </script>
 
 <div class="cq-side-3-grid text-left">
   {#each displayCards as item, index (item.id || index)}
-    {@const isHighlighted = index === 1}
-    {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {@const itemStyle = resolveTestimonialItemStyle(item, index, nodeStyles)}
+    {@const isHighlighted = displayCards.length >= 3 ? index === 1 : index === 0}
+    {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {@const isAvatarActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === `testi_avatar_${index}`}
 
     <div
       role="button"
@@ -51,14 +43,14 @@
           : 'bg-card border border-light/80 shadow-xs hover:shadow-md'
       } ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-2xl'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-2xl'
           : ''
       }`}
     >
       {#if isHighlighted}
         <span class="absolute -top-2.5 right-6 bg-primary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
           <Sparkles size={11} />
-          <span>TOP REVIEW</span>
+          <span>ULASAN PILIHAN</span>
         </span>
       {/if}
 
@@ -68,19 +60,44 @@
         {/each}
       </div>
 
-      <p class={`text-xs sm:text-sm leading-relaxed ${isHighlighted ? 'text-slate-200 font-medium' : 'text-secondary italic'}`}>
+      <p
+        class={`text-xs sm:text-sm leading-relaxed ${isHighlighted ? 'text-slate-200 font-medium' : 'text-secondary italic'}`}
+        style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
+      >
         "{item.comment}"
       </p>
 
-      <div class={`pt-3 border-t ${isHighlighted ? 'border-slate-800' : 'border-light/60'}`}>
-        <h5 class={`font-heading font-bold text-xs ${isHighlighted ? 'text-white' : 'text-main'}`}>
-          — {item.customerName}
-        </h5>
-        {#if item.role}
-          <span class={`text-[10px] ${isHighlighted ? 'text-slate-400' : 'text-secondary'}`}>
-            {item.role}
-          </span>
+      <div class={`pt-3 border-t flex items-center gap-3 ${isHighlighted ? 'border-slate-800' : 'border-light/60'}`}>
+        {#if item.avatar}
+          <div
+            role="button"
+            tabindex="0"
+            on:click={(e) => selectAvatar(e, index)}
+            on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
+            class={`w-9 h-9 rounded-full overflow-hidden bg-nested shrink-0 cursor-pointer ${
+              isAvatarActive ? 'ring-2 ring-primary' : ''
+            }`}
+          >
+            <img src={item.avatar} alt={item.customerName} class="w-full h-full object-cover" />
+          </div>
         {/if}
+
+        <div class="min-w-0">
+          <h5 class={`font-heading font-bold text-xs truncate ${isHighlighted ? 'text-white' : 'text-main'}`}>
+            — {item.customerName}
+          </h5>
+          {#if item.role}
+            <span class={`text-[10px] block truncate ${isHighlighted ? 'text-slate-400' : 'text-secondary'}`}>
+              {item.role}
+            </span>
+          {/if}
+          {#if item.verified !== false}
+            <span class="text-[10px] text-emerald-500 font-semibold flex items-center gap-1 mt-0.5">
+              <CheckCircle2 size={10} />
+              <span>{item.verifiedText || 'Pembeli Terverifikasi'}</span>
+            </span>
+          {/if}
+        </div>
       </div>
     </div>
   {/each}

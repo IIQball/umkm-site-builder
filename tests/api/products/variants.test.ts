@@ -11,6 +11,12 @@ vi.mock('../../../src/lib/db/client', () => ({
   },
 }));
 
+// Mock auth to prevent state bleed from other tests in bun test
+vi.mock('../../../src/lib/auth', () => ({
+  canManageStore: vi.fn(),
+}));
+import { canManageStore } from '../../../src/lib/auth';
+
 const mockProduct = {
   id: 'prod-1',
   storeId: 'store-1',
@@ -122,6 +128,7 @@ describe('Variants API', () => {
     });
 
     it('returns 403 for non-tenant role', async () => {
+      (canManageStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(false);
       let callCount = 0;
       (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
@@ -156,6 +163,7 @@ describe('Variants API', () => {
     });
 
     it('returns 400 for invalid variant data', async () => {
+      (canManageStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
       let callCount = 0;
       (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;
@@ -196,6 +204,7 @@ describe('Variants API', () => {
     });
 
     it('updates variants successfully', async () => {
+      (canManageStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
       const newVariants = [
         {
           groupName: 'Warna',
@@ -265,6 +274,7 @@ describe('Variants API', () => {
     });
 
     it('returns 403 for non-owner', async () => {
+      (canManageStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(false);
       let callCount = 0;
       (db.select as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callCount++;

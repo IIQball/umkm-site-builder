@@ -2,7 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import BuilderEditor from '@/components/builder/BuilderEditor.svelte';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { getPlatformFeePercentage } from '@/services/finance';
+import { getPlatformFeePercentage, getMaxStoreBranches } from '@/services/finance';
 
 const { templateId } = Astro.params;
 
@@ -17,11 +17,12 @@ if (!user || !isAuthorizedDesigner(user)) {
 }
 
 const platformFeePercentage = await getPlatformFeePercentage();
+const maxStoreBranches = await getMaxStoreBranches();
 ---
 
 <BaseLayout title="Template Builder" hideNavbar={true}>
-  <div class="h-screen w-full bg-base-100 overflow-hidden flex flex-col">
-    <BuilderEditor client:only="svelte" {templateId} {platformFeePercentage} />
+  <div class="h-screen w-full bg-canvas text-main overflow-hidden flex flex-col">
+    <BuilderEditor client:only="svelte" {templateId} {platformFeePercentage} {maxStoreBranches} />
   </div>
 </BaseLayout>
 

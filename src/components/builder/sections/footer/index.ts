@@ -9,3 +9,5 @@ export { default as FooterSplitMap } from './FooterSplitMap.svelte';
 export { default as FooterSocialLinksGrid } from './FooterSocialLinksGrid.svelte';
 export { default as FooterBoxedCard } from './FooterBoxedCard.svelte';
 export * from './footer.helpers';
+export * from './footerLayout.helpers';
+export * from './footerStyles.helpers';

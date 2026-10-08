@@ -127,3 +127,49 @@ Rules:
 :global(.my-class) { color: red; }
 ```
 
+## 13. Verifikasi Prop Interface Sebelum Refactor Komponen Custom
+
+Sebelum mengubah nama atau nilai prop pada komponen Svelte/React custom lokal
+(bukan HTML native), **selalu baca definisi prop-nya terlebih dahulu**:
+
+- Svelte: cek `export let propName` di blok `<script>` komponen target.
+- React/TSX: cek interface Props atau parameter destructuring komponen.
+
+Jangan asumsikan konvensi (`class` vs `className`, `onClick` vs `on:click`)
+tanpa verifikasi. Komponen lokal boleh mengexpose prop dengan nama non-standar.
+
+Contoh:
+
+```svelte
+<!-- WhatsAppIcon.svelte mengexpose `className`, bukan `class` -->
+export let className: string = ""
+export { className as class, className }
+
+<!-- Penggunaan BENAR -->
+<WhatsAppIcon size={14} className="shrink-0" />
+
+<!-- Penggunaan SALAH: tidak ada prop 'class' di interface-nya -->
+<WhatsAppIcon size={14} class="shrink-0" />
+```
+
+## 14. Isolasi Runtime Cloudflare Workers
+
+- **Lazy Import Module Cloudflare:** Pustaka yang bergantung pada runtime khusus Cloudflare seperti `cloudflare:sockets` atau `cloudflare:workers` (contoh: `worker-mailer`) dilarang diimpor di level modul (top-level static import).
+- Gunakan dynamic import di dalam fungsi eksekutor (`const { WorkerMailer } = await import('worker-mailer')`) agar file utilitas tetap aman diimpor oleh modul auth, middleware, dan test runner (Bun/Vitest) tanpa memicu missing package error.
+
+## 15. Sinkronisasi Data Finansial & Pengaturan Sensitif pada Modal
+
+Modal yang menampilkan angka finansial (fee platform, komisi bagi hasil, saldo dompet, simulasi harga, atau pajak) dilarang hanya mengandalkan pemanggilan API pada `onMount` atau props statis SSR:
+- **Fresh on Open**: Wajib memicu pengambilan data terbaru setiap kali modal terbuka (`$: if (isOpen)`).
+- **Anti-Cache Headers**: Endpoint dan request fetch untuk data finansial/pengaturan wajib mematikan caching (`Cache-Control: no-store, no-cache, must-revalidate` dan query timestamp `?t=${Date.now()}`).
+- **Multi-Tab & Window Focus**: Pasang listener `window.addEventListener('focus', ...)` dan sediakan kontrol sinkronisasi manual ("Sinkronkan") di UI untuk mencegah salah paham akibat stale data saat admin mengubah pengaturan di tab lain.
+
+## 16. Dynamic Entity Selection (Searchable Combobox)
+
+Untuk input seleksi data relasi yang berpotensi berjumlah dinamis atau banyak (seperti daftar tenant binaan, toko, pengguna, atau kategori):
+- **Dilarang Menggunakan `<select>` Native**: `<select>` native tidak memiliki fitur pencarian, sulit digunakan pada data puluhan/ratusan, dan memotong label panjang secara kaku.
+- **Gunakan `SearchableSelect` dari `@/components/ui`**:
+  - Menyediakan filter pencarian instan berdasarkan `label` utama dan `sublabel` pelengkap.
+  - Memiliki aksesibilitas keyboard (`ArrowDown`, `ArrowUp`, `Enter`, `Escape`), auto-focus, dan tombol clear `X`.
+  - Mengikuti token tema global (`bg-card`, `bg-nested`, `border-light`, `text-main`) tanpa warna hardcoded.
+

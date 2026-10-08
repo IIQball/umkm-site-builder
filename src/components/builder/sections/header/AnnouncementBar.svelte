@@ -10,8 +10,8 @@
   $: announcementText = props.announcementText ?? 'Diskon 20% khusus pesanan hari ini';
   $: freeShippingText = props.freeShippingText ?? '';
   $: align = props.announcementAlign ?? 'center';
-  $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, #2563eb)';
-  $: textColor = (props.announcementTextColor as string) || '#ffffff';
+  $: bgColor = (props.announcementBgColor as string) || 'var(--theme-primary, var(--color-primary))';
+  $: textColor = (props.announcementTextColor as string) || 'var(--theme-btn-primary-text, currentColor)';
   $: paddingY = (props.announcementPaddingY as string) || '8px';
 
   $: nodeStyles = props?.nodeStyles?.announcement || {};
@@ -26,17 +26,19 @@
   $: textStyleString = [
     `color: ${textColor}`,
     `text-align: ${align === 'left' ? 'left' : 'center'}`,
-    nodeStyles.fontSize ? `font-size: ${nodeStyles.fontSize}` : 'font-size: var(--theme-text-caption, 10px)',
-    nodeStyles.fontWeight ? `font-weight: ${nodeStyles.fontWeight}` : '',
-    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : '',
+    nodeStyles.fontSize ? `font-size: ${nodeStyles.fontSize}` : 'font-size: var(--theme-text-caption, var(--text-caption-size, 12px))',
+    nodeStyles.fontWeight ? `font-weight: ${nodeStyles.fontWeight}` : 'font-weight: var(--text-body-weight, 500)',
+    nodeStyles.fontFamily ? `font-family: ${nodeStyles.fontFamily}` : 'font-family: var(--theme-font-body, var(--font-family, inherit))',
   ].filter(Boolean).join('; ');
 
   const handleClick = (e: MouseEvent) => {
+    if (!isActive) return;
     e.stopPropagation();
     editorStore.selectNode(sectionId, 'announcement');
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isActive) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       editorStore.selectNode(sectionId, 'announcement');
@@ -45,15 +47,18 @@
 </script>
 
 {#if showAnnouncement && (announcementText || freeShippingText)}
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
-    role="button"
-    tabindex="0"
+    role={isActive ? 'button' : undefined}
+    tabindex={isActive ? 0 : undefined}
     on:click={handleClick}
     on:keydown={handleKeyDown}
     style={containerStyleString}
-    class={`w-full transition-all cursor-pointer box-border ${
+    class={`w-full transition-all box-border ${
+      isActive ? 'cursor-pointer' : ''
+    } ${
       isNodeActive
-        ? 'ring-2 ring-blue-400 ring-inset shadow-inner'
+        ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-inset shadow-inner'
         : 'hover:opacity-95'
     }`}
   >
@@ -61,11 +66,13 @@
       class={`announcement-inner-container w-full mx-auto flex items-center ${
         align === 'left' ? 'justify-start text-left' : 'justify-center text-center'
       } min-w-0 box-border`}
-      style="padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px));"
+      style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px));"
     >
       <p
         style={textStyleString}
-        class="w-full text-xs sm:text-sm font-medium truncate sm:whitespace-normal leading-none tracking-wide flex items-center justify-center gap-2 m-0 p-0"
+        class={`w-full truncate sm:whitespace-normal leading-normal tracking-wide flex items-center ${
+          align === 'left' ? 'justify-start' : 'justify-center'
+        } gap-2 m-0 p-0`}
       >
         <span>{announcementText}</span>
         {#if freeShippingText}

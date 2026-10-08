@@ -11,6 +11,8 @@ export interface EditorTemplate {
   price: number;
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   rejectionReason?: string | null;
+  revisionCount?: number;
+  revisionNotes?: string | null;
   config: TemplateConfig;
 }
 

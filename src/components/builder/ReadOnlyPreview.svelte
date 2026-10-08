@@ -15,16 +15,23 @@
   import { onMount } from 'svelte';
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';
-  import { Badge } from '@/components/ui';
+  import type { TemplateTheme } from '@/schemas';
+  import { Badge, Button } from '@/components/ui';
   import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
+  import { mergeStoreCustomization } from '@/lib/templates/mergeCustomization';
+  import { clone } from '@/lib/templates/migration';
+  import { getStoredTheme, applyTheme } from '@/lib/utils/theme';
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
   export let storeId: string | null = null;
+  export let isEmbed: boolean = false;
+  export let initialViewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
 
-  let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+  let viewMode: 'desktop' | 'tablet' | 'mobile' = initialViewMode;
   let isDark = false;
+  let baseTemplateConfig = template?.config ? clone(template.config) : null;
 
   let containerWidth = 0;
   let canvasHeight = 0;
@@ -37,7 +44,7 @@
     : 1;
 
   $: sections = template?.config?.sections || [];
-  $: theme = template?.config?.theme || {};
+  $: theme = (template?.config?.theme || {}) as TemplateTheme;
 
   $: canvasCssVars = buildCanvasCssVars(theme, isDark, viewMode);
   $: {
@@ -51,22 +58,57 @@
   onMount(() => {
     if (template) {
       editorStore.init(template);
+      if (!baseTemplateConfig && template.config) {
+        baseTemplateConfig = clone(template.config);
+      }
     }
     editorStore.setViewMode(viewMode);
-    isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    isDark = getStoredTheme() === 'dark';
+    applyTheme(isDark ? 'dark' : 'light');
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: 'PREVIEW_READY',
+          config: template?.config,
+        },
+        '*'
+      );
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'UPDATE_PREVIEW' && event.data.customization) {
+        if (!baseTemplateConfig && template?.config) {
+          baseTemplateConfig = clone(template.config);
+        }
+        if (baseTemplateConfig) {
+          const merged = mergeStoreCustomization(baseTemplateConfig, event.data.customization, event.data.storeData);
+          template = { ...template, config: merged };
+          editorStore.init(template);
+          editorStore.setViewMode(viewMode);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
   });
 
   const toggleTheme = () => {
     isDark = !isDark;
     const themeName = isDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('theme', themeName);
+    applyTheme(themeName);
+    editorStore.setEditorTheme(themeName);
+    editorStore.setPreviewTheme(themeName);
   };
 </script>
 
 <div class="min-h-screen bg-canvas flex flex-col font-sans text-main transition-colors">
   <!-- Top Admin Status & Navigation Banner -->
-  <header class="sticky top-0 z-50 border-b shadow-sm bg-card border-light">
+  {#if !isEmbed}
+    <header class="sticky top-0 z-50 border-b shadow-sm bg-card border-light">
     <!-- Status Specific Color Alert Bar (hanya untuk desainer pemilik template) -->
     {#if isOwner}
       {#if template.status === 'pending'}
@@ -138,56 +180,52 @@
       </div>
 
       <!-- Center: Viewport Switcher -->
-      <div class="flex items-center bg-nested p-1 rounded-lg border border-light">
-        <button
+      <div class="flex items-center bg-nested p-1 rounded-lg border border-light gap-1">
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'desktop' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'desktop')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'desktop'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'desktop' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Desktop (100%)"
         >
           <Monitor size={14} />
           <span class="hidden sm:inline">Desktop</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'tablet' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'tablet')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'tablet'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'tablet' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Tablet (768px)"
         >
           <Tablet size={14} />
           <span class="hidden sm:inline">Tablet</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant={viewMode === 'mobile' ? 'secondary' : 'ghost'}
           on:click={() => (viewMode = 'mobile')}
-          class={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-            viewMode === 'mobile'
-              ? 'bg-card text-main font-semibold shadow-sm'
-              : 'text-secondary hover:text-main'
-          }`}
+          class="!px-3 !py-1 !h-auto !min-h-0 text-xs font-medium {viewMode === 'mobile' ? 'bg-card text-main font-semibold shadow-sm' : 'text-secondary hover:text-main'}"
           title="Tampilan Mobile (375px)"
         >
           <Smartphone size={14} />
           <span class="hidden sm:inline">Mobile</span>
-        </button>
+        </Button>
       </div>
 
       <!-- Right: Theme Toggle -->
       <div class="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant="ghost"
           on:click={toggleTheme}
-          class="p-1.5 rounded-lg bg-nested hover:bg-nested/80 text-secondary hover:text-main transition-colors cursor-pointer"
+          class="!p-1.5 !h-8 !w-8 !min-h-0 !min-w-0 rounded-lg bg-nested hover:bg-nested/80 text-secondary hover:text-main"
           title="Ganti Tema (Terang / Gelap)"
         >
           {#if isDark}
@@ -195,10 +233,11 @@
           {:else}
             <Moon size={14} class="text-secondary" />
           {/if}
-        </button>
+        </Button>
       </div>
     </div>
   </header>
+  {/if}
 
   <!-- Read-Only Canvas Area -->
   <main
@@ -211,19 +250,20 @@
     >
       <div
         bind:clientHeight={canvasHeight}
+        data-theme={isDark ? 'dark' : 'light'}
         style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
         class={`transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
-          isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
+          isDark ? 'theme-dark dark bg-canvas text-main' : 'theme-light bg-card text-main'
         } ${
           viewMode === 'desktop'
-            ? 'min-h-[800px] border border-base-300 dark:border-slate-800'
+            ? 'min-h-[800px] border border-light'
             : viewMode === 'tablet'
-            ? 'min-h-[800px] border border-slate-400 dark:border-slate-700'
-            : 'min-h-[667px] border border-slate-400 dark:border-slate-700'
+            ? 'min-h-[800px] border border-light'
+            : 'min-h-[667px] border border-light'
         }`}
       >
         {#if sections.length === 0}
-          <div class="p-16 text-center text-slate-400">
+          <div class="p-16 text-center text-muted">
             <p class="text-sm">Belum ada section yang dikonfigurasi.</p>
           </div>
         {:else}

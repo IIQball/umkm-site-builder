@@ -1,12 +1,5 @@
 <script lang="ts">
-  import {
-    Loader2,
-    Palette,
-    Sparkles,
-    ShoppingBag,
-    Store,
-    Check,
-  } from 'lucide-svelte';
+  import { Loader2, Palette, Sparkles, ShoppingBag, Store, Check, ChevronLeft, ChevronRight } from 'lucide-svelte';
   import ConfirmTemplateModal from './ConfirmTemplateModal.svelte';
   import { Badge, Button } from '@/components/ui';
   import { toast } from '@/lib/toast';
@@ -25,16 +18,24 @@
     acquiredAt?: string | Date | null;
   };
 
+  const ITEMS_PER_PAGE = 6;
+
   let templates: TemplateItem[] = [];
   let loading = true;
   let error = '';
   let applyingId = '';
+  let currentPage = 1;
 
   let modalOpen = false;
   let pendingTemplateId = '';
   let pendingTemplateName = '';
 
   $: currentTemplateName = templates.find((t) => t.id === currentTemplateId)?.name || '';
+  $: totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
+  $: paginatedTemplates = templates.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   async function fetchTemplates() {
     loading = true;
@@ -46,6 +47,7 @@
       }
       const result = await res.json();
       templates = result.data?.templates || result.templates || [];
+      currentPage = 1;
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'Terjadi kesalahan saat memuat template';
     } finally {
@@ -96,6 +98,14 @@
     pendingTemplateName = '';
   }
 
+  function prevPage() {
+    if (currentPage > 1) currentPage--;
+  }
+
+  function nextPage() {
+    if (currentPage < totalPages) currentPage++;
+  }
+
   fetchTemplates();
 </script>
 
@@ -136,98 +146,140 @@
     </div>
   {:else}
     <!-- Templates Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {#each templates as tpl (tpl.id)}
-        {@const isActive = currentTemplateId === tpl.id}
-        <div
-          class="bg-card border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col group"
-          class:border-primary={isActive}
-          class:ring-2={isActive}
-          class:ring-primary={isActive}
-          class:border-light={!isActive}
-        >
-          <!-- Thumbnail Mockup (16:9) -->
-          <div class="relative aspect-video w-full bg-nested overflow-hidden border-b border-light">
-            {#if tpl.thumbnailUrl}
-              <img
-                src={tpl.thumbnailUrl}
-                alt={tpl.name}
-                class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                loading="lazy"
-              />
-            {:else}
-              <div class="flex flex-col items-center justify-center w-full h-full text-secondary gap-1.5 bg-nested">
-                <Store size={36} class="text-primary/60" />
-                <span class="text-2xs font-medium">Tema Toko UMKM</span>
-              </div>
-            {/if}
-
-            <!-- Badges -->
-            <div class="absolute top-3 right-3 flex items-center gap-1.5">
-              {#if isActive}
-                <Badge variant="emerald" dot size="sm">
-                  Aktif Digunakan
-                </Badge>
-              {:else if tpl.isFree}
-                <Badge variant="sky" size="sm">
-                  Gratis
-                </Badge>
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {#each paginatedTemplates as tpl (tpl.id)}
+          {@const isActive = currentTemplateId === tpl.id}
+          <div
+            class="bg-card border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col group"
+            class:border-primary={isActive}
+            class:ring-2={isActive}
+            class:ring-primary={isActive}
+            class:border-light={!isActive}
+          >
+            <!-- Thumbnail Mockup (16:9) -->
+            <div class="relative aspect-video w-full bg-nested overflow-hidden border-b border-light">
+              {#if tpl.thumbnailUrl}
+                <img
+                  src={tpl.thumbnailUrl}
+                  alt={tpl.name}
+                  class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  loading="lazy"
+                />
               {:else}
-                <Badge variant="secondary" size="sm">
-                  Sudah Dimiliki
-                </Badge>
+                <div class="flex flex-col items-center justify-center w-full h-full text-secondary gap-1.5 bg-nested">
+                  <Store size={36} class="text-primary/60" />
+                  <span class="text-2xs font-medium">Tema Toko UMKM</span>
+                </div>
               {/if}
-            </div>
-          </div>
 
-          <!-- Content Body -->
-          <div class="p-5 flex-1 flex flex-col justify-between gap-4">
-            <div class="space-y-1.5">
-              <h3 class="font-heading font-bold text-base text-main leading-snug line-clamp-1">
-                {tpl.name}
-              </h3>
-              {#if tpl.description}
-                <p class="text-xs text-secondary line-clamp-2 leading-relaxed">
-                  {tpl.description}
-                </p>
-              {/if}
-              <div class="pt-1 flex items-center justify-between text-2xs text-secondary font-medium">
-                <span>Kreator: <strong class="text-main font-semibold">{tpl.designerName}</strong></span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-bold">Lisensi Aktif</span>
+              <!-- Badges -->
+              <div class="absolute top-3 right-3 flex items-center gap-1.5">
+                {#if isActive}
+                  <Badge variant="emerald" dot size="sm">
+                    Aktif Digunakan
+                  </Badge>
+                {:else if tpl.isFree}
+                  <Badge variant="sky" size="sm">
+                    Gratis
+                  </Badge>
+                {:else}
+                  <Badge variant="secondary" size="sm">
+                    Sudah Dimiliki
+                  </Badge>
+                {/if}
               </div>
             </div>
 
-            <!-- Card Actions -->
-            <div class="pt-2 border-t border-light">
-              {#if isActive}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  fullWidth
-                  disabled
-                  className="font-bold text-xs"
-                >
-                  <Check size={14} class="text-emerald-500" />
-                  <span>Sedang Aktif di Toko</span>
-                </Button>
-              {:else}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  fullWidth
-                  disabled={!!applyingId}
-                  loading={applyingId === tpl.id}
-                  className="font-bold text-xs shadow-2xs"
-                  on:click={() => requestApply(tpl.id, tpl.name)}
-                >
-                  <Sparkles size={14} />
-                  <span>Terapkan ke Toko</span>
-                </Button>
-              {/if}
+            <!-- Content Body -->
+            <div class="p-5 flex-1 flex flex-col justify-between gap-4">
+              <div class="space-y-1.5">
+                <h3 class="font-heading font-bold text-base text-main leading-snug line-clamp-1">
+                  {tpl.name}
+                </h3>
+                {#if tpl.description}
+                  <p class="text-xs text-secondary line-clamp-2 leading-relaxed">
+                    {tpl.description}
+                  </p>
+                {/if}
+                <div class="pt-1 flex items-center justify-between text-2xs text-secondary font-medium">
+                  <span>Kreator: <strong class="text-main font-semibold">{tpl.designerName}</strong></span>
+                  <span class="text-success font-bold">Lisensi Aktif</span>
+                </div>
+              </div>
+
+              <!-- Card Actions -->
+              <div class="pt-2 border-t border-light">
+                {#if isActive}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    disabled
+                    className="font-bold text-xs"
+                  >
+                    <Check size={14} class="text-success" />
+                    <span>Sedang Aktif di Toko</span>
+                  </Button>
+                {:else}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    fullWidth
+                    disabled={!!applyingId}
+                    loading={applyingId === tpl.id}
+                    className="font-bold text-xs shadow-2xs"
+                    on:click={() => requestApply(tpl.id, tpl.name)}
+                  >
+                    <Sparkles size={14} />
+                    <span>Terapkan ke Toko</span>
+                  </Button>
+                {/if}
+              </div>
             </div>
           </div>
+        {/each}
+      </div>
+
+      <!-- Pagination -->
+      {#if totalPages > 1}
+        <div class="flex items-center justify-center gap-4 pt-4">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={currentPage === 1}
+            on:click={prevPage}
+            className="font-bold"
+          >
+            <ChevronLeft size={16} />
+            <span>Sebelumnya</span>
+          </Button>
+
+          <div class="flex items-center gap-2">
+            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page}
+              <button
+                on:click={() => (currentPage = page)}
+                class="w-8 h-8 rounded-lg font-bold transition-all {currentPage === page
+                  ? 'bg-primary text-white'
+                  : 'bg-nested text-main hover:bg-light'}"
+              >
+                {page}
+              </button>
+            {/each}
+          </div>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={currentPage === totalPages}
+            on:click={nextPage}
+            className="font-bold"
+          >
+            <span>Selanjutnya</span>
+            <ChevronRight size={16} />
+          </Button>
         </div>
-      {/each}
+      {/if}
     </div>
   {/if}
 </div>

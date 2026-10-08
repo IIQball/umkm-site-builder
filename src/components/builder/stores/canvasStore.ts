@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { type CanvasState, initialCanvasState } from './editorStore.types';
+import { getStoredTheme, applyTheme } from '@/lib/utils/theme';
 
 /**
  * canvasStore (Ephemeral / Visual State)
@@ -7,7 +8,12 @@ import { type CanvasState, initialCanvasState } from './editorStore.types';
  * Mutations here DO NOT push history and DO NOT modify isDirty.
  */
 export function createCanvasStore() {
-  const { subscribe, set, update } = writable<CanvasState>(initialCanvasState);
+  const initialTheme = typeof window !== 'undefined' ? getStoredTheme() : initialCanvasState.editorTheme;
+  const { subscribe, set, update } = writable<CanvasState>({
+    ...initialCanvasState,
+    editorTheme: initialTheme,
+    previewTheme: initialTheme,
+  });
 
   return {
     subscribe,
@@ -88,14 +94,34 @@ export function createCanvasStore() {
     },
 
     toggleEditorTheme() {
-      update((state) => ({
-        ...state,
-        editorTheme: state.editorTheme === 'light' ? 'dark' : 'light',
-      }));
+      update((state) => {
+        const next = state.editorTheme === 'light' ? 'dark' : 'light';
+        applyTheme(next);
+        return {
+          ...state,
+          editorTheme: next,
+          previewTheme: next,
+        };
+      });
     },
 
     setEditorTheme(editorTheme: 'light' | 'dark') {
-      update((state) => ({ ...state, editorTheme }));
+      applyTheme(editorTheme);
+      update((state) => ({
+        ...state,
+        editorTheme,
+        previewTheme: editorTheme,
+      }));
+    },
+
+    initEditorTheme() {
+      const current = getStoredTheme();
+      applyTheme(current);
+      update((state) => ({
+        ...state,
+        editorTheme: current,
+        previewTheme: current,
+      }));
     },
 
     deselectAll() {
@@ -108,7 +134,12 @@ export function createCanvasStore() {
     },
 
     reset() {
-      set(initialCanvasState);
+      const current = typeof window !== 'undefined' ? getStoredTheme() : initialCanvasState.editorTheme;
+      set({
+        ...initialCanvasState,
+        editorTheme: current,
+        previewTheme: current,
+      });
     },
   };
 }

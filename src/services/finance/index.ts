@@ -6,3 +6,4 @@ export * from './transaction.service';
 export * from './wallet.service';
 export * from './commission.service';
 export * from './payout.service';
+export * from './bank-account.service';

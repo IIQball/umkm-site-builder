@@ -1,6 +1,15 @@
 .hero-card {
   container-type: inline-size;
   container-name: herocard;
+  font-family: var(--font-family, var(--font-sans, system-ui, sans-serif));
+}
+
+.hero-card h1,
+.hero-card h2,
+.hero-card h3,
+.hero-card [data-node="title"],
+.hero-card .font-heading {
+  font-family: var(--font-heading, system-ui, sans-serif);
 }
 
 .cq-grid-split {
@@ -15,6 +24,7 @@
 }
 
 .cq-title-lg {
+  font-family: var(--font-heading, system-ui, sans-serif);
   font-size: 1.75rem;
   line-height: 2.125rem;
 }

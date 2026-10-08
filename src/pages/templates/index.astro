@@ -1,17 +1,23 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PublicTemplateMarketplace from '@/components/public/PublicTemplateMarketplace.svelte';
+import LandingFooter from '@/components/landing/LandingFooter.svelte';
 import { db } from '@/lib/db/client';
 import { templates, templateCategories, userTemplates, designers, users, stores } from '@/db/schema';
-import { eq, and, isNull, desc, asc } from 'drizzle-orm';
+import { eq, and, isNull, desc, asc, inArray } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getAdminServiceFee } from '@/services/finance/commission.service';
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
 
 export const prerender = false;
 
 const currentUser = await getAuthenticatedUser(Astro.request);
+const adminServiceFee = await getAdminServiceFee();
+const { page } = getPaginationParams(Astro.url);
+const whereConditions = and(eq(templates.status, 'approved'), isNull(templates.deletedAt));
 
-// Fetch all approved templates with category and designer data
-const rawTemplates = await db
+// Fetch approved templates paginated at database level (max 10)
+const queryBuilder = db
   .select({
     id: templates.id,
     name: templates.name,
@@ -30,8 +36,11 @@ const rawTemplates = await db
   .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
   .leftJoin(designers, eq(templates.designerId, designers.userId))
   .leftJoin(users, eq(designers.userId, users.id))
-  .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+  .where(whereConditions)
   .orderBy(desc(templates.createdAt));
+
+const paginatedResult = await paginate(db, templates, queryBuilder, whereConditions, page);
+const rawTemplates = paginatedResult.data;
 
 // Fetch all master template categories
 const categories = await db
@@ -56,7 +65,15 @@ if (currentUser) {
 }
 
 // Fetch assisted tenants if admin
-let assistedTenants: Array<{ id: string; name: string; storeName: string; storeId: string }> = [];
+let assistedTenants: Array<{
+  id: string;
+  name: string;
+  storeName: string;
+  storeId: string;
+  currentTemplateId: string | null;
+  ownedTemplateIds: string[];
+}> = [];
+
 if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
   const adminStores = await db.query.stores.findMany({
     where: and(
@@ -71,42 +88,58 @@ if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'supera
     orderBy: [desc(stores.createdAt)],
   });
 
-  assistedTenants = adminStores.map((s) => ({
-    id: s.userId,
-    name: s.owner?.name || s.owner?.email || 'Tenant',
-    storeName: s.name,
-    storeId: s.id,
-  }));
+  const tenantUserIds = adminStores.map((s) => s.userId);
+  const tenantOwnedRecords = tenantUserIds.length > 0
+    ? await db
+        .select({
+          userId: userTemplates.userId,
+          templateId: userTemplates.templateId,
+        })
+        .from(userTemplates)
+        .where(inArray(userTemplates.userId, tenantUserIds))
+    : [];
+
+  assistedTenants = adminStores.map((s) => {
+    const ownedForThisUser = tenantOwnedRecords
+      .filter((r) => r.userId === s.userId)
+      .map((r) => r.templateId);
+
+    if (s.templateId && !ownedForThisUser.includes(s.templateId)) {
+      ownedForThisUser.push(s.templateId);
+    }
+
+    return {
+      id: s.userId,
+      name: s.owner?.name || s.owner?.email || 'Tenant',
+      storeName: s.name,
+      storeId: s.id,
+      currentTemplateId: s.templateId,
+      ownedTemplateIds: ownedForThisUser,
+    };
+  });
 }
 
 const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
 ---
 
-<BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko">
-  <div class="min-h-screen bg-canvas py-10 md:py-14 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto space-y-8 md:space-y-10">
-      <!-- Clean Hero Banner Header -->
-      <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 text-white p-8 sm:p-10 md:p-12 shadow-sm dark:bg-slate-900/90 dark:border-slate-800">
-        <div class="relative z-10 max-w-3xl space-y-4">
-          <div class="inline-flex items-center gap-2 bg-slate-800/80 text-slate-200 px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-700 shadow-xs">
-            <span class="material-symbols-outlined text-sm text-indigo-400">storefront</span>
-            <span>Marketplace Template UMKM</span>
-          </div>
-
-          <h1 class="text-heading-xl md:text-display-sm font-extrabold tracking-tight text-white leading-tight">
-            Koleksi Desain Siap Pakai untuk Toko Online Anda
-          </h1>
-
-          <p class="text-body-base md:text-body-lg text-slate-300 leading-relaxed font-sans">
-            Jelajahi template toko responsif yang dirancang khusus oleh desainer profesional untuk meningkatkan omzet dan kepercayaan pembeli bisnis Anda.
-          </p>
-        </div>
+<BaseLayout title="Katalog Template Website UMKM - Pasar Desain Toko | Pinoka">
+  <div class="w-full min-h-screen bg-canvas text-main flex flex-col justify-between transition-colors duration-200">
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-8 sm:pt-12 pb-20 flex-1 space-y-8 md:space-y-10">
+      <!-- Clean Hero Header -->
+      <div class="mb-10 sm:mb-12 text-center space-y-3">
+        <h1 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-main font-heading leading-tight">
+          Koleksi Desain Siap Pakai
+        </h1>
+        <p class="text-secondary text-sm sm:text-base max-w-xl mx-auto font-sans leading-relaxed">
+          Jelajahi template toko responsif yang dirancang khusus oleh desainer profesional untuk meningkatkan omzet dan kepercayaan pembeli bisnis Anda.
+        </p>
       </div>
 
       <!-- Marketplace Interactive Catalog -->
       <PublicTemplateMarketplace
         client:load
         initialTemplates={rawTemplates}
+        pagination={paginatedResult}
         {categories}
         {ownedTemplateIds}
         {assistedTenants}
@@ -114,7 +147,10 @@ const initialTenantId = Astro.url.searchParams.get('tenantId') || '';
         currentUserId={currentUser?.id || null}
         isLoggedIn={!!currentUser}
         userRole={currentUser?.role || null}
+        {adminServiceFee}
       />
-    </div>
+    </main>
+
+    <LandingFooter client:load />
   </div>
 </BaseLayout>

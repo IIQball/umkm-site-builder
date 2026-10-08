@@ -50,14 +50,16 @@ describe('Section Registry Map Architecture', () => {
     expect(types).toContain('footer');
   });
 
-  it('marks header_announcement and hero as isFullBleed', () => {
+  it('marks header_announcement, hero, features, and product_catalog as isFullBleed', () => {
     const headerDef = getSectionDefinition('header_announcement');
     const heroDef = getSectionDefinition('hero');
     const featuresDef = getSectionDefinition('features');
+    const catalogDef = getSectionDefinition('product_catalog');
 
     expect(headerDef?.isFullBleed).toBe(true);
     expect(heroDef?.isFullBleed).toBe(true);
-    expect(featuresDef?.isFullBleed).toBe(false);
+    expect(featuresDef?.isFullBleed).toBe(true);
+    expect(catalogDef?.isFullBleed).toBe(true);
   });
 
   it('allows dynamic registration of new custom section modules', () => {

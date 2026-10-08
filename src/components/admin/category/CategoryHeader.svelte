@@ -9,7 +9,7 @@
 
 <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
   <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+    <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested dark:text-main flex items-center justify-center flex-shrink-0 shadow-2xs">
       <span class="material-symbols-outlined text-lg">category</span>
     </div>
     <div>
@@ -30,7 +30,7 @@
         type="text"
         bind:value={searchQuery}
         placeholder="Cari kategori / slug..."
-        class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-48 sm:w-56"
+        class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-56"
       />
     </div>
 

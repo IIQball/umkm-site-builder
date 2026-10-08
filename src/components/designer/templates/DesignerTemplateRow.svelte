@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Badge, Button } from '@/components/ui';
   import { formatCurrency } from '@/lib/utils/format';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  export let rowNumber: number = 1;
   export let tpl: any;
   export let copiedId: string | null = null;
   export let badge: { label: string; variant: any; dot: boolean; pulse: boolean };
@@ -13,7 +15,7 @@
   export let onDeleteDraft: ((tpl: any) => void) | undefined = undefined;
 </script>
 
-<tr class={`transition-colors group ${isSelected ? 'bg-blue-500/5 hover:bg-blue-500/10' : 'hover:bg-nested/40'}`}>
+<tr class={`transition-colors group ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-nested/40'}`}>
   <!-- Checkbox Column -->
   <td class="pl-5 pr-1 py-4 w-10 text-center">
     {#if tpl.status === 'draft' && onToggleSelect}
@@ -22,8 +24,8 @@
         on:click|stopPropagation={() => onToggleSelect && onToggleSelect(tpl.id)}
         class={`w-5 h-5 rounded-md border transition-all flex items-center justify-center cursor-pointer mx-auto ${
           isSelected
-            ? 'bg-blue-600 border-blue-600 text-white'
-            : 'bg-card border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+            ? 'bg-primary border-primary text-primary-content'
+            : 'bg-card border-border hover:border-primary text-transparent'
         }`}
         title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
         aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
@@ -35,12 +37,17 @@
     {/if}
   </td>
 
+  <!-- Sequence Number (#) -->
+  <td class="px-2 py-4 text-center font-mono text-2xs text-secondary font-bold">
+    {rowNumber}
+  </td>
+
   <!-- Template Info + Thumbnail -->
   <td class="px-6 py-4">
     <div class="flex items-center gap-3.5">
       <div class="w-14 h-9 rounded-xl bg-nested border border-light overflow-hidden flex-shrink-0 relative shadow-2xs">
         {#if tpl.thumbnailUrl}
-          <img src={tpl.thumbnailUrl} alt={tpl.name} class="w-full h-full object-cover" />
+          <img src={getOptimizedCloudinaryUrl(tpl.thumbnailUrl, 160)} alt={tpl.name} class="w-full h-full object-cover" loading="lazy" />
         {:else}
           <div class="w-full h-full bg-nested flex items-center justify-center text-muted">
             <span class="material-symbols-outlined text-base">palette</span>
@@ -52,7 +59,7 @@
       <div class="min-w-0 max-w-[240px]">
         <div class="flex items-center gap-2">
           <a
-            href={`/builder/${tpl.id}`}
+            href={tpl.status === 'draft' || tpl.status === 'rejected' ? `/builder/new?id=${tpl.id}` : `/builder/preview/${tpl.id}`}
             class="font-bold text-xs text-main hover:text-primary transition-colors truncate block leading-tight font-sans"
             title="Buka di Editor"
           >
@@ -61,7 +68,7 @@
           <button
             type="button"
             on:click={() => onCopyId(tpl.id)}
-            class="text-3xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95"
+            class="text-xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95"
             title="Salin ID Template"
           >
             <span>#{tpl.id.slice(0, 6)}</span>
@@ -117,7 +124,7 @@
           <span>Hapus</span>
         </Button>
         <Button
-          href={`/builder/${tpl.id}`}
+          href={`/builder/new?id=${tpl.id}`}
           variant="dark"
           size="sm"
           className="rounded-xl font-bold"
@@ -138,7 +145,7 @@
           <span>Alasan</span>
         </Button>
         <Button
-          href={`/builder/${tpl.id}`}
+          href={`/builder/new?id=${tpl.id}`}
           variant="primary"
           size="sm"
           className="rounded-xl font-bold"

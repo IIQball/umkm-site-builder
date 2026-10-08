@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { getRoleConfig, type NavGroup } from "./sidebar.helpers";
+  import { getRoleConfig, getDashboardHomePath, getSettingsHref, type NavGroup } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -8,6 +8,7 @@
   export let navGroups: NavGroup[] = [];
   export let drawerOpen = false;
   export let currentPath = "";
+  export let isLoggingOut = false;
 
   const dispatch = createEventDispatcher<{
     openDrawer: void;
@@ -17,12 +18,19 @@
 
   $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
   $: roleCfg = getRoleConfig(user.role);
+  $: homePath = getDashboardHomePath(user?.role);
+  $: settingsHref = getSettingsHref();
 
   const isActive = (href: string): boolean => {
     if (!currentPath) return false;
     const cleanCurrent = currentPath.replace(/\/$/, "") || "/";
     const cleanHref = href.replace(/\/$/, "") || "/";
-    if (cleanHref === "/dashboard" || cleanHref === "/admin") {
+    if (
+      cleanHref === "/dashboard" ||
+      cleanHref === "/admin" ||
+      cleanHref === "/superadmin" ||
+      cleanHref === "/designer"
+    ) {
       return cleanCurrent === cleanHref;
     }
     return (
@@ -62,16 +70,20 @@
   <div
     class="flex items-center justify-between h-16 px-4 border-b border-light"
   >
-    <div class="flex items-center gap-2.5">
-      <div
-        class="w-9 h-9 rounded-xl bg-slate-900 text-white dark:bg-blue-600 flex items-center justify-center font-black text-sm shadow-sm"
-      >
-        <span class="material-symbols-outlined icon-filled text-sm"
-          >storefront</span
-        >
-      </div>
-      <span class="font-bold text-sm text-main">UMKM Builder</span>
-    </div>
+    <a
+      href={homePath}
+      class="flex items-center min-w-0 hover:opacity-90 transition-opacity select-none"
+      title="Pinoka"
+    >
+      <img
+        src="/assets/logo/logo.webp"
+        alt="Pinoka"
+        class="h-9 w-auto max-w-[145px] object-contain"
+        width="117"
+        height="36"
+        loading="eager"
+      />
+    </a>
     <button
       type="button"
       on:click={() => dispatch("closeDrawer")}
@@ -100,7 +112,7 @@
               href={item.href}
               on:click={() => dispatch("closeDrawer")}
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active
-                ? 'bg-slate-900 text-white dark:bg-primary dark:text-white font-bold'
+                ? 'bg-main text-canvas dark:bg-primary dark:text-white font-bold'
                 : 'text-secondary hover:bg-nested hover:text-main'}"
             >
               <span
@@ -111,10 +123,10 @@
               {#if active}
                 <span class="relative flex h-2 w-2">
                   <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-75"
                   ></span>
                   <span
-                    class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"
+                    class="relative inline-flex rounded-full h-2 w-2 bg-orange"
                   ></span>
                 </span>
               {/if}
@@ -137,12 +149,12 @@
     >
       <div class="relative flex-shrink-0">
         <div
-          class="w-9 h-9 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-xs shadow-xs"
+          class="w-9 h-9 rounded-lg bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs shadow-xs"
         >
           {userInitial}
         </div>
         <span
-          class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-card"
+          class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-success rounded-full ring-2 ring-card"
           title="Online"
         ></span>
       </div>
@@ -162,7 +174,7 @@
         </div>
       </div>
       <a
-        href="/auth/settings"
+        href={settingsHref}
         on:click={() => dispatch("closeDrawer")}
         class="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-card border border-transparent hover:border-light transition-colors flex-shrink-0"
         title="Pengaturan"
@@ -176,10 +188,11 @@
     <button
       type="button"
       on:click={() => dispatch("signOut")}
+      disabled={isLoggingOut}
       class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
     >
-      <span class="material-symbols-outlined text-base">logout</span>
-      <span>Keluar</span>
+      <span class="material-symbols-outlined text-base" class:animate-spin={isLoggingOut}>power_settings_new</span>
+      <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
     </button>
   </div>
 </div>

@@ -1,11 +1,15 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
-import StatCard from '@/components/ui/StatCard.svelte';
+import TenantOrdersOverview from '@/components/dashboard/TenantOrdersOverview.svelte';
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { transactionService } from '@/services/finance/transaction.service';
-import { formatIDR } from '@/lib/currency';
+import { db } from '@/lib/db/client';
+import { eq, and, desc } from 'drizzle-orm';
+import { transactions, stores, users } from '@/db/schema';
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
+import type { PaginatedResult } from '@/types/common';
+
+export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) {
@@ -16,18 +20,103 @@ if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin
   return Astro.redirect('/dashboard');
 }
 
-let initialOrders: Awaited<ReturnType<typeof transactionService.getTenantOrders>> = [];
+const { page } = getPaginationParams(Astro.url);
+const whereClause = and(
+  eq(transactions.userId, user.id),
+  eq(transactions.type, 'template_purchase'),
+);
+
+let initialOrders: any[] = [];
+let paginationResult: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
 try {
-  initialOrders = await transactionService.getTenantOrders(user.id);
+  const queryBuilder = (limit: number, offset: number) =>
+    db.query.transactions.findMany({
+      where: whereClause,
+      columns: {
+        id: true,
+        userId: true,
+        type: true,
+        amount: true,
+        adminFee: true,
+        status: true,
+        storeId: true,
+        templateId: true,
+        assistedBy: true,
+        externalId: true,
+        paymentGatewayRef: true,
+        paymentChannel: true,
+        createdAt: true,
+      },
+      with: {
+        template: {
+          columns: {
+            id: true,
+            name: true,
+            thumbnailUrl: true,
+            price: true,
+          },
+        },
+        assistant: {
+          columns: { id: true, name: true, email: true },
+        },
+      },
+      orderBy: [desc(transactions.createdAt)],
+      limit,
+      offset,
+    });
+
+  paginationResult = await paginate(db, transactions, queryBuilder, whereClause, page);
+  initialOrders = paginationResult.data || [];
 } catch {
   initialOrders = [];
 }
 
-const totalPaidOrders = initialOrders.filter((o) => o.status === 'success');
-const totalPendingOrders = initialOrders.filter((o) => o.status === 'pending');
+const tenantStore = await db.query.stores.findFirst({
+  where: eq(stores.userId, user.id),
+  columns: { name: true },
+});
 
-const totalSpent = totalPaidOrders.reduce((sum, o) => sum + o.amount, 0);
-const formattedTotalSpent = formatIDR(totalSpent);
+const tenantUser = await db.query.users.findFirst({
+  where: eq(users.id, user.id),
+  columns: { name: true, email: true, registeredBy: true },
+});
+
+let registeringAdmin: { name: string; email: string } | null = null;
+if (tenantUser?.registeredBy) {
+  const adminRec = await db.query.users.findFirst({
+    where: eq(users.id, tenantUser.registeredBy),
+    columns: { name: true, email: true },
+  });
+  if (adminRec) {
+    registeringAdmin = adminRec;
+  }
+}
+
+const ordersWithMerchant = initialOrders.map((o) => {
+  const isRegisteredByAdmin = Boolean(tenantUser?.registeredBy);
+  const adminName = isRegisteredByAdmin
+    ? (o.assistant?.name || registeringAdmin?.name || null)
+    : null;
+  const adminEmail = isRegisteredByAdmin
+    ? (o.assistant?.email || registeringAdmin?.email || null)
+    : null;
+
+  return {
+    ...o,
+    merchantName: tenantUser?.name || user.name || user.email,
+    merchantEmail: tenantUser?.email || user.email,
+    storeName: tenantStore?.name || 'Belum Membuat Toko',
+    adminName,
+    adminEmail,
+  };
+});
 ---
 
 <DashboardLayout title="Riwayat Pesanan Template" breadcrumb="Dashboard / Riwayat Pesanan">
@@ -39,7 +128,7 @@ const formattedTotalSpent = formatIDR(totalSpent);
           <span>Riwayat Pesanan & Tagihan</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, atau terapkan tema yang telah lunas.
+          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, dan unduh bukti faktur resmi.
         </p>
       </div>
 
@@ -52,63 +141,20 @@ const formattedTotalSpent = formatIDR(totalSpent);
           size="md"
           class="font-bold"
         >
-          <span class="material-symbols-outlined text-primary text-base">palette</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0" aria-hidden="true">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+          </svg>
           <span>Galeri Template Toko</span>
         </Button>
       </div>
     </div>
 
-    <!-- Statcards Grid (animated on client load) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
-      <StatCard
-        client:load
-        label="Total Pesanan"
-        value={initialOrders.length}
-        rawValue={initialOrders.length}
-        icon="receipt_long"
-        cardTheme="dark"
-        badge="Semua Transaksi"
-        footerText="Riwayat seluruh invoice"
-        delayClass="delay-100"
-      />
-      <StatCard
-        client:load
-        label="Template Lunas"
-        value={totalPaidOrders.length}
-        rawValue={totalPaidOrders.length}
-        icon="check_circle"
-        cardTheme="default"
-        badge="Siap Pakai"
-        footerText="Dapat langsung diterapkan"
-        delayClass="delay-150"
-      />
-      <StatCard
-        client:load
-        label="Menunggu Pembayaran"
-        value={totalPendingOrders.length}
-        rawValue={totalPendingOrders.length}
-        icon="hourglass_top"
-        cardTheme="orange"
-        badge="Pending"
-        footerText="Selesaikan tagihan pembayaran"
-        delayClass="delay-200"
-      />
-      <StatCard
-        client:load
-        label="Total Pengeluaran"
-        value={formattedTotalSpent}
-        rawValue={totalSpent}
-        icon="payments"
-        cardTheme="blue"
-        badge="Akumulasi"
-        footerText="Total pembelian template lunas"
-        delayClass="delay-250"
-      />
-    </div>
-
-    <!-- Interactive Table Card -->
-    <div class="animate-fade-in-up delay-300">
-      <OrderHistoryTable client:load {initialOrders} />
-    </div>
+    <!-- Master Tenant Orders Overview (Period Filter, Statcards & Interactive Table) -->
+    <TenantOrdersOverview client:load allOrders={ordersWithMerchant} pagination={paginationResult} />
   </div>
 </DashboardLayout>
+

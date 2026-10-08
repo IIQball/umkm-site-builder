@@ -6,7 +6,7 @@ import { stores, products, storeCategories } from "@/db/schema";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { migrateTemplateConfig } from "@/lib/templates/migration";
 import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
-import { buildCanvasCssVars } from "@/components/builder/canvas/canvasCss.helpers";
+import { buildStorefrontCssTheme } from "@/components/builder/canvas/canvasCss.helpers";
 import { extractFontNames, buildGoogleFontsUrl } from "@/components/builder/canvas/fontLoader.helpers";
 import { firstProductImageUrl } from "@/lib/products/image";
 import { deserializeVariants } from "@/components/tenant/product/productForm.helpers";
@@ -107,6 +107,10 @@ if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl
   }
 }
 
+const storeCustomization = (store.customization as Record<string, unknown>) || {};
+const branchMode = (storeCustomization.maps as any)?.branchMode || (storeCustomization as any).branchMode || 'single';
+const branches = (storeCustomization.maps as any)?.branches || (storeCustomization as any).branches || [];
+
 const finalConfig = mergeStoreCustomization(normalizedConfig, store.customization, {
   id: store.id,
   name: store.name,
@@ -118,10 +122,12 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
   categoryName: store.category?.name || undefined,
   latitude: store.latitude,
   longitude: store.longitude,
+  branchMode,
+  branches,
 });
 
 // 5. Dynamic Theme Tokens & Google Fonts Injection
-const cssVars = buildCanvasCssVars(finalConfig.theme ?? {}, false, "desktop");
+const themeCss = buildStorefrontCssTheme(finalConfig.theme ?? {});
 
 const fontNames = [
   ...extractFontNames(finalConfig.theme?.typography?.headingFont || ""),
@@ -129,8 +135,9 @@ const fontNames = [
 ];
 const googleFontsUrl = buildGoogleFontsUrl(fontNames);
 
-const customization = (store.customization as Record<string, unknown>) || {};
+const customization = storeCustomization;
 const isOpen = customization.isOpen !== false;
+const storeLogo = (customization.logoUrl as string) || storeProducts[0]?.image || '/og-image.png';
 
 // Set cache headers
 Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
@@ -143,20 +150,27 @@ const safeStore = {
   subdomain: store.subdomain,
   templateId: store.templateId,
   waNumber: store.waNumber,
+  whatsappTemplate: customization.waCheckoutTemplate as string,
   address: store.address,
   googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
   googleMapsEmbedUrl: store.googleMapsEmbedUrl,
   latitude: store.latitude,
   longitude: store.longitude,
   status: store.status,
+  branchMode,
+  branches,
   category: store.category ? { id: store.category.id, name: store.category.name, slug: store.category.slug } : null,
   managedByAdmin: store.registeredBy && store.registrar?.name ? { name: store.registrar.name } : null,
 };
 ---
 
-<StorefrontLayout title={`${store.name} — ${store.category?.name || "Toko Online"}`}>
+<StorefrontLayout
+  title={`${store.name} — ${store.category?.name || "Toko Online"}`}
+  description={`${store.name} — Toko online resmi di Banyuwangi. ${store.address ? store.address + '.' : ''} Pesan produk lokal terbaik langsung via WhatsApp.`}
+  image={storeLogo}
+>
   {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
-  <style is:inline set:html={`:root { ${cssVars} }`} />
+  <style is:inline set:html={themeCss} />
 
   <StorefrontDynamicPage
     client:load

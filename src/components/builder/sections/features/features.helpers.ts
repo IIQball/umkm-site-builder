@@ -1,10 +1,18 @@
 import type { FeatureItem, FeaturesProps } from '@/types';
 
-export const IMAGE_SUPPORTED_FEATURE_PRESETS = [
+export const SHOWCASE_IMAGE_FEATURE_PRESETS = [
   'bento_grid_asymmetric',
+  'vertical_accordion_showcase',
+];
+
+export const ITEM_IMAGE_FEATURE_PRESETS = [
   'alternating_zigzag_rows',
   'interactive_tabs',
-  'vertical_accordion_showcase',
+];
+
+export const IMAGE_SUPPORTED_FEATURE_PRESETS = [
+  ...SHOWCASE_IMAGE_FEATURE_PRESETS,
+  ...ITEM_IMAGE_FEATURE_PRESETS,
 ];
 
 export const defaultFeaturesItems: FeatureItem[] = [

@@ -1,114 +1,262 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import OnboardingWizard from '@/components/onboarding/OnboardingWizard.svelte';
-import { getAuthenticatedUser } from '@/lib/auth';
-import { db } from '@/db';
-import { stores, businessCategories, templates, userTemplates, templateCategories } from '@/db/schema';
-import { eq, and, isNull, desc, asc, sql } from 'drizzle-orm';
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import OnboardingWizard from "@/components/onboarding/OnboardingWizard.svelte";
+import { getAuthenticatedUser, canManageStore } from "@/lib/auth";
+import { getMaxStoreBranches } from "@/services/finance";
+import { db } from "@/db";
+import {
+  stores,
+  businessCategories,
+  templates,
+  userTemplates,
+  templateCategories,
+} from "@/db/schema";
+import { eq, and, isNull, desc, asc, sql } from "drizzle-orm";
+import type {
+  ExistingStoreData,
+  RegionData,
+} from "@/components/onboarding/onboarding.types";
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user) return Astro.redirect('/auth/login');
+if (!user) return Astro.redirect("/auth/login");
+if (user.status !== "active") return Astro.redirect("/auth/login");
 
-if (user.status !== 'active') return Astro.redirect('/auth/login');
-if (user.role !== 'tenant') return Astro.redirect('/dashboard');
+const tenantIdParam = Astro.url.searchParams.get("tenantId");
+const storeIdParam = Astro.url.searchParams.get("storeId");
+const isAdminOrSuper = user.role === "admin" || user.role === "superadmin";
 
-// Check if user already has an active store (regardless of isOnboarded flag)
-const [store] = await db.select().from(stores).where(
-  eq(stores.userId, user.id)
-).limit(1);
-
-// If store exists, skip onboarding and go to settings
-if (store) {
-  return Astro.redirect('/dashboard/store-settings');
+if (!isAdminOrSuper && user.role !== "tenant") {
+  return Astro.redirect("/dashboard");
 }
 
-const categories = await db.select({
-  id: businessCategories.id,
-  name: businessCategories.name,
-}).from(businessCategories).orderBy(asc(businessCategories.name));
+// Admin must provide tenantId or storeId
+if (isAdminOrSuper && !tenantIdParam && !storeIdParam) {
+  return Astro.redirect("/admin/merchants");
+}
 
-// 1. Fetch 3 newest templates owned by this tenant
-const ownedTemplates = await db
+// Determine target store and target user
+let store = null;
+let targetUserId = user.id;
+
+if (storeIdParam) {
+  store = await db.query.stores.findFirst({
+    where: and(eq(stores.id, storeIdParam), isNull(stores.deletedAt)),
+    with: {
+      registrar: {
+        columns: { name: true },
+      },
+    },
+  });
+
+  if (!store || !canManageStore(user, store)) {
+    return Astro.redirect(isAdminOrSuper ? "/admin/merchants" : "/dashboard");
+  }
+  targetUserId = store.userId;
+} else if (tenantIdParam) {
+  if (!isAdminOrSuper && tenantIdParam !== user.id) {
+    return Astro.redirect("/dashboard");
+  }
+
+  targetUserId = tenantIdParam;
+  store = await db.query.stores.findFirst({
+    where: and(eq(stores.userId, tenantIdParam), isNull(stores.deletedAt)),
+    with: {
+      registrar: {
+        columns: { name: true },
+      },
+    },
+  });
+} else {
+  // Tenant viewing own store
+  store = await db.query.stores.findFirst({
+    where: and(eq(stores.userId, user.id), isNull(stores.deletedAt)),
+    with: {
+      registrar: {
+        columns: { name: true },
+      },
+    },
+  });
+}
+
+const isEdit = !!store;
+const customization = (store?.customization as Record<string, unknown>) || {};
+const managedByAdmin =
+  store?.registeredBy && store.registrar
+    ? { name: store.registrar.name }
+    : null;
+
+const existingStoreData: ExistingStoreData | null = store
+  ? {
+      id: store.id,
+      name: store.name,
+      subdomain: store.subdomain,
+      categoryId: store.categoryId,
+      waNumber: store.waNumber,
+      googleMapsUrl: store.googleMapsUrl,
+      address: store.address,
+      templateId: store.templateId,
+      regionData: (customization.region as RegionData) || null,
+      isOpen: customization.isOpen !== false,
+      waCheckoutTemplate: (customization.waCheckoutTemplate as string) || null,
+      status: store.status,
+      registeredByName: managedByAdmin?.name || null,
+      customization: (store.customization as Record<string, unknown>) || null,
+    }
+  : null;
+
+const categories = await db
   .select({
-    id: templates.id,
-    name: templates.name,
-    description: templates.description,
-    thumbnailUrl: templates.thumbnailUrl,
-    price: templates.price,
-    slug: templates.slug,
-    categoryName: templateCategories.name,
-    isOwned: sql<boolean>`true`,
+    id: businessCategories.id,
+    name: businessCategories.name,
   })
+  .from(businessCategories)
+  .orderBy(asc(businessCategories.name));
+
+// Fetch templates owned by target tenant
+const templateSelectShape = {
+  id: templates.id,
+  name: templates.name,
+  description: templates.description,
+  thumbnailUrl: templates.thumbnailUrl,
+  price: templates.price,
+  slug: templates.slug,
+  categoryName: templateCategories.name,
+  config: templates.config,
+};
+
+const ownedTemplates = await db
+  .select({ ...templateSelectShape, isOwned: sql<boolean>`true` })
   .from(userTemplates)
   .innerJoin(templates, eq(userTemplates.templateId, templates.id))
   .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
-  .where(eq(userTemplates.userId, user.id))
+  .where(eq(userTemplates.userId, targetUserId))
   .orderBy(desc(userTemplates.acquiredAt))
-  .limit(3);
+  .limit(6);
 
 let availableTemplates = ownedTemplates;
 
-// 2. If user doesn't own any templates, fetch 3 newest free templates
+// If active store template is not in owned list, fetch and prepend it
+if (
+  store?.templateId &&
+  !availableTemplates.some((t) => t.id === store.templateId)
+) {
+  const [activeTpl] = await db
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`true` })
+    .from(templates)
+    .leftJoin(
+      templateCategories,
+      eq(templates.categoryId, templateCategories.id),
+    )
+    .where(eq(templates.id, store.templateId))
+    .limit(1);
+
+  if (activeTpl) {
+    availableTemplates = [activeTpl, ...availableTemplates];
+  }
+}
+
+// Fallback to free or approved templates if none owned
 if (availableTemplates.length === 0) {
   const freeTemplates = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      slug: templates.slug,
-      categoryName: templateCategories.name,
-      isOwned: sql<boolean>`false`,
-    })
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`false` })
     .from(templates)
-    .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
-    .where(and(eq(templates.price, 0), eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+    .leftJoin(
+      templateCategories,
+      eq(templates.categoryId, templateCategories.id),
+    )
+    .where(
+      and(
+        eq(templates.price, 0),
+        eq(templates.status, "approved"),
+        isNull(templates.deletedAt),
+      ),
+    )
     .orderBy(desc(templates.createdAt))
     .limit(3);
 
   availableTemplates = freeTemplates;
 }
 
-// 3. Fallback if no free templates: fetch any approved templates
 if (availableTemplates.length === 0) {
   const anyTemplates = await db
-    .select({
-      id: templates.id,
-      name: templates.name,
-      description: templates.description,
-      thumbnailUrl: templates.thumbnailUrl,
-      price: templates.price,
-      slug: templates.slug,
-      categoryName: templateCategories.name,
-      isOwned: sql<boolean>`false`,
-    })
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`false` })
     .from(templates)
-    .leftJoin(templateCategories, eq(templates.categoryId, templateCategories.id))
-    .where(and(eq(templates.status, 'approved'), isNull(templates.deletedAt)))
+    .leftJoin(
+      templateCategories,
+      eq(templates.categoryId, templateCategories.id),
+    )
+    .where(and(eq(templates.status, "approved"), isNull(templates.deletedAt)))
     .orderBy(desc(templates.createdAt))
     .limit(3);
 
   availableTemplates = anyTemplates;
 }
+
+const pageTitle = isEdit
+  ? "Pengaturan Toko - Pinoka"
+  : "Setup Toko Baru - Pinoka";
+const breadcrumb = isEdit ? "Pengaturan Toko" : "Setup Toko";
+const heading = isEdit ? "Pengaturan Toko" : "Setup Toko Baru";
+const subheading = isEdit
+  ? "Kelola alamat subdomain, informasi profil usaha, kontak WhatsApp, dan preferensi template toko online Anda."
+  : "Lengkapi langkah berikut untuk mengatur subdomain, identitas toko, alamat fisik, dan desain template toko online Anda.";
+
+const maxStoreBranches = await getMaxStoreBranches();
 ---
 
-<DashboardLayout title="Setup Toko Baru - UMKM Site Builder" breadcrumb="Setup Toko">
+<DashboardLayout title={pageTitle} breadcrumb={breadcrumb}>
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
       <div>
-        <h1 class="text-heading-lg font-bold tracking-tight text-main">Setup Toko Baru</h1>
+        <h1 class="text-heading-lg font-bold tracking-tight text-main">
+          {heading}
+        </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Lengkapi langkah berikut untuk mengatur subdomain, identitas toko, alamat fisik, dan desain template toko online Anda.
+          {subheading}
         </p>
       </div>
     </div>
+
+    {
+      managedByAdmin && (
+        <div class="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center gap-3 text-main animate-fade-in">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-primary shrink-0"
+            aria-hidden="true"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <p class="text-sm">
+            Toko ini didampingi oleh Admin{" "}
+            <strong>{managedByAdmin.name}</strong> untuk bantuan pengelolaan dan
+            operasional.
+          </p>
+        </div>
+      )
+    }
 
     <div class="animate-fade-in-up delay-150">
       <OnboardingWizard
         client:load
         categories={categories}
         templates={availableTemplates}
+        isEdit={isEdit}
+        existingStore={existingStoreData}
+        {maxStoreBranches}
+        tenantId={!isEdit && targetUserId !== user.id
+          ? targetUserId
+          : undefined}
       />
     </div>
   </div>

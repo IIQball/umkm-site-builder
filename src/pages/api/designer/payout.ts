@@ -4,7 +4,7 @@ import { withTransaction } from '@/lib/db/transaction';
 import { wallets, walletMutations, payoutRequests, platformSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { calculateEligibleBalance, createXenditDisbursement } from '@/services/finance';
+import { calculateEligibleBalance, createXenditDisbursement, getOrCreateWallet } from '@/services/finance';
 import { payoutSchema } from '@/schemas';
 import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { formatIDR } from '@/lib/currency';
@@ -18,13 +18,37 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const records = await db.query.payoutRequests.findMany({
       where: (payoutRequests, { eq }) => eq(payoutRequests.userId, user.id),
+      columns: {
+        id: true,
+        userId: true,
+        amount: true,
+        status: true,
+        bankAccountId: true,
+        xenditPayoutId: true,
+        gatewayReference: true,
+        gatewayMessage: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       with: {
-        bankAccount: true,
+        bankAccount: {
+          columns: {
+            id: true,
+            bankCode: true,
+            bankName: true,
+            accountNumber: true,
+            accountHolder: true,
+          },
+        },
       },
       orderBy: (payoutRequests, { desc }) => [desc(payoutRequests.createdAt)],
+      limit: 10,
     });
 
-    const settingsList = await db.select().from(platformSettings).limit(1);
+    const settingsList = await db
+      .select({ payoutMinimumBalance: platformSettings.payoutMinimumBalance })
+      .from(platformSettings)
+      .limit(1);
     const minBalance = settingsList.length > 0 ? settingsList[0].payoutMinimumBalance : 50000;
 
     return jsonSuccess({
@@ -54,7 +78,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     // 2. Verify amount is >= payoutMinimumBalance
-    const settingsList = await db.select().from(platformSettings).limit(1);
+    const settingsList = await db
+      .select({ payoutMinimumBalance: platformSettings.payoutMinimumBalance })
+      .from(platformSettings)
+      .limit(1);
     const minBalance = settingsList.length > 0 ? settingsList[0].payoutMinimumBalance : 50000;
     if (amount < minBalance) {
       throw new AppError(`Nominal penarikan minimal ${formatIDR(minBalance)}`, 400, undefined, 'VALIDATION_ERROR');
@@ -70,11 +97,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let newPayout;
     try {
       newPayout = await withTransaction(async (tx) => {
-        const walletList = await tx.select().from(wallets).where(eq(wallets.userId, user.id)).limit(1);
-        if (walletList.length === 0) {
-          throw new Error('WALLET_NOT_FOUND');
-        }
-        const wallet = walletList[0];
+        const wallet = await getOrCreateWallet(user.id, tx);
         const currentBalance = Number(wallet.balance);
 
         if (currentBalance < amount) {
@@ -99,19 +122,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           })
           .where(eq(wallets.id, wallet.id));
 
-        // Record DEBIT mutation
-        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        await tx.insert(walletMutations)
-          .values({
-            id: mutationId,
-            walletId: wallet.id,
-            type: 'DEBIT',
-            amount,
-            balanceAfter,
-            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
-            createdAt: new Date(),
-          });
-
         // Create payoutRequests record with status 'processing'
         const payoutId = `po_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
         const [record] = await tx.insert(payoutRequests)
@@ -125,6 +135,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
             updatedAt: new Date(),
           })
           .returning();
+
+        // Record DEBIT mutation with payout referenceId
+        const mutationId = `wmut_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        await tx.insert(walletMutations)
+          .values({
+            id: mutationId,
+            walletId: wallet.id,
+            type: 'DEBIT',
+            amount,
+            balanceAfter,
+            description: `Penarikan dana ke ${bankAcc.bankName} (${bankAcc.accountNumber})`,
+            referenceId: payoutId,
+            createdAt: new Date(),
+          });
 
         return record;
       });

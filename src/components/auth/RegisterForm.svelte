@@ -1,8 +1,9 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { RegisterSchema } from "@/schemas/auth.schema";
-  import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft, ArrowRight, KeyRound } from "lucide-svelte";
+  import { Eye, EyeOff, Store, PenTool, CheckCircle2, ArrowLeft, KeyRound } from "lucide-svelte";
   import Input from "@/components/ui/Input.svelte";
+  import OtpInput from "./OtpInput.svelte";
   import Button from "@/components/ui/Button.svelte";
   import { fade, fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
@@ -50,7 +51,10 @@
       return;
     }
 
+    // Optimistic UI: Pindah langsung ke halaman verifikasi agar terasa cepat
+    step = 3;
     loading = true;
+
     try {
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
@@ -61,12 +65,13 @@
       
       if (res.ok && data.ok) {
         toast.success("Kode OTP telah dikirim ke email Anda.");
-        step = 3;
       } else {
         toast.error(data.error || "Gagal mengirim OTP.");
+        step = 2; // Kembalikan ke step 2 jika gagal
       }
-    } catch (err: any) {
-      toast.error(err.message || "Kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kesalahan sistem.");
+      step = 2; // Kembalikan ke step 2 jika gagal
     } finally {
       loading = false;
     }
@@ -93,8 +98,8 @@
       } else {
         toast.error(data.error || "Kode OTP tidak valid.");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kesalahan sistem.");
     } finally {
       loading = false;
     }
@@ -149,12 +154,13 @@
         return;
       }
 
-      toast.success("Akun berhasil dibuat!");
-      if (role === 'designer') {
-        window.location.href = '/designer/wallet';
-      } else {
-        window.location.href = '/dashboard';
-      }
+      toast.success("Akun berhasil dibuat! Silakan masuk dengan akun baru Anda.");
+      
+      // Sign out immediately so they don't skip the login screen
+      await authClient.signOut();
+      
+      // Redirect to login view (without ?mode=register)
+      window.location.href = '/auth/login';
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
     } finally {
@@ -179,11 +185,11 @@
           on:click={() => { role = 'tenant'; }}
         >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
               <Store size={18} strokeWidth={2.5} />
             </div>
             <div class="pr-6">
-              <h3 class="font-medium text-main text-sm">Merchant / Pemilik Toko</h3>
+              <span class="font-medium text-main text-sm block">Merchant / Pemilik Toko</span>
               <p class="text-xs text-secondary mt-0.5 leading-relaxed">Bangun website UMKM impian tanpa koding.</p>
             </div>
           </div>
@@ -198,14 +204,14 @@
         <button 
           type="button"
           class="relative p-4 rounded-xl border text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 group {role === 'designer' ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-sm' : 'border-light bg-card hover:border-muted hover:shadow-xs'}"
-          on:click={() => { role = 'designer'; }}
+          on:click={() => { role = 'designer' }}
         >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-white' : 'bg-nested text-muted group-hover:text-main'}">
+            <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
               <PenTool size={18} strokeWidth={2.5} />
             </div>
             <div class="pr-6">
-              <h3 class="font-medium text-main text-sm">Desainer Template</h3>
+              <span class="font-medium text-main text-sm block">Desainer Template</span>
               <p class="text-xs text-secondary mt-0.5 leading-relaxed">Buat dan jual template desain eksklusif.</p>
             </div>
           </div>
@@ -317,15 +323,7 @@
       </div>
 
       <div class="flex justify-center my-6">
-        <Input
-          type="text"
-          id="otp"
-          bind:value={otp}
-          placeholder="XXXXXX"
-          size="lg"
-          maxlength="6"
-          class="text-center text-xl tracking-widest font-bold"
-        />
+        <OtpInput bind:value={otp} disabled={loading} />
       </div>
 
       <div class="pt-2 flex items-center gap-3 w-full">
@@ -385,10 +383,12 @@
         size="md"
         fullWidth
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={togglePasswordVisibility}
           aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         >
@@ -397,7 +397,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <Input
@@ -412,10 +412,12 @@
         size="md"
         fullWidth
       >
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           slot="suffix"
           type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+          class="text-muted"
           on:click={toggleConfirmPasswordVisibility}
           aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
         >
@@ -424,7 +426,7 @@
           {:else}
             <Eye size={16} />
           {/if}
-        </button>
+        </Button>
       </Input>
 
       <div class="pt-2 flex items-center gap-3 w-full">

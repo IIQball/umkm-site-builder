@@ -10,11 +10,12 @@
   export let onShowDetail: (user: AdminUserItem) => void;
 
   const tableHeaders = [
-    { label: 'Pengguna' },
-    { label: 'Peran', width: '120px' },
-    { label: 'Tanggal Daftar', width: '160px' },
-    { label: 'Status', width: '140px' },
-    { label: 'Aksi', align: 'right' as const, width: '200px' },
+    { key: 'name', label: 'PENGGUNA' },
+    { key: 'role', label: 'PERAN' },
+    { key: 'email', label: 'EMAIL' },
+    { key: 'createdAt', label: 'TANGGAL' },
+    { key: 'status', label: 'STATUS' },
+    { key: 'actions', label: 'AKSI', align: 'right' as const }
   ];
 </script>
 
@@ -31,64 +32,78 @@
 {:else}
   <Table headers={tableHeaders} minWidth="min-w-[640px]">
     {#each users as item (item.id)}
-      <tr class="hover:bg-nested/40 transition-colors">
-        <td class="px-6 py-4">
-          <p class="font-bold text-xs text-main">{item.name}</p>
-          <p class="text-xs text-muted truncate max-w-[200px]">{item.email}</p>
+      <tr>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-nested/80 text-secondary flex items-center justify-center shrink-0 border border-light/50">
+              <span class="font-bold text-xs uppercase">{item.name.charAt(0)}</span>
+            </div>
+            <span class="font-medium text-main text-sm">{item.name}</span>
+          </div>
         </td>
-        <td class="px-4 py-4">
-          <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-nested border border-light uppercase tracking-wider text-secondary">
             {item.role === 'designer' ? 'Desainer' : item.role === 'tenant' ? 'Merchant' : item.role === 'admin' ? 'Admin' : item.role}
           </span>
         </td>
-        <td class="px-4 py-4 text-xs text-muted">
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+          {item.email}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted">
           {item.createdAt ? formatDate(item.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
         </td>
-        <td class="px-4 py-4">
-          {#if item.status === 'active'}
-            <Badge variant="emerald" size="sm">
-              <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
-              Aktif
-            </Badge>
-          {:else}
-            <Badge variant="rose" size="sm">
-              <Ban size={12} strokeWidth={3} class="mr-1 inline" />
-              Ditangguhkan
-            </Badge>
-          {/if}
+        <td class="px-6 py-4 whitespace-nowrap">
+            {#if item.status === 'active'}
+              <Badge variant="emerald" size="sm" class="justify-center shadow-xs">
+                <CheckCircle size={12} strokeWidth={3} class="mr-1 inline" />
+                Aktif
+              </Badge>
+            {:else if item.status === 'pending'}
+              <Badge variant="amber" size="sm" class="justify-center shadow-xs">
+                <AlertCircle size={12} strokeWidth={3} class="mr-1 inline" />
+                Menunggu
+              </Badge>
+            {:else}
+              <Badge variant="rose" size="sm" class="justify-center shadow-xs">
+                <Ban size={12} strokeWidth={3} class="mr-1 inline" />
+                Ditangguhkan
+              </Badge>
+            {/if}
         </td>
-        <td class="px-6 py-4 text-right">
+        <td class="px-6 py-4 whitespace-nowrap text-right">
           <div class="flex items-center justify-end gap-1.5">
             {#if item.status === 'active'}
               <Button 
-                size="xs"
+                size="sm"
                 variant="destructive"
                 on:click={() => onSuspend(item)}
                 title="Tangguhkan Pengguna"
+                className="h-8 px-3 rounded-xl font-bold text-xs hover:scale-105 transition-all"
               >
                 <AlertCircle size={13} class="mr-1" />
-                <span>Tangguhkan</span>
+                <span>Suspend</span>
               </Button>
-            {:else}
+            {:else if item.status === 'suspended'}
               {#if item.suspendReason}
                 <Button 
-                  size="xs"
-                  variant="secondary"
+                  size="sm"
+                  variant="ghost"
                   title="Lihat Alasan"
                   on:click={() => onShowDetail(item)}
+                  className="h-8 w-8 p-0 rounded-xl text-secondary hover:bg-nested hover:scale-105 transition-all"
                 >
-                  <FileText size={13} class="mr-1" />
-                  <span>Alasan</span>
+                  <FileText size={14} />
                 </Button>
               {/if}
               <Button 
-                size="xs"
+                size="sm"
                 variant="primary"
                 on:click={() => onUnsuspend(item)}
                 title="Aktifkan Pengguna"
+                className="h-8 px-3 rounded-xl font-bold text-xs hover:scale-105 transition-all"
               >
                 <CheckCircle2 size={13} class="mr-1" />
-                <span>Aktifkan</span>
+                <span>Unsuspend</span>
               </Button>
             {/if}
           </div>

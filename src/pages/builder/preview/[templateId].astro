@@ -19,6 +19,17 @@ if (!templateId) {
 
 const templateRecord = await db.query.templates.findFirst({
   where: eq(templates.id, templateId),
+  columns: {
+    id: true,
+    name: true,
+    description: true,
+    thumbnailUrl: true,
+    price: true,
+    status: true,
+    rejectionReason: true,
+    config: true,
+    designerId: true,
+  },
 });
 
 if (!templateRecord) {
@@ -42,13 +53,26 @@ let tenantStoreId: string | null = null;
 if (currentUser && currentUser.role === 'tenant') {
   const storeRecord = await db.query.stores.findFirst({
     where: eq(stores.userId, currentUser.id),
+    columns: {
+      id: true,
+    },
   });
   if (storeRecord) {
     tenantStoreId = storeRecord.id;
   }
 }
+
+const isEmbed = Astro.url.searchParams.get('embed') === 'true';
+const viewModeParam = Astro.url.searchParams.get('view') as ('desktop' | 'tablet' | 'mobile') | null;
 ---
 
-<BaseLayout title={`Preview: ${templateRecord.name} - UMKM Site Builder`} hideNavbar={true}>
-  <ReadOnlyPreview client:only="svelte" template={previewTemplate} isOwner={isOwner} storeId={tenantStoreId} />
+<BaseLayout title={`Preview: ${templateRecord.name} - Pinoka`} hideNavbar={true}>
+  <ReadOnlyPreview
+    client:only="svelte"
+    template={previewTemplate}
+    isOwner={isOwner}
+    storeId={tenantStoreId}
+    isEmbed={isEmbed}
+    initialViewMode={viewModeParam || 'desktop'}
+  />
 </BaseLayout>

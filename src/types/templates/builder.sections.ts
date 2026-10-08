@@ -24,6 +24,17 @@ export interface HeaderAnnouncementProps {
   navHoverColorToken?: ColorToken;
   ctaText?: string;
   ctaLink?: string;
+  promoIcon?: string;
+  promoText?: string;
+  promoDiscount?: string;
+  promoDurationHours?: number;
+  deliveryIcon?: string;
+  deliveryText?: string;
+  deliveryPartners?: string;
+  bpomIcon?: string;
+  bpomText?: string;
+  halalIcon?: string;
+  halalText?: string;
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }
@@ -35,9 +46,50 @@ export interface HeroProps {
   imageUrl?: string;
   ctaText?: string;
   ctaLink?: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
   badgeText?: string;
+  badgeIcon?: string;
+  whatsappNumber?: string;
+  waNumber?: string;
+  imageFrame?: 'none' | 'card' | 'grid';
+  imageShape?: 'rounded' | 'square' | 'circle' | 'squircle';
+  videoUrl?: string;
   elementOrder?: string[];
   nodeStyles?: Record<string, NodeStyles>;
+  // Dynamic layout props
+  trustBadges?: Array<{ text: string; icon?: string }>;
+  terminalFile?: string;
+  terminalCmd1?: string;
+  terminalRes1?: string;
+  terminalCmd2?: string;
+  terminalRes2?: string;
+  terminalStatus?: string;
+  floatingCards?: Array<{ icon: string; title: string; desc: string }>;
+  socialProofStars?: number;
+  socialProofAvatars?: string[];
+  socialProofText?: string;
+  selectedProductIndex1?: number;
+  selectedProductIndex2?: number;
+  bentoPromoTitle?: string;
+  bentoPromoHighlight?: string;
+  bentoPromoSubtitle?: string;
+  bentoPromoTextColor?: string;
+  bentoReviewStars?: number;
+  bentoReviewText?: string;
+  bentoReviewAuthor?: string;
+  bentoFeatureIcon?: string;
+  bentoFeatureTitle?: string;
+  bentoFeatureSubtitle?: string;
+  stats?: Array<{ value: string; label: string }>;
+  chatMessages?: Array<{ sender: 'in' | 'out'; text: string; time?: string }>;
+  stickerText?: string;
+  contrastCardBg?: string;
+  contrastBadgeText?: string;
+  contrastTitleText?: string;
+  contrastDescText?: string;
+  founderRole?: string;
+  founderTitle?: string;
   [key: string]: unknown;
 }
 
@@ -77,12 +129,14 @@ export interface ProductItem {
   name: string;
   price: number;
   basePrice?: number;
-  image?: string | null;
-  imageUrl?: string | null;
+  originalPrice?: number;
+  showOriginalPrice?: boolean;
+  image?: string | null; imageUrl?: string | null;
   imageUrls?: string[];
   description?: string;
   badge?: string;
   variants?: VariantGroup[];
+  categoryId?: string | null;
   category?: { id: string; name: string; slug: string } | null;
   categoryName?: string | null;
   sortOrder?: number;
@@ -103,7 +157,6 @@ export interface ProductCatalogProps {
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }
-
 export interface TestimonialItem {
   id?: string;
   name?: string;
@@ -111,16 +164,21 @@ export interface TestimonialItem {
   role?: string;
   avatar?: string;
   avatarUrl?: string;
+  videoUrl?: string;
   comment?: string;
   content?: string;
   rating?: number;
   platform?: string;
   verified?: boolean;
+  verifiedText?: string;
+  verifiedIcon?: string;
+  comments?: Array<{ author: string; text: string; time?: string }>;
 }
 
 export interface TestimonialsProps {
   title?: string;
   subtitle?: string;
+  badgeText?: string;
   testimonials?: TestimonialItem[];
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
@@ -152,24 +210,22 @@ export interface MapBranchItem {
 
 export interface GoogleMapsProps {
   badge?: string;
+  badgeText?: string;
+  badgeIcon?: string;
   title?: string;
   subtitle?: string;
   apiKey?: string;
   address?: string;
   googleMapsUrl?: string;
-  latitude?: number;
-  longitude?: number;
-  zoom?: number;
+  latitude?: number; longitude?: number; zoom?: number;
   mapHeight?: string;
   showMarker?: boolean;
   markerTitle?: string;
   storeHours?: string;
   storeHoursStatus?: string;
-  phone?: string;
-  whatsappNumber?: string;
+  phone?: string; whatsappNumber?: string;
   facilities?: string;
-  directionsLandmark?: string;
-  directionsParking?: string;
+  directionsLandmark?: string; directionsParking?: string;
   branches?: MapBranchItem[];
   storeImageUrl?: string;
   nodeStyles?: Record<string, NodeStyles>;
@@ -202,24 +258,20 @@ export interface FooterProps {
   address?: string;
   storeHours?: string;
   googleMapsUrl?: string;
-  // Preset 3: CTA Focused
+  // Presets 3, 6, 7, 9, 10
   floatingCtaTitle?: string;
   floatingCtaSubtitle?: string;
   floatingCtaButtonText?: string;
-  // Preset 6: Newsletter Centric
   newsletterBadge?: string;
   newsletterTitle?: string;
   newsletterSubtitle?: string;
   newsletterButtonText?: string;
   newsletterPlaceholder?: string;
-  // Preset 7: Live Status Badge
   statusBadgeText?: string;
   statusBadgeSubtext?: string;
   statusChatButtonText?: string;
-  // Preset 9: Social Links Grid
   communityTitle?: string;
   communitySubtitle?: string;
-  // Preset 10: Boxed Card
   boxedOfficialBadge?: string;
   boxedStoreTitle?: string;
   boxedStoreSubtitle?: string;

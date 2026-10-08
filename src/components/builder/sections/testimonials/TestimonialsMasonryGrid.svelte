@@ -2,9 +2,11 @@
   import type { TestimonialItem } from '@/types';
   import { Star, CheckCircle2 } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveTestimonialItemStyle } from './testimonialStyles.helpers';
 
   export let sectionId: string = '';
   export let testimonials: TestimonialItem[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
 
   function selectCard(e: Event, idx: number, item: TestimonialItem) {
     e.stopPropagation();
@@ -23,8 +25,9 @@
 
 <div class="cq-testi-grid-3 text-left">
   {#each testimonials as item, index (item.id || index)}
-    {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
-    {@const isAvatarActive = $canvasStore.selectedNodeId === `testi_avatar_${index}`}
+    {@const itemStyle = resolveTestimonialItemStyle(item, index, nodeStyles)}
+    {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `testi_item_${index}`)}
+    {@const isAvatarActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === `testi_avatar_${index}`}
 
     <div
       role="button"
@@ -33,7 +36,7 @@
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
       class={`p-5 rounded-2xl border border-light/80 bg-card shadow-xs flex flex-col justify-between space-y-4 transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900 shadow-md'
+          ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-md'
           : 'hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
@@ -43,7 +46,10 @@
             <Star size={13} class="fill-amber-400 text-amber-400" />
           {/each}
         </div>
-        <p class="text-xs sm:text-sm text-secondary leading-relaxed italic">
+        <p
+          class="text-xs sm:text-sm text-secondary leading-relaxed italic"
+          style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
+        >
           "{item.comment}"
         </p>
       </div>
@@ -55,7 +61,7 @@
           on:click={(e) => selectAvatar(e, index)}
           on:keydown={(e) => { if (e.key === 'Enter') selectAvatar(e, index); }}
           class={`w-10 h-10 rounded-full overflow-hidden bg-nested shrink-0 relative cursor-pointer ${
-            isAvatarActive ? 'ring-2 ring-blue-500' : ''
+            isAvatarActive ? 'ring-2 ring-primary' : ''
           }`}
         >
           <img
@@ -69,10 +75,15 @@
           <h4 class="font-heading font-bold text-xs text-main truncate">
             {item.customerName}
           </h4>
-          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
-            <CheckCircle2 size={11} />
-            <span>Pembeli Terverifikasi</span>
-          </span>
+          {#if item.verified !== false}
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+              <CheckCircle2 size={11} />
+              <span>{item.verifiedText || 'Pembeli Terverifikasi'}</span>
+            </span>
+          {/if}
+          {#if item.role}
+            <p class="text-[10px] text-secondary truncate mt-0.5">{item.role}</p>
+          {/if}
         </div>
       </div>
     </div>

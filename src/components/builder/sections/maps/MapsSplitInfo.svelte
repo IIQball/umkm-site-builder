@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { MapPin, Clock, ShieldCheck, Navigation, MessageCircle } from 'lucide-svelte';
+  import { MapPin, Clock, ShieldCheck, MessageCircle } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
+  import type { MapBranchItem } from './maps.helpers';
+  import { resolveMapIcon } from './mapsIcons';
+  import { resolveMapsNodeStyle } from './mapsStyles.helpers';
+  import MapsBranchSwitcher from './MapsBranchSwitcher.svelte';
 
   export let sectionId: string = '';
   export let mapEmbedUrl: string = '';
@@ -10,10 +14,31 @@
   export let address: string = 'Jl. Ahmad Yani No. 18, Pusat Kota, Banyuwangi';
   export let storeHours: string = 'Setiap Hari (08.00 - 21.00 WIB)';
   export let facilities: string = 'Parkir Mobil/Bus Luas, Musholla, Toilet Bersih';
+  export let branchMode: 'single' | 'multi' = 'single';
+  export let branches: MapBranchItem[] = [];
+  export let activeBranchIdx: number = 0;
+  export let onSelectBranch: (idx: number) => void = () => {};
+  export let ctaText: string = 'Navigasi Maps';
+  export let ctaIcon: string = 'Navigation';
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let elementOrder: string[] = [];
+
+  $: hasIframe = !elementOrder.length || elementOrder.includes('maps_iframe') || elementOrder.includes('iframe') || elementOrder.includes('map');
+  $: hasInfoCard = !elementOrder.length || elementOrder.includes('maps_info_card') || elementOrder.includes('info_card') || elementOrder.includes('card');
+  $: hasCta = !elementOrder.length || elementOrder.includes('maps_cta_button') || elementOrder.includes('cta_button') || elementOrder.includes('cta');
 
   $: isIframeSelected = $canvasStore?.selectedNodeId === 'maps_iframe' && $canvasStore?.selectedSectionId === sectionId;
   $: isCardSelected = $canvasStore?.selectedNodeId === 'maps_info_card' && $canvasStore?.selectedSectionId === sectionId;
   $: isCtaSelected = $canvasStore?.selectedNodeId === 'maps_cta_button' && $canvasStore?.selectedSectionId === sectionId;
+
+  $: iframeStyle = resolveMapsNodeStyle('maps_iframe', nodeStyles);
+  $: cardStyle = resolveMapsNodeStyle('maps_info_card', nodeStyles);
+  $: ctaStyle = resolveMapsNodeStyle('maps_cta_button', nodeStyles);
+
+  $: viewMode = $canvasStore?.viewMode || 'desktop';
+  $: isMobile = viewMode === 'mobile';
+
+  $: ResolvedCtaIcon = resolveMapIcon(ctaIcon || 'Navigation');
 
   function selectNode(e: Event, nodeId: string) {
     e.stopPropagation();
@@ -30,53 +55,70 @@
   }
 </script>
 
+{#if branchMode === 'multi'}
+  <MapsBranchSwitcher
+    {sectionId}
+    {branches}
+    {activeBranchIdx}
+    {onSelectBranch}
+    {nodeStyles}
+  />
+{/if}
+
 <div class="cq-map-split text-left">
+  {#if hasInfoCard}
   <!-- Kartu Info Kiri -->
   <div
+    data-node="maps_info_card"
+    data-node-id="maps_info_card"
     role="button"
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`bg-[var(--color-card-base,var(--theme-surface,#ffffff))] p-6 rounded-2xl border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-sm flex flex-col justify-between space-y-4 transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
+    class={`bg-[var(--theme-surface,var(--color-card-base))] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm flex flex-col justify-between space-y-4 transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
+    style={`border-radius: ${cardStyle.borderRadius || '1rem'}; padding: ${cardStyle.padding || ''}; ${cardStyle.backgroundColor ? `background-color: ${cardStyle.backgroundColor} !important;` : ''} ${cardStyle.borderColor ? `border-color: ${cardStyle.borderColor} !important;` : ''}`}
   >
     <div>
       <span
-        class="font-bold text-[var(--theme-primary,#2563eb)] uppercase tracking-wider font-[var(--theme-font-heading,var(--font-heading,inherit))] block mb-1"
+        class="font-bold text-[var(--theme-primary,var(--color-primary))] uppercase tracking-wider font-heading block mb-1"
         style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));"
       >
         Kontak & Alamat
       </span>
       <h3
-        class="font-[var(--theme-font-heading,var(--font-heading,inherit))] text-[var(--theme-text-primary,var(--color-text-main,#0f172a))] mt-1 mb-3"
-        style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+        class="font-heading text-[var(--theme-text-primary,var(--color-text-main))] mt-1 mb-3"
+        style={`font-size: ${cardStyle.fontSize || 'var(--theme-text-h3, var(--text-h3-size, 20px))'}; font-weight: ${cardStyle.fontWeight || 'var(--theme-text-h3-weight, var(--text-h3-weight, 700))'}; ${cardStyle.color ? `color: ${cardStyle.color} !important;` : ''}`}
       >
         {storeName}
       </h3>
       <div
-        class="space-y-3 text-[var(--theme-text-muted,var(--color-text-secondary,#334155))] font-[var(--theme-font-body,var(--font-family,inherit))]"
+        class="space-y-3 text-[var(--theme-text-muted,var(--color-text-muted))] font-sans"
         style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
       >
         <div class="flex items-start gap-2">
-          <MapPin size={15} class="text-[var(--theme-primary,#2563eb)] mt-0.5 shrink-0" />
-          <p><strong class="text-[var(--theme-text-primary,var(--color-text-main,#0f172a))]">Alamat:</strong> {address}</p>
+          <MapPin size={15} class="text-[var(--theme-primary,var(--color-primary))] mt-0.5 shrink-0" />
+          <p><strong class="text-[var(--theme-text-primary,var(--color-text-main))]">Alamat:</strong> {address}</p>
         </div>
         <div class="flex items-start gap-2">
           <Clock size={15} class="text-emerald-500 mt-0.5 shrink-0" />
-          <p><strong class="text-[var(--theme-text-primary,var(--color-text-main,#0f172a))]">Jam Operasional:</strong> {storeHours}</p>
+          <p><strong class="text-[var(--theme-text-primary,var(--color-text-main))]">Jam Operasional:</strong> {storeHours}</p>
         </div>
         {#if facilities}
           <div class="flex items-start gap-2">
-            <ShieldCheck size={15} class="text-[var(--theme-primary,#2563eb)] mt-0.5 shrink-0" />
-            <p><strong class="text-[var(--theme-text-primary,var(--color-text-main,#0f172a))]">Fasilitas:</strong> {facilities}</p>
+            <ShieldCheck size={15} class="text-[var(--theme-primary,var(--color-primary))] mt-0.5 shrink-0" />
+            <p><strong class="text-[var(--theme-text-primary,var(--color-text-main))]">Fasilitas:</strong> {facilities}</p>
           </div>
         {/if}
       </div>
     </div>
 
-    <div class="pt-4 border-t border-[var(--color-border,rgba(15,23,42,0.08))] flex flex-col sm:flex-row gap-2">
+    <div class={`pt-4 border-t border-[var(--color-border)] flex ${isMobile ? 'flex-col' : 'flex-col sm:flex-row'} gap-2.5`}>
+      {#if hasCta}
       <a
+        data-node="maps_cta_button"
+        data-node-id="maps_cta_button"
         href={directMapsUrl}
         target="_blank"
         rel="noreferrer"
@@ -84,38 +126,44 @@
         tabindex="0"
         on:click={(e) => selectNode(e, 'maps_cta_button')}
         on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
-        class={`inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-[var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary,#2563eb)))] text-[var(--theme-btn-primary-text,var(--btn-primary-text,#ffffff))] font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
-          isCtaSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
+        class={`inline-flex items-center justify-center gap-1.5 ${isMobile ? 'w-full' : 'flex-1'} h-10 px-4 font-heading font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
+          isCtaSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
         }`}
-        style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);"
+        style={`border-radius: ${ctaStyle.borderRadius || 'var(--theme-btn-radius,var(--btn-radius,16px))'}; background-color: ${ctaStyle.backgroundColor || 'var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))'}; color: ${ctaStyle.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'}; font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);`}
       >
-        <Navigation size={13} />
-        <span>Navigasi Maps</span>
+        <svelte:component this={ResolvedCtaIcon} size={14} class="shrink-0" />
+        <span class="truncate">{ctaText || 'Navigasi Maps'}</span>
       </a>
+      {/if}
       {#if whatsappUrl}
         <a
           href={whatsappUrl}
           target="_blank"
           rel="noreferrer"
-          class="inline-flex items-center justify-center gap-1.5 flex-1 h-9 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-emerald-600 text-white font-[var(--theme-font-heading,var(--font-heading,inherit))] font-bold hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-xs"
+          class={`inline-flex items-center justify-center gap-1.5 ${isMobile ? 'w-full' : 'flex-1'} h-10 px-4 rounded-[var(--theme-btn-radius,var(--btn-radius,16px))] bg-emerald-600 text-white font-heading font-bold hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-xs`}
           style="font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);"
         >
-          <MessageCircle size={13} />
-          <span>Hubungi via WA</span>
+          <MessageCircle size={14} class="shrink-0" />
+          <span class="truncate">Hubungi via WA</span>
         </a>
       {/if}
     </div>
   </div>
+  {/if}
 
+  {#if hasIframe}
   <!-- Frame Peta Kanan -->
   <div
+    data-node="maps_iframe"
+    data-node-id="maps_iframe"
     role="button"
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_iframe')}
     on:keydown={(e) => handleKeydown(e, 'maps_iframe')}
-    class={`w-full h-full min-h-[260px] rounded-2xl overflow-hidden shadow-md border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] transition-all outline-none ${
-      isIframeSelected ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900' : ''
+    class={`w-full h-full min-h-[260px] rounded-2xl overflow-hidden shadow-md border border-[var(--color-border)] bg-[var(--theme-surface,var(--color-card-base))] transition-all outline-none ${
+      isIframeSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
+    style={`border-radius: ${iframeStyle.borderRadius || '1rem'}; ${iframeStyle.borderColor ? `border-color: ${iframeStyle.borderColor} !important;` : ''}`}
   >
     <iframe
       title="Peta Interaktif Kanan"
@@ -125,4 +173,5 @@
       allowfullscreen
     ></iframe>
   </div>
+  {/if}
 </div>

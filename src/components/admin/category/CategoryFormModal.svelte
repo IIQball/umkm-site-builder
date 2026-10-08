@@ -78,16 +78,18 @@
       </label>
       <div class="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1 bg-nested/50 rounded-2xl border border-light">
         {#each iconOptions as opt}
-          <button
+          <Button
             type="button"
+            size="xs"
+            variant={formIcon === opt.value ? 'primary' : 'outline'}
+            class="!justify-start !p-2 !rounded-xl !h-auto !min-h-0 text-left truncate {formIcon === opt.value
+              ? 'shadow-2xs font-bold'
+              : 'hover:bg-nested border-light text-main'}"
             on:click={() => (formIcon = opt.value)}
-            class="flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition-all text-left {formIcon === opt.value
-              ? 'bg-primary text-white border-primary shadow-2xs font-bold'
-              : 'bg-card hover:bg-nested border-light text-main'}"
           >
             <span class="material-symbols-outlined text-sm flex-shrink-0">{opt.value}</span>
             <span class="truncate">{opt.value}</span>
-          </button>
+          </Button>
         {/each}
       </div>
     </div>

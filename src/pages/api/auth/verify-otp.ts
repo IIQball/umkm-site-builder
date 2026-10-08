@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, verifications } from '@/db';
-import { eq, and, gt, desc } from 'drizzle-orm';
+import { db } from '@/db'
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -29,7 +28,8 @@ export const POST: APIRoute = async ({ request }) => {
     // but better-auth normally handles this or we can just leave it to expire.
 
     return new Response(JSON.stringify({ ok: true, message: 'OTP valid' }), { status: 200 });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ ok: false, error: err.message || 'Kesalahan sistem' }), { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Kesalahan sistem'
+    return new Response(JSON.stringify({ ok: false, error: message }), { status: 500 })
   }
 };

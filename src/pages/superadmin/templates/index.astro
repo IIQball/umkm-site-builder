@@ -1,0 +1,124 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import TemplateReviewDashboard from "@/components/admin/TemplateReviewDashboard.svelte";
+import Button from "@/components/ui/Button.svelte";
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from "@/lib/auth";
+import { db } from "@/lib/db/client";
+import { templates, designers, users } from "@/db/schema";
+import { eq, ne, isNull, desc, and, count } from "drizzle-orm";
+import { getPaginationParams, paginate } from "@/lib/pagination/server";
+import type { AdminTemplateItem } from "@/components/admin/review/review.types";
+import type { PaginatedResult } from "@/types/common";
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect("/403");
+}
+
+const { page } = getPaginationParams(Astro.url);
+const baseConditions = and(isNull(templates.deletedAt), ne(templates.status, "draft"));
+
+let paginatedResult: PaginatedResult<AdminTemplateItem> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
+let statusCounts = { all: 0, pending: 0, approved: 0, rejected: 0 };
+
+try {
+  const queryBuilder = db
+    .select({
+      id: templates.id,
+      name: templates.name,
+      description: templates.description,
+      thumbnailUrl: templates.thumbnailUrl,
+      price: templates.price,
+      status: templates.status,
+      rejectionReason: templates.rejectionReason,
+      revisionCount: templates.revisionCount,
+      revisionNotes: templates.revisionNotes,
+      createdAt: templates.createdAt,
+      updatedAt: templates.updatedAt,
+      designerId: templates.designerId,
+      designerName: users.name,
+      designerEmail: users.email,
+    })
+    .from(templates)
+    .leftJoin(designers, eq(templates.designerId, designers.userId))
+    .leftJoin(users, eq(designers.userId, users.id))
+    .where(baseConditions)
+    .orderBy(desc(templates.createdAt));
+
+  const [pResult, pendingC, approvedC, rejectedC] = await Promise.all([
+    paginate<AdminTemplateItem>(db, templates, queryBuilder, baseConditions, page),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "pending"))),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "approved"))),
+    db.select({ total: count() }).from(templates).where(and(baseConditions, eq(templates.status, "rejected"))),
+  ]);
+
+  paginatedResult = pResult;
+  statusCounts = {
+    all: pResult.totalItems,
+    pending: Number(pendingC[0]?.total ?? 0),
+    approved: Number(approvedC[0]?.total ?? 0),
+    rejected: Number(rejectedC[0]?.total ?? 0),
+  };
+} catch (error) {
+  console.error("[SuperadminTemplates] Query error:", error);
+}
+---
+
+<DashboardLayout
+  title="Kurasi Template"
+  breadcrumb="Super Admin / Kurasi Template"
+>
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Page Header (matching designer/wallet & designer/templates style) -->
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
+      <div>
+        <h1
+          class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+        >
+          <span>Kurasi & Review Template</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Verifikasi kelayakan desain, tata letak, dan standar visual template
+          yang diajukan oleh para desainer.
+        </p>
+      </div>
+
+      <!-- Quick Action / Link -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <Button
+          client:load
+          href="/admin/template-categories"
+          variant="secondary"
+          size="md"
+          class="font-bold"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0" aria-hidden="true">
+            <path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3.16a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <circle cx="17.5" cy="17.5" r="3.5"/>
+          </svg>
+          <span>Kelola Kategori Template</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Master Template Review Dashboard (Period Filter, Statcards & Interactive Panel) -->
+    <TemplateReviewDashboard client:load allTemplates={paginatedResult.data} pagination={paginatedResult} initialCounts={statusCounts} />
+  </div>
+</DashboardLayout>
+

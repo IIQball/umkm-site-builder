@@ -21,6 +21,7 @@ import {
   applyNodeStyleToken,
   applySectionSpacing,
   applyNodeSpacing,
+  applyUpdateSectionLayoutPreset,
 } from './documentStore.actions';
 
 export * from './documentStore.actions';
@@ -48,6 +49,9 @@ export function createDocumentStore() {
         thumbnailUrl: rawTemplate.thumbnailUrl || null,
         price: typeof rawTemplate.price === 'number' ? rawTemplate.price : 0,
         status: rawTemplate.status || 'draft',
+        rejectionReason: rawTemplate.rejectionReason || null,
+        revisionCount: typeof rawTemplate.revisionCount === 'number' ? rawTemplate.revisionCount : 0,
+        revisionNotes: rawTemplate.revisionNotes || null,
         config: validConfig,
       };
       set({ ...initialDocumentState, template });
@@ -55,17 +59,11 @@ export function createDocumentStore() {
     },
 
     updateSectionLayoutPreset(sectionId: string, preset: string) {
-      update((state) => {
-        if (!state.template) return state;
-        const sections = state.template.config.sections.map((s) =>
-          s.id === sectionId ? { ...s, layoutPreset: preset } : s
-        );
-        return pushHistory(state, { ...state.template.config, sections });
-      });
+      update((state) => applyUpdateSectionLayoutPreset(state, sectionId, preset, pushHistory));
     },
 
-    reorderSectionSlot(sectionId: string, fromIndex: number, toIndex: number) {
-      update((state) => applyReorderSectionSlot(state, sectionId, fromIndex, toIndex, pushHistory));
+    reorderSectionSlot(sectionId: string, fromIndex: number, toIndex: number, groupKey: string = 'elementOrder') {
+      update((state) => applyReorderSectionSlot(state, sectionId, fromIndex, toIndex, pushHistory, groupKey));
     },
 
     updateSectionProps(sectionId: string, props: Record<string, unknown>) {
@@ -247,8 +245,8 @@ export function createDocumentStore() {
       await applySave(get({ subscribe }), update);
     },
 
-    async submitReview(): Promise<boolean> {
-      return await applySubmitReview(get({ subscribe }), update);
+    async submitReview(revisionNotes?: string): Promise<boolean> {
+      return await applySubmitReview(get({ subscribe }), update, revisionNotes);
     },
 
     // Backward-compatibility delegators for canvas visual state
@@ -261,36 +259,18 @@ export function createDocumentStore() {
     deselectAll() {
       canvasStore.deselectAll();
     },
-    setViewMode(viewMode: 'desktop' | 'tablet' | 'mobile') {
-      canvasStore.setViewMode(viewMode);
-    },
-    setActiveMargin(activeMargin: '16px' | '24px' | '32px' | '48px') {
-      canvasStore.setActiveMargin(activeMargin);
-    },
-    setCanvasMargin(canvasMargin: '16px' | '24px' | '32px' | '48px') {
-      canvasStore.setCanvasMargin(canvasMargin);
-    },
-    toggleColumnGrid() {
-      canvasStore.toggleColumnGrid();
-    },
-    togglePixelGrid() {
-      canvasStore.togglePixelGrid();
-    },
-    togglePreviewTheme() {
-      canvasStore.togglePreviewTheme();
-    },
-    setPreviewTheme(previewTheme: 'light' | 'dark') {
-      canvasStore.setPreviewTheme(previewTheme);
-    },
-    toggleLeftSidebar() {
-      canvasStore.toggleLeftSidebar();
-    },
-    toggleRightSidebar() {
-      canvasStore.toggleRightSidebar();
-    },
-    toggleEditorTheme() {
-      canvasStore.toggleEditorTheme();
-    },
+    setViewMode: (mode: 'desktop' | 'tablet' | 'mobile') => canvasStore.setViewMode(mode),
+    setActiveMargin: (m: '16px' | '24px' | '32px' | '48px') => canvasStore.setActiveMargin(m),
+    setCanvasMargin: (m: '16px' | '24px' | '32px' | '48px') => canvasStore.setCanvasMargin(m),
+    toggleColumnGrid: () => canvasStore.toggleColumnGrid(),
+    togglePixelGrid: () => canvasStore.togglePixelGrid(),
+    togglePreviewTheme: () => canvasStore.togglePreviewTheme(),
+    setPreviewTheme: (theme: 'light' | 'dark') => canvasStore.setPreviewTheme(theme),
+    toggleLeftSidebar: () => canvasStore.toggleLeftSidebar(),
+    toggleRightSidebar: () => canvasStore.toggleRightSidebar(),
+    toggleEditorTheme: () => canvasStore.toggleEditorTheme(),
+    setEditorTheme: (theme: 'light' | 'dark') => canvasStore.setEditorTheme(theme),
+    initEditorTheme: () => canvasStore.initEditorTheme(),
   };
 }
 

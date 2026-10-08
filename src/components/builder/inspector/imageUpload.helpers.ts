@@ -88,3 +88,83 @@ export async function uploadToCloudinary(
   const cloudData = await cloudRes.json();
   return cloudData.secure_url;
 }
+
+export const ALLOWED_VIDEO_TYPES = [
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'video/x-matroska',
+  'video/x-m4v',
+];
+
+export const MAX_VIDEO_SIZE_BYTES = 30 * 1024 * 1024; // 30 MB (optimal for web & Cloudinary free tier)
+
+export function validateVideoFile(file: File): string | null {
+  if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+    return 'Format video harus MP4, MOV, WEBM, MKV, atau M4V';
+  }
+  if (file.size > MAX_VIDEO_SIZE_BYTES) {
+    return 'Ukuran video maksimal 30MB (optimal untuk performa web)';
+  }
+  return null;
+}
+
+export async function uploadVideoToCloudinary(
+  file: File,
+  folder = 'templates',
+  onProgress?: (percent: number) => void
+): Promise<string> {
+  const error = validateVideoFile(file);
+  if (error) throw new Error(error);
+
+  const signRes = await fetch('/api/media/sign', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder, resourceType: 'video' }),
+  });
+
+  if (!signRes.ok) throw new Error('Gagal mendapatkan signature upload video');
+  const { data: signData } = await signRes.json();
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('api_key', signData.apiKey);
+  formData.append('timestamp', signData.timestamp);
+  formData.append('signature', signData.signature);
+  formData.append('folder', signData.folder);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', signData.uploadUrl);
+
+    if (onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const result = JSON.parse(xhr.responseText);
+          let finalUrl = result.secure_url as string;
+          if (finalUrl.includes('/video/upload/')) {
+            finalUrl = finalUrl.replace('/video/upload/', '/video/upload/f_webm,vc_vp9,q_auto,w_1280,c_limit/');
+          }
+          resolve(finalUrl);
+        } catch {
+          reject(new Error('Gagal memproses respon video dari Cloudinary'));
+        }
+      } else {
+        reject(new Error(`Upload video gagal (HTTP ${xhr.status})`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Koneksi terputus saat upload video'));
+    xhr.send(formData);
+  });
+}
+

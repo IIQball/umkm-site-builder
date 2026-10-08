@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   export let currentPage: number = 1;
   export let totalItems: number = 0;
   export let pageSize: number = 10;
   export let showInfo: boolean = true;
   export let size: 'xs' | 'sm' | 'md' = 'sm';
+  export let autoUpdateUrl: boolean = true;
+  export let pageParam: string = 'page';
   let className: string = '';
   export { className as class };
 
@@ -17,10 +19,26 @@
   $: startIndex = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   $: endIndex = Math.min(currentPage * pageSize, totalItems);
 
+  onMount(() => {
+    if (autoUpdateUrl && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const urlPage = parseInt(url.searchParams.get(pageParam) || '', 10);
+      if (urlPage && urlPage > 0 && urlPage !== currentPage) {
+        currentPage = urlPage;
+      }
+    }
+  });
+
   function goToPage(page: number) {
     if (page < 1 || page > totalPages || page === currentPage) return;
     currentPage = page;
     dispatch('pageChange', page);
+
+    if (autoUpdateUrl && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set(pageParam, page.toString());
+      window.location.assign(url.toString());
+    }
   }
 
   // Generate smart pagination page numbers with ellipsis
@@ -77,7 +95,7 @@
           {:else}
             <button
               type="button"
-              class="join-item btn {btnSizeClass} border-0 font-mono font-bold cursor-pointer transition-all {currentPage === p ? 'bg-slate-900 text-white dark:bg-orange dark:text-white shadow-inner' : 'bg-nested hover:bg-nested/80 text-main'}"
+              class="join-item btn {btnSizeClass} border-0 font-mono font-bold cursor-pointer transition-all {currentPage === p ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-inner' : 'bg-nested hover:bg-nested/80 text-main'}"
               on:click={() => goToPage(Number(p))}
               aria-current={currentPage === p ? 'page' : undefined}
             >

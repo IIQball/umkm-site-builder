@@ -1,10 +1,14 @@
 <script lang="ts">
   import type { FAQItem } from '@/types';
-  import { Package, RefreshCw, Users, HelpCircle, CreditCard, ShieldCheck } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
+  import { resolveFaqItemStyle } from './faqStyles.helpers';
+  import { resolveFeatureIcon } from '../../sections/features/featureIcons';
 
   export let sectionId: string = '';
   export let faqs: (FAQItem & { iconName?: string })[] = [];
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+
+  const DEFAULT_ICONS = ['package', 'refresh-cw', 'users', 'credit-card', 'shield-check', 'help-circle'];
 
   function selectCard(e: Event, idx: number, item: FAQItem) {
     e.stopPropagation();
@@ -12,43 +16,38 @@
       canvasStore.selectNode(sectionId, item.id || `faq_item_${idx}`);
     }
   }
-
-  function getIcon(name?: string, index: number = 0) {
-    const icons = [Package, RefreshCw, Users, CreditCard, ShieldCheck, HelpCircle];
-    if (name === 'Package') return Package;
-    if (name === 'RefreshCw') return RefreshCw;
-    if (name === 'Users' || name === 'Handshake') return Users;
-    if (name === 'CreditCard') return CreditCard;
-    if (name === 'ShieldCheck') return ShieldCheck;
-    return icons[index % icons.length];
-  }
 </script>
 
 <div class="cq-faq-grid-3 text-left">
   {#each faqs as item, index (item.id || index)}
-    {@const IconComponent = getIcon(item.iconName, index)}
-    {@const isCardActive = $canvasStore.selectedNodeId === (item.id || `faq_item_${index}`)}
+    {@const IconComponent = resolveFeatureIcon(item.iconName || DEFAULT_ICONS[index % DEFAULT_ICONS.length])}
+    {@const isCardActive = $canvasStore.selectedSectionId === sectionId && $canvasStore.selectedNodeId === (item.id || `faq_item_${index}`)}
+    {@const itemStyle = resolveFaqItemStyle(item, index, nodeStyles)}
 
     <div
       role="button"
       tabindex="0"
       on:click={(e) => selectCard(e, index, item)}
       on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, index, item); }}
-      class={`p-5 rounded-3xl border border-[var(--color-border,rgba(15,23,42,0.08))] bg-[var(--color-card-base,var(--theme-surface,#ffffff))] shadow-xs space-y-3 transition-all duration-200 cursor-pointer ${
+      class={`p-5 rounded-3xl border border-[var(--color-border)] bg-[var(--theme-surface, var(--color-card-base))] shadow-xs space-y-3 transition-all duration-200 cursor-pointer ${
         isCardActive
-          ? 'ring-2 ring-[var(--theme-primary,#2563eb)] ring-offset-2 dark:ring-offset-slate-900 shadow-md'
-          : 'hover:shadow-md hover:border-[var(--theme-primary,#2563eb)]/30'
+          ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 shadow-md'
+          : 'hover:shadow-md hover:border-[var(--theme-primary, var(--color-primary))]/30'
       }`}
+      style="background: {itemStyle.backgroundColor || 'var(--theme-surface, var(--color-card-base))'}; border-color: {itemStyle.borderColor || 'var(--color-border)'}; border-radius: var(--theme-btn-border-radius, var(--btn-radius, 24px));"
     >
-      <div class="w-10 h-10 rounded-2xl bg-[var(--theme-primary,#2563eb)]/10 text-[var(--theme-primary,#2563eb)] border border-[var(--theme-primary,#2563eb)]/20 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-2xl bg-[var(--theme-primary, var(--color-primary))]/10 text-[var(--theme-primary, var(--color-primary))] border border-[var(--theme-primary, var(--color-primary))]/20 flex items-center justify-center">
         <svelte:component this={IconComponent} size={18} />
       </div>
 
-      <h4 class="font-[var(--font-heading,inherit)] font-bold text-xs sm:text-sm text-[var(--color-text-main,var(--theme-text-primary,#0f172a))] line-clamp-1">
+      <h3
+        class="font-heading font-bold text-xs sm:text-sm line-clamp-1"
+        style="color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading));"
+      >
         {item.question}
-      </h4>
+      </h3>
 
-      <p class="text-xs text-[var(--color-text-secondary,var(--theme-text-muted,#64748b))] leading-relaxed line-clamp-3 pt-1 border-t border-[var(--color-border,rgba(15,23,42,0.08))] font-[var(--font-family,inherit)]">
+      <p class="text-xs text-[var(--theme-text-muted, var(--color-text-secondary))] leading-relaxed line-clamp-3 pt-1 border-t border-[var(--color-border)] font-sans" style="font-family: var(--theme-body-font, var(--font-family));">
         {item.answer}
       </p>
     </div>

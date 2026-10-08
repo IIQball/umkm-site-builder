@@ -25,6 +25,8 @@ export const commissionSettingsSchema = z.object({
   adminServiceFee: z.number().int().min(0).optional(),
   payoutMinimumBalance: z.number().int().min(0).optional(),
   settlementDelayDays: z.number().int().min(0).optional(),
+  maxStoreBranches: z.number().int().min(1).max(50).optional(),
+  maxTemplateRevisions: z.number().int().min(1).max(20).optional(),
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;
@@ -62,20 +64,7 @@ export type AdminStatusUpdateInput = z.infer<typeof adminStatusUpdateSchema>;
 export const manualUserRegistrationSchema = z.object({
   role: z.enum(['tenant', 'designer', 'admin'], { required_error: 'Peran wajib dipilih' }),
   name: z.string().min(3, 'Nama minimal 3 karakter'),
-  email: z.string().email('Format email tidak valid'),
-  password: z.string().min(8, 'Kata sandi minimal 8 karakter').optional(),
-  confirmPassword: z.string().min(8, 'Konfirmasi sandi minimal 8 karakter').optional(),
-}).refine(
-  (data) => {
-    if (data.role !== 'admin') {
-      return !!data.password && !!data.confirmPassword && data.password === data.confirmPassword;
-    }
-    return true;
-  },
-  {
-    message: "Kata sandi wajib diisi dan konfirmasi sandi harus cocok",
-    path: ["confirmPassword"],
-  }
-);
+  email: z.string().email('Format email tidak valid')
+});
 
 export type ManualUserRegistrationInput = z.infer<typeof manualUserRegistrationSchema>;

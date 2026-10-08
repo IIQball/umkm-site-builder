@@ -1,0 +1,152 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser } from '@/lib/auth';
+import SuperadminOverviewDashboard from '@/components/superadmin/dashboard/SuperadminOverviewDashboard.svelte';
+import { db } from '@/lib/db/client';
+import { users, transactions, templates, activityLogs } from '@/db/schema';
+import { isNull, desc, count, eq, and } from 'drizzle-orm';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || user.role !== 'superadmin') {
+  return Astro.redirect('/auth/login?redirect=/superadmin');
+}
+
+let userRows: Array<{
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  createdAt: string;
+}> = [];
+
+let transactionRows: Array<{
+  id: string;
+  amount: number;
+  adminFee: number | null;
+  status: string;
+  createdAt: string;
+}> = [];
+
+let pendingTemplatesCount = 0;
+let activityRows: Array<{
+  id: string;
+  action: string;
+  userName: string | null;
+  createdAt: string;
+}> = [];
+
+try {
+  const [rawUsers, rawTransactions, pendingCountResult, rawActivities] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(isNull(users.deletedAt))
+      .orderBy(desc(users.createdAt)),
+
+    db
+      .select({
+        id: transactions.id,
+        amount: transactions.amount,
+        adminFee: transactions.adminFee,
+        status: transactions.status,
+        createdAt: transactions.createdAt,
+      })
+      .from(transactions)
+      .orderBy(desc(transactions.createdAt)),
+
+    db
+      .select({ total: count() })
+      .from(templates)
+      .where(and(isNull(templates.deletedAt), eq(templates.status, 'pending'))),
+
+    db
+      .select({
+        id: activityLogs.id,
+        action: activityLogs.action,
+        userName: users.name,
+        createdAt: activityLogs.createdAt,
+      })
+      .from(activityLogs)
+      .leftJoin(users, eq(activityLogs.userId, users.id))
+      .orderBy(desc(activityLogs.createdAt))
+      .limit(10),
+  ]);
+
+  userRows = rawUsers.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    createdAt: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
+  }));
+
+  transactionRows = rawTransactions.map((t) => ({
+    id: t.id,
+    amount: Number(t.amount || 0),
+    adminFee: Number(t.adminFee || 0),
+    status: t.status,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+  }));
+
+  pendingTemplatesCount = Number(pendingCountResult[0]?.total ?? 0);
+
+  activityRows = rawActivities.map((a) => ({
+    id: a.id,
+    action: a.action,
+    userName: a.userName || null,
+    createdAt: a.createdAt ? a.createdAt.toISOString() : new Date().toISOString(),
+  }));
+} catch (error) {
+  console.error('[SuperadminDashboard] Gagal memuat data overview dasbor:', error);
+}
+
+const userCreatedYear = user.createdAt
+  ? new Date(user.createdAt).getFullYear()
+  : new Date().getFullYear();
+
+const currentHour = new Date().getHours();
+let greeting = 'Selamat Datang';
+if (currentHour >= 4 && currentHour < 11) {
+  greeting = 'Selamat Pagi';
+} else if (currentHour >= 11 && currentHour < 15) {
+  greeting = 'Selamat Siang';
+} else if (currentHour >= 15 && currentHour < 18.5) {
+  greeting = 'Selamat Sore';
+} else {
+  greeting = 'Selamat Malam';
+}
+---
+
+<DashboardLayout title="Overview Dasbor Super Admin" breadcrumb="Super Admin / Dashboard">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Owner'}!</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat monitoring performa operasional platform, statistik pendapatan fee, pertumbuhan pengguna, dan kurasi template sistem.
+        </p>
+      </div>
+    </div>
+
+    <!-- Master Superadmin Overview Dashboard (Filter Periode, Statcard, Dua Grafik Analytics, Map, & Aktivitas) -->
+    <SuperadminOverviewDashboard
+      client:load
+      allUsers={userRows}
+      allTransactions={transactionRows}
+      pendingTemplatesCount={pendingTemplatesCount}
+      recentActivities={activityRows}
+      userCreatedYear={userCreatedYear}
+    />
+  </div>
+</DashboardLayout>

@@ -47,32 +47,7 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 4. Oversized Bold Typography (Bawah-Atas, teks raksasa display penuh)
-  if (id === 'oversized_bold_typography') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="95" y="14" width="50" height="6" rx="3" fill="#334155"/>
-      <rect x="20" y="28" width="200" height="24" rx="4" fill="#f8fafc"/>
-      <rect x="36" y="58" width="168" height="20" rx="4" fill="#94a3b8"/>
-      <rect x="64" y="86" width="112" height="6" rx="2" fill="#64748b"/>
-      <rect x="92" y="100" width="56" height="16" rx="8" fill="#3b82f6"/>
-    </svg>`;
-  }
-
-  // 5. Inline Email Capture (Bawah-Atas, teks tengah + form pill menyatu di bawah)
-  if (id === 'inline_email_capture') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="92" y="18" width="56" height="6" rx="3" fill="#3b82f6" opacity="0.8"/>
-      <rect x="46" y="32" width="148" height="12" rx="3" fill="#f8fafc"/>
-      <rect x="68" y="50" width="104" height="6" rx="2" fill="#64748b"/>
-      <rect x="38" y="74" width="164" height="30" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
-      <rect x="48" y="84" width="80" height="10" rx="3" fill="#334155"/>
-      <rect x="136" y="79" width="60" height="20" rx="6" fill="#3b82f6"/>
-    </svg>`;
-  }
-
-  // 6. Social Proof Community (Bawah-Atas, avatar wall di atas judul tengah)
+  // 5. Social Proof Community (Bawah-Atas, avatar wall di atas judul tengah)
   if (id === 'social_proof_community') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="240" height="135" rx="8" fill="#090d16"/>
@@ -88,21 +63,7 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 7. Pill Category Selector (Bawah-Atas, teks tengah + row pills kategori di bawah)
-  if (id === 'pill_category_selector') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="52" y="18" width="136" height="11" rx="3" fill="#f8fafc"/>
-      <rect x="76" y="34" width="88" height="5" rx="2" fill="#64748b"/>
-      <rect x="20" y="50" width="44" height="14" rx="7" fill="#3b82f6"/>
-      <rect x="70" y="50" width="46" height="14" rx="7" fill="#1e293b"/>
-      <rect x="122" y="50" width="46" height="14" rx="7" fill="#1e293b"/>
-      <rect x="174" y="50" width="46" height="14" rx="7" fill="#1e293b"/>
-      <rect x="28" y="74" width="184" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-    </svg>`;
-  }
-
-  // 8. Bento Masonry Hero (Grid asimetris)
+  // 6. Bento Masonry Hero (Grid asimetris)
   if (id === 'bento_masonry_hero') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="240" height="135" rx="8" fill="#090d16"/>
@@ -116,7 +77,7 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 9. Interactive Terminal Code (Kanan-Kiri: Teks kiri, Terminal kanan)
+  // 7. Interactive Terminal Code (Kanan-Kiri: Teks kiri, Terminal kanan)
   if (id === 'interactive_terminal_code') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="240" height="135" rx="8" fill="#090d16"/>
@@ -133,7 +94,7 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 10. Sticky WhatsApp Pill Float (Kanan-Kiri: Teks kiri, dialog chat bubble WA kanan)
+  // 8. Sticky WhatsApp Pill Float (Kanan-Kiri: Teks kiri, dialog chat bubble WA kanan)
   if (id === 'sticky_whatsapp_pill_float') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="240" height="135" rx="8" fill="#090d16"/>
@@ -146,21 +107,6 @@ export const getHeroSchematicSvg = (presetId: string): string => {
       <rect x="146" y="52" width="72" height="22" rx="5" fill="#052e16" stroke="#22c55e" stroke-width="0.75"/>
       <rect x="152" y="60" width="56" height="4" rx="1" fill="#86efac"/>
       <rect x="126" y="82" width="68" height="18" rx="5" fill="#1e293b"/>
-    </svg>`;
-  }
-
-  // 11. Side Card Booking (Kanan-Kiri: Teks kiri, Card Form Reservasi kanan)
-  if (id === 'side_card_booking') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="16" y="24" width="94" height="12" rx="3" fill="#f8fafc"/>
-      <rect x="16" y="44" width="80" height="6" rx="2" fill="#64748b"/>
-      <rect x="122" y="14" width="102" height="106" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
-      <rect x="130" y="22" width="60" height="6" rx="2" fill="#f8fafc"/>
-      <rect x="130" y="34" width="86" height="14" rx="3" fill="#0f172a" stroke="#334155" stroke-width="1"/>
-      <rect x="130" y="54" width="86" height="14" rx="3" fill="#0f172a" stroke="#334155" stroke-width="1"/>
-      <rect x="130" y="74" width="86" height="14" rx="3" fill="#0f172a" stroke="#334155" stroke-width="1"/>
-      <rect x="130" y="94" width="86" height="18" rx="4" fill="#3b82f6"/>
     </svg>`;
   }
 

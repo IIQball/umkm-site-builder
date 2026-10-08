@@ -1,10 +1,13 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db/client';
-import { bankAccounts, designers, wallets } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { bankAccountSchema } from '@/schemas/designer/bank-account.schema';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
+import {
+  getUserBankAccounts,
+  addUserBankAccount,
+  deleteUserBankAccount,
+  setPrimaryBankAccount,
+} from '@/services/finance/bank-account.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -13,11 +16,17 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Akses desainer diperlukan', 401);
     }
 
-    const record = await db.query.bankAccounts.findFirst({
-      where: (bankAccounts, { eq }) => eq(bankAccounts.userId, user.id),
-    });
+    const accounts = await getUserBankAccounts(user.id);
+    if (accounts.length === 0) {
+      return jsonSuccess(null);
+    }
 
-    return jsonSuccess(record || null);
+    const primaryAccount = accounts.find((a) => a.isPrimary) || accounts[0];
+    return jsonSuccess({
+      ...primaryAccount,
+      accounts,
+      primaryAccount,
+    });
   });
 };
 
@@ -28,59 +37,51 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Akses desainer diperlukan', 401);
     }
 
-    // Ensure designer profile and wallet exist (for admin/superadmin acting as designers)
-    const existingDesigner = await db.select().from(designers).where(eq(designers.userId, user.id)).limit(1);
-    if (existingDesigner.length === 0) {
-      await db.insert(designers).values({
-        userId: user.id,
-        isVerified: true,
-      });
-      // also create wallet if it doesn't exist
-      await db.insert(wallets).values({
-        id: `wal_${crypto.randomUUID()}`,
-        userId: user.id,
-        balance: 0,
-        availableBalance: 0,
-      }).onConflictDoNothing();
-    }
-
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(bankAccountSchema, body);
 
-    const existingAccount = await db.select().from(bankAccounts).where(eq(bankAccounts.userId, user.id)).limit(1);
+    const result = await addUserBankAccount(user.id, validated);
+    return jsonSuccess(result);
+  });
+};
 
-    let result;
-    if (existingAccount.length === 0) {
-      const [newRecord] = await db
-        .insert(bankAccounts)
-        .values({
-          id: `ba_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          userId: user.id,
-          bankCode: validated.bankCode,
-          bankName: validated.bankName,
-          accountNumber: validated.accountNumber,
-          accountHolder: validated.accountHolder,
-        })
-        .returning();
-      result = newRecord;
-    } else {
-      const [updatedRecord] = await db
-        .update(bankAccounts)
-        .set({
-          bankCode: validated.bankCode,
-          bankName: validated.bankName,
-          accountNumber: validated.accountNumber,
-          accountHolder: validated.accountHolder,
-          updatedAt: new Date(),
-        })
-        .where(eq(bankAccounts.userId, user.id))
-        .returning();
-      result = updatedRecord;
+export const DELETE: APIRoute = async (context): Promise<Response> => {
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedDesigner(user)) {
+      throw new AppError('Akses desainer diperlukan', 401);
     }
 
+    const url = new URL(context.request.url);
+    const body = await context.request.json().catch(() => ({}));
+    const accountId = url.searchParams.get('id') || body.id;
+
+    if (!accountId) {
+      throw new AppError('ID rekening bank diperlukan', 400);
+    }
+
+    await deleteUserBankAccount(user.id, accountId);
+    return jsonSuccess({ success: true, message: 'Rekening bank berhasil dihapus' });
+  });
+};
+
+export const PATCH: APIRoute = async (context): Promise<Response> => {
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedDesigner(user)) {
+      throw new AppError('Akses desainer diperlukan', 401);
+    }
+
+    const body = await context.request.json().catch(() => ({}));
+    const accountId = body.id || body.bankAccountId;
+
+    if (!accountId) {
+      throw new AppError('ID rekening bank diperlukan', 400);
+    }
+
+    const result = await setPrimaryBankAccount(user.id, accountId);
     return jsonSuccess(result);
   });
 };
 
 export const PUT: APIRoute = POST;
-

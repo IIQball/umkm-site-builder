@@ -7,6 +7,7 @@
   export let selectedCategoryName: string = 'Umum';
   export let thumbnailUrl: string = '';
   export let pricePreview: string = 'Gratis';
+  export let status: string = 'draft';
 </script>
 
 <div class="lg:col-span-5 p-6 md:p-8 bg-nested/30 flex flex-col justify-between space-y-6">
@@ -32,18 +33,26 @@
             <div class="w-12 h-12 rounded-2xl bg-card border border-light flex items-center justify-center text-primary mx-auto shadow-xs">
               <Store size={24} />
             </div>
-            <span class="text-3xs font-mono font-bold text-muted uppercase tracking-widest block">
+            <span class="text-xs font-mono font-bold text-muted uppercase tracking-widest block">
               PRATINJAU VISUAL KANVAS
             </span>
           </div>
         {/if}
 
         <div class="absolute top-3 right-3">
-          <Badge variant="slate" dot size="sm">Draft</Badge>
+          {#if status === 'rejected'}
+            <Badge variant="rose" dot size="sm">Ditolak</Badge>
+          {:else if status === 'approved'}
+            <Badge variant="emerald" dot size="sm">Disetujui</Badge>
+          {:else if status === 'pending'}
+            <Badge variant="amber" dot size="sm">Review</Badge>
+          {:else}
+            <Badge variant="slate" dot size="sm">Draft</Badge>
+          {/if}
         </div>
 
         <div class="absolute bottom-3 left-3">
-          <span class="px-2.5 py-1 rounded-lg text-3xs font-bold bg-card/90 backdrop-blur-md text-main border border-light shadow-2xs">
+          <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-card/90 backdrop-blur-md text-main border border-light shadow-2xs">
             {selectedCategoryName}
           </span>
         </div>

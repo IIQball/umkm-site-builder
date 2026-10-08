@@ -1,10 +1,20 @@
 <script lang="ts">
   import type { FeatureItem } from '@/types';
   import { resolveFeatureIcon } from './featureIcons';
+  import FeaturesHeaderTitle from './FeaturesHeaderTitle.svelte';
 
+  export let badgeText: string = '';
+  export let title: string = '';
+  export let subtitle: string = '';
   export let items: FeatureItem[] = [];
+  export let elementOrder: string[] = ['ribbon_bar'];
   export let activeNodeId: string | null = null;
   export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
+  export let nodeStyles: Record<string, Record<string, string>> = {};
+
+  $: hasHeader = elementOrder.some((s) => ['badge', 'title', 'subtitle'].includes(s));
+  $: hasRibbon = elementOrder.includes('ribbon_bar') || elementOrder.includes('features_grid');
+  $: isRibbonFirst = (elementOrder.indexOf('ribbon_bar') === 0) || (elementOrder.indexOf('features_grid') === 0);
 
   const handleItemClick = (e: MouseEvent, index: number) => {
     if (selectNode) selectNode(e, `feature_item_${index}`);
@@ -17,43 +27,73 @@
   };
 </script>
 
-<div class="py-6">
-  <div class="w-full bg-slate-900 text-white p-4 sm:p-6 rounded-2xl shadow-lg border border-slate-800">
-    <div class="banner-ribbon-container text-left">
-      {#each items as item, index (item.id || `ribbon-${index}`)}
-        {@const isActiveNode = activeNodeId === `feature_item_${index}`}
-        <div
-          data-node="feature_card"
-          role="button"
-          tabindex="0"
-          on:click={(e) => handleItemClick(e, index)}
-          on:keydown={(e) => handleItemKeydown(e, index)}
-          class={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-all cursor-pointer ${
-            isActiveNode
-              ? 'ring-2 ring-blue-500 bg-white/10 ring-offset-2 ring-offset-slate-900'
-              : 'hover:bg-white/5 hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
-          } ${index > 0 ? 'border-t border-slate-800 pt-3 sm:border-t-0 sm:pt-2.5 sm:border-l sm:pl-4' : ''}`}
-        >
-          <div
-            data-node="feature_icon"
-            class="w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0 border border-white/10"
-          >
-            <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={20} />
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 data-node="feature_title" class="text-heading-md font-heading font-semibold text-sm sm:text-base text-white truncate">
-              {item.title}
-            </h3>
-            {#if item.description}
-              <p data-node="feature_desc" class="text-body-sm text-slate-300 ribbon-desc mt-0.5 truncate font-sans">
-                {item.description}
-              </p>
-            {/if}
-          </div>
-        </div>
-      {/each}
+<div class="py-6 flex flex-col text-center">
+  {#if hasHeader}
+    <div style="order: {isRibbonFirst ? 2 : 1};">
+      <FeaturesHeaderTitle
+        {badgeText}
+        {title}
+        {subtitle}
+        {activeNodeId}
+        {selectNode}
+        {elementOrder}
+        {nodeStyles}
+        maxWidthClass="max-w-2xl"
+      />
     </div>
-  </div>
+  {/if}
+
+  {#if hasRibbon}
+    <div
+      style="order: {isRibbonFirst ? 1 : 2};"
+      class="w-full p-4 sm:p-6 shadow-lg border transition-colors"
+      style:background-color="var(--color-nested-base, #111827)"
+      style:border-color="var(--color-border)"
+      style:border-radius="var(--btn-radius, 16px)"
+      style:color="var(--color-text-main)"
+    >
+      <div class="banner-ribbon-container text-left" data-node="ribbon_bar" data-node-id="ribbon_bar">
+        {#each items as item, index (item.id || `ribbon-${index}`)}
+          {@const isActiveNode = activeNodeId === `feature_item_${index}`}
+          <div
+            data-node="feature_card"
+            role="button"
+            tabindex="0"
+            on:click={(e) => handleItemClick(e, index)}
+            on:keydown={(e) => handleItemKeydown(e, index)}
+            class={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-all cursor-pointer ${
+              isActiveNode
+                ? 'ring-2 ring-[var(--color-primary)] bg-[var(--color-primary)]/10 ring-offset-2'
+                : 'hover:bg-[var(--color-primary)]/5 hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
+            } ${index > 0 ? 'border-t border-[var(--color-border)] pt-3 sm:border-t-0 sm:pt-2.5 sm:border-l sm:pl-4' : ''}`}
+          >
+            <div
+              data-node="feature_icon"
+              class="w-10 h-10 flex items-center justify-center shrink-0 border"
+              style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); color: var(--color-primary); border-radius: calc(var(--btn-radius, 16px) * 0.75);"
+            >
+              <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={20} />
+            </div>
+            <div class="min-w-0 flex-1">
+              {#if item.badge}
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-heading font-medium mb-0.5" style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">
+                  {item.badge}
+                </span>
+              {/if}
+              <h3 data-node="feature_title" class="feature-item-title-compact font-heading text-[var(--color-text-main)] truncate">
+                {item.title}
+              </h3>
+              {#if item.description}
+                <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] ribbon-desc mt-0.5 truncate font-sans">
+                  {item.description}
+                </p>
+              {/if}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -71,7 +111,7 @@
   @container featurecard (min-width: 640px) {
     .banner-ribbon-container {
       display: grid !important;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
       gap: 16px !important;
     }
     .ribbon-desc {

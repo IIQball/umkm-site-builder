@@ -1,0 +1,130 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import SuperadminTransactionsOverview from '@/components/superadmin/SuperadminTransactionsOverview.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { transactions, templates, users, stores } from '@/db/schema';
+import { eq, desc, or, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
+import type { OrderTransactionItem } from '@/types/finance';
+
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
+import type { PaginatedResult } from '@/types/common';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || user.role !== 'superadmin') {
+  return Astro.redirect('/auth/login?redirect=/superadmin/transactions');
+}
+
+const adminUsers = alias(users, 'adminUsers');
+const { page } = getPaginationParams(Astro.url);
+
+let initialOrders: OrderTransactionItem[] = [];
+let paginationResult: PaginatedResult<any> = {
+  data: [],
+  totalItems: 0,
+  totalPages: 1,
+  currentPage: page,
+  pageSize: 10,
+};
+
+try {
+  const queryBuilder = db
+    .select({
+      id: transactions.id,
+      userId: transactions.userId,
+      type: transactions.type,
+      amount: transactions.amount,
+      adminFee: transactions.adminFee,
+      status: transactions.status,
+      storeId: transactions.storeId,
+      templateId: transactions.templateId,
+      assistedBy: transactions.assistedBy,
+      externalId: transactions.externalId,
+      paymentGatewayRef: transactions.paymentGatewayRef,
+      paymentChannel: transactions.paymentChannel,
+      createdAt: transactions.createdAt,
+      templateName: templates.name,
+      templateThumbnail: templates.thumbnailUrl,
+      templatePrice: templates.price,
+      merchantName: users.name,
+      merchantEmail: users.email,
+      registeredBy: users.registeredBy,
+      storeName: stores.name,
+      adminName: adminUsers.name,
+      adminEmail: adminUsers.email,
+    })
+    .from(transactions)
+    .leftJoin(templates, eq(transactions.templateId, templates.id))
+    .leftJoin(users, eq(transactions.userId, users.id))
+    .leftJoin(
+      stores,
+      or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
+    )
+    .leftJoin(
+      adminUsers,
+      eq(adminUsers.id, sql`COALESCE(${transactions.assistedBy}, ${users.registeredBy})`),
+    )
+    .orderBy(desc(transactions.createdAt));
+
+  paginationResult = await paginate(db, transactions, queryBuilder, undefined, page);
+
+  initialOrders = (paginationResult.data || []).map((r: any) => {
+    const adminFee = Number(r.adminFee || 0);
+    const amount = Number(r.amount);
+    const basePrice = Math.max(0, amount - adminFee);
+    const hasAdmin = Boolean(r.assistedBy || r.registeredBy);
+    return {
+      id: r.id,
+      userId: r.userId,
+      type: r.type,
+      amount,
+      adminFee,
+      basePrice,
+      status: r.status,
+      storeId: r.storeId,
+      templateId: r.templateId,
+      assistedBy: r.assistedBy || r.registeredBy || null,
+      externalId: r.externalId,
+      paymentGatewayRef: r.paymentGatewayRef,
+      paymentChannel: r.paymentChannel,
+      createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
+      merchantName: r.merchantName || '—',
+      merchantEmail: r.merchantEmail || null,
+      storeName: r.storeName || 'Belum Membuat Toko',
+      adminName: hasAdmin ? (r.adminName || null) : null,
+      adminEmail: hasAdmin ? (r.adminEmail || null) : null,
+      template: r.templateName ? {
+        id: r.templateId || '',
+        name: r.templateName,
+        thumbnailUrl: r.templateThumbnail,
+        price: r.templatePrice ? Number(r.templatePrice) : basePrice,
+      } : null,
+    };
+  });
+} catch (error) {
+  console.error('[SuperadminTransactions] Failed to query transactions:', error);
+  initialOrders = [];
+}
+---
+
+<DashboardLayout title="Riwayat Transaksi" breadcrumb="Super Admin / Transaksi">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Riwayat Transaksi Pembelian Template</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Daftar seluruh pesanan template platform, rincian pembayaran merchant, fee pendampingan admin, dan status invoice.
+        </p>
+      </div>
+    </div>
+
+    <!-- Master Superadmin Transactions Overview with Period Filter, Statcards & Table -->
+    <SuperadminTransactionsOverview client:load allTransactions={initialOrders} pagination={paginationResult} />
+  </div>
+</DashboardLayout>
+

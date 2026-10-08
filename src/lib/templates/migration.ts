@@ -83,8 +83,12 @@ export function normalizeTheme(rawTheme: unknown): TemplateTheme {
   // Handle legacy flat properties if colors/typography nested objects are missing them
   const primaryColor = (rawColors.primary as string) || (themeObj.primaryColor as string) || DEFAULT_TEMPLATE_THEME.colors?.primary;
   const fontFamily = (rawTypography.bodyFont as string) || (themeObj.fontFamily as string) || DEFAULT_TEMPLATE_THEME.fontFamily;
+  const colorMode = (['auto', 'light', 'dark'].includes(themeObj.colorMode as string)
+    ? themeObj.colorMode
+    : 'auto') as 'auto' | 'light' | 'dark';
 
   return {
+    colorMode,
     primaryColor,
     fontFamily,
     colors: {

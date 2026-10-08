@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { Sliders, Type, ChevronRight, PanelRightClose } from 'lucide-svelte';
+  import { Sliders, Type, LayoutGrid, ChevronRight, PanelRightClose } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
   import ContentTab from './ContentTab.svelte';
+  import LayoutTab from './LayoutTab.svelte';
   import StylesTab from './StylesTab.svelte';
   import NodeStylesTab from './NodeStylesTab.svelte';
   import NodeContentForm from './inspector/NodeContentForm.svelte';
@@ -8,46 +10,23 @@
   import HeaderAnnouncementPanel from './inspector/header/HeaderAnnouncementPanel.svelte';
   import HeaderLogoPanel from './inspector/header/HeaderLogoPanel.svelte';
   import HeaderNavPanel from './inspector/header/HeaderNavPanel.svelte';
+  import HeroElementNodePanel from './inspector/hero/HeroElementNodePanel.svelte';
+  import FeatureElementNodePanel from './inspector/features/FeatureElementNodePanel.svelte';
+  import CatalogElementNodePanel from './inspector/catalog/CatalogElementNodePanel.svelte';
+  import TestimonialsElementNodePanel from './inspector/testimonials/TestimonialsElementNodePanel.svelte';
+  import FaqElementNodePanel from './inspector/faq/FaqElementNodePanel.svelte';
+  import MapsElementNodePanel from './inspector/maps/MapsElementNodePanel.svelte';
+  import FooterElementNodePanel from './inspector/footer/FooterElementNodePanel.svelte';
+  import { getNodeLabel } from './inspector/nodeContent.constants';
+  import { sectionTypeLabels } from './layer/layerPanel.helpers';
   import type { TemplateSection } from '@/schemas';
   import { editorStore, canvasStore, activeNodeId } from './stores/editorStore';
 
   export let section: TemplateSection | undefined = undefined;
   export let onSectionUpdate: (section: TemplateSection) => void;
 
-  let activeTab: 'content' | 'styles' = 'content';
+  let activeTab: 'layout' | 'content' | 'styles' = 'layout';
   let nodeTab: 'content' | 'styles' = 'styles';
-
-  const getNodeLabel = (nodeId: string): string => {
-    switch (nodeId) {
-      case 'badge': return 'Promo Badge';
-      case 'title': return 'Heading Title';
-      case 'subtitle': return 'Subtitle Description';
-      case 'image': return 'Banner Image';
-      case 'cta': return 'CTA Button';
-      case 'announcement': return 'Announcement Bar';
-      case 'logo': return 'Logo & Brand';
-      case 'nav_links': return 'Navigation Menu';
-      case 'header': return 'Section Header';
-      case 'features_heading': return 'Judul & Subjudul Fitur';
-      case 'features_image': return 'Gambar Ilustrasi Fitur';
-      case 'items': return 'Card Items';
-      case 'whatsapp': return 'WhatsApp Contact';
-      case 'address': return 'Store Location';
-      case 'info': return 'Information Links';
-      case 'copyright': return 'Copyright Text';
-      default: {
-        if (nodeId.startsWith('feature_item_')) {
-          const idx = parseInt(nodeId.replace('feature_item_', ''), 10);
-          return `Kartu Fitur #${isNaN(idx) ? 1 : idx + 1}`;
-        }
-        if (nodeId.startsWith('item_')) {
-          const idx = parseInt(nodeId.replace('item_', ''), 10);
-          return `Item #${isNaN(idx) ? 1 : idx + 1}`;
-        }
-        return nodeId.startsWith('nav_') ? 'Navigation Menu' : nodeId;
-      }
-    }
-  };
 
   const handlePropChange = (key: string, value: unknown) => {
     if (!section) return;
@@ -62,66 +41,74 @@
   };
 </script>
 
-<aside class="w-80 flex-shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden text-slate-800 dark:text-slate-200 transition-colors">
+<aside class="w-80 flex-shrink-0 bg-base-100 border-l border-base-300 flex flex-col h-full overflow-hidden text-base-content transition-colors">
   {#if !section}
     <div class="relative flex-1 flex flex-col overflow-hidden">
       <!-- Close button overlay for Global Theme Inspector -->
-      <button
+      <Button
         type="button"
+        size="xs"
+        variant="ghost"
         on:click={() => canvasStore.toggleRightSidebar()}
-        class="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200/80 border border-transparent hover:border-base-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+        class="!absolute top-2.5 right-2.5 z-20 !p-1.5 !h-7 !w-7 !min-h-0 !min-w-0 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200/80"
         title="Tutup Inspector (Ctrl+/)"
-        aria-label="Tutup Inspector"
       >
         <PanelRightClose size={15} />
-      </button>
+      </Button>
       <GlobalThemeInspector />
     </div>
   {:else}
     <!-- Section & Node Breadcrumb Header -->
-    <div class="px-4 py-3 border-b border-base-200 dark:border-slate-800 flex items-start justify-between gap-2 bg-base-100">
+    <div class="px-4 py-3 border-b border-base-200 flex items-start justify-between gap-2 bg-base-100">
       <div class="flex flex-col gap-1 min-w-0 flex-1">
-        <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+        <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs">
           <button
             type="button"
             on:click={() => editorStore.selectNode(section.id, null)}
-            class={`text-label-caps hover:text-base-content transition-colors uppercase tracking-caps cursor-pointer truncate ${
-              !$activeNodeId ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-base-content/60 hover:underline'
-            }`}
+            class="text-left font-semibold text-xs leading-snug transition-colors hover:text-primary hover:underline cursor-pointer {!$activeNodeId ? 'text-primary font-bold' : 'text-base-content/70'}"
+            title={sectionTypeLabels[section.type] || section.type}
           >
-            {section.type.replace('_', ' ')}
+            {sectionTypeLabels[section.type] || section.type.replace('_', ' ')}
           </button>
 
           {#if $activeNodeId}
-            <ChevronRight size={13} class="text-base-content/40 flex-shrink-0" />
-            <span class="text-blue-600 dark:text-blue-400 font-semibold truncate text-xs">
-              {getNodeLabel($activeNodeId)}
+            <ChevronRight size={12} class="text-base-content/40 flex-shrink-0" />
+            <span
+              class="text-primary font-bold text-xs leading-snug break-words"
+              title={getNodeLabel($activeNodeId, section?.type, (section?.layoutPreset || section?.props?.layoutPreset || 'grid_3_cards') as string)}
+            >
+              {getNodeLabel($activeNodeId, section?.type, (section?.layoutPreset || section?.props?.layoutPreset || 'grid_3_cards') as string)}
             </span>
           {/if}
-        </div>
-        <p class="text-3xs text-base-content/40 font-mono">{section.id}</p>
+        </nav>
+        <p class="text-xs text-base-content/40 font-mono">
+          {section.id}{#if $activeNodeId} &bull; {$activeNodeId}{/if}
+        </p>
       </div>
 
       <!-- Close Inspector Button -->
-      <button
+      <Button
         type="button"
+        size="xs"
+        variant="ghost"
         on:click={() => canvasStore.toggleRightSidebar()}
-        class="p-1 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200 border border-transparent hover:border-base-300 dark:hover:border-slate-700 transition-colors cursor-pointer flex-shrink-0"
+        class="!p-1 !h-7 !w-7 !min-h-0 !min-w-0 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-200 flex-shrink-0"
         title="Tutup Inspector (Ctrl+/)"
-        aria-label="Tutup Inspector"
       >
         <PanelRightClose size={15} />
-      </button>
+      </Button>
     </div>
 
     <!-- Contextual Node Inspector (when a specific sub-element is selected) -->
     {#if $activeNodeId}
       <!-- Node Level Tab Switcher -->
-      <div class="grid grid-cols-2 border-b border-base-200 dark:border-slate-800 bg-base-200/50 p-1 gap-1">
-        <button
+      <div class="grid grid-cols-2 border-b border-base-200 bg-base-200/50 p-1 gap-1">
+        <Button
           type="button"
+          size="xs"
+          variant={nodeTab === 'styles' ? 'secondary' : 'ghost'}
           on:click={() => (nodeTab = 'styles')}
-          class={`flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+          class={`!flex !items-center !justify-center !gap-1.5 !py-1.5 !h-auto !min-h-0 rounded-md text-xs font-medium transition-all ${
             nodeTab === 'styles'
               ? 'bg-base-100 text-base-content font-semibold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
@@ -129,11 +116,13 @@
         >
           <Sliders size={13} />
           <span>Styles Node</span>
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="xs"
+          variant={nodeTab === 'content' ? 'secondary' : 'ghost'}
           on:click={() => (nodeTab = 'content')}
-          class={`flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+          class={`!flex !items-center !justify-center !gap-1.5 !py-1.5 !h-auto !min-h-0 rounded-md text-xs font-medium transition-all ${
             nodeTab === 'content'
               ? 'bg-base-100 text-base-content font-semibold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
@@ -141,7 +130,7 @@
         >
           <Type size={13} />
           <span>Konten Node</span>
-        </button>
+        </Button>
       </div>
 
       <div class="flex-1 overflow-y-auto">
@@ -158,6 +147,66 @@
             <div class="p-4 space-y-4 text-xs text-base-content/80">
               <HeaderNavPanel {section} onConfigChange={handlePropChange} />
             </div>
+          {:else if section.type === 'hero'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <HeroElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+              />
+            </div>
+          {:else if section.type === 'features'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FeatureElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+              />
+            </div>
+          {:else if section.type === 'product_catalog'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <CatalogElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'testimonials'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <TestimonialsElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'faq'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FaqElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'google_maps'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <MapsElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
+          {:else if section.type === 'footer'}
+            <div class="p-4 space-y-4 text-xs text-base-content/80">
+              <FooterElementNodePanel
+                {section}
+                nodeId={$activeNodeId}
+                onPropChange={handlePropChange}
+                {onSectionUpdate}
+              />
+            </div>
           {:else}
             <NodeStylesTab {section} nodeId={$activeNodeId} onUpdate={onSectionUpdate} />
           {/if}
@@ -172,11 +221,27 @@
       </div>
     {:else}
       <!-- Standard Full Section Tab Bar -->
-      <div class="grid grid-cols-2 border-b border-base-200 dark:border-slate-800 bg-base-200/50 p-1 gap-1">
-        <button
+      <div class="grid grid-cols-3 border-b border-base-200 bg-base-200/50 p-1 gap-1">
+        <Button
           type="button"
+          size="xs"
+          variant={activeTab === 'layout' ? 'secondary' : 'ghost'}
+          on:click={() => (activeTab = 'layout')}
+          class={`!flex !items-center !justify-center !gap-1.5 !py-1.5 !h-auto !min-h-0 rounded-md text-xs font-medium transition-all ${
+            activeTab === 'layout'
+              ? 'bg-base-100 text-base-content font-semibold shadow-sm'
+              : 'text-base-content/60 hover:text-base-content'
+          }`}
+        >
+          <LayoutGrid size={13} />
+          <span>Tata Letak</span>
+        </Button>
+        <Button
+          type="button"
+          size="xs"
+          variant={activeTab === 'content' ? 'secondary' : 'ghost'}
           on:click={() => (activeTab = 'content')}
-          class={`flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+          class={`!flex !items-center !justify-center !gap-1.5 !py-1.5 !h-auto !min-h-0 rounded-md text-xs font-medium transition-all ${
             activeTab === 'content'
               ? 'bg-base-100 text-base-content font-semibold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
@@ -184,11 +249,13 @@
         >
           <Type size={13} />
           <span>Content</span>
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="xs"
+          variant={activeTab === 'styles' ? 'secondary' : 'ghost'}
           on:click={() => (activeTab = 'styles')}
-          class={`flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+          class={`!flex !items-center !justify-center !gap-1.5 !py-1.5 !h-auto !min-h-0 rounded-md text-xs font-medium transition-all ${
             activeTab === 'styles'
               ? 'bg-base-100 text-base-content font-semibold shadow-sm'
               : 'text-base-content/60 hover:text-base-content'
@@ -196,12 +263,14 @@
         >
           <Sliders size={13} />
           <span>Styles</span>
-        </button>
+        </Button>
       </div>
 
       <!-- Tab Content -->
       <div class="flex-1 overflow-y-auto">
-        {#if activeTab === 'content'}
+        {#if activeTab === 'layout'}
+          <LayoutTab {section} />
+        {:else if activeTab === 'content'}
           <ContentTab {section} onUpdate={onSectionUpdate} />
         {:else}
           <StylesTab {section} onUpdate={onSectionUpdate} />

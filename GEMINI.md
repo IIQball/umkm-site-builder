@@ -11,8 +11,8 @@ umkm-site-builder/
 │   │   ├── 10-process.md                       # [77 baris] SOP & workflow proses pengembangan fitur
 │   │   ├── 15-file-size-limits.md              # [20 baris] Batas maksimal 300 baris per file & modularisasi
 │   │   ├── 20-code-standards.md                # [91 baris] Standar penulisan clean code & konvensi penamaan
-│   │   ├── 30-ui-ux.md                         # [147 baris] Panduan standar desain UI/UX & aksesibilitas
-│   │   ├── 31-component-patterns.md            # [51 baris] Pola arsitektur komponen Svelte & Astro
+│   │   ├── 30-ui-ux.md                         # [181 baris] Panduan standar desain UI/UX & aksesibilitas
+│   │   ├── 31-component-patterns.md            # [151 baris] Pola arsitektur komponen Svelte & Astro
 │   │   ├── 40-security.md                      # [98 baris] Protokol keamanan web, otentikasi, & proteksi role
 │   │   ├── 50-design-system-rules.md           # [11 baris] Aturan konsistensi token Design System global
 │   │   ├── 50-qa-testing.md                    # [110 baris] Standar penulisan test suite unit & integrasi Vitest
@@ -124,7 +124,8 @@ umkm-site-builder/
 │   │   │   │   │   ├── FeaturesComparisonContent.svelte # [144 baris] Form inspector komparasi keunggulan fitur
 │   │   │   │   │   └── FeaturesRepeaterContent.svelte # [173 baris] Form repeater item keunggulan fitur
 │   │   │   │   ├── content.helpers.ts          # [51 baris] Helper pengisian konten section builder
-│   │   │   │   ├── FaqContent.svelte           # [91 baris] Form inspector konten FAQ section
+│   │   │   │   ├── FaqContent.svelte           # [162 baris] Form inspector konten FAQ section
+│   │   │   │   ├── FaqItemCard.svelte          # [108 baris] Kartu editor butir pertanyaan FAQ modular
 │   │   │   │   ├── FeaturesContent.svelte      # [68 baris] Form inspector konten features section
 │   │   │   │   ├── FooterContent.svelte        # [78 baris] Form inspector konten footer section
 │   │   │   │   ├── GoogleMapsContent.svelte    # [82 baris] Form inspector konten Google Maps section
@@ -133,19 +134,23 @@ umkm-site-builder/
 │   │   │   │   ├── ProductCatalogContent.svelte # [151 baris] Form inspector data produk katalog
 │   │   │   │   └── TestimonialsContent.svelte  # [104 baris] Form inspector isi ulasan/testimonial
 │   │   │   ├── inspector/ # Panel properti kustomisasi node & tema
+│   │   │   │   ├── faq/ # Sub-panel konfigurasi elemen FAQ
+│   │   │   │   │   └── FaqElementNodePanel.svelte # [186 baris] Panel kustomisasi gaya elemen FAQ & gating margin kartu
 │   │   │   │   ├── header/ # Sub-panel konfigurasi elemen header
 │   │   │   │   │   ├── HeaderAnnouncementPanel.svelte # [91 baris] Panel teks pengumuman header
 │   │   │   │   │   ├── HeaderLogoPanel.svelte  # [99 baris] Panel upload/URL logo toko
 │   │   │   │   │   └── HeaderNavPanel.svelte   # [137 baris] Panel menu navigasi menu header
+│   │   │   │   ├── testimonials/ # Sub-panel konfigurasi elemen ulasan testimoni
+│   │   │   │   │   └── TestimonialsElementNodePanel.svelte # [265 baris] Panel kustomisasi gaya elemen ulasan & gating margin kartu
 │   │   │   │   ├── node-forms/ # Form input mikro spesifik sub-node
 │   │   │   │   │   ├── AnnouncementNodeForm.svelte # [73 baris] Form spesifik node pengumuman
 │   │   │   │   │   ├── CatalogNodeForms.svelte # [⚠️ mepet 300 baris - 289 baris] Form spesifik node katalog produk
-│   │   │   │   │   ├── FaqNodeForms.svelte     # [138 baris] Form spesifik node tanya jawab FAQ
+│   │   │   │   │   ├── FaqNodeForms.svelte     # [187 baris] Form spesifik node tanya jawab FAQ
 │   │   │   │   │   ├── FeatureHeadingNodeForm.svelte # [83 baris] Form spesifik heading section fitur
 │   │   │   │   │   ├── FeatureImageNodeForm.svelte # [127 baris] Form upload gambar kartu fitur
 │   │   │   │   │   ├── FeatureItemNodeForm.svelte # [⚠️ mepet 300 baris - 250 baris] Form konfigurasi item benefit fitur
 │   │   │   │   │   ├── FooterNodeForms.svelte  # [237 baris] Form spesifik kustomisasi elemen sub-node footer
-│   │   │   │   │   ├── HeroElementNodeForms.svelte # [217 baris] Form elemen visual/teks hero
+│   │   │   │   │   ├── HeroNodeForms.svelte    # [254 baris] Form spesifik elemen visual/teks/CTA hero
 │   │   │   │   │   ├── HeroExtraNodeForms.svelte # [93 baris] Form elemen pendukung hero
 │   │   │   │   │   ├── HeroImageNodeForm.svelte # [121 baris] Form konfigurasi node gambar hero
 │   │   │   │   │   ├── LogoNodeForm.svelte     # [139 baris] Form logo toko pada header
@@ -160,8 +165,6 @@ umkm-site-builder/
 │   │   │   │   ├── CatalogCardPanel.svelte     # [107 baris] Panel pengubah style kartu produk
 │   │   │   │   ├── CatalogCtaPanel.svelte      # [169 baris] Panel styling tombol CTA katalog
 │   │   │   │   ├── CatalogGridPanel.svelte     # [101 baris] Panel layout grid katalog produk
-│   │   │   │   ├── catalogStyles.helpers.ts    # [42 baris] Fungsi helper styling css katalog
-│   │   │   │   ├── CatalogStylesTab.svelte     # [22 baris] Tab pengeditan gaya katalog produk
 │   │   │   │   ├── GeneralStylesTab.svelte     # [36 baris] Tab layout jarak & padding section
 │   │   │   │   ├── GlobalThemeInspector.svelte # [147 baris] Panel warna dasar tema template builder
 │   │   │   │   ├── HeaderStylesTab.svelte      # [23 baris] Tab konfigurasi gaya navigasi header
@@ -187,7 +190,6 @@ umkm-site-builder/
 │   │   │   ├── SectionPresetSelector.svelte # [87 baris] Panel ringkasan & trigger modal galeri layout
 │   │   │   ├── SectionSlotReorder.svelte   # [73 baris] Panel drag-and-drop slots section
 │   │   │   ├── SectionSpacingControls.svelte # [150 baris] Kontrol padding & margin interaktif
-│   │   │   └── StyleSelector.svelte        # [85 baris] Dropdown pemilih varian style visual
 │   │   │   ├── layer/ # Komponen pohon layer section & sub-node
 │   │   │   │   ├── AddNodeDropdown.svelte      # [45 baris] Tombol nambah block section baru
 │   │   │   │   ├── layerPanel.helpers.ts       # [⚠️ mepet 300 baris - 291 baris] Helper manipulasi susunan layer adaptif
@@ -201,12 +203,11 @@ umkm-site-builder/
 │   │   │   │   │   ├── CatalogAccordion.svelte # [73 baris] Layout katalog akordeon minimalis
 │   │   │   │   │   ├── CatalogBentoSpotlight.svelte # [178 baris] Layout bento spotlight katalog
 │   │   │   │   │   ├── CatalogBundleTiers.svelte # [129 baris] Layout paket bundling produk bertingkat
-│   │   │   │   │   ├── CatalogCarouselMasonry.svelte # [88 baris] Layout masonry & lookbook katalog
 │   │   │   │   │   ├── CatalogCarouselScroll.svelte # [140 baris] Layout slider carousel produk horizontal
 │   │   │   │   │   ├── CatalogCheckoutModal.svelte # [246 baris] Modal checkout cepat katalog
 │   │   │   │   │   ├── CatalogFlashSale.svelte # [147 baris] Layout promo flash sale countdown
 │   │   │   │   │   ├── CatalogGridStandard.svelte # [207 baris] Layout grid katalog standar
-│   │   │   │   │   ├── CatalogHeader.svelte    # [57 baris] Header judul & deskripsi katalog produk
+│   │   │   │   │   ├── CatalogHeader.svelte    # [115 baris] Header judul, badge, & deskripsi katalog produk
 │   │   │   │   │   ├── CatalogListCompact.svelte # [102 baris] Layout list compact horizontal
 │   │   │   │   │   ├── CatalogLookbook.svelte  # [87 baris] Layout lookbook galeri visual majalah
 │   │   │   │   │   ├── CatalogMasonry.svelte   # [110 baris] Layout masonry katalog 3 kolom
@@ -215,23 +216,23 @@ umkm-site-builder/
 │   │   │   │   │   ├── CatalogSingleFocus.svelte # [143 baris] Layout fokus tunggal produk unggulan
 │   │   │   │   │   ├── CatalogSpecialCards.svelte # [168 baris] Layout kartu spesial katalog
 │   │   │   │   │   ├── ProductCatalogCard.svelte # [213 baris] Komponen visual kartu katalog produk
-│   │   │   │   │   ├── ProductCatalogQuickView.svelte # [156 baris] Detail popup cepat ulasan produk
 │   │   │   │   │   └── ProductQuickCheckoutModal.svelte # [⚠️ >300 baris - 313 baris] Modal checkout instan WhatsApp langsung dari katalog
 │   │   │   │   ├── faq/ # Preset layout FAQ tanya jawab (10 preset)
 │   │   │   │   │   ├── faq.css                 # [62 baris] Container queries `@container faqcard`
-│   │   │   │   │   ├── faq.helpers.ts          # [79 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── faq.helpers.ts          # [74 baris] Helper WhatsApp deep-link & default FAQs
+│   │   │   │   │   ├── faqLayout.helpers.ts    # [139 baris] SSOT sinkronisasi slot, label elemen per ulasan, dan elementOrder FAQ
+│   │   │   │   │   ├── faqStyles.helpers.ts    # [88 baris] Helper cascading styles node & aturan gating margin kartu FAQ
 │   │   │   │   │   ├── FaqAccordionSingle.svelte # [68 baris] Preset FAQ akordeon 1 kolom terpusat
 │   │   │   │   │   ├── FaqAccordionTwoCol.svelte # [128 baris] Preset FAQ akordeon 2 kolom simetris
-│   │   │   │   │   ├── FaqBoxedCardsGrid.svelte # [35 baris] Preset FAQ kotak kartu grid
-│   │   │   │   │   ├── FaqCategorizedTabs.svelte # [114 baris] Preset FAQ dengan tab kategori
-│   │   │   │   │   ├── FaqChatStyle.svelte     # [58 baris] Preset FAQ gaya balon obrolan
-│   │   │   │   │   ├── FaqGridCards.svelte     # [56 baris] Preset FAQ grid 2 kolom kartu terbuka
-│   │   │   │   │   ├── FaqHeader.svelte        # [66 baris] Header judul H2 FAQ & sub-node selection
-│   │   │   │   │   ├── FaqHelpCenter.svelte    # [57 baris] Preset FAQ gaya Help Center floating cards
-│   │   │   │   │   ├── FaqHorizontalCards.svelte # [53 baris] Preset FAQ kartu horizontal slider
-│   │   │   │   │   ├── FaqNumberedList.svelte  # [50 baris] Preset FAQ daftar bernomor 01, 02, 03
-│   │   │   │   │   ├── FaqSearchFiltered.svelte # [110 baris] Preset FAQ dengan filter pencarian real-time
-│   │   │   │   │   └── FaqSplitSidebar.svelte  # [140 baris] Preset FAQ layout split sidebar CS WhatsApp
+│   │   │   │   │   ├── FaqCategorizedTabs.svelte # [124 baris] Preset FAQ dengan tab kategori
+│   │   │   │   │   ├── FaqChatStyle.svelte     # [68 baris] Preset FAQ gaya balon obrolan
+│   │   │   │   │   ├── FaqGridCards.svelte     # [59 baris] Preset FAQ grid 2 kolom kartu terbuka
+│   │   │   │   │   ├── FaqHeader.svelte        # [124 baris] Header judul H2 FAQ & sub-node selection
+│   │   │   │   │   ├── FaqHelpCenter.svelte    # [61 baris] Preset FAQ gaya Help Center floating cards
+│   │   │   │   │   ├── FaqHorizontalCards.svelte # [57 baris] Preset FAQ kartu horizontal slider
+│   │   │   │   │   ├── FaqNumberedList.svelte  # [54 baris] Preset FAQ daftar bernomor 01, 02, 03
+│   │   │   │   │   ├── FaqSearchFiltered.svelte # [119 baris] Preset FAQ dengan filter pencarian real-time
+│   │   │   │   │   └── FaqSplitSidebar.svelte  # [185 baris] Preset FAQ layout split sidebar CS WhatsApp
 │   │   │   │   ├── features/ # Preset layout keunggulan fitur (10 preset)
 │   │   │   │   │   ├── featureIcons.ts         # [164 baris] Helper pemetaan icon Lucide fitur
 │   │   │   │   │   ├── features.css            # [188 baris] Container queries `@container featurecard`
@@ -261,7 +262,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── FooterNewsletter.svelte # [59 baris] Preset footer langganan newsletter
 │   │   │   │   │   ├── FooterNewsletterCentric.svelte # [91 baris] Preset footer form newsletter promo
 │   │   │   │   │   ├── FooterSocialLinksGrid.svelte # [192 baris] Preset footer showcase tautan akun media sosial
-│   │   │   │   │   ├── FooterSocialShowcase.svelte # [40 baris] Preset footer showcase media sosial
 │   │   │   │   │   ├── FooterSplitMap.svelte   # [85 baris] Preset footer info toko & peta mini
 │   │   │   │   │   └── index.ts                # [12 baris] Registri sentral modularisasi modul section builder
 │   │   │   │   ├── header/ # Preset layout header & announcement (12 preset)
@@ -285,7 +285,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── HeroDualContrast.svelte # [52 baris] Preset hero duo-tone kontras kuota & pendaftaran
 │   │   │   │   │   ├── HeroDualProduct.svelte  # [79 baris] Preset hero showcase 2 kartu produk terlaris
 │   │   │   │   │   ├── HeroEditorialSerif.svelte # [77 baris] Preset hero editorial mewah tipografi serif
-│   │   │   │   │   ├── HeroElementToolbar.svelte # [102 baris] Floating toolbar elemen teks/gambar hero
 │   │   │   │   │   ├── HeroEmailCapture.svelte # [59 baris] Preset hero penangkap email prospek
 │   │   │   │   │   ├── HeroFloatingCards.svelte # [53 baris] Preset hero kartu mengambang 3D
 │   │   │   │   │   ├── HeroFounderStory.svelte # [63 baris] Preset hero kisah profil pendiri & artisan
@@ -305,7 +304,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── maps.helpers.ts         # [69 baris] Helper sanitasi URL embed & navigasi Google Maps
 │   │   │   │   │   ├── MapsCardOverlay.svelte  # [93 baris] Preset maps bilah penutup bawah melayang
 │   │   │   │   │   ├── MapsCompactBoxed.svelte # [93 baris] Preset maps kotak kompak terpusat
-│   │   │   │   │   ├── MapsDirectionsGuide.svelte # [65 baris] Preset maps panduan rute & navigasi
 │   │   │   │   │   ├── MapsFloatingCard.svelte # [102 baris] Preset maps kartu alamat pojok kanan atas
 │   │   │   │   │   ├── MapsFullwidth.svelte    # [100 baris] Preset maps peta penuh kartu glassmorphism melayang
 │   │   │   │   │   ├── MapsHeader.svelte       # [64 baris] Header judul H2 maps & sub-node selection
@@ -318,9 +316,11 @@ umkm-site-builder/
 │   │   │   │   ├── testimonials/ # Preset layout testimoni ulasan (10 preset)
 │   │   │   │   │   ├── testimonials.css        # [94 baris] Container queries `@container testicard` & marquee keyframes
 │   │   │   │   │   ├── testimonials.helpers.ts # [110 baris] Helper kalkulasi rating rata-rata & mock data
+│   │   │   │   │   ├── testimonialStyles.helpers.ts # [28 baris] Helper resolusi style CSS ulasan dari nodeStyles
+│   │   │   │   │   ├── testimonialsLayout.helpers.ts # [135 baris] Helper SSOT tata letak & urutan slot elemen ulasan
 │   │   │   │   │   ├── TestimonialsCarouselSlider.svelte # [83 baris] Preset testimoni slider carousel panah
 │   │   │   │   │   ├── TestimonialsChatBubble.svelte # [54 baris] Preset testimoni bubble chat WhatsApp
-│   │   │   │   │   ├── TestimonialsHeader.svelte # [57 baris] Header judul H2 testimoni & sub-node selection
+│   │   │   │   │   ├── TestimonialsHeader.svelte # [125 baris] Header judul, badge, & deskripsi ulasan testimoni
 │   │   │   │   │   ├── TestimonialsLogoCloud.svelte # [45 baris] Preset testimoni logo client cloud
 │   │   │   │   │   ├── TestimonialsMarquee.svelte # [54 baris] Preset testimoni running text horizontal 25s
 │   │   │   │   │   ├── TestimonialsMasonryGrid.svelte # [81 baris] Preset testimoni masonry grid 3 kolom
@@ -328,7 +328,6 @@ umkm-site-builder/
 │   │   │   │   │   ├── TestimonialsSocialCards.svelte # [91 baris] Preset testimoni kartu postingan media sosial
 │   │   │   │   │   ├── TestimonialsSplitStats.svelte # [113 baris] Preset testimoni split rating stats 4.9/5
 │   │   │   │   │   ├── TestimonialsSpotlight.svelte # [83 baris] Preset testimoni kutipan tunggal spotlight
-│   │   │   │   │   ├── TestimonialsSpotlightCarousel.svelte # [93 baris] Preset testimoni spotlight & slider
 │   │   │   │   │   └── TestimonialsVideoCards.svelte # [78 baris] Preset testimoni kartu video ulasan vertikal
 │   │   │   │   ├── FAQ.svelte                  # [85 baris] Komponen visual Frequently Asked Questions
 │   │   │   │   ├── Features.svelte             # [178 baris] Komponen visual daftar keunggulan/layanan
@@ -374,8 +373,7 @@ umkm-site-builder/
 │   │   ├── common/ # Komponen navigasi & shell layout umum
 │   │   │   ├── GlobalZoomControl.svelte        # [89 baris] Kontrol interaktif floating pill zoom-in & zoom-out (25%-200%)
 │   │   │   ├── Navbar.astro                    # [23 baris] Navigasi utama header base layout
-│   │   │   ├── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
-│   │   │   └── ThemeToggle.astro               # [37 baris] Tombol pengubah dark mode / light mode
+│   │   │   └── PublicNavbar.svelte             # [⚠️ >300 baris - 424 baris] Navbar publik interaktif
 │   │   ├── dashboard/ # Komponen dashboard manajemen tenant
 │   │   │   ├── category/ # Pengelola master kategori template
 │   │   │   │   ├── TenantCategoryDeleteModal.svelte # [41 baris] Modal konfirmasi hapus kategori tenant
@@ -387,8 +385,7 @@ umkm-site-builder/
 │   │   │   ├── sidebar/ # Komponen navigasi samping dashboard tenant
 │   │   │   │   ├── sidebar.helpers.ts          # [170 baris] Helper navigasi sidebar dashboard
 │   │   │   │   ├── SidebarDesktop.svelte       # [195 baris] Sidebar dashboard versi layar desktop
-│   │   │   │   ├── SidebarMobile.svelte        # [178 baris] Drawer sidebar dashboard versi mobile
-│   │   │   │   └── SidebarUserProfile.svelte   # [89 baris] Mini profil & badge status tenant
+│   │   │   │   └── SidebarMobile.svelte        # [178 baris] Drawer sidebar dashboard versi mobile
 │   │   │   ├── CategoryManager.svelte          # [⚠️ mepet 300 baris - 258 baris] Pengelola CRUD kategori produk tenant
 │   │   │   ├── ConfirmTemplateModal.svelte     # [82 baris] Modal konfirmasi penerapan template toko
 │   │   │   ├── DashboardNavbar.svelte          # [176 baris] Navigasi panel dashboard tenant & profil aksi
@@ -433,15 +430,13 @@ umkm-site-builder/
 │   │   │   │   └── MarketplaceFilterBar.svelte # [124 baris] Toolbar filter kategori & harga
 │   │   │   ├── marketplace.types.ts            # [23 baris] Tipe data catalog template marketplace
 │   │   │   ├── PublicTemplateMarketplace.svelte # [199 baris] Pasar katalog template interaktif
-│   │   │   ├── StoreDirectory.svelte           # [⚠️ mepet 300 baris - 250 baris] Direktori daftar pencarian toko UMKM publik
-│   │   │   └── TemplateCardAction.svelte       # [100 baris] Kartu katalog template dengan tombol beli & demo
+│   │   │   └── StoreDirectory.svelte           # [⚠️ mepet 300 baris - 250 baris] Direktori daftar pencarian toko UMKM publik
 │   │   ├── shared/ # Komponen bersama lintas peran pengguna
 │   │   │   └── ImageUpload.svelte              # [⚠️ >300 baris - 312 baris] Pengunggah gambar terintegrasi Cloudinary API
 │   │   ├── storefront/ # Komponen rendering toko storefront tenant
 │   │   │   ├── DynamicSection.svelte           # [41 baris] Komponen rendering section dinamis storefront
 │   │   │   ├── Footer.svelte                   # [10 baris] Footer publik website toko tenant
 │   │   │   ├── Hero.svelte                     # [18 baris] Banner hero publik website toko tenant
-│   │   │   ├── ProductGrid.svelte              # [⚠️ mepet 300 baris - 295 baris] Grid daftar produk di storefront
 │   │   │   ├── PromoBanner.svelte              # [11 baris] Banner promosi publik website toko tenant
 │   │   │   └── StoreStatusBanner.svelte        # [30 baris] Banner status operasional toko storefront tenant
 │   │   ├── tenant/ # Komponen manajemen operasional tenant

@@ -1,10 +1,16 @@
 import { db } from '@/lib/db/client';
-import { templates, designers, users } from '@/db/schema';
-import { eq, isNull, desc, and } from 'drizzle-orm';
+import { templates, designers, users, notifications } from '@/db/schema';
+import { eq, ne, isNull, desc, and } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
 
 export async function getTemplatesForAdmin(statusFilter?: string | null) {
-  let conditions = isNull(templates.deletedAt);
+  // Hanya data yang statusnya pending, approved, dan rejected yang masuk kurasi admin.
+  // Draft hanya milik desainer dan tidak boleh tampil di antrean kurasi admin.
+  let conditions = and(
+    isNull(templates.deletedAt),
+    ne(templates.status, 'draft')
+  )!;
+
   if (statusFilter && ['pending', 'approved', 'rejected'].includes(statusFilter)) {
     conditions = and(conditions, eq(templates.status, statusFilter as 'pending' | 'approved' | 'rejected'))!;
   }
@@ -18,7 +24,10 @@ export async function getTemplatesForAdmin(statusFilter?: string | null) {
       price: templates.price,
       status: templates.status,
       rejectionReason: templates.rejectionReason,
+      revisionCount: templates.revisionCount,
+      revisionNotes: templates.revisionNotes,
       createdAt: templates.createdAt,
+      updatedAt: templates.updatedAt,
       designerId: templates.designerId,
       designerName: users.name,
       designerEmail: users.email,
@@ -69,6 +78,19 @@ export async function reviewTemplate(
     .set(updatePayload)
     .where(eq(templates.id, templateId))
     .returning();
+
+  const notificationMessage = action === 'approve' 
+    ? `Template "${existingTemplate.name}" telah disetujui dan sekarang tersedia di katalog publik.` 
+    : `Template "${existingTemplate.name}" ditolak. Alasan: ${rejectionReason || 'Tidak memenuhi standar'}`;
+
+  await db.insert(notifications).values({
+    id: `notif_${crypto.randomUUID()}`,
+    userId: existingTemplate.designerId,
+    type: 'template_reviewed',
+    title: `Review Template: ${action === 'approve' ? 'Disetujui' : 'Ditolak'}`,
+    message: notificationMessage,
+    metadata: { templateId: existingTemplate.id, action }
+  });
 
   return updatedData;
 }

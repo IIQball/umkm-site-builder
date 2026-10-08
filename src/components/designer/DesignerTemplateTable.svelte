@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { Card, Table, Pagination, Button } from '@/components/ui';
+  import { Card, Table, Pagination } from '@/components/ui';
   import DesignerTemplateCard from './DesignerTemplateCard.svelte';
   import DesignerTemplateRow from './templates/DesignerTemplateRow.svelte';
   import DesignerRejectionModal from './templates/DesignerRejectionModal.svelte';
   import DesignerDeleteDraftModal from './templates/DesignerDeleteDraftModal.svelte';
   import { addToast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
-
   export let templates: Array<{
     id: string;
     name: string;
@@ -17,13 +16,18 @@
     rejectionReason: string | null;
     createdAt: Date | string;
     totalSold: number;
+    categoryId?: string | null;
+    revisionCount?: number;
+    revisionNotes?: string | null;
   }> = [];
+  export let categories: Array<{ id: string; name: string; slug: string }> = [];
 
   let searchQuery = '';
   let activeFilter: 'all' | 'draft' | 'pending' | 'approved' | 'rejected' = 'all';
+  let selectedCategory: string = 'all';
   // Default tampilan card/grid sesuai permintaan user
   let viewMode: 'table' | 'grid' = 'grid';
-  let selectedRejection: { name: string; reason: string } | null = null;
+  let selectedRejection: { id: string; name: string; reason: string; revisionCount: number } | null = null;
   let copiedId: string | null = null;
   let currentPage = 1;
   const pageSize = 10;
@@ -48,6 +52,16 @@
     }
   };
 
+  let prevQuery = '';
+  let prevFilter = '';
+  let prevCat = '';
+  $: if (searchQuery !== prevQuery || activeFilter !== prevFilter || selectedCategory !== prevCat) {
+    prevQuery = searchQuery;
+    prevFilter = activeFilter;
+    prevCat = selectedCategory;
+    currentPage = 1;
+  }
+
   $: counts = {
     all: templates.length,
     draft: templates.filter(t => t.status === 'draft').length,
@@ -58,19 +72,21 @@
 
   $: filteredTemplates = templates.filter(t => {
     const matchesFilter = activeFilter === 'all' || t.status === activeFilter;
+    const matchesCategory = selectedCategory === 'all' || t.categoryId === selectedCategory;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q ||
       t.name.toLowerCase().includes(q) ||
       (t.description && t.description.toLowerCase().includes(q)) ||
       t.id.toLowerCase().includes(q);
-    return matchesFilter && matchesSearch;
+    return matchesFilter && matchesCategory && matchesSearch;
   });
 
-  $: {
-    searchQuery;
-    activeFilter;
-    currentPage = 1;
-  }
+  $: totalPages = Math.max(1, Math.ceil(filteredTemplates.length / pageSize));
+  $: if (currentPage > totalPages) currentPage = totalPages;
+
+  $: activePage = currentPage;
+  $: activePageSize = pageSize;
+  $: activeTotalItems = filteredTemplates.length;
 
   $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -90,7 +106,7 @@
   const toggleSelectAllVisibleDrafts = () => {
     if (allVisibleDraftsSelected) {
       const visibleIds = new Set(visibleDraftTemplates.map(t => t.id));
-      selectedDraftIds = selectedDraftIds.filter(id => !visibleIds.has(id));
+      selectedDraftIds = selectedDraftIds.filter((id: string) => !visibleIds.has(id));
     } else {
       const newIds = new Set([...selectedDraftIds, ...visibleDraftTemplates.map(t => t.id)]);
       selectedDraftIds = Array.from(newIds);
@@ -119,7 +135,7 @@
     if (targetsToDelete.length === 0) return;
     try {
       isDeletingDraft = true;
-      const ids = targetsToDelete.map(t => t.id);
+      const ids: string[] = targetsToDelete.map((t: { id: string }) => t.id);
 
       const res = await fetch('/api/designer/templates/draft', {
         method: 'DELETE',
@@ -131,27 +147,18 @@
       if (res.ok) {
         const deletedSet = new Set(ids);
         templates = templates.filter(t => !deletedSet.has(t.id));
-        selectedDraftIds = selectedDraftIds.filter(id => !deletedSet.has(id));
+        selectedDraftIds = selectedDraftIds.filter((id: string) => !deletedSet.has(id));
         deleteModalOpen = false;
         targetsToDelete = [];
-
         addToast({
           type: 'success',
-          message: ids.length > 1
-            ? `${ids.length} draf template berhasil dihapus permanen!`
-            : 'Draf template berhasil dihapus permanen!',
+          message: ids.length > 1 ? `${ids.length} draf template berhasil dihapus permanen!` : 'Draf template berhasil dihapus permanen!',
         });
       } else {
-        addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal menghapus draf template',
-        });
+        addToast({ type: 'error', message: result.error?.message || 'Gagal menghapus draf template' });
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Terjadi kesalahan koneksi saat menghapus draf',
-      });
+      addToast({ type: 'error', message: 'Terjadi kesalahan koneksi saat menghapus draf' });
     } finally {
       isDeletingDraft = false;
     }
@@ -170,6 +177,7 @@
 
   $: tableHeaders = [
     { label: '', align: 'center' as const, width: 'w-10' },
+    { label: '#', align: 'center' as const, width: 'w-10' },
     { label: 'Template Desain', align: 'left' as const },
     { label: 'Harga Jual', align: 'left' as const, width: 'w-32' },
     { label: 'Penjualan', align: 'left' as const, width: 'w-28' },
@@ -177,151 +185,24 @@
     { label: 'Tanggal Dibuat', align: 'left' as const, width: 'w-36' },
     { label: 'Aksi', align: 'right' as const, width: 'w-44' },
   ];
+  import DesignerTemplateTableToolbar from './templates/DesignerTemplateTableToolbar.svelte';
 </script>
 
 <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
-  <!-- Table Header & Controls -->
-  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <span class="material-symbols-outlined text-lg">dashboard</span>
-      </div>
-      <div>
-        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
-          Katalog Desain Saya
-        </h3>
-        <p class="text-body-sm text-secondary mt-0.5 font-sans">
-          Daftar seluruh template, status kurasi admin, dan statistik penjualan
-        </p>
-      </div>
-    </div>
-
-    <!-- Actions & Filter Pills -->
-    <div class="flex flex-wrap items-center gap-2.5">
-      <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="Cari template / ID..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-44 sm:w-52"
-        />
-      </div>
-
-      <!-- Segmented Status Filter -->
-      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
-        <button
-          type="button"
-          on:click={() => (activeFilter = 'all')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeFilter === 'all'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
-        >
-          Semua ({counts.all})
-        </button>
-        <button
-          type="button"
-          on:click={() => (activeFilter = 'approved')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'approved'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          Aktif ({counts.approved})
-        </button>
-        <button
-          type="button"
-          on:click={() => (activeFilter = 'pending')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'pending'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
-          Review ({counts.pending})
-        </button>
-        <button
-          type="button"
-          on:click={() => (activeFilter = 'draft')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'draft'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-          Draft ({counts.draft})
-        </button>
-      </div>
-
-      <!-- Batch Draft Selection Button (if drafts exist) -->
-      {#if counts.draft > 0}
-        <button
-          type="button"
-          on:click={toggleSelectAllVisibleDrafts}
-          class={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-            allVisibleDraftsSelected
-              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-              : hasDraftSelection
-              ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
-              : 'bg-nested/80 border-light text-secondary hover:text-main'
-          }`}
-          title="Pilih draf template di halaman ini"
-        >
-          <span class="material-symbols-outlined text-sm">
-            {allVisibleDraftsSelected ? 'check_box' : hasDraftSelection ? 'indeterminate_check_box' : 'checklist'}
-          </span>
-          <span class="hidden sm:inline">{allVisibleDraftsSelected ? 'Lepas Pilihan' : hasDraftSelection ? `${selectedDraftIds.length} Dipilih` : 'Pilih Draf'}</span>
-        </button>
-      {/if}
-
-      <!-- Toggle Table / Grid -->
-      <div class="flex items-center p-1 bg-nested/80 border border-light rounded-full shadow-2xs">
-        <button
-          type="button"
-          on:click={() => (viewMode = 'grid')}
-          class="p-1 rounded-full text-xs transition-all {viewMode === 'grid' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
-          title="Tampilan Card"
-        >
-          <span class="material-symbols-outlined text-sm block">grid_view</span>
-        </button>
-        <button
-          type="button"
-          on:click={() => (viewMode = 'table')}
-          class="p-1 rounded-full text-xs transition-all {viewMode === 'table' ? 'bg-card text-main shadow-2xs' : 'text-muted hover:text-main'}"
-          title="Tampilan Tabel"
-        >
-          <span class="material-symbols-outlined text-sm block">table_rows</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Batch Action Bar (Displayed when 1 or more drafts are selected) -->
-  {#if hasDraftSelection}
-    <div class="px-5 sm:px-6 py-3 bg-blue-50/80 dark:bg-blue-950/50 border-b border-blue-200/80 dark:border-blue-900/60 flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-150">
-      <div class="flex items-center gap-2.5 text-xs font-bold text-blue-900 dark:text-blue-200">
-        <span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
-        <span>{selectedDraftIds.length} draf template dipilih</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <Button
-          variant="secondary"
-          size="xs"
-          className="rounded-xl font-bold"
-          on:click={clearDraftSelection}
-        >
-          Batalkan Pilihan
-        </Button>
-        <Button
-          variant="destructive"
-          size="xs"
-          className="rounded-xl font-bold flex items-center gap-1.5 shadow-sm"
-          on:click={openDeleteModalForBatch}
-        >
-          <span class="material-symbols-outlined text-xs">delete_forever</span>
-          <span>Hapus Terpilih ({selectedDraftIds.length})</span>
-        </Button>
-      </div>
-    </div>
-  {/if}
+  <DesignerTemplateTableToolbar
+    bind:searchQuery
+    bind:activeFilter
+    bind:selectedCategory
+    bind:viewMode
+    {categories}
+    {counts}
+    {selectedDraftIds}
+    {allVisibleDraftsSelected}
+    {hasDraftSelection}
+    onToggleSelectAllVisibleDrafts={toggleSelectAllVisibleDrafts}
+    onClearDraftSelection={clearDraftSelection}
+    onOpenDeleteBatchModal={openDeleteModalForBatch}
+  />
 
   <!-- Content -->
   {#if filteredTemplates.length === 0}
@@ -345,9 +226,10 @@
     </div>
   {:else if viewMode === 'table'}
     <Table headers={tableHeaders} minWidth="min-w-[840px]">
-      {#each paginatedTemplates as tpl (tpl.id)}
+      {#each paginatedTemplates as tpl, idx (tpl.id)}
         {@const badge = getStatusBadge(tpl.status)}
         <DesignerTemplateRow
+          rowNumber={(activePage - 1) * activePageSize + idx + 1}
           {tpl}
           {copiedId}
           {badge}
@@ -356,29 +238,31 @@
           onToggleSelect={toggleDraftSelect}
           onDeleteDraft={openDeleteModalForSingle}
           onCopyId={copyToClipboard}
-          onShowRejection={(t) => selectedRejection = { name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.' }}
+          onShowRejection={(t) => selectedRejection = { id: t.id, name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.', revisionCount: t.revisionCount || 0 }}
         />
       {/each}
     </Table>
   {:else}
     <!-- Grid / Card Mode (Default View) -->
     <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {#each paginatedTemplates as tpl (tpl.id)}
+      {#each paginatedTemplates as tpl, idx (tpl.id)}
         <DesignerTemplateCard
+          rowNumber={(activePage - 1) * activePageSize + idx + 1}
           template={tpl}
           isSelected={selectedDraftIds.includes(tpl.id)}
           onToggleSelect={toggleDraftSelect}
           onDeleteDraft={openDeleteModalForSingle}
+          onShowRejection={(t) => selectedRejection = { id: t.id, name: t.name, reason: t.rejectionReason || 'Tidak ada alasan terperinci.', revisionCount: t.revisionCount || 0 }}
         />
       {/each}
     </div>
   {/if}
 
-  {#if filteredTemplates.length > 0}
+  {#if activeTotalItems > 0}
     <Pagination
-      bind:currentPage
-      totalItems={filteredTemplates.length}
-      {pageSize}
+      bind:currentPage={currentPage}
+      totalItems={activeTotalItems}
+      pageSize={activePageSize}
     />
   {/if}
 </Card>

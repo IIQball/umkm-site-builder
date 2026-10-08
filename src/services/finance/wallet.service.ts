@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { wallets, walletMutations } from '@/db/schema';
+import { wallets, walletMutations, payoutRequests } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
 import type { WalletOperationParams, WalletSummary } from '@/types';
@@ -159,10 +159,17 @@ export async function debitWallet({
  */
 export async function getDesignerWalletSummary(
   designerId: string,
-  client: DbExecutor = db
+  client: DbExecutor = db,
+  limit: number = 10,
+  offset: number = 0
 ): Promise<WalletSummary> {
   const existingWallets = await client
-    .select()
+    .select({
+      id: wallets.id,
+      userId: wallets.userId,
+      balance: wallets.balance,
+      availableBalance: wallets.availableBalance,
+    })
     .from(wallets)
     .where(eq(wallets.userId, designerId))
     .limit(1);
@@ -193,25 +200,92 @@ export async function getDesignerWalletSummary(
     eligible = Number(wallet.availableBalance || 0);
   }
 
-  const mutations = await client
-    .select()
+  const mutationsQuery = client
+    .select({
+      id: walletMutations.id,
+      walletId: walletMutations.walletId,
+      amount: walletMutations.amount,
+      balanceAfter: walletMutations.balanceAfter,
+      type: walletMutations.type,
+      description: walletMutations.description,
+      referenceId: walletMutations.referenceId,
+      createdAt: walletMutations.createdAt,
+    })
     .from(walletMutations)
     .where(eq(walletMutations.walletId, wallet.id))
     .orderBy(desc(walletMutations.createdAt));
+
+  type PaginatedMutationsQuery = {
+    limit: (l: number) => { offset: (o: number) => Promise<Array<typeof walletMutations.$inferSelect>> };
+  };
+  const queryWithPagination = mutationsQuery as unknown as PaginatedMutationsQuery;
+  const mutations = typeof queryWithPagination.limit === 'function'
+    ? await queryWithPagination.limit(limit).offset(offset)
+    : await (mutationsQuery as unknown as Promise<Array<typeof walletMutations.$inferSelect>>);
+
+  let userPayouts: Array<typeof payoutRequests.$inferSelect> = [];
+  try {
+    userPayouts = (await client
+      .select({
+        id: payoutRequests.id,
+        userId: payoutRequests.userId,
+        amount: payoutRequests.amount,
+        xenditPayoutId: payoutRequests.xenditPayoutId,
+        gatewayReference: payoutRequests.gatewayReference,
+      })
+      .from(payoutRequests)
+      .where(eq(payoutRequests.userId, designerId))) as Array<typeof payoutRequests.$inferSelect>;
+  } catch {
+    userPayouts = [];
+  }
+
+  const mappedMutations = await Promise.all(
+    (mutations || []).map(async (m: typeof walletMutations.$inferSelect) => {
+      let effectiveRefId = m.referenceId;
+
+      if (m.type === 'DEBIT') {
+        const matchingPayout = userPayouts.find((p) => {
+          if (m.referenceId && (p.id === m.referenceId || p.xenditPayoutId === m.referenceId || p.gatewayReference === m.referenceId)) {
+            return true;
+          }
+          if (!m.referenceId && Number(p.amount) === Number(m.amount)) {
+            return true;
+          }
+          return false;
+        });
+
+        if (matchingPayout) {
+          effectiveRefId = matchingPayout.xenditPayoutId || matchingPayout.gatewayReference || matchingPayout.id;
+          if (m.referenceId !== effectiveRefId && !isMock) {
+            try {
+              await client
+                .update(walletMutations)
+                .set({ referenceId: effectiveRefId })
+                .where(eq(walletMutations.id, m.id));
+            } catch {
+              // Ignore update failure during read
+            }
+          }
+        }
+      }
+
+      return {
+        id: m.id,
+        type: m.type,
+        amount: Number(m.amount),
+        balanceAfter: Number(m.balanceAfter),
+        description: m.description,
+        referenceId: effectiveRefId,
+        createdAt: m.createdAt,
+      };
+    })
+  );
 
   return {
     designerId,
     balance: Number(wallet.balance),
     availableBalance: eligible,
     walletId: wallet.id,
-    mutations: (mutations || []).map((m: typeof walletMutations.$inferSelect) => ({
-      id: m.id,
-      type: m.type,
-      amount: Number(m.amount),
-      balanceAfter: Number(m.balanceAfter),
-      description: m.description,
-      referenceId: m.referenceId,
-      createdAt: m.createdAt,
-    })),
+    mutations: mappedMutations,
   };
 }

@@ -8,7 +8,7 @@
   import ProductDeleteModal from "./ProductDeleteModal.svelte";
   import ProductTableRow from "./ProductTableRow.svelte";
 
-  import { StatCard, Card, Table, Input } from "@/components/ui";
+  import { StatCard, Card, Table, Input, Button, Pagination } from "@/components/ui";
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };
 
@@ -26,6 +26,20 @@
     const catName = categories.find((c) => c.id === p.categoryId)?.name || "";
     return catName.toLowerCase().includes(searchCategoryName.toLowerCase());
   });
+
+  let currentPage = 1;
+  const itemsPerPage = 5;
+  
+  // Reset pagination on search change
+  $: if (searchCategoryName !== undefined) {
+    currentPage = 1;
+  }
+
+  $: totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+  $: paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   $: displayedCategories = categories.filter(
     (c) =>
@@ -155,11 +169,11 @@
 <div class="space-y-8">
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     {#key totalProducts}
-      <StatCard 
-        label="Total Produk" 
-        value={totalProducts} 
+      <StatCard
+        label="Total Produk"
+        value={totalProducts}
         rawValue={totalProducts}
-        icon="shopping_bag" 
+        icon="shopping_bag"
         cardTheme="dark"
         badge="Katalog"
         footerText="Jumlah produk dibuat"
@@ -167,11 +181,11 @@
       />
     {/key}
     {#key activeProducts}
-      <StatCard 
-        label="Produk Aktif" 
-        value={activeProducts} 
+      <StatCard
+        label="Produk Aktif"
+        value={activeProducts}
         rawValue={activeProducts}
-        icon="check_circle" 
+        icon="check_circle"
         cardTheme="default"
         badge="Aktif"
         footerText="Tersedia untuk dijual"
@@ -179,11 +193,11 @@
       />
     {/key}
     {#key inactiveProducts}
-      <StatCard 
-        label="Stok Terbatas" 
-        value={0} 
+      <StatCard
+        label="Stok Terbatas"
+        value={0}
         rawValue={0}
-        icon="warning" 
+        icon="warning"
         cardTheme="orange"
         badge="Perhatian"
         footerText="Produk dengan stok < 5"
@@ -191,11 +205,11 @@
       />
     {/key}
     {#key categoryCount}
-      <StatCard 
-        label="Kategori" 
-        value={categoryCount} 
+      <StatCard
+        label="Kategori"
+        value={categoryCount}
         rawValue={categoryCount}
-        icon="layers" 
+        icon="layers"
         cardTheme="blue"
         badge="Organisir"
         footerText="Kategori produk toko"
@@ -204,26 +218,35 @@
     {/key}
   </div>
 
-
   <!-- Kontainer Tabel Utama -->
-  <Card padding="lg" className="animate-fade-in-up delay-400">
+  <Card
+    variant="bordered"
+    padding="none"
+    radius="2xl"
+    className="shadow-xs overflow-hidden animate-fade-in-up delay-400"
+  >
     <div
-      class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-light pb-6"
+      class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4"
     >
-      <div>
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs"
+        >
+          <span class="material-symbols-outlined text-lg">inventory_2</span>
+        </div>
         <div>
-          <h2 class="text-heading-md text-main font-bold font-heading leading-tight">
+          <h3
+            class="text-heading-md text-main font-bold font-heading leading-tight"
+          >
             Daftar Produk
-          </h2>
+          </h3>
           <p class="text-body-sm text-secondary mt-0.5 font-sans">
             Kelola daftar produk, varian, dan harga untuk toko Anda
           </p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2.5">
-        <div
-          class="dropdown dropdown-end {isDropdownOpen ? 'dropdown-open' : ''}"
-        >
+        <div class="relative {isDropdownOpen ? 'block' : ''}">
           <div class="relative w-full min-w-[200px]">
             <Input
               id="categorySearchInput"
@@ -259,35 +282,37 @@
               </div>
             </Input>
           </div>
-          <ul
-            class="dropdown-content z-20 menu p-2 shadow-md bg-card rounded-xl w-full mt-2 max-h-60 overflow-y-auto border border-light"
-          >
-            <li>
-              <button
-                type="button"
-                class="text-sm font-bold font-sans cursor-pointer text-main w-full text-left hover:bg-nested/80"
-                on:click={() => selectCategory("Semua Kategori")}
-              >
-                Semua Kategori
-              </button>
-            </li>
-            {#each displayedCategories as category}
+          {#if isDropdownOpen}
+            <ul
+              class="absolute right-0 z-20 p-1.5 flex flex-col gap-0.5 shadow-md bg-card rounded-xl w-full mt-2 max-h-60 overflow-y-auto border border-light"
+            >
               <li>
                 <button
                   type="button"
-                  class="text-sm font-medium font-sans cursor-pointer text-main w-full text-left hover:bg-nested/80"
-                  on:click={() => selectCategory(category.name)}
+                  class="text-sm font-bold font-sans cursor-pointer text-main w-full text-left px-3 py-2 rounded-lg hover:bg-nested/80"
+                  on:click={() => selectCategory("Semua Kategori")}
                 >
-                  {category.name}
+                  Semua Kategori
                 </button>
               </li>
-            {/each}
-            {#if displayedCategories.length === 0}
-              <li class="px-4 py-2 text-sm font-sans text-muted text-center">
-                Kategori tidak ditemukan
-              </li>
-            {/if}
-          </ul>
+              {#each displayedCategories as category}
+                <li>
+                  <button
+                    type="button"
+                    class="text-sm font-medium font-sans cursor-pointer text-main w-full text-left px-3 py-2 rounded-lg hover:bg-nested/80"
+                    on:click={() => selectCategory(category.name)}
+                  >
+                    {category.name}
+                  </button>
+                </li>
+              {/each}
+              {#if displayedCategories.length === 0}
+                <li class="px-4 py-2 text-sm font-sans text-muted text-center">
+                  Kategori tidak ditemukan
+                </li>
+              {/if}
+            </ul>
+          {/if}
         </div>
       </div>
     </div>
@@ -306,16 +331,26 @@
         <span class="loading loading-spinner loading-md text-primary"></span>
       </div>
     {:else if products.length === 0}
-      <div
-        class="text-center py-16 rounded-2xl border border-dashed border-light"
-      >
-        <span class="material-symbols-outlined text-4xl text-muted mb-3"
-          >inventory_2</span
+      <div class="py-16 px-8 flex flex-col items-center text-center">
+        <div
+          class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs"
         >
-        <h3 class="text-lg font-bold text-main mb-1">Belum ada produk</h3>
-        <p class="text-body-sm text-secondary">
+          <span class="material-symbols-outlined text-2xl">inventory_2</span>
+        </div>
+        <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">
+          Belum Ada Produk
+        </h4>
+        <p
+          class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans"
+        >
           Silakan tambahkan produk pertama Anda.
         </p>
+        <div class="mt-2">
+          <Button variant="primary" size="sm" on:click={handleOpenAdd}>
+            <span class="material-symbols-outlined text-base">add</span>
+            <span>Tambah Produk</span>
+          </Button>
+        </div>
       </div>
     {:else}
       <Table
@@ -328,14 +363,14 @@
           { label: "Aksi", align: "right" },
         ]}
       >
-        {#if filteredProducts.length === 0}
+        {#if paginatedProducts.length === 0}
           <tr>
             <td colspan="6" class="text-center py-8 text-secondary">
               Tidak ada produk di kategori ini.
             </td>
           </tr>
         {:else}
-          {#each filteredProducts as product}
+          {#each paginatedProducts as product}
             <ProductTableRow
               {product}
               {categories}
@@ -346,6 +381,17 @@
           {/each}
         {/if}
       </Table>
+      
+      {#if totalPages > 1}
+        <div class="px-6 py-4 border-t border-light flex justify-center">
+          <Pagination
+            {currentPage}
+            totalItems={filteredProducts.length}
+            pageSize={itemsPerPage}
+            on:pageChange={(e) => (currentPage = e.detail)}
+          />
+        </div>
+      {/if}
     {/if}
   </Card>
 

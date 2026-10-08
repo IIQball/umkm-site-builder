@@ -80,12 +80,12 @@
         out:fade={{ duration: 200 }}
         class={`alert shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
           item.type === 'success'
-            ? 'bg-emerald-600 text-white border-emerald-500/30 shadow-emerald-600/20'
+            ? 'bg-success text-white border-success/30 shadow-success/20'
             : item.type === 'error'
-            ? 'bg-rose-600 text-white border-rose-500/30 shadow-rose-600/20'
+            ? 'bg-error text-white border-error/30 shadow-error/20'
             : item.type === 'warning'
             ? 'bg-orange text-white border-orange-light/30 shadow-orange/20'
-            : 'bg-primary text-white border-primary-light/30 shadow-primary/20'
+            : 'bg-primary text-slate-950 border-primary-light/30 shadow-primary/20'
         }`}
         role="alert"
       >

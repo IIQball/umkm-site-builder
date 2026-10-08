@@ -14,10 +14,31 @@ export const GET: APIRoute = async (context): Promise<Response> => {
 
     const records = await db.query.payoutRequests.findMany({
       where: (payoutRequests, { eq }) => eq(payoutRequests.userId, user.id),
+      columns: {
+        id: true,
+        userId: true,
+        amount: true,
+        status: true,
+        bankAccountId: true,
+        xenditPayoutId: true,
+        gatewayReference: true,
+        gatewayMessage: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       with: {
-        bankAccount: true,
+        bankAccount: {
+          columns: {
+            id: true,
+            bankCode: true,
+            bankName: true,
+            accountNumber: true,
+            accountHolder: true,
+          },
+        },
       },
       orderBy: (payoutRequests, { desc }) => [desc(payoutRequests.createdAt)],
+      limit: 10,
     });
 
     const walletList = await db

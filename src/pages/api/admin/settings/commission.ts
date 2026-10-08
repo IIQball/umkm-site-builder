@@ -21,6 +21,8 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       adminServiceFee: settings.adminServiceFee,
       payoutMinimumBalance: settings.payoutMinimumBalance,
       settlementDelayDays: settings.settlementDelayDays,
+      maxStoreBranches: settings.maxStoreBranches ?? 5,
+      maxTemplateRevisions: settings.maxTemplateRevisions ?? 3,
     });
   });
 };

@@ -1,6 +1,6 @@
 import type { ProductItem } from '@/types';
 import { formatIDR } from '@/lib/currency';
-import { getEffectiveWhatsAppNumber } from '@/lib/whatsapp';
+import { getEffectiveWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp';
 
 export const IMAGE_SUPPORTED_CATALOG_PRESETS = [
   'grid_standard',
@@ -27,44 +27,93 @@ export function isCatalogImageSupported(preset: string): boolean {
   return (IMAGE_SUPPORTED_CATALOG_PRESETS as readonly string[]).includes(preset);
 }
 
-export const formatRupiah = formatIDR;
+export function isCatalogCategorySupported(preset: string): boolean {
+  return preset === 'interactive_filter_tabs' || preset === 'split_category_sidebar';
+}
 
-export const getCleanWaNumber = getEffectiveWhatsAppNumber;
+export function isCatalogCartSupported(preset: string): boolean {
+  return !['price_table_view', 'lookbook_gallery', 'bundle_package_tiers', 'single_product_deep_focus', 'minimal_accordion_catalog'].includes(preset);
+}
+
+export function isCatalogSingleProduct(preset: string): boolean {
+  return preset === 'single_product_deep_focus';
+}
+
+export function resolveProductNodeStyle(
+  product: ProductItem,
+  index: number,
+  nodeStyles?: Record<string, Record<string, string>>
+): { color: string; marginTop: string; marginBottom: string; marginStyle: string } {
+  if (!nodeStyles) return { color: '', marginTop: '', marginBottom: '', marginStyle: '' };
+  const specific = (product?.id && nodeStyles[product.id]) || nodeStyles[`product_item_${index}`] || {};
+  const generic = nodeStyles['catalog_grid'] || nodeStyles['product_cards'] || {};
+  const color = specific.color || generic.color || '';
+  const marginTop = specific.marginTop || generic.marginTop || '';
+  const marginBottom = specific.marginBottom || generic.marginBottom || '';
+  const marginStyle = `${marginTop ? `margin-top: ${marginTop};` : ''} ${marginBottom ? `margin-bottom: ${marginBottom};` : ''}`.trim();
+  return { color, marginTop, marginBottom, marginStyle };
+}
+
+export interface CartItem {
+  product: ProductItem;
+  selections: Record<string, { name: string; priceAdjustment?: number } | string>;
+  variantId: string;
+  qty: number;
+  price: number;
+  subtotal: number;
+}
 
 export function buildWhatsAppOrderLink(waNumber: string, productName: string, price: number | string): string {
   const cleanPhone = getEffectiveWhatsAppNumber(waNumber);
   const text = `Halo, saya ingin memesan: ${productName} (${formatIDR(price)}). Mohon info ketersediaan stok & rekening. Terima kasih!`;
-  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  return generateWhatsAppLink(cleanPhone, text);
 }
+
+export interface CatalogCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export const DEFAULT_CATALOG_CATEGORIES: CatalogCategory[] = [
+  { id: 'cat_makanan', name: 'Makanan & Snack', slug: 'makanan' },
+  { id: 'cat_minuman', name: 'Minuman Segar', slug: 'minuman' },
+  { id: 'cat_kriya', name: 'Kriya & Oleh-Oleh', slug: 'kriya' },
+];
 
 export const DEFAULT_DEMO_PRODUCTS: ProductItem[] = [
   {
-    name: 'Kopi Arabika Gayo Specialty 250g',
-    price: 85000,
+    id: 'prod_1',
+    name: 'Produk Unggulan 1',
+    price: 50000,
     badge: 'Terlaris',
-    imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&auto=format&fit=crop&q=80',
-    description: 'Biji kopi pilihan dipetik merah dari dataran tinggi Gayo Aceh.',
+    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60',
+    description: 'Deskripsi lengkap mengenai keunggulan, kualitas, atau manfaat utama produk Anda.',
+    categoryId: 'cat_makanan',
+    category: { id: 'cat_makanan', name: 'Makanan & Snack', slug: 'makanan' },
+    categoryName: 'Makanan & Snack',
   },
   {
-    name: 'Madu Hutan Alami Murni 500ml',
-    price: 120000,
-    badge: 'Organik',
-    imageUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&auto=format&fit=crop&q=80',
-    description: 'Madu murni mentah tanpa pemanasan, kaya antioksidan alami.',
+    id: 'prod_2',
+    name: 'Produk Unggulan 2',
+    price: 65000,
+    badge: 'Spesial',
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60',
+    description: 'Bahan berkualitas premium yang diproses secara higienis untuk menjaga mutu terbaik.',
+    categoryId: 'cat_minuman',
+    category: { id: 'cat_minuman', name: 'Minuman Segar', slug: 'minuman' },
+    categoryName: 'Minuman Segar',
   },
   {
-    name: 'Keripik Tempe Renyah Gurih 200g',
-    price: 25000,
-    badge: 'Baru',
-    imageUrl: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=600&auto=format&fit=crop&q=80',
-    description: 'Irisan tempe kedelai lokal renyah dengan bumbu ketumbar khas.',
-  },
-  {
-    name: 'Sambal Cakalang Khas Nusantara',
-    price: 45000,
+    id: 'prod_3',
+    name: 'Produk Unggulan 3',
+    price: 80000,
     badge: 'Favorit',
-    imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
-    description: 'Suwiran ikan cakalang asap dengan pedas segar cabai rawit.',
+    imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60',
+    description: 'Pilihan favorit pelanggan setia dengan cita rasa dan kemasan eksklusif.',
+    categoryId: 'cat_kriya',
+    category: { id: 'cat_kriya', name: 'Kriya & Oleh-Oleh', slug: 'kriya' },
+    categoryName: 'Kriya & Oleh-Oleh',
   },
 ];
 

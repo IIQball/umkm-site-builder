@@ -8,40 +8,52 @@
     CheckCircle2,
     Clock,
     XCircle,
+    Search,
   } from 'lucide-svelte';
-  import { Card, Pagination } from '@/components/ui';
+  import { Card, Pagination, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import type { AdminTemplateItem } from './review/review.types';
   import TemplateReviewTable from './review/TemplateReviewTable.svelte';
   import TemplateReviewModals from './review/TemplateReviewModals.svelte';
 
+  export let initialTemplates: AdminTemplateItem[] | undefined = undefined;
   export let initialTemplatesJson: string = '[]';
-  let templates: AdminTemplateItem[] = JSON.parse(initialTemplatesJson);
+  export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
+  let allTemplates: AdminTemplateItem[] = [];
+
+  $: if (initialTemplates !== undefined) {
+    allTemplates = initialTemplates.filter((t) => t.status !== 'draft');
+  } else {
+    try {
+      const parsed = JSON.parse(initialTemplatesJson);
+      allTemplates = Array.isArray(parsed) ? parsed.filter((t) => t.status !== 'draft') : [];
+    } catch {
+      allTemplates = [];
+    }
+  }
   let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = 'pending';
   let searchQuery = '';
   let isLoading = false;
   let selectedTemplate: AdminTemplateItem | null = null;
   let approveModalOpen = false;
   let rejectModalOpen = false;
+  let revisionNotesModalOpen = false;
   let rejectionReason = '';
   let actionLoading = false;
   let currentPage = 1;
+  $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
 
   const fetchTemplates = async () => {
     isLoading = true;
     try {
-      const param = activeTab === 'all' ? '' : `?status=${activeTab}`;
-      const res = await fetch(`/api/admin/templates${param}`);
+      const res = await fetch('/api/admin/templates');
       const result = await res.json();
       if (result.ok && Array.isArray(result.data)) {
-        templates = result.data;
+        allTemplates = result.data.filter((t: AdminTemplateItem) => t.status !== 'draft');
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Gagal memuat daftar template',
-      });
+      addToast({ type: 'error', message: 'Gagal memuat daftar template' });
     } finally {
       isLoading = false;
     }
@@ -50,7 +62,6 @@
   const handleTabChange = (tab: typeof activeTab) => {
     activeTab = tab;
     currentPage = 1;
-    fetchTemplates();
   };
 
   const openApproveModal = (t: AdminTemplateItem) => {
@@ -64,9 +75,15 @@
     rejectModalOpen = true;
   };
 
+  const openRevisionNotesModal = (t: AdminTemplateItem) => {
+    selectedTemplate = t;
+    revisionNotesModalOpen = true;
+  };
+
   const closeModal = () => {
     approveModalOpen = false;
     rejectModalOpen = false;
+    revisionNotesModalOpen = false;
     selectedTemplate = null;
     rejectionReason = '';
   };
@@ -74,10 +91,7 @@
   const submitReview = async (action: 'approve' | 'reject') => {
     if (!selectedTemplate) return;
     if (action === 'reject' && rejectionReason.trim().length < 5) {
-      addToast({
-        type: 'error',
-        message: 'Alasan penolakan minimal 5 karakter',
-      });
+      addToast({ type: 'error', message: 'Alasan penolakan minimal 5 karakter' });
       return;
     }
     actionLoading = true;
@@ -91,55 +105,54 @@
         }),
       });
       const result = await res.json();
-
       if (res.ok && result.ok) {
         addToast({
           type: 'success',
-          message:
-            action === 'approve'
-              ? `Template "${selectedTemplate.name}" berhasil disetujui!`
-              : `Template "${selectedTemplate.name}" telah ditolak.`,
+          message: action === 'approve'
+            ? `Template "${selectedTemplate.name}" berhasil disetujui!`
+            : `Template "${selectedTemplate.name}" telah ditolak.`,
         });
         closeModal();
         await fetchTemplates();
       } else {
-        addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal memproses review template',
-        });
+        addToast({ type: 'error', message: result.error?.message || 'Gagal memproses review template' });
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Terjadi kesalahan jaringan saat memproses review',
-      });
+      addToast({ type: 'error', message: 'Terjadi kesalahan jaringan saat memproses review' });
     } finally {
       actionLoading = false;
     }
   };
 
-  $: filteredTemplates = templates.filter((t) => {
+  $: countPending = allTemplates.filter((t) => t.status === 'pending').length;
+  $: countApproved = allTemplates.filter((t) => t.status === 'approved').length;
+  $: countRejected = allTemplates.filter((t) => t.status === 'rejected').length;
+
+  $: filteredTemplates = allTemplates.filter((t) => {
+    if (t.status === 'draft') return false;
+    const matchesTab = activeTab === 'all' ? true : t.status === activeTab;
+
     const q = searchQuery.toLowerCase().trim();
-    return (
+    const matchesSearch =
       !q ||
       t.name.toLowerCase().includes(q) ||
       (t.designerName && t.designerName.toLowerCase().includes(q)) ||
-      (t.designerEmail && t.designerEmail.toLowerCase().includes(q))
-    );
+      (t.designerEmail && t.designerEmail.toLowerCase().includes(q));
+
+    return matchesTab && matchesSearch;
   });
 
-  $: paginatedTemplates = filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  $: countPending = templates.filter((t) => t.status === 'pending').length;
-  $: countApproved = templates.filter((t) => t.status === 'approved').length;
-  $: countRejected = templates.filter((t) => t.status === 'rejected').length;
+  $: paginatedTemplates = pagination
+    ? filteredTemplates
+    : filteredTemplates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  $: totalItems = pagination ? pagination.totalItems : filteredTemplates.length;
 </script>
 
 <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden">
   <!-- Table Header & Controls -->
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-slate-800 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
         <Palette size={20} />
       </div>
       <div>
@@ -156,68 +169,64 @@
     <div class="flex flex-wrap items-center gap-2.5">
       <!-- Search Input Capsule -->
       <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <input
           type="text"
           bind:value={searchQuery}
           placeholder="Cari nama template / desainer..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-blue-500 focus:bg-card transition-all w-52 sm:w-60"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-52 sm:w-60"
         />
       </div>
 
       <!-- Segmented Status Filter (Exact matching style from OrderHistoryTable) -->
       <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'all' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold {activeTab === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('all')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {activeTab === 'all'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          Semua ({templates.length})
-        </button>
+          Semua ({allTemplates.length})
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'pending' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'pending' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('pending')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'pending'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
           <span>Menunggu</span>
           {#if countPending > 0}
-            <span class="opacity-80 font-mono text-3xs">({countPending})</span>
+            <span class="opacity-80 font-mono text-xs">({countPending})</span>
           {/if}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'approved' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'approved' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('approved')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'approved'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
           <span>Disetujui</span>
           {#if countApproved > 0}
-            <span class="opacity-80 font-mono text-3xs">({countApproved})</span>
+            <span class="opacity-80 font-mono text-xs">({countApproved})</span>
           {/if}
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          size="xs"
+          variant={activeTab === 'rejected' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {activeTab === 'rejected' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => handleTabChange('rejected')}
-          class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeTab === 'rejected'
-            ? 'bg-slate-900 text-white dark:bg-primary shadow-2xs'
-            : 'text-muted hover:text-main'}"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
           <span>Ditolak</span>
           {#if countRejected > 0}
-            <span class="opacity-80 font-mono text-3xs">({countRejected})</span>
+            <span class="opacity-80 font-mono text-xs">({countRejected})</span>
           {/if}
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -251,13 +260,16 @@
   {:else}
     <TemplateReviewTable
       {paginatedTemplates}
+      {currentPage}
+      {pageSize}
       onApprove={openApproveModal}
       onReject={openRejectModal}
+      onViewRevisionNotes={openRevisionNotesModal}
     />
 
     <Pagination
       bind:currentPage
-      totalItems={filteredTemplates.length}
+      {totalItems}
       {pageSize}
     />
   {/if}
@@ -266,9 +278,12 @@
 <TemplateReviewModals
   bind:approveModalOpen
   bind:rejectModalOpen
+  bind:revisionNotesModalOpen
   {selectedTemplate}
   bind:rejectionReason
   {actionLoading}
   onClose={closeModal}
   onSubmitReview={submitReview}
+  onOpenApproveFromNotes={() => { revisionNotesModalOpen = false; approveModalOpen = true; }}
+  onOpenRejectFromNotes={() => { revisionNotesModalOpen = false; rejectModalOpen = true; }}
 />

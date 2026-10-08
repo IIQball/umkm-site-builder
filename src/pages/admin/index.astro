@@ -1,11 +1,14 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import AdminMetricsOverview from '@/components/admin/AdminMetricsOverview.svelte';
-import AdminAssistedStores from '@/components/admin/AdminAssistedStores.svelte';
+import Button from '@/components/ui/Button.svelte';
+import AdminOverviewDashboard from '@/components/admin/dashboard/AdminOverviewDashboard.svelte';
+import { getDesignerWalletSummary } from '@/services';
 import { db } from '@/lib/db/client';
-import { stores, users } from '@/db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { users, stores, transactions, templates, tenantInvitations } from '@/db/schema';
+import { eq, and, or, isNull, desc, notExists, ne } from 'drizzle-orm';
+import { getPaginationParams, paginate } from '@/lib/pagination/server';
+import type { PaginatedResult } from '@/types/common';
 
 export const prerender = false;
 
@@ -14,58 +17,158 @@ if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect('/auth/login?redirect=/admin');
 }
 
-let assistedStores: Array<{
+if (user.role === 'superadmin') {
+  return Astro.redirect('/superadmin');
+}
+
+const { page: txPage } = getPaginationParams(Astro.url, 'txPage');
+const { page: merchantPage } = getPaginationParams(Astro.url, 'merchantPage');
+
+let availableBalance = 0;
+let tenantRows: Array<{
   id: string;
-  name: string;
-  subdomain: string;
-  status: string;
-  userId: string;
+  name: string | null;
+  email: string;
   createdAt: string;
-  tenantName: string | null;
-  tenantEmail: string | null;
-  owner: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
+  storeId?: string | null;
+  storeName?: string | null;
+  storeStatus?: string | null;
 }> = [];
 
-try {
-  const rows = await db
-    .select({
-      id: stores.id,
-      name: stores.name,
-      subdomain: stores.subdomain,
-      status: stores.status,
-      userId: stores.userId,
-      createdAt: stores.createdAt,
-      tenantName: users.name,
-      tenantEmail: users.email,
-    })
-    .from(stores)
-    .leftJoin(users, eq(stores.userId, users.id))
-    .where(and(eq(stores.registeredBy, user.id), isNull(stores.deletedAt)))
-    .orderBy(desc(stores.createdAt));
+let transactionRows: Array<{
+  id: string;
+  externalId?: string | null;
+  amount: number;
+  adminFee: number | null;
+  status: string;
+  type: string;
+  createdAt: string;
+  templateId?: string | null;
+  templateName: string | null;
+  templateThumbnailUrl?: string | null;
+  merchantName: string | null;
+  storeName: string | null;
+}> = [];
 
-  assistedStores = (rows || []).map((s) => ({
-    id: s.id,
-    name: s.name,
-    subdomain: s.subdomain,
-    status: s.status,
-    userId: s.userId,
-    tenantName: s.tenantName,
-    tenantEmail: s.tenantEmail,
-    createdAt: s.createdAt ? s.createdAt.toISOString() : new Date().toISOString(),
-    owner: {
-      id: s.userId,
-      name: s.tenantName,
-      email: s.tenantEmail ?? '-',
-    },
+let txPagination: PaginatedResult<any> | undefined = undefined;
+let merchantPagination: PaginatedResult<any> | undefined = undefined;
+
+try {
+  const wallet = await getDesignerWalletSummary(user.id);
+  availableBalance = wallet.availableBalance;
+
+  const unacceptedInvitationSubquery = db
+    .select({ id: tenantInvitations.id })
+    .from(tenantInvitations)
+    .where(
+      and(
+        eq(tenantInvitations.email, users.email),
+        isNull(tenantInvitations.acceptedAt),
+      ),
+    );
+
+  const tenantsWhereCondition = and(
+    eq(users.registeredBy, user.id),
+    eq(users.role, 'tenant'),
+    ne(users.status, 'pending'),
+    isNull(users.deletedAt),
+    notExists(unacceptedInvitationSubquery),
+  );
+
+  const tenantsQueryBuilder = db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+      storeId: stores.id,
+      storeName: stores.name,
+      storeStatus: stores.status,
+    })
+    .from(users)
+    .leftJoin(stores, and(eq(stores.userId, users.id), isNull(stores.deletedAt)))
+    .where(tenantsWhereCondition)
+    .orderBy(desc(users.createdAt));
+
+  merchantPagination = await paginate(
+    db,
+    users,
+    tenantsQueryBuilder,
+    tenantsWhereCondition,
+    merchantPage
+  );
+
+  tenantRows = (merchantPagination.data || []).map((t: any) => ({
+    id: t.id,
+    name: t.name,
+    email: t.email,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+    storeId: t.storeId,
+    storeName: t.storeName,
+    storeStatus: t.storeStatus,
+  }));
+
+  const txWhereCondition = or(
+    eq(transactions.userId, user.id),
+    eq(transactions.assistedBy, user.id),
+  );
+
+  const txQueryBuilder = db
+    .select({
+      id: transactions.id,
+      externalId: transactions.externalId,
+      amount: transactions.amount,
+      adminFee: transactions.adminFee,
+      status: transactions.status,
+      type: transactions.type,
+      createdAt: transactions.createdAt,
+      templateId: templates.id,
+      templateName: templates.name,
+      templateThumbnailUrl: templates.thumbnailUrl,
+      merchantName: users.name,
+      merchantEmail: users.email,
+      storeName: stores.name,
+    })
+    .from(transactions)
+    .leftJoin(templates, eq(transactions.templateId, templates.id))
+    .leftJoin(users, eq(transactions.userId, users.id))
+    .leftJoin(
+      stores,
+      or(eq(transactions.storeId, stores.id), eq(stores.userId, transactions.userId)),
+    )
+    .where(txWhereCondition)
+    .orderBy(desc(transactions.createdAt));
+
+  txPagination = await paginate(
+    db,
+    transactions,
+    txQueryBuilder,
+    txWhereCondition,
+    txPage
+  );
+
+  transactionRows = (txPagination.data || []).map((t: any) => ({
+    id: t.id,
+    externalId: t.externalId,
+    amount: Number(t.amount),
+    adminFee: Number(t.adminFee || 0),
+    status: t.status,
+    type: t.type,
+    createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+    templateId: t.templateId,
+    templateName: t.templateName,
+    templateThumbnailUrl: t.templateThumbnailUrl,
+    merchantName: t.merchantName || '—',
+    merchantEmail: t.merchantEmail || null,
+    storeName: t.storeName || 'Belum Membuat Toko',
   }));
 } catch (error) {
-  console.error('[AdminDashboard] Failed to query assisted stores:', error);
-  assistedStores = [];
+  console.error('[AdminDashboard] Gagal memuat data overview dasbor:', error);
 }
+
+const userCreatedYear = user.createdAt
+  ? new Date(user.createdAt).getFullYear()
+  : new Date().getFullYear();
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -80,23 +183,42 @@ if (currentHour >= 4 && currentHour < 11) {
 }
 ---
 
-<DashboardLayout title="Admin Dashboard" breadcrumb="Dashboard">
-  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+<DashboardLayout title="Overview Dasbor" breadcrumb="Dashboard">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
-        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
           <span>{greeting}, {user.name ? user.name.split(' ')[0] : 'Admin'}!</span>
         </h1>
-        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Berikut adalah rangkuman metrik sistem, pendapatan, dan pengelolaan toko UMKM binaan Anda.
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed font-sans">
+          Pusat monitoring performa pendampingan UMKM, tren pertumbuhan merchant, dan metrik bisnis operasional Anda.
         </p>
+      </div>
+
+      <!-- Quick Action Navigation -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <Button href="/templates" variant="secondary" size="md">
+          <span class="material-symbols-outlined text-base">storefront</span>
+          <span>Beli Template</span>
+        </Button>
+
+        <Button href="/admin/merchants" variant="primary" size="md">
+          <span class="material-symbols-outlined text-base">groups</span>
+          <span>Kelola Merchant</span>
+        </Button>
       </div>
     </div>
 
-    <!-- Toko Binaan Saya -->
-    <AdminAssistedStores client:load stores={assistedStores} />
-
-    <!-- Metrik Sistem & Transaksi -->
-    <AdminMetricsOverview client:load />
+    <!-- Master Overview Dashboard (Filter Tahun & Bulan, Statcard, Grafik & Tabel Terkini) -->
+    <AdminOverviewDashboard
+      client:load
+      allTenants={tenantRows}
+      allTransactions={transactionRows}
+      availableBalance={availableBalance}
+      userCreatedYear={userCreatedYear}
+      txPagination={txPagination}
+      merchantPagination={merchantPagination}
+    />
   </div>
 </DashboardLayout>

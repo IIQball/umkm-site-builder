@@ -1,7 +1,9 @@
 <script lang="ts">
   import { formatCurrency, formatDate } from '@/lib/utils/format';
   import { Badge, Button } from '@/components/ui';
+  import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  export let rowNumber: number = 1;
   export let template: {
     id: string;
     name: string;
@@ -16,8 +18,10 @@
   export let isSelected: boolean = false;
   export let onToggleSelect: ((id: string) => void) | undefined = undefined;
   export let onDeleteDraft: ((template: any) => void) | undefined = undefined;
+  export let onShowRejection: ((template: any) => void) | undefined = undefined;
 
   let isDeleting = false;
+  let imageLoadError = false;
 
   const handleDelete = async () => {
     if (onDeleteDraft) {
@@ -42,12 +46,9 @@
   };
 
   const handleShowRejection = () => {
-    const nameEl = document.getElementById('rejection_template_name');
-    const reasonEl = document.getElementById('rejection_reason_text');
-    const modal = document.getElementById('rejection_modal') as HTMLDialogElement | null;
-    if (nameEl) nameEl.textContent = template.name;
-    if (reasonEl) reasonEl.textContent = template.rejectionReason || 'Tidak ada alasan terperinci.';
-    modal?.showModal();
+    if (onShowRejection) {
+      onShowRejection(template);
+    }
   };
 
   const formatPrice = (p: number) => (p === 0 ? 'Gratis' : formatCurrency(p));
@@ -71,8 +72,8 @@
 </script>
 
 <div
-  class={`template-card bg-card border rounded-3xl overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col group relative ${
-    isSelected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-light'
+  class={`template-card bg-card border rounded-3xl overflow-hidden shadow-xs hover:border-primary/50 transition-all duration-200 flex flex-col group relative ${
+    isSelected ? 'border-primary ring-2 ring-primary/40' : 'border-light'
   }`}
   data-status={template.status}
   data-name={template.name.toLowerCase()}
@@ -87,8 +88,8 @@
           on:click|stopPropagation={() => onToggleSelect && onToggleSelect(template.id)}
           class={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center cursor-pointer shadow-sm ${
             isSelected
-              ? 'bg-blue-600 border-blue-600 text-white'
-              : 'bg-card/90 dark:bg-slate-900/90 border-slate-300 dark:border-slate-700 hover:border-blue-500 text-transparent'
+              ? 'bg-primary border-primary text-primary-content'
+              : 'bg-card/90 border-border hover:border-primary text-transparent'
           }`}
           title={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
           aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih draf template'}
@@ -98,19 +99,27 @@
       </div>
     {/if}
 
-    {#if template.thumbnailUrl}
+    <!-- Sequence Number Badge -->
+    <div class="absolute {template.status === 'draft' && onToggleSelect ? 'top-3 left-11' : 'top-3 left-3'} z-20">
+      <span class="px-2 py-0.5 rounded-lg bg-card/90 border border-light font-mono text-2xs font-bold text-secondary shadow-xs backdrop-blur-xs">
+        #{rowNumber}
+      </span>
+    </div>
+
+    {#if template.thumbnailUrl && !imageLoadError}
       <img
-        src={template.thumbnailUrl}
+        src={getOptimizedCloudinaryUrl(template.thumbnailUrl, 500)}
         alt={template.name}
         class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
         loading="lazy"
+        on:error={() => (imageLoadError = true)}
       />
     {:else}
       <div class="absolute inset-0 bg-nested flex flex-col items-center justify-center gap-1.5 text-muted">
         <div class="w-10 h-10 rounded-xl bg-card border border-light flex items-center justify-center text-muted shadow-2xs">
           <span class="material-symbols-outlined text-xl">palette</span>
         </div>
-        <span class="text-3xs font-medium text-muted">Tanpa Pratinjau</span>
+        <span class="text-xs font-medium text-muted">Tanpa Pratinjau</span>
       </div>
     {/if}
 
@@ -124,7 +133,7 @@
     <!-- Sold count overlay -->
     {#if template.totalSold > 0}
       <div class="absolute bottom-3 left-3 z-10 pointer-events-none">
-        <span class="text-3xs font-bold text-main bg-card/90 dark:bg-slate-900/90 backdrop-blur-md border border-light rounded-full px-2.5 py-1 shadow-xs flex items-center gap-1 font-mono">
+        <span class="text-xs font-bold text-main bg-card/90 backdrop-blur-md border border-light rounded-full px-2.5 py-1 shadow-xs flex items-center gap-1 font-mono">
           <span>{template.totalSold}× Terjual</span>
         </span>
       </div>
@@ -134,9 +143,9 @@
   <!-- Card body -->
   <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
     <div>
-      <div class="flex items-start justify-between gap-2 mb-1.5">
-        <h3 class="text-heading-md font-bold text-main line-clamp-1 flex-1 font-heading">{template.name}</h3>
-        <span class="text-xs font-bold text-main font-mono flex-shrink-0 bg-nested border border-light px-2.5 py-0.5 rounded-full">
+      <div class="flex items-start justify-between gap-2.5 mb-1.5">
+        <h3 class="text-heading-md font-bold text-main break-words flex-1 min-w-0 font-heading leading-tight">{template.name}</h3>
+        <span class="text-xs font-bold text-main font-mono flex-shrink-0 whitespace-nowrap bg-nested border border-light px-2.5 py-0.5 rounded-full shadow-2xs">
           {formatPrice(template.price)}
         </span>
       </div>
@@ -146,29 +155,29 @@
     </div>
 
     <!-- Footer: date + actions -->
-    <div class="pt-3.5 border-t border-light flex items-center justify-between gap-2">
-      <div class="flex items-center gap-1.5 text-2xs text-muted font-mono">
+    <div class="pt-3.5 border-t border-light flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center gap-1.5 text-2xs text-muted font-mono whitespace-nowrap">
         <span class="material-symbols-outlined text-xs">calendar_today</span>
         <span>{formatDate(template.createdAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         {#if template.status === 'draft'}
           <Button
             variant="destructive"
             size="xs"
             disabled={isDeleting}
             on:click={handleDelete}
-            className="font-bold"
+            className="font-bold whitespace-nowrap"
           >
             {isDeleting ? '...' : 'Hapus'}
           </Button>
           <Button
-            href={`/builder/${template.id}`}
+            href={`/builder/new?id=${template.id}`}
             variant="dark"
             size="sm"
-            className="rounded-xl font-bold"
+            className="rounded-xl font-bold whitespace-nowrap"
           >
             <span class="material-symbols-outlined text-xs">edit</span>
             <span>Edit</span>
@@ -179,17 +188,17 @@
           <Button
             variant="secondary"
             size="sm"
-            className="rounded-xl font-bold"
+            className="rounded-xl font-bold whitespace-nowrap"
             on:click={handleShowRejection}
           >
             <span class="material-symbols-outlined text-xs text-rose-500">info</span>
             <span>Alasan</span>
           </Button>
           <Button
-            href={`/builder/${template.id}`}
+            href={`/builder/new?id=${template.id}`}
             variant="primary"
             size="sm"
-            className="rounded-xl font-bold"
+            className="rounded-xl font-bold whitespace-nowrap"
           >
             Edit Ulang
           </Button>
@@ -200,7 +209,7 @@
             href={`/builder/preview/${template.id}`}
             variant="secondary"
             size="sm"
-            className="rounded-xl font-bold"
+            className="rounded-xl font-bold whitespace-nowrap"
           >
             <span class="material-symbols-outlined text-xs">visibility</span>
             <span>Pratinjau</span>

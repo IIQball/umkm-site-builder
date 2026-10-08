@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
-  import { formatIDR, formatCurrencyInput } from '@/lib/currency';
+  import { formatIDR } from '@/lib/currency';
   import TemplateCardPreview from './template-form/TemplateCardPreview.svelte';
   import TemplatePricingSimulator from './template-form/TemplatePricingSimulator.svelte';
   import TemplateBasicDetails from './template-form/TemplateBasicDetails.svelte';
@@ -15,13 +15,20 @@
     description?: string | null;
     icon?: string | null;
   }> = [];
+  export let initialTemplate: {
+    id: string; name: string; price: number; status: string;
+    description?: string | null; categoryId?: string | null;
+    thumbnailUrl?: string | null; rejectionReason?: string | null;
+    revisionCount?: number; revisionNotes?: string | null;
+  } | null = null;
 
-  let name = '';
-  let description = '';
-  let selectedCategoryId = '';
-  let thumbnailUrl = '';
-  let priceDisplay = '50.000';
-  let numericPriceState = 50000;
+  let name = initialTemplate?.name || '';
+  let description = initialTemplate?.description || '';
+  let selectedCategoryId = initialTemplate?.categoryId || '';
+  let thumbnailUrl = initialTemplate?.thumbnailUrl || '';
+  let numericPriceState = initialTemplate?.price ?? 50000;
+  let priceDisplay = initialTemplate ? (initialTemplate.price === 0 ? '0' : initialTemplate.price.toLocaleString('id-ID')) : '50.000';
+  let isEditMode = Boolean(initialTemplate);
   let loading = false;
   let loadingCategories = false;
   let error: string | null = null;
@@ -32,6 +39,29 @@
   $: selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : 'Umum';
 
   onMount(async () => {
+    if (!initialTemplate && typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId = urlParams.get('id') || urlParams.get('templateId');
+      if (queryId) {
+        try {
+          const res = await fetch(`/api/designer/templates/draft?templateId=${encodeURIComponent(queryId)}`);
+          const json = await res.json();
+          if (json.ok && json.data) {
+            initialTemplate = json.data;
+            name = json.data.name || '';
+            description = json.data.description || '';
+            selectedCategoryId = json.data.categoryId || '';
+            thumbnailUrl = json.data.thumbnailUrl || '';
+            numericPriceState = json.data.price ?? 0;
+            priceDisplay = numericPriceState === 0 ? '0' : numericPriceState.toLocaleString('id-ID');
+            isEditMode = true;
+          }
+        } catch (fetchErr) {
+          console.error('Failed to load initial template data:', fetchErr);
+        }
+      }
+    }
+
     if (categories.length === 0) {
       loadingCategories = true;
       try {
@@ -71,20 +101,6 @@
       ? formatIDR(numericPriceState)
       : 'Gratis';
 
-  /** Auto-format visual masking while typing */
-  const handlePriceInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const rawDigits = target.value.replace(/\D/g, '');
-    target.value = formatCurrencyInput(rawDigits);
-    priceDisplay = target.value;
-    numericPriceState = Number(rawDigits) || 0;
-  };
-
-  const selectPricePreset = (val: number) => {
-    numericPriceState = val;
-    priceDisplay = val > 0 ? formatCurrencyInput(val) : '0';
-  };
-
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -96,8 +112,13 @@
     error = null;
 
     try {
-      const response = await fetch('/api/designer/templates/draft', {
-        method: 'POST',
+      const currentTemplateId = initialTemplate?.id;
+      const isUpdating = isEditMode && Boolean(currentTemplateId);
+      const endpoint = isUpdating && currentTemplateId
+        ? `/api/designer/templates/draft?templateId=${encodeURIComponent(currentTemplateId)}`
+        : '/api/designer/templates/draft';
+      const response = await fetch(endpoint, {
+        method: isUpdating ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
@@ -109,14 +130,15 @@
       });
 
       const result = await response.json();
+      const targetId = isUpdating ? currentTemplateId : result.data?.id;
 
-      if (response.ok && result.ok && result.data?.id) {
-        window.location.href = `/builder/${result.data.id}`;
+      if (response.ok && result.ok && targetId) {
+        window.location.href = `/builder/${targetId}`;
       } else {
-        error = result.error?.message || 'Gagal membuat template baru. Silakan coba lagi.';
+        error = result.error?.message || 'Gagal memproses template. Silakan coba lagi.';
       }
     } catch {
-      error = 'Terjadi kesalahan sistem saat membuat template.';
+      error = 'Terjadi kesalahan sistem saat memproses template.';
     } finally {
       loading = false;
     }
@@ -140,10 +162,20 @@
             <h1 class="text-heading-md text-main font-bold">
               Studio Inisialisasi Template
             </h1>
-            <Badge variant="secondary" size="sm">Draf Baru</Badge>
+            {#if isEditMode}
+              {#if initialTemplate?.status === 'rejected'}
+                <Badge variant="rose" size="sm">Perbaikan Desain</Badge>
+              {:else}
+                <Badge variant="primary" size="sm">Edit Draf</Badge>
+              {/if}
+            {:else}
+              <Badge variant="secondary" size="sm">Draf Baru</Badge>
+            {/if}
           </div>
           <p class="text-body-sm text-secondary mt-0.5">
-            Konfigurasi metadata awal template sebelum masuk ke No-Code Visual Builder
+            {isEditMode
+              ? 'Perbarui metadata template sebelum melanjutkan ke No-Code Visual Builder'
+              : 'Konfigurasi metadata awal template sebelum masuk ke No-Code Visual Builder'}
           </p>
         </div>
       </div>
@@ -176,6 +208,26 @@
           </div>
         {/if}
 
+        {#if isEditMode && initialTemplate?.status === 'rejected' && initialTemplate.rejectionReason}
+          <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs space-y-2 animate-fade-in-up">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold">
+                <span class="material-symbols-outlined text-base">assignment_late</span>
+                <span>Catatan Penolakan dari Kurator</span>
+              </div>
+              {#if initialTemplate.revisionCount !== undefined}
+                <Badge variant="rose" size="sm">Revisi #{initialTemplate.revisionCount}</Badge>
+              {/if}
+            </div>
+            <div class="p-3 bg-card/80 border border-rose-500/20 rounded-xl text-secondary leading-relaxed font-sans">
+              {initialTemplate.rejectionReason}
+            </div>
+            <p class="text-2xs text-muted">
+              Perbaiki metadata dasar di bawah ini, lalu klik tombol simpan untuk menyelaraskan desain kanvas.
+            </p>
+          </div>
+        {/if}
+
         <!-- Basic Details: Name, Category, Thumbnail -->
         <TemplateBasicDetails
           bind:name
@@ -188,14 +240,12 @@
 
         <!-- Pricing & Income Simulator Sub-Component -->
         <TemplatePricingSimulator
-          {numericPriceState}
-          {priceDisplay}
-          {pricePreview}
+          bind:numericPriceState
+          bind:priceDisplay
+          bind:pricePreview
           {loading}
           {platformFeePercentage}
           {designerPercentage}
-          onPriceInput={handlePriceInput}
-          onSelectPricePreset={selectPricePreset}
         />
 
         <!-- Description / Tagline Input -->
@@ -218,7 +268,7 @@
             {loading}
             className="shadow-md hover:shadow-primary/20"
           >
-            <span>Buka Visual Editor</span>
+            <span>{isEditMode ? 'Simpan & Buka Visual Editor' : 'Buka Visual Editor'}</span>
             <ArrowRight size={16} class="ml-1" />
           </Button>
         </div>
@@ -231,6 +281,7 @@
         {selectedCategoryName}
         {thumbnailUrl}
         {pricePreview}
+        status={isEditMode && initialTemplate ? initialTemplate.status : 'draft'}
       />
     </div>
   </Card>

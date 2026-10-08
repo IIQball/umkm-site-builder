@@ -1,7 +1,9 @@
 <script lang="ts">
   import HeroHeaderContent from './HeroHeaderContent.svelte';
+  import HeroImageCard from './HeroImageCard.svelte';
 
   export let badgeText: string = '';
+  export let badgeIcon: string = '';
   export let tagName: string = 'h1';
   export let title: string = '';
   export let subtitle: string = '';
@@ -11,16 +13,41 @@
   export let secondaryCtaLink: string = '#';
   export let waNumber: string = '';
   export let imageUrl: string = '';
+  export let imageFrame: 'none' | 'card' | 'grid' = 'none';
+  export let imageShape: 'rounded' | 'square' | 'circle' | 'squircle' = 'rounded';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent, key: string) => void = () => {};
   export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
+  export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta', 'image'];
 
-  $: isImageActive = activeNodeId === 'hero_image' || activeNodeId === 'hero_media' || activeNodeId === 'image';
+  $: isImageActive =
+    activeNodeId === 'hero_image' || activeNodeId === 'hero_media' || activeNodeId === 'image';
+  $: hasImage = elementOrder.includes('image');
 </script>
 
-<div class="w-full flex flex-col items-center text-center gap-6 py-6">
+{#snippet imageBlock()}
+  {#if imageUrl && hasImage}
+    <div class="my-3 w-full flex justify-center">
+      <HeroImageCard
+        {imageUrl}
+        altText={title}
+        {imageFrame}
+        {imageShape}
+        aspectRatio="aspect-[16/9]"
+        maxWidthClass="w-full max-w-4xl"
+        nodeKey="hero_image"
+        isActive={isImageActive}
+        {selectNode}
+        {selectNodeKey}
+      />
+    </div>
+  {/if}
+{/snippet}
+
+<div class="w-full py-6">
   <HeroHeaderContent
     {badgeText}
+    {badgeIcon}
     {tagName}
     {title}
     {subtitle}
@@ -32,27 +59,8 @@
     {activeNodeId}
     {selectNode}
     {selectNodeKey}
+    {elementOrder}
     align="center"
+    customBlocks={{ image: imageBlock }}
   />
-
-  {#if imageUrl}
-    <div
-      data-node="image"
-      role="button"
-      tabindex="0"
-      on:click={(e) => selectNode(e, 'hero_image')}
-      on:keydown={(e) => selectNodeKey(e, 'hero_image')}
-      class={`w-full max-w-4xl mt-4 p-2 rounded-2xl bg-[var(--color-card-base,#ffffff)] border border-[var(--color-border,rgba(15,23,42,0.08))] shadow-lg transition-all cursor-pointer ${
-        isImageActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
-          : 'hover:outline-dashed hover:outline-1 hover:outline-blue-400/50'
-      }`}
-    >
-      <img
-        src={imageUrl}
-        alt="Hero Showcase"
-        class="w-full aspect-[16/9] object-cover rounded-xl"
-      />
-    </div>
-  {/if}
 </div>

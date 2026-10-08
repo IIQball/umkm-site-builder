@@ -24,6 +24,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchas
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
+export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased', 'store_managed_by_admin']);
 
 // ==========================================
 // 2. CORE AUTH TABLES (BETTER-AUTH COMPATIBLE)
@@ -191,6 +192,8 @@ export const templates = pgTable('templates', {
  
   status: templateStatusEnum('status').default('pending').notNull(),
   rejectionReason: text('rejection_reason'),
+  revisionCount: integer('revision_count').default(0).notNull(),
+  revisionNotes: text('revision_notes'),
   deleteReason: text('delete_reason'),
  
   categoryId: text('category_id').references(() => templateCategories.id, { onDelete: 'set null' }),
@@ -339,6 +342,9 @@ export const stores = pgTable('stores', {
     storeSubdomainUniqueIdx: uniqueIndex('stores_subdomain_unique_idx')
       .on(table.subdomain)
       .where(sql`${table.deletedAt} IS NULL`),
+    storeActiveDirectoryIdx: index('stores_active_directory_idx')
+      .on(table.categoryId, table.latitude, table.longitude)
+      .where(sql`${table.status} = 'active' AND ${table.deletedAt} IS NULL`),
   };
 });
 
@@ -405,8 +411,25 @@ export const platformSettings = pgTable('platform_settings', {
   adminServiceFee: bigint('admin_service_fee', { mode: 'number' }).default(5000).notNull(),
   payoutMinimumBalance: bigint('payout_minimum_balance', { mode: 'number' }).default(50000).notNull(),
   settlementDelayDays: integer('settlement_delay_days').default(7).notNull(),
+  maxStoreBranches: integer('max_store_branches').default(5).notNull(),
+  maxTemplateRevisions: integer('max_template_revisions').default(3).notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.id),
+});
+
+// ==========================================
+// 8. NOTIFICATIONS
+// ==========================================
+
+export const notifications = pgTable('notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: notificationTypeEnum('type').notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  isRead: boolean('is_read').default(false).notNull(),
+  metadata: jsonb('metadata').default({}).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // ==========================================
@@ -433,6 +456,11 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ownedTemplates: many(userTemplates),
   activities: many(activityLogs),
   updatedSettings: many(platformSettings),
+  notifications: many(notifications),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
 
 export const tenantInvitationsRelations = relations(tenantInvitations, ({ one }) => ({
@@ -501,6 +529,32 @@ export const userTemplatesRelations = relations(userTemplates, ({ one }) => ({
 export const businessCategoriesRelations = relations(businessCategories, ({ one, many }) => ({
   creator: one(users, { fields: [businessCategories.createdBy], references: [users.id] }),
   stores: many(stores),
+}));
+
+// Statistik harian per toko (bucket tanggal mengikuti zona waktu WIB, format YYYY-MM-DD).
+// Dipakai untuk grafik garis di dashboard merchant.
+export const storeDailyStats = pgTable('store_daily_stats', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  date: text('date').notNull(),
+  views: integer('views').default(0).notNull(),
+  waClicks: integer('wa_clicks').default(0).notNull(),
+}, (table) => ({
+  storeDateUniqueIdx: uniqueIndex('store_daily_stats_store_date_idx').on(table.storeId, table.date),
+}));
+
+// Daily visitor tracking untuk anti-spam: 1 visitor IP per toko per hari max 1x view + 1x click
+export const visitorDailyLimit = pgTable('visitor_daily_limit', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  visitorIp: text('visitor_ip').notNull(),
+  date: text('date').notNull(),
+  viewedAt: timestamp('viewed_at'),
+  clickedAt: timestamp('clicked_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  storeIpDateUniqueIdx: uniqueIndex('visitor_daily_limit_store_ip_date_idx').on(table.storeId, table.visitorIp, table.date),
 }));
 
 export const storesRelations = relations(stores, ({ one, many }) => ({

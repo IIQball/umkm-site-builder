@@ -1,4 +1,5 @@
 import type { VariantGroup, VariantOption } from "../../../schemas/product-variant.schema";
+import { formatCurrencyInput } from "@/lib/currency";
 
 export function deserializeVariants(raw: unknown): VariantGroup[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
@@ -25,8 +26,8 @@ export function deserializeVariants(raw: unknown): VariantGroup[] {
 
 export function formatPriceAdjustment(value: number): string {
   if (value === 0) return "";
-  const prefix = value > 0 ? "+" : "";
-  return prefix + value.toLocaleString("id-ID");
+  const prefix = value > 0 ? "+" : value < 0 ? "-" : "";
+  return prefix + formatCurrencyInput(Math.abs(value));
 }
 
 export function parsePriceAdjustment(raw: string): number {

@@ -4,7 +4,7 @@
  */
 
 import { db } from '@/lib/db/client';
-import { transactions, users, templates, userTemplates } from '@/db/schema';
+import { transactions, users, templates, userTemplates, notifications } from '@/db/schema';
 import { xenditClient } from '@/lib/finance/xendit';
 import { eq, and } from 'drizzle-orm';
 import { AppError, formatCurrency } from '@/lib/utils';
@@ -121,6 +121,27 @@ export class TransactionService {
         templateId: template.id,
         acquiredAt: new Date(),
       });
+
+      const buyerName = user.length > 0 ? user[0].name : 'Seseorang';
+      await db.insert(notifications).values({
+        id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        userId: template.designerId,
+        type: 'template_purchased',
+        title: 'Template Diunduh',
+        message: `${buyerName} telah mengunduh template gratis Anda "${template.name}".`,
+        metadata: { templateId: template.id }
+      });
+
+      if (assistedBy) {
+        await db.insert(notifications).values({
+          id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
+          userId,
+          type: 'template_purchased',
+          title: 'Template Berhasil Diunduh',
+          message: `Admin telah membantu mengunduh template gratis "${template.name}" untuk toko Anda.`,
+          metadata: { templateId: template.id }
+        });
+      }
 
       return { isFree: true, message: 'Free template added to your account successfully' };
     }

@@ -92,7 +92,7 @@
                 variant={admin.status === 'active' ? 'orange' : 'primary'}
                 size="xs"
                 disabled={isActionLoading}
-                className="font-bold {admin.status !== 'active' ? '!bg-emerald-600 hover:!bg-emerald-700' : ''}"
+                className="font-bold {admin.status !== 'active' ? '!bg-success hover:!bg-success/90 text-white' : ''}"
                 on:click={() => dispatch('toggleStatus', admin)}
                 title={admin.status === 'active' ? 'Blokir Admin' : 'Aktifkan Admin'}
               >

@@ -93,6 +93,7 @@ export const ThemeLayoutSchema = z.object({
 }).optional();
 
 export const TemplateThemeSchema = z.object({
+  colorMode: z.enum(['auto', 'light', 'dark']).optional().default('auto'),
   primaryColor: z.string().optional(),
   fontFamily: z.string().optional(),
   colors: ThemeColorsSchema,
@@ -135,6 +136,7 @@ export const TemplateDraftSubmitSchema = z.object({
 
 export const SubmitReviewSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),
+  revisionNotes: z.string().max(1000).optional(),
 });
 
 export type TemplateStyles = z.infer<typeof TemplateStylesSchema>;

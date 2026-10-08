@@ -2,6 +2,7 @@
   import { MessageCircle, Menu } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import HeaderNav from './HeaderNav.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
 
@@ -102,7 +103,12 @@
           <HeaderNav {props} {sectionId} {isActive} onlyDesktop={true} />
         </div>
       {/if}
-    {:else if slot3 === 'cta'}
+    {/if}
+
+    <!-- Theme Toggle (Sebelum tombol CTA) -->
+    <TemplateThemeToggle size="sm" />
+
+    {#if slot3 === 'cta'}
       {#if isDesktop || viewMode === 'tablet'}
         <div data-node="cta" class="flex items-center justify-end">
           <a

@@ -28,9 +28,9 @@
   }
 
   const sizeStyles = {
-    sm: 'text-3xs py-0.5 px-2 gap-1.5',
-    md: 'text-2xs py-1 px-2.5 gap-1.5',
-    lg: 'text-xs py-1.5 px-3 gap-2'
+    sm: 'text-2xs py-0.5 px-2 gap-1.5',
+    md: 'text-xs py-1 px-2.5 gap-1.5',
+    lg: 'text-sm py-1.5 px-3 gap-2'
   }
 
   $: styleConfig = dotColorStyles[variant] || dotColorStyles.secondary

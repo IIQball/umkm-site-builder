@@ -20,6 +20,7 @@ let initialFeePercentage = 30;
 let initialSettlementDelayDays = 7;
 let initialAdminServiceFee = 5000;
 let initialMaxStoreBranches = 5;
+let initialMaxTemplateRevisions = 3;
 
 try {
   const records = await db
@@ -28,6 +29,7 @@ try {
       settlementDelayDays: platformSettings.settlementDelayDays,
       adminServiceFee: platformSettings.adminServiceFee,
       maxStoreBranches: platformSettings.maxStoreBranches,
+      maxTemplateRevisions: platformSettings.maxTemplateRevisions,
     })
     .from(platformSettings)
     .limit(1);
@@ -44,12 +46,16 @@ try {
     if (typeof records[0].maxStoreBranches === 'number') {
       initialMaxStoreBranches = records[0].maxStoreBranches;
     }
+    if (typeof records[0].maxTemplateRevisions === 'number') {
+      initialMaxTemplateRevisions = records[0].maxTemplateRevisions;
+    }
   }
 } catch {
   initialFeePercentage = 30;
   initialSettlementDelayDays = 7;
   initialAdminServiceFee = 5000;
   initialMaxStoreBranches = 5;
+  initialMaxTemplateRevisions = 3;
 }
 ---
 
@@ -61,6 +67,7 @@ try {
       {initialSettlementDelayDays}
       {initialAdminServiceFee}
       {initialMaxStoreBranches}
+      {initialMaxTemplateRevisions}
     />
   </div>
 </DashboardLayout>

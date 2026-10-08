@@ -10,11 +10,13 @@
   export let initialSettlementDelayDays: number = 7;
   export let initialAdminServiceFee: number = 5000;
   export let initialMaxStoreBranches: number = 5;
+  export let initialMaxTemplateRevisions: number = 3;
 
   let platformFeePercentage: number = initialFeePercentage;
   let settlementDelayDays: number = initialSettlementDelayDays;
   let adminServiceFee: number = initialAdminServiceFee;
   let maxStoreBranches: number = initialMaxStoreBranches;
+  let maxTemplateRevisions: number = initialMaxTemplateRevisions;
   let isLoading = false;
 
   onMount(async () => {
@@ -33,6 +35,9 @@
         }
         if (result.data.maxStoreBranches !== undefined) {
           maxStoreBranches = Number(result.data.maxStoreBranches);
+        }
+        if (result.data.maxTemplateRevisions !== undefined) {
+          maxTemplateRevisions = Number(result.data.maxTemplateRevisions);
         }
       }
     } catch {
@@ -69,6 +74,13 @@
       });
       return;
     }
+    if (maxTemplateRevisions < 1 || maxTemplateRevisions > 20) {
+      addToast({
+        type: "error",
+        message: "Maksimal revisi template harus antara 1 hingga 20 kali",
+      });
+      return;
+    }
 
     isLoading = true;
 
@@ -81,6 +93,7 @@
           settlementDelayDays: Number(settlementDelayDays),
           adminServiceFee: Number(adminServiceFee),
           maxStoreBranches: Number(maxStoreBranches),
+          maxTemplateRevisions: Number(maxTemplateRevisions),
         }),
       });
       const result = await res.json();
@@ -89,7 +102,7 @@
         addToast({
           type: "success",
           message:
-            "Pengaturan komisi, fee admin, settlement & batas cabang berhasil disimpan!",
+            "Pengaturan komisi, fee admin, settlement & batas cabang/revisi berhasil disimpan!",
         });
       } else {
         addToast({
@@ -147,13 +160,14 @@
     </div>
   </div>
 
-  <!-- Stat Cards Layout (1 Full di Kiri, 4 Sub di Kanan sesuai Frame 1100) -->
+  <!-- Stat Cards Layout (6 Cards Grid sesuai Frame 1101) -->
   <CommissionStatsGrid
     {platformFeePercentage}
     {designerShare}
     {adminServiceFee}
     {settlementDelayDays}
     {maxStoreBranches}
+    {maxTemplateRevisions}
     {samplePrice}
     {samplePlatformFee}
   />
@@ -206,6 +220,7 @@
             bind:adminServiceFee
             bind:settlementDelayDays
             bind:maxStoreBranches
+            bind:maxTemplateRevisions
             {isLoading}
           />
 

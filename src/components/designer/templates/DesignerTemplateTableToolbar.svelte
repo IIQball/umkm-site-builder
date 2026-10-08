@@ -1,9 +1,12 @@
 <script lang="ts">
   import { Button } from '@/components/ui';
+  import SearchableSelect from '@/components/ui/SearchableSelect.svelte';
 
   export let searchQuery: string = '';
   export let activeFilter: 'all' | 'draft' | 'pending' | 'approved' | 'rejected' = 'all';
   export let viewMode: 'table' | 'grid' = 'grid';
+  export let categories: Array<{ id: string; name: string; slug: string }> = [];
+  export let selectedCategory: string = 'all';
   export let counts: {
     all: number;
     draft: number;
@@ -18,6 +21,11 @@
   export let onToggleSelectAllVisibleDrafts: () => void;
   export let onClearDraftSelection: () => void;
   export let onOpenDeleteBatchModal: () => void;
+
+  $: categoryOptions = [
+    { value: 'all', label: 'Semua Kategori' },
+    ...categories.map((c) => ({ value: c.id, label: c.name })),
+  ];
 </script>
 
 <!-- Table Header & Controls -->
@@ -44,9 +52,23 @@
         type="text"
         bind:value={searchQuery}
         placeholder="Cari template / ID..."
-        class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
+        class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-40 sm:w-48"
       />
     </div>
+
+    <!-- Category Filter Dropdown with Search (using existing UI component) -->
+    {#if categories.length > 0}
+      <div class="w-40 sm:w-48 flex-shrink-0">
+        <SearchableSelect
+          options={categoryOptions}
+          bind:value={selectedCategory}
+          placeholder="Pilih Kategori"
+          searchPlaceholder="Cari kategori..."
+          size="sm"
+          clearable={false}
+        />
+      </div>
+    {/if}
 
     <!-- Segmented Status Filter -->
     <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
@@ -88,6 +110,16 @@
       >
         <span class="w-1.5 h-1.5 rounded-full bg-muted"></span>
         Draft ({counts.draft})
+      </button>
+      <button
+        type="button"
+        on:click={() => (activeFilter = 'rejected')}
+        class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter === 'rejected'
+          ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
+          : 'text-muted hover:text-main'}"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+        Ditolak ({counts.rejected})
       </button>
     </div>
 

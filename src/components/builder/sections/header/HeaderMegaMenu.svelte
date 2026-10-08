@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ChevronDown, MessageCircle, Menu } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
@@ -136,6 +137,9 @@
 
   <!-- Right Controls: Desktop CTA & Mobile Hamburger -->
   <div data-node="cta" class="flex items-center gap-2 flex-shrink-0 ml-auto">
+    <!-- Theme Toggle (Sebelum tombol CTA) -->
+    <TemplateThemeToggle size="sm" />
+
     {#if hasCta && isDesktop}
       <a
         href={waUrl}

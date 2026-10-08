@@ -65,7 +65,7 @@
       </div>
       <div>
         <span>Nota Transaksi Resmi</span>
-        <span class="text-3xs text-secondary font-mono block font-normal">
+        <span class="text-xs text-secondary font-mono block font-normal">
           {displayId}
         </span>
       </div>
@@ -237,13 +237,13 @@
 
         <!-- Footer Perusahaan di Dalam Kertas Nota -->
         <div class="mt-6 pt-4 border-t border-dashed border-light text-center space-y-1 text-muted font-sans select-none">
-          <div class="text-3xs tracking-wider">
+          <div class="text-xs tracking-wider">
             Instagram · Threads · X
           </div>
           <div class="text-2xs font-semibold text-secondary">
             PT. Pinoka Inovasi Nusantara
           </div>
-          <div class="text-3xs text-muted">
+          <div class="text-xs text-muted">
             Banyuwangi, Jawa Timur, Indonesia
           </div>
         </div>

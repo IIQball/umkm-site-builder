@@ -32,3 +32,20 @@ export function calculateGoldenRatioTypography(baseFont: number = 16) {
     caption: Math.round(baseFont / phi),   // ~10px for 16px
   };
 }
+
+/**
+ * Determines whether a color hex string is perceptually dark based on HSP / luminance formula.
+ */
+export function isDarkColor(color?: unknown): boolean {
+  if (typeof color !== 'string' || !color || color === 'transparent') return false;
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16) || 0;
+    const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16) || 0;
+    const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16) || 0;
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  }
+  return false;
+}
+

@@ -72,7 +72,7 @@
       <span class="block text-xs font-bold text-main font-heading">
         Jumlah Cabang / Lokasi Toko
       </span>
-      <span class="text-3xs text-secondary font-mono">Maks {maxBranches} Cabang</span>
+      <span class="text-xs text-secondary font-mono">Maks {maxBranches} Cabang</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
@@ -141,7 +141,7 @@
           </div>
 
           <div>
-            <label for={`branch-name-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">
+            <label for={`branch-name-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
               Nama Cabang
             </label>
             <input
@@ -155,7 +155,7 @@
           </div>
 
           <div>
-            <label for={`branch-addr-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">
+            <label for={`branch-addr-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
               Alamat Lengkap Cabang
             </label>
             <textarea
@@ -169,7 +169,7 @@
           </div>
 
           <div>
-            <label for={`branch-maps-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">
+            <label for={`branch-maps-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
               Link Google Maps Cabang
             </label>
             <div class="relative flex items-center">

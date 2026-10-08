@@ -15,6 +15,7 @@
   import NavbarMobileDrawer from './NavbarMobileDrawer.svelte'
   import { Button } from '@/components/ui'
   import NavbarDropdown from './NavbarDropdown.svelte'
+  import { getStoredTheme, applyTheme } from '@/lib/utils/theme'
 
   export let user: NavUser | null = null
   export let currentPath: string = ''
@@ -81,9 +82,7 @@
   }
 
   onMount(() => {
-    const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+    isDark = getStoredTheme() === 'dark'
 
     if (!currentPath && typeof window !== 'undefined') {
       currentPath = window.location.pathname
@@ -107,18 +106,7 @@
 
   const toggleTheme = () => {
     isDark = !isDark
-    applyTheme(isDark)
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
-  }
-
-  const applyTheme = (dark: boolean) => {
-    const themeName = dark ? 'dark' : 'light'
-    document.documentElement.setAttribute('data-theme', themeName)
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    applyTheme(isDark ? 'dark' : 'light')
   }
 
   const handleSignOut = async () => {
@@ -166,7 +154,7 @@
       <a
         href="/umkm"
         class={currentPath.startsWith('/umkm')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         UMKM
@@ -176,7 +164,7 @@
       <a
         href="/templates"
         class={currentPath.startsWith('/templates')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         Template
@@ -217,7 +205,7 @@
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
       <a
         href="/#contact"
-        class="hidden sm:inline-block label-caps tracking-wider text-secondary hover:text-main dark:text-muted dark:hover:text-white font-medium transition-colors shrink-0"
+        class="hidden sm:inline-block label-caps tracking-wider text-secondary hover:text-main dark:text-white/80 dark:hover:text-white font-medium transition-colors shrink-0"
       >
         KONTAK
       </a>

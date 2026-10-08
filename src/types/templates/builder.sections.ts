@@ -157,7 +157,6 @@ export interface ProductCatalogProps {
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }
-
 export interface TestimonialItem {
   id?: string;
   name?: string;
@@ -165,6 +164,7 @@ export interface TestimonialItem {
   role?: string;
   avatar?: string;
   avatarUrl?: string;
+  videoUrl?: string;
   comment?: string;
   content?: string;
   rating?: number;

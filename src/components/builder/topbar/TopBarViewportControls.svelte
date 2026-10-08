@@ -54,7 +54,7 @@
       title="Desktop (100% full width)"
     >
       <Monitor size={12} />
-      <span class="hidden md:inline text-3xs">Desktop</span>
+      <span class="hidden md:inline text-xs">Desktop</span>
     </Button>
 
     <Button
@@ -66,7 +66,7 @@
       title="Tablet (768px)"
     >
       <Tablet size={12} />
-      <span class="hidden md:inline text-3xs">Tablet</span>
+      <span class="hidden md:inline text-xs">Tablet</span>
     </Button>
 
     <Button
@@ -78,7 +78,7 @@
       title="Mobile (375px)"
     >
       <Smartphone size={12} />
-      <span class="hidden md:inline text-3xs">Mobile</span>
+      <span class="hidden md:inline text-xs">Mobile</span>
     </Button>
   </div>
 
@@ -93,7 +93,7 @@
       title="Toggle Figma 12/8/4 Column Layout Grid (Ctrl+G)"
     >
       <Grid size={12} />
-      <span class="text-3xs">Kolom</span>
+      <span class="text-xs">Kolom</span>
     </Button>
 
     <Button
@@ -105,7 +105,7 @@
       title="Toggle 8px Pixel Grid Pattern"
     >
       <Grid2X2 size={12} />
-      <span class="text-3xs">Grid</span>
+      <span class="text-xs">Grid</span>
     </Button>
   </div>
 </div>

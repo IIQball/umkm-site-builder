@@ -3,6 +3,7 @@
   import { Button } from '@/components/ui';
   import { makeHandlePropChange } from './content.helpers';
   import HeroImageUploadContent from './hero/HeroImageUploadContent.svelte';
+  import HeroVideoUploadContent from './hero/HeroVideoUploadContent.svelte';
   import HeroCtaLinkSelect from './hero/HeroCtaLinkSelect.svelte';
   import SearchableIconDropdown from '../inspector/SearchableIconDropdown.svelte';
   import {
@@ -115,6 +116,16 @@
     <div class="space-y-3">
       <HeroImageUploadContent
         {imageUrl}
+        onPropChange={handlePropChange}
+      />
+    </div>
+  {/if}
+
+  <!-- Panel Upload Video Background - Jika layout preset video_background_loop -->
+  {#if preset === 'video_background_loop'}
+    <div class="space-y-3">
+      <HeroVideoUploadContent
+        videoUrl={(section.props?.videoUrl as string) ?? ''}
         onPropChange={handlePropChange}
       />
     </div>

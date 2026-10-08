@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { X, ChevronDown, MessageCircle, Clock, MapPin, Bike, ShieldCheck, CheckCircle2, Zap } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
   import { stripEmoji } from './headerIcons';
@@ -103,15 +104,18 @@
       <div class="flex items-center gap-2">
         <HeaderLogo {props} {sectionId} {isActive} />
       </div>
-      <button
-        type="button"
-        on:click|stopPropagation={onClose}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); border: 1px solid var(--color-border); background-color: var(--theme-surface, var(--color-card-base, transparent)); color: var(--theme-text-primary, var(--color-text-main));"
-        class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer hover:bg-[var(--color-nested-base)]"
-        aria-label="Tutup Menu"
-      >
-        <X size={20} />
-      </button>
+      <div class="flex items-center gap-2">
+        <TemplateThemeToggle size="sm" />
+        <button
+          type="button"
+          on:click|stopPropagation={onClose}
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); border: 1px solid var(--color-border); background-color: var(--theme-surface, var(--color-card-base, transparent)); color: var(--theme-text-primary, var(--color-text-main));"
+          class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer hover:bg-[var(--color-nested-base)]"
+          aria-label="Tutup Menu"
+        >
+          <X size={20} />
+        </button>
+      </div>
     </div>
 
     <!-- Top Bar / Badges Info for Presets -->

@@ -92,27 +92,27 @@
     tabindex="0"
     on:click={(e) => selectNode(e, 'maps_info_card')}
     on:keydown={(e) => handleKeydown(e, 'maps_info_card')}
-    class={`cq-floating-card-bottom bg-[var(--theme-surface,var(--color-card-base))]/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border border-[var(--color-border)] text-left transition-all outline-none ${
-      isCardSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+    class={`cq-floating-card-bottom bg-card/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border border-light text-left transition-all outline-none ${
+      isCardSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
     }`}
     style={`border-radius: ${cardStyle.borderRadius || '1rem'}; padding: ${cardStyle.padding || ''}; ${cardStyle.backgroundColor ? `background-color: ${cardStyle.backgroundColor} !important;` : ''} ${cardStyle.borderColor ? `border-color: ${cardStyle.borderColor} !important;` : ''}`}
   >
     <div
-      class="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400 uppercase bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-heading"
+      class="inline-flex items-center gap-1.5 font-bold text-success uppercase bg-success/10 px-2 py-0.5 rounded-full border border-success/20 font-heading"
       style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));"
     >
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
       <span>{storeHoursStatus}</span>
     </div>
 
     <h3
-      class="font-heading text-[var(--theme-text-primary,var(--color-text-main))] mt-2 mb-1"
+      class="font-heading text-main mt-2 mb-1"
       style={`font-size: ${cardStyle.fontSize || 'var(--theme-text-h3, var(--text-h3-size, 20px))'}; font-weight: ${cardStyle.fontWeight || 'var(--theme-text-h3-weight, var(--text-h3-weight, 600))'}; ${cardStyle.color ? `color: ${cardStyle.color} !important;` : ''}`}
     >
       {storeName}
     </h3>
     <p
-      class="text-[var(--theme-text-muted,var(--color-text-muted))] font-sans leading-relaxed mb-4"
+      class="text-muted font-sans leading-relaxed mb-4"
       style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
     >
       {address}
@@ -130,7 +130,7 @@
       on:click={(e) => selectNode(e, 'maps_cta_button')}
       on:keydown={(e) => handleKeydown(e, 'maps_cta_button')}
       class={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-4 font-heading font-bold hover:opacity-90 active:scale-[0.98] transition-all outline-none shadow-xs ${
-        isCtaSelected ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''
+        isCtaSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''
       }`}
       style={`border-radius: ${ctaStyle.borderRadius || 'var(--theme-btn-radius,var(--btn-radius,16px))'}; background-color: ${ctaStyle.backgroundColor || 'var(--theme-btn-primary-bg,var(--btn-primary-bg,var(--theme-primary, var(--color-primary))))'}; color: ${ctaStyle.color || 'var(--theme-btn-primary-text, var(--btn-primary-text, white))'}; font-size: calc(var(--theme-text-body, var(--text-body-size, 16px)) * 0.9);`}
     >

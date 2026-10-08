@@ -145,8 +145,11 @@
         loop
         muted
         playsinline
+        preload="auto"
         class="w-full h-full object-cover select-none"
-      ></video>
+      >
+        <track kind="captions" />
+      </video>
       <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px]"></div>
     </div>
   {:else if activePreset === 'gradient_mesh_glow'}

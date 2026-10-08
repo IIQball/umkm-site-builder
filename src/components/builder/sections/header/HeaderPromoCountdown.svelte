@@ -3,6 +3,7 @@
   import { Menu, Ticket } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import HeaderNav from './HeaderNav.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
@@ -149,6 +150,9 @@
 
     <!-- Right Controls: Desktop Promo CTA & Mobile 44x44px Hamburger Button -->
     <div data-node="cta" class="flex items-center gap-2 flex-shrink-0 ml-auto">
+      <!-- Theme Toggle (Sebelum tombol CTA) -->
+      <TemplateThemeToggle size="sm" />
+
       {#if hasCta && (isDesktop || viewMode === 'tablet')}
         <a
           href={waUrl}

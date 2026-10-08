@@ -30,7 +30,7 @@
       placeholder="Contoh: Promo Spesial: Belanja hemat hari ini!"
       class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
     />
-    <p class="text-3xs text-secondary mt-1 font-sans">
+    <p class="text-xs text-secondary mt-1 font-sans">
       Teks pengumuman / promosi yang tampil di baris teratas halaman toko.
     </p>
   </div>
@@ -43,12 +43,12 @@
           Logo Toko
         </span>
         {#if customization.header.logoImageUrl}
-          <span class="text-3xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+          <span class="text-xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
             Logo Terpasang
           </span>
         {/if}
       </div>
-      <p class="text-3xs text-secondary font-sans leading-relaxed">
+      <p class="text-xs text-secondary font-sans leading-relaxed">
         Template ini mendukung tampilan logo toko. Unggah file logo Anda (PNG, JPG, atau WebP). Logo ini otomatis digunakan pada navbar header dan footer toko.
       </p>
       <ImageUpload

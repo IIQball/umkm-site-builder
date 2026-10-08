@@ -44,7 +44,7 @@
               {cat.name}
             </span>
             {#if cat.description}
-              <span class="text-3xs text-secondary block truncate font-sans max-w-xs mt-0.5">
+              <span class="text-xs text-secondary block truncate font-sans max-w-xs mt-0.5">
                 {cat.description}
               </span>
             {/if}

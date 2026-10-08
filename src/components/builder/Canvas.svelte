@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
+  import { PlusSquare } from 'lucide-svelte';
   import SectionRenderer from './sections/SectionRenderer.svelte';
   import LayoutGridOverlay from './LayoutGridOverlay.svelte';
   import CanvasSpacingHandles from './canvas/CanvasSpacingHandles.svelte';
@@ -52,7 +53,7 @@
   $: scaleRatio = Number(Math.min(1, Math.max(0.1, autoScale * userZoom)).toFixed(4));
 
   $: theme = ($editorStore.template?.config.theme || {}) as TemplateTheme;
-  $: isDarkPreview = $canvasStore.previewTheme === 'dark';
+  $: isDarkPreview = $canvasStore.editorTheme === 'dark' || $canvasStore.previewTheme === 'dark' || theme?.colorMode === 'dark';
   $: canvasCssVars = buildCanvasCssVars(theme, isDarkPreview, viewMode);
   $: {
     loadDynamicGoogleFonts(theme?.typography?.headingFont, theme?.typography?.bodyFont);
@@ -175,7 +176,7 @@
 
   <!-- Drag Spacing Value Tooltip Overlay -->
   {#if isDraggingSpacing && currentDragTooltip}
-    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white font-mono font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl border border-white/20 animate-pulse pointer-events-none flex items-center gap-2">
+    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-main text-canvas font-mono font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl border border-light animate-pulse pointer-events-none flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-orange"></span>
       <span>{currentDragTooltip}</span>
     </div>
@@ -191,9 +192,9 @@
     "
   >
     <!-- Viewport Header Indicator -->
-    <div class="w-full flex items-center justify-between px-3 py-1.5 mb-2 bg-card border border-light rounded-t-xl text-3xs font-mono text-secondary shadow-xs">
+    <div class="w-full flex items-center justify-between px-3 py-1.5 mb-2 bg-card border border-light rounded-t-xl text-xs font-mono text-secondary shadow-xs">
       <div class="flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="w-2 h-2 rounded-full bg-success"></span>
         <span class="font-bold text-main uppercase font-heading">{viewMode}</span>
         <span>•</span>
         <span>{targetWidth}px</span>
@@ -208,7 +209,9 @@
     <div
       id="canvas-frame"
       bind:clientHeight={canvasHeight}
-      class="w-full bg-card rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible builder-canvas-viewport"
+      class="w-full bg-canvas text-main rounded-b-2xl shadow-xl transition-all duration-200 border border-light relative overflow-visible builder-canvas-viewport"
+      class:dark={isDarkPreview}
+      data-theme={isDarkPreview ? 'dark' : 'light'}
       style="{canvasCssVars};"
       on:click|stopPropagation
       role="region"
@@ -224,7 +227,7 @@
       {#if sections.length === 0}
         <div class="py-24 px-8 text-center flex flex-col items-center justify-center">
           <div class="w-16 h-16 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mb-4 shadow-2xs">
-            <span class="material-symbols-outlined text-3xl">add_box</span>
+            <PlusSquare size={32} class="text-primary/70" />
           </div>
           <h3 class="text-base font-bold text-main font-heading mb-1">Canvas Masih Kosong</h3>
           <p class="text-xs text-secondary max-w-sm font-sans mb-4 leading-relaxed">

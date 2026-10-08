@@ -14,6 +14,7 @@ export const MediaSignInput = z.object({
   folder: z.enum(ALLOWED_FOLDERS, {
     errorMap: () => ({ message: 'Folder harus salah satu: products, templates, stores' }),
   }),
+  resourceType: z.enum(['image', 'video']).optional().default('image'),
 });
 
 export type MediaSignInput = z.infer<typeof MediaSignInput>;

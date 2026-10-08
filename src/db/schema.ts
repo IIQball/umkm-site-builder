@@ -192,6 +192,8 @@ export const templates = pgTable('templates', {
  
   status: templateStatusEnum('status').default('pending').notNull(),
   rejectionReason: text('rejection_reason'),
+  revisionCount: integer('revision_count').default(0).notNull(),
+  revisionNotes: text('revision_notes'),
   deleteReason: text('delete_reason'),
  
   categoryId: text('category_id').references(() => templateCategories.id, { onDelete: 'set null' }),
@@ -410,6 +412,7 @@ export const platformSettings = pgTable('platform_settings', {
   payoutMinimumBalance: bigint('payout_minimum_balance', { mode: 'number' }).default(50000).notNull(),
   settlementDelayDays: integer('settlement_delay_days').default(7).notNull(),
   maxStoreBranches: integer('max_store_branches').default(5).notNull(),
+  maxTemplateRevisions: integer('max_template_revisions').default(3).notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.id),
 });

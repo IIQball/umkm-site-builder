@@ -31,12 +31,13 @@
       allTemplates = [];
     }
   }
-  let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = pagination ? 'all' : 'pending';
+  let activeTab: 'all' | 'pending' | 'approved' | 'rejected' = 'pending';
   let searchQuery = '';
   let isLoading = false;
   let selectedTemplate: AdminTemplateItem | null = null;
   let approveModalOpen = false;
   let rejectModalOpen = false;
+  let revisionNotesModalOpen = false;
   let rejectionReason = '';
   let actionLoading = false;
   let currentPage = 1;
@@ -52,10 +53,7 @@
         allTemplates = result.data.filter((t: AdminTemplateItem) => t.status !== 'draft');
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Gagal memuat daftar template',
-      });
+      addToast({ type: 'error', message: 'Gagal memuat daftar template' });
     } finally {
       isLoading = false;
     }
@@ -77,9 +75,15 @@
     rejectModalOpen = true;
   };
 
+  const openRevisionNotesModal = (t: AdminTemplateItem) => {
+    selectedTemplate = t;
+    revisionNotesModalOpen = true;
+  };
+
   const closeModal = () => {
     approveModalOpen = false;
     rejectModalOpen = false;
+    revisionNotesModalOpen = false;
     selectedTemplate = null;
     rejectionReason = '';
   };
@@ -87,10 +91,7 @@
   const submitReview = async (action: 'approve' | 'reject') => {
     if (!selectedTemplate) return;
     if (action === 'reject' && rejectionReason.trim().length < 5) {
-      addToast({
-        type: 'error',
-        message: 'Alasan penolakan minimal 5 karakter',
-      });
+      addToast({ type: 'error', message: 'Alasan penolakan minimal 5 karakter' });
       return;
     }
     actionLoading = true;
@@ -104,28 +105,20 @@
         }),
       });
       const result = await res.json();
-
       if (res.ok && result.ok) {
         addToast({
           type: 'success',
-          message:
-            action === 'approve'
-              ? `Template "${selectedTemplate.name}" berhasil disetujui!`
-              : `Template "${selectedTemplate.name}" telah ditolak.`,
+          message: action === 'approve'
+            ? `Template "${selectedTemplate.name}" berhasil disetujui!`
+            : `Template "${selectedTemplate.name}" telah ditolak.`,
         });
         closeModal();
         await fetchTemplates();
       } else {
-        addToast({
-          type: 'error',
-          message: result.error?.message || 'Gagal memproses review template',
-        });
+        addToast({ type: 'error', message: result.error?.message || 'Gagal memproses review template' });
       }
     } catch {
-      addToast({
-        type: 'error',
-        message: 'Terjadi kesalahan jaringan saat memproses review',
-      });
+      addToast({ type: 'error', message: 'Terjadi kesalahan jaringan saat memproses review' });
     } finally {
       actionLoading = false;
     }
@@ -205,7 +198,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
           <span>Menunggu</span>
           {#if countPending > 0}
-            <span class="opacity-80 font-mono text-3xs">({countPending})</span>
+            <span class="opacity-80 font-mono text-xs">({countPending})</span>
           {/if}
         </Button>
 
@@ -218,7 +211,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
           <span>Disetujui</span>
           {#if countApproved > 0}
-            <span class="opacity-80 font-mono text-3xs">({countApproved})</span>
+            <span class="opacity-80 font-mono text-xs">({countApproved})</span>
           {/if}
         </Button>
 
@@ -231,7 +224,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
           <span>Ditolak</span>
           {#if countRejected > 0}
-            <span class="opacity-80 font-mono text-3xs">({countRejected})</span>
+            <span class="opacity-80 font-mono text-xs">({countRejected})</span>
           {/if}
         </Button>
       </div>
@@ -271,6 +264,7 @@
       {pageSize}
       onApprove={openApproveModal}
       onReject={openRejectModal}
+      onViewRevisionNotes={openRevisionNotesModal}
     />
 
     <Pagination
@@ -284,9 +278,12 @@
 <TemplateReviewModals
   bind:approveModalOpen
   bind:rejectModalOpen
+  bind:revisionNotesModalOpen
   {selectedTemplate}
   bind:rejectionReason
   {actionLoading}
   onClose={closeModal}
   onSubmitReview={submitReview}
+  onOpenApproveFromNotes={() => { revisionNotesModalOpen = false; approveModalOpen = true; }}
+  onOpenRejectFromNotes={() => { revisionNotesModalOpen = false; rejectModalOpen = true; }}
 />

@@ -97,7 +97,7 @@
               class={`!w-full !flex !items-center !justify-between !px-2 !py-1.5 !h-auto !min-h-0 rounded-lg text-xs text-left ${
                 isSelected
                   ? 'font-semibold'
-                  : 'text-base-content hover:bg-base-200 dark:hover:bg-slate-800'
+                  : 'text-base-content hover:bg-base-200'
               }`}
             >
               <div class="flex items-center gap-2 truncate">

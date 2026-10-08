@@ -126,7 +126,7 @@
       <div class="p-3.5 bg-card rounded-xl border border-light space-y-3 shadow-2xs">
         <div class="flex items-center justify-between gap-2 border-b border-light/60 pb-2">
           <div class="flex items-center gap-1.5 min-w-0">
-            <div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xs shrink-0">
+            <div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
               {(item.customerName || 'U').charAt(0).toUpperCase()}
             </div>
             <span class="text-xs font-bold text-main truncate font-heading">
@@ -167,7 +167,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
-            <label for={`testi-name-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">Nama Pelanggan</label>
+            <label for={`testi-name-${idx}`} class="block text-xs font-semibold text-secondary mb-1">Nama Pelanggan</label>
             <input
               id={`testi-name-${idx}`}
               type="text"
@@ -179,7 +179,7 @@
           </div>
 
           <div>
-            <label for={`testi-role-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">Status / Asal Pelanggan</label>
+            <label for={`testi-role-${idx}`} class="block text-xs font-semibold text-secondary mb-1">Status / Asal Pelanggan</label>
             <input
               id={`testi-role-${idx}`}
               type="text"
@@ -192,7 +192,7 @@
         </div>
 
         <div>
-          <label for={`testi-rating-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">Rating Kepuasan</label>
+          <label for={`testi-rating-${idx}`} class="block text-xs font-semibold text-secondary mb-1">Rating Kepuasan</label>
           <div class="flex items-center gap-1">
             {#each [1, 2, 3, 4, 5] as star}
               <button
@@ -211,7 +211,7 @@
         </div>
 
         <div>
-          <label for={`testi-comment-${idx}`} class="block text-3xs font-semibold text-secondary mb-1">Isi Ulasan / Testimoni</label>
+          <label for={`testi-comment-${idx}`} class="block text-xs font-semibold text-secondary mb-1">Isi Ulasan / Testimoni</label>
           <textarea
             id={`testi-comment-${idx}`}
             rows="2"

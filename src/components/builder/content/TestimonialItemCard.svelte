@@ -2,7 +2,7 @@
   import { ChevronUp, ChevronDown, Trash2, CheckCircle2, Star, Plus } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import type { TestimonialItem } from '@/types';
-  import ImageUploadDropzone from '../inspector/ImageUploadDropzone.svelte';
+  import TestimonialItemMediaUpload from './testimonials/TestimonialItemMediaUpload.svelte';
 
   export let item: TestimonialItem;
   export let index: number;
@@ -238,28 +238,26 @@
             }}
           ></textarea>
         </div>
-        <button
+        <Button
           type="button"
+          size="xs"
+          variant="primary"
           on:click={handleAddComment}
           disabled={!newCommentText.trim()}
-          class="w-full py-1.5 px-3 bg-primary hover:bg-primary/90 disabled:opacity-40 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+          class="w-full !py-1.5 font-semibold"
         >
           <Plus size={13} />
           <span>Tambah Komentar</span>
-        </button>
+        </Button>
       </div>
     </div>
 
-    <!-- Avatar Upload Dropzone -->
-    <div class="space-y-1 pt-1">
-      <span class="block font-semibold text-2xs text-base-content/70">Foto / Gambar Pelanggan</span>
-      <ImageUploadDropzone
-        imageUrl={item.avatar || ''}
-        onImageChange={(url) => onFieldChange('avatar', url)}
-        label={`Foto ${item.customerName || `Review #${index + 1}`}`}
-        folder="testimonials"
-        compact={true}
-      />
-    </div>
+    <!-- Media Upload (Avatar & Video Ulasan) -->
+    <TestimonialItemMediaUpload
+      avatar={item.avatar || ''}
+      videoUrl={item.videoUrl || ''}
+      onAvatarChange={(url) => onFieldChange('avatar', url)}
+      onVideoChange={(url) => onFieldChange('videoUrl', url)}
+    />
   </div>
 </div>

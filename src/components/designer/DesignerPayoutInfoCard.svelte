@@ -54,7 +54,7 @@
 
   <!-- Card Footer -->
   <div class="px-5 py-3.5 sm:px-6 bg-nested/50 border-t border-light flex items-center justify-between">
-    <span class="text-3xs text-secondary font-medium font-sans">
+    <span class="text-xs text-secondary font-medium font-sans">
       Pencairan otomatis diproses transfer antar-bank
     </span>
     <a

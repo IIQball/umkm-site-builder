@@ -50,7 +50,7 @@
         {#each targetTemplates as tpl}
           <div class="text-xs text-main font-mono px-2 py-1 bg-card rounded-md border border-light flex items-center justify-between">
             <span class="truncate">{tpl.name}</span>
-            <span class="text-3xs text-muted flex-shrink-0 ml-2">#{tpl.id.slice(0, 6)}</span>
+            <span class="text-xs text-muted flex-shrink-0 ml-2">#{tpl.id.slice(0, 6)}</span>
           </div>
         {/each}
       </div>

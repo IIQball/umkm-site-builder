@@ -15,11 +15,13 @@
   import { onMount } from 'svelte';
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';
+  import type { TemplateTheme } from '@/schemas';
   import { Badge, Button } from '@/components/ui';
   import { buildCanvasCssVars } from './canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from './canvas/fontLoader.helpers';
   import { mergeStoreCustomization } from '@/lib/templates/mergeCustomization';
   import { clone } from '@/lib/templates/migration';
+  import { getStoredTheme, applyTheme } from '@/lib/utils/theme';
 
   export let template: EditorTemplate;
   export let isOwner: boolean = false;
@@ -42,7 +44,7 @@
     : 1;
 
   $: sections = template?.config?.sections || [];
-  $: theme = template?.config?.theme || {};
+  $: theme = (template?.config?.theme || {}) as TemplateTheme;
 
   $: canvasCssVars = buildCanvasCssVars(theme, isDark, viewMode);
   $: {
@@ -61,7 +63,8 @@
       }
     }
     editorStore.setViewMode(viewMode);
-    isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    isDark = getStoredTheme() === 'dark';
+    applyTheme(isDark ? 'dark' : 'light');
 
     if (window.parent && window.parent !== window) {
       window.parent.postMessage(
@@ -96,8 +99,9 @@
   const toggleTheme = () => {
     isDark = !isDark;
     const themeName = isDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('theme', themeName);
+    applyTheme(themeName);
+    editorStore.setEditorTheme(themeName);
+    editorStore.setPreviewTheme(themeName);
   };
 </script>
 
@@ -246,19 +250,20 @@
     >
       <div
         bind:clientHeight={canvasHeight}
+        data-theme={isDark ? 'dark' : 'light'}
         style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
         class={`transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
-          isDark ? 'theme-dark bg-slate-950 text-slate-100' : 'theme-light bg-white text-slate-900'
+          isDark ? 'theme-dark dark bg-canvas text-main' : 'theme-light bg-card text-main'
         } ${
           viewMode === 'desktop'
-            ? 'min-h-[800px] border border-base-300'
+            ? 'min-h-[800px] border border-light'
             : viewMode === 'tablet'
-            ? 'min-h-[800px] border border-base-300'
-            : 'min-h-[667px] border border-base-300'
+            ? 'min-h-[800px] border border-light'
+            : 'min-h-[667px] border border-light'
         }`}
       >
         {#if sections.length === 0}
-          <div class="p-16 text-center text-slate-400">
+          <div class="p-16 text-center text-muted">
             <p class="text-sm">Belum ada section yang dikonfigurasi.</p>
           </div>
         {:else}

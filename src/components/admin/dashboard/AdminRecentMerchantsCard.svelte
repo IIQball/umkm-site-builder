@@ -84,7 +84,7 @@
                   <User size={13} class="text-primary flex-shrink-0" />
                   <span class="truncate max-w-[130px] font-sans">{m.name || 'Tenant UMKM'}</span>
                 </div>
-                <div class="flex items-center gap-1.5 text-3xs text-secondary">
+                <div class="flex items-center gap-1.5 text-xs text-secondary">
                   <Store size={12} class="flex-shrink-0" />
                   <span class="truncate max-w-[130px] font-sans">{m.storeName || 'Belum Buat Toko'}</span>
                 </div>

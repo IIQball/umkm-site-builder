@@ -73,7 +73,7 @@
     <div class="px-2.5 py-1 rounded-md bg-card border border-light text-2xs font-mono text-secondary flex items-center gap-1.5 max-w-[200px] sm:max-w-[260px] truncate shadow-2xs">
       <span class="w-2 h-2 rounded-full bg-success shrink-0"></span>
       <span class="text-main font-semibold truncate">{subdomain || 'toko'}.{mainDomain}</span>
-      <span class="text-muted shrink-0 text-3xs">({Math.round(scaleRatio * 100)}%)</span>
+      <span class="text-muted shrink-0 text-xs">({Math.round(scaleRatio * 100)}%)</span>
     </div>
 
     <!-- Device Viewport Switcher -->

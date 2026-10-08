@@ -73,16 +73,16 @@
             on:click={() => onSelectAccount(acc.id)}
           >
             <span>{acc.bankName}</span>
-            <span class="text-3xs opacity-80">••{acc.accountNumber.slice(-4)}</span>
+            <span class="text-xs opacity-80">••{acc.accountNumber.slice(-4)}</span>
             {#if acc.isPrimary}
-              <span class="text-3xs font-black bg-white/20 px-1 py-0.2 rounded-xs">Utama</span>
+              <span class="text-xs font-black bg-white/20 px-1 py-0.2 rounded-xs">Utama</span>
             {/if}
           </button>
         {/each}
       </div>
 
       <div class="flex items-center gap-2 flex-shrink-0">
-        <span class="text-3xs font-mono font-bold px-2 py-0.5 rounded-full bg-nested border border-light text-secondary">
+        <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-nested border border-light text-secondary">
           {accountsList.length}/3 Rekening
         </span>
         {#if accountsList.length < 3}
@@ -139,7 +139,7 @@
               </svg>
 
               {#if activeAccount.isPrimary}
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-3xs font-extrabold uppercase tracking-wide bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-xs">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wide bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-xs">
                   <Star size={10} class="fill-amber-300 text-amber-300" />
                   <span>Rekening Utama</span>
                 </span>
@@ -163,7 +163,7 @@
               {#if !activeAccount.isPrimary}
                 <button
                   type="button"
-                  class="px-2.5 py-1 rounded-full text-3xs font-bold text-white border border-white/30 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-xs transition-all cursor-pointer"
+                  class="px-2.5 py-1 rounded-full text-xs font-bold text-white border border-white/30 hover:border-white bg-white/10 hover:bg-white/20 backdrop-blur-xs transition-all cursor-pointer"
                   title="Jadikan Sebagai Rekening Utama"
                   on:click={() => triggerSetPrimaryModal(activeAccount)}
                 >
@@ -213,7 +213,7 @@
                 <span class="text-xs font-bold uppercase tracking-wider text-white/80 font-heading">
                   Saldo Siap Dicairkan
                 </span>
-                <span class="text-3xs font-mono text-white/60 bg-white/10 border border-white/10 px-2 py-0.5 rounded-full">
+                <span class="text-xs font-mono text-white/60 bg-white/10 border border-white/10 px-2 py-0.5 rounded-full">
                   Min: {formatIDR(minPayoutLimit)}
                 </span>
               </div>

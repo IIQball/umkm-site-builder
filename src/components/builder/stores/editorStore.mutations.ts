@@ -51,7 +51,8 @@ export async function applySave(
 
 export async function applySubmitReview(
   state: DocumentState,
-  update: Updater
+  update: Updater,
+  revisionNotes?: string
 ): Promise<boolean> {
   if (!state.template || state.isSaving) return false;
   update((s) => ({ ...s, isSaving: true, error: null }));
@@ -65,7 +66,7 @@ export async function applySubmitReview(
     const response = await fetch('/api/designer/templates/submit-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ templateId: template.id }),
+      body: JSON.stringify({ templateId: template.id, revisionNotes: revisionNotes?.trim() || undefined }),
     });
     const resData = await response.json().catch(() => ({}));
     if (!response.ok || !resData.ok) throw new Error(resData.error?.message || 'Gagal mengajukan review template');
@@ -73,8 +74,7 @@ export async function applySubmitReview(
     window.location.href = resData.redirectUrl || `/builder/preview/${template.id}`;
     return true;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Gagal mengajukan review';
-    update((s) => ({ ...s, isSaving: false, error: msg }));
+    update((s) => ({ ...s, isSaving: false, error: err instanceof Error ? err.message : 'Gagal mengajukan review' }));
     throw err;
   }
 }

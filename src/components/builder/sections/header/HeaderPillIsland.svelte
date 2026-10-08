@@ -2,6 +2,7 @@
   import { MessageCircle, Menu } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import HeaderNav from './HeaderNav.svelte';
+  import TemplateThemeToggle from './TemplateThemeToggle.svelte';
   import type { HeaderAnnouncementProps } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
@@ -47,6 +48,9 @@
 
     <!-- Right Controls: CTA (Desktop) + Hamburger (Tablet & Mobile, Far Right inside Capsule) -->
     <div class="flex items-center gap-2 flex-shrink-0">
+      <!-- Theme Toggle (Sebelum tombol CTA) -->
+      <TemplateThemeToggle size="sm" />
+
       {#if hasCta && isDesktop}
         <a
           href={waUrl}

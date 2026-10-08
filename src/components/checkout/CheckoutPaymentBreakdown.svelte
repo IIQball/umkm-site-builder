@@ -75,7 +75,7 @@
       <div class="flex justify-between items-start text-secondary">
         <div class="min-w-0 pr-2">
           <span class="text-main font-medium block">Biaya Jasa Pendampingan</span>
-          <span class="text-3xs text-secondary block mt-0.5">Fee pendampingan resmi admin untuk toko merchant binaan</span>
+          <span class="text-xs text-secondary block mt-0.5">Fee pendampingan resmi admin untuk toko merchant binaan</span>
         </div>
         <span class="font-mono font-bold text-primary shrink-0">
           +{formatIDR(pageData.adminFee)}

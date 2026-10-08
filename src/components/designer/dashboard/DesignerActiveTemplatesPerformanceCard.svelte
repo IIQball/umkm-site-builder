@@ -121,7 +121,7 @@
                     </span>
                     <Badge variant="success" size="sm" dot>Publik</Badge>
                   </div>
-                  <div class="flex items-center gap-2 mt-0.5 text-3xs text-secondary font-mono">
+                  <div class="flex items-center gap-2 mt-0.5 text-xs text-secondary font-mono">
                     {#if tpl.categoryName}
                       <span>{tpl.categoryName}</span>
                       <span>•</span>
@@ -134,7 +134,7 @@
               <!-- Sales & Revenue Stat -->
               <div class="flex items-center gap-4 sm:gap-6 justify-between sm:justify-end flex-shrink-0 text-xs">
                 <div class="text-left sm:text-right">
-                  <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+                  <span class="text-xs uppercase tracking-wider text-muted font-bold block">
                     Terjual
                   </span>
                   <div class="flex items-center gap-1 font-mono font-bold text-main">
@@ -144,7 +144,7 @@
                 </div>
 
                 <div class="text-right min-w-[90px]">
-                  <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+                  <span class="text-xs uppercase tracking-wider text-muted font-bold block">
                     Pendapatan
                   </span>
                   <span class="font-mono font-bold text-success block">
@@ -156,7 +156,7 @@
 
             <!-- Progress Contribution Bar -->
             <div class="space-y-1">
-              <div class="flex items-center justify-between text-3xs text-muted font-mono font-semibold">
+              <div class="flex items-center justify-between text-xs text-muted font-mono font-semibold">
                 <span>Kontribusi Penjualan</span>
                 <span>{sharePct}%</span>
               </div>
@@ -187,7 +187,7 @@
   <div class="px-5 py-3.5 sm:px-6 bg-nested/50 border-t border-light flex flex-wrap items-center justify-between gap-4 text-xs">
     <div class="flex items-center gap-4 sm:gap-6">
       <div>
-        <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block">
           Total Template Publik
         </span>
         <span class="font-mono font-bold text-main">
@@ -196,7 +196,7 @@
       </div>
       <div class="h-6 w-px bg-light"></div>
       <div>
-        <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block">
           Akumulasi Terjual
         </span>
         <span class="font-mono font-bold text-primary">
@@ -205,7 +205,7 @@
       </div>
       <div class="h-6 w-px bg-light"></div>
       <div>
-        <span class="text-3xs uppercase tracking-wider text-muted font-bold block">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block">
           Total Komisi
         </span>
         <span class="font-mono font-bold text-success">

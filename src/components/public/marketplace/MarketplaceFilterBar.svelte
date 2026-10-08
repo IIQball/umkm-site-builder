@@ -11,7 +11,7 @@
   export let onReset: () => void;
 </script>
 
-<div class="bg-card border border-light rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
+<div class="bg-card rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
   <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
     <!-- Search Bar -->
     <div class="relative flex-1">
@@ -20,7 +20,7 @@
         type="text"
         bind:value={searchQuery}
         placeholder="Cari tema toko, kuliner, fashion, nama desainer..."
-        class="w-full bg-nested/70 border border-light rounded-full pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all shadow-2xs font-sans"
+        class="w-full bg-nested/80 rounded-full pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card transition-all shadow-2xs font-sans border-0"
       />
       <label
         for="marketplace-search-input"
@@ -47,7 +47,7 @@
         <select
           id="marketplace-price-filter"
           bind:value={selectedPriceFilter}
-          class="w-full bg-nested/70 border border-light rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:border-primary transition-all shadow-2xs cursor-pointer appearance-none pr-8"
+          class="w-full bg-nested/80 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs cursor-pointer appearance-none pr-8 border-0"
         >
           <option value="all">Semua Harga</option>
           <option value="free">Gratis (Rp 0)</option>
@@ -70,7 +70,7 @@
         <select
           id="marketplace-sort-filter"
           bind:value={selectedSort}
-          class="w-full bg-nested/70 border border-light rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:border-primary transition-all shadow-2xs cursor-pointer appearance-none pr-8"
+          class="w-full bg-nested/80 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-main focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs cursor-pointer appearance-none pr-8 border-0"
         >
           <option value="newest">Terbaru</option>
           <option value="price_asc">Harga: Terendah</option>
@@ -101,13 +101,13 @@
   </div>
 
   <!-- Category Pills Rail -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1 border-t border-light/60">
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2 border-t border-border/40 dark:border-white/10">
     <button
       type="button"
       on:click={() => (selectedCategorySlug = 'all')}
       class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
         ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
-        : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
+        : 'bg-nested/80 hover:bg-card text-secondary hover:text-main'}"
     >
       <span class="material-symbols-outlined text-sm">grid_view</span>
       <span>Semua Kategori</span>
@@ -123,7 +123,7 @@
         on:click={() => (selectedCategorySlug = cat.slug)}
         class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
           ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
-          : 'bg-nested/80 hover:bg-card border border-light text-secondary hover:text-main'}"
+          : 'bg-nested/80 hover:bg-card text-secondary hover:text-main'}"
       >
         <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>
         <span>{cat.name}</span>

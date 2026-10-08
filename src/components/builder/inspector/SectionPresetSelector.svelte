@@ -32,7 +32,7 @@
         variant="ghost"
         size="xs"
         on:click={() => (isModalOpen = true)}
-        class="!p-0 !h-auto !min-h-0 text-3xs font-bold text-primary hover:underline flex items-center gap-0.5"
+        class="!p-0 !h-auto !min-h-0 text-xs font-bold text-primary hover:underline flex items-center gap-0.5"
       >
         <span>Lihat Semua</span>
         <ChevronRight size={10} />
@@ -67,7 +67,7 @@
 
       <!-- Trigger Button -->
       <div class="mt-3 pt-2.5 border-t border-primary/20 flex items-center justify-between">
-        <span class="text-3xs font-mono text-base-content/50 uppercase tracking-wider">
+        <span class="text-xs font-mono text-base-content/50 uppercase tracking-wider">
           {section.type}
         </span>
         <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-0.5 transition-transform">

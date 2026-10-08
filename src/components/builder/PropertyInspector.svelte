@@ -81,7 +81,7 @@
             </span>
           {/if}
         </nav>
-        <p class="text-3xs text-base-content/40 font-mono">
+        <p class="text-xs text-base-content/40 font-mono">
           {section.id}{#if $activeNodeId} &bull; {$activeNodeId}{/if}
         </p>
       </div>

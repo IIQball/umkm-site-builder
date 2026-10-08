@@ -133,7 +133,7 @@
               size={12}
               class={isNodeSelected ? 'text-white' : 'text-muted'}
             />
-            <span class="text-3xs leading-snug whitespace-normal break-words" title={node.name}>{node.name}</span>
+            <span class="text-xs leading-snug whitespace-normal break-words" title={node.name}>{node.name}</span>
           </div>
 
           <div class="flex items-center gap-0.5 opacity-0 group-hover/node:opacity-100 transition-opacity">
@@ -158,7 +158,7 @@
           variant="outline"
           size="xs"
           on:click={(e) => { e.stopPropagation(); onToggleAddNodeDropdown(section.id); }}
-          class="!w-full !flex !items-center !justify-center gap-1 !py-1 !h-auto !min-h-0 text-3xs font-semibold text-muted hover:text-primary bg-nested/50 hover:bg-nested rounded border-dashed border-light"
+          class="!w-full !flex !items-center !justify-center gap-1 !py-1 !h-auto !min-h-0 text-xs font-semibold text-muted hover:text-primary bg-nested/50 hover:bg-nested rounded border-dashed border-light"
         >
           <Plus size={11} />
           <span>Tambah Elemen</span>

@@ -3,22 +3,24 @@
   import {
     ArrowLeft,
     ArrowRight,
-    Check,
-    Layout,
     AlertCircle,
     Save,
     RotateCcw,
     MessageSquare,
     Store,
-    ExternalLink,
-    Monitor,
-    Tablet,
-    Smartphone,
   } from "lucide-svelte";
   import { Button, Badge } from "@/components/ui";
-  import type { TemplateItem } from "../onboarding.types";
+  import type { StoreContentCustomization, TemplateItem, StoreBranchItem } from "../onboarding.types";
   import { DEFAULT_WA_CHECKOUT_TEMPLATE } from "../onboarding.helpers";
   import { getMainDomain } from "@/lib/domain";
+  import OnboardingContentPreview from "./OnboardingContentPreview.svelte";
+  import SettingsTemplatePicker from "./SettingsTemplatePicker.svelte";
+  import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
+  import { migrateTemplateConfig } from "@/lib/templates/migration";
+  import { DEFAULT_TEMPLATE_CONFIG } from "@/schemas/templates/template.defaults";
+  import { buildCanvasCssVars } from "@/components/builder/canvas/canvasCss.helpers";
+  import { loadDynamicGoogleFonts } from "@/components/builder/canvas/fontLoader.helpers";
+  import { buildTemplateCustomizationPayload } from "./content/contentCustomization.helpers";
 
   export let templates: TemplateItem[] = [];
   export let selectedTemplateId: string = "";
@@ -30,6 +32,15 @@
   export let onPrev: () => void;
   export let onSave: () => void;
   export let onNext: (() => void) | undefined = undefined;
+
+  export let categories: Array<{ id: string; name: string }> = [];
+  export let storeName: string = "";
+  export let waNumber: string = "";
+  export let address: string = "";
+  export let googleMapsUrl: string = "";
+  export let branchMode: "single" | "multi" = "single";
+  export let branches: StoreBranchItem[] = [];
+  export let customization: StoreContentCustomization | undefined = undefined;
 
   let mainDomain = "localhost:4321";
   let previewViewMode: "desktop" | "tablet" | "mobile" = "desktop";
@@ -45,18 +56,40 @@
   function resetWaTemplate() {
     waCheckoutTemplate = DEFAULT_WA_CHECKOUT_TEMPLATE;
   }
+
+  $: selectedTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0];
+  $: baseConfig = selectedTemplate?.config
+    ? migrateTemplateConfig(selectedTemplate.config)
+    : DEFAULT_TEMPLATE_CONFIG;
+
+  $: activeAddress = address || customization?.footer?.address || "";
+  $: activeStoreName = customization?.header?.logoText || storeName || subdomain || "Toko UMKM";
+
+  $: activeStoreData = {
+    id: "preview-store",
+    name: activeStoreName,
+    subdomain: subdomain || "toko",
+    address: activeAddress,
+    waNumber: waNumber || "",
+    googleMapsUrl: googleMapsUrl || customization?.maps?.branches?.[0]?.googleMapsUrl || "",
+    branchMode: branchMode || customization?.maps?.branchMode || "single",
+    branches: branches && branches.length > 0 ? branches : (customization?.maps?.branches || []),
+  };
+
+  $: finalMergedConfig = customization
+    ? mergeStoreCustomization(baseConfig, buildTemplateCustomizationPayload(customization), activeStoreData)
+    : baseConfig;
+  $: canvasCssVars = buildCanvasCssVars(finalMergedConfig.theme ?? {}, false, previewViewMode);
+  $: loadDynamicGoogleFonts(finalMergedConfig.theme?.typography?.headingFont, finalMergedConfig.theme?.typography?.bodyFont);
 </script>
 
-<div
-  class="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300"
->
+<div class="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
   <div class="border-b border-light pb-4">
     <h2 class="text-heading-md text-main font-bold font-heading leading-tight">
       Pengaturan Operasional & Template Toko
     </h2>
     <p class="text-body-sm text-secondary mt-0.5 font-sans">
-      Atur status ketersediaan toko, pesan transaksi WhatsApp, dan tinjau
-      tampilan real landing page lengkap toko Anda.
+      Atur status ketersediaan toko, pesan transaksi WhatsApp, dan tinjau tampilan real landing page lengkap toko Anda.
     </p>
   </div>
 
@@ -64,14 +97,10 @@
     <!-- Left Section: Inputs & Template Picker (5 cols) -->
     <div class="lg:col-span-5 space-y-5">
       <!-- 1. Status Operasional Toko -->
-      <div
-        class="p-4 sm:p-5 rounded-2xl bg-nested border border-light space-y-3"
-      >
+      <div class="p-4 sm:p-5 rounded-2xl bg-nested border border-light space-y-3">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-start gap-3">
-            <div
-              class="w-9 h-9 rounded-xl bg-card border border-light flex items-center justify-center text-primary shrink-0 mt-0.5"
-            >
+            <div class="w-9 h-9 rounded-xl bg-card border border-light flex items-center justify-center text-primary shrink-0 mt-0.5">
               <Store size={18} />
             </div>
             <div>
@@ -83,31 +112,21 @@
                   {isOpen ? "Buka" : "Tutup"}
                 </Badge>
               </div>
-              <p
-                class="text-2xs text-secondary mt-0.5 leading-relaxed font-sans"
-              >
-                {isOpen
-                  ? "Toko aktif. Pelanggan dapat memesan produk."
-                  : "Toko dinonaktifkan sementara dari pesanan."}
+              <p class="text-2xs text-secondary mt-0.5 leading-relaxed font-sans">
+                {isOpen ? "Toko aktif. Pelanggan dapat memesan produk." : "Toko dinonaktifkan sementara dari pesanan."}
               </p>
             </div>
           </div>
 
-          <label
-            class="relative inline-flex items-center cursor-pointer shrink-0"
-          >
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
             <input type="checkbox" bind:checked={isOpen} class="sr-only peer" />
-            <div
-              class="w-11 h-6 bg-base-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-light after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
-            ></div>
+            <div class="w-11 h-6 bg-base-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-light after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
           </label>
         </div>
       </div>
 
       <!-- 2. Template Pesan WhatsApp Checkout -->
-      <div
-        class="p-4 sm:p-5 rounded-2xl bg-nested border border-light space-y-3"
-      >
+      <div class="p-4 sm:p-5 rounded-2xl bg-nested border border-light space-y-3">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div class="flex items-center gap-2">
             <MessageSquare size={16} class="text-primary" />
@@ -126,8 +145,7 @@
         </div>
 
         <p class="text-2xs text-secondary leading-relaxed font-sans">
-          Teks pesan bawaan yang otomatis terisi saat pelanggan menekan tombol
-          checkout atau chat WhatsApp di toko.
+          Teks pesan bawaan yang otomatis terisi saat pelanggan menekan tombol checkout atau chat WhatsApp di toko.
         </p>
 
         <textarea
@@ -139,103 +157,10 @@
       </div>
 
       <!-- 3. Koleksi & Pilihan Template Toko -->
-      <div
-        class="p-4 sm:p-5 rounded-2xl bg-nested border border-light space-y-3"
-      >
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <h3 class="text-xs sm:text-sm font-bold text-main font-heading">
-              Pilihan Template Toko ({templates.length})
-            </h3>
-            <p class="text-2xs text-secondary mt-0.5 font-sans">
-              Klik template untuk melihat preview langsung landing page di
-              sebelah kanan.
-            </p>
-          </div>
-
-          <a
-            href="/templates"
-            class="inline-flex items-center gap-1 text-2xs font-semibold text-primary hover:underline shrink-0"
-          >
-            <span>Katalog</span>
-            <ExternalLink size={11} />
-          </a>
-        </div>
-
-        <div
-          class="space-y-2.5 max-h-[280px] overflow-y-auto pr-1 scrollbar-thin"
-        >
-          {#each templates as tpl (tpl.id)}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div
-              on:click={() => (selectedTemplateId = tpl.id)}
-              class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all duration-150 {selectedTemplateId ===
-              tpl.id
-                ? 'bg-primary/5 border-primary ring-1 ring-primary/20 shadow-2xs'
-                : 'bg-card border-light hover:border-primary/40 hover:bg-nested/40'}"
-            >
-              <div
-                class="w-12 h-12 rounded-lg overflow-hidden bg-nested border border-light shrink-0 relative"
-              >
-                {#if tpl.thumbnailUrl}
-                  <img
-                    src={tpl.thumbnailUrl}
-                    alt={tpl.name}
-                    class="w-full h-full object-cover"
-                  />
-                {:else}
-                  <div
-                    class="w-full h-full flex items-center justify-center text-muted"
-                  >
-                    <Layout size={16} />
-                  </div>
-                {/if}
-              </div>
-
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <p class="text-xs font-bold text-main truncate font-heading">
-                    {tpl.name}
-                  </p>
-                  {#if tpl.categoryName}
-                    <span
-                      class="text-3xs font-semibold px-1.5 py-0.2 rounded bg-nested text-muted border border-light"
-                    >
-                      {tpl.categoryName}
-                    </span>
-                  {/if}
-                </div>
-                <p
-                  class="text-2xs text-secondary line-clamp-1 mt-0.5 font-sans"
-                >
-                  {tpl.description ||
-                    "Template toko online responsif dan optimal."}
-                </p>
-              </div>
-
-              <div class="shrink-0">
-                {#if selectedTemplateId === tpl.id}
-                  <span
-                    class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shadow-xs"
-                  >
-                    <Check size={12} strokeWidth={3} />
-                  </span>
-                {:else}
-                  <span
-                    class="w-4 h-4 rounded-full border border-light flex items-center justify-center"
-                  ></span>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
-      </div>
+      <SettingsTemplatePicker {templates} bind:selectedTemplateId />
 
       {#if submitError}
-        <div
-          class="p-3 rounded-xl bg-error/10 border border-error/20 text-xs text-error flex items-center gap-2"
-        >
+        <div class="p-3 rounded-xl bg-error/10 border border-error/20 text-xs text-error flex items-center gap-2">
           <AlertCircle size={15} class="shrink-0" />
           <span class="font-medium">{submitError}</span>
         </div>
@@ -281,92 +206,18 @@
       </div>
     </div>
 
-    <!-- Right Section: Real Landing Page Preview (7 cols) -->
+    <!-- Right Section: Real Live Storefront Preview (7 cols) -->
     <div class="lg:col-span-7 sticky top-6">
-      <div
-        class="bg-card rounded-2xl border border-light shadow-md overflow-hidden flex flex-col"
-      >
-        <!-- Mockup Browser Top Bar -->
-        <div
-          class="h-11 px-4 bg-nested border-b border-light flex items-center justify-between gap-2"
-        >
-          <div class="flex items-center gap-1.5 shrink-0">
-            <div class="w-2.5 h-2.5 rounded-full bg-error/80"></div>
-            <div class="w-2.5 h-2.5 rounded-full bg-warning/80"></div>
-            <div class="w-2.5 h-2.5 rounded-full bg-success/80"></div>
-          </div>
-
-          <!-- URL Bar -->
-          <div
-            class="px-2.5 py-1 rounded-md bg-card border border-light text-2xs font-mono text-secondary flex items-center gap-1.5 max-w-[220px] sm:max-w-[280px] truncate shadow-2xs"
-          >
-            <span class="w-2 h-2 rounded-full bg-success shrink-0"></span>
-            <span class="text-main font-semibold truncate"
-              >{subdomain || "toko"}.{mainDomain}</span
-            >
-          </div>
-
-          <!-- Device Viewport Switcher -->
-          <div
-            class="flex items-center bg-card p-0.5 rounded-lg border border-light gap-0.5 shrink-0"
-          >
-            <button
-              type="button"
-              on:click={() => (previewViewMode = "desktop")}
-              class="p-1 rounded text-xs transition-colors {previewViewMode ===
-              'desktop'
-                ? 'bg-primary text-white shadow-2xs'
-                : 'text-secondary hover:text-main'}"
-              title="Tampilan Desktop"
-            >
-              <Monitor size={13} />
-            </button>
-            <button
-              type="button"
-              on:click={() => (previewViewMode = "tablet")}
-              class="p-1 rounded text-xs transition-colors {previewViewMode ===
-              'tablet'
-                ? 'bg-primary text-white shadow-2xs'
-                : 'text-secondary hover:text-main'}"
-              title="Tampilan Tablet"
-            >
-              <Tablet size={13} />
-            </button>
-            <button
-              type="button"
-              on:click={() => (previewViewMode = "mobile")}
-              class="p-1 rounded text-xs transition-colors {previewViewMode ===
-              'mobile'
-                ? 'bg-primary text-white shadow-2xs'
-                : 'text-secondary hover:text-main'}"
-              title="Tampilan Mobile"
-            >
-              <Smartphone size={13} />
-            </button>
-          </div>
-        </div>
-
-        <!-- Real Landing Page iframe Container -->
-        <div
-          class="relative bg-nested/40 w-full h-[620px] lg:h-[700px] overflow-hidden"
-        >
-          {#if selectedTemplateId}
-            <iframe
-              src={`/builder/preview/${selectedTemplateId}?embed=true&view=${previewViewMode}`}
-              class="w-full h-full border-0"
-              title="Real Landing Page Preview"
-              loading="lazy"
-            ></iframe>
-          {:else}
-            <div
-              class="w-full h-full flex flex-col items-center justify-center text-muted text-sm gap-2"
-            >
-              <Layout size={32} class="opacity-40" />
-              <p>Pilih template untuk melihat preview landing page lengkap</p>
-            </div>
-          {/if}
-        </div>
-      </div>
+      <OnboardingContentPreview
+        {baseConfig}
+        {finalMergedConfig}
+        {activeStoreData}
+        {categories}
+        {subdomain}
+        {mainDomain}
+        {canvasCssVars}
+        bind:previewViewMode
+      />
     </div>
   </div>
 </div>

@@ -1,18 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import {
-    MapPin,
-    Building2,
-    Landmark,
-    Map as MapIcon,
-    Milestone,
-    Home,
-    ChevronsUpDown,
-    Check,
-    AlertCircle,
-    AlertTriangle,
-    Search,
-    Loader2
+    MapPin, Building2, Landmark, Map as MapIcon, Milestone,
+    Home, ChevronsUpDown, Check, AlertCircle, AlertTriangle, Search, Loader2
   } from 'lucide-svelte';
 
   interface Region {
@@ -114,7 +104,7 @@
   <div class="flex items-center gap-2 border-b border-light pb-2">
     <MapPin size={15} class="text-primary" />
     <span class="text-label-caps text-muted">Wilayah & Alamat Toko</span>
-    <span class="text-2xs text-error font-bold uppercase">*Wajib</span>
+    <span class="text-xs text-error font-bold uppercase">*Wajib</span>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -132,7 +122,7 @@
         <span class="flex items-center gap-2 truncate font-medium">
           <MapPin size={14} class="text-primary/70 shrink-0" /> Jawa Timur
         </span>
-        <span class="text-3xs font-bold uppercase tracking-caps bg-muted/20 px-2 py-0.5 rounded text-muted">Terkunci</span>
+        <span class="text-xs font-bold uppercase tracking-caps bg-muted/20 px-2 py-0.5 rounded text-muted">Terkunci</span>
       </button>
     </div>
 
@@ -150,7 +140,7 @@
         <span class="flex items-center gap-2 truncate font-medium">
           <Building2 size={14} class="text-primary/70 shrink-0" /> Banyuwangi
         </span>
-        <span class="text-3xs font-bold uppercase tracking-caps bg-muted/20 px-2 py-0.5 rounded text-muted">Terkunci</span>
+        <span class="text-xs font-bold uppercase tracking-caps bg-muted/20 px-2 py-0.5 rounded text-muted">Terkunci</span>
       </button>
     </div>
 
@@ -164,10 +154,10 @@
         type="button"
         on:click={() => { openDist = !openDist; openSub = false; }}
         class="w-full flex items-center justify-between h-10 px-4 bg-nested border rounded-xl font-sans text-sm text-main transition-all duration-150 text-left {errors.district
-          ? 'border-[var(--color-error)] focus:ring-2 focus:ring-[var(--color-error)]/20'
-          : 'border-light hover:border-[var(--color-primary)]/50 focus:ring-2 focus:ring-[var(--color-primary)]/20'}"
+          ? 'border-error focus:ring-2 focus:ring-error/20'
+          : 'border-light hover:border-primary/50 focus:ring-2 focus:ring-primary/20'}"
       >
-        <span class="flex items-center gap-2 truncate {!regionData.district ? 'text-[var(--color-text-light)] italic' : 'font-medium'}">
+        <span class="flex items-center gap-2 truncate {!regionData.district ? 'text-light-muted italic' : 'font-medium'}">
           <Landmark size={14} class={regionData.district ? 'text-primary shrink-0' : 'text-muted shrink-0'} />
           {regionData.district || 'Pilih kecamatan di Banyuwangi...'}
         </span>
@@ -183,36 +173,24 @@
         <div class="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-light rounded-xl shadow-lg overflow-hidden animate-fade-in-up">
           <div class="p-2 border-b border-light flex items-center gap-2 bg-nested">
             <Search size={14} class="text-muted shrink-0" />
-            <input
-              type="text"
-              bind:value={distSearch}
-              placeholder="Cari kecamatan..."
-              class="w-full text-xs font-sans bg-transparent border-none outline-none text-main placeholder:italic placeholder:text-[var(--color-text-light)]"
-            />
+            <input type="text" bind:value={distSearch} placeholder="Cari kecamatan..." class="w-full text-xs font-sans bg-transparent border-none outline-none text-main placeholder:italic placeholder:text-light-muted" />
           </div>
           <div class="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
             {#if filteredDistricts.length === 0}
               <p class="py-4 text-center text-xs text-muted italic">Kecamatan tidak ditemukan</p>
             {:else}
               {#each filteredDistricts as d (d.id)}
-                <button
-                  type="button"
-                  on:click={() => onSelectDistrict(d)}
-                  class="w-full flex items-center justify-between px-3 py-2 text-xs font-sans font-medium rounded-lg hover:bg-nested transition-colors text-left {regionData.district === d.name ? 'text-primary bg-primary/10 font-bold' : 'text-main'}"
-                >
+                <button type="button" on:click={() => onSelectDistrict(d)} class="w-full flex items-center justify-between px-3 py-2 text-xs font-sans font-medium rounded-lg hover:bg-nested transition-colors text-left {regionData.district === d.name ? 'text-primary bg-primary/10 font-bold' : 'text-main'}">
                   <span>{d.name}</span>
-                  {#if regionData.district === d.name}
-                    <Check size={14} class="text-primary" />
-                  {/if}
+                  {#if regionData.district === d.name}<Check size={14} class="text-primary" />{/if}
                 </button>
               {/each}
             {/if}
           </div>
         </div>
       {/if}
-
       {#if errors.district}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
+        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
           <AlertCircle size={14} class="flex-shrink-0" />
           <span>{errors.district}</span>
         </p>
@@ -226,7 +204,7 @@
           <MapIcon size={12} class="text-primary" /> Kelurahan / Desa <span class="text-error">*</span>
         </label>
         {#if !regionData.district}
-          <span class="text-3xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+          <span class="text-xs font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20 flex items-center gap-1">
             <AlertTriangle size={8} /> pilih kecamatan dulu
           </span>
         {/if}
@@ -237,9 +215,9 @@
         type="button"
         disabled={!regionData.district}
         on:click={() => { openSub = !openSub; openDist = false; }}
-        class="w-full flex items-center justify-between h-10 px-4 bg-nested border rounded-xl font-sans text-sm text-main transition-all duration-150 text-left {!regionData.district ? 'opacity-50 cursor-not-allowed bg-nested/50' : 'hover:border-[var(--color-primary)]/50 focus:ring-2 focus:ring-[var(--color-primary)]/20'} {errors.subDistrict ? 'border-[var(--color-error)]' : 'border-light'}"
+        class="w-full flex items-center justify-between h-10 px-4 bg-nested border rounded-xl font-sans text-sm text-main transition-all duration-150 text-left {!regionData.district ? 'opacity-50 cursor-not-allowed bg-nested/50' : 'hover:border-primary/50 focus:ring-2 focus:ring-primary/20'} {errors.subDistrict ? 'border-error' : 'border-light'}"
       >
-        <span class="flex items-center gap-2 truncate {!regionData.subDistrict ? 'text-[var(--color-text-light)] italic' : 'font-medium'}">
+        <span class="flex items-center gap-2 truncate {!regionData.subDistrict ? 'text-light-muted italic' : 'font-medium'}">
           <MapIcon size={14} class={regionData.subDistrict ? 'text-primary shrink-0' : 'text-muted shrink-0'} />
           {regionData.subDistrict || 'Pilih kelurahan / desa...'}
         </span>
@@ -255,36 +233,24 @@
         <div class="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-light rounded-xl shadow-lg overflow-hidden animate-fade-in-up">
           <div class="p-2 border-b border-light flex items-center gap-2 bg-nested">
             <Search size={14} class="text-muted shrink-0" />
-            <input
-              type="text"
-              bind:value={subSearch}
-              placeholder="Cari kelurahan / desa..."
-              class="w-full text-xs font-sans bg-transparent border-none outline-none text-main placeholder:italic placeholder:text-[var(--color-text-light)]"
-            />
+            <input type="text" bind:value={subSearch} placeholder="Cari kelurahan / desa..." class="w-full text-xs font-sans bg-transparent border-none outline-none text-main placeholder:italic placeholder:text-light-muted" />
           </div>
           <div class="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
             {#if filteredSubDistricts.length === 0}
               <p class="py-4 text-center text-xs text-muted italic">Kelurahan tidak ditemukan</p>
             {:else}
               {#each filteredSubDistricts as s (s.id)}
-                <button
-                  type="button"
-                  on:click={() => onSelectSubDistrict(s)}
-                  class="w-full flex items-center justify-between px-3 py-2 text-xs font-sans font-medium rounded-lg hover:bg-nested transition-colors text-left {regionData.subDistrict === s.name ? 'text-primary bg-primary/10 font-bold' : 'text-main'}"
-                >
+                <button type="button" on:click={() => onSelectSubDistrict(s)} class="w-full flex items-center justify-between px-3 py-2 text-xs font-sans font-medium rounded-lg hover:bg-nested transition-colors text-left {regionData.subDistrict === s.name ? 'text-primary bg-primary/10 font-bold' : 'text-main'}">
                   <span>{s.name}</span>
-                  {#if regionData.subDistrict === s.name}
-                    <Check size={14} class="text-primary" />
-                  {/if}
+                  {#if regionData.subDistrict === s.name}<Check size={14} class="text-primary" />{/if}
                 </button>
               {/each}
             {/if}
           </div>
         </div>
       {/if}
-
       {#if errors.subDistrict}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
+        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
           <AlertCircle size={14} class="flex-shrink-0" />
           <span>{errors.subDistrict}</span>
         </p>
@@ -301,13 +267,10 @@
         type="text"
         bind:value={regionData.hamlet}
         placeholder="Contoh: Krajan, Sawahan, Karanganyar..."
-        class="w-full h-10 px-4 bg-nested text-main border rounded-xl font-sans text-sm transition-all duration-150 placeholder:italic placeholder:text-[var(--color-text-light)] placeholder:opacity-80 focus:outline-none focus:bg-card focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 {errors.hamlet ? 'border-[var(--color-error)]' : 'border-light'}"
+        class="w-full h-10 px-4 bg-nested text-main border rounded-xl font-sans text-sm transition-all duration-150 placeholder:italic placeholder:text-light-muted placeholder:opacity-80 focus:outline-none focus:bg-card focus:border-primary focus:ring-2 focus:ring-primary/20 {errors.hamlet ? 'border-error' : 'border-light'}"
       />
       {#if errors.hamlet}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
-          <AlertCircle size={14} class="flex-shrink-0" />
-          <span>{errors.hamlet}</span>
-        </p>
+        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up"><AlertCircle size={14} class="flex-shrink-0" /><span>{errors.hamlet}</span></p>
       {/if}
     </div>
 
@@ -316,18 +279,9 @@
       <label for="reg-street" class="block text-label-caps text-muted mb-1.5 flex items-center gap-1.5">
         <Home size={12} class="text-primary" /> Detail Jalan & RT/RW <span class="text-error">*</span>
       </label>
-      <input
-        id="reg-street"
-        type="text"
-        bind:value={regionData.street}
-        placeholder="Contoh: Jl. Gajah Mada No. 12, RT 01 / RW 02"
-        class="w-full h-10 px-4 bg-nested text-main border rounded-xl font-sans text-sm transition-all duration-150 placeholder:italic placeholder:text-[var(--color-text-light)] placeholder:opacity-80 focus:outline-none focus:bg-card focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 {errors.street ? 'border-[var(--color-error)]' : 'border-light'}"
-      />
+      <input id="reg-street" type="text" bind:value={regionData.street} placeholder="Contoh: Jl. Gajah Mada No. 12, RT 01 / RW 02" class="w-full h-10 px-4 bg-nested text-main border rounded-xl font-sans text-sm transition-all duration-150 placeholder:italic placeholder:text-light-muted placeholder:opacity-80 focus:outline-none focus:bg-card focus:border-primary focus:ring-2 focus:ring-primary/20 {errors.street ? 'border-error' : 'border-light'}" />
       {#if errors.street}
-        <p class="text-xs text-[var(--color-error)] flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up">
-          <AlertCircle size={14} class="flex-shrink-0" />
-          <span>{errors.street}</span>
-        </p>
+        <p class="text-xs text-error flex items-center gap-1 mt-1.5 font-medium animate-fade-in-up"><AlertCircle size={14} class="flex-shrink-0" /><span>{errors.street}</span></p>
       {/if}
     </div>
   </div>

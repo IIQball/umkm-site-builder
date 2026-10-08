@@ -36,7 +36,7 @@
           >{subdomain || "tokomami"}.{mainDomain}</span
         >
       </div>
-      <div class="text-3xs font-bold uppercase tracking-caps text-primary">
+      <div class="text-xs font-bold uppercase tracking-caps text-primary">
         Preview
       </div>
     </div>
@@ -63,7 +63,7 @@
                 >
                   {storeName || "Nama Toko Anda"}
                 </h4>
-                <p class="text-3xs text-secondary leading-tight">
+                <p class="text-xs text-secondary leading-tight">
                   Katalog Resmi & WhatsApp Order
                 </p>
               </div>
@@ -90,7 +90,7 @@
             ></div>
             <div class="relative z-10 space-y-2 max-w-xs">
               <span
-                class="text-3xs font-bold uppercase tracking-caps text-primary-light bg-primary/20 px-2 py-0.5 rounded border border-primary/30"
+                class="text-xs font-bold uppercase tracking-caps text-primary-light bg-primary/20 px-2 py-0.5 rounded border border-primary/30"
               >
                 {activeTemplate.name}
               </span>
@@ -122,7 +122,7 @@
               >
                 <ShoppingBag size={13} class="text-primary" /> Produk Unggulan
               </span>
-              <span class="text-3xs text-secondary font-medium"
+              <span class="text-xs text-secondary font-medium"
                 >3 Produk Sampel</span
               >
             </div>
@@ -132,7 +132,7 @@
                   class="bg-card p-2 rounded-xl border border-light text-center space-y-1 shadow-2xs"
                 >
                   <div
-                    class="w-full h-14 rounded-lg bg-nested flex items-center justify-center text-secondary/60 text-3xs"
+                    class="w-full h-14 rounded-lg bg-nested flex items-center justify-center text-secondary/60 text-xs"
                   >
                     Foto {idx}
                   </div>

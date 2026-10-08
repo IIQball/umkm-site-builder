@@ -261,6 +261,8 @@
         <OnboardingStepSettings
           {templates} {subdomain} bind:selectedTemplateId
           bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
+          {categories} {storeName} {waNumber} {address} {googleMapsUrl}
+          {branchMode} {branches} customization={contentCustomization}
           onPrev={prevStep} onSave={handleEditSubmit} onNext={nextStep}
         />
       {:else}

@@ -1,11 +1,34 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { db, stores, users, activityLogs } from '@/db/index';
-import { eq } from 'drizzle-orm';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('POST /api/admin/stores/[id]/suspend', () => {
-  let adminUser: any;
-  let tenantUser: any;
-  let testStore: any;
+  interface AdminUser {
+    id: string;
+    role: 'admin';
+    name: string;
+    email: string;
+  }
+
+  interface TenantUser {
+    id: string;
+    role: 'tenant';
+    name: string;
+    email: string;
+    registeredBy: string;
+  }
+
+  interface TestStore {
+    id: string;
+    name: string;
+    subdomain: string;
+    userId: string;
+    registeredBy: string;
+    status: 'active' | 'suspended';
+    suspendReason: string | null;
+  }
+
+  let adminUser: AdminUser;
+  let tenantUser: TenantUser;
+  let testStore: TestStore;
 
   beforeEach(async () => {
     // Setup: create admin and tenant users

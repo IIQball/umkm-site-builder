@@ -93,6 +93,7 @@ export const ThemeLayoutSchema = z.object({
 }).optional();
 
 export const TemplateThemeSchema = z.object({
+  colorMode: z.enum(['auto', 'light', 'dark']).optional().default('auto'),
   primaryColor: z.string().optional(),
   fontFamily: z.string().optional(),
   colors: ThemeColorsSchema,

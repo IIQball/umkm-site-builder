@@ -29,7 +29,7 @@ function getCloudinaryConfig() {
  * Client uses these params to POST directly to Cloudinary upload API.
  * No file bytes pass through our server.
  */
-export async function generateSignedUploadParams(folder: string) {
+export async function generateSignedUploadParams(folder: string, resourceType: 'image' | 'video' = 'image') {
   const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
   const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -48,7 +48,8 @@ export async function generateSignedUploadParams(folder: string) {
     apiKey,
     cloudName,
     folder: fullFolder,
-    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    resourceType,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
   };
 }
 
@@ -159,4 +160,24 @@ export function getOptimizedCloudinaryUrl(url?: string | null, width: number = 5
   }
   const transform = `f_auto,q_auto,w_${width}`;
   return url.replace('/image/upload/', `/image/upload/${transform}/`);
+}
+
+/**
+ * Automatically injects Cloudinary transformations (f_webm, vc_vp9, q_auto, w_<width>, c_limit)
+ * to deliver ultra-compressed, web-optimized WebM video with minimal bandwidth.
+ */
+export function getOptimizedCloudinaryVideoUrl(url?: string | null, width: number = 1280): string {
+  if (!url || typeof url !== 'string') return '';
+  if (!url.includes('cloudinary.com') || !url.includes('/video/upload/')) {
+    return url;
+  }
+  if (
+    url.includes('/video/upload/f_webm') ||
+    url.includes('/video/upload/f_auto') ||
+    url.includes('/video/upload/q_auto')
+  ) {
+    return url;
+  }
+  const transform = `f_webm,vc_vp9,q_auto,w_${width},c_limit`;
+  return url.replace('/video/upload/', `/video/upload/${transform}/`);
 }

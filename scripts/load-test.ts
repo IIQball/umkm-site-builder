@@ -25,7 +25,7 @@ interface TestResult {
 }
 
 const config: LoadTestConfig = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: process.env.TEST_BASE_URL || 'http://localhost:4321',
   storeDomains: generateStoreDomainsForTesting(50),
   concurrentRequests: 10,
   requestsPerStore: 5,

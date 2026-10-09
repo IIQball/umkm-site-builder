@@ -19,7 +19,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
     
     const newExpiresAt = new Date();
-    newExpiresAt.setHours(newExpiresAt.getHours() + 24);
+    newExpiresAt.setHours(newExpiresAt.getHours() + 3);
 
     const whereClause = user.role !== 'superadmin' 
       ? and(eq(tenantInvitations.id, body.id), eq(tenantInvitations.invitedBy, user.id))
@@ -35,6 +35,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Undangan tidak ditemukan atau Anda tidak memiliki akses', 404);
     }
 
-    return jsonSuccess({ message: 'Masa aktif undangan berhasil diperpanjang 24 jam' });
+    return jsonSuccess({ message: 'Masa aktif undangan berhasil diperpanjang 3 jam' });
   });
 };

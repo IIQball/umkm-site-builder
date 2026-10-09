@@ -267,7 +267,7 @@ describe('TransactionService', () => {
         type: 'template_purchase',
         amount: 50000,
         status: 'success',
-        adminFee: 0,
+        adminFee: 5000,
         assistedBy: 'admin_123', // Assisted by admin
         externalId: 'ext_1',
         paymentGatewayRef: null,
@@ -276,8 +276,8 @@ describe('TransactionService', () => {
         createdAt: new Date(),
       });
 
-      // db.insert is called for: userTemplates, commission, creditWallet (designer), creditWallet (admin), notification (designer), notification (tenant)
-      expect(mockDb.insert).toHaveBeenCalledTimes(6);
+      // db.insert is called for: userTemplates, commission, creditWallet (designer) [wallet + mutation], creditWallet (admin) [wallet + mutation], notification (designer), notification (tenant)
+      expect(mockDb.insert).toHaveBeenCalledTimes(8);
     });
   });
 

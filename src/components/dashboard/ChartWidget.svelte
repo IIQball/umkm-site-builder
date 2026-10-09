@@ -77,6 +77,7 @@
     
     // Hide markers for longer ranges to reduce clutter
     const showMarkers = range === '7d';
+    // Show grid lines for all ranges, sparse for 30d via tickAmount
 
     return {
       chart: {

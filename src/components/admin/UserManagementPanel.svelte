@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Search } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Card, Input, StatCard } from '@/components/ui';
+  import { Card, Input, StatCard, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
@@ -137,6 +137,10 @@
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  let currentPage = 1;
+  const pageSize = 10;
+  $: paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const roleOptions = [
     { value: 'all', label: 'Semua Peran' },
     { value: 'tenant', label: 'Merchant' },
@@ -230,11 +234,19 @@
       </div>
     {:else}
       <AdminUserTable
-        users={filteredUsers}
+        users={paginatedUsers}
+        startIndex={(currentPage - 1) * pageSize}
         onSuspend={openSuspendModal}
         onUnsuspend={openUnsuspendModal}
         onShowDetail={openDetailModal}
       />
+      {#if filteredUsers.length > 0}
+        <Pagination
+          bind:currentPage={currentPage}
+          totalItems={filteredUsers.length}
+          pageSize={pageSize}
+        />
+      {/if}
     {/if}
   </Card>
 </div>

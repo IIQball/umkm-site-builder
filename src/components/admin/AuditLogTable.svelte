@@ -111,33 +111,39 @@
     {:else}
       <Table
         headers={[
+          { label: '#', align: 'center' as const, width: 'w-12' },
           { label: 'Pengguna & Toko' },
           { label: 'Aksi' },
-          { label: 'Tanggal' },
-          { label: 'Detail Payload', align: 'center' }
+          { label: 'Tanggal', width: 'w-48' },
+          { label: 'Detail Payload', align: 'center' as const, width: 'w-36' }
         ]}
         minWidth="min-w-[900px]"
       >
-      {#each logs as log (log.id)}
-        <tr>
+      {#each logs as log, i (log.id)}
+        <tr class="hover:bg-nested/40 transition-colors group">
+          <!-- Sequence Number (#) -->
+          <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
+            {(currentPage - 1) * 10 + i + 1}
+          </td>
+
           <!-- Column: Pengguna -->
           <td class="px-6 py-4">
-            <div class="flex items-center gap-3.5">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-2xs border border-light/50 {log.user ? 'bg-primary/10 text-primary' : 'bg-nested/60 text-muted'}">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs {log.user ? 'bg-primary/10 border border-primary/20 text-primary' : 'bg-nested/60 border border-light/50 text-muted'}">
                 {#if log.user}
-                  <User size={18} strokeWidth={2.5} />
+                  <User size={16} />
                 {:else}
-                  <Monitor size={18} strokeWidth={2.5} />
+                  <Monitor size={16} />
                 {/if}
               </div>
-              <div class="flex flex-col">
-                <div class="font-bold text-main font-heading text-sm">
+              <div class="min-w-0">
+                <span class="font-bold text-xs text-main block font-sans truncate">
                   {log.user ? log.user.name : 'Sistem'}
-                </div>
+                </span>
                 {#if log.user}
-                  <div class="text-xs text-secondary mt-0.5">
+                  <span class="text-3xs text-secondary block truncate font-sans max-w-xs mt-0.5">
                     {log.user.email} {log.store ? `• Toko: ${log.store.name}` : ''}
-                  </div>
+                  </span>
                 {/if}
               </div>
             </div>
@@ -151,21 +157,20 @@
           </td>
 
           <!-- Column: Tanggal -->
-          <td class="px-6 py-4 text-secondary text-sm">
+          <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
             {formatDate(log.createdAt)}
           </td>
 
           <!-- Column: Detail Payload -->
-          <td class="px-6 py-4 text-center">
+          <td class="px-4 py-4 text-center">
             {#if log.details && Object.keys(log.details).length > 0}
               <Button
                 variant="secondary"
-                size="xs"
+                size="icon"
                 on:click={() => openDetailModal(log)}
                 title="Lihat Detail Payload"
               >
-                <Info size={14} class="mr-1" />
-                Detail
+                <Info size={13} />
               </Button>
             {:else}
               <span class="text-xs text-muted font-medium">-</span>

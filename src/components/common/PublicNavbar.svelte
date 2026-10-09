@@ -204,7 +204,7 @@
     <!-- 3. Right: Action Buttons, Theme Toggle, Auth / CTA -->
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
       <a
-        href="/#contact"
+        href="/contact"
         class="hidden sm:inline-block label-caps tracking-wider text-secondary hover:text-main dark:text-white/80 dark:hover:text-white font-medium transition-colors shrink-0"
       >
         KONTAK

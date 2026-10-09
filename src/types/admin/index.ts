@@ -10,6 +10,7 @@ export interface AdminUserItem {
   status: 'active' | 'suspended' | 'pending';
   suspendReason: string | null;
   createdAt: string;
+  hasStore?: boolean;
 }
 
 export interface AdminWhitelistItem {

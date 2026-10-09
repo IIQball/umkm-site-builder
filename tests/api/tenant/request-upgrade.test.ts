@@ -11,6 +11,9 @@ vi.mock('../../../src/db', () => ({
     query: {
       users: {
         findMany: vi.fn(),
+      },
+      notifications: {
+        findFirst: vi.fn(),
       }
     }
   },
@@ -66,6 +69,7 @@ describe('Request Upgrade API', () => {
 
     // Mock db.query.users.findMany for finding superadmins
     (db.query.users.findMany as Mock).mockResolvedValue(mockSuperAdmins);
+    (db.query.notifications.findFirst as Mock).mockResolvedValue(null);
 
     // Mock db.insert for creating notifications
     const insertMock = vi.fn().mockReturnValue({

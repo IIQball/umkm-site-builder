@@ -16,6 +16,18 @@
   let maxProducts = 15;
   let maxCategories = 5;
 
+  let progressProducts = 0;
+  let progressCategories = 0;
+
+  $: {
+    if (maxProducts > 0 && typeof products === 'number') {
+      progressProducts = Math.min((products / maxProducts) * 100, 100) || 0;
+    }
+    if (maxCategories > 0 && typeof categories === 'number') {
+      progressCategories = Math.min((categories / maxCategories) * 100, 100) || 0;
+    }
+  }
+
   async function fetchQuota() {
     try {
       const res = await fetch('/api/tenant/quota');
@@ -95,8 +107,8 @@
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full transition-all duration-500 {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {Math.min(Math.round((products / maxProducts) * 100), 100)}%"
+              class="h-1.5 rounded-full {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
+              style="width: {progressProducts}%"
             ></div>
           </div>
         </div>
@@ -109,8 +121,8 @@
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full transition-all duration-500 {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {Math.min(Math.round((categories / maxCategories) * 100), 100)}%"
+              class="h-1.5 rounded-full {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
+              style="width: {progressCategories}%"
             ></div>
           </div>
         </div>
@@ -133,20 +145,28 @@
     </p>
     
     <div class="space-y-4 mt-1">
-      <Input
-        type="number"
-        label="Tambahan Kuota Produk"
-        min={0}
-        placeholder="Contoh: 10"
-        bind:value={requestProducts}
-      />
-      <Input
-        type="number"
-        label="Tambahan Kuota Kategori"
-        min={0}
-        placeholder="Contoh: 5"
-        bind:value={requestCategories}
-      />
+      <div class="space-y-1">
+        <Input
+          type="number"
+          label="Tambahan Kuota Produk"
+          min={0}
+          placeholder="Contoh: 10"
+          bind:value={requestProducts}
+          class="no-spinners"
+        />
+        <p class="text-[11px] text-muted font-medium ml-1">Limit toko saat ini: {maxProducts} Produk</p>
+      </div>
+      <div class="space-y-1">
+        <Input
+          type="number"
+          label="Tambahan Kuota Kategori"
+          min={0}
+          placeholder="Contoh: 5"
+          bind:value={requestCategories}
+          class="no-spinners"
+        />
+        <p class="text-[11px] text-muted font-medium ml-1">Limit toko saat ini: {maxCategories} Kategori</p>
+      </div>
     </div>
   </div>
   

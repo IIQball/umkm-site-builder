@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { handleApiRoute, AppError } from '@/lib/utils';
 import { db, notifications, users } from '@/db';
-import { eq } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const RequestUpgradeSchema = z.object({
@@ -27,6 +27,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     
     if (categorySlots === 0 && productSlots === 0) {
       throw new AppError('Silakan isi jumlah slot tambahan yang dibutuhkan', 400);
+    }
+
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    const recentRequest = await db.query.notifications.findFirst({
+      where: and(
+        eq(notifications.type, 'quota_upgrade_request'),
+        sql`${notifications.metadata}->>'tenantId' = ${user.id}`,
+        gte(notifications.createdAt, oneWeekAgo)
+      )
+    });
+
+    if (recentRequest) {
+      throw new AppError('Anda hanya dapat mengajukan penambahan kuota 1 kali per minggu.', 429);
     }
 
     // Create notification for superadmins

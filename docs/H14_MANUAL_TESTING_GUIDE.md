@@ -94,7 +94,18 @@ bun run dev status
 
 ### Test 3: Load Testing — Multi-Domain Resolution (5 min)
 
+**IMPORTANT:** Dev server MUST be running before this test.
+
+Verify dev server is still running in Terminal 1:
 ```bash
+# Terminal 1 should show:
+# ┃ Local    http://localhost:4321/
+# ┃ watching for file changes...
+```
+
+Then run load test in a NEW terminal:
+```bash
+# Terminal 2
 bun run load-test
 ```
 

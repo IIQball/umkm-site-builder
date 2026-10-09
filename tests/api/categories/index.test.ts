@@ -90,6 +90,36 @@ describe('Categories API', () => {
     expect(response.status).toBe(201);
   });
 
+  it('POST rejects if category quota exceeded', async () => {
+    (db.select as unknown as Mock).mockImplementation((opts) => {
+      if (opts && opts.count) {
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 2 }]), // User already has 2 categories
+          }),
+        };
+      }
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1', maxCategories: 2 }]), // Limit is 2
+          }),
+        }),
+      };
+    });
+
+    const request = new Request('http://localhost/api/categories', {
+      method: 'POST',
+      body: JSON.stringify({ storeId: 's1', name: 'New', slug: 'new' }),
+    });
+    const context = { request, url: new URL(request.url), params: {} } as unknown as APIContext;
+    const response = (await POST(context)) as Response;
+    const data = await response.json();
+
+    expect(response.status).toBe(402);
+    expect(data.error.message).toContain('Maksimal 2 kategori');
+  });
+
   it('PATCH updates a category', async () => {
     (db.select as unknown as Mock).mockReturnValue({
       from: vi.fn().mockReturnValue({

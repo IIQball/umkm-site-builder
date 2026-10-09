@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { db, users, tenantInvitations } from '@/db/index';
+import { db, users, tenantInvitations, stores } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
-import { desc, inArray, and, eq, ne, isNull, notExists } from 'drizzle-orm';
+import { desc, inArray, and, eq, ne, isNull, notExists, sql } from 'drizzle-orm';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -22,6 +22,11 @@ export const GET: APIRoute = async (context): Promise<Response> => {
         ),
       );
 
+    const storeExistsSubquery = db
+      .select({ 1: sql`1` })
+      .from(stores)
+      .where(eq(stores.userId, users.id));
+
     let query = db.select({
       id: users.id,
       name: users.name,
@@ -30,6 +35,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       status: users.status,
       suspendReason: users.suspendReason,
       createdAt: users.createdAt,
+      hasStore: sql<boolean>`exists (${storeExistsSubquery})`,
     })
     .from(users)
     .$dynamic();

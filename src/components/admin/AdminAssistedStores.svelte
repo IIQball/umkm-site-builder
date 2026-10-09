@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { Card, Table, Pagination } from "@/components/ui";
   import AdminStoreRow from "./merchants/AdminStoreRow.svelte";
+  import AdminStoreSuspendModal from "./merchants/AdminStoreSuspendModal.svelte";
   import { addToast } from "@/lib/toast";
   import { formatDate } from "@/lib/utils/format";
   import { getMainDomain } from "@/lib/domain";
@@ -15,6 +16,8 @@
   let activeFilter: "all" | "published" | "draft" | "nostore" = "all";
   let copiedId: string | null = null;
   let currentPage = 1;
+  let suspendModalOpen = false;
+  let selectedStoreForSuspend: AssistedStoreItem | null = null;
   $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let mainDomain = "localhost:4321";
@@ -102,6 +105,11 @@
     { label: "Terdaftar Pada", align: "left" as const, width: "w-36" },
     { label: "Aksi", align: "right" as const, width: "w-64" },
   ];
+
+  function handleSuspendClick(store: AssistedStoreItem) {
+    selectedStoreForSuspend = store;
+    suspendModalOpen = true;
+  }
 </script>
 
 <Card
@@ -228,6 +236,7 @@
           {copiedId}
           {formatDate}
           onCopyId={copyToClipboard}
+          onSuspend={handleSuspendClick}
         />
       {/each}
     </Table>
@@ -241,3 +250,8 @@
     />
   {/if}
 </Card>
+
+<AdminStoreSuspendModal
+  bind:open={suspendModalOpen}
+  store={selectedStoreForSuspend}
+/>

@@ -65,33 +65,67 @@ function fetchStorefrontPage(
       });
     }, timeoutMs);
 
-    const req = http.get(url.toString(), {
-      headers: {
-        'Host': `${subdomain}.localhost:3000`,
-      },
-      timeout: timeoutMs,
-    }, (res) => {
-      const responseTime = Date.now() - startTime;
-      clearTimeout(timeoutHandle);
+    try {
+      const req = http.get(
+        {
+          hostname: 'localhost',
+          port: 4321,
+          path: `/storefront/${subdomain}`,
+          method: 'GET',
+          headers: {
+            'Host': `${subdomain}.localhost:4321`,
+            'User-Agent': 'H14-LoadTest/1.0',
+          },
+          timeout: timeoutMs,
+        },
+        (res) => {
+          const responseTime = Date.now() - startTime;
+          clearTimeout(timeoutHandle);
 
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
 
-      res.on('end', () => {
-        const success = res.statusCode === 200 && responseTime < 1000;
+          res.on('end', () => {
+            const statusCode = res.statusCode || 0;
+            const success = statusCode === 200 && responseTime < 1000;
+            resolve({
+              store: subdomain,
+              statusCode,
+              responseTime,
+              success,
+              error: !success ? `Status ${statusCode}, Time ${responseTime}ms` : undefined,
+            });
+          });
+        }
+      );
+
+      req.on('error', (err) => {
+        const responseTime = Date.now() - startTime;
+        clearTimeout(timeoutHandle);
         resolve({
           store: subdomain,
-          statusCode: res.statusCode || 0,
+          statusCode: 0,
           responseTime,
-          success,
-          error: !success ? `Status ${res.statusCode}, Time ${responseTime}ms` : undefined,
+          success: false,
+          error: err.message,
         });
       });
-    });
 
-    req.on('error', (err) => {
+      req.on('timeout', () => {
+        req.destroy();
+        const responseTime = Date.now() - startTime;
+        clearTimeout(timeoutHandle);
+        resolve({
+          store: subdomain,
+          statusCode: 0,
+          responseTime,
+          success: false,
+          error: 'Socket timeout',
+        });
+      });
+    } catch (err) {
       const responseTime = Date.now() - startTime;
       clearTimeout(timeoutHandle);
       resolve({
@@ -99,9 +133,9 @@ function fetchStorefrontPage(
         statusCode: 0,
         responseTime,
         success: false,
-        error: err.message,
+        error: err instanceof Error ? err.message : 'Unknown error',
       });
-    });
+    }
   });
 }
 

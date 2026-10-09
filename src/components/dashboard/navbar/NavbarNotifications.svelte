@@ -243,7 +243,7 @@
           </div>
         {:else}
           {#each filteredNotifications as notif (notif.id)}
-            <div out:slide|local={{ duration: 200, easing: cubicOut }}>
+            <div out:slide={{ duration: 200, easing: cubicOut }}>
               <a
                 href={getLink(notif)}
                 on:click={() => markAsRead(notif.id, notif.isRead)}

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { spring } from 'svelte/motion';
   import Modal from '../../ui/Modal.svelte';
   import Input from '../../ui/Input.svelte';
   import Button from '../../ui/Button.svelte';
@@ -17,12 +16,16 @@
   let maxProducts = 15;
   let maxCategories = 5;
 
-  const progressProducts = spring(0, { stiffness: 0.08, damping: 0.4 });
-  const progressCategories = spring(0, { stiffness: 0.08, damping: 0.4 });
+  let progressProducts = 0;
+  let progressCategories = 0;
 
   $: {
-    if (maxProducts > 0) $progressProducts = Math.min((products / maxProducts) * 100, 100);
-    if (maxCategories > 0) $progressCategories = Math.min((categories / maxCategories) * 100, 100);
+    if (maxProducts > 0 && typeof products === 'number') {
+      progressProducts = Math.min((products / maxProducts) * 100, 100) || 0;
+    }
+    if (maxCategories > 0 && typeof categories === 'number') {
+      progressCategories = Math.min((categories / maxCategories) * 100, 100) || 0;
+    }
   }
 
   async function fetchQuota() {
@@ -80,19 +83,6 @@
   });
 </script>
 
-<style>
-  :global(.no-spinners::-webkit-inner-spin-button),
-  :global(.no-spinners::-webkit-outer-spin-button) {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
-  }
-  :global(input[type="number"].no-spinners) {
-    -moz-appearance: textfield;
-    appearance: textfield;
-  }
-</style>
-
 <div class="py-4 mt-auto border-t border-light flex flex-col gap-3 w-full shrink-0 {collapsed ? 'px-2 items-center' : 'px-4'}">
   {#if collapsed}
     <div 
@@ -117,8 +107,8 @@
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {$progressProducts}%"
+              class="h-1.5 rounded-full {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
+              style="width: {progressProducts}%"
             ></div>
           </div>
         </div>
@@ -131,8 +121,8 @@
           </div>
           <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
             <div 
-              class="h-1.5 rounded-full {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'}" 
-              style="width: {$progressCategories}%"
+              class="h-1.5 rounded-full {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
+              style="width: {progressCategories}%"
             ></div>
           </div>
         </div>

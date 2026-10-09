@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2, Database } from 'lucide-svelte';
+  import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2, UserMinus, Cloud } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
   import { Badge, Button, Table } from '@/components/ui';
   import { formatDate } from '@/lib/utils/format';
@@ -103,7 +103,7 @@
                 on:click={() => onSuspend(item)}
                 title="Tangguhkan Pengguna"
               >
-                <AlertCircle size={13} />
+                <UserMinus size={13} />
               </Button>
               {#if item.role === 'tenant' && item.hasStore}
                 <Button
@@ -112,7 +112,7 @@
                   title="Kelola Kuota"
                   on:click={() => onManageQuota(item)}
                 >
-                  <Database size={13} />
+                  <Cloud size={13} />
                 </Button>
               {/if}
             {:else if item.status === 'suspended'}

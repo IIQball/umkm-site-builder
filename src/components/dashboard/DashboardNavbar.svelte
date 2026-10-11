@@ -8,6 +8,7 @@
   import { getStoredTheme, applyTheme } from "@/lib/utils/theme";
 
   export let userJson: string;
+  export let breadcrumb: string | undefined = undefined;
 
   $: user = JSON.parse(userJson) as AuthenticatedUser;
 
@@ -119,6 +120,13 @@
 
   <!-- Right: notifications, theme toggle, and user dropdown -->
   <div class="flex items-center gap-2.5 flex-shrink-0 ml-3">
+    <!-- Breadcrumb (mobile only) -->
+    {#if breadcrumb}
+      <span class="text-xs font-medium text-muted md:hidden truncate max-w-[120px]" title={breadcrumb}>
+        {breadcrumb}
+      </span>
+    {/if}
+
     <!-- Notification Bell -->
     <NavbarNotifications {user} />
 

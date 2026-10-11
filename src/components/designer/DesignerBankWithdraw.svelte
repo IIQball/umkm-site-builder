@@ -84,7 +84,8 @@
       if (res.ok && result.ok && result.data) {
         const rawAccounts: BankAccount[] = result.data.accounts || [result.data];
         bankAccounts = rawAccounts.map((a) => {
-          const resolvedName = a.accountHolder || a.holderName || (a as any).accountHolderName || '';
+          const r = a as unknown as Record<string, unknown>;
+          const resolvedName = (a.accountHolder || a.holderName || r.accountHolderName || '') as string;
           return { ...a, holderName: resolvedName, accountHolder: resolvedName };
         });
         const primary = bankAccounts.find((a) => a.isPrimary) || bankAccounts[0];
@@ -186,13 +187,17 @@
       return;
     }
 
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `po_${Date.now()}`;
     withdrawError = '';
     isWithdrawing = true;
     try {
       const res = await fetch('/api/designer/payout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountNum, bankAccountId: targetAccount.id }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey,
+        },
+        body: JSON.stringify({ amount: amountNum, bankAccountId: targetAccount.id, idempotencyKey }),
       });
 
       const result = await res.json();
@@ -278,8 +283,7 @@
   showModal={showBankModal}
   {bankAccount} {isLoading} {apiError}
   bind:inputBankName bind:inputAccountNumber bind:inputHolderName
-  onSave={saveBankAccount}
-  onClose={() => (showBankModal = false)}
+  onSave={saveBankAccount} onClose={() => (showBankModal = false)}
 />
 
 <DesignerWithdrawModal

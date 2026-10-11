@@ -1,11 +1,19 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-10-08 by feature/h13-fauzan-suspend-logic
+Status: LIVE · Updated: 2026-10-09 by feature/h14-fauzan-stress-test
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
 
 Keep it short and current. This is a checkpoint, not a changelog.
+
+- **H14 Multi-Domain SSR Stress Test & CLS Optimization ([`scripts/load-test.ts`](scripts/load-test.ts), [`src/lib/performance/cls.helpers.ts`](src/lib/performance/cls.helpers.ts), [`src/components/storefront/StorefrontDynamicPage.svelte`](src/components/storefront/StorefrontDynamicPage.svelte), [`docs/prd/features/h14-stress-test.md`](docs/prd/features/h14-stress-test.md)):**
+  - **Load Testing Script**: `scripts/load-test.ts` simulates 50 concurrent store domains with 5 requests each (250 total). Validates SSR response time SLA: p95 < 1000ms, success rate ≥ 95%. Run via `bun run load-test`.
+  - **CLS Optimization Helpers**: `src/lib/performance/cls.helpers.ts` provides utilities to prevent layout shifts: `getImageContainerStyle()` (reserve space for images), `getProductCardStyle()` (fix product card heights), `getHeroSectionStyle()` (reserve space for hero), `monitorCLS()` (real-time CLS monitoring via PerformanceObserver).
+  - **StorefrontDynamicPage Integration**: Added `monitorCLS(0.05)` on mount to monitor layout shifts > 5% in browser console.
+  - **Feature Spec & Manual Testing Guide**: `docs/prd/features/h14-stress-test.md` and `docs/H14_MANUAL_TESTING_GUIDE.md` provide complete specifications and step-by-step manual testing instructions (load test, CLS monitoring, Lighthouse audit, regression check).
+  - **Status**: Ready for manual testing. Pending user walkthrough before PR creation to `dev`.
+  - 0 typecheck errors (`bun run type-check`), 0 lint warnings (`bun run lint`). Load test framework ready; CLS monitoring active in browser.
 
 - **H13 Admin Store Suspension with Reason Modal ([`src/pages/api/admin/stores/[id]/suspend.ts`](src/pages/api/admin/stores/[id]/suspend.ts), [`src/components/admin/merchants/AdminStoreSuspendModal.svelte`](src/components/admin/merchants/AdminStoreSuspendModal.svelte), [`src/components/admin/merchants/AdminStoreRow.svelte`](src/components/admin/merchants/AdminStoreRow.svelte), [`src/components/admin/AdminAssistedStores.svelte`](src/components/admin/AdminAssistedStores.svelte)):**
   - **Backend Suspension Endpoint**: POST `/api/admin/stores/[id]/suspend` accepts `{ reason: string }` (1-500 chars). Validates admin authorization (registering admin or superadmin only), prevents re-suspension of already-suspended stores, updates `stores.status = 'suspended'` and `stores.suspendReason`, auto-logs to `activityLogs`.

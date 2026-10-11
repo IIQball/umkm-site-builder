@@ -5,6 +5,7 @@
   import SectionRenderer from '@/components/builder/sections/SectionRenderer.svelte';
   import { editorStore, canvasStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
+  import { monitorCLS } from '@/lib/performance/cls.helpers';
 
   export let config: TemplateConfig;
   export let store: any;
@@ -34,6 +35,9 @@
   }
 
   onMount(() => {
+    // Monitor CLS on storefront (H14 optimization)
+    monitorCLS(0.05);
+
     if (viewModeOverride) {
       editorStore.setViewMode(viewModeOverride);
       return;

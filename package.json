@@ -18,7 +18,8 @@
     "format": "prettier --write src",
     "test": "vitest",
     "test:unit": "vitest run --reporter=verbose",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "load-test": "bun run scripts/load-test.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.3",

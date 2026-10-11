@@ -115,11 +115,11 @@ export const berandaItems = [
   { label: 'Alur Kerja (Value Matrix)', href: '/#value-matrix', desc: '3 langkah praktis operasional platform' },
   { label: 'Ulasan & Testimoni', href: '/#testimonials', desc: 'Cerita sukses mitra perajin & UMKM' },
   { label: 'Tanya Jawab (FAQ)', href: '/#faq', desc: 'Jawaban pertanyaan umum seputar platform' },
-  { label: 'Kontak & Gabung', href: '/#contact', desc: 'Konsultasi langsung dengan tim Pinoka' }
+  { label: 'Kontak & Gabung', href: '/contact', desc: 'Konsultasi langsung dengan tim Pinoka' }
 ]
 
 export const helpCenterItems = [
-  { label: 'Pusat Bantuan', href: '/help', desc: 'Tanya jawab & kontak tim via WhatsApp' },
+  { label: 'Hubungi Kami', href: '/contact', desc: 'Tanya jawab & kontak tim via WhatsApp' },
   { label: 'Syarat & Ketentuan', href: '/terms', desc: 'Aturan layanan & hak kekayaan intelektual' },
   { label: 'Kebijakan Privasi', href: '/privacy', desc: 'Perlindungan data pribadi & keamanan' }
 ]

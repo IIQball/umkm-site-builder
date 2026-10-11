@@ -73,7 +73,7 @@
 </script>
 
 <section
-  id="public-contact"
+  id="contact"
   bind:this={containerEl}
   class="w-full bg-canvas text-main py-12 sm:py-16 md:py-20 px-6 sm:px-8 md:px-12 relative select-none transition-colors duration-200 flex-1 flex flex-col justify-center"
 >

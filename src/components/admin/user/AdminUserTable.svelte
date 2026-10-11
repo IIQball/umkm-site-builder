@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2 } from 'lucide-svelte';
+  import { UserX, AlertCircle, FileText, CheckCircle, Ban, CheckCircle2, UserMinus, Cloud } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
   import { Badge, Button, Table } from '@/components/ui';
   import { formatDate } from '@/lib/utils/format';
@@ -9,6 +9,7 @@
   export let onSuspend: (user: AdminUserItem) => void;
   export let onUnsuspend: (user: AdminUserItem) => void;
   export let onShowDetail: (user: AdminUserItem) => void;
+  export let onManageQuota: (user: AdminUserItem) => void;
 
   const tableHeaders = [
     { label: '#', align: 'center' as const, width: 'w-12' },
@@ -102,8 +103,18 @@
                 on:click={() => onSuspend(item)}
                 title="Tangguhkan Pengguna"
               >
-                <AlertCircle size={13} />
+                <UserMinus size={13} />
               </Button>
+              {#if item.role === 'tenant' && item.hasStore}
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  title="Kelola Kuota"
+                  on:click={() => onManageQuota(item)}
+                >
+                  <Cloud size={13} />
+                </Button>
+              {/if}
             {:else if item.status === 'suspended'}
               {#if item.suspendReason}
                 <Button

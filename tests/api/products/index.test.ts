@@ -105,6 +105,48 @@ describe('Products API', () => {
       const data = await response.json();
       expect(data.ok).toBe(true);
     });
+
+    it('rejects if product quota exceeded', async () => {
+      (db.select as Mock).mockImplementation((opts) => {
+        if (opts && opts.count) {
+          return {
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ count: 10 }]),
+            }),
+          };
+        }
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ id: 's1', userId: 'u1', maxProducts: 10 }]),
+            }),
+          }),
+        };
+      });
+
+      const request = new Request('http://localhost/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: 's1',
+          categoryId: 'c1',
+          name: 'New Product',
+          slug: 'new-product',
+          basePrice: 10000,
+        }),
+      });
+
+      const locals = {
+        user: { id: 'u1', role: 'tenant', status: 'active', email: 'test@example.com' },
+      };
+
+      const context = { request, locals, url: new URL(request.url) } as unknown as APIContext;
+      const response = (await POST(context)) as Response;
+      const data = await response.json();
+
+      expect(response.status).toBe(402);
+      expect(data.error.message).toContain('Maksimal 10 produk');
+    });
   });
 
   describe('PUT /api/products/[id]', () => {

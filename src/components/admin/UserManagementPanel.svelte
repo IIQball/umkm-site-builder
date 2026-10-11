@@ -6,6 +6,7 @@
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
+  import AdminUserQuotaModal from './user/AdminUserQuotaModal.svelte';
   import AdminUserTable from './user/AdminUserTable.svelte';
 
   export let initialUsersJson: string = '[]';
@@ -26,6 +27,9 @@
   let suspendModalOpen = false;
   let unsuspendModalOpen = false;
   let detailModalOpen = false;
+  let quotaModalOpen = false;
+  let suggestedAddProducts = 0;
+  let suggestedAddCategories = 0;
   let suspendReason = '';
   let actionLoading = false;
   
@@ -46,6 +50,7 @@
       const result = await res.json();
       if (result.ok && Array.isArray(result.data)) {
         users = result.data;
+        checkUrlForQuotaAction();
       } else if (result.error) {
         showToast(result.error.message || 'Gagal memuat pengguna', 'error');
       }
@@ -59,8 +64,32 @@
   onMount(() => {
     if (users.length === 0) {
       fetchUsers();
+    } else {
+      checkUrlForQuotaAction();
     }
   });
+
+  const checkUrlForQuotaAction = () => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'quota') {
+      const tenantId = params.get('tenantId');
+      if (tenantId) {
+        const u = users.find(u => u.id === tenantId);
+        if (u) {
+          openQuotaModal(
+            u, 
+            Number(params.get('addProd')) || 0, 
+            Number(params.get('addCat')) || 0
+          );
+          
+          // clean URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        }
+      }
+    }
+  };
 
   const openSuspendModal = (user: AdminUserItem) => {
     selectedUser = user;
@@ -79,10 +108,18 @@
     detailModalOpen = true;
   };
 
+  const openQuotaModal = (user: AdminUserItem, addProd = 0, addCat = 0) => {
+    selectedUser = user;
+    suggestedAddProducts = addProd;
+    suggestedAddCategories = addCat;
+    quotaModalOpen = true;
+  };
+
   const closeModal = () => { 
     suspendModalOpen = false; 
     unsuspendModalOpen = false;
     detailModalOpen = false;
+    quotaModalOpen = false;
     selectedUser = null; 
     suspendReason = ''; 
   };
@@ -239,6 +276,7 @@
         onSuspend={openSuspendModal}
         onUnsuspend={openUnsuspendModal}
         onShowDetail={openDetailModal}
+        onManageQuota={(u) => openQuotaModal(u)}
       />
       {#if filteredUsers.length > 0}
         <Pagination
@@ -265,6 +303,14 @@
 <AdminUserDetailModal
   isOpen={detailModalOpen}
   selectedUser={selectedUser}
+  onClose={closeModal}
+/>
+
+<AdminUserQuotaModal
+  isOpen={quotaModalOpen}
+  selectedUser={selectedUser}
+  {suggestedAddProducts}
+  {suggestedAddCategories}
   onClose={closeModal}
 />
 

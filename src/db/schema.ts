@@ -322,7 +322,7 @@ export const stores = pgTable('stores', {
   suspendReason: text('suspend_reason'),
   deleteReason: text('delete_reason'),
 
-  maxProducts: integer('max_products').default(15).notNull(),
+  maxProducts: integer('max_products').default(10).notNull(),
   maxCategories: integer('max_categories').default(5).notNull(),
 
   customization: jsonb('customization').default({}).notNull(),

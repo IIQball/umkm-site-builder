@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal, Button } from '@/components/ui';
+  import { Modal, Button, Textarea } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import type { AssistedStoreItem } from '@/types/admin';
 
@@ -69,21 +69,16 @@
   on:close={close}
 >
   <div class="space-y-4">
-    <div>
-      <label for="suspend-reason" class="block text-sm font-semibold text-main mb-2">
-        Alasan Penangguhan
-      </label>
-      <textarea
-        id="suspend-reason"
-        bind:value={reason}
-        placeholder="Jelaskan alasan penangguhan toko..."
-        class="w-full px-4 py-3 rounded-xl border border-light bg-card text-main placeholder:text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none"
-        rows="4"
-      />
-      <p class="text-xs text-secondary mt-1">
-        Alasan ini akan diinformasikan kepada pemilik toko
-      </p>
-    </div>
+    <Textarea
+      id="suspend-reason"
+      label="Alasan Penangguhan"
+      helper="Alasan ini akan diinformasikan kepada pemilik toko"
+      placeholder="Jelaskan alasan penangguhan toko..."
+      bind:value={reason}
+      rows={4}
+      resizable={false}
+      required
+    />
   </div>
 
   <svelte:fragment slot="footer">
@@ -92,16 +87,14 @@
       size="sm"
       on:click={close}
       disabled={loading}
-      className="rounded-lg"
     >
       Batal
     </Button>
     <Button
-      variant="primary"
+      variant="destructive"
       size="sm"
       loading={loading}
       on:click={handleSuspend}
-      className="rounded-lg"
     >
       Tangguhkan Toko
     </Button>

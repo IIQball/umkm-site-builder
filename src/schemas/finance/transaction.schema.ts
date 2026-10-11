@@ -12,6 +12,7 @@ export const TransactionInitiateInputSchema = z.object({
   templateId: z.string().optional(),
   assistedBy: z.string().optional().nullable(),
   adminFee: z.number().optional(),
+  idempotencyKey: z.string().optional(),
 });
 
 export type TransactionInitiateInput = z.infer<typeof TransactionInitiateInputSchema>;
@@ -41,6 +42,7 @@ export const TemplatePurchaseInputSchema = z.object({
   templateId: z.string().min(1, 'templateId is required'),
   tenantId: z.string().optional(),
   assistedBy: z.string().optional().nullable(),
+  idempotencyKey: z.string().optional(),
 });
 
 export type TemplatePurchaseInput = z.infer<typeof TemplatePurchaseInputSchema>;

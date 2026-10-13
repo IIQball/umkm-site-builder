@@ -4,7 +4,7 @@ import AdminRegistrationPanel from '@/components/admin/AdminRegistrationPanel.sv
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { tenantInvitations, users } from '@/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, or, lt, isNull, isNotNull } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -21,12 +21,26 @@ let initialInvitations: Array<{
   invitedBy: string;
   expiresAt: string;
   acceptedAt: string | null;
+  extensionCount?: number;
   createdAt: string;
   userId: string | null;
   userStatus: string | null;
 }> = [];
 
 try {
+  // Otomatis bersihkan undangan yang sudah kadaluwarsa > 7 hari atau yang sudah diaktivasi
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  await db
+    .delete(tenantInvitations)
+    .where(
+      or(
+        isNotNull(tenantInvitations.acceptedAt),
+        lt(tenantInvitations.expiresAt, sevenDaysAgo)
+      )
+    );
+
   const rows = await db
     .select({
       id: tenantInvitations.id,
@@ -36,6 +50,7 @@ try {
       invitedBy: tenantInvitations.invitedBy,
       expiresAt: tenantInvitations.expiresAt,
       acceptedAt: tenantInvitations.acceptedAt,
+      extensionCount: tenantInvitations.extensionCount,
       createdAt: tenantInvitations.createdAt,
       userId: users.id,
       userStatus: users.status,
@@ -44,7 +59,9 @@ try {
     .innerJoin(users, eq(tenantInvitations.email, users.email))
     .where(and(
       eq(tenantInvitations.invitedBy, user.id),
-      eq(users.role, 'tenant')
+      eq(users.role, 'tenant'),
+      isNull(tenantInvitations.acceptedAt),
+      eq(users.status, 'pending')
     ))
     .orderBy(desc(tenantInvitations.createdAt));
 
@@ -56,6 +73,7 @@ try {
     invitedBy: row.invitedBy,
     expiresAt: row.expiresAt.toISOString(),
     acceptedAt: row.acceptedAt ? row.acceptedAt.toISOString() : null,
+    extensionCount: row.extensionCount ?? 0,
     createdAt: row.createdAt.toISOString(),
     userId: row.userId,
     userStatus: row.userStatus,

@@ -42,6 +42,9 @@ vi.mock('@/db/index', () => {
       email: 'mock_inv_email',
       acceptedAt: 'mock_inv_acceptedAt',
     },
+    stores: {
+      userId: 'mock_userId',
+    },
   };
 });
 

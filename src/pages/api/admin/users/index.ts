@@ -13,7 +13,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const unacceptedInvitationSubquery = db
-      .select()
+      .select({ id: tenantInvitations.id })
       .from(tenantInvitations)
       .where(
         and(

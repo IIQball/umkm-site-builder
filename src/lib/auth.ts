@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, users, sessions, accounts, verifications, designers, wallets, notifications } from "@/db";
+import { db, users, sessions, accounts, verifications, designers, wallets, notifications, tenantInvitations } from "@/db";
 import { eq } from "drizzle-orm";
 import { sendEmail, getEmailLogoUrl } from "@/lib/utils/email";
 
@@ -402,6 +402,8 @@ export const auth = betterAuth({
           const isSignInRequest = ctx?.path?.includes('/sign-in') || ctx?.path?.includes('/callback');
           if (user?.status === 'pending' && isSignInRequest) {
             await db.update(users).set({ status: 'active' }).where(eq(users.id, user.id));
+            // Hapus undangan yang sudah dipakai agar tidak nyampah di dashboard admin
+            await db.delete(tenantInvitations).where(eq(tenantInvitations.email, user.email));
           }
 
           return {
@@ -513,6 +515,6 @@ export function canManageStore(
 }
 
 export function getRedirectUrlForRole(role?: string | null): string {
-  if (role === 'designer') return '/designer';
+  if (role === 'designer') return '/designer/wallet';
   return '/dashboard';
 }

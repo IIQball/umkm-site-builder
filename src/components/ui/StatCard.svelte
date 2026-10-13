@@ -12,7 +12,7 @@
   export let valueSuffix: string = "";
   export let description: string = "";
   export let isHero: boolean = false;
-  export let cardTheme: "default" | "dark" | "orange" | "blue" = "default";
+  export let cardTheme: "default" | "dark" | "orange" | "blue" | "pink" = "default";
   export let footerText: string = "";
   export let delayClass: string = "";
   export let compactCurrency: boolean = true;
@@ -23,7 +23,8 @@
   $: isDarkCard = resolvedTheme === "dark";
   $: isOrangeCard = resolvedTheme === "orange";
   $: isBlueCard = resolvedTheme === "blue";
-  $: isColoredCard = isDarkCard || isOrangeCard || isBlueCard;
+  $: isPinkCard = resolvedTheme === "pink";
+  $: isColoredCard = isDarkCard || isOrangeCard || isBlueCard || isPinkCard;
   let animationId: number;
 
   $: valueLength = displayValue ? displayValue.length : 0;
@@ -111,7 +112,7 @@
 <div
   class="{isDarkCard
     ? 'bg-main text-canvas dark:bg-nested dark:text-white border border-border/80 dark:border-white/10 shadow-sm'
-    : isOrangeCard
+    : isOrangeCard || isPinkCard
       ? 'bg-orange text-white border border-orange/20 shadow-md shadow-orange/10'
       : isBlueCard
         ? 'bg-primary text-white border border-primary/20 shadow-md shadow-primary/10'

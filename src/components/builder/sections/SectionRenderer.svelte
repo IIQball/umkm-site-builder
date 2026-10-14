@@ -15,7 +15,7 @@
     const rules: string[] = [];
     const hasCustomBg = !!s.backgroundColor && s.backgroundColor !== 'transparent';
     const defaultTextColor = hasCustomBg
-      ? (isDarkColor(s.backgroundColor) ? '#f8fafc' : '#0f172a')
+      ? (isDarkColor(s.backgroundColor) ? 'var(--color-bg-base, #f8fafc)' : 'var(--color-text-main, #0f172a)')
       : 'var(--theme-text-primary, var(--color-text-main, inherit))';
 
     const defaultPadding = '0px';
@@ -105,8 +105,10 @@
   data-section-type={section?.type}
   data-section-id={section?.id}
   style={inlineStyle}
-  class={`relative box-border w-full max-w-full min-w-0 scroll-mt-20 font-sans ${
-    section?.type === 'header_announcement' ? 'overflow-visible z-30' : 'overflow-x-hidden'
+  class={`box-border w-full max-w-full min-w-0 scroll-mt-20 font-sans ${
+    section?.type === 'header_announcement'
+      ? `${isLiveStorefront ? 'sticky top-0 z-40' : 'relative z-30'} overflow-visible`
+      : 'relative overflow-x-hidden'
   }`}
 >
   {#if section?.type && SECTION_TYPE_TO_ALIASES[section.type]}

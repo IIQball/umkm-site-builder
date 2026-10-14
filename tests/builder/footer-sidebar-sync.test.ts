@@ -92,7 +92,7 @@ describe('Footer Section Left Sidebar & Right Sidebar 1:1 Synchronization', () =
         managedByAdmin: { name: 'Admin Rudi' },
       },
     });
-    expect(withAdmin).toBe('Powered by Pinoka | Didampingi oleh Admin Rudi');
+    expect(withAdmin).toBe('Didukung oleh Pinoka | Didampingi oleh Admin Rudi');
 
     // 2. Storefront registered independently (no admin)
     const independent = formatAttributionText({
@@ -102,20 +102,20 @@ describe('Footer Section Left Sidebar & Right Sidebar 1:1 Synchronization', () =
         registrar: null,
       },
     });
-    expect(independent).toBe('Powered by Pinoka');
+    expect(independent).toBe('Didukung oleh Pinoka');
 
     // 3. Builder preview with custom designer admin name
     const builderCustom = formatAttributionText({
       isLiveStorefront: false,
       designerAdminName: 'Fasilitator UMKM Banyuwangi',
     });
-    expect(builderCustom).toBe('Powered by Pinoka | Didampingi oleh Fasilitator UMKM Banyuwangi');
+    expect(builderCustom).toBe('Didukung oleh Pinoka | Didampingi oleh Fasilitator UMKM Banyuwangi');
 
     // 4. Builder preview fallback
     const builderDefault = formatAttributionText({
       isLiveStorefront: false,
     });
-    expect(builderDefault).toBe('Powered by Pinoka | Didampingi oleh Admin Pendamping');
+    expect(builderDefault).toBe('Didukung oleh Pinoka | Didampingi oleh Admin Pendamping');
   });
 
   it('allows slot deletion without re-adding deleted slots', () => {

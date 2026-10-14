@@ -98,7 +98,7 @@ export function getFooterSlotLabel(slot: string, preset?: string): string {
       return 'Menu Navigasi Footer';
     case 'footer_copyright':
     case 'copyright':
-      return 'Hak Cipta & Powered by Pinoka';
+      return 'Hak Cipta & Didukung oleh Pinoka';
     case 'footer_floating_cta':
       return 'Banner Penawaran (Floating CTA)';
     case 'footer_newsletter':

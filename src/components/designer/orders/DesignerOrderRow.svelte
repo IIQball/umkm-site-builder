@@ -72,7 +72,7 @@
       </div>
       <div class="min-w-0">
         <span class="font-bold text-xs text-main block truncate font-sans">
-          {order.user?.name || 'Tenant UMKM'}
+          {order.user?.name || 'Merchant UMKM'}
         </span>
         <span class="text-xs text-secondary block truncate font-mono mt-0.5">
           {order.user?.email}

@@ -78,7 +78,7 @@
     if (isAdmin && !selectedTenantId) {
       addToast({
         type: 'error',
-        message: 'Silakan pilih tenant binaan terlebih dahulu di dropdown!',
+        message: 'Silakan pilih merchant binaan terlebih dahulu di dropdown!',
       });
       const el = document.getElementById('assisted-tenant-select');
       if (el) {
@@ -168,7 +168,7 @@
         addToast({
           type: 'success',
           message: isAdmin
-            ? `Template gratis "${template.name}" berhasil dipasangkan ke tenant binaan!`
+            ? `Template gratis "${template.name}" berhasil dipasangkan ke merchant binaan!`
             : `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
         });
         isPurchaseModalOpen = false;

@@ -52,7 +52,7 @@
   const roleOptions = [
     { value: 'all', label: 'Semua Role' },
     { value: 'admin', label: 'Admin' },
-    { value: 'tenant', label: 'Tenant (Merchant)' },
+    { value: 'tenant', label: 'Merchant' },
     { value: 'designer', label: 'Designer' },
     { value: 'superadmin', label: 'Super Admin' }
   ];

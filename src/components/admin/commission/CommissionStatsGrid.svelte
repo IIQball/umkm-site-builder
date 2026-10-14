@@ -46,7 +46,7 @@
     icon="support_agent"
     cardTheme="blue"
     badge="Jasa Pendamping"
-    footerText="Biaya bantuan transaksi tenant"
+    footerText="Biaya bantuan transaksi merchant"
     delayClass="delay-200"
   />
 
@@ -68,7 +68,7 @@
     value="{maxStoreBranches} Cabang"
     rawValue={maxStoreBranches}
     icon="store"
-    cardTheme="default"
+    cardTheme="dark"
     badge="Multi Cabang"
     footerText="Batas cabang onboarding & builder"
     delayClass="delay-300"

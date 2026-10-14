@@ -34,7 +34,7 @@
         { label: 'Tentang Pinoka', href: '/#why-us' },
         { label: 'Nilai Keunggulan', href: '/#features' },
         { label: 'Sinergi & Komisi', href: '/#synergy' },
-        { label: 'Cerita Tenant', href: '/#testimonials' }
+        { label: 'Cerita Merchant', href: '/#testimonials' }
       ]
     },
     {
@@ -42,7 +42,7 @@
       links: [
         { label: 'Pusat Bantuan', href: '/help' },
         { label: 'Tanya Jawab FAQ', href: '/#faq' },
-        { label: 'Panduan Tenant', href: '/#features' },
+        { label: 'Panduan Merchant', href: '/#features' },
         { label: 'Ajukan Fitur', href: 'mailto:halo@umkm-web-builder.iqdevmp.workers.dev' }
       ]
     },
@@ -52,7 +52,7 @@
         { label: 'UMKM Banyuwangi', href: '/umkm' },
         { label: 'Pasar Desainer', href: '/templates' },
         { label: 'Portal Usaha', href: '/auth/login' },
-        { label: 'Bina Tenant', href: '/auth/login' }
+        { label: 'Bina Merchant', href: '/auth/login' }
       ]
     }
   ]

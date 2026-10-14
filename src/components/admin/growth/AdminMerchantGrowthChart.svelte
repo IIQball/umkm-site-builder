@@ -32,7 +32,7 @@
           Pertumbuhan Merchant
         </h3>
         <p class="text-body-xs text-secondary mt-0.5 font-sans">
-          {growthData.periodLabel ? `Tren pendaftaran tenant (${growthData.periodLabel})` : 'Tren pendaftaran tenant baru'}
+          {growthData.periodLabel ? `Tren pendaftaran merchant (${growthData.periodLabel})` : 'Tren pendaftaran merchant baru'}
         </p>
       </div>
     </div>

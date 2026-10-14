@@ -36,7 +36,7 @@
       copiedId = text;
       addToast({
         type: "success",
-        message: `ID Tenant #${text.slice(0, 8)} disalin!`,
+        message: `ID Merchant #${text.slice(0, 8)} disalin!`,
       });
       setTimeout(() => {
         copiedId = null;
@@ -151,7 +151,7 @@
         <input
           type="text"
           bind:value={searchQuery}
-          placeholder="Cari toko / tenant / ID..."
+          placeholder="Cari toko / merchant / ID..."
           class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
         />
       </div>

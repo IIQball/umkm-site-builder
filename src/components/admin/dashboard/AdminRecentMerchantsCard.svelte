@@ -19,7 +19,7 @@
 
   const tableHeaders = [
     { label: '#', align: 'center' as const, width: '40px' },
-    { label: 'Tenant & Toko', align: 'left' as const, width: '30%' },
+    { label: 'Merchant & Toko', align: 'left' as const, width: '30%' },
     { label: 'Email Merchant', align: 'left' as const, width: '28%' },
     { label: 'Tanggal Daftar', align: 'left' as const, width: '22%' },
     { label: 'Status Setup', align: 'center' as const, width: '20%' },
@@ -82,7 +82,7 @@
               <div class="space-y-0.5">
                 <div class="flex items-center gap-1.5 font-bold text-xs text-main">
                   <User size={13} class="text-primary flex-shrink-0" />
-                  <span class="truncate max-w-[130px] font-sans">{m.name || 'Tenant UMKM'}</span>
+                  <span class="truncate max-w-[130px] font-sans">{m.name || 'Merchant UMKM'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-xs text-secondary">
                   <Store size={12} class="flex-shrink-0" />

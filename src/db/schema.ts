@@ -56,6 +56,7 @@ export const tenantInvitations = pgTable('tenant_invitations', {
   invitedBy: text('invited_by').notNull().references(() => users.id),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),
+  extensionCount: integer('extension_count').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   invitationEmailIdx: index('tenant_invitations_email_idx').on(table.email),

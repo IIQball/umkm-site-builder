@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Card, Button, Badge, Modal, Table, Pagination } from '@/components/ui';
+  import { Card, Button, Badge, Modal, Table, Pagination, StatCard } from '@/components/ui';
   import { Clock, CheckCircle, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
@@ -17,6 +17,7 @@
     createdAt: string;
     userId: string | null;
     userStatus: string | null;
+    extensionCount?: number;
   }> = [];
   export let currentUser: { id: string; role?: string } | null = null;
   export let title: string = 'Link Registrasi';
@@ -38,12 +39,6 @@
 
   let statusFilter = 'all';
 
-  $: stats = {
-    total: invitations.length,
-    registered: invitations.filter((i) => i.acceptedAt && i.userStatus === 'active').length,
-    pending: invitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
-  };
-
   // Deduplicate invitations by email (keep newest by createdAt)
   $: uniqueInvitations = Object.values(invitations.reduce((acc, current) => {
     if (!acc[current.email] || new Date(current.createdAt) > new Date(acc[current.email].createdAt)) {
@@ -51,6 +46,13 @@
     }
     return acc;
   }, {} as Record<string, typeof invitations[0]>)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  $: stats = {
+    total: uniqueInvitations.length,
+    registered: uniqueInvitations.filter((i) => i.acceptedAt && i.userStatus === 'active').length,
+    pending: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
+    expired: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) < new Date()).length,
+  };
 
   $: filteredInvitations = uniqueInvitations.filter((i) => {
     // Text search
@@ -247,6 +249,14 @@
     </div>
   </div>
 
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
+    <StatCard label="Total Undangan" value={stats.total} badge="Semua" cardTheme="dark" icon="mail" delayClass="delay-100" />
+    <StatCard label="Sudah Daftar" value={stats.registered} badge="Aktif" cardTheme="default" icon="check_circle" delayClass="delay-150" />
+    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="blue" icon="schedule" delayClass="delay-175" />
+    <StatCard label="Kedaluwarsa" value={stats.expired} badge="Hangus" cardTheme="pink" icon="link_off" delayClass="delay-200" />
+  </div>
+
   <!-- Main Table Panel -->
   <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-75">
     <!-- Header & Controls -->
@@ -288,14 +298,16 @@
           >
             Semua ({stats.total})
           </button>
-          <button
-            type="button"
-            on:click={() => (statusFilter = "active")}
-            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'active' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
-          >
-            <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-            Aktif ({stats.registered})
-          </button>
+          {#if stats.registered > 0}
+            <button
+              type="button"
+              on:click={() => (statusFilter = "active")}
+              class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'active' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+              Sudah Daftar ({stats.registered})
+            </button>
+          {/if}
           <button
             type="button"
             on:click={() => (statusFilter = "pending")}
@@ -306,11 +318,11 @@
           </button>
           <button
             type="button"
-            on:click={() => (statusFilter = "suspended")}
-            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'suspended' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+            on:click={() => (statusFilter = "expired")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'expired' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
           >
             <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-            Ditangguhkan
+            Kedaluwarsa ({stats.expired})
           </button>
         </div>
       </div>
@@ -403,13 +415,13 @@
                     variant="secondary"
                     size="sm"
                     className="rounded-xl font-bold text-xs"
-                    title="Perpanjang Masa Aktif"
+                    title={(inv.extensionCount ?? 0) >= 3 ? "Batas maksimal 3x perpanjangan telah tercapai" : "Perpanjang Masa Aktif 24 Jam"}
                     on:click={() => handleExtend(inv.id)}
-                    disabled={isExtending === inv.id || isDeleting === inv.id}
+                    disabled={isExtending === inv.id || isDeleting === inv.id || (inv.extensionCount ?? 0) >= 3}
                     loading={isExtending === inv.id}
                   >
                     <span class="material-symbols-outlined text-xs">refresh</span>
-                    <span>Perpanjang</span>
+                    <span>Perpanjang{#if (inv.extensionCount ?? 0) > 0} <span class="text-3xs opacity-80 font-mono">({inv.extensionCount}/3)</span>{/if}</span>
                   </Button>
                   <Button
                     variant="destructive"

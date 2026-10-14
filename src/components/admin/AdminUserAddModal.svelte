@@ -1,22 +1,21 @@
 <script lang="ts">
-  import { UserPlus } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
   import { createEventDispatcher } from 'svelte';
-  import { Button, Input, Modal } from '@/components/ui';
-
+  import { Button, Modal } from '@/components/ui';
   import { authClient } from '@/lib/auth-client';
 
-  export let isOpen = false
-  export let currentUser: { role?: string; id?: string } | null = null
+  export let isOpen = false;
+  export let currentUser: { role?: string; id?: string } | null = null;
   export let forceRole: 'tenant' | 'admin' | null = null;
 
   const dispatch = createEventDispatcher<{ success: void; close: void }>();
 
   $: selectedRole = forceRole ? forceRole : (currentUser?.role === 'superadmin' ? 'admin' : 'tenant');
+  $: roleLabel = selectedRole === 'admin' ? 'Admin' : 'Merchant';
+  $: roleIcon = selectedRole === 'admin' ? 'manage_accounts' : 'storefront';
 
   let newName = '';
   let newEmail = '';
-
   let isSubmitting = false;
 
   const close = () => {
@@ -26,41 +25,33 @@
   };
 
   const resetForm = () => {
-    newName = ''
-    newEmail = ''
-  }
+    newName = '';
+    newEmail = '';
+  };
 
   const handleAdd = async () => {
     if (!newName || !newEmail) return;
 
     isSubmitting = true;
-
     try {
-      const payload = {
-        role: selectedRole,
-        name: newName, 
-        email: newEmail
-      };
-
       const res = await fetch('/api/admin/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ role: selectedRole, name: newName, email: newEmail }),
       });
       const result = await res.json();
 
       if (res.ok && result.ok) {
-        // Automatically send activation link via client
         const redirectUrl = `/activation?uid=${result.data.id}&name=${encodeURIComponent(newName)}`;
         const { error } = await authClient.requestPasswordReset({
           email: result.data.email || newEmail,
-          redirectTo: redirectUrl
+          redirectTo: redirectUrl,
         });
 
         if (error) {
           toast.error(`Akun berhasil dibuat, tetapi gagal mengirim email aktivasi: ${error.message}`);
         } else {
-          toast.success(`Akun ${selectedRole === 'tenant' ? 'Merchant' : 'Admin'} berhasil didaftarkan dan email aktivasi telah dikirim.`);
+          toast.success(`Akun ${roleLabel} berhasil didaftarkan dan email aktivasi telah dikirim.`);
         }
 
         resetForm();
@@ -78,71 +69,84 @@
 
 <Modal open={isOpen} on:close={close} size="md">
   <svelte:fragment slot="header">
-    <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
-      <UserPlus size={18} class="text-primary" />
-      <span>Tambah {selectedRole === 'admin' ? 'Admin' : 'Merchant'} Baru</span>
-    </h3>
-  </svelte:fragment>
-
-  <div class="py-1">
-    <p class="text-[13px] text-secondary mb-5 leading-relaxed">
-      Kirimkan link undangan registrasi ke alamat email calon <strong class="font-semibold">{selectedRole === 'admin' ? 'Admin' : 'Merchant'}</strong> baru. Mereka akan menerima instruksi lengkap untuk masuk ke sistem.
-    </p>
-    <form on:submit|preventDefault={handleAdd} class="animate-fade-in">
-      <div class="space-y-5">
-        <div class="grid grid-cols-1 gap-5">
-          <Input
-            id="newName"
-            type="text"
-            label="Nama Lengkap"
-            bind:value={newName}
-            disabled={isSubmitting}
-            required
-            minlength="3"
-            placeholder="Contoh: Budi Santoso"
-          />
-          
-          <Input
-            id="newEmail"
-            type="email"
-            label="Alamat Email"
-            bind:value={newEmail}
-            disabled={isSubmitting}
-            required
-            placeholder="budi@email.com"
-          />
-        </div>
-
-        <div class="bg-primary/5 border border-primary/20 rounded-xl p-3.5 text-xs text-primary/80 leading-relaxed font-medium">
-          Sistem akan membuat profil awal dan mengirimkan link aktivasi ke 
-          {#if newEmail}
-            <strong class="text-primary font-bold">{newEmail}</strong>
-          {:else}
-            <span class="text-primary/60 italic">alamat email di atas</span>
-          {/if}.
-          Pengguna dapat membuat kata sandi mereka secara mandiri melalui link tersebut.
-        </div>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">{roleIcon}</span>
       </div>
-    </form>
-  </div>
-
-  <svelte:fragment slot="footer">
-    <div class="w-full flex justify-between items-center">
-      <Button variant="secondary" size="sm" on:click={close} disabled={isSubmitting}>
-        <span>Batal</span>
-      </Button>
-      <Button 
-        type="button"
-        variant="primary" 
-        size="sm" 
-        disabled={isSubmitting || !newName || !newEmail} 
-        loading={isSubmitting}
-        on:click={handleAdd}
-        className="font-bold px-6"
-      >
-        <UserPlus size={16} class="mr-1" />
-        <span>Kirim Undangan</span>
-      </Button>
+      <div>
+        <h3 class="text-base font-extrabold text-main font-heading leading-tight">
+          Tambah {roleLabel} Baru
+        </h3>
+        <p class="text-2xs text-muted mt-0.5">
+          Kirimkan link undangan registrasi ke email calon {roleLabel.toLowerCase()} baru untuk aktivasi akun.
+        </p>
+      </div>
     </div>
   </svelte:fragment>
+
+  <form on:submit|preventDefault={handleAdd} class="space-y-4 pt-1">
+    <div class="space-y-1.5">
+      <label for="inv_name" class="text-xs font-bold text-main block font-heading">
+        Nama Lengkap <span class="text-rose-500">*</span>
+      </label>
+      <input
+        id="inv_name"
+        type="text"
+        bind:value={newName}
+        disabled={isSubmitting}
+        required
+        minlength="3"
+        placeholder="Contoh: Budi Santoso"
+        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all font-sans"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="inv_email" class="text-xs font-bold text-main block font-heading">
+        Alamat Email <span class="text-rose-500">*</span>
+      </label>
+      <input
+        id="inv_email"
+        type="email"
+        bind:value={newEmail}
+        disabled={isSubmitting}
+        required
+        placeholder="budi@email.com"
+        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all font-sans"
+      />
+    </div>
+
+    <!-- Info notice — warna hitam / text-main jelas, bukan biru -->
+    <div class="bg-nested border border-light rounded-xl p-3.5 text-xs text-main leading-relaxed font-sans">
+      Sistem akan mengirimkan link aktivasi ke
+      {#if newEmail}
+        <strong class="font-bold text-main">{newEmail}</strong>
+      {:else}
+        <span class="text-secondary italic">alamat email di atas</span>
+      {/if}.
+      Pengguna dapat membuat kata sandi mereka secara mandiri melalui link tersebut.
+    </div>
+
+    <div class="flex items-center justify-end gap-2 pt-3 border-t border-light">
+      <Button
+        variant="secondary"
+        size="sm"
+        class="rounded-xl font-bold"
+        on:click={close}
+        disabled={isSubmitting}
+      >
+        Batal
+      </Button>
+      <Button
+        type="submit"
+        variant="primary"
+        size="sm"
+        class="rounded-xl font-bold"
+        disabled={isSubmitting || !newName || !newEmail}
+        loading={isSubmitting}
+      >
+        {isSubmitting ? 'Mengirim...' : 'Kirim Undangan'}
+      </Button>
+    </div>
+  </form>
 </Modal>

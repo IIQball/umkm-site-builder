@@ -65,10 +65,9 @@ export const POST: APIRoute = async ({ request }) => {
           }
         }
         
-        // Mark invitation as accepted if this email was invited (regardless of role)
+        // Hapus undangan yang telah diaktivasi agar otomatis hilang dan tidak menumpuk di database
         await db
-          .update(tenantInvitations)
-          .set({ acceptedAt: new Date() })
+          .delete(tenantInvitations)
           .where(eq(tenantInvitations.email, userEmail));
       }
     }

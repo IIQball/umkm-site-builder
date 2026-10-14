@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Search } from 'lucide-svelte';
   import type { AdminUserItem } from '@/types';
-  import { Card, Input, StatCard, Pagination } from '@/components/ui';
+  import { Card, StatCard, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
@@ -217,54 +216,70 @@
     <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="dark" icon="block" delayClass="delay-100" />
     <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-150" />
     <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-175" />
-    <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="orange" icon="pending_actions" delayClass="delay-200" />
+    <StatCard label="Menunggu Aktivasi" value={users.filter(u => u.status === 'pending').length} badge="Baru" cardTheme="pink" icon="pending_actions" delayClass="delay-200" />
   </div>
 
-  <div class="flex flex-col gap-4">
-    <!-- Search Bar -->
-    <div class="relative w-full md:w-96">
-      <Input 
-        bind:value={searchQuery}
-        placeholder="Cari nama atau email..." 
-        size="md"
-      >
-        <div slot="prefix"><Search size={18} class="text-muted" /></div>
-      </Input>
-    </div>
-    
-    <!-- Filter Pills -->
-    <div class="flex flex-col sm:flex-row gap-4 sm:items-center">
-      {#if currentUser?.role === 'superadmin'}
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
-        {#each roleOptions as opt}
-          <button 
-            type="button"
-            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap {roleFilter === opt.value ? 'bg-main text-canvas shadow-xs' : 'bg-card-base text-secondary hover:bg-nested border border-light/50 hover:text-main'}"
-            on:click={() => roleFilter = opt.value as any}
-          >
-            {opt.label}
-          </button>
-        {/each}
+  <Card variant="bordered" padding="none" radius="2xl" class="overflow-hidden shadow-xs animate-fade-in-up delay-75">
+    <!-- Header & Controls -->
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">group</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+              Daftar Pengguna
+            </h3>
+          </div>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">
+            Kelola dan tinjau seluruh akun pengguna di platform.
+          </p>
+        </div>
       </div>
-      
-      <div class="hidden sm:block w-px h-6 bg-light"></div>
-      {/if}
 
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
-        {#each statusOptions as opt}
-          <button 
-            type="button"
-            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap {statusFilter === opt.value ? 'bg-main text-canvas shadow-xs' : 'bg-card-base text-secondary hover:bg-nested border border-light/50 hover:text-main'}"
-            on:click={() => statusFilter = opt.value as any}
-          >
-            {opt.label}
-          </button>
-        {/each}
+      <!-- Actions & Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Cari nama atau email..."
+            class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
+          />
+        </div>
+
+        {#if currentUser?.role === 'superadmin'}
+          <!-- Segmented Role Filter -->
+          <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
+            {#each roleOptions as opt}
+              <button
+                type="button"
+                on:click={() => (roleFilter = opt.value as any)}
+                class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {roleFilter === opt.value ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+              >
+                {opt.label}
+              </button>
+            {/each}
+          </div>
+        {/if}
+
+        <!-- Segmented Status Filter -->
+        <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
+          {#each statusOptions as opt}
+            <button
+              type="button"
+              on:click={() => (statusFilter = opt.value as any)}
+              class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {statusFilter === opt.value ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+            >
+              {opt.label}
+            </button>
+          {/each}
+        </div>
       </div>
     </div>
-  </div>
 
-  <Card variant="bordered" padding="none" radius="2xl" class="overflow-hidden shadow-xs">
     {#if isLoading && users.length === 0}
       <div class="flex justify-center items-center py-16">
         <span class="loading loading-spinner loading-lg text-primary"></span>

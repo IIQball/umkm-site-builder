@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Pagination, Badge, Select, Table, Modal, Button } from '@/components/ui';
-  import { History, Filter, User, Monitor, Info } from 'lucide-svelte';
+  import { Pagination, Badge, Select, Table, Modal, Button, Card } from '@/components/ui';
+  import { User, Monitor, Info } from 'lucide-svelte';
   import { formatDate } from '@/lib/utils/format';
 
   export let initialLogs: Array<{
@@ -67,58 +67,65 @@
   };
 </script>
 
-<div class="space-y-4">
-  <!-- Filters Section -->
-  <div class="bg-card rounded-2xl border border-light p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-end sm:items-center">
-    <div class="flex items-center gap-2 text-main font-bold text-sm mr-2 shrink-0">
-      <Filter size={16} />
-      <span>Filter:</span>
+<Card variant="bordered" padding="none" radius="2xl" class="shadow-xs overflow-hidden">
+  <!-- Card Header with integrated filters -->
+  <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested dark:text-main flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <span class="material-symbols-outlined text-lg">history</span>
+      </div>
+      <div>
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
+          Daftar Log Aktivitas
+        </h3>
+        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+          Jejak aktivitas pengguna dan sistem secara kronologis
+        </p>
+      </div>
     </div>
-    
-    <div class="w-full sm:w-48">
-      <Select 
-        options={actionOptions} 
-        bind:value={actionFilter} 
-        on:change={handleFilterChange} 
-      />
-    </div>
-    
-    <div class="w-full sm:w-48">
-      <Select 
-        options={roleOptions} 
-        bind:value={roleFilter} 
-        on:change={handleFilterChange} 
-      />
+
+    <!-- Filters & Badge on the right -->
+    <div class="flex flex-wrap items-center gap-2.5">
+      <div class="w-44 sm:w-48">
+        <Select 
+          options={actionOptions} 
+          bind:value={actionFilter} 
+          on:change={handleFilterChange} 
+        />
+      </div>
+      
+      <div class="w-36 sm:w-40">
+        <Select 
+          options={roleOptions} 
+          bind:value={roleFilter} 
+          on:change={handleFilterChange} 
+        />
+      </div>
+
     </div>
   </div>
 
-  <div class="bg-card rounded-2xl border border-light shadow-sm overflow-hidden mt-6">
-    <div class="px-6 py-5 border-b border-light flex justify-between items-center bg-nested/20">
-      <h3 class="font-bold text-main text-sm leading-none pt-2.5">Daftar Log Aktivitas</h3>
-      <span class="badge badge-sm badge-outline text-xs font-semibold">{total} Aktivitas</span>
-    </div>
-
-    {#if logs.length === 0}
-      <div class="py-16 flex flex-col items-center justify-center">
-        <div class="w-16 h-16 rounded-full bg-nested/50 text-muted flex items-center justify-center mb-4 ring-8 ring-nested/30">
-          <History size={32} strokeWidth={1.5} />
-        </div>
-        <h3 class="font-bold text-main mb-1">Tidak Ada Aktivitas</h3>
-        <p class="text-xs text-secondary max-w-sm text-center leading-relaxed">
-          Belum ada aktivitas sistem yang sesuai dengan filter.
-        </p>
+  {#if logs.length === 0}
+    <div class="py-16 px-8 flex flex-col items-center text-center">
+      <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
+        <span class="material-symbols-outlined text-2xl">history</span>
       </div>
-    {:else}
-      <Table
-        headers={[
-          { label: '#', align: 'center' as const, width: 'w-12' },
-          { label: 'Pengguna & Toko' },
-          { label: 'Aksi' },
-          { label: 'Tanggal', width: 'w-48' },
-          { label: 'Detail Payload', align: 'center' as const, width: 'w-36' }
-        ]}
-        minWidth="min-w-[900px]"
-      >
+      <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Aktivitas</h4>
+      <p class="text-xs text-secondary max-w-sm mx-auto font-sans leading-relaxed">
+        Belum ada aktivitas sistem yang sesuai dengan filter.
+      </p>
+    </div>
+  {:else}
+    <Table
+      headers={[
+        { label: '#', align: 'center' as const, width: 'w-12' },
+        { label: 'Pengguna & Toko' },
+        { label: 'Aksi' },
+        { label: 'Tanggal', width: 'w-48' },
+        { label: 'Detail Payload', align: 'center' as const, width: 'w-36' }
+      ]}
+      minWidth="min-w-[900px]"
+    >
       {#each logs as log, i (log.id)}
         <tr class="hover:bg-nested/40 transition-colors group">
           <!-- Sequence Number (#) -->
@@ -178,23 +185,15 @@
           </td>
         </tr>
       {/each}
-      </Table>
-    {/if}
-  </div>
+    </Table>
 
-    <div class="pt-4 flex justify-center">
-      <Pagination 
-        {currentPage} 
-        totalItems={total}
-        pageSize={10}
-        on:pageChange={(e) => {
-          const params = new URLSearchParams(window.location.search);
-          params.set('page', e.detail.toString());
-          window.location.href = `?${params.toString()}`;
-        }} 
-      />
-    </div>
-</div>
+    <Pagination 
+      bind:currentPage 
+      totalItems={total}
+      pageSize={10}
+    />
+  {/if}
+</Card>
 
 <Modal
   open={!!selectedLog}

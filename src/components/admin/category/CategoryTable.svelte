@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Trash2, Edit2 } from 'lucide-svelte';
-  import { Badge, Table, Button } from '@/components/ui';
+  import { Table, Button } from '@/components/ui';
   import { formatDate } from '@/lib/utils';
 
   export let paginatedCategories: Array<{
@@ -19,14 +19,12 @@
   const tableHeaders = [
     { label: '#', align: 'center' as const, width: 'w-12' },
     { label: 'Kategori Bisnis' },
-    { label: 'Slug URL', width: 'w-48' },
-    { label: 'Ikon UI', align: 'center' as const, width: 'w-28' },
     { label: 'Tanggal Dibuat', width: 'w-40' },
-    { label: 'Aksi', align: 'right' as const, width: 'w-36' },
+    { label: 'Aksi', align: 'right' as const, width: 'w-48' },
   ];
 </script>
 
-<Table headers={tableHeaders} minWidth="min-w-[700px]">
+<Table headers={tableHeaders} minWidth="min-w-[650px]">
   {#each paginatedCategories as cat, i (cat.id)}
     <tr class="hover:bg-nested/40 transition-colors group">
       <!-- Sequence Number (#) -->
@@ -52,20 +50,6 @@
         </div>
       </td>
 
-      <!-- Slug URL -->
-      <td class="px-4 py-4">
-        <span class="font-mono text-2xs font-bold text-secondary bg-nested/80 px-2 py-1 rounded-lg border border-light">
-          {cat.slug}
-        </span>
-      </td>
-
-      <!-- Icon Badge -->
-      <td class="px-4 py-4 text-center">
-        <Badge variant="primary" size="sm">
-          {cat.icon || 'folder'}
-        </Badge>
-      </td>
-
       <!-- Created Date -->
       <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
         {cat.createdAt ? formatDate(cat.createdAt) : '—'}
@@ -73,24 +57,26 @@
 
       <!-- Actions -->
       <td class="px-6 py-4 text-right whitespace-nowrap">
-        <div class="flex items-center justify-end gap-1.5">
+        <div class="flex items-center justify-end gap-2">
           <Button
             variant="secondary"
-            size="icon"
+            size="sm"
             on:click={() => onEdit(cat)}
             title="Edit Kategori"
           >
             <Edit2 size={13} />
+            <span>Edit</span>
           </Button>
 
           <Button
             variant="destructive"
-            size="icon"
+            size="sm"
             className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
             on:click={() => onDelete(cat)}
             title="Hapus Kategori"
           >
             <Trash2 size={13} />
+            <span>Hapus</span>
           </Button>
         </div>
       </td>

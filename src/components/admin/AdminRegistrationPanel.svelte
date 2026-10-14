@@ -238,6 +238,7 @@
     
     <div class="flex items-center justify-start md:justify-end">
       <Button
+        id="btn-create-invitation"
         variant="primary"
         size="md"
         on:click={() => isAddModalOpen = true}

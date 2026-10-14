@@ -7,7 +7,7 @@
   export let statusChatButtonText: string = 'Chat Sekarang';
   export let whatsappLink: string;
   export let copyrightText: string;
-  export let attributionText: string = 'Powered by Pinoka';
+  export let attributionText: string = 'Didukung oleh Pinoka';
   export let storeHours: string = '09.00 - 21.00 WIB';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};

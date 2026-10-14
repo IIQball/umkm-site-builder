@@ -5,7 +5,7 @@
   export let brandName: string;
   export let logoImageUrl: string = '';
   export let copyrightText: string;
-  export let attributionText: string = 'Powered by Pinoka';
+  export let attributionText: string = 'Didukung oleh Pinoka';
   export let socialLinks: FooterSocialLink[] = [];
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};

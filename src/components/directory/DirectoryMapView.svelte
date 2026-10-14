@@ -3,6 +3,7 @@
   import { type DirectoryStore, getStoreUrl } from './directory.types';
   import { DEFAULT_PLATFORM_REGION } from '@/config/platform';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
+  import { formatNumber } from '@/lib/currency';
 
   export let stores: DirectoryStore[] = [];
   export let userLocation: { lat: number; lng: number; label?: string } | null = null;
@@ -18,30 +19,32 @@
   function renderPopupContent(store: DirectoryStore): string {
     const storeUrl = getStoreUrl(store.subdomain);
     const categoryHtml = store.category
-      ? `<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(252,1,139,0.1);color:#FC018B;border:1px solid rgba(252,1,139,0.2);margin-bottom:6px;">${store.category.name}</span>`
-      : ''
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600;background:rgba(var(--color-secondary-rgb, 252 1 139),0.1);color:var(--color-secondary, #FC018B);border:1px solid rgba(var(--color-secondary-rgb, 252 1 139),0.2);margin-bottom:6px;">${store.category.name}</span>`
+      : '';
+    const viewsHtml = `<div style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> ${formatNumber(store.totalViews || 0)} Kunjungan</div>`;
     const distanceHtml = store.distance !== null
-      ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#FC018B;margin-bottom:6px;">📍 ${store.distance} km dari Anda</div>`
-      : ''
+      ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--color-secondary, #FC018B);margin-bottom:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${store.distance} km dari Anda</div>`
+      : '';
     const addressHtml = store.address
       ? `<div style="font-size:11px;color:var(--color-text-muted);margin-bottom:8px;line-height:1.3;">${store.address}</div>`
-      : ''
+      : '';
     const waButton = store.waNumber
-      ? `<a href="${generateWhatsAppLink(store.waNumber, `Halo ${store.name}, saya menemukan toko Anda di Direktori UMKM.`)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:9999px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;text-decoration:none;">WhatsApp</a>`
-      : ''
+      ? `<a href="${generateWhatsAppLink(store.waNumber, `Halo ${store.name}, saya menemukan toko Anda di Direktori UMKM.`)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:9999px;background:var(--color-success, #10b981);color:#fff;font-size:11px;font-weight:600;text-decoration:none;">WhatsApp</a>`
+      : '';
 
     return `
       <div style="font-family:inherit;min-width:180px;max-width:240px;padding:2px 0;">
         <div style="font-weight:700;font-size:14px;color:var(--color-text-main);margin-bottom:4px;">${store.name}</div>
         ${categoryHtml}
+        ${viewsHtml}
         ${distanceHtml}
         ${addressHtml}
         <div style="display:flex;gap:6px;margin-top:8px;">
-          <a href="${storeUrl}" target="_blank" rel="noopener noreferrer" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 14px;border-radius:9999px;background:#FC018B;color:#fff;font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:0.04em;">Kunjungi</a>
+          <a href="${storeUrl}" target="_blank" rel="noopener noreferrer" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 14px;border-radius:9999px;background:var(--color-secondary, #FC018B);color:#fff;font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:0.04em;">Kunjungi</a>
           ${waButton}
         </div>
       </div>
-    `
+    `;
   }
 
   function updateMarkers() {
@@ -70,7 +73,7 @@
           iconAnchor: [12, 12],
         })
         userMarker = L.marker(userLatLng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map)
-        userMarker.bindPopup(`<div style="${['font-size:12px', 'font-weight:600', 'color:var(--color-text-main)'].join(String.fromCharCode(59))}">📍 ${userLocation.label ? `Lokasi: ${userLocation.label}` : 'Lokasi Anda Saat Ini'}</div>`)
+        userMarker.bindPopup(`<div style="${['font-size:12px', 'font-weight:600', 'color:var(--color-text-main)'].join(String.fromCharCode(59))}">${userLocation.label ? `Lokasi: ${userLocation.label}` : 'Lokasi Anda Saat Ini'}</div>`)
       } else {
         userMarker.setLatLng(userLatLng);
       }
@@ -88,7 +91,7 @@
         const storeIcon = L.divIcon({
           className: 'custom-store-pin',
           html: `
-            <div style="position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:#FC018B;border-radius:9999px;border:2.5px solid #ffffff;box-shadow:0 4px 14px rgba(252,1,139,0.35);color:#ffffff;transition:transform 0.2s ease;">
+            <div style="position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--color-secondary, #FC018B);border-radius:9999px;border:2.5px solid var(--color-card-base, #ffffff);box-shadow:0 4px 14px rgba(var(--color-secondary-rgb, 252 1 139),0.35);color:#ffffff;transition:transform 0.2s ease;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
             </div>
           `,

@@ -36,6 +36,7 @@
 </script>
 
 <aside
+  id="dashboard-sidebar"
   class="hidden md:flex flex-col bg-card border-r border-light transition-all duration-300 ease-in-out flex-shrink-0 relative z-40 shadow-sm select-none"
   style="width: {sidebarWidth}"
   aria-label="Navigasi Dashboard"

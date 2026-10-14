@@ -39,7 +39,7 @@ export function getDynamicLandingNavLinks(sections?: TemplateSection[]): FooterM
 }
 
 export const DEFAULT_SOCIAL_LINKS: FooterSocialLink[] = [
-  { platform: 'whatsapp', url: 'https://wa.me/6281234567890', label: 'WhatsApp', handle: '0812-3456-7890', subtext: 'Fast Response' },
+  { platform: 'whatsapp', url: generateWhatsAppLink('6281234567890', 'Halo Warung Berkah, saya ingin bertanya mengenai toko Anda.'), label: 'WhatsApp', handle: '0812-3456-7890', subtext: 'Fast Response' },
   { platform: 'instagram', url: 'https://instagram.com/warungberkah', label: 'Instagram', handle: '@warungberkah', subtext: 'Galeri Foto' },
   { platform: 'tiktok', url: 'https://tiktok.com/@warungberkah', label: 'TikTok', handle: '@warungberkah', subtext: 'Video Menu' },
   { platform: 'facebook', url: 'https://facebook.com/warungberkah', label: 'Facebook', handle: 'Warung Berkah', subtext: 'Halaman Toko' },
@@ -89,9 +89,9 @@ export function formatAttributionText(options: FooterAttributionOptions = {}): s
   if (isLiveStorefront || store?.id) {
     const adminName = store?.managedByAdmin?.name || store?.registrar?.name;
     if (adminName && adminName.trim()) {
-      return `Powered by Pinoka | Didampingi oleh ${adminName.trim()}`;
+      return `Didukung oleh Pinoka | Didampingi oleh ${adminName.trim()}`;
     }
-    return 'Powered by Pinoka';
+    return 'Didukung oleh Pinoka';
   }
 
   const previewAdmin = designerAdminName !== undefined && designerAdminName !== null
@@ -99,9 +99,9 @@ export function formatAttributionText(options: FooterAttributionOptions = {}): s
     : 'Admin Pendamping';
 
   if (!previewAdmin) {
-    return 'Powered by Pinoka';
+    return 'Didukung oleh Pinoka';
   }
-  return `Powered by Pinoka | Didampingi oleh ${previewAdmin}`;
+  return `Didukung oleh Pinoka | Didampingi oleh ${previewAdmin}`;
 }
 
 export { getFooterLayerNodes } from './footerLayout.helpers';

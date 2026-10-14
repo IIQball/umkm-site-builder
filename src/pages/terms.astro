@@ -1,7 +1,18 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPlatformSettings } from '@/services/finance';
+import { formatIDR } from '@/lib/currency';
 
 export const prerender = false;
+
+const settings = await getPlatformSettings();
+const platformFee = settings.platformFeePercentage;
+const designerFee = 100 - platformFee;
+const adminFeeFormatted = formatIDR(settings.adminServiceFee);
+const settlementDays = settings.settlementDelayDays;
+const minPayoutFormatted = formatIDR(settings.payoutMinimumBalance);
+const maxBranches = settings.maxStoreBranches;
+const maxRevisions = settings.maxTemplateRevisions;
 ---
 
 <BaseLayout
@@ -16,7 +27,7 @@ export const prerender = false;
           Syarat dan Ketentuan Penggunaan Pinoka
         </h1>
         <p class="text-xs sm:text-sm font-medium text-secondary font-sans">
-          Terakhir diperbarui: 19 September 2026
+          Terakhir diperbarui: 14 Oktober 2026
         </p>
       </header>
 
@@ -36,31 +47,47 @@ export const prerender = false;
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.2</span>
-              <span><strong>Tenant</strong> adalah pelaku usaha mikro, kecil, dan menengah yang mendaftarkan toko untuk mempublikasikan katalog produk dan menerima pemesanan daring.</span>
+              <span><strong>Merchant</strong> adalah pelaku usaha mikro, kecil, dan menengah yang mendaftarkan toko untuk mempublikasikan katalog produk dan menerima pemesanan daring.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.3</span>
               <span><strong>Desainer</strong> adalah kreator terverifikasi yang membuat dan menyediakan rancangan tema visual storefront di template marketplace.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.4</span>
+              <span><strong>Superadmin</strong> adalah pengelola otoritas tertinggi platform yang berwenang menetapkan kebijakan sistem, mengkurasi dan menyetujui template desainer, menyetujui permohonan peningkatan kuota toko, serta mengawasi keamanan seluruh ekosistem Pinoka.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.5</span>
+              <span><strong>Admin Pendamping</strong> adalah fasilitator operasional yang memiliki kewenangan terbatas untuk mendampingi UMKM, yakni: membantu mendaftarkan akun merchant, mendaftarkan toko baru, mengelola pengaturan toko, dan membelikan template desain toko yang didampingi.</span>
             </li>
           </ul>
         </section>
 
         <section class="space-y-3">
           <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
-            2. Registrasi dan Pengelolaan Akun Toko
+            2. Registrasi Akun, Pengelolaan Berbantuan, dan Kuota Toko
           </h2>
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.1</span>
-              <span>Pengguna wajib memberikan identitas asli, alamat email aktif, nomor WhatsApp bisnis yang valid, dan rincian lokasi usaha yang akurat saat registrasi akun.</span>
+              <span>Pengguna wajib memberikan identitas asli, alamat email aktif, nomor WhatsApp bisnis yang valid, dan rincian lokasi fisik usaha yang akurat saat registrasi.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.2</span>
-              <span>Setiap Tenant bertanggung jawab penuh menjaga kerahasiaan kredensial login serta seluruh aktivitas yang terjadi di bawah subdomain tokonya.</span>
+              <span><strong>Akun Berbantuan (Assisted Management):</strong> Akun Merchant dapat didaftarkan langsung oleh Admin Pendamping. Untuk akun yang didaftarkan atau didampingi Admin, wewenang Admin terbatas pada: mendaftarkan akun, mendaftarkan toko, mengelola dan memperbarui data toko, serta membelikan template desain atas persetujuan Merchant.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.3</span>
-              <span>Admin berhak menolak registrasi atau menangguhkan akun yang terindikasi menggunakan data palsu, identitas curian, atau profil usaha fiktif.</span>
+              <span><strong>Transparansi Notifikasi Real-time:</strong> Setiap kali Admin Pendamping melakukan pembaruan profil toko, perubahan cabang gerai, atau membelikan template, sistem Pinoka otomatis mengirimkan notifikasi internal langsung ke akun Merchant demi akuntabilitas.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.4</span>
+              <span><strong>Kuota Standar Toko dan Cabang:</strong> Setiap toko awal diberikan kuota default maksimal 10 produk aktif, maksimal 5 kategori barang, dan pengelolaan hingga maksimal {maxBranches} cabang toko fisik lengkap dengan titik lokasi Google Maps.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.5</span>
+              <span><strong>Alur Pengajuan Penambahan Kuota:</strong> Merchant yang membutuhkan penambahan kuota produk atau kategori dapat mengajukan permohonan melalui dasbor toko dengan frekuensi maksimal 1 kali dalam 7 hari. Permohonan peningkatan kuota akan ditinjau dan ditetapkan secara eksklusif oleh Superadmin.</span>
             </li>
           </ul>
         </section>
@@ -72,11 +99,11 @@ export const prerender = false;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.1</span>
-              <span>Tenant memiliki kendali penuh untuk menambahkan foto produk, deskripsi, varian harga, serta ketersediaan stok pada etalase toko masing-masing.</span>
+              <span>Merchant memiliki kendali penuh atas foto produk, deskripsi, varian harga, serta ketersediaan stok pada etalase toko masing-masing.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.2</span>
-              <span>Sistem pemesanan diarahkan langsung ke WhatsApp resmi Tenant melalui deep-link checkout otomatis. Kesepakatan akhir, pembayaran produk, dan pengiriman barang merupakan tanggung jawab langsung antara Tenant dan pembeli.</span>
+              <span>Sistem pemesanan diarahkan langsung ke WhatsApp resmi Merchant melalui deep-link checkout otomatis tanpa potongan komisi penjualan produk apa pun dari pihak Pinoka.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.3</span>
@@ -87,40 +114,52 @@ export const prerender = false;
 
         <section class="space-y-3">
           <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
-            4. Pasar Template dan Hak Cipta Desain
+            4. Pasar Template, Alur Kurasi Superadmin, dan Batas Revisi
           </h2>
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.1</span>
-              <span>Seluruh template yang diunggah oleh Desainer wajib melalui kurasi dan persetujuan Admin sebelum diterbitkan di katalog marketplace publik.</span>
+              <span><strong>Alur Pengajuan Kurasi Awal:</strong> Desainer membuat rancangan tema di Builder (status draf) lalu mengajukan kurasi ke Superadmin (status peninjauan). Tim Superadmin menguji orisinalitas, estetika visual, responsivitas antarmuka perangkat, dan integritas konfigurasi sebelum disetujui terbit di katalog marketplace publik.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.2</span>
-              <span>Desainer menjamin bahwa karya template merupakan ciptaan orisinal dan tidak melanggar hak cipta pihak ketiga mana pun.</span>
+              <span><strong>Alur dan Batas Pengajuan Revisi:</strong> Jika template ditolak oleh Superadmin, Desainer menerima catatan evaluasi resmi dan dapat mengajukan perbaikan ulang. Pengajuan revisi dibatasi maksimal {maxRevisions} kali. Apabila mencapai {maxRevisions} kali penolakan berturut-turut, template terkunci permanen dan tidak dapat diajukan kurasi ulang lagi.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.3</span>
-              <span>Pembelian template memberikan lisensi penggunaan non-eksklusif kepada Tenant untuk diterapkan pada storefront toko aktif miliknya. Template tidak boleh dijual kembali secara terpisah.</span>
+              <span>Desainer menjamin bahwa rancangan template merupakan ciptaan orisinal dan tidak melanggar hak kekayaan intelektual pihak ketiga mana pun.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.4</span>
+              <span>Pembelian template memberikan lisensi penggunaan non-eksklusif seumur hidup kepada Merchant untuk storefront toko aktif miliknya dan tidak dapat diperjualbelikan kembali secara terpisah.</span>
             </li>
           </ul>
         </section>
 
         <section class="space-y-3">
           <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
-            5. Pembayaran, Komisi, dan Penarikan Dana
+            5. Pembayaran, Pembagian Fee Komisi, dan Penarikan Dana
           </h2>
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.1</span>
-              <span>Transaksi pembelian template berbayar diproses melalui saluran pembayaran resmi platform dalam mata uang Rupiah (IDR).</span>
+              <span>Transaksi template diproses melalui saluran gateway pembayaran resmi dalam mata uang Rupiah (IDR).</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.2</span>
-              <span>Pendapatan penjualan template akan dipotong biaya layanan platform sesuai persentase yang ditetapkan, dan sisanya masuk ke saldo dompet digital Desainer.</span>
+              <span><strong>Pembagian Fee Penjualan Template:</strong> Dari setiap penjualan 1 template berbayar, sistem memotong fee layanan platform sebesar {platformFee}% untuk operasional sistem, serta menyalurkan {designerFee}% secara utuh sebagai royalti bersih ke saldo dompet digital Desainer.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.3</span>
-              <span>Penarikan saldo (payout) dapat diajukan oleh Desainer setelah memenuhi batas nominal minimum dan masa jeda penyelesaian transaksi (settlement delay) ke rekening bank terdaftar.</span>
+              <span><strong>Fee Pendampingan Admin:</strong> Pembelian template yang difasilitasi atau dibelikan melalui bantuan Admin Pendamping dikenakan tambahan Fee Pendampingan Admin sebesar {adminFeeFormatted} per transaksi yang dialokasikan resmi kepada Admin pendamping terkait.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.4</span>
+              <span><strong>Penahanan Settlement (Settlement Delay):</strong> Komisi penjualan template yang diperoleh Desainer akan ditahan selama {settlementDays} hari kalender (masa hold) sebelum dialihkan ke saldo siap tarik demi keamanan transaksi.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.5</span>
+              <span><strong>Batas Penarikan Dana (Payout):</strong> Desainer dapat mencairkan saldo komisi ke rekening bank domestik terverifikasi setelah memenuhi batas saldo siap tarik minimal {minPayoutFormatted}.</span>
             </li>
           </ul>
         </section>
@@ -132,11 +171,11 @@ export const prerender = false;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.1</span>
-              <span>Pengelola berhak membekukan sementara atau mencabut akses akun yang terbukti melakukan penipuan transaksi, manipulasi sistem, atau pelanggaran ketentuan hukum.</span>
+              <span>Superadmin berhak membekukan sementara (suspend) atau mencabut akses akun yang terbukti melakukan manipulasi data, pelanggaran hak cipta, atau tindak pidana siber.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.2</span>
-              <span>Tenant dan Desainer berhak mengajukan permohonan penutupan akun mandiri melalui menu pengaturan profil setelah menyelesaikan seluruh kewajiban yang masih berjalan.</span>
+              <span>Merchant dan Desainer berhak mengajukan penutupan akun mandiri melalui menu pengaturan profil setelah menyelesaikan seluruh kewajiban yang masih berjalan.</span>
             </li>
           </ul>
         </section>
@@ -164,3 +203,4 @@ export const prerender = false;
     text-align: left;
   }
 </style>
+

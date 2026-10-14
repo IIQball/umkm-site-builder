@@ -5,15 +5,15 @@
   let ticking = false
 
   const updateVisibility = () => {
-    const footer = document.getElementById('contact') || document.querySelector('footer')
-    if (footer && footer.getBoundingClientRect().top <= 100) {
-      isVisible = false
-      return
-    }
-
     const heroTrack = document.getElementById('hero-scroll-track')
     if (!heroTrack) {
       isVisible = true
+      return
+    }
+
+    const footer = document.getElementById('contact') || document.querySelector('footer')
+    if (footer && footer.getBoundingClientRect().top <= 100) {
+      isVisible = false
       return
     }
 

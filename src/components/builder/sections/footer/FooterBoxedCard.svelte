@@ -10,7 +10,7 @@
   export let boxedSecondaryCtaText: string = 'Konsultasi Pesanan';
   export let whatsappLink: string;
   export let copyrightText: string;
-  export let attributionText: string = 'Powered by Pinoka';
+  export let attributionText: string = 'Didukung oleh Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
   export let nodeStyles: Record<string, Record<string, string>> = {};

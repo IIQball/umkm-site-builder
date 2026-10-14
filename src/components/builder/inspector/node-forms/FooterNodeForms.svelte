@@ -214,7 +214,7 @@
 
   {:else if nodeId === 'footer_copyright'}
     <div class="space-y-3">
-      <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Baris Hak Cipta & Powered by Pinoka</h4>
+      <h4 class="text-xs font-bold uppercase tracking-wider text-base-content/60">Baris Hak Cipta & Didukung oleh Pinoka</h4>
       <div>
         <label for="cr-val" class="block text-xs font-semibold text-base-content/70 mb-1">Teks Hak Cipta</label>
         <input id="cr-val" type="text" value={copyrightText} on:input={(e) => onPropChange('copyrightText', e.currentTarget.value)} placeholder="© 2026 Warung Berkah..." class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
@@ -222,7 +222,7 @@
       <div>
         <label for="cr-admin" class="block text-xs font-semibold text-base-content/70 mb-1">Nama Admin Pendamping (Preview Template)</label>
         <input id="cr-admin" type="text" value={adminAttributionName} on:input={(e) => onPropChange('adminAttributionName', e.currentTarget.value)} placeholder="Admin Pendamping" class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" />
-        <p class="text-[10px] text-base-content/60 mt-1">Pada toko tenant, teks ini otomatis menyesuaikan: jika didaftarkan admin muncul "Didampingi oleh [Nama]", jika mandiri hanya "Powered by Pinoka".</p>
+        <p class="text-[10px] text-base-content/60 mt-1">Pada toko merchant, teks ini otomatis menyesuaikan: jika didaftarkan admin muncul "Didampingi oleh [Nama]", jika mandiri hanya "Didukung oleh Pinoka".</p>
       </div>
     </div>
   {/if}

@@ -116,7 +116,7 @@
       on:input={handleFeeInput}
       disabled={isLoading}
       className="font-bold text-sm font-mono"
-      helper="Jasa admin saat membelikan template tenant."
+      helper="Jasa admin saat membelikan template merchant."
     >
       <span slot="prefix" class="font-bold text-xs text-muted select-none">Rp</span>
     </Input>
@@ -226,7 +226,7 @@
   </div>
 
   <!-- Max Template Revisions Input -->
-  <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+  <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs md:col-span-2">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-lg bg-warning/15 text-warning flex items-center justify-center">

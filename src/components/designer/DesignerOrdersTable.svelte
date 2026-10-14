@@ -99,7 +99,7 @@
     { label: '#', align: 'center' as const, width: '40px' },
     { label: 'ID Invoice & Tanggal' },
     { label: 'Template Dibeli', width: 'w-64' },
-    { label: 'Pembeli (Tenant)', width: 'w-52' },
+    { label: 'Pembeli (Merchant)', width: 'w-52' },
     { label: 'Harga Jual', align: 'right' as const, width: 'w-36' },
     { label: 'Komisi Desainer', align: 'right' as const, width: 'w-44' },
     { label: 'Status Tagihan', align: 'center' as const, width: 'w-36' },
@@ -186,7 +186,7 @@
       <p class="text-xs text-secondary mt-1 max-w-sm mx-auto font-sans leading-relaxed">
         {searchQuery || selectedStatus !== 'all'
           ? 'Tidak ada transaksi masuk yang cocok dengan kriteria pencarian.'
-          : 'Belum ada transaksi pembelian template oleh tenant saat ini.'}
+          : 'Belum ada transaksi pembelian template oleh merchant saat ini.'}
       </p>
     </div>
   {:else}

@@ -44,7 +44,7 @@
             type="button"
             on:click={() => onCopyId(store.userId)}
             class="text-xs text-muted hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer font-mono bg-nested/80 px-1.5 py-0.5 rounded-md border border-light active:scale-95 flex-shrink-0"
-            title="Salin ID Tenant"
+            title="Salin ID Merchant"
           >
             <span>#{store.userId.slice(0, 6)}</span>
             <span class="material-symbols-outlined text-[10px]">

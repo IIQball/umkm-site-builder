@@ -41,7 +41,7 @@
   {#if selectedTemplate}
     <div class="space-y-4 pt-1">
       <p class="text-xs text-secondary leading-relaxed font-sans">
-        Apakah Anda yakin ingin menyetujui template <strong class="text-main">{selectedTemplate.name}</strong> karya <strong class="text-main">{selectedTemplate.designerName || selectedTemplate.designerEmail}</strong>? Template ini akan langsung dapat dibeli dan digunakan oleh semua tenant UMKM.
+        Apakah Anda yakin ingin menyetujui template <strong class="text-main">{selectedTemplate.name}</strong> karya <strong class="text-main">{selectedTemplate.designerName || selectedTemplate.designerEmail}</strong>? Template ini akan langsung dapat dibeli dan digunakan oleh semua merchant UMKM.
       </p>
 
       <div class="flex items-center justify-end gap-2 pt-2">

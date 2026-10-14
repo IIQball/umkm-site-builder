@@ -128,7 +128,9 @@
     {/if}
 
     <!-- Notification Bell -->
-    <NavbarNotifications {user} />
+    <div id="navbar-notifications" class="flex items-center">
+      <NavbarNotifications {user} />
+    </div>
 
     <!-- Theme Toggle -->
     <button
@@ -152,6 +154,8 @@
     </button>
 
     <!-- Profile Chip & Dropdown Component -->
-    <NavbarUserMenu {user} />
+    <div id="navbar-user-menu" class="flex items-center">
+      <NavbarUserMenu {user} />
+    </div>
   </div>
 </header>

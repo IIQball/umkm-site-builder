@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import type ApexCharts from 'apexcharts';
+  import { formatNumber } from '@/lib/currency';
 
   export let totalViews = 0;
   export let totalClicks = 0;
@@ -70,7 +71,7 @@
 
   function buildOptions(): ApexCharts.ApexOptions {
     const { text, main } = themeColors();
-    const nf = (v: number) => Math.round(v).toLocaleString('id-ID');
+    const nf = (v: number) => formatNumber(Math.round(v));
 
     // Determine tick amount based on range to reduce crowding
     const tickAmount = range === '7d' ? 6 : range === '30d' ? 5 : 5;
@@ -325,6 +326,7 @@
 </script>
 
 <div
+  id="merchant-traffic-chart"
   class="rounded-3xl bg-card border border-light shadow-xs overflow-hidden"
 >
   <div class="p-6 border-b border-light flex flex-col md:flex-row md:items-center justify-between gap-4">

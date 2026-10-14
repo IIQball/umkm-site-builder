@@ -136,6 +136,7 @@
     </div>
     
     <Button
+      id="btn-add-admin-whitelist"
       variant="primary"
       size="md"
       on:click={() => isAddModalOpen = true}

@@ -6,6 +6,7 @@
   import { editorStore, canvasStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
   import { monitorCLS } from '@/lib/performance/cls.helpers';
+  import { trackAnalyticsEvent } from '@/lib/analytics/track';
 
   export let config: TemplateConfig;
   export let store: any;
@@ -37,6 +38,11 @@
   onMount(() => {
     // Monitor CLS on storefront (H14 optimization)
     monitorCLS(0.05);
+
+    // Track store view analytics dynamically
+    if (!isPreview && store?.id) {
+      trackAnalyticsEvent(store.id, 'store_view').catch(() => {});
+    }
 
     if (viewModeOverride) {
       editorStore.setViewMode(viewModeOverride);
@@ -196,5 +202,12 @@
   :global(.storefront-root .builder-header-nav-link),
   :global(.storefront-root [role="tab"]) {
     cursor: pointer !important;
+  }
+
+  /* Sticky Header in Subdomain Storefront */
+  :global(.storefront-root [data-section-type="header_announcement"]) {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
   }
 </style>

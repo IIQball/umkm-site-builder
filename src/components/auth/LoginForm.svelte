@@ -55,7 +55,13 @@
       });
 
       if (errResponse) {
-        toast.error(errResponse.message || "Gagal masuk. Periksa kembali email dan sandi Anda.");
+        if (errResponse.message === "ACCOUNT_PENDING_ACTIVATION" || errResponse.message?.toLowerCase().includes("aktivasi")) {
+          toast.error("Akun Anda belum aktif. Silakan lakukan aktivasi terlebih dahulu melalui tautan yang dikirimkan ke email Anda.");
+        } else if (errResponse.message === "ACCOUNT_SUSPENDED") {
+          toast.error("Akun Anda telah ditangguhkan. Silakan hubungi administrator.");
+        } else {
+          toast.error(errResponse.message || "Gagal masuk. Periksa kembali email dan sandi Anda.");
+        }
         return;
       }
       

@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, users, sessions, accounts, verifications, designers, wallets, notifications, tenantInvitations } from "@/db";
+import { db, users, sessions, accounts, verifications, designers, wallets, notifications } from "@/db";
 import { eq } from "drizzle-orm";
 import { sendEmail, getEmailLogoUrl } from "@/lib/utils/email";
 
@@ -386,7 +386,7 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        before: async (session, ctx) => {
+        before: async (session) => {
           const user = await db.query.users.findFirst({
             where: (u) => eq(u.id, session.userId),
           });
@@ -397,13 +397,10 @@ export const auth = betterAuth({
             });
           }
 
-          // Otomatis aktifkan akun saat pengguna berhasil login pertama kali
-          // Pastikan ini BUKAN dari proses signUpEmail admin (yang auto-create session)
-          const isSignInRequest = ctx?.path?.includes('/sign-in') || ctx?.path?.includes('/callback');
-          if (user?.status === 'pending' && isSignInRequest) {
-            await db.update(users).set({ status: 'active' }).where(eq(users.id, user.id));
-            // Hapus undangan yang sudah dipakai agar tidak nyampah di dashboard admin
-            await db.delete(tenantInvitations).where(eq(tenantInvitations.email, user.email));
+          if (user?.status === 'pending') {
+            throw new APIError("UNAUTHORIZED", {
+              message: "ACCOUNT_PENDING_ACTIVATION",
+            });
           }
 
           return {

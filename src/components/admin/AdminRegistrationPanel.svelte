@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Card, Button, Badge, Modal, Table, Pagination, StatCard } from '@/components/ui';
-  import { Clock, CheckCircle, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
+  import { Clock, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
-  import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import { toast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
 
@@ -29,13 +28,6 @@
   let isAddModalOpen = false;
   let isExtending: string | null = null;
   let isDeleting: string | null = null;
-  let isUpdatingUser: string | null = null;
-
-  let isSuspendModalOpen = false;
-  let isUnsuspendMode = false;
-  let suspendReason = '';
-  let suspendTarget: { id: string; name: string } | null = null;
-  let actionLoading = false;
 
   let statusFilter = 'all';
 
@@ -49,7 +41,6 @@
 
   $: stats = {
     total: uniqueInvitations.length,
-    registered: uniqueInvitations.filter((i) => i.acceptedAt && i.userStatus === 'active').length,
     pending: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
     expired: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) < new Date()).length,
   };
@@ -63,9 +54,7 @@
     // Status filter
     let matchesStatus = true;
     if (statusFilter !== 'all') {
-      if (statusFilter === 'active') matchesStatus = !!(i.acceptedAt && i.userStatus === 'active');
-      else if (statusFilter === 'suspended') matchesStatus = !!(i.acceptedAt && i.userStatus === 'suspended');
-      else if (statusFilter === 'pending') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) >= new Date();
+      if (statusFilter === 'pending') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) >= new Date();
       else if (statusFilter === 'expired') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) < new Date();
     }
     
@@ -100,24 +89,14 @@
   };
 
   let isDeleteModalOpen = false;
-  let deleteTarget: { id: string; type: 'invitation' | 'user'; message: string; subMessage?: string } | null = null;
+  let deleteTarget: { id: string; message: string; subMessage?: string } | null = null;
 
-  const openDeleteModal = (id: string, type: 'invitation' | 'user') => {
-    if (type === 'invitation') {
-      deleteTarget = {
-        id,
-        type,
-        message: 'Apakah Anda yakin ingin menghapus undangan ini?',
-        subMessage: 'Jika pengguna belum aktivasi, akunnya juga akan ikut terhapus.'
-      };
-    } else {
-      deleteTarget = {
-        id,
-        type,
-        message: 'Apakah Anda yakin ingin menghapus pengguna ini?',
-        subMessage: 'Seluruh data pengguna beserta tokonya akan terhapus secara permanen.'
-      };
-    }
+  const openDeleteModal = (id: string) => {
+    deleteTarget = {
+      id,
+      message: 'Apakah Anda yakin ingin menghapus undangan ini?',
+      subMessage: 'Pengguna yang belum aktivasi tidak akan dapat mendaftar dengan link ini, dan akun sementaranya akan dibersihkan.'
+    };
     isDeleteModalOpen = true;
   };
 
@@ -128,98 +107,32 @@
 
   const executeDelete = async () => {
     if (!deleteTarget) return;
-    const { id, type } = deleteTarget;
+    const { id } = deleteTarget;
     
-    if (type === 'invitation') {
-      isDeleting = id;
-      try {
-        const res = await fetch(`/api/admin/invitations/delete?id=${id}`, {
-          method: 'DELETE',
-        });
-        const result = await res.json();
-        
-        if (res.ok && result.ok) {
-          toast.success(result.data?.message || 'Undangan berhasil dihapus');
-          window.location.reload();
-        } else {
-          toast.error(result.error?.message || 'Gagal menghapus undangan');
-        }
-      } catch {
-        toast.error('Terjadi kesalahan jaringan');
-      } finally {
-        isDeleting = null;
-        closeDeleteModal();
-      }
-    } else {
-      isUpdatingUser = id;
-      try {
-        const res = await fetch(`/api/admin/users/${id}`, {
-          method: 'DELETE',
-        });
-        const result = await res.json();
-        
-        if (res.ok && result.ok) {
-          toast.success('Pengguna berhasil dihapus');
-          window.location.reload();
-        } else {
-          toast.error(result.error?.message || 'Gagal menghapus pengguna');
-        }
-      } catch {
-        toast.error('Terjadi kesalahan jaringan');
-      } finally {
-        isUpdatingUser = null;
-        closeDeleteModal();
-      }
-    }
-  };
-
-  const openSuspendModal = (userId: string, userName: string, isUnsuspend: boolean) => {
-    suspendTarget = { id: userId, name: userName };
-    isUnsuspendMode = isUnsuspend;
-    suspendReason = '';
-    isSuspendModalOpen = true;
-  };
-
-  const closeSuspendModal = () => {
-    isSuspendModalOpen = false;
-    suspendTarget = null;
-    suspendReason = '';
-  };
-
-  const handleUserStatusSubmit = async (status: 'active' | 'suspended', reason?: string) => {
-    if (!suspendTarget) return;
-    
-    actionLoading = true;
-    isUpdatingUser = suspendTarget.id;
+    isDeleting = id;
     try {
-      const res = await fetch(`/api/admin/users/${suspendTarget.id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, suspendReason: reason }),
+      const res = await fetch(`/api/admin/invitations/delete?id=${id}`, {
+        method: 'DELETE',
       });
       const result = await res.json();
       
       if (res.ok && result.ok) {
-        toast.success(`Pengguna berhasil di${status === 'active' ? 'aktifkan' : 'tangguhkan'}`);
+        toast.success(result.data?.message || 'Undangan berhasil dihapus');
         window.location.reload();
       } else {
-        toast.error(result.error?.message || 'Gagal mengubah status pengguna');
+        toast.error(result.error?.message || 'Gagal menghapus undangan');
       }
     } catch {
       toast.error('Terjadi kesalahan jaringan');
     } finally {
-      actionLoading = false;
-      isUpdatingUser = null;
-      closeSuspendModal();
+      isDeleting = null;
+      closeDeleteModal();
     }
   };
 
-  // Deleted handleUserDelete and moved logic to executeDelete
-
   const getStatus = (inv: typeof invitations[0]) => {
-    if (inv.acceptedAt) return { label: 'Terdaftar', color: 'badge-success', icon: CheckCircle };
     if (new Date(inv.expiresAt) < new Date()) return { label: 'Kedaluwarsa', color: 'badge-error', icon: XCircle };
-    return { label: 'Menunggu', color: 'badge-warning', icon: Clock };
+    return { label: 'Menunggu Aktivasi', color: 'badge-warning', icon: Clock };
   };
 </script>
 
@@ -250,10 +163,9 @@
   </div>
 
   <!-- Stat Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in-up">
     <StatCard label="Total Undangan" value={stats.total} badge="Semua" cardTheme="dark" icon="mail" delayClass="delay-100" />
-    <StatCard label="Sudah Daftar" value={stats.registered} badge="Aktif" cardTheme="default" icon="check_circle" delayClass="delay-150" />
-    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="blue" icon="schedule" delayClass="delay-175" />
+    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="blue" icon="schedule" delayClass="delay-150" />
     <StatCard label="Kedaluwarsa" value={stats.expired} badge="Hangus" cardTheme="pink" icon="link_off" delayClass="delay-200" />
   </div>
 
@@ -298,16 +210,6 @@
           >
             Semua ({stats.total})
           </button>
-          {#if stats.registered > 0}
-            <button
-              type="button"
-              on:click={() => (statusFilter = "active")}
-              class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'active' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-              Sudah Daftar ({stats.registered})
-            </button>
-          {/if}
           <button
             type="button"
             on:click={() => (statusFilter = "pending")}
@@ -383,97 +285,43 @@
             
             <!-- Status Badge -->
             <td class="px-4 py-4 whitespace-nowrap">
-              {#if inv.userStatus === 'active'}
-                <Badge variant="success" dot={true} size="sm">
-                  Aktif
-                </Badge>
-              {:else if inv.userStatus === 'suspended'}
-                <Badge variant="error" dot={true} size="sm">
-                  Ditangguhkan
-                </Badge>
-              {:else}
-                <Badge variant={status.color === 'badge-success' ? 'success' : status.color === 'badge-error' ? 'error' : 'warning'} dot={true} size="sm">
-                  {status.label}
-                </Badge>
-              {/if}
+              <Badge variant={status.color === 'badge-error' ? 'error' : 'warning'} dot={true} size="sm">
+                {status.label}
+              </Badge>
             </td>
 
             <!-- Tanggal -->
             <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
-              {#if inv.acceptedAt}
-                -
-              {:else}
-                {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
-              {/if}
+              {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
             </td>
 
             <!-- Aksi Buttons -->
             <td class="px-6 py-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
-                {#if !inv.acceptedAt}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="rounded-xl font-bold text-xs"
-                    title={(inv.extensionCount ?? 0) >= 3 ? "Batas maksimal 3x perpanjangan telah tercapai" : "Perpanjang Masa Aktif 24 Jam"}
-                    on:click={() => handleExtend(inv.id)}
-                    disabled={isExtending === inv.id || isDeleting === inv.id || (inv.extensionCount ?? 0) >= 3}
-                    loading={isExtending === inv.id}
-                  >
-                    <span class="material-symbols-outlined text-xs">refresh</span>
-                    <span>Perpanjang{#if (inv.extensionCount ?? 0) > 0} <span class="text-3xs opacity-80 font-mono">({inv.extensionCount}/3)</span>{/if}</span>
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
-                    title="Hapus Undangan"
-                    on:click={() => openDeleteModal(inv.id, 'invitation')}
-                    disabled={isExtending === inv.id || isDeleting === inv.id}
-                    loading={isDeleting === inv.id}
-                  >
-                    <span class="material-symbols-outlined text-xs">delete</span>
-                    <span>Hapus</span>
-                  </Button>
-                {:else if inv.userId}
-                  {#if inv.userStatus === 'active'}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
-                      title="Tangguhkan"
-                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, false)}
-                      disabled={isUpdatingUser === inv.userId}
-                    >
-                      <span class="material-symbols-outlined text-xs">block</span>
-                      <span>Suspend</span>
-                    </Button>
-                  {:else if inv.userStatus === 'suspended'}
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="rounded-xl font-bold text-xs"
-                      title="Aktifkan"
-                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, true)}
-                      disabled={isUpdatingUser === inv.userId}
-                    >
-                      <span class="material-symbols-outlined text-xs">check_circle</span>
-                      <span>Aktifkan</span>
-                    </Button>
-                  {/if}
-                  
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs ml-1"
-                    title="Hapus Pengguna Permanen"
-                    on:click={() => inv.userId && openDeleteModal(inv.userId, 'user')}
-                    disabled={isUpdatingUser === inv.userId}
-                  >
-                    <span class="material-symbols-outlined text-xs">delete_forever</span>
-                    <span>Hapus Akun</span>
-                  </Button>
-                {/if}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl font-bold text-xs"
+                  title={(inv.extensionCount ?? 0) >= 3 ? "Batas maksimal 3x perpanjangan telah tercapai" : "Perpanjang Masa Aktif 24 Jam"}
+                  on:click={() => handleExtend(inv.id)}
+                  disabled={isExtending === inv.id || isDeleting === inv.id || (inv.extensionCount ?? 0) >= 3}
+                  loading={isExtending === inv.id}
+                >
+                  <span class="material-symbols-outlined text-xs">refresh</span>
+                  <span>Perpanjang{#if (inv.extensionCount ?? 0) > 0} <span class="text-3xs opacity-80 font-mono">({inv.extensionCount}/3)</span>{/if}</span>
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+                  title="Hapus Undangan"
+                  on:click={() => openDeleteModal(inv.id)}
+                  disabled={isExtending === inv.id || isDeleting === inv.id}
+                  loading={isDeleting === inv.id}
+                >
+                  <span class="material-symbols-outlined text-xs">delete</span>
+                  <span>Hapus</span>
+                </Button>
               </div>
             </td>
           </tr>
@@ -500,21 +348,11 @@
   }} 
 />
 
-<AdminUserSuspendModal
-  isOpen={isSuspendModalOpen}
-  isUnsuspend={isUnsuspendMode}
-  selectedUser={suspendTarget}
-  bind:suspendReason={suspendReason}
-  actionLoading={actionLoading}
-  onSubmit={handleUserStatusSubmit}
-  onClose={closeSuspendModal}
-/>
-
 <Modal open={isDeleteModalOpen} on:close={closeDeleteModal} size="sm">
   <svelte:fragment slot="header">
     <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
       <Trash2 size={18} class="text-rose-500" />
-      <span>Hapus {deleteTarget?.type === 'invitation' ? 'Undangan' : 'Pengguna'}</span>
+      <span>Hapus Undangan</span>
     </h3>
   </svelte:fragment>
 
@@ -532,15 +370,15 @@
 
   <svelte:fragment slot="footer">
     <div class="w-full flex justify-between items-center">
-      <Button variant="secondary" size="sm" on:click={closeDeleteModal} disabled={isDeleting !== null || isUpdatingUser !== null}>
+      <Button variant="secondary" size="sm" on:click={closeDeleteModal} disabled={isDeleting !== null}>
         <span>Batal</span>
       </Button>
       <Button 
         variant="destructive" 
         size="sm" 
         on:click={executeDelete} 
-        loading={isDeleting !== null || isUpdatingUser !== null}
-        disabled={isDeleting !== null || isUpdatingUser !== null}
+        loading={isDeleting !== null}
+        disabled={isDeleting !== null}
         className="font-bold px-5"
       >
         <Trash2 size={16} class="mr-1" />

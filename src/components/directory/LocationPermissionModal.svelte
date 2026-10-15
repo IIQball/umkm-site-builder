@@ -1,8 +1,18 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
+  import {
+    MapPin,
+    AlertCircle,
+    Sparkles,
+    LocateFixed,
+    Loader2,
+    Compass,
+  } from 'lucide-svelte';
+  import Badge from '@/components/ui/Badge.svelte';
   import { BANYUWANGI_POPULAR_DISTRICTS, ALL_BANYUWANGI_DISTRICTS, type DistrictOption } from './directoryDistricts';
 
   export let isOpen = false;
+  export let currentLocationLabel = '';
 
   const dispatch = createEventDispatcher<{
     granted: { lat: number; lng: number; label?: string };
@@ -16,6 +26,10 @@
   let errorMessage = '';
   let isInsecureContext = false;
   let selectedDistrictName = '';
+
+  $: if (isOpen && currentLocationLabel) {
+    selectedDistrictName = currentLocationLabel;
+  }
 
   function checkSecurityContext() {
     if (typeof window !== 'undefined' && window.isSecureContext === false) {
@@ -36,6 +50,7 @@
 
   function handleSelectDistrict(dist: DistrictOption) {
     errorMessage = '';
+    selectedDistrictName = dist.name;
     const payload = {
       lat: dist.lat,
       lng: dist.lng,
@@ -152,7 +167,7 @@
       <!-- Header -->
       <div class="text-center mb-5">
         <div class="w-12 h-12 rounded-2xl bg-orange/10 text-orange flex items-center justify-center border border-orange/20 shadow-xs mx-auto mb-3">
-          <span class="material-symbols-outlined text-[24px]">location_on</span>
+          <MapPin size={24} />
         </div>
         <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-main font-heading">
           Temukan UMKM Terdekat
@@ -163,8 +178,8 @@
       </div>
 
       {#if errorMessage}
-        <div class="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs flex items-start gap-2">
-          <span class="material-symbols-outlined text-[18px] text-amber-500 shrink-0 mt-0.5">info</span>
+        <div class="mb-4 p-3 rounded-2xl bg-warning/10 border border-warning/20 text-warning text-xs flex items-start gap-2">
+          <AlertCircle size={18} class="shrink-0 mt-0.5" />
           <div class="flex-1">
             <p class="font-medium leading-relaxed">{errorMessage}</p>
           </div>
@@ -175,23 +190,26 @@
       <div class="mb-5 p-4 rounded-2xl bg-nested border border-border">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-xs font-bold text-main flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-orange text-[16px]">pin_drop</span>
+            <MapPin size={16} class="text-orange" />
             Pilih Kecamatan (Instan & Akurat)
           </span>
-          <span class="text-[10px] text-orange font-semibold px-2 py-0.5 rounded-full bg-orange/10 border border-orange/20">
-            Rekomendasi
-          </span>
+          <Badge variant="orange" size="sm" dot={false}>Rekomendasi</Badge>
         </div>
 
         <!-- Popular Chips -->
         <div class="flex flex-wrap gap-1.5 mb-3">
           {#each BANYUWANGI_POPULAR_DISTRICTS as dist}
+            {@const isSelected = selectedDistrictName === dist.name || currentLocationLabel === dist.name}
             <button
               type="button"
               on:click={() => handleSelectDistrict(dist)}
-              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 flex items-center gap-1 border shadow-xs cursor-pointer {dist.name === 'Songgon' ? 'bg-orange hover:bg-orange-dark text-white border-orange shadow-orange/20' : 'bg-card hover:bg-nested text-secondary hover:text-main border-border'}"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 border shadow-xs cursor-pointer {isSelected ? 'bg-orange hover:bg-orange-dark text-white border-orange shadow-orange/20' : 'bg-card hover:bg-nested text-secondary hover:text-main border-border'}"
             >
-              <span class="material-symbols-outlined text-[13px]">{dist.name === 'Songgon' ? 'stars' : 'location_on'}</span>
+              {#if isSelected}
+                <Sparkles size={13} />
+              {:else}
+                <MapPin size={13} />
+              {/if}
               <span>{dist.name}</span>
             </button>
           {/each}
@@ -222,10 +240,10 @@
             class="w-full py-2.5 px-4 rounded-xl border border-border bg-card hover:bg-nested text-main text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-60"
           >
             {#if loading}
-              <span class="material-symbols-outlined animate-spin text-[16px] text-orange">progress_activity</span>
+              <Loader2 size={16} class="animate-spin text-orange" />
               <span>Mencoba Sensor GPS...</span>
             {:else}
-              <span class="material-symbols-outlined text-[16px] text-orange">my_location</span>
+              <LocateFixed size={16} class="text-orange" />
               <span>Deteksi GPS Perangkat Otomatis</span>
             {/if}
           </button>
@@ -237,7 +255,7 @@
           disabled={loading}
           class="w-full py-2.5 px-4 rounded-xl bg-nested hover:bg-card border border-border text-secondary hover:text-main font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
         >
-          <span class="material-symbols-outlined text-[15px]">explore</span>
+          <Compass size={15} />
           <span>Jelajahi Semua UMKM (Tanpa Filter Jarak)</span>
         </button>
 

@@ -1,5 +1,5 @@
 import { formatIDR } from '@/lib/currency';
-import { formatDate } from '@/lib/utils/format';
+import { formatDate, escapeHtml } from '@/lib/utils/format';
 
 export interface ReceiptOrderData {
   id?: string;
@@ -26,16 +26,6 @@ export interface ReceiptOrderData {
     name?: string | null;
     email?: string | null;
   } | null;
-}
-
-function escapeHtml(str: unknown): string {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
 
 export function generateReceiptHtml(

@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { StoreSettingsInput } from '@/lib/stores/schemas';
 import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
+import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 import { ZodError } from 'zod';
 
 export const PUT: APIRoute = async (context) => {
@@ -65,11 +66,21 @@ export const PUT: APIRoute = async (context) => {
       });
     }
 
+    let coords: { lat: number; lng: number } | undefined;
+    if (data.googleMapsUrl || data.address || data.regionData?.district || existingStore.latitude === null) {
+      coords = await resolveStoreCoordinates({
+        googleMapsUrl: data.googleMapsUrl || existingStore.googleMapsUrl,
+        address: data.address ?? existingStore.address,
+        district: (data.regionData?.district || (existingStore.customization as Record<string, unknown>)?.region ? ((existingStore.customization as Record<string, unknown>).region as Record<string, unknown>)?.district : undefined) as string | undefined,
+      });
+    }
+
     await db.update(stores)
       .set({
         name: data.name,
         waNumber: data.waNumber,
         googleMapsUrl: data.googleMapsUrl || undefined,
+        ...(coords ? { latitude: coords.lat, longitude: coords.lng } : {}),
         ...(data.address !== undefined ? { address: data.address } : {}),
         ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
         ...(data.templateId !== undefined ? { templateId: data.templateId } : {}),

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Store, Navigation, Eye, Link2, MapPin, ArrowRight } from 'lucide-svelte';
+  import Badge from '@/components/ui/Badge.svelte';
   import { type DirectoryStore, getStoreUrl } from './directory.types';
   import { formatIDR, formatNumber } from '@/lib/currency';
   import { getMainDomain } from '@/lib/domain';
@@ -31,7 +32,7 @@
 
     <div class="flex flex-col items-end shrink-0 gap-1">
       {#if store.distance !== null}
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange/10 border border-orange/20 text-orange dark:text-orange-400 text-xs font-semibold">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange/10 border border-orange/20 text-orange text-xs font-semibold">
           <Navigation size={12} class="text-orange" />
           {store.distance} km
         </span>
@@ -87,10 +88,7 @@
 
   <!-- Bottom CTA -->
   <div class="mt-auto pt-3.5 flex items-center justify-between border-t border-border">
-    <span class="inline-flex items-center gap-1.5 text-xs text-secondary font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-      Toko Aktif
-    </span>
+    <Badge variant="success" size="sm">Toko Aktif</Badge>
     <span class="text-xs font-bold text-orange group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
       Kunjungi Toko
       <ArrowRight size={15} />

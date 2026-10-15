@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { MapPinOff, Loader2 } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import LocationPermissionModal from '@/components/directory/LocationPermissionModal.svelte';
   import DirectoryStoreCard from '@/components/directory/DirectoryStoreCard.svelte';
@@ -21,7 +22,7 @@
 
   // Geolocation state
   let userLocation: { lat: number; lng: number; label?: string } | null = null;
-  let radius = 10;
+  let radius = 25;
   let isPermissionModalOpen = false;
   let viewMode: 'list' | 'map' = 'list';
 
@@ -50,8 +51,9 @@
 
     try {
       const url = new URL('/api/directory/search', window.location.origin);
+      const effectiveLimit = viewMode === 'map' ? 100 : limit;
       url.searchParams.set('page', page.toString());
-      url.searchParams.set('limit', limit.toString());
+      url.searchParams.set('limit', effectiveLimit.toString());
 
       if (searchQuery.trim()) {
         url.searchParams.set('keyword', searchQuery.trim());
@@ -138,7 +140,14 @@
     }
   }
 
-  onMount(() => {
+  function changeViewMode(mode: 'list' | 'map') {
+    if (viewMode !== mode) {
+      viewMode = mode;
+      fetchStores(true);
+    }
+  }
+
+  onMount(async () => {
     fetchCategories();
 
     try {
@@ -153,6 +162,36 @@
       }
     } catch {
       // ignore
+    }
+
+    if (typeof navigator !== 'undefined' && 'permissions' in navigator && navigator.geolocation) {
+      try {
+        const perm = await navigator.permissions.query({ name: 'geolocation' });
+        if (perm.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              userLocation = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                label: 'Lokasi GPS',
+              };
+              try {
+                localStorage.setItem('umkm_user_location', JSON.stringify(userLocation));
+              } catch {
+                // ignore
+              }
+              fetchStores(true);
+            },
+            () => {
+              fetchStores(true);
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+          );
+          return;
+        }
+      } catch {
+        // ignore
+      }
     }
 
     fetchStores(true);
@@ -172,13 +211,13 @@
     on:setRadius={(e) => setRadius(e.detail)}
     on:openLocationModal={openLocationModal}
     on:disableLocation={disableLocation}
-    on:changeViewMode={(e) => (viewMode = e.detail)}
+    on:changeViewMode={(e) => changeViewMode(e.detail)}
   />
 
   {#if error}
-    <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs text-center flex items-center justify-center gap-2">
+    <div class="p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-xs text-center flex items-center justify-center gap-2">
       <span>{error}</span>
-      <button class="font-bold underline cursor-pointer hover:text-red-700 dark:hover:text-red-300 transition-colors" on:click={() => fetchStores(true)}>Coba lagi</button>
+      <button class="font-bold underline cursor-pointer hover:opacity-80 transition-opacity" on:click={() => fetchStores(true)}>Coba lagi</button>
     </div>
   {/if}
 
@@ -214,7 +253,7 @@
     {#if stores.length === 0 && !loading}
       <div class="py-16 sm:py-20 flex flex-col items-center justify-center text-center p-8 rounded-3xl bg-card border border-border">
         <div class="w-16 h-16 rounded-2xl bg-nested text-muted flex items-center justify-center mb-4">
-          <span class="material-symbols-outlined text-3xl">location_off</span>
+          <MapPinOff size={32} />
         </div>
         <h3 class="text-lg font-bold text-main font-heading mb-1.5">Tidak Ada Toko UMKM Ditemukan</h3>
         <p class="text-xs sm:text-sm text-secondary max-w-md font-sans">
@@ -233,7 +272,7 @@
           class="rounded-full uppercase tracking-wider"
         >
           {#if loading}
-            <span class="material-symbols-outlined animate-spin text-[16px] text-orange">progress_activity</span>
+            <Loader2 size={16} class="animate-spin text-orange" />
           {/if}
           <span>{loading ? 'Memuat...' : 'Tampilkan Lebih Banyak'}</span>
         </Button>
@@ -244,6 +283,7 @@
 
 <LocationPermissionModal
   bind:isOpen={isPermissionModalOpen}
+  currentLocationLabel={userLocation?.label || ''}
   on:granted={handleLocationGranted}
   on:skip={handleLocationSkip}
   on:dismissed={handleLocationSkip}

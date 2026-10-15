@@ -6,6 +6,7 @@ import { RegisterSubdomainInput } from '@lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 
 
 async function hasExistingStore(userId: string): Promise<boolean> {
@@ -58,6 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const storeId = crypto.randomUUID();
+    const coords = await resolveStoreCoordinates({ googleMapsUrl });
 
     await db.insert(stores).values({
       id: storeId,
@@ -67,6 +69,8 @@ export const POST: APIRoute = async ({ request }) => {
       templateId: 'default',
       waNumber: '',
       googleMapsUrl,
+      latitude: coords.lat,
+      longitude: coords.lng,
       status: 'active',
       registeredBy,
       lastEditedBy,

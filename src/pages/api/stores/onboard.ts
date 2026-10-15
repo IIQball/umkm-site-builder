@@ -7,6 +7,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 
 
 
@@ -78,6 +79,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     const storeId = crypto.randomUUID();
 
+    const coords = await resolveStoreCoordinates({
+      googleMapsUrl,
+      address,
+      district: typeof regionData?.district === 'string' ? regionData.district : undefined,
+    });
+
     await db.insert(stores).values({
       id: storeId,
       name,
@@ -88,6 +95,8 @@ export const POST: APIRoute = async ({ request }) => {
       address,
       waNumber,
       googleMapsUrl,
+      latitude: coords.lat,
+      longitude: coords.lng,
       status: 'active',
       customization: {
         isOnboarded: true,

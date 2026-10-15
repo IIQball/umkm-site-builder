@@ -41,18 +41,20 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     .$dynamic();
 
     if (user.role === 'superadmin') {
-      // Superadmin can see tenant, designer, and admin (excluding pending)
+      // Superadmin can see tenant, designer, and admin (excluding pending and deleted)
       query = query.where(and(
         inArray(users.role, ['tenant', 'designer', 'admin']),
         ne(users.status, 'pending'),
+        isNull(users.deletedAt),
         notExists(unacceptedInvitationSubquery),
       ));
     } else {
-      // Admin can only see tenants that they registered (excluding pending)
+      // Admin can only see tenants that they registered (excluding pending and deleted)
       query = query.where(and(
         eq(users.role, 'tenant'), 
         eq(users.registeredBy, user.id),
         ne(users.status, 'pending'),
+        isNull(users.deletedAt),
         notExists(unacceptedInvitationSubquery),
       ));
     }

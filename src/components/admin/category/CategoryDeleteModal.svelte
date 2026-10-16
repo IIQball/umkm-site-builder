@@ -4,6 +4,7 @@
   export let showModal: boolean = false;
   export let deletingCategory: { id: string; name: string } | null = null;
   export let isDeleting: boolean = false;
+  export let warningText: string = 'Template yang terkait kategori ini mungkin akan kehilangan label industrinya.';
   export let onClose: () => void;
   export let onConfirm: () => void;
 </script>
@@ -17,10 +18,10 @@
   <div class="space-y-4">
     <div class="p-4 rounded-2xl bg-error/10 border border-error/20 flex items-start gap-3">
       <span class="material-symbols-outlined text-error text-xl mt-0.5">warning</span>
-      <div class="space-y-1 text-body-sm">
+      <div class="space-y-1 text-sm">
         <p class="font-bold text-main">Apakah Anda yakin ingin menghapus kategori ini?</p>
         <p class="text-secondary">
-          Kategori <strong class="text-main">{deletingCategory?.name}</strong> akan dihapus permanen. Template yang terkait kategori ini mungkin akan kehilangan label industrinya.
+          Kategori <strong class="text-main">{deletingCategory?.name}</strong> akan dihapus permanen. {warningText}
         </p>
       </div>
     </div>

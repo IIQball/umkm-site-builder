@@ -38,11 +38,11 @@
             <span class="material-symbols-outlined text-base">{cat.icon || 'folder'}</span>
           </div>
           <div class="min-w-0">
-            <span class="font-bold text-xs text-main block font-sans">
+            <span class="font-bold text-xs text-main block">
               {cat.name}
             </span>
             {#if cat.description}
-              <span class="text-xs text-secondary block truncate font-sans max-w-xs mt-0.5">
+              <span class="text-xs text-secondary block truncate max-w-xs mt-0.5">
                 {cat.description}
               </span>
             {/if}
@@ -71,7 +71,7 @@
           <Button
             variant="destructive"
             size="sm"
-            className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+            className="!bg-nested hover:!bg-error/10 !border-light hover:!border-error/20 !text-secondary hover:!text-error shadow-2xs"
             on:click={() => onDelete(cat)}
             title="Hapus Kategori"
           >

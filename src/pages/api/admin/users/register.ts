@@ -31,7 +31,12 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     // For all roles created by admin/superadmin, generate a secure random password
     const finalPassword = crypto.randomUUID() + crypto.randomUUID()
 
-    // Create user via BetterAuth API so password is encrypted correctly
+    // Create user via BetterAuth API so password is encrypted correctly.
+    // IMPORTANT: Do NOT include `registeredBy` in the signUpEmail body.
+    // If present, the user.create.before hook will set status='pending', which
+    // then causes the session.create.before hook to throw ACCOUNT_PENDING_ACTIVATION
+    // before we can delete the session — resulting in a 500 error.
+    // We set registeredBy, role, and status manually via DB update immediately after.
     let newUserId = '';
     try {
       const res = await auth.api.signUpEmail({
@@ -40,25 +45,32 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           email: validated.email,
           password: finalPassword as string,
           role: validated.role,
-          registeredBy: user.id
         },
-        // We pass empty Headers so it doesn't set cookies on the admin's session
+        // Empty Headers so it doesn't set cookies on the admin's browser session
         headers: new Headers()
       }) as unknown as { user?: { id: string } };
       
       if (res && res.user) {
         newUserId = res.user.id;
-        // Delete the session created by signUpEmail to prevent auto-login
+
+        // Immediately set status=pending and registeredBy BEFORE the session is used
+        await db.update(users).set({ 
+          role: validated.role,
+          status: 'pending',
+          registeredBy: user.id
+        }).where(eq(users.id, newUserId));
+
+        // Delete any session created by signUpEmail to prevent auto-login
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
 
-        // Insert a record into tenantInvitations so it appears in the invitation dashboard
+        // Clean up any orphaned invitations for this email to prevent duplicates
+        await db.delete(tenantInvitations).where(eq(tenantInvitations.email, validated.email));
+
+        // Insert invitation record so it appears in the pending dashboard
         const invId = crypto.randomUUID();
         const token = crypto.randomUUID();
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 24);
-        
-        // Clean up any orphaned invitations for this email to prevent duplicates
-        await db.delete(tenantInvitations).where(eq(tenantInvitations.email, validated.email));
 
         await db.insert(tenantInvitations).values({
           id: invId,
@@ -68,13 +80,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           invitedBy: user.id,
           expiresAt: expiresAt,
         });
-        
-        // Explicitly set the role, status, and registeredBy in case BetterAuth ignored it
-        await db.update(users).set({ 
-          role: validated.role,
-          status: 'pending',
-          registeredBy: user.id
-        }).where(eq(users.id, newUserId));
 
         // Add activity log
         await db.insert(activityLogs).values({
@@ -84,7 +89,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           details: { email: validated.email, targetRole: validated.role },
         });
 
-        // We will trigger the activation email from the client-side to prevent server deadlocks
+        // Activation email is triggered client-side after this response succeeds
       } else {
         throw new AppError('Failed to create user account', 500);
       }

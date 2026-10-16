@@ -78,6 +78,7 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
         { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: Users },
         { label: 'Kurasi Template', href: '/superadmin/templates', icon: Palette },
         { label: 'Kategori Template', href: '/superadmin/template-categories', icon: Layers },
+        { label: 'Kategori Bisnis', href: '/superadmin/business-categories', icon: Store },
         { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: Receipt },
         { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: Settings }
       ]

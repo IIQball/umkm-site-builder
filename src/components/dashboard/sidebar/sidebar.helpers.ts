@@ -100,6 +100,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Kurasi Template', href: '/superadmin/templates', icon: 'palette', group: 'Katalog & Template' },
           { label: 'Kategori Template', href: '/superadmin/template-categories', icon: 'category', group: 'Katalog & Template' },
+          { label: 'Kategori Bisnis', href: '/superadmin/business-categories', icon: 'storefront', group: 'Katalog & Template' },
         ],
       },
       {

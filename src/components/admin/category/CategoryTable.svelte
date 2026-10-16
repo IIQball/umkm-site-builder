@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Trash2, Edit2 } from 'lucide-svelte';
-  import { Table, Button } from '@/components/ui';
+  import { Table, Button, Badge } from '@/components/ui';
   import { formatDate } from '@/lib/utils';
 
   export let paginatedCategories: Array<{
@@ -13,12 +13,13 @@
   }> = [];
   export let currentPage: number = 1;
   export let pageSize: number = 10;
-  export let onEdit: (cat: any) => void;
-  export let onDelete: (cat: any) => void;
+  export let onEdit: (cat: (typeof paginatedCategories)[0]) => void;
+  export let onDelete: (cat: (typeof paginatedCategories)[0]) => void;
+  export let categoryLabel: string = 'Kategori';
 
-  const tableHeaders = [
+  $: tableHeaders = [
     { label: '#', align: 'center' as const, width: 'w-12' },
-    { label: 'Kategori Bisnis' },
+    { label: categoryLabel },
     { label: 'Tanggal Dibuat', width: 'w-40' },
     { label: 'Aksi', align: 'right' as const, width: 'w-48' },
   ];
@@ -31,18 +32,23 @@
       <td class="px-4 py-4 text-center font-mono text-2xs text-secondary font-bold">
         {(currentPage - 1) * pageSize + i + 1}
       </td>
-      <!-- Name + Description -->
+      <!-- Name + Slug Badge + Description -->
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 shadow-2xs">
             <span class="material-symbols-outlined text-base">{cat.icon || 'folder'}</span>
           </div>
           <div class="min-w-0">
-            <span class="font-bold text-xs text-main block font-sans">
+            <span class="font-heading font-bold text-xs text-main block">
               {cat.name}
             </span>
+            <div class="mt-0.5">
+              <Badge variant="slate" size="sm" dot={false} class="font-mono text-3xs py-0 px-1.5 h-auto">
+                /{cat.slug}
+              </Badge>
+            </div>
             {#if cat.description}
-              <span class="text-xs text-secondary block truncate font-sans max-w-xs mt-0.5">
+              <span class="text-xs text-secondary block truncate max-w-xs mt-0.5">
                 {cat.description}
               </span>
             {/if}
@@ -71,7 +77,6 @@
           <Button
             variant="destructive"
             size="sm"
-            className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
             on:click={() => onDelete(cat)}
             title="Hapus Kategori"
           >

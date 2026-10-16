@@ -1,4 +1,3 @@
-import { slugify } from '@/lib/utils/format';
 
 export const iconOptions = [
   { value: 'restaurant', label: 'Kuliner (restaurant)' },
@@ -11,6 +10,4 @@ export const iconOptions = [
   { value: 'fitness_center', label: 'Olahraga/Fitnes (fitness_center)' },
   { value: 'folder', label: 'Folder Umum (folder)' },
 ];
-
-export const generateSlug = (val: string): string => slugify(val);
 

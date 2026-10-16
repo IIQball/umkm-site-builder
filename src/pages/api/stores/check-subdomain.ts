@@ -8,15 +8,14 @@ import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 
 
-export const POST: APIRoute = async ({ request }) => {
+async function handleCheckSubdomain(request: Request, rawInput: unknown) {
   const user = await getAuthenticatedUser(request);
   if (!user) {
     return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
   }
 
   try {
-    const body = await request.json();
-    const { subdomain } = CheckSubdomainInput.parse(body);
+    const { subdomain } = CheckSubdomainInput.parse(rawInput);
 
     const [existing] = await db
       .select({ id: stores.id })
@@ -33,4 +32,14 @@ export const POST: APIRoute = async ({ request }) => {
     console.error('[STORE] check-subdomain failed:', err);
     return jsonError('Internal server error', 500, undefined, 'INTERNAL');
   }
+}
+
+export const GET: APIRoute = async ({ request, url }) => {
+  return handleCheckSubdomain(request, { subdomain: url.searchParams.get('subdomain') || '' });
 };
+
+export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json().catch(() => ({}));
+  return handleCheckSubdomain(request, body);
+};
+

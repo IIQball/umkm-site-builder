@@ -33,6 +33,23 @@ describe('Template Categories API & Schemas', () => {
       expect(result.success).toBe(false);
     });
 
+    it('accepts payload when slug is omitted (auto-generated in service)', () => {
+      const withoutSlug = {
+        name: 'Kuliner & Minuman',
+      };
+      const result = TemplateCategoryCreateSchema.safeParse(withoutSlug);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts payload when slug is empty string (auto-generated in service)', () => {
+      const emptySlug = {
+        name: 'Fashion Pria',
+        slug: '',
+      };
+      const result = TemplateCategoryCreateSchema.safeParse(emptySlug);
+      expect(result.success).toBe(true);
+    });
+
     it('validates partial update schema', () => {
       const partial = {
         name: 'Nama Baru',

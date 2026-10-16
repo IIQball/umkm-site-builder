@@ -178,7 +178,7 @@ export const auth = betterAuth({
     <!-- HEADER BAR (Dark #090D16 background merges logo.webp seamlessly with NO black border box) -->
     <div style="background-color: #090D16; padding: 36px 24px; text-align: center; border-bottom: 1px solid #1E293B;">
       <img src="${safeLogoUrl}" alt="Pinoka" style="height: 42px; max-width: 180px; object-fit: contain; display: inline-block; margin-bottom: 8px;" />
-      <div style="color: #38BDF8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Indonesia</div>
+      <div style="color: #38BDF8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Banyuwangi</div>
     </div>
 
     <!-- MAIN CARD CONTENT -->
@@ -200,11 +200,12 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, token }) => {
       const status = (user as unknown as { status?: string }).status;
-      if (status === 'pending') {
+      const isInvited = (user as unknown as { registeredBy?: string }).registeredBy;
+      if (status === 'pending' || isInvited) {
         return;
       }
       
@@ -249,7 +250,7 @@ export const auth = betterAuth({
     <!-- HEADER (Warna Dark #090d16 menyatu sempurna dengan background logo.webp tanpa kotak hitam) -->
     <div style="background-color: #090d16; padding: 36px 24px; text-align: center; border-bottom: 1px solid #1e293b;">
       <img src="${safeLogoUrl}" alt="PINOKA" style="height: 38px; max-width: 170px; object-fit: contain; display: inline-block; margin-bottom: 10px;" />
-      <div style="color: #38bdf8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Indonesia</div>
+      <div style="color: #38bdf8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Banyuwangi</div>
     </div>
 
     <!-- CONTENT -->

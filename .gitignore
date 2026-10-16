@@ -34,3 +34,21 @@ pnpm-debug.log*
 
 # wrangler local state
 .wrangler/
+
+# Documents, presentations, spreadsheets & office files
+*.pdf
+*.ppt
+*.pptx
+*.odp
+*.doc
+*.docx
+*.odt
+*.xls
+*.xlsx
+*.ods
+*.key
+*.numbers
+*.pages
+
+# Windows metadata / Alternate Data Streams
+*:Zone.Identifier

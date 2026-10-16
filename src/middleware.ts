@@ -4,12 +4,15 @@ import { db, users } from "@/db";
 import { eq } from "drizzle-orm";
 import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 import { extractSubdomain } from "@/lib/domain";
+import { jsonError } from "@/lib/utils/api-handler";
 
 // Inisialisasi Rate Limiter untuk API:
 // 1. Read (GET): Longgar untuk memuat data (30 request / menit)
 const apiReadLimiter = new InMemoryRateLimiter(30, 60 * 1000);
 // 2. Write (POST/PUT/DELETE): Ketat untuk mencegah spam klik (5 request / menit)
 const apiWriteLimiter = new InMemoryRateLimiter(5, 60 * 1000);
+// 3. Subdomain Check: Live availability check saat mengetik (60 request / menit)
+const apiCheckSubdomainLimiter = new InMemoryRateLimiter(60, 60 * 1000);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
@@ -42,20 +45,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
       clientIp = context.request.headers.get('x-forwarded-for') || 'unknown';
     }
 
-    // Gunakan limiter yang sesuai berdasarkan HTTP Method
+    // Gunakan limiter yang sesuai berdasarkan endpoint dan HTTP Method
     const method = context.request.method;
-    const isAllowed = method === 'GET' 
-      ? apiReadLimiter.check(clientIp) 
-      : apiWriteLimiter.check(clientIp);
+    let isAllowed = true;
+    if (pathname === '/api/stores/check-subdomain') {
+      isAllowed = apiCheckSubdomainLimiter.check(clientIp);
+    } else if (method === 'GET') {
+      isAllowed = apiReadLimiter.check(clientIp);
+    } else {
+      isAllowed = apiWriteLimiter.check(clientIp);
+    }
     
     if (!isAllowed) {
-      return new Response(JSON.stringify({ error: 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.' }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': '60'
-        }
-      });
+      const res = jsonError('Terlalu banyak permintaan. Silakan tunggu beberapa saat.', 429, undefined, 'RATE_LIMITED');
+      res.headers.set('Retry-After', '60');
+      return res;
     }
   }
 
@@ -110,11 +114,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Superadmin-only: platform settings, master categories, kurasi template, whitelist, user management
     { prefix: '/admin/settings', roles: ['superadmin'] },
     { prefix: '/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/admin/business-categories', roles: ['superadmin'] },
     { prefix: '/admin/templates', roles: ['superadmin'] },
     { prefix: '/admin/whitelist', roles: ['superadmin'] },
     { prefix: '/admin/users', roles: ['superadmin', 'admin'] },
     { prefix: '/api/admin/settings', roles: ['superadmin'] },
     { prefix: '/api/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/api/admin/business-categories', roles: ['superadmin'] },
     { prefix: '/api/admin/templates', roles: ['superadmin'] },
     { prefix: '/api/admin/whitelist', roles: ['superadmin'] },
     { prefix: '/api/admin/users', roles: ['superadmin', 'admin'] },
@@ -143,10 +149,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Jika rute diproteksi tapi tidak ada user (belum login)
     if (!user) {
       if (pathname.startsWith('/api/')) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
       }
       return context.redirect('/401');
     }
@@ -154,10 +157,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Jika akun ditangguhkan
     if ((user as { status?: string }).status === 'suspended') {
       if (pathname.startsWith('/api/')) {
-        return new Response(JSON.stringify({ error: 'Akun Anda ditangguhkan' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
       }
       return context.redirect('/auth/login?error=account_suspended');
     }
@@ -165,10 +165,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Jika sudah login tapi role tidak sesuai
     if (!protectedRoute.roles.includes(user.role as string)) {
       if (pathname.startsWith('/api/')) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return jsonError('Forbidden', 403, undefined, 'FORBIDDEN');
       }
       return context.redirect('/403');
     }

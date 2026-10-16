@@ -1,28 +1,10 @@
 import type { APIRoute } from 'astro';
-import { handleApiRoute } from '@/lib/utils/api-handler';
-import { db } from '@/db';
-import { businessCategories } from '@/db/schema';
-import { asc } from 'drizzle-orm';
+import { handleApiRoute, jsonSuccess } from '@/lib/utils';
+import { getBusinessCategories } from '@/services/business-categories';
 
 export const GET: APIRoute = async (): Promise<Response> => {
   return handleApiRoute(async () => {
-    const categories = await db
-      .select({
-        id: businessCategories.id,
-        name: businessCategories.name,
-        slug: businessCategories.slug,
-        icon: businessCategories.icon,
-      })
-      .from(businessCategories)
-      .orderBy(asc(businessCategories.name));
-
-    return Response.json(
-      {
-        success: true,
-        ok: true,
-        data: categories,
-      },
-      { status: 200 }
-    );
+    const categories = await getBusinessCategories();
+    return jsonSuccess(categories);
   });
 };

@@ -9,28 +9,17 @@
   import OnboardingStepper from './wizard/OnboardingStepper.svelte';
   import OnboardingSuccessStep from './wizard/OnboardingSuccessStep.svelte';
   import type {
-    TemplateItem,
-    OnboardingStep,
-    ExistingStoreData,
-    StoreContentCustomization,
-    StoreBranchItem,
-    ValidationStatus,
+    TemplateItem, OnboardingStep, ExistingStoreData,
+    StoreContentCustomization, StoreBranchItem, ValidationStatus,
   } from './onboarding.types';
   import { validateSubdomainLocally } from '@/lib/validators/subdomain';
   import {
-    validateStoreInfo,
-    checkSubdomainAvailability,
-    submitOnboardStore,
-    submitUpdateStore,
-    DEFAULT_WA_CHECKOUT_TEMPLATE,
-    DEFAULT_REGION,
-    loadSavedOnboardingState,
-    saveOnboardingState,
-    clearOnboardingState,
+    validateStoreInfo, checkSubdomainAvailability, submitOnboardStore, submitUpdateStore,
+    DEFAULT_WA_CHECKOUT_TEMPLATE, DEFAULT_REGION, loadSavedOnboardingState,
+    saveOnboardingState, clearOnboardingState,
   } from './onboarding.helpers';
   import {
-    createDefaultContentCustomization,
-    extractContentCustomizationFromStore,
+    createDefaultContentCustomization, extractContentCustomizationFromStore,
     buildTemplateCustomizationPayload,
   } from './wizard/content/contentCustomization.helpers';
 
@@ -45,27 +34,16 @@
 
   // Wizard Form State
   let currentStep: OnboardingStep = 1;
-  let subdomain = '';
-  let subdomainStatus: ValidationStatus = 'idle';
-  let subdomainMessage = '';
+  let subdomain = '', subdomainStatus: ValidationStatus = 'idle', subdomainMessage = '';
   let debounceTimer: ReturnType<typeof setTimeout>;
 
-  let storeName = '';
-  let categoryId = '';
-  let waNumber = '';
-  let googleMapsUrl = '';
-  let address = '';
-  let branchMode: 'single' | 'multi' = 'single';
-  let branches: StoreBranchItem[] = [];
-  let regionData = { ...DEFAULT_REGION };
-  let formErrors: Record<string, string> = {};
+  let storeName = '', categoryId = '', waNumber = '', googleMapsUrl = '', address = '';
+  let branchMode: 'single' | 'multi' = 'single', branches: StoreBranchItem[] = [];
+  let regionData = { ...DEFAULT_REGION }, formErrors: Record<string, string> = {};
 
-  let selectedTemplateId = '';
-  let isOpen = true;
-  let waCheckoutTemplate = '';
+  let selectedTemplateId = '', isOpen = true, waCheckoutTemplate = '';
   let contentCustomization: StoreContentCustomization = createDefaultContentCustomization();
-  let submitStatus: SubmitStatus = 'idle';
-  let submitError = '';
+  let submitStatus: SubmitStatus = 'idle', submitError = '';
 
   onMount(() => {
     if (isEdit && existingStore) {
@@ -80,8 +58,9 @@
       selectedTemplateId = existingStore.templateId || (templates[0]?.id ?? '');
       isOpen = existingStore.isOpen !== false;
       waCheckoutTemplate = existingStore.waCheckoutTemplate || DEFAULT_WA_CHECKOUT_TEMPLATE;
-      branchMode = existingStore.branchMode || (existingStore.customization?.maps as any)?.branchMode || (existingStore.customization?.branchMode as any) || 'single';
-      branches = existingStore.branches || (existingStore.customization?.maps as any)?.branches || (existingStore.customization?.branches as any) || [];
+      const mapsCust = (existingStore.customization?.maps as any) || (existingStore.customization as any) || {};
+      branchMode = existingStore.branchMode || mapsCust.branchMode || 'single';
+      branches = existingStore.branches || mapsCust.branches || [];
       const cat = categories.find((c) => c.id === existingStore?.categoryId)?.name || '';
       contentCustomization = extractContentCustomizationFromStore(existingStore.customization, storeName, cat, address);
       contentCustomization.maps = { branchMode, branches };
@@ -90,9 +69,7 @@
 
     const state = loadSavedOnboardingState();
     if (state) {
-      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 4) {
-        currentStep = state.currentStep;
-      }
+      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 4) currentStep = state.currentStep;
       subdomain = state.subdomain || '';
       storeName = state.storeName || '';
       categoryId = state.categoryId || '';
@@ -108,9 +85,7 @@
       if (state.contentCustomization) contentCustomization = state.contentCustomization;
       if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
     }
-    if (!selectedTemplateId && templates.length > 0) {
-      selectedTemplateId = templates[0].id;
-    }
+    if (!selectedTemplateId && templates.length > 0) selectedTemplateId = templates[0].id;
   });
 
   function saveState() {
@@ -124,15 +99,31 @@
 
   $: isStep1Valid = isEdit ? true : subdomainStatus === 'available';
 
+  let checkAbortCtrl: AbortController | null = null;
+
   function onSubdomainInput(e: Event) {
     if (isEdit) return;
     const input = (e.target || e.currentTarget) as HTMLInputElement | null;
     if (!input) return;
     subdomain = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     clearTimeout(debounceTimer);
+    if (checkAbortCtrl) {
+      checkAbortCtrl.abort();
+      checkAbortCtrl = null;
+    }
     if (!subdomain) {
       subdomainStatus = 'idle';
       subdomainMessage = '';
+      return;
+    }
+    if (subdomain.length < 3) {
+      subdomainStatus = 'typing';
+      subdomainMessage = 'Ketik minimal 3 karakter...';
+      return;
+    }
+    if (subdomain.endsWith('-')) {
+      subdomainStatus = 'typing';
+      subdomainMessage = 'Lanjutkan mengetik setelah tanda hubung (-)...';
       return;
     }
     const localErr = validateSubdomainLocally(subdomain);
@@ -142,13 +133,29 @@
       return;
     }
     subdomainStatus = 'typing';
-    subdomainMessage = '';
+    subdomainMessage = 'Mengetik...';
+
+    const currentQuery = subdomain;
     debounceTimer = setTimeout(async () => {
+      checkAbortCtrl = new AbortController();
       subdomainStatus = 'checking';
-      const res = await checkSubdomainAvailability(subdomain);
-      subdomainStatus = res.status;
-      subdomainMessage = res.message;
-    }, 300);
+      subdomainMessage = '';
+      const res = await checkSubdomainAvailability(currentQuery, checkAbortCtrl.signal);
+      if (res && subdomain === currentQuery) {
+        subdomainStatus = res.status;
+        subdomainMessage = res.message;
+        saveState();
+      }
+    }, 350);
+  }
+
+  function onSubdomainBlur() {
+    if (isEdit || !subdomain) return;
+    const localErr = validateSubdomainLocally(subdomain);
+    if (localErr) {
+      subdomainStatus = 'invalid';
+      subdomainMessage = localErr;
+    }
   }
 
   function nextStep() {
@@ -156,9 +163,7 @@
       currentStep = 2;
       saveState();
     } else if (currentStep === 2) {
-      const validation = validateStoreInfo({
-        storeName, categoryId, waNumber, googleMapsUrl, address, regionData,
-      });
+      const validation = validateStoreInfo({ storeName, categoryId, waNumber, googleMapsUrl, address, regionData });
       formErrors = validation.errors;
       if (validation.isValid) {
         if (!contentCustomization.hero.title || contentCustomization.hero.title === 'Toko Unggulan Anda') {
@@ -246,7 +251,7 @@
     {#if currentStep === 1}
       <OnboardingStepSubdomain
         {isEdit} bind:subdomain {subdomainStatus} {subdomainMessage} {isStep1Valid}
-        onInput={onSubdomainInput} onNext={nextStep}
+        onInput={onSubdomainInput} onBlur={onSubdomainBlur} onNext={nextStep}
       />
     {:else if currentStep === 2}
       <OnboardingStepStoreInfo

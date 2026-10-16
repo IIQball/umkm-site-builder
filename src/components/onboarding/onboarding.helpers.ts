@@ -82,32 +82,49 @@ export function validateStoreInfo(data: StoreInfoValidationInput): {
   return { isValid, errors };
 }
 
-export async function checkSubdomainAvailability(val: string): Promise<{
+export async function checkSubdomainAvailability(
+  val: string,
+  signal?: AbortSignal
+): Promise<{
   status: 'available' | 'taken' | 'invalid' | 'error';
   message: string;
-}> {
+} | null> {
   try {
     const res = await fetch('/api/stores/check-subdomain', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subdomain: val }),
+      signal,
     });
 
     if (res.status === 401) {
-      window.location.href = '/auth/login';
-      return { status: 'error', message: 'Sesi kedaluwarsa' };
+      return { status: 'error', message: 'Sesi kedaluwarsa. Silakan masuk kembali.' };
     }
 
-    const data = await res.json();
+    if (res.status === 429) {
+      return { status: 'error', message: 'Terlalu sering memeriksa. Mohon tunggu beberapa detik.' };
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) {
+      return { status: 'error', message: 'Gagal memproses respon server.' };
+    }
+
     if (!data.ok) {
-      return { status: 'invalid', message: data.error?.message ?? 'Validasi gagal' };
+      const errorMsg = typeof data.error === 'string'
+        ? data.error
+        : (data.error?.message ?? 'Validasi subdomain gagal');
+      return { status: 'invalid', message: errorMsg };
     }
 
-    if (data.data.available) {
+    if (data.data?.available) {
       return { status: 'available', message: 'Subdomain tersedia' };
     }
     return { status: 'taken', message: 'Subdomain sudah digunakan' };
-  } catch {
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return null;
+    }
     return { status: 'error', message: 'Gagal memeriksa ketersediaan' };
   }
 }

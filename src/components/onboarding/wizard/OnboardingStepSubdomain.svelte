@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CheckCircle, Loader2, XCircle, AlertCircle, ArrowRight, ExternalLink, Lock } from 'lucide-svelte';
-  import { Button } from '@/components/ui';
+  import { Button, Badge } from '@/components/ui';
   import { slide } from 'svelte/transition';
 
   import { onMount } from 'svelte';
@@ -15,6 +15,7 @@
   export let isStep1Valid: boolean = false;
   export let onInput: (e: Event) => void;
   export let onNext: () => void;
+  export let onBlur: (() => void) | undefined = undefined;
 
   const MAX_LENGTH = 63;
   let mainDomain = 'localhost:4321';
@@ -40,7 +41,7 @@
 
   <div class="space-y-3">
     <label for="subdomain-input" class="block text-label-caps text-muted">
-      Subdomain Toko {isEdit ? '' : '<span class="text-error ml-0.5">*</span>'}
+      Subdomain Toko{#if !isEdit}<span class="text-error ml-0.5">*</span>{/if}
     </label>
 
     {#if isEdit}
@@ -54,24 +55,25 @@
               <p class="font-mono font-bold text-main text-base">
                 {subdomain}<span class="text-muted font-normal">.{mainDomain}</span>
               </p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="w-2 h-2 rounded-full bg-success"></span>
-                <span class="text-2xs font-semibold text-success">
+              <div class="mt-1">
+                <Badge variant="success" size="sm" dot>
                   Subdomain Terdaftar & Aktif
-                </span>
+                </Badge>
               </div>
             </div>
           </div>
 
-          <a
+          <Button
             href={storeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-nested border border-light text-xs font-semibold text-main hover:text-primary transition-colors shadow-2xs w-fit"
+            variant="secondary"
+            size="sm"
+            class="rounded-xl text-xs font-semibold w-fit"
           >
             <span>Lihat Toko Online</span>
             <ExternalLink size={13} />
-          </a>
+          </Button>
         </div>
 
         <p class="text-xs text-muted leading-relaxed border-t border-light pt-3">
@@ -96,6 +98,13 @@
           spellcheck="false"
           bind:value={subdomain}
           on:input={onInput}
+          on:blur={onBlur}
+          on:keydown={(e) => {
+            if (e.key === 'Enter' && isStep1Valid) {
+              e.preventDefault();
+              onNext();
+            }
+          }}
         />
         <span class="flex items-center bg-nested/90 px-4 py-2.5 text-sm font-mono font-semibold text-secondary border-l border-light select-none">
           .{mainDomain}
@@ -125,7 +134,7 @@
           </span>
         {:else if subdomainStatus === 'typing'}
           <span class="text-xs text-muted" transition:slide={{ axis: 'y', duration: 200 }}>
-            Mengetik...
+            {subdomainMessage || 'Mengetik...'}
           </span>
         {:else}
           <span class="text-xs text-muted">

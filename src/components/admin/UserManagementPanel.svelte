@@ -212,9 +212,9 @@
 
   <!-- User Stats Summary -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="default" icon="group" delayClass="delay-100" />
-    <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="blue" icon="check_circle" delayClass="delay-150" />
-    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="dark" icon="block" delayClass="delay-200" />
+    <StatCard label="Total Pengguna" value={users.length} badge="Semua" cardTheme="dark" icon="group" delayClass="delay-100" />
+    <StatCard label="Pengguna Aktif" value={users.filter(u => u.status === 'active').length} badge="Sehat" cardTheme="default" icon="check_circle" delayClass="delay-150" />
+    <StatCard label="Ditangguhkan" value={users.filter(u => u.status === 'suspended').length} badge="Perhatian" cardTheme="blue" icon="block" delayClass="delay-200" />
   </div>
 
   <Card variant="bordered" padding="none" radius="2xl" class="overflow-hidden shadow-xs animate-fade-in-up delay-75">

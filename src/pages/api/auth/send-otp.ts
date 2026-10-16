@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
     <!-- HEADER BAR (Dark #090D16 background merges logo.webp seamlessly with NO black border box) -->
     <div style="background-color: #090D16; padding: 36px 24px; text-align: center; border-bottom: 1px solid #1E293B;">
       <img src="${safeLogoUrl}" alt="Pinoka" style="height: 42px; max-width: 180px; object-fit: contain; display: inline-block; margin-bottom: 8px;" />
-      <div style="color: #38BDF8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Indonesia</div>
+      <div style="color: #38BDF8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">Platform Digital UMKM Banyuwangi</div>
     </div>
 
     <!-- MAIN CONTENT -->

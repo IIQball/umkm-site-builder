@@ -166,8 +166,8 @@
   <!-- Stat Cards -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in-up">
     <StatCard label="Total Undangan" value={stats.total} badge="Semua" cardTheme="dark" icon="mail" delayClass="delay-100" />
-    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="blue" icon="schedule" delayClass="delay-150" />
-    <StatCard label="Kedaluwarsa" value={stats.expired} badge="Hangus" cardTheme="pink" icon="link_off" delayClass="delay-200" />
+    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="default" icon="schedule" delayClass="delay-150" />
+    <StatCard label="Kedaluwarsa" value={stats.expired} badge="Hangus" cardTheme="blue" icon="link_off" delayClass="delay-200" />
   </div>
 
   <!-- Main Table Panel -->

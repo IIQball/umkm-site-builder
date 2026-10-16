@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client';
 import { templateCategories } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
-import { AppError } from '@/lib/utils';
+import { AppError, slugify } from '@/lib/utils';
 import type {
   TemplateCategoryCreateInput,
   TemplateCategoryUpdateInput,
@@ -39,16 +39,21 @@ export async function getTemplateCategoryById(id: string) {
 }
 
 export async function createTemplateCategory(data: TemplateCategoryCreateInput) {
+  const slug = (data.slug?.trim() || slugify(data.name)).trim();
+  if (!slug) {
+    throw new AppError('Slug is required', 400, undefined, 'SLUG_REQUIRED');
+  }
+
   // Check if slug already exists
   const existing = await db.query.templateCategories.findFirst({
-    where: eq(templateCategories.slug, data.slug),
+    where: eq(templateCategories.slug, slug),
   });
 
   if (existing) {
     throw new AppError('Category with this slug already exists', 400, undefined, 'SLUG_EXISTS');
   }
 
-  const categoryId = `cat_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const categoryId = `cat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const now = new Date();
 
   const [newCategory] = await db
@@ -56,7 +61,7 @@ export async function createTemplateCategory(data: TemplateCategoryCreateInput) 
     .values({
       id: categoryId,
       name: data.name,
-      slug: data.slug,
+      slug,
       description: data.description ?? null,
       icon: data.icon ?? null,
       createdAt: now,
@@ -76,9 +81,15 @@ export async function updateTemplateCategory(id: string, data: TemplateCategoryU
     throw new AppError('Template category not found', 404, undefined, 'NOT_FOUND');
   }
 
-  if (data.slug && data.slug !== category.slug) {
+  let slug: string | undefined = undefined;
+  if (data.slug !== undefined && data.slug !== null) {
+    const trimmed = data.slug.trim();
+    slug = trimmed || (data.name ? slugify(data.name) : category.slug);
+  }
+
+  if (slug && slug !== category.slug) {
     const existingSlug = await db.query.templateCategories.findFirst({
-      where: eq(templateCategories.slug, data.slug),
+      where: eq(templateCategories.slug, slug),
     });
     if (existingSlug) {
       throw new AppError('Category with this slug already exists', 400, undefined, 'SLUG_EXISTS');
@@ -90,7 +101,7 @@ export async function updateTemplateCategory(id: string, data: TemplateCategoryU
   };
 
   if (data.name !== undefined) updateData.name = data.name;
-  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (slug !== undefined) updateData.slug = slug;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.icon !== undefined) updateData.icon = data.icon;
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { AlertTriangle, Trash2 } from 'lucide-svelte';
   import { Modal, Button } from '@/components/ui';
 
   export let showModal: boolean = false;
@@ -11,40 +12,56 @@
 
 <Modal
   bind:open={showModal}
-  title="Konfirmasi Hapus Kategori"
-  size="md"
+  size="sm"
   on:close={onClose}
 >
-  <div class="space-y-4">
-    <div class="p-4 rounded-2xl bg-error/10 border border-error/20 flex items-start gap-3">
-      <span class="material-symbols-outlined text-error text-xl mt-0.5">warning</span>
-      <div class="space-y-1 text-sm">
-        <p class="font-bold text-main">Apakah Anda yakin ingin menghapus kategori ini?</p>
-        <p class="text-secondary">
-          Kategori <strong class="text-main">{deletingCategory?.name}</strong> akan dihapus permanen. {warningText}
+  <svelte:fragment slot="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-error/10 text-error flex items-center justify-center flex-shrink-0 shadow-2xs">
+        <Trash2 size={18} />
+      </div>
+      <div>
+        <h3 class="font-heading font-bold text-heading-sm text-main leading-tight">
+          Konfirmasi Hapus
+        </h3>
+        <p class="text-2xs text-secondary mt-0.5">
+          Tindakan ini tidak dapat dibatalkan
         </p>
       </div>
     </div>
+  </svelte:fragment>
 
-    <div class="flex items-center justify-end gap-3 pt-2">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={isDeleting}
-        on:click={onClose}
-      >
-        Batal
-      </Button>
-      <Button
-        variant="destructive"
-        size="sm"
-        loading={isDeleting}
-        disabled={isDeleting}
-        on:click={onConfirm}
-      >
-        <span class="material-symbols-outlined text-sm mr-1">delete</span>
-        Hapus Permanen
-      </Button>
+  <div class="p-4 rounded-2xl bg-error/10 border border-error/20 flex items-start gap-3">
+    <AlertTriangle size={18} class="text-error flex-shrink-0 mt-0.5" />
+    <div class="space-y-1 text-sm">
+      <p class="font-heading font-bold text-main text-xs">Apakah Anda yakin ingin menghapus kategori ini?</p>
+      <p class="text-secondary text-xs leading-relaxed">
+        Kategori <strong class="text-main font-semibold">{deletingCategory?.name}</strong> akan dihapus permanen. {warningText}
+      </p>
     </div>
   </div>
+
+  <svelte:fragment slot="footer">
+    <Button
+      variant="secondary"
+      size="sm"
+      className="rounded-xl font-bold"
+      disabled={isDeleting}
+      on:click={onClose}
+    >
+      Batal
+    </Button>
+    <Button
+      variant="destructive"
+      size="sm"
+      className="rounded-xl font-bold"
+      loading={isDeleting}
+      disabled={isDeleting}
+      on:click={onConfirm}
+    >
+      <Trash2 size={13} class="mr-1" />
+      Hapus Permanen
+    </Button>
+  </svelte:fragment>
 </Modal>
+

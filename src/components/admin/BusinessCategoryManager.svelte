@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Plus } from 'lucide-svelte';
+  import { Plus, Store } from 'lucide-svelte';
   import { Card, Button, Pagination } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import CategoryHeader from './category/CategoryHeader.svelte';
   import CategoryTable from './category/CategoryTable.svelte';
   import CategoryFormModal from './category/CategoryFormModal.svelte';
   import CategoryDeleteModal from './category/CategoryDeleteModal.svelte';
-  import { generateSlug } from '@/lib/utils';
+  import { slugify } from '@/lib/utils';
   import { iconOptions } from './category/category.helpers';
 
   export let initialCategories: Array<{
@@ -63,18 +63,15 @@
     : filteredCategories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   $: totalItems = pagination ? pagination.totalItems : filteredCategories.length;
 
-  const handleNameInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    formName = target.value;
-    if (!isEditing) formSlug = generateSlug(formName);
-  };
-
   const fetchCategories = async () => {
     loading = true;
     try {
       const res = await fetch('/api/admin/business-categories');
       const json = await res.json();
-      if (json.ok && Array.isArray(json.data)) categories = json.data;
+      if (json.ok && Array.isArray(json.data)) {
+        categories = json.data;
+        pagination = undefined;
+      }
     } catch {
       addToast({ type: 'error', message: 'Gagal mengambil data kategori bisnis' });
     } finally {
@@ -103,10 +100,12 @@
       formError = 'Nama kategori wajib diisi';
       return;
     }
-    if (!formSlug.trim()) {
+    const finalSlug = formSlug.trim() || slugify(formName.trim());
+    if (!finalSlug) {
       formError = 'Slug kategori wajib diisi';
       return;
     }
+    formSlug = finalSlug;
 
     isSaving = true;
     formError = null;
@@ -191,16 +190,17 @@
     {loading}
     title="Master Kategori Bisnis"
     subtitle="Daftar sektor industri UMKM, slug URL, ikon antarmuka, dan opsi modifikasi data"
-    icon="storefront"
     onRefresh={fetchCategories}
-  />
+  >
+    <Store slot="icon" size={20} />
+  </CategoryHeader>
 
   {#if filteredCategories.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-        <span class="material-symbols-outlined text-2xl">storefront</span>
+        <Store size={24} />
       </div>
-      <h4 class="font-bold text-main text-base mb-1">Tidak Ada Kategori Bisnis Ditemukan</h4>
+      <h4 class="font-heading font-bold text-main text-base mb-1">Tidak Ada Kategori Bisnis Ditemukan</h4>
       <p class="text-xs text-secondary max-w-sm mx-auto leading-relaxed">
         {searchQuery ? 'Tidak ada kategori bisnis yang cocok dengan pencarian Anda.' : 'Belum ada kategori bisnis terdaftar. Tambahkan kategori baru sekarang.'}
       </p>
@@ -218,6 +218,7 @@
       {paginatedCategories}
       {currentPage}
       {pageSize}
+      categoryLabel="Kategori Bisnis"
       onEdit={(cat) => openFormModal(cat)}
       onDelete={openDeleteConfirm}
     />
@@ -229,11 +230,11 @@
 <CategoryFormModal
   bind:showModal={showFormModal}
   {isEditing}
-  {formName}
-  {formSlug}
-  {formDescription}
-  {formIcon}
-  {formError}
+  bind:formName
+  bind:formSlug
+  bind:formDescription
+  bind:formIcon
+  bind:formError
   {isSaving}
   {iconOptions}
   editTitle="Ubah Kategori Bisnis"
@@ -242,7 +243,6 @@
   createSubtitle="Buat sektor kategori baru untuk registrasi toko merchant"
   namePlaceholder="Contoh: Kuliner & Minuman"
   descPlaceholder="Kategori untuk resto, cafe, kedai kopi, kuliner, dan catering..."
-  onNameInput={handleNameInput}
   onSave={handleSave}
   onClose={() => (showFormModal = false)}
 />

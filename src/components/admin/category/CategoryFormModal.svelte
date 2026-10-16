@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { FolderPlus, Edit3, AlertCircle } from 'lucide-svelte';
   import { Modal, Input, Textarea, Button } from '@/components/ui';
+  import { slugify } from '@/lib/utils';
+  import { iconOptions as defaultIconOptions } from './category.helpers';
 
   export let showModal: boolean = false;
   export let isEditing: boolean = false;
@@ -9,16 +12,44 @@
   export let formIcon: string = 'folder';
   export let formError: string | null = null;
   export let isSaving: boolean = false;
-  export let iconOptions: Array<{ value: string; label: string }> = [];
+  export let iconOptions: Array<{ value: string; label: string }> = defaultIconOptions;
   export let editTitle: string = 'Ubah Kategori Template';
   export let createTitle: string = 'Tambah Kategori Template Baru';
   export let editSubtitle: string = 'Perbarui informasi industri template';
   export let createSubtitle: string = 'Buat kategori industri baru untuk marketplace';
   export let namePlaceholder: string = 'Contoh: Kuliner & Minuman';
   export let descPlaceholder: string = 'Template yang cocok untuk restoran, cafe, kedai kopi, dan catering...';
-  export let onNameInput: (e: Event) => void;
-  export let onSave: (e: Event) => void;
+  export let onSave: (e?: Event) => void;
   export let onClose: () => void;
+
+  let isSlugManuallyEdited = false;
+
+  $: if (!showModal) {
+    isSlugManuallyEdited = false;
+  }
+
+  function handleNameInput() {
+    if (!isEditing || !isSlugManuallyEdited) {
+      formSlug = slugify(formName);
+    }
+  }
+
+  function handleSlugInput() {
+    isSlugManuallyEdited = true;
+  }
+
+  function resetSlugFromName() {
+    isSlugManuallyEdited = false;
+    formSlug = slugify(formName);
+  }
+
+  function handleSubmit(e?: Event) {
+    if (e) e.preventDefault();
+    if (!formSlug.trim() && formName.trim()) {
+      formSlug = slugify(formName);
+    }
+    onSave(e);
+  }
 </script>
 
 <Modal
@@ -29,23 +60,27 @@
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <span class="material-symbols-outlined text-lg">{isEditing ? 'edit_note' : 'add_circle'}</span>
+        {#if isEditing}
+          <Edit3 size={18} />
+        {:else}
+          <FolderPlus size={18} />
+        {/if}
       </div>
       <div>
-        <h3 class="text-base font-extrabold text-main leading-tight">
+        <h3 class="text-heading-sm font-bold text-main leading-tight font-heading">
           {isEditing ? editTitle : createTitle}
         </h3>
-        <p class="text-2xs text-muted mt-0.5">
+        <p class="text-2xs text-secondary mt-0.5">
           {isEditing ? editSubtitle : createSubtitle}
         </p>
       </div>
     </div>
   </svelte:fragment>
 
-  <form on:submit={onSave} class="space-y-4 pt-1">
+  <form on:submit|preventDefault={handleSubmit} class="space-y-4 pt-1">
     {#if formError}
-      <div class="p-3 rounded-xl bg-error/10 border border-error/20 text-error text-xs flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm">error</span>
+      <div class="alert alert-error text-xs rounded-xl shadow-2xs py-2 px-3 flex items-center gap-2">
+        <AlertCircle size={15} class="shrink-0" />
         <span>{formError}</span>
       </div>
     {/if}
@@ -54,10 +89,10 @@
       id="cat_name"
       label="Nama Kategori"
       required
-      value={formName}
+      bind:value={formName}
       placeholder={namePlaceholder}
       size="sm"
-      on:input={onNameInput}
+      on:input={handleNameInput}
     />
 
     <Input
@@ -68,7 +103,22 @@
       placeholder="kuliner-dan-minuman"
       size="sm"
       class="font-mono"
-    />
+      on:input={handleSlugInput}
+    >
+      <svelte:fragment slot="suffix">
+        {#if formName.trim()}
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="!p-1 !h-auto text-primary font-medium hover:bg-transparent hover:underline"
+            on:click={resetSlugFromName}
+          >
+            Auto dari nama
+          </Button>
+        {/if}
+      </svelte:fragment>
+    </Input>
 
     <div class="space-y-1.5">
       <span class="block text-label-caps text-muted">
@@ -80,13 +130,13 @@
             type="button"
             size="xs"
             variant={formIcon === opt.value ? 'primary' : 'outline'}
-            class="!justify-start !p-2 !rounded-xl !h-auto !min-h-0 text-left truncate {formIcon === opt.value
+            className="justify-start p-2 rounded-xl h-auto min-h-0 text-left truncate {formIcon === opt.value
               ? 'shadow-2xs font-bold'
               : 'hover:bg-nested border-light text-main'}"
             on:click={() => (formIcon = opt.value)}
           >
             <span class="material-symbols-outlined text-sm flex-shrink-0">{opt.value}</span>
-            <span class="truncate">{opt.value}</span>
+            <span class="truncate">{opt.label.split(' ')[0]}</span>
           </Button>
         {/each}
       </div>
@@ -101,25 +151,28 @@
       class="text-xs"
     />
 
-    <div class="flex items-center justify-end gap-2 pt-3 border-t border-light">
-      <Button
-        variant="secondary"
-        size="sm"
-        className="rounded-xl font-bold"
-        on:click={onClose}
-        disabled={isSaving}
-      >
-        Batal
-      </Button>
-      <Button
-        type="submit"
-        variant="primary"
-        size="sm"
-        className="rounded-xl font-bold"
-        disabled={isSaving}
-      >
-        {isSaving ? 'Menyimpan...' : isEditing ? 'Simpan Perubahan' : 'Tambah Kategori'}
-      </Button>
-    </div>
+    <button type="submit" class="hidden" aria-hidden="true" tabindex="-1"></button>
   </form>
+
+  <svelte:fragment slot="footer">
+    <Button
+      variant="secondary"
+      size="sm"
+      className="rounded-xl font-bold"
+      on:click={onClose}
+      disabled={isSaving}
+    >
+      Batal
+    </Button>
+    <Button
+      type="button"
+      variant="primary"
+      size="sm"
+      className="rounded-xl font-bold"
+      disabled={isSaving}
+      on:click={() => handleSubmit()}
+    >
+      {isSaving ? 'Menyimpan...' : isEditing ? 'Simpan Perubahan' : 'Tambah Kategori'}
+    </Button>
+  </svelte:fragment>
 </Modal>

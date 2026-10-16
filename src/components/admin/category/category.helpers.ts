@@ -11,5 +11,3 @@ export const iconOptions = [
   { value: 'folder', label: 'Folder Umum (folder)' },
 ];
 
-export { generateSlug } from '@/lib/utils';
-

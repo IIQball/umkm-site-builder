@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RefreshCw } from 'lucide-svelte';
+  import { RefreshCw, Search } from 'lucide-svelte';
   import { Button } from '@/components/ui';
 
   export let searchQuery: string = '';
@@ -13,10 +13,12 @@
 <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
-      <span class="material-symbols-outlined text-lg">{icon}</span>
+      <slot name="icon">
+        <span class="material-symbols-outlined text-lg">{icon}</span>
+      </slot>
     </div>
     <div>
-      <h3 class="text-heading-md text-main leading-tight">
+      <h3 class="font-heading font-bold text-heading-md text-main leading-tight">
         {title}
       </h3>
       <p class="text-sm text-secondary mt-0.5">
@@ -28,7 +30,7 @@
   <!-- Actions & Search Box -->
   <div class="flex flex-wrap items-center gap-2.5">
     <div class="relative">
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+      <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
       <input
         type="text"
         bind:value={searchQuery}
@@ -50,3 +52,4 @@
     </div>
   </div>
 </div>
+

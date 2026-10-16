@@ -1,8 +1,9 @@
 <script lang="ts">
   import { fade, scale } from 'svelte/transition';
-  import { X, Plus, Minus, ShoppingBag, ShoppingCart } from 'lucide-svelte';
+  import { X, Plus, Minus, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp } from 'lucide-svelte';
   import type { ProductItem } from '@/types';
   import { formatIDR } from '@/lib/currency';
+  import { Badge } from '@/components/ui';
 
   export let isOpen: boolean = false;
   export let product: ProductItem | null = null;
@@ -23,8 +24,12 @@
 
   let qty = 1;
   let selectedVariants: Record<string, { name: string; priceAdjustment?: number }> = {};
+  let isDescriptionExpanded = false;
 
   $: basePrice = Number(product?.basePrice ?? product?.price ?? 0);
+  $: hasLongDesc = Boolean(
+    product?.description && (product.description.length > 65 || product.description.includes('\n'))
+  );
 
   $: normalizedVariants = Array.isArray(product?.variants)
     ? product.variants.map((group: any, idx: number) => ({
@@ -37,6 +42,7 @@
   // Reset & initialize defaults when product opens
   $: if (isOpen && product) {
     qty = 1;
+    isDescriptionExpanded = false;
     const initial: Record<string, { name: string; priceAdjustment?: number }> = {};
     normalizedVariants.forEach((group) => {
       const avail = group.options.find((o: any) => o.isAvailable !== false);
@@ -94,7 +100,7 @@
     aria-modal="true"
     aria-label="Pilih Varian Produk"
     tabindex="-1"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-neutral/60 backdrop-blur-sm"
     transition:fade={{ duration: 180 }}
   >
     <button
@@ -143,17 +149,39 @@
 
           <div class="flex-1 min-w-0">
             {#if categoryName}
-              <span class="inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-base-300 text-base-content mb-1">
-                {categoryName}
-              </span>
+              <div class="mb-1">
+                <Badge variant="slate" size="sm" dot={false} uppercase>
+                  {categoryName}
+                </Badge>
+              </div>
             {/if}
             <h4 class="font-bold text-base-content text-sm line-clamp-1">
               {product.name}
             </h4>
             {#if product.description}
-              <p class="text-xs text-base-content/70 line-clamp-2 mt-0.5 leading-relaxed">
+              <div
+                class="text-xs text-base-content/70 mt-0.5 leading-relaxed break-words {isDescriptionExpanded
+                  ? 'max-h-32 overflow-y-auto pr-1 whitespace-pre-line'
+                  : 'line-clamp-2'}"
+              >
                 {product.description}
-              </p>
+              </div>
+              {#if hasLongDesc}
+                <button
+                  type="button"
+                  on:click={() => (isDescriptionExpanded = !isDescriptionExpanded)}
+                  aria-expanded={isDescriptionExpanded}
+                  aria-label={isDescriptionExpanded ? 'Sembunyikan deskripsi lengkap' : 'Lihat deskripsi lengkap'}
+                  class="inline-flex items-center gap-0.5 text-xs-dense font-semibold text-[var(--theme-primary,var(--color-primary))] hover:underline mt-0.5 focus:outline-none"
+                >
+                  <span>{isDescriptionExpanded ? 'Sembunyikan' : 'Selanjutnya'}</span>
+                  {#if isDescriptionExpanded}
+                    <ChevronUp size={12} />
+                  {:else}
+                    <ChevronDown size={12} />
+                  {/if}
+                </button>
+              {/if}
             {/if}
             <p class="text-sm font-extrabold font-mono text-[var(--theme-primary, var(--color-primary))] mt-1.5">
               {formatIDR(unitPrice)}
@@ -179,13 +207,13 @@
                         on:click={() => handleSelectOption(group.groupName, opt)}
                         class="px-3.5 py-1.5 text-xs font-semibold rounded-xl border transition-all {
                           isSelected
-                            ? 'bg-[var(--theme-primary, var(--color-primary))] border-[var(--theme-primary, var(--color-primary))] text-white shadow-sm ring-2 ring-[var(--theme-primary, var(--color-primary))]/20'
+                            ? 'bg-[var(--theme-primary,var(--color-primary))] border-[var(--theme-primary,var(--color-primary))] text-primary-content shadow-sm ring-2 ring-[var(--theme-primary,var(--color-primary))]/20'
                             : 'bg-base-100 border-base-300 text-base-content hover:border-primary/50'
                         } disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {opt.name}
                         {#if opt.priceAdjustment}
-                          <span class="text-[11px] ml-1 opacity-90">(+{formatIDR(opt.priceAdjustment)})</span>
+                          <span class="text-xs-dense ml-1 opacity-90">(+{formatIDR(opt.priceAdjustment)})</span>
                         {/if}
                       </button>
                     {/each}
@@ -202,7 +230,7 @@
             <span class="text-xs font-bold uppercase tracking-wider text-base-content block">
               Jumlah
             </span>
-            <span class="text-[11px] text-base-content/50">Atur kuantitas pesanan</span>
+            <span class="text-xs-dense text-base-content/50">Atur kuantitas pesanan</span>
           </div>
 
           <div class="flex items-center border border-base-300 rounded-xl bg-base-200 overflow-hidden">
@@ -242,7 +270,7 @@
           <button
             type="button"
             on:click={handleConfirmBuyNow}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-white text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
             style="border-radius: var(--btn-radius, 0.75rem);"
           >
             <span>Beli Sekarang</span>
@@ -251,7 +279,7 @@
           <button
             type="button"
             on:click={handleConfirmAddToCart}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-white text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
             style="border-radius: var(--btn-radius, 0.75rem);"
           >
             <ShoppingCart size={18} />

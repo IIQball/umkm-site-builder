@@ -34,6 +34,7 @@ export function jsonError(message: string, status = 500, details?: unknown, code
       case 401: return 'UNAUTHORIZED';
       case 403: return 'FORBIDDEN';
       case 404: return 'NOT_FOUND';
+      case 429: return 'RATE_LIMITED';
       default: return 'ERROR';
     }
   };

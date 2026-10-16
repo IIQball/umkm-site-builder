@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { Store, Navigation, Eye, Link2, MapPin, ArrowRight } from 'lucide-svelte';
+  import Badge from '@/components/ui/Badge.svelte';
   import { type DirectoryStore, getStoreUrl } from './directory.types';
-  import { formatIDR } from '@/lib/currency';
+  import { formatIDR, formatNumber } from '@/lib/currency';
   import { getMainDomain } from '@/lib/domain';
 
   export let store: DirectoryStore;
@@ -24,23 +26,21 @@
       {#if store.logoUrl}
         <img src={store.logoUrl} alt={store.name} class="w-full h-full object-cover" loading="lazy" />
       {:else}
-        <span class="material-symbols-outlined text-muted text-[22px]">storefront</span>
+        <Store size={22} class="text-muted" />
       {/if}
     </div>
 
-    <div class="flex flex-col items-end shrink-0">
+    <div class="flex flex-col items-end shrink-0 gap-1">
       {#if store.distance !== null}
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange/10 border border-orange/20 text-orange dark:text-orange-400 text-xs font-semibold">
-          <span class="material-symbols-outlined text-[13px]">near_me</span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange/10 border border-orange/20 text-orange text-xs font-semibold">
+          <Navigation size={12} class="text-orange" />
           {store.distance} km
         </span>
-      {:else}
-        <span class="text-[11px] font-bold uppercase tracking-wider text-muted font-mono">Kunjungan</span>
-        <span class="text-xs font-semibold text-secondary flex items-center gap-1 mt-0.5">
-          {store.totalViews.toLocaleString('id-ID')}
-          <span class="material-symbols-outlined text-[13px] text-muted">visibility</span>
-        </span>
       {/if}
+      <div class="flex items-center gap-1 text-xs font-semibold text-secondary" title="Total Kunjungan Toko">
+        <span>{formatNumber(store.totalViews || 0)}</span>
+        <Eye size={13} class="text-muted" />
+      </div>
     </div>
   </div>
 
@@ -51,13 +51,13 @@
     </h2>
 
     <p class="text-xs text-secondary line-clamp-1 flex items-center gap-1">
-      <span class="material-symbols-outlined text-[13px] text-muted">link</span>
+      <Link2 size={13} class="text-muted shrink-0" />
       <span class="font-mono text-muted">{store.subdomain}.{mainDomain}</span>
     </p>
 
     {#if store.address}
       <p class="text-xs text-secondary line-clamp-1 flex items-center gap-1 pt-0.5">
-        <span class="material-symbols-outlined text-[13px] text-muted">location_on</span>
+        <MapPin size={13} class="text-muted shrink-0" />
         <span>{store.address}</span>
       </p>
     {/if}
@@ -88,13 +88,10 @@
 
   <!-- Bottom CTA -->
   <div class="mt-auto pt-3.5 flex items-center justify-between border-t border-border">
-    <span class="inline-flex items-center gap-1.5 text-xs text-secondary font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-      Toko Aktif
-    </span>
+    <Badge variant="success" size="sm">Toko Aktif</Badge>
     <span class="text-xs font-bold text-orange group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
       Kunjungi Toko
-      <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+      <ArrowRight size={15} />
     </span>
   </div>
 </a>

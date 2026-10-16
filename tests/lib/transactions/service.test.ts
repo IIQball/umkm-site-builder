@@ -5,6 +5,7 @@ import type { TransactionInitiateInput } from '@/types';
 import { db } from '@/lib/db/client';
 import { xenditClient } from '@/lib/finance/xendit';
 
+
 // Mock xenditClient
 vi.mock('@/lib/finance/xendit', () => ({
   xenditClient: {
@@ -246,19 +247,30 @@ describe('TransactionService', () => {
 
   describe('fulfillPaidTransaction', () => {
     it('should trigger notification to tenant if transaction was assisted by admin', async () => {
-      mockDb.query.templates.findFirst.mockResolvedValueOnce({
-        id: 'tmpl_1',
-        name: 'Paid Template',
-        designerId: 'designer_1'
-      });
-
-      mockDb.select.mockReturnValueOnce({
+      mockDb.select.mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 'tenant_1', name: 'Budi' }]),
+            limit: vi.fn().mockResolvedValue([{ 
+              id: 'tmpl_1', 
+              name: 'Budi', 
+              balance: 0, 
+              platformFeePercentage: 30, 
+              designerId: 'designer_1', 
+              price: 50000 
+            }]),
           }),
+          limit: vi.fn().mockResolvedValue([{ 
+            id: 'tmpl_1', 
+            name: 'Budi', 
+            balance: 0, 
+            platformFeePercentage: 30, 
+            designerId: 'designer_1', 
+            price: 50000 
+          }]),
         }),
       });
+
+
 
       await fulfillPaidTransaction({
         id: 'txn_paid_assisted',
@@ -267,7 +279,7 @@ describe('TransactionService', () => {
         type: 'template_purchase',
         amount: 50000,
         status: 'success',
-        adminFee: 0,
+        adminFee: 5000,
         assistedBy: 'admin_123', // Assisted by admin
         externalId: 'ext_1',
         paymentGatewayRef: null,
@@ -276,7 +288,7 @@ describe('TransactionService', () => {
         createdAt: new Date(),
       });
 
-      // db.insert is called for: userTemplates, commission, creditWallet (designer), creditWallet (admin), notification (designer), notification (tenant)
+      // db.insert is called for: userTemplates, commission, creditWallet (designer) [mutation], creditWallet (admin) [mutation], notification (designer), notification (tenant)
       expect(mockDb.insert).toHaveBeenCalledTimes(6);
     });
   });

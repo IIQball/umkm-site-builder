@@ -20,7 +20,7 @@ describe('Tenant Quota API', () => {
 
   it('GET returns quota count for store', async () => {
     // Mock store
-    const mockStore = [{ id: 's1', userId: 'u1' }];
+    const mockStore = [{ id: 's1', userId: 'u1', maxProducts: 15, maxCategories: 5 }];
     
     // Mock products count
     const mockProductCount = [{ count: 6 }];
@@ -60,7 +60,9 @@ describe('Tenant Quota API', () => {
       ok: true,
       data: {
         products: 6,
-        categories: 2
+        categories: 2,
+        maxProducts: 15,
+        maxCategories: 5
       }
     });
   });
@@ -91,7 +93,9 @@ describe('Tenant Quota API', () => {
       ok: true,
       data: {
         products: 0,
-        categories: 0
+        categories: 0,
+        maxProducts: 15,
+        maxCategories: 5
       }
     })
   })

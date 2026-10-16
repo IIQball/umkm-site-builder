@@ -41,6 +41,7 @@
 
 <!-- # MOBILE — FAB + SLIDE-OVER DRAWER -->
 <button
+  id="mobile-sidebar-fab"
   type="button"
   on:click={() => dispatch("openDrawer")}
   class="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:bg-primary/95 active:scale-95 transition-all cursor-pointer"

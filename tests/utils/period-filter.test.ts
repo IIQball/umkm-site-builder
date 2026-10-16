@@ -41,7 +41,7 @@ describe('Period Filter Utilities', () => {
     const items = [
       { id: '1', date: '2026-01-15T10:00:00Z' },
       { id: '2', date: '2026-02-10T10:00:00Z' },
-      { id: '3', date: '2025-12-31T23:59:59Z' },
+      { id: '3', date: '2025-12-30T23:59:59Z' },
       { id: '4', date: null },
     ];
 

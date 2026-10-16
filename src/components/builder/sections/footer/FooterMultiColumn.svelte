@@ -12,7 +12,7 @@
   export let whatsappLink: string;
   export let menuLinks: FooterMenuLink[];
   export let copyrightText: string;
-  export let attributionText: string = 'Powered by Pinoka';
+  export let attributionText: string = 'Didukung oleh Pinoka';
   export let activeNodeId: string | null = null;
   export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
   export let elementOrder: string[] = ['footer_brand', 'footer_contact', 'footer_navigation', 'footer_copyright'];

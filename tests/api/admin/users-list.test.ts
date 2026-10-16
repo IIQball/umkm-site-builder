@@ -37,10 +37,14 @@ vi.mock('@/db/index', () => {
       suspendReason: 'mock_suspendReason',
       createdAt: 'mock_createdAt',
       registeredBy: 'mock_registeredBy',
+      deletedAt: 'mock_deletedAt',
     },
     tenantInvitations: {
       email: 'mock_inv_email',
       acceptedAt: 'mock_inv_acceptedAt',
+    },
+    stores: {
+      userId: 'mock_userId',
     },
   };
 });

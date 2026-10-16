@@ -3,6 +3,7 @@ import { transactions, templates, userTemplates, commissions, notifications, use
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { eq, and, desc, inArray } from 'drizzle-orm';
+import { xenditClient } from '@/lib/finance/xendit';
 import type { TransactionRecord } from '@/types';
 import { formatIDR } from '@/lib/currency';
 
@@ -205,4 +206,74 @@ export async function queryDesignerIncomingOrders(designerId: string, limit: num
     limit,
     offset,
   });
+}
+export async function getTransactionByExternalId(externalId: string) {
+  const query = db.select().from(transactions).where(eq(transactions.externalId, externalId));
+  const hasLimit = 'limit' in query && typeof (query as { limit?: (n: number) => Promise<unknown> }).limit === 'function';
+  const rawResults = hasLimit ? await (query as { limit: (n: number) => Promise<unknown[]> }).limit(1) : await query;
+  const results = Array.isArray(rawResults) ? rawResults : [];
+  return (results[0] as typeof transactions.$inferSelect) || null;
+}
+
+export function formatInvoiceNum(userId: string, idempotencyKey?: string | null): { cleanKey: string | null; invoiceNum: string } {
+  const cleanKey = idempotencyKey?.trim() || null;
+  const invoiceNum = cleanKey
+    ? (cleanKey.startsWith('INV-') ? cleanKey : `INV-${cleanKey}`)
+    : `INV-${userId}-${Date.now()}`;
+  return { cleanKey, invoiceNum };
+}
+
+export async function grantFreeTemplate(
+  userId: string,
+  buyerName: string,
+  template: { id: string; designerId: string; name: string },
+  assistedBy?: string | null
+): Promise<{ isFree: true; message: string }> {
+  const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  await db.insert(userTemplates).values({
+    id: userTemplateId,
+    userId,
+    templateId: template.id,
+    acquiredAt: new Date(),
+  });
+
+  await db.insert(notifications).values({
+    id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    userId: template.designerId,
+    type: 'template_purchased',
+    title: 'Template Diunduh',
+    message: `${buyerName} telah mengunduh template gratis Anda "${template.name}".`,
+    metadata: { templateId: template.id },
+  });
+
+  if (assistedBy) {
+    await db.insert(notifications).values({
+      id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
+      userId,
+      type: 'template_purchased',
+      title: 'Template Berhasil Diunduh',
+      message: `Admin telah membantu mengunduh template gratis "${template.name}" untuk toko Anda.`,
+      metadata: { templateId: template.id },
+    });
+  }
+
+  return { isFree: true, message: 'Free template added to your account successfully' };
+}
+
+export const invoiceUrlCache = new Map<string, string>();
+
+export async function fetchInvoiceUrl(externalId: string): Promise<string | null> {
+  try {
+    if (invoiceUrlCache.has(externalId)) return invoiceUrlCache.get(externalId) || null;
+
+    const tx = await getTransactionByExternalId(externalId);
+    if (!tx?.paymentGatewayRef) return null;
+
+    const xenditInvoice = await xenditClient.getInvoice(tx.paymentGatewayRef);
+    const invoiceUrl = xenditInvoice.invoiceUrl || null;
+    if (invoiceUrl) invoiceUrlCache.set(externalId, invoiceUrl);
+    return invoiceUrl;
+  } catch {
+    return null;
+  }
 }

@@ -41,8 +41,8 @@ export const POST: APIRoute = async ({ request }) => {
       .from(storeCategories)
       .where(and(eq(storeCategories.storeId, storeId), isNull(storeCategories.deletedAt)));
 
-    if (Number(catCount.count) >= 5) {
-      return jsonError('Maksimal 5 kategori. Tambah lebih banyak fitur berbayar.', 402, undefined, 'PAYMENT_REQUIRED');
+    if (Number(catCount.count) >= store.maxCategories) {
+      return jsonError(`Maksimal ${store.maxCategories} kategori. Anda telah mencapai batas kuota Anda. Silakan ajukan peningkatan kuota.`, 402, undefined, 'PAYMENT_REQUIRED');
     }
     
     // Check if slug exists

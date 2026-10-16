@@ -205,7 +205,7 @@
       <FileText size={16} class="text-primary shrink-0" />
       <div>
         <h4 class="font-bold text-xs text-base-content">Hak Cipta & Attribution</h4>
-        <p class="text-[10px] text-base-content/60">Gaya teks hak cipta & Powered by Pinoka</p>
+        <p class="text-[10px] text-base-content/60">Gaya teks hak cipta & Didukung oleh Pinoka</p>
       </div>
     </div>
     <NodeStyleControls

@@ -3,7 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ActivationForm from "@/components/auth/ActivationForm.svelte";
 import Card from "@/components/ui/Card.svelte";
 import { db } from "@/lib/db/client";
-import { verifications } from "@/db/schema";
+import { verifications, users, tenantInvitations } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 
 const title = "Aktivasi Akun";
@@ -12,6 +12,7 @@ const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktif
 // Strict Access Control: Token is strictly required.
 // We redirect to login instantly if there is no token.
 const token = Astro.url.searchParams.get("token");
+const uid = Astro.url.searchParams.get("uid");
 
 if (!token) {
   return Astro.redirect("/auth/login?error=invalid_token");
@@ -29,6 +30,37 @@ const validToken = await db.query.verifications.findFirst({
 // So if it's missing or expired, it's an invalid/used token.
 if (!validToken) {
   return Astro.redirect("/auth/login?error=invalid_or_expired_token");
+}
+
+// Validasi status user dan link undangan dari tenantInvitations
+if (uid) {
+  const targetUser = await db.query.users.findFirst({
+    where: eq(users.id, uid)
+  });
+
+  if (!targetUser) {
+    return Astro.redirect("/auth/login?error=user_not_found");
+  }
+
+  // Jika akun sudah aktif, link aktivasi otomatis tidak bisa digunakan lagi
+  if (targetUser.status === 'active') {
+    return Astro.redirect("/auth/login?error=already_activated");
+  }
+
+  // Periksa apakah undangan masih ada di tenantInvitations
+  const invitation = await db.query.tenantInvitations.findFirst({
+    where: eq(tenantInvitations.email, targetUser.email)
+  });
+
+  // Jika undangan sudah hilang (misal: otomatis terhapus karena > 7 hari tidak diperpanjang)
+  if (!invitation) {
+    return Astro.redirect("/auth/login?error=invitation_not_found");
+  }
+
+  // Jika masa aktif (24 jam) sudah kedaluwarsa dan belum diperpanjang
+  if (new Date(invitation.expiresAt) < new Date()) {
+    return Astro.redirect("/auth/login?error=invitation_expired");
+  }
 }
 
 // Uses ActivationForm which handles name, password, and confirmation

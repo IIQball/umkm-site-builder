@@ -2,10 +2,11 @@
  * Formatting utilities
  */
 
-import { formatIDR as curFormatIDR, formatSmartIDR as curFormatSmartIDR, formatCurrencyInput, parseCurrencyInput } from '../currency';
+import { formatIDR as curFormatIDR, formatSmartIDR as curFormatSmartIDR, formatNumber as curFormatNumber, formatCurrencyInput, parseCurrencyInput } from '../currency';
 
 export const formatIDR = curFormatIDR;
 export const formatSmartIDR = curFormatSmartIDR;
+export const formatNumber = curFormatNumber;
 
 export function formatCurrency(amount: number): string {
   return formatIDR(amount);
@@ -124,6 +125,12 @@ export function computeAvailableYears<T>(
   }
   return years.sort((a, b) => b - a);
 }
-
-
-
+export function escapeHtml(str: unknown): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}

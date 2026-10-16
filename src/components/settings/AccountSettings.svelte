@@ -2,8 +2,7 @@
   import { onMount } from "svelte";
   import { authClient } from "@/lib/auth-client";
   import { toast } from "@/lib/toast";
-  import Button from "@/components/ui/Button.svelte";
-  import { Eye, EyeOff, Info, ShieldAlert } from "lucide-svelte";
+  import { Card, Button, Input } from "@/components/ui";
 
   export let userJson: string;
   let user = JSON.parse(userJson);
@@ -82,9 +81,11 @@
       if (error) throw error;
       toast.success("Nama berhasil diperbarui! Memuat ulang...");
       
+      // Memberi jeda sedikit agar toast terlihat, lalu muat ulang untuk memperbarui navbar
       setTimeout(() => {
         window.location.reload();
       }, 750);
+      
     } catch (err: any) {
       toast.error(err.message || "Gagal memperbarui nama.");
       isUpdatingName = false;
@@ -123,6 +124,7 @@
       
       if (error) throw error;
       
+      // Catat timestamp perubahan kata sandi untuk batas waktu 24 jam
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEY, Date.now().toString());
       }
@@ -140,199 +142,175 @@
   }
 </script>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-10">
   <!-- Profil Akun Card -->
-  <section class="border border-light rounded-xl overflow-hidden bg-card shadow-xs flex flex-col">
-    <div class="border-b border-light p-5 sm:p-6 bg-nested/30">
-      <h2 class="text-lg font-semibold text-main tracking-tight font-heading">Profil Akun</h2>
-      <p class="text-sm text-secondary mt-1">Kelola informasi publik dan data pribadi Anda.</p>
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden flex flex-col h-full">
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">person</span>
+        </div>
+        <div>
+          <h3 class="text-heading-md text-main font-bold font-heading leading-tight">Profil Akun</h3>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">Kelola informasi publik dan data pribadi Anda.</p>
+        </div>
+      </div>
     </div>
     
     <form on:submit={handleUpdateName} class="flex flex-col flex-grow">
-      <div class="p-5 sm:p-6 space-y-5 flex-grow">
-        <!-- Email (Disabled) -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="email">
-            <span class="label-text font-medium text-main">Alamat Email</span>
-          </label>
-          <input
-            type="email"
-            id="email"
-            class="input input-bordered w-full bg-nested text-muted cursor-not-allowed focus:outline-none"
-            value={user.email}
-            disabled
-            title="Email tidak dapat diubah"
-          />
-          <p class="text-xs text-muted mt-2 flex items-center gap-1.5">
-            <Info size={14} class="shrink-0" />
-            Email digunakan untuk login dan tidak dapat diganti.
-          </p>
-        </div>
+      <div class="p-6 md:p-8 space-y-6 flex-grow">
+        <Input
+          id="email"
+          type="email"
+          label="Alamat Email"
+          value={user.email}
+          disabled={true}
+          helper="Email digunakan untuk login dan tidak dapat diganti."
+          title="Email tidak dapat diubah"
+        />
 
-        <!-- Name -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="name">
-            <span class="label-text font-medium text-main">Nama Lengkap</span>
-          </label>
-          <input
-            type="text"
-            id="name"
-            class="input input-bordered w-full bg-nested text-main focus:border-primary"
-            bind:value={newName}
-            placeholder="Masukkan nama lengkap Anda"
-            required
-          />
-        </div>
+        <Input
+          id="name"
+          type="text"
+          label="Nama Lengkap"
+          placeholder="Masukkan nama lengkap Anda"
+          bind:value={newName}
+          required={true}
+        />
       </div>
 
-      <div class="border-t border-light p-4 sm:px-6 bg-nested/30 flex justify-end mt-auto">
+      <div class="p-4 sm:px-6 py-4 border-t border-light flex justify-end mt-auto bg-card">
         <Button 
           type="submit" 
           variant="primary"
+          size="md"
+          className="shadow-xs font-bold rounded-2xl w-full sm:w-auto"
           loading={isUpdatingName}
           disabled={isUpdatingName || newName === user.name}
-          class="w-full sm:w-auto"
         >
-          Simpan Perubahan
+          <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">save</span>
+          <span>Simpan Perubahan</span>
         </Button>
       </div>
     </form>
-  </section>
+  </Card>
 
   <!-- Ubah Kata Sandi Card -->
-  <section class="border border-light rounded-xl overflow-hidden bg-card shadow-xs flex flex-col">
-    <div class="border-b border-light p-5 sm:p-6 bg-nested/30">
-      <h2 class="text-lg font-semibold text-main tracking-tight font-heading">Keamanan & Kata Sandi</h2>
-      <p class="text-sm text-secondary mt-1">Pastikan akun Anda menggunakan kata sandi yang kuat agar tetap aman.</p>
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden flex flex-col h-full">
+    <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">lock</span>
+        </div>
+        <div>
+          <h3 class="text-heading-md text-main font-bold font-heading leading-tight">Keamanan & Kata Sandi</h3>
+          <p class="text-body-sm text-secondary mt-0.5 font-sans">Pastikan akun Anda menggunakan kata sandi yang kuat.</p>
+        </div>
+      </div>
     </div>
     
     <form on:submit={handleUpdatePassword} class="flex flex-col flex-grow">
-      <div class="p-5 sm:p-6 space-y-5 flex-grow">
+      <div class="p-6 md:p-8 space-y-6 flex-grow">
         {#if isCooldownActive}
-          <div class="p-4 rounded-lg bg-warning/10 border border-warning/30 text-main text-xs sm:text-sm flex items-start gap-3 shadow-xs">
-            <ShieldAlert size={20} class="text-warning shrink-0 mt-0.5" />
+          <div class="p-4 rounded-xl bg-orange/10 border border-orange/20 text-orange-dark dark:text-orange-light text-xs sm:text-sm flex items-start gap-3 shadow-2xs mb-6">
+            <span class="material-symbols-outlined text-orange shrink-0 mt-0.5">warning</span>
             <div>
-              <p class="font-semibold text-warning">Batas Waktu Perubahan Kata Sandi (Cooldown)</p>
-              <p class="text-secondary mt-1 leading-relaxed">
-                Demi keamanan akun dan mencegah spamming, kata sandi hanya dapat diperbarui <strong>1 kali dalam 24 jam</strong>. Silakan tunggu <span class="font-bold text-main underline decoration-warning/50">{cooldownFormatted}</span> sebelum melakukan pembaruan berikutnya.
+              <p class="font-bold font-heading">Batas Waktu Perubahan Kata Sandi (Cooldown)</p>
+              <p class="mt-1 leading-relaxed opacity-90">
+                Demi keamanan akun dan mencegah spamming, kata sandi hanya dapat diperbarui <strong>1 kali dalam 24 jam</strong>. Silakan tunggu <span class="font-bold underline decoration-orange/40">{cooldownFormatted}</span> sebelum melakukan pembaruan berikutnya.
               </p>
             </div>
           </div>
         {/if}
 
-        <!-- Current Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="currentPassword">
-            <span class="label-text font-medium text-main">Kata Sandi Saat Ini</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showCurrentPassword ? "text" : "password"}
-              id="currentPassword"
-              class="input input-bordered w-full pr-10 bg-nested text-main focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-              bind:value={currentPassword}
-              placeholder="Masukkan kata sandi saat ini"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-main transition-colors disabled:opacity-50"
-              on:click={() => showCurrentPassword = !showCurrentPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-              aria-label={showCurrentPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-            >
-              {#if showCurrentPassword}
-                <EyeOff size={18} />
-              {:else}
-                <Eye size={18} />
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="currentPassword"
+          type={showCurrentPassword ? "text" : "password"}
+          label="Kata Sandi Saat Ini"
+          placeholder="Masukkan kata sandi saat ini"
+          bind:value={currentPassword}
+          disabled={isCooldownActive}
+          required={true}
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showCurrentPassword = !showCurrentPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showCurrentPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
 
-        <!-- New Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="newPassword">
-            <span class="label-text font-medium text-main">Kata Sandi Baru</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showNewPassword ? "text" : "password"}
-              id="newPassword"
-              class="input input-bordered w-full pr-10 bg-nested text-main focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-              bind:value={newPassword}
-              placeholder="Min. 8 karakter"
-              minlength="8"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-main transition-colors disabled:opacity-50"
-              on:click={() => showNewPassword = !showNewPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-              aria-label={showNewPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-            >
-              {#if showNewPassword}
-                <EyeOff size={18} />
-              {:else}
-                <Eye size={18} />
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="newPassword"
+          type={showNewPassword ? "text" : "password"}
+          label="Kata Sandi Baru"
+          placeholder="Min. 8 karakter"
+          bind:value={newPassword}
+          disabled={isCooldownActive}
+          required={true}
+          minlength="8"
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showNewPassword = !showNewPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showNewPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
 
-        <!-- Confirm Password -->
-        <div class="form-control w-full">
-          <label class="label pb-1.5" for="confirmPassword">
-            <span class="label-text font-medium text-main">Konfirmasi Kata Sandi</span>
-          </label>
-          <div class="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              class="input input-bordered w-full pr-10 bg-nested text-main focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-              bind:value={confirmPassword}
-              placeholder="Ketik ulang kata sandi baru"
-              minlength="8"
-              disabled={isCooldownActive}
-              required
-            />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-main transition-colors disabled:opacity-50"
-              on:click={() => showConfirmPassword = !showConfirmPassword}
-              disabled={isCooldownActive}
-              tabindex="-1"
-              aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-            >
-              {#if showConfirmPassword}
-                <EyeOff size={18} />
-              {:else}
-                <Eye size={18} />
-              {/if}
-            </button>
-          </div>
-        </div>
+        <Input
+          id="confirmPassword"
+          type={showConfirmPassword ? "text" : "password"}
+          label="Konfirmasi Kata Sandi"
+          placeholder="Ketik ulang kata sandi baru"
+          bind:value={confirmPassword}
+          disabled={isCooldownActive}
+          required={true}
+          minlength="8"
+        >
+          <button 
+            slot="suffix"
+            type="button" 
+            class="text-muted hover:text-main transition-colors outline-none disabled:opacity-50 flex items-center justify-center"
+            on:click={() => showConfirmPassword = !showConfirmPassword}
+            disabled={isCooldownActive}
+            tabindex="-1"
+          >
+            <span class="material-symbols-outlined text-[18px]">
+              {showConfirmPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </Input>
       </div>
 
-      <div class="border-t border-light p-4 sm:px-6 bg-nested/30 flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-auto">
-        <a href="/auth/forgot-password" class="text-sm text-primary hover:underline font-medium">
-          Lupa kata sandi lama?
+      <div class="p-4 sm:px-6 py-4 border-t border-light flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-auto bg-card">
+        <a href="/auth/forgot-password" class="text-label-caps font-bold text-primary hover:text-primary-focus hover:underline active:scale-95 transition-all duration-150 ease-out">
+          LUPA KATA SANDI LAMA?
         </a>
         <Button 
           type="submit" 
           variant="primary"
+          size="md"
+          className="shadow-xs font-bold rounded-2xl w-full sm:w-auto"
           loading={isUpdatingPassword}
           disabled={isUpdatingPassword || isCooldownActive}
-          class="w-full sm:w-auto"
         >
-          Perbarui Kata Sandi
+          <span class="material-symbols-outlined text-[18px] mr-1.5 icon-filled">lock_reset</span>
+          <span>Perbarui Kata Sandi</span>
         </Button>
       </div>
     </form>
-  </section>
+  </Card>
 </div>

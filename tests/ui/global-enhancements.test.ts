@@ -3,6 +3,7 @@ import { zoomStore } from '@/lib/stores/zoomStore';
 import { getBankBrandConfig } from '@/components/designer/bankBranding.helpers';
 import { PRESETS_BY_SECTION_TYPE, SECTION_TYPE_LABELS } from '@/components/builder/inspector/layoutPresets.data';
 import { getPresetSchematicSvg } from '@/components/builder/inspector/layoutSchematics.helpers';
+import { sectionRegistry } from '@/components/builder/registry';
 import { get } from 'svelte/store';
 
 describe('Global Zoom Controls & Centered Layout Tests', () => {
@@ -184,9 +185,8 @@ describe('Web Builder Layout Selector & Schematics Tests', () => {
     expect(footerCentered).not.toEqual(footerMulti);
   });
 
-  it('verifies product_catalog in registry relies solely on layout presets without extra styles sub-tabs', async () => {
-    const { sectionRegistry } = await import('@/components/builder/registry');
+  it('verifies product_catalog in registry relies solely on layout presets without extra styles sub-tabs', () => {
     expect(sectionRegistry.product_catalog).toBeDefined();
     expect(sectionRegistry.product_catalog.stylesComponent).toBeUndefined();
-  }, 15000);
+  });
 });

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Palette, RotateCcw } from 'lucide-svelte';
-  import { Pagination, Button } from '@/components/ui';
+  import { Pagination, Button, Badge, Card } from '@/components/ui';
   import { addToast } from '@/lib/toast';
   import type { PublicTemplate, CategoryItem, AssistedTenant } from './marketplace.types';
   import MarketplaceFilterBar from './marketplace/MarketplaceFilterBar.svelte';
@@ -78,7 +78,7 @@
     if (isAdmin && !selectedTenantId) {
       addToast({
         type: 'error',
-        message: 'Silakan pilih tenant binaan terlebih dahulu di dropdown!',
+        message: 'Silakan pilih merchant binaan terlebih dahulu di dropdown!',
       });
       const el = document.getElementById('assisted-tenant-select');
       if (el) {
@@ -140,8 +140,10 @@
       }
 
       // Skenario pembelian template berbayar baru
-      const payload: { templateId: string; tenantId?: string; assistedBy?: string | null } = {
+      const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `pay_${Date.now()}`;
+      const payload: { templateId: string; tenantId?: string; assistedBy?: string | null; idempotencyKey: string } = {
         templateId: template.id,
+        idempotencyKey,
       };
 
       if (isAdmin && selectedTenantId) {
@@ -151,7 +153,10 @@
 
       const res = await fetch('/api/tenant/transactions/template-purchase', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey,
+        },
         body: JSON.stringify(payload),
       });
       const result = await res.json();
@@ -163,7 +168,7 @@
         addToast({
           type: 'success',
           message: isAdmin
-            ? `Template gratis "${template.name}" berhasil dipasangkan ke tenant binaan!`
+            ? `Template gratis "${template.name}" berhasil dipasangkan ke merchant binaan!`
             : `Template gratis "${template.name}" berhasil dipasang ke toko Anda!`,
         });
         isPurchaseModalOpen = false;
@@ -216,22 +221,22 @@
       </span>
       {#if selectedCategorySlug !== 'all'}
         <span class="text-muted">•</span>
-        <span class="bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-full border border-primary/20">
+        <Badge variant="primary" size="sm">
           Kategori: {categories.find((c) => c.slug === selectedCategorySlug)?.name || selectedCategorySlug}
-        </span>
+        </Badge>
       {/if}
       {#if selectedPriceFilter !== 'all'}
         <span class="text-muted">•</span>
-        <span class="bg-orange/10 text-orange font-bold px-2.5 py-0.5 rounded-full border border-orange/20">
+        <Badge variant="orange" size="sm">
           {selectedPriceFilter === 'free' ? 'Gratis' : selectedPriceFilter === 'under50' ? '< Rp 50.000' : selectedPriceFilter === '50to100' ? 'Rp 50rb - 100rb' : 'Berbayar'}
-        </span>
+        </Badge>
       {/if}
     </div>
   </div>
 
   <!-- Templates Grid -->
   {#if filteredTemplates.length === 0}
-    <div class="bg-card border border-light rounded-3xl py-20 px-8 text-center shadow-sm space-y-4">
+    <Card variant="bordered" radius="2xl" class="py-20 px-8 text-center space-y-4">
       <div class="w-16 h-16 rounded-3xl bg-nested border border-light flex items-center justify-center text-muted mx-auto shadow-2xs">
         <Palette size={32} />
       </div>
@@ -245,7 +250,7 @@
           Reset Semua Filter
         </Button>
       </div>
-    </div>
+    </Card>
   {:else}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       {#each paginatedTemplates as tpl (tpl.id)}

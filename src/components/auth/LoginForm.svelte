@@ -1,6 +1,7 @@
 <script lang="ts">
   import { authClient } from "@/lib/auth-client";
   import { Eye, EyeOff } from "lucide-svelte";
+  import { onMount } from "svelte";
   import GoogleAuthButton from "./GoogleAuthButton.svelte";
   import Input from "@/components/ui/Input.svelte";
   import Button from "@/components/ui/Button.svelte";
@@ -10,6 +11,24 @@
   let password = "";
   let loading = false;
   let showPassword = false;
+
+  onMount(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get("error");
+      if (error) {
+        if (error === "invitation_expired") {
+          toast.error("Link aktivasi sudah kedaluwarsa (lebih dari 24 jam). Silakan hubungi admin untuk memperpanjang undangan.");
+        } else if (error === "invitation_not_found") {
+          toast.error("Link aktivasi tidak ditemukan atau sudah kedaluwarsa lebih dari 7 hari.");
+        } else if (error === "already_activated") {
+          toast.info("Akun Anda sudah aktif. Silakan masuk menggunakan kata sandi Anda.");
+        } else if (error === "invalid_or_expired_token") {
+          toast.error("Token verifikasi tidak valid atau telah kedaluwarsa.");
+        }
+      }
+    }
+  });
 
   const togglePasswordVisibility = () => {
     showPassword = !showPassword;
@@ -36,7 +55,13 @@
       });
 
       if (errResponse) {
-        toast.error(errResponse.message || "Gagal masuk. Periksa kembali email dan sandi Anda.");
+        if (errResponse.message === "ACCOUNT_PENDING_ACTIVATION" || errResponse.message?.toLowerCase().includes("aktivasi")) {
+          toast.error("Akun Anda belum aktif. Silakan lakukan aktivasi terlebih dahulu melalui tautan yang dikirimkan ke email Anda.");
+        } else if (errResponse.message === "ACCOUNT_SUSPENDED") {
+          toast.error("Akun Anda telah ditangguhkan. Silakan hubungi administrator.");
+        } else {
+          toast.error(errResponse.message || "Gagal masuk. Periksa kembali email dan sandi Anda.");
+        }
         return;
       }
       

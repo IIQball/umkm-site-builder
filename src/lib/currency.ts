@@ -22,6 +22,11 @@ export function formatIDR(value: number | bigint | string): string {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(numericValue);
 }
 
+export function formatNumber(value: number | bigint | string): string {
+  const numericValue = typeof value === 'bigint' ? Number(value) : Number(value) || 0;
+  return new Intl.NumberFormat('id-ID').format(numericValue);
+}
+
 /**
  * Smart compact currency formatting for StatCards & dashboard summaries.
  * Retains exact 0s for values under 1.000.000 (e.g. Rp 800.000, Rp 50.000) where space permits.

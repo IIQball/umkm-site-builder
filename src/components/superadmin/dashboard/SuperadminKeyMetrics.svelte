@@ -27,7 +27,7 @@
     rawValue: totalVolume,
     badge: 'Gross Volume',
     icon: 'payments',
-    cardTheme: 'orange' as const,
+    cardTheme: 'default' as const,
     footerText: 'Total omzet transaksi platform',
     delayClass: 'delay-150',
   };
@@ -49,7 +49,7 @@
     rawValue: pendingTemplatesCount,
     badge: pendingTemplatesCount > 0 ? 'Perlu Review' : 'Terkurasi',
     icon: 'palette',
-    cardTheme: 'default' as const,
+    cardTheme: 'orange' as const,
     footerText: 'Antrean verifikasi template',
     delayClass: 'delay-250',
   };

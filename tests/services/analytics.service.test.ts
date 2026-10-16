@@ -8,6 +8,11 @@ vi.mock('../../src/lib/db/client', () => ({
       },
     },
     update: vi.fn(),
+    insert: vi.fn().mockReturnValue({ 
+      values: vi.fn().mockReturnValue({ 
+        onConflictDoUpdate: vi.fn().mockResolvedValue(undefined) 
+      }) 
+    }),
   },
 }));
 

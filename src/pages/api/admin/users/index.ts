@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { db, users, tenantInvitations } from '@/db/index';
+import { db, users, tenantInvitations, stores } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
-import { desc, inArray, and, eq, ne, isNull, notExists } from 'drizzle-orm';
+import { desc, inArray, and, eq, ne, isNull, notExists, sql } from 'drizzle-orm';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -13,7 +13,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     }
 
     const unacceptedInvitationSubquery = db
-      .select()
+      .select({ id: tenantInvitations.id })
       .from(tenantInvitations)
       .where(
         and(
@@ -21,6 +21,11 @@ export const GET: APIRoute = async (context): Promise<Response> => {
           isNull(tenantInvitations.acceptedAt),
         ),
       );
+
+    const storeExistsSubquery = db
+      .select({ 1: sql`1` })
+      .from(stores)
+      .where(eq(stores.userId, users.id));
 
     let query = db.select({
       id: users.id,
@@ -30,23 +35,26 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       status: users.status,
       suspendReason: users.suspendReason,
       createdAt: users.createdAt,
+      hasStore: sql<boolean>`exists (${storeExistsSubquery})`,
     })
     .from(users)
     .$dynamic();
 
     if (user.role === 'superadmin') {
-      // Superadmin can see tenant, designer, and admin (excluding pending)
+      // Superadmin can see tenant, designer, and admin (excluding pending and deleted)
       query = query.where(and(
         inArray(users.role, ['tenant', 'designer', 'admin']),
         ne(users.status, 'pending'),
+        isNull(users.deletedAt),
         notExists(unacceptedInvitationSubquery),
       ));
     } else {
-      // Admin can only see tenants that they registered (excluding pending)
+      // Admin can only see tenants that they registered (excluding pending and deleted)
       query = query.where(and(
         eq(users.role, 'tenant'), 
         eq(users.registeredBy, user.id),
         ne(users.status, 'pending'),
+        isNull(users.deletedAt),
         notExists(unacceptedInvitationSubquery),
       ));
     }

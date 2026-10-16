@@ -49,7 +49,7 @@
     bind:selectedYear
     bind:selectedMonth
     title="Filter Periode Pesanan Masuk"
-    description="Sesuaikan seluruh data pesanan template toko dari tenant berdasarkan periode waktu."
+    description="Sesuaikan seluruh data pesanan template toko dari merchant berdasarkan periode waktu."
   />
 
   <!-- Reactive Statcards Grid -->
@@ -81,7 +81,7 @@
       icon="hourglass_top"
       cardTheme="blue"
       badge="Pending"
-      footerText="Belum diselesaikan tenant"
+      footerText="Belum diselesaikan merchant"
       delayClass="delay-200"
     />
     <StatCard

@@ -9,6 +9,8 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import Sidebar from '@/components/dashboard/Sidebar.svelte';
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar.svelte';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
+import LandingMarquee from '@/components/landing/LandingMarquee.svelte';
+import DashboardAppTour from '@/components/dashboard/tour/DashboardAppTour.svelte';
 
 interface Props {
   title?: string;
@@ -38,7 +40,7 @@ const userJson = JSON.stringify(user);
     <link rel="icon" type="image/svg+xml" href="/icon-512x512.svg" sizes="512x512" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.svg" sizes="180x180" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#f97316" />
+    <meta name="theme-color" content="#36C6FD" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -55,9 +57,11 @@ const userJson = JSON.stringify(user);
       }
     </script>
   </head>
-  <body class="bg-base-200 min-h-screen overflow-x-hidden">
+  <body class="bg-base-200 h-screen overflow-hidden flex flex-col">
     <ToastContainer client:load />
-    <div class="flex h-screen overflow-hidden">
+    <LandingMarquee client:load />
+    {!hideSidebar && user?.role !== 'superadmin' && <DashboardAppTour client:load role={user.role} currentPath={Astro.url.pathname} />}
+    <div class="flex flex-1 min-h-0 overflow-hidden">
       <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
       {!hideSidebar && <Sidebar client:load userJson={userJson} currentPath={Astro.url.pathname} />}
 

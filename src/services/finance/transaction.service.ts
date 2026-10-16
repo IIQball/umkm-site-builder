@@ -4,196 +4,219 @@
  */
 
 import { db } from '@/lib/db/client';
-import { transactions, users, templates, userTemplates, notifications } from '@/db/schema';
+import { transactions, users, templates, userTemplates } from '@/db/schema';
 import { xenditClient } from '@/lib/finance/xendit';
 import { eq, and } from 'drizzle-orm';
 import { AppError, formatCurrency } from '@/lib/utils';
+import { idempotencyManager } from '@/lib/finance/idempotency';
 import type { TransactionInitiateInput, TransactionRecord, TransactionType, PaymentStatus } from '@/types';
 import {
   mapTransactionToRecord,
   fulfillPaidTransaction,
   queryTenantOrders,
   queryDesignerIncomingOrders,
+  fetchInvoiceUrl,
+  invoiceUrlCache,
+  formatInvoiceNum,
+  grantFreeTemplate,
+  getTransactionByExternalId,
 } from './transaction.helpers';
 import { getAdminServiceFee } from './commission.service';
 
 export * from './transaction.helpers';
 
-// In-memory cache for invoice URLs
-const invoiceUrlCache = new Map<string, string>();
-
 export class TransactionService {
   async initiateTransaction(
     userId: string,
     input: TransactionInitiateInput,
-    baseUrl: string
+    baseUrl: string,
+    idempotencyKey?: string | null
   ): Promise<{ invoiceId: string; paymentUrl: string }> {
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user.length) throw new AppError('User not found', 404);
+    const { cleanKey, invoiceNum } = formatInvoiceNum(userId, idempotencyKey || input.idempotencyKey);
 
-    const existingTx = await db.select().from(transactions).where(eq(transactions.userId, userId));
-    if (existingTx.some((tx: { status: string }) => tx.status === 'pending')) {
-      throw new AppError('Payment already in progress', 400);
-    }
+    const checkExistingInDb = async () => {
+      if (!cleanKey) return null;
+      const existing = await getTransactionByExternalId(invoiceNum);
+      if (!existing) return null;
+      const invoiceUrl = (await this.getInvoiceUrl(existing.externalId)) || '';
+      return { invoiceId: existing.externalId, paymentUrl: invoiceUrl };
+    };
 
-    const adminFee = input.assistedBy
-      ? (input.adminFee !== undefined ? input.adminFee : await getAdminServiceFee())
-      : 0;
-    const totalAmount = input.adminFee !== undefined ? input.amount : input.amount + adminFee;
+    const executeCore = async () => {
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!user.length) throw new AppError('User not found', 404);
 
-    const invoiceNum = `INV-${userId}-${Date.now()}`;
-    const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const existingTx = await db.select().from(transactions).where(eq(transactions.userId, userId));
+      if (existingTx.some((tx: { status: string }) => tx.status === 'pending')) {
+        throw new AppError('Payment already in progress', 400);
+      }
 
-    const xenditInvoice = await xenditClient.createInvoice({
-      invoiceNum,
-      amount: totalAmount,
-      payerEmail: user[0].email,
-      description: 'Payment for Template Purchase',
-      expiryDate,
-      successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
-      failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
-      metadata: {
+      const adminFee = input.assistedBy
+        ? (input.adminFee !== undefined ? input.adminFee : await getAdminServiceFee())
+        : 0;
+      const totalAmount = input.adminFee !== undefined ? input.amount : input.amount + adminFee;
+      const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      const xenditInvoice = await xenditClient.createInvoice({
+        invoiceNum,
+        amount: totalAmount,
+        payerEmail: user[0].email,
+        description: 'Payment for Template Purchase',
+        expiryDate,
+        successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
+        failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+        metadata: {
+          userId,
+          type: input.type,
+          storeId: input.storeId || null,
+          templateId: input.templateId || null,
+          assistedBy: input.assistedBy || null,
+          adminFee,
+          idempotencyKey: cleanKey || null,
+        },
+      });
+
+      const externalId = xenditInvoice?.invoiceNum || xenditInvoice?.id;
+      await db.insert(transactions).values({
+        id: `txn_${Date.now()}`,
         userId,
-        type: input.type,
+        type: input.type as TransactionType,
+        amount: totalAmount,
+        adminFee,
+        assistedBy: input.assistedBy || null,
+        status: 'pending' as PaymentStatus,
         storeId: input.storeId || null,
         templateId: input.templateId || null,
-        assistedBy: input.assistedBy || null,
-        adminFee,
-      },
-    });
+        externalId,
+        paymentGatewayRef: xenditInvoice.id,
+        paymentChannel: null,
+        createdAt: new Date(),
+      });
 
-    const transactionId = `txn_${Date.now()}`;
-    const externalId = xenditInvoice?.invoiceNum || xenditInvoice?.id;
-    await db.insert(transactions).values({
-      id: transactionId,
-      userId,
-      type: input.type as TransactionType,
-      amount: totalAmount,
-      adminFee,
-      assistedBy: input.assistedBy || null,
-      status: 'pending' as PaymentStatus,
-      storeId: input.storeId || null,
-      templateId: input.templateId || null,
-      externalId,
-      paymentGatewayRef: xenditInvoice.id,
-      paymentChannel: null,
-      createdAt: new Date(),
-    });
+      if (xenditInvoice.invoiceUrl) {
+        invoiceUrlCache.set(externalId, xenditInvoice.invoiceUrl);
+      }
 
-    if (xenditInvoice.invoiceUrl) {
-      invoiceUrlCache.set(externalId, xenditInvoice.invoiceUrl);
+      return { invoiceId: externalId, paymentUrl: xenditInvoice.invoiceUrl || '' };
+    };
+
+    if (cleanKey) {
+      return idempotencyManager.execute({
+        key: `initiate_${userId}_${cleanKey}`,
+        fn: executeCore,
+        checkDb: checkExistingInDb,
+      });
     }
 
-    return { invoiceId: externalId, paymentUrl: xenditInvoice.invoiceUrl || '' };
+    return executeCore();
   }
 
   async purchaseTemplate(
     userId: string,
     templateId: string,
     baseUrl: string,
-    assistedBy?: string | null
+    assistedBy?: string | null,
+    idempotencyKey?: string | null
   ): Promise<{ isFree: boolean; message?: string; data?: { invoiceUrl: string; invoiceId: string; externalId: string } }> {
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user.length) throw new AppError('Authentication required', 401);
+    const { cleanKey, invoiceNum } = formatInvoiceNum(userId, idempotencyKey);
 
-    const template = await db.query.templates.findFirst({
-      where: and(eq(templates.id, templateId), eq(templates.status, 'approved')),
-    });
+    const checkExistingInDb = async () => {
+      if (!cleanKey) return null;
+      const tx = await getTransactionByExternalId(invoiceNum);
+      if (!tx) return null;
+      const invoiceUrl = (await this.getInvoiceUrl(tx.externalId)) || '';
+      return {
+        isFree: false,
+        data: {
+          invoiceUrl,
+          invoiceId: tx.paymentGatewayRef || '',
+          externalId: tx.externalId,
+        },
+      };
+    };
 
-    if (!template) {
-      throw new AppError('Template not found or not approved', 404);
-    }
+    const executeCore = async () => {
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!user.length) throw new AppError('Authentication required', 401);
 
-    const existingOwnership = await db.query.userTemplates.findFirst({
-      where: and(eq(userTemplates.userId, userId), eq(userTemplates.templateId, templateId)),
-    });
-
-    if (existingOwnership) {
-      throw new AppError('Template already owned', 400, undefined, 'TEMPLATE_ALREADY_OWNED');
-    }
-
-    // Free template case
-    if (template.price === 0) {
-      const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      await db.insert(userTemplates).values({
-        id: userTemplateId,
-        userId,
-        templateId: template.id,
-        acquiredAt: new Date(),
+      const template = await db.query.templates.findFirst({
+        where: and(eq(templates.id, templateId), eq(templates.status, 'approved')),
       });
 
-      const buyerName = user.length > 0 ? user[0].name : 'Seseorang';
-      await db.insert(notifications).values({
-        id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        userId: template.designerId,
-        type: 'template_purchased',
-        title: 'Template Diunduh',
-        message: `${buyerName} telah mengunduh template gratis Anda "${template.name}".`,
-        metadata: { templateId: template.id }
-      });
-
-      if (assistedBy) {
-        await db.insert(notifications).values({
-          id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
-          userId,
-          type: 'template_purchased',
-          title: 'Template Berhasil Diunduh',
-          message: `Admin telah membantu mengunduh template gratis "${template.name}" untuk toko Anda.`,
-          metadata: { templateId: template.id }
-        });
+      if (!template) {
+        throw new AppError('Template not found or not approved', 404);
       }
 
-      return { isFree: true, message: 'Free template added to your account successfully' };
-    }
+      const existingOwnership = await db.query.userTemplates.findFirst({
+        where: and(eq(userTemplates.userId, userId), eq(userTemplates.templateId, templateId)),
+      });
 
-    // Admin fee calculation if assisted by admin
-    const adminFee = assistedBy ? await getAdminServiceFee() : 0;
-    const totalAmount = template.price + adminFee;
+      if (existingOwnership) {
+        if (cleanKey && template.price === 0) {
+          return { isFree: true, message: 'Free template added to your account successfully' };
+        }
+        throw new AppError('Template already owned', 400, undefined, 'TEMPLATE_ALREADY_OWNED');
+      }
 
-    // Paid template case
-    const invoiceNum = `INV-${userId}-${Date.now()}`;
+      if (template.price === 0) {
+        return grantFreeTemplate(userId, user[0].name, template, assistedBy);
+      }
 
-    const xenditInvoice = await xenditClient.createInvoice({
-      invoiceNum,
-      amount: totalAmount,
-      payerEmail: user[0].email,
-      description: `Pembelian Template: ${template.name}`,
-      expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
-      failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
-      metadata: {
+      const adminFee = assistedBy ? await getAdminServiceFee() : 0;
+      const totalAmount = template.price + adminFee;
+
+      const xenditInvoice = await xenditClient.createInvoice({
+        invoiceNum,
+        amount: totalAmount,
+        payerEmail: user[0].email,
+        description: `Pembelian Template: ${template.name}`,
+        expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
+        failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+        metadata: {
+          userId,
+          type: 'template_purchase',
+          templateId: template.id,
+          assistedBy: assistedBy || null,
+          adminFee,
+          idempotencyKey: cleanKey || null,
+        },
+      });
+
+      await db.insert(transactions).values({
+        id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         userId,
         type: 'template_purchase',
-        templateId: template.id,
-        assistedBy: assistedBy || null,
+        amount: totalAmount,
         adminFee,
-      },
-    });
-
-    const transactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    await db.insert(transactions).values({
-      id: transactionId,
-      userId,
-      type: 'template_purchase',
-      amount: totalAmount,
-      adminFee,
-      assistedBy: assistedBy || null,
-      status: 'pending',
-      templateId: template.id,
-      externalId: invoiceNum,
-      paymentGatewayRef: xenditInvoice.id,
-      paymentChannel: null,
-      createdAt: new Date(),
-    });
-
-    return {
-      isFree: false,
-      data: {
-        invoiceUrl: xenditInvoice.invoiceUrl || '',
-        invoiceId: xenditInvoice.id,
+        assistedBy: assistedBy || null,
+        status: 'pending',
+        templateId: template.id,
         externalId: invoiceNum,
-      },
+        paymentGatewayRef: xenditInvoice.id,
+        paymentChannel: null,
+        createdAt: new Date(),
+      });
+
+      return {
+        isFree: false,
+        data: {
+          invoiceUrl: xenditInvoice.invoiceUrl || '',
+          invoiceId: xenditInvoice.id,
+          externalId: invoiceNum,
+        },
+      };
     };
+
+    if (cleanKey) {
+      return idempotencyManager.execute({
+        key: `purchase_${userId}_${cleanKey}`,
+        fn: executeCore,
+        checkDb: checkExistingInDb,
+      });
+    }
+
+    return executeCore();
   }
 
   async processWebhook(payload: {
@@ -210,13 +233,12 @@ export class TransactionService {
     const status = payload.status?.toUpperCase() || 'PENDING';
     const isPaid = status === 'PAID' || status === 'SETTLED' || Boolean(payload.paid);
 
-    const existingTxs = await db.select().from(transactions).where(eq(transactions.externalId, payload.external_id));
-    if (!existingTxs.length) {
+    const transaction = await getTransactionByExternalId(payload.external_id);
+    if (!transaction) {
       console.warn(`Webhook received for unknown transaction: ${payload.external_id}`);
       return { status: 'not_found', message: 'Transaction not found' };
     }
 
-    const transaction = existingTxs[0];
     if (transaction.status === 'success') {
       return { status: 'ignored', message: 'Already processed' };
     }
@@ -241,25 +263,12 @@ export class TransactionService {
   }
 
   async getTransactionDetails(externalId: string): Promise<TransactionRecord | null> {
-    const results = await db.select().from(transactions).where(eq(transactions.externalId, externalId));
-    if (!results.length) return null;
-    return mapTransactionToRecord(results[0]);
+    const tx = await getTransactionByExternalId(externalId);
+    return tx ? mapTransactionToRecord(tx) : null;
   }
 
   async getInvoiceUrl(externalId: string): Promise<string | null> {
-    try {
-      if (invoiceUrlCache.has(externalId)) return invoiceUrlCache.get(externalId) || null;
-
-      const txResults = await db.select().from(transactions).where(eq(transactions.externalId, externalId));
-      if (!txResults.length || !txResults[0].paymentGatewayRef) return null;
-
-      const xenditInvoice = await xenditClient.getInvoice(txResults[0].paymentGatewayRef);
-      const invoiceUrl = xenditInvoice.invoiceUrl || null;
-      if (invoiceUrl) invoiceUrlCache.set(externalId, invoiceUrl);
-      return invoiceUrl;
-    } catch {
-      return null;
-    }
+    return fetchInvoiceUrl(externalId);
   }
 
   async getTenantOrders(userId: string) {

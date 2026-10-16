@@ -13,6 +13,7 @@ export interface TransactionInitiateInput {
   templateId?: string;
   assistedBy?: string | null;
   adminFee?: number;
+  idempotencyKey?: string;
 }
 
 export interface TransactionInitiateResponse {

@@ -110,7 +110,7 @@ if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'supera
 
     return {
       id: s.userId,
-      name: s.owner?.name || s.owner?.email || 'Tenant',
+      name: s.owner?.name || s.owner?.email || 'Merchant',
       storeName: s.name,
       storeId: s.id,
       currentTemplateId: s.templateId,

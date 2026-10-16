@@ -38,6 +38,7 @@ vi.mock('@/lib/db/transaction', () => ({
 vi.mock('@/services/finance', () => ({
   calculateEligibleBalance: vi.fn(),
   createXenditDisbursement: vi.fn(),
+  getOrCreateWallet: vi.fn(),
 }));
 
 describe('Designer Payout Request API Endpoints', () => {
@@ -206,6 +207,9 @@ describe('Designer Payout Request API Endpoints', () => {
 
       // Mock eligible balance = 100000
       mockCalculateEligibleBalance.mockResolvedValue(100000);
+
+      const { getOrCreateWallet } = await import('@/services/finance');
+      (getOrCreateWallet as unknown as Mock).mockResolvedValue({ id: 'w_1', balance: 200000, availableBalance: 100000 });
 
       // Mock transaction execution
       const mockResult = { id: 'po_123', amount: 50000, status: 'processing' };

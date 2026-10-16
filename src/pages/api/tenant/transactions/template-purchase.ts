@@ -3,6 +3,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { handleApiRoute, validate, AppError } from '@/lib/utils';
 import { transactionService } from '@/services';
 import { TemplatePurchaseInputSchema } from '@/schemas';
+import { extractIdempotencyKey } from '@/lib/finance/idempotency';
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -15,7 +16,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     const body = await context.request.json().catch(() => ({}));
-    const { templateId, tenantId, assistedBy } = validate(TemplatePurchaseInputSchema, body);
+    const validated = validate(TemplatePurchaseInputSchema, body);
+    const { templateId, tenantId, assistedBy } = validated;
+    const idempotencyKey = extractIdempotencyKey(context.request, validated);
 
     const protocol = context.request.url.startsWith('https') ? 'https' : 'http';
     const host = context.request.headers.get('host') || 'localhost:4321';
@@ -33,7 +36,13 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     }
 
-    const result = await transactionService.purchaseTemplate(targetUserId, templateId, baseUrl, actingAssistedBy);
+    const result = await transactionService.purchaseTemplate(
+      targetUserId,
+      templateId,
+      baseUrl,
+      actingAssistedBy,
+      idempotencyKey
+    );
 
     if (result.isFree) {
       return Response.json({

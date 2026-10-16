@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { Card, Button, Input, StatCard, Select, Badge, Modal, Table } from '@/components/ui';
-  import { Mail, Clock, CheckCircle, RefreshCcw, Link2, Search, XCircle, FileText, UserPlus, AlertCircle, CheckCircle2, Trash2, CalendarDays } from 'lucide-svelte';
+  import { Card, Button, Badge, Modal, Table, Pagination, StatCard } from '@/components/ui';
+  import { Clock, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
   import AdminUserAddModal from './AdminUserAddModal.svelte';
-  import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import { toast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
 
@@ -17,6 +16,7 @@
     createdAt: string;
     userId: string | null;
     userStatus: string | null;
+    extensionCount?: number;
   }> = [];
   export let currentUser: { id: string; role?: string } | null = null;
   export let title: string = 'Link Registrasi';
@@ -28,28 +28,8 @@
   let isAddModalOpen = false;
   let isExtending: string | null = null;
   let isDeleting: string | null = null;
-  let isUpdatingUser: string | null = null;
-
-  let isSuspendModalOpen = false;
-  let isUnsuspendMode = false;
-  let suspendReason = '';
-  let suspendTarget: { id: string; name: string } | null = null;
-  let actionLoading = false;
 
   let statusFilter = 'all';
-  const statusOptions = [
-    { value: 'all', label: 'Semua Status' },
-    { value: 'active', label: 'Aktif / Terdaftar' },
-    { value: 'suspended', label: 'Ditangguhkan' },
-    { value: 'pending', label: 'Menunggu' },
-    { value: 'expired', label: 'Kedaluwarsa' }
-  ];
-
-  $: stats = {
-    total: invitations.length,
-    registered: invitations.filter((i) => i.acceptedAt && i.userStatus === 'active').length,
-    pending: invitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
-  };
 
   // Deduplicate invitations by email (keep newest by createdAt)
   $: uniqueInvitations = Object.values(invitations.reduce((acc, current) => {
@@ -58,6 +38,12 @@
     }
     return acc;
   }, {} as Record<string, typeof invitations[0]>)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  $: stats = {
+    total: uniqueInvitations.length,
+    pending: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) >= new Date()).length,
+    expired: uniqueInvitations.filter((i) => !i.acceptedAt && new Date(i.expiresAt) < new Date()).length,
+  };
 
   $: filteredInvitations = uniqueInvitations.filter((i) => {
     // Text search
@@ -68,14 +54,16 @@
     // Status filter
     let matchesStatus = true;
     if (statusFilter !== 'all') {
-      if (statusFilter === 'active') matchesStatus = !!(i.acceptedAt && i.userStatus === 'active');
-      else if (statusFilter === 'suspended') matchesStatus = !!(i.acceptedAt && i.userStatus === 'suspended');
-      else if (statusFilter === 'pending') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) >= new Date();
+      if (statusFilter === 'pending') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) >= new Date();
       else if (statusFilter === 'expired') matchesStatus = !i.acceptedAt && new Date(i.expiresAt) < new Date();
     }
     
     return matchesSearch && matchesStatus;
   });
+
+  let currentPage = 1;
+  const pageSize = 10;
+  $: paginatedInvitations = filteredInvitations.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExtend = async (id: string) => {
     isExtending = id;
@@ -101,24 +89,14 @@
   };
 
   let isDeleteModalOpen = false;
-  let deleteTarget: { id: string; type: 'invitation' | 'user'; message: string; subMessage?: string } | null = null;
+  let deleteTarget: { id: string; message: string; subMessage?: string } | null = null;
 
-  const openDeleteModal = (id: string, type: 'invitation' | 'user') => {
-    if (type === 'invitation') {
-      deleteTarget = {
-        id,
-        type,
-        message: 'Apakah Anda yakin ingin menghapus undangan ini?',
-        subMessage: 'Jika pengguna belum aktivasi, akunnya juga akan ikut terhapus.'
-      };
-    } else {
-      deleteTarget = {
-        id,
-        type,
-        message: 'Apakah Anda yakin ingin menghapus pengguna ini?',
-        subMessage: 'Seluruh data pengguna beserta tokonya akan terhapus secara permanen.'
-      };
-    }
+  const openDeleteModal = (id: string) => {
+    deleteTarget = {
+      id,
+      message: 'Apakah Anda yakin ingin menghapus undangan ini?',
+      subMessage: 'Pengguna yang belum aktivasi tidak akan dapat mendaftar dengan link ini, dan akun sementaranya akan dibersihkan.'
+    };
     isDeleteModalOpen = true;
   };
 
@@ -129,98 +107,32 @@
 
   const executeDelete = async () => {
     if (!deleteTarget) return;
-    const { id, type } = deleteTarget;
+    const { id } = deleteTarget;
     
-    if (type === 'invitation') {
-      isDeleting = id;
-      try {
-        const res = await fetch(`/api/admin/invitations/delete?id=${id}`, {
-          method: 'DELETE',
-        });
-        const result = await res.json();
-        
-        if (res.ok && result.ok) {
-          toast.success(result.data?.message || 'Undangan berhasil dihapus');
-          window.location.reload();
-        } else {
-          toast.error(result.error?.message || 'Gagal menghapus undangan');
-        }
-      } catch {
-        toast.error('Terjadi kesalahan jaringan');
-      } finally {
-        isDeleting = null;
-        closeDeleteModal();
-      }
-    } else {
-      isUpdatingUser = id;
-      try {
-        const res = await fetch(`/api/admin/users/${id}`, {
-          method: 'DELETE',
-        });
-        const result = await res.json();
-        
-        if (res.ok && result.ok) {
-          toast.success('Pengguna berhasil dihapus');
-          window.location.reload();
-        } else {
-          toast.error(result.error?.message || 'Gagal menghapus pengguna');
-        }
-      } catch {
-        toast.error('Terjadi kesalahan jaringan');
-      } finally {
-        isUpdatingUser = null;
-        closeDeleteModal();
-      }
-    }
-  };
-
-  const openSuspendModal = (userId: string, userName: string, isUnsuspend: boolean) => {
-    suspendTarget = { id: userId, name: userName };
-    isUnsuspendMode = isUnsuspend;
-    suspendReason = '';
-    isSuspendModalOpen = true;
-  };
-
-  const closeSuspendModal = () => {
-    isSuspendModalOpen = false;
-    suspendTarget = null;
-    suspendReason = '';
-  };
-
-  const handleUserStatusSubmit = async (status: 'active' | 'suspended', reason?: string) => {
-    if (!suspendTarget) return;
-    
-    actionLoading = true;
-    isUpdatingUser = suspendTarget.id;
+    isDeleting = id;
     try {
-      const res = await fetch(`/api/admin/users/${suspendTarget.id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, suspendReason: reason }),
+      const res = await fetch(`/api/admin/invitations/delete?id=${id}`, {
+        method: 'DELETE',
       });
       const result = await res.json();
       
       if (res.ok && result.ok) {
-        toast.success(`Pengguna berhasil di${status === 'active' ? 'aktifkan' : 'tangguhkan'}`);
+        toast.success(result.data?.message || 'Undangan berhasil dihapus');
         window.location.reload();
       } else {
-        toast.error(result.error?.message || 'Gagal mengubah status pengguna');
+        toast.error(result.error?.message || 'Gagal menghapus undangan');
       }
     } catch {
       toast.error('Terjadi kesalahan jaringan');
     } finally {
-      actionLoading = false;
-      isUpdatingUser = null;
-      closeSuspendModal();
+      isDeleting = null;
+      closeDeleteModal();
     }
   };
 
-  // Deleted handleUserDelete and moved logic to executeDelete
-
   const getStatus = (inv: typeof invitations[0]) => {
-    if (inv.acceptedAt) return { label: 'Terdaftar', color: 'badge-success', icon: CheckCircle };
     if (new Date(inv.expiresAt) < new Date()) return { label: 'Kedaluwarsa', color: 'badge-error', icon: XCircle };
-    return { label: 'Menunggu', color: 'badge-warning', icon: Clock };
+    return { label: 'Menunggu Aktivasi', color: 'badge-warning', icon: Clock };
   };
 </script>
 
@@ -239,6 +151,7 @@
     
     <div class="flex items-center justify-start md:justify-end">
       <Button
+        id="btn-create-invitation"
         variant="primary"
         size="md"
         on:click={() => isAddModalOpen = true}
@@ -250,52 +163,26 @@
     </div>
   </div>
 
-  <!-- Stat Cards with Premium Look -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-    <StatCard 
-      label="Total Undangan" 
-      value={stats.total} 
-      icon="mail" 
-      cardTheme="default" 
-      description="Keseluruhan link yang dibuat" 
-      delayClass="delay-75" 
-    />
-    <StatCard 
-      label="Aktif" 
-      value={stats.registered} 
-      icon="check_circle" 
-      cardTheme="blue" 
-      description="Akun yang telah berhasil daftar" 
-      delayClass="delay-100" 
-      badge="Verified" 
-      badgeCls="border-white/20 text-white" 
-    />
-    <StatCard 
-      label="Menunggu" 
-      value={stats.pending} 
-      icon="pending_actions" 
-      cardTheme="orange" 
-      description="Menunggu aktivasi link" 
-      delayClass="delay-125" 
-    />
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in-up">
+    <StatCard label="Total Undangan" value={stats.total} badge="Semua" cardTheme="dark" icon="mail" delayClass="delay-100" />
+    <StatCard label="Menunggu Aktivasi" value={stats.pending} badge="Pending" cardTheme="blue" icon="schedule" delayClass="delay-150" />
+    <StatCard label="Kedaluwarsa" value={stats.expired} badge="Hangus" cardTheme="pink" icon="link_off" delayClass="delay-200" />
   </div>
 
   <!-- Main Table Panel -->
-  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-150">
-    <!-- Header -->
+  <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-75">
+    <!-- Header & Controls -->
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-2xs">
-          <Link2 size={20} />
+        <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
+          <span class="material-symbols-outlined text-lg">link</span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
               Daftar Undangan {targetRoleName}
             </h3>
-            <span class="badge badge-primary badge-outline font-bold text-xs hidden sm:inline-flex">
-              {invitations.length} Undangan
-            </span>
           </div>
           <p class="text-body-sm text-secondary mt-0.5 font-sans">
             Kelola link registrasi untuk calon {targetRoleName.toLowerCase()} binaan Anda.
@@ -303,27 +190,44 @@
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-        {#if invitations.length > 0}
-          <div class="w-full sm:w-48 shrink-0">
-            <Select 
-              bind:value={statusFilter}
-              options={statusOptions}
-            />
-          </div>
-          <div class="w-full sm:w-64">
-            <Input
-              id="search-invites"
-              placeholder="Cari nama / email..."
-              bind:value={searchQuery}
-              className="text-xs"
-            >
-              <span slot="prefix" class="text-muted">
-                <Search size={14} />
-              </span>
-            </Input>
-          </div>
-        {/if}
+      <!-- Actions & Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">search</span>
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Cari nama / email..."
+            class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
+          />
+        </div>
+
+        <!-- Segmented Status Filter -->
+        <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
+          <button
+            type="button"
+            on:click={() => (statusFilter = "all")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] {statusFilter === 'all' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            Semua ({stats.total})
+          </button>
+          <button
+            type="button"
+            on:click={() => (statusFilter = "pending")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'pending' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+            Menunggu ({stats.pending})
+          </button>
+          <button
+            type="button"
+            on:click={() => (statusFilter = "expired")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {statusFilter === 'expired' ? 'bg-main text-canvas dark:bg-primary shadow-2xs' : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+            Kedaluwarsa ({stats.expired})
+          </button>
+        </div>
       </div>
     </div>
 
@@ -347,128 +251,90 @@
     {:else}
       <Table 
         headers={[
-          { label: 'NAMA & EMAIL' },
-          { label: 'STATUS' },
-          { label: 'TANGGAL KEDALUWARSA' },
-          { label: 'AKSI', align: 'right' }
+          { label: '#', align: 'center' as const, width: '40px' },
+          { label: 'Nama & Email', align: 'left' as const },
+          { label: 'Status', align: 'left' as const, width: 'w-36' },
+          { label: 'Tanggal Kedaluwarsa', align: 'left' as const, width: 'w-48' },
+          { label: 'Aksi', align: 'right' as const, width: 'w-64' }
         ]} 
-        minWidth="min-w-[800px]"
+        minWidth="min-w-[760px]"
       >
-        {#each filteredInvitations as inv (inv.id)}
+        {#each paginatedInvitations as inv, i (inv.id)}
           {@const status = getStatus(inv)}
-          <tr>
+          <tr class="hover:bg-nested/40 transition-colors group">
+            <!-- Sequence Number (#) -->
+            <td class="px-3 py-4 text-center font-mono text-2xs text-secondary font-bold">
+              {(currentPage - 1) * pageSize + i + 1}
+            </td>
+            
+            <!-- Nama & Email -->
             <td class="px-6 py-4">
               <div class="flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-nested/50 text-secondary flex items-center justify-center shrink-0 border border-light/50">
-                  <Mail size={18} strokeWidth={2.5} />
+                <div class="w-10 h-10 rounded-xl bg-nested border border-light flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <span class="material-symbols-outlined text-lg text-primary">mail</span>
                 </div>
-                <div class="flex flex-col">
-                  <div class="font-bold text-main font-heading text-sm">{inv.name}</div>
-                  <div class="text-xs text-secondary mt-0.5">{inv.email}</div>
+                <div class="min-w-0 max-w-[280px]">
+                  <div class="font-bold text-xs text-main truncate block leading-tight font-heading">
+                    {inv.name}
+                  </div>
+                  <div class="text-xs text-secondary mt-0.5 truncate max-w-[200px] font-sans">
+                    {inv.email}
+                  </div>
                 </div>
               </div>
             </td>
             
-            <td class="px-6 py-4">
-              {#if inv.userStatus === 'active'}
-                <Badge variant="success" size="sm" class="shadow-xs">
-                  <CheckCircle2 size={12} strokeWidth={3} class="mr-1" />
-                  Aktif
-                </Badge>
-              {:else if inv.userStatus === 'suspended'}
-                <Badge variant="error" size="sm" class="shadow-xs">
-                  <AlertCircle size={12} strokeWidth={3} class="mr-1" />
-                  Ditangguhkan
-                </Badge>
-              {:else}
-                <span class="badge {status.color} badge-outline badge-sm text-[10px] uppercase font-bold tracking-wider shadow-xs">
-                  <svelte:component this={status.icon} size={12} class="mr-1" />
-                  <span>{status.label}</span>
-                </span>
-              {/if}
+            <!-- Status Badge -->
+            <td class="px-4 py-4 whitespace-nowrap">
+              <Badge variant={status.color === 'badge-error' ? 'error' : 'warning'} dot={true} size="sm">
+                {status.label}
+              </Badge>
             </td>
 
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-1.5 text-secondary text-sm">
-                <CalendarDays size={14} />
-                <span>
-                  {#if inv.acceptedAt}
-                    -
-                  {:else}
-                    {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
-                  {/if}
-                </span>
-              </div>
+            <!-- Tanggal -->
+            <td class="px-4 py-4 text-2xs text-secondary font-mono whitespace-nowrap">
+              {formatDate(inv.expiresAt, { day: 'numeric', month: 'short', year: 'numeric' })}
             </td>
 
-            <td class="px-6 py-4 text-right">
+            <!-- Aksi Buttons -->
+            <td class="px-6 py-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
-                {#if !inv.acceptedAt}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-lg text-primary hover:bg-primary/10 transition-all"
-                    title="Perpanjang Masa Aktif"
-                    on:click={() => handleExtend(inv.id)}
-                    disabled={isExtending === inv.id || isDeleting === inv.id}
-                    loading={isExtending === inv.id}
-                  >
-                    <RefreshCcw size={15} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all"
-                    title="Hapus Undangan"
-                    on:click={() => openDeleteModal(inv.id, 'invitation')}
-                    disabled={isExtending === inv.id || isDeleting === inv.id}
-                    loading={isDeleting === inv.id}
-                  >
-                    <Trash2 size={15} />
-                  </Button>
-                {:else if inv.userId}
-                  {#if inv.userStatus === 'active'}
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
-                      title="Tangguhkan"
-                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, false)}
-                      disabled={isUpdatingUser === inv.userId}
-                    >
-                      <AlertCircle size={14} class="mr-1" />
-                      Suspend
-                    </Button>
-                  {:else if inv.userStatus === 'suspended'}
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      className="h-8 px-3 rounded-lg font-bold text-xs hover:scale-105 transition-all"
-                      title="Aktifkan"
-                      on:click={() => inv.userId && openSuspendModal(inv.userId, inv.name, true)}
-                      disabled={isUpdatingUser === inv.userId}
-                    >
-                      <CheckCircle2 size={14} class="mr-1" />
-                      Unsuspend
-                    </Button>
-                  {/if}
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all ml-1"
-                    title="Hapus Pengguna Permanen"
-                    on:click={() => inv.userId && openDeleteModal(inv.userId, 'user')}
-                    disabled={isUpdatingUser === inv.userId}
-                  >
-                    <Trash2 size={15} />
-                  </Button>
-                {/if}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl font-bold text-xs"
+                  title={(inv.extensionCount ?? 0) >= 3 ? "Batas maksimal 3x perpanjangan telah tercapai" : "Perpanjang Masa Aktif 24 Jam"}
+                  on:click={() => handleExtend(inv.id)}
+                  disabled={isExtending === inv.id || isDeleting === inv.id || (inv.extensionCount ?? 0) >= 3}
+                  loading={isExtending === inv.id}
+                >
+                  <span class="material-symbols-outlined text-xs">refresh</span>
+                  <span>Perpanjang{#if (inv.extensionCount ?? 0) > 0} <span class="text-3xs opacity-80 font-mono">({inv.extensionCount}/3)</span>{/if}</span>
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-xl font-bold text-xs !bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+                  title="Hapus Undangan"
+                  on:click={() => openDeleteModal(inv.id)}
+                  disabled={isExtending === inv.id || isDeleting === inv.id}
+                  loading={isDeleting === inv.id}
+                >
+                  <span class="material-symbols-outlined text-xs">delete</span>
+                  <span>Hapus</span>
+                </Button>
               </div>
             </td>
           </tr>
         {/each}
       </Table>
+      {#if filteredInvitations.length > 0}
+        <Pagination
+          bind:currentPage={currentPage}
+          totalItems={filteredInvitations.length}
+          pageSize={pageSize}
+        />
+      {/if}
     {/if}
   </Card>
 </div>
@@ -483,21 +349,11 @@
   }} 
 />
 
-<AdminUserSuspendModal
-  isOpen={isSuspendModalOpen}
-  isUnsuspend={isUnsuspendMode}
-  selectedUser={suspendTarget}
-  bind:suspendReason={suspendReason}
-  actionLoading={actionLoading}
-  onSubmit={handleUserStatusSubmit}
-  onClose={closeSuspendModal}
-/>
-
 <Modal open={isDeleteModalOpen} on:close={closeDeleteModal} size="sm">
   <svelte:fragment slot="header">
     <h3 class="font-bold text-main text-base flex items-center gap-2 leading-none">
       <Trash2 size={18} class="text-rose-500" />
-      <span>Hapus {deleteTarget?.type === 'invitation' ? 'Undangan' : 'Pengguna'}</span>
+      <span>Hapus Undangan</span>
     </h3>
   </svelte:fragment>
 
@@ -515,15 +371,15 @@
 
   <svelte:fragment slot="footer">
     <div class="w-full flex justify-between items-center">
-      <Button variant="secondary" size="sm" on:click={closeDeleteModal} disabled={isDeleting !== null || isUpdatingUser !== null}>
+      <Button variant="secondary" size="sm" on:click={closeDeleteModal} disabled={isDeleting !== null}>
         <span>Batal</span>
       </Button>
       <Button 
         variant="destructive" 
         size="sm" 
         on:click={executeDelete} 
-        loading={isDeleting !== null || isUpdatingUser !== null}
-        disabled={isDeleting !== null || isUpdatingUser !== null}
+        loading={isDeleting !== null}
+        disabled={isDeleting !== null}
         className="font-bold px-5"
       >
         <Trash2 size={16} class="mr-1" />

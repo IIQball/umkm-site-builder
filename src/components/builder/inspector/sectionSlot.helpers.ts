@@ -219,7 +219,7 @@ export const SLOT_LABELS: Record<string, string> = {
   footer_brand: 'Profil & Identitas Toko',
   footer_contact: 'Kontak & Jam Operasional',
   footer_navigation: 'Menu Navigasi Footer',
-  footer_copyright: 'Hak Cipta & Powered by Pinoka',
+  footer_copyright: 'Hak Cipta & Didukung oleh Pinoka',
   footer_floating_cta: 'Banner Penawaran (Floating CTA)',
   footer_newsletter: 'Formulir Langganan Promo WA',
   footer_status_badge: 'Bilah Status Operasional Toko',

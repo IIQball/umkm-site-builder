@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { Card, Table, Pagination } from "@/components/ui";
   import AdminStoreRow from "./merchants/AdminStoreRow.svelte";
+  import AdminStoreSuspendModal from "./merchants/AdminStoreSuspendModal.svelte";
   import { addToast } from "@/lib/toast";
   import { formatDate } from "@/lib/utils/format";
   import { getMainDomain } from "@/lib/domain";
@@ -15,6 +16,8 @@
   let activeFilter: "all" | "published" | "draft" | "nostore" = "all";
   let copiedId: string | null = null;
   let currentPage = 1;
+  let suspendModalOpen = false;
+  let selectedStoreForSuspend: AssistedStoreItem | null = null;
   $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
   let mainDomain = "localhost:4321";
@@ -33,7 +36,7 @@
       copiedId = text;
       addToast({
         type: "success",
-        message: `ID Tenant #${text.slice(0, 8)} disalin!`,
+        message: `ID Merchant #${text.slice(0, 8)} disalin!`,
       });
       setTimeout(() => {
         copiedId = null;
@@ -102,6 +105,11 @@
     { label: "Terdaftar Pada", align: "left" as const, width: "w-36" },
     { label: "Aksi", align: "right" as const, width: "w-64" },
   ];
+
+  function handleSuspendClick(store: AssistedStoreItem) {
+    selectedStoreForSuspend = store;
+    suspendModalOpen = true;
+  }
 </script>
 
 <Card
@@ -143,7 +151,7 @@
         <input
           type="text"
           bind:value={searchQuery}
-          placeholder="Cari toko / tenant / ID..."
+          placeholder="Cari toko / merchant / ID..."
           class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
         />
       </div>
@@ -228,6 +236,7 @@
           {copiedId}
           {formatDate}
           onCopyId={copyToClipboard}
+          onSuspend={handleSuspendClick}
         />
       {/each}
     </Table>
@@ -241,3 +250,8 @@
     />
   {/if}
 </Card>
+
+<AdminStoreSuspendModal
+  bind:open={suspendModalOpen}
+  store={selectedStoreForSuspend}
+/>

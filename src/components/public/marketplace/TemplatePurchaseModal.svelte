@@ -87,7 +87,7 @@
               <Store size={13} class="text-primary" />
               Toko Merchant Tujuan
             </span>
-            <Badge variant="info" size="sm">Tenant Binaan</Badge>
+            <Badge variant="info" size="sm">Merchant Binaan</Badge>
           </div>
           <div class="flex items-baseline justify-between text-xs">
             <span class="font-bold text-main">{selectedTenant.storeName}</span>

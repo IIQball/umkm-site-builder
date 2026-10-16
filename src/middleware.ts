@@ -110,11 +110,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Superadmin-only: platform settings, master categories, kurasi template, whitelist, user management
     { prefix: '/admin/settings', roles: ['superadmin'] },
     { prefix: '/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/admin/business-categories', roles: ['superadmin'] },
     { prefix: '/admin/templates', roles: ['superadmin'] },
     { prefix: '/admin/whitelist', roles: ['superadmin'] },
     { prefix: '/admin/users', roles: ['superadmin', 'admin'] },
     { prefix: '/api/admin/settings', roles: ['superadmin'] },
     { prefix: '/api/admin/template-categories', roles: ['superadmin'] },
+    { prefix: '/api/admin/business-categories', roles: ['superadmin'] },
     { prefix: '/api/admin/templates', roles: ['superadmin'] },
     { prefix: '/api/admin/whitelist', roles: ['superadmin'] },
     { prefix: '/api/admin/users', roles: ['superadmin', 'admin'] },

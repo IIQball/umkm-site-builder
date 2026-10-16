@@ -1,0 +1,45 @@
+import type { APIRoute } from 'astro';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
+import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
+import { BusinessCategoryUpdateSchema } from '@/schemas';
+import {
+  updateBusinessCategory,
+  deleteBusinessCategory,
+} from '@/services/business-categories';
+
+export const PUT: APIRoute = async (context): Promise<Response> => {
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedSuperAdmin(user)) {
+      throw new AppError('Superadmin access required', 403);
+    }
+
+    const { id } = context.params;
+    if (!id) {
+      throw new AppError('Category ID is required', 400);
+    }
+
+    const body = await context.request.json().catch(() => ({}));
+    const input = validate(BusinessCategoryUpdateSchema, body);
+
+    const updated = await updateBusinessCategory(id, input);
+    return jsonSuccess(updated);
+  });
+};
+
+export const DELETE: APIRoute = async (context): Promise<Response> => {
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(context.request);
+    if (!user || !isAuthorizedSuperAdmin(user)) {
+      throw new AppError('Superadmin access required', 403);
+    }
+
+    const { id } = context.params;
+    if (!id) {
+      throw new AppError('Category ID is required', 400);
+    }
+
+    const result = await deleteBusinessCategory(id);
+    return jsonSuccess(result);
+  });
+};

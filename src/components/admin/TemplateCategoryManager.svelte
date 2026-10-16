@@ -7,7 +7,8 @@
   import CategoryTable from './category/CategoryTable.svelte';
   import CategoryFormModal from './category/CategoryFormModal.svelte';
   import CategoryDeleteModal from './category/CategoryDeleteModal.svelte';
-  import { iconOptions, generateSlug } from './category/category.helpers';
+  import { generateSlug } from '@/lib/utils';
+  import { iconOptions } from './category/category.helpers';
 
   export let initialCategories: Array<{
     id: string;
@@ -230,8 +231,8 @@
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
         <span class="material-symbols-outlined text-2xl">category</span>
       </div>
-      <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Kategori Ditemukan</h4>
-      <p class="text-xs text-secondary max-w-sm mx-auto font-sans leading-relaxed">
+      <h4 class="font-bold text-main text-base mb-1">Tidak Ada Kategori Ditemukan</h4>
+      <p class="text-xs text-secondary max-w-sm mx-auto leading-relaxed">
         {searchQuery ? 'Tidak ada kategori yang cocok dengan pencarian Anda.' : 'Belum ada kategori template terdaftar. Tambahkan kategori baru sekarang.'}
       </p>
       {#if !searchQuery}

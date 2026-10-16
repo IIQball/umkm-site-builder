@@ -6,7 +6,6 @@
  * Creates default template and business categories, then a superadmin user registered in admin_whitelist.
  * Requires SEED_SUPERADMIN_EMAIL, SEED_SUPERADMIN_PASSWORD, and SEED_SUPERADMIN_NAME in .env.
  */
-import "dotenv/config";
 import { withTransaction } from "@/lib/db/transaction";
 import { users, accounts, adminWhitelist, templateCategories, businessCategories } from "@/db/schema";
 import { eq } from "drizzle-orm";

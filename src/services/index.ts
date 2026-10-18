@@ -10,4 +10,5 @@ export * from './analytics.service';
 export * from './store-template.service';
 export * from './stores';
 export * from './business-categories';
+export * from './ai';
 

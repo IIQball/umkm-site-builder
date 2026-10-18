@@ -3,9 +3,7 @@
  * Shared Contract for Virda AI Studio & Store Quota Management
  */
 
-// ==========================================
 // 1. ENUMS & CONSTANTS
-// ==========================================
 
 export const AI_FEATURE_TYPES = [
   'logo',
@@ -28,9 +26,7 @@ export type AiSizeRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 
 export type AiQualityTier = 'standard' | 'hd' | 'ultra';
 
-// ==========================================
 // 2. DATABASE ENTITY / MODEL INTERFACES
-// ==========================================
 
 export interface TenantAiCredit {
   id: string;
@@ -88,9 +84,7 @@ export interface StoreQuotaPurchase {
   createdAt: string | Date;
 }
 
-// ==========================================
 // 3. REQUEST & RESPONSE DTOs
-// ==========================================
 
 export interface GenerateAiImageRequest {
   featureType: AiFeatureType;
@@ -110,6 +104,20 @@ export interface GenerateLogoPromptInput {
   visualStyle?: string;
   colorPalette?: string;
 }
+
+export interface GenerateLogoImageOptions {
+  quality?: 'medium' | 'high';
+}
+
+export interface GeneratedLogoResult {
+  base64: string;
+  format: 'png';
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export type GenerateLogoOptions = GenerateLogoImageOptions;
+export type GeneratedLogoImage = GeneratedLogoResult;
 
 export interface GenerateAiImageResponse {
   success: boolean;
@@ -154,9 +162,7 @@ export interface AiHistoryListResponse {
   totalPages: number;
 }
 
-// ==========================================
 // 4. MOCK DATA (FOR PARALLEL WORK)
-// ==========================================
 
 export const MOCK_TENANT_AI_CREDIT: TenantAiCredit = {
   id: 'credit_mock_001',

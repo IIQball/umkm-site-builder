@@ -104,6 +104,13 @@ export interface GenerateAiImageRequest {
   storeId?: string;
 }
 
+export interface GenerateLogoPromptInput {
+  storeName: string;
+  category: string;
+  visualStyle?: string;
+  colorPalette?: string;
+}
+
 export interface GenerateAiImageResponse {
   success: boolean;
   logId: string;

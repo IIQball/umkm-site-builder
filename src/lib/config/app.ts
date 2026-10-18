@@ -55,6 +55,10 @@ export const config = {
     cloudinarySecret: env('CLOUDINARY_SECRET'),
   },
 
+  ai: {
+    openaiApiKey: env('OPENAI_API_KEY'),
+  },
+
   // Feature flags
   features: {
     enableAutoSave: false, // MVP: save-on-click only

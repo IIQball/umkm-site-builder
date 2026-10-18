@@ -134,3 +134,21 @@ export function escapeHtml(str: unknown): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+/**
+ * Sanitizes input text by stripping non-printable ASCII control characters and normalizing spaces.
+ * Preserves standard whitespace (\t, \n, \r) during extraction, collapses repeated spaces, and trims.
+ */
+export function sanitizeText(value: string): string {
+  if (!value) return '';
+  return Array.from(value)
+    .filter((char) => {
+      if (char === '\t' || char === '\n' || char === '\r') return true;
+      const code = char.charCodeAt(0);
+      return code >= 32 && code !== 127;
+    })
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+

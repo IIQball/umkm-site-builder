@@ -80,7 +80,7 @@ describe('AI & Quota Schema Specifications', () => {
   });
 });
 
-describe('AI & Quota Shared Contract (types/ai.ts)', () => {
+describe('AI & Quota Shared Contract (src/types/ai.ts)', () => {
   it('should align AI_FEATURE_TYPES with AiFeatureType union', () => {
     const validFeature: AiFeatureType = 'logo';
     expect(AI_FEATURE_TYPES).toContain(validFeature);

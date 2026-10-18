@@ -3,12 +3,12 @@
  * Aligned with transactions table schema
  */
 
-export type TransactionType = 'template_purchase';
+export type TransactionType = 'template_purchase' | 'ai_credit_purchase' | 'store_quota_purchase';
 export type PaymentStatus = 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded';
 
 export interface TransactionInitiateInput {
   amount: number;
-  type: 'template_purchase';
+  type: TransactionType;
   storeId?: string;
   templateId?: string;
   assistedBy?: string | null;

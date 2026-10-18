@@ -20,7 +20,8 @@ export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'designer', 'tena
 export const genericStatusEnum = pgEnum('generic_status', ['active', 'suspended', 'pending']);
 export const templateStatusEnum = pgEnum('template_status', ['draft', 'pending', 'approved', 'rejected']);
 export const storeStatusEnum = pgEnum('store_status', ['pending', 'active', 'inactive', 'suspended']);
-export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchase']);
+export const transactionTypeEnum = pgEnum('transaction_type', ['template_purchase', 'ai_credit_purchase', 'store_quota_purchase']);
+export const aiFeatureTypeEnum = pgEnum('ai_feature_type', ['logo', 'packaging_mockup', 'product_poster']);
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'expired', 'canceled', 'refunded']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
@@ -437,7 +438,84 @@ export const notifications = pgTable('notifications', {
 });
 
 // ==========================================
-// 8. DRIZZLE RELATIONS (Object Mapping)
+// 9. AI GENERATION & STORE QUOTA
+// ==========================================
+
+export const tenantAiCredits = pgTable('tenant_ai_credits', {
+  id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull().unique().references(() => stores.id, { onDelete: 'cascade' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  balance: integer('balance').default(2).notNull(),
+  totalPurchased: integer('total_purchased').default(0).notNull(),
+  totalUsed: integer('total_used').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  tenantAiCreditsTenantIdIdx: uniqueIndex('tenant_ai_credits_tenant_id_idx').on(table.tenantId),
+  tenantAiCreditsUserIdIdx: index('tenant_ai_credits_user_id_idx').on(table.userId),
+}));
+
+export const aiGenerationLogs = pgTable('ai_generation_logs', {
+  id: text('id').primaryKey(),
+  tenantId: text('tenant_id').references(() => stores.id, { onDelete: 'set null' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  isTesting: boolean('is_testing').default(false).notNull(),
+  featureType: aiFeatureTypeEnum('feature_type').notNull(),
+  modelUsed: text('model_used').notNull(),
+  sizeRatio: text('size_ratio'),
+  qualityTier: text('quality_tier'),
+  promptFinal: text('prompt_final').notNull(),
+  inputTokens: integer('input_tokens').default(0).notNull(),
+  outputTokens: integer('output_tokens').default(0).notNull(),
+  creditsDeducted: integer('credits_deducted').default(1).notNull(),
+  costUsd: doublePrecision('cost_usd').default(0).notNull(),
+  costIdr: bigint('cost_idr', { mode: 'number' }).default(0).notNull(),
+  cloudinaryUrl: text('cloudinary_url'),
+  status: text('status').default('pending').notNull(),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  aiGenerationLogsTenantIdIdx: index('ai_generation_logs_tenant_id_idx').on(table.tenantId),
+  aiGenerationLogsUserIdIdx: index('ai_generation_logs_user_id_idx').on(table.userId),
+  aiGenerationLogsFeatureTypeIdx: index('ai_generation_logs_feature_type_idx').on(table.featureType),
+  aiGenerationLogsStatusIdx: index('ai_generation_logs_status_idx').on(table.status),
+  aiGenerationLogsCreatedAtIdx: index('ai_generation_logs_created_at_idx').on(table.createdAt),
+}));
+
+export const storeQuotaPackages = pgTable('store_quota_packages', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  price: bigint('price', { mode: 'number' }).notNull(),
+  additionalProducts: integer('additional_products').default(0).notNull(),
+  additionalCategories: integer('additional_categories').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  storeQuotaPackagesSlugIdx: uniqueIndex('store_quota_packages_slug_idx').on(table.slug),
+  storeQuotaPackagesIsActiveIdx: index('store_quota_packages_is_active_idx').on(table.isActive),
+}));
+
+export const storeQuotaPurchases = pgTable('store_quota_purchases', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id').notNull().references(() => stores.id, { onDelete: 'cascade' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  packageId: text('package_id').references(() => storeQuotaPackages.id, { onDelete: 'set null' }),
+  transactionId: text('transaction_id').references(() => transactions.id, { onDelete: 'set null' }),
+  productsAdded: integer('products_added').default(0).notNull(),
+  categoriesAdded: integer('categories_added').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  storeQuotaPurchasesStoreIdIdx: index('store_quota_purchases_store_id_idx').on(table.storeId),
+  storeQuotaPurchasesUserIdIdx: index('store_quota_purchases_user_id_idx').on(table.userId),
+  storeQuotaPurchasesPackageIdIdx: index('store_quota_purchases_package_id_idx').on(table.packageId),
+  storeQuotaPurchasesTransactionIdIdx: index('store_quota_purchases_transaction_id_idx').on(table.transactionId),
+}));
+
+// ==========================================
+// 10. DRIZZLE RELATIONS (Object Mapping)
 // ==========================================
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -461,6 +539,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   activities: many(activityLogs),
   updatedSettings: many(platformSettings),
   notifications: many(notifications),
+  aiCredits: one(tenantAiCredits, { fields: [users.id], references: [tenantAiCredits.userId] }),
+  aiLogs: many(aiGenerationLogs),
+  quotaPurchases: many(storeQuotaPurchases),
 }));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
@@ -523,6 +604,7 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
   commission: one(commissions),
   store: one(stores, { fields: [transactions.storeId], references: [stores.id] }),
   template: one(templates, { fields: [transactions.templateId], references: [templates.id] }),
+  quotaPurchase: one(storeQuotaPurchases, { fields: [transactions.id], references: [storeQuotaPurchases.transactionId] }),
 }));
 
 export const userTemplatesRelations = relations(userTemplates, ({ one }) => ({
@@ -570,6 +652,9 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   categories: many(storeCategories),
   products: many(products),
   activities: many(activityLogs),
+  aiCredits: one(tenantAiCredits, { fields: [stores.id], references: [tenantAiCredits.tenantId] }),
+  aiLogs: many(aiGenerationLogs),
+  quotaPurchases: many(storeQuotaPurchases),
 }));
 
 export const storeCategoriesRelations = relations(storeCategories, ({ one, many }) => ({
@@ -589,4 +674,25 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
 
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
   updater: one(users, { fields: [platformSettings.updatedBy], references: [users.id] }),
+}));
+
+export const tenantAiCreditsRelations = relations(tenantAiCredits, ({ one }) => ({
+  store: one(stores, { fields: [tenantAiCredits.tenantId], references: [stores.id] }),
+  user: one(users, { fields: [tenantAiCredits.userId], references: [users.id] }),
+}));
+
+export const aiGenerationLogsRelations = relations(aiGenerationLogs, ({ one }) => ({
+  store: one(stores, { fields: [aiGenerationLogs.tenantId], references: [stores.id] }),
+  user: one(users, { fields: [aiGenerationLogs.userId], references: [users.id] }),
+}));
+
+export const storeQuotaPackagesRelations = relations(storeQuotaPackages, ({ many }) => ({
+  purchases: many(storeQuotaPurchases),
+}));
+
+export const storeQuotaPurchasesRelations = relations(storeQuotaPurchases, ({ one }) => ({
+  store: one(stores, { fields: [storeQuotaPurchases.storeId], references: [stores.id] }),
+  user: one(users, { fields: [storeQuotaPurchases.userId], references: [users.id] }),
+  package: one(storeQuotaPackages, { fields: [storeQuotaPurchases.packageId], references: [storeQuotaPackages.id] }),
+  transaction: one(transactions, { fields: [storeQuotaPurchases.transactionId], references: [transactions.id] }),
 }));

@@ -25,6 +25,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": [".astro/types.d.ts", "src/**/*", "tests/**/*", "types/**/*"],
+  "include": [".astro/types.d.ts", "src/**/*", "tests/**/*"],
   "exclude": ["dist", "node_modules", ".astro"]
 }

@@ -37,7 +37,7 @@ export function getOpenAIClient(): OpenAI {
  * Standard error formatter for OpenAI SDK operations.
  */
 export function handleOpenAIError(error: unknown): Error {
-  if (OpenAI?.APIError && error instanceof OpenAI.APIError) {
+  if (error instanceof OpenAI.APIError) {
     return new Error(`OpenAI API Error [${error.status || 'unknown'}]: ${error.message}`);
   }
   if (error instanceof Error) {

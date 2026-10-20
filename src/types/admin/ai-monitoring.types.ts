@@ -19,6 +19,12 @@ export interface AiMonitoringSummary {
   totalTokens: number;
   statusCounts: AiStatusCounts;
   successRate: number;
+  totalDepositUsd?: number;
+  totalDepositIdr?: number;
+  remainingDepositUsd?: number;
+  remainingDepositIdr?: number;
+  remainingTokens?: number;
+  activeExchangeRate?: number;
 }
 
 export interface AiMonitoringRecentLog {
@@ -37,7 +43,19 @@ export interface AiMonitoringRecentLog {
   userName?: string | null;
 }
 
+export interface AiDepositHistoryItem {
+  id: string;
+  amountUsd: number;
+  amountIdr: number;
+  exchangeRate: number;
+  description?: string | null;
+  createdAt: string;
+  createdByName?: string | null;
+  createdByEmail?: string | null;
+}
+
 export interface AiMonitoringDashboardData {
   summary: AiMonitoringSummary;
   recentLogs: AiMonitoringRecentLog[];
+  depositHistory?: AiDepositHistoryItem[];
 }

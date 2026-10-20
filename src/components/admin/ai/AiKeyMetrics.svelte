@@ -12,12 +12,26 @@
     processing: 0,
   };
   $: formattedCostIdr = formatSmartIDR(summary.totalCostIdr || 0);
+  $: formattedRemainingIdr = formatSmartIDR(summary.remainingDepositIdr || 0);
   $: failedOrPendingCount =
     (statusCounts.failed || 0) + (statusCounts.pending || 0);
 </script>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-  <!-- 1. Total Transaksi / Eksekusi (Dark Theme) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-5">
+  <!-- 1. Sisa Token Terkini -->
+  <StatCard
+    label="SISA TOKEN TERKINI"
+    value={summary.remainingTokens || 0}
+    rawValue={summary.remainingTokens || 0}
+    valueSuffix="Token"
+    icon="toll"
+    cardTheme="default"
+    badge="Saldo Aktif"
+    footerText={`Saldo: $${(summary.remainingDepositUsd || 0).toFixed(2)} (${formattedRemainingIdr})`}
+    delayClass="delay-75"
+  />
+
+  <!-- 2. Total Transaksi / Eksekusi (Dark Theme) -->
   <StatCard
     label="TOTAL EKSEKUSI"
     value={summary.totalExecutions}
@@ -29,7 +43,7 @@
     delayClass="delay-100"
   />
 
-  <!-- 2. Transaksi Lunas / Berhasil (Default White Theme) -->
+  <!-- 3. Transaksi Lunas / Berhasil (Default White Theme) -->
   <StatCard
     label="GENERASI BERHASIL"
     value={statusCounts.success}
@@ -41,7 +55,7 @@
     delayClass="delay-150"
   />
 
-  <!-- 3. Fee Platform / Biaya AI (Blue Theme) -->
+  <!-- 4. Fee Platform / Biaya AI (Blue Theme) -->
   <StatCard
     label="BIAYA GENERASI"
     value={formattedCostIdr}
@@ -53,15 +67,16 @@
     delayClass="delay-200"
   />
 
-  <!-- 4. Menunggu / Gagal (Orange Theme -> Pink Accent) -->
+  <!-- 5. Menunggu / Gagal (Orange Theme -> Pink Accent) -->
   <StatCard
     label="MENUNGGU / GAGAL"
     value={failedOrPendingCount}
     rawValue={failedOrPendingCount}
     icon="hourglass_top"
     cardTheme="orange"
-    badge="Pending"
+    badge="Menunggu"
     footerText={`${statusCounts.failed} batal/gagal tercatat`}
     delayClass="delay-250"
   />
 </div>
+

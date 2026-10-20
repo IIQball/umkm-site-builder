@@ -24,8 +24,7 @@ export default defineConfig({
       exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js', 'cloudinary'],
     },
     ssr: {
-      external: ['cloudinary'],
-      noExternal: ['worker-mailer'],
+      noExternal: ['worker-mailer', 'cloudinary'],
     },
     build: {
       chunkSizeWarningLimit: 2000,

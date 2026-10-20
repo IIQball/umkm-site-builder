@@ -3,7 +3,7 @@ import { getAuthenticatedUser, isAuthorizedSuperAdmin, isAuthorizedAdmin } from 
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 import { db } from '@/db';
 import { aiDepositHistory } from '@/db/schema';
-import { getAiDepositHistory } from '@/services/ai';
+import { getAiDepositHistory } from '@/services/ai/monitoring.service';
 
 export const prerender = false;
 

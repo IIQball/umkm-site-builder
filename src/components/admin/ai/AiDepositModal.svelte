@@ -12,24 +12,26 @@
     close: void;
   }>();
 
-  let amountUsd = '';
-  let amountIdr = '';
+  let amountUsd: string | number = '';
   let displayAmountIdr = '';
   let description = '';
   let isSubmitting = false;
 
   // Auto-kalkulasi kurs riil (IDR per USD)
-  $: numUsd = Number(amountUsd);
-  $: numIdr = parseCurrencyInput(amountIdr);
+  $: numUsd = typeof amountUsd === 'number' ? amountUsd : parseFloat(String(amountUsd).replace(',', '.')) || 0;
+  $: numIdr = parseCurrencyInput(displayAmountIdr);
   $: exchangeRate = numUsd > 0 && numIdr > 0 ? Math.round(numIdr / numUsd) : 0;
   $: isValid = numUsd > 0 && numIdr > 0 && exchangeRate > 0;
 
   const handleIdrInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    if (!target) return;
-    amountIdr = target.value;
-    displayAmountIdr = formatCurrencyInput(target.value);
-    target.value = displayAmountIdr;
+    const nativeEvent = (e as CustomEvent<Event>).detail || e;
+    const target = (nativeEvent?.target || e.target) as HTMLInputElement | null;
+    const rawVal = target ? target.value : displayAmountIdr;
+    const cleanDigits = String(rawVal).replace(/\D/g, '');
+    displayAmountIdr = cleanDigits ? formatCurrencyInput(cleanDigits) : '';
+    if (target) {
+      target.value = displayAmountIdr;
+    }
   };
 
   const handleClose = () => {
@@ -61,7 +63,6 @@
       if (response.ok && result.ok) {
         toast.success('Deposit AI berhasil dicatat dengan kurs riil!');
         amountUsd = '';
-        amountIdr = '';
         displayAmountIdr = '';
         description = '';
         isOpen = false;
@@ -121,7 +122,7 @@
         type="text"
         inputmode="numeric"
         placeholder="Contoh: 162.000"
-        value={displayAmountIdr}
+        bind:value={displayAmountIdr}
         on:input={handleIdrInput}
         disabled={isSubmitting}
         required

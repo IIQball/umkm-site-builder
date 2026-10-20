@@ -250,7 +250,7 @@ describe('ProductMockupService - generateProductMockup', () => {
         new Headers()
       );
 
-      mockEdit.mockRejectedValueOnce(quotaError);
+      mockEdit.mockRejectedValue(quotaError);
 
       await expect(generateProductMockup(inputBuffer, 'Valid prompt')).rejects.toThrow(
         /OpenAI API Error \[429\]:.*monthly quota/i

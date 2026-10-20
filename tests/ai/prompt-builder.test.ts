@@ -210,7 +210,7 @@ describe('PromptBuilderService - buildLogoPrompt', () => {
     });
 
     it('propagates OpenAI API errors properly', async () => {
-      mockCreate.mockRejectedValueOnce(new MockAPIError(429, 'Rate limit exceeded'));
+      mockCreate.mockRejectedValue(new MockAPIError(429, 'Rate limit exceeded'));
 
       await expect(buildLogoPrompt({ storeName: 'Toko Maju', category: 'Retail' })).rejects.toThrow(
         'Rate limit exceeded'

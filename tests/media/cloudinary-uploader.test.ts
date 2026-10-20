@@ -39,6 +39,7 @@ describe('CloudinaryUploader - uploadBase64Image', () => {
         {
           folder: 'pinoka/mockups',
           resource_type: 'image',
+          format: 'webp',
         }
       );
 
@@ -65,6 +66,7 @@ describe('CloudinaryUploader - uploadBase64Image', () => {
         {
           folder: 'templates',
           resource_type: 'image',
+          format: 'webp',
         }
       );
       expect(result.publicId).toBe('templates/sample_002');

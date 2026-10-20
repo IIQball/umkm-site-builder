@@ -1,4 +1,4 @@
-import { cloudinary, getCloudinaryConfig } from '@/lib/cloudinary';
+import { cloudinary, getCloudinaryServer } from '@/lib/cloudinary.server';
 
 import type { CloudinaryUploadResult } from '@/types/media';
 
@@ -36,7 +36,7 @@ export async function uploadBase64Image(
   }
 
   // Ensure Cloudinary SDK is initialized with environment credentials
-  getCloudinaryConfig();
+  getCloudinaryServer();
 
   const dataUri = sanitizedBase64.startsWith('data:')
     ? sanitizedBase64

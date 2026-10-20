@@ -17,10 +17,14 @@ export default defineConfig({
     server: {
       allowedHosts: true,
     },
+    define: {
+      'process.env': {},
+    },
     optimizeDeps: {
-      exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js'],
+      exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js', 'cloudinary'],
     },
     ssr: {
+      external: ['cloudinary'],
       noExternal: ['worker-mailer'],
     },
     build: {

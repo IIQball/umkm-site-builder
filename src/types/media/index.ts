@@ -28,3 +28,10 @@ export interface MediaSyncReport {
   productsUpdated: number;
   brokenUrlsRemoved: number;
 }
+
+export interface CloudinaryUploadResult {
+  publicId: string;
+  secureUrl: string;
+  bytes: number;
+}
+

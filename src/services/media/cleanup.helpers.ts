@@ -4,17 +4,9 @@ import { isNotNull, isNull } from 'drizzle-orm';
 import type { CloudinaryAsset, DbExecutor } from '@/types';
 
 
-export function getCloudinaryCredentials() {
-  const cloudName = process.env.CLOUDINARY_NAME || (import.meta as unknown as { env: Record<string, string | undefined> }).env?.CLOUDINARY_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY || (import.meta as unknown as { env: Record<string, string | undefined> }).env?.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_SECRET || (import.meta as unknown as { env: Record<string, string | undefined> }).env?.CLOUDINARY_SECRET;
+import { getCloudinaryConfig } from '@/lib/cloudinary';
 
-  if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error('Cloudinary credentials (CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_SECRET) are missing');
-  }
-
-  return { cloudName, apiKey, apiSecret };
-}
+export const getCloudinaryCredentials = getCloudinaryConfig;
 
 /**
  * Extracts publicId with 'umkm-builder/' prefix from a Cloudinary URL or path.

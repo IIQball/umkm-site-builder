@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
 import type OpenAI from 'openai';
 import {
   withOpenAiRetry,
@@ -12,9 +12,9 @@ import {
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 import * as cloudinaryUploader from '@/services/media/cloudinary-uploader';
 
-describe('OpenAI Retry Resilience Utility', () => {
+describe('OpenAI Retry Resilience Utility (bun:test)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Clear state
   });
 
   describe('isTransientError classification', () => {
@@ -25,6 +25,8 @@ describe('OpenAI Retry Resilience Utility', () => {
       expect(isTransientError({ status: 503 })).toBe(true);
       expect(isTransientError({ status: 504 })).toBe(true);
       expect(isTransientError({ statusCode: 429 })).toBe(true);
+      expect(isTransientError({ status: '429' })).toBe(true);
+      expect(isTransientError({ status: '503' })).toBe(true);
     });
 
     it('identifies transient network codes as retryable', () => {
@@ -33,6 +35,8 @@ describe('OpenAI Retry Resilience Utility', () => {
       expect(isTransientError({ cause: { code: 'ECONNRESET' } })).toBe(true);
       expect(isTransientError(new Error('Connection reset: ECONNRESET'))).toBe(true);
       expect(isTransientError(new Error('Request timed out: ETIMEDOUT'))).toBe(true);
+      expect(isTransientError('ECONNRESET connection terminated')).toBe(true);
+      expect(isTransientError('ETIMEDOUT gateway connection')).toBe(true);
     });
 
     it('identifies non-transient HTTP status codes as non-retryable', () => {
@@ -41,6 +45,7 @@ describe('OpenAI Retry Resilience Utility', () => {
       expect(isTransientError({ status: 403 })).toBe(false);
       expect(isTransientError({ status: 404 })).toBe(false);
       expect(isTransientError({ status: 422 })).toBe(false);
+      expect(isTransientError({ status: '400' })).toBe(false);
     });
 
     it('returns false for null, undefined, and non-transient standard errors', () => {
@@ -53,24 +58,23 @@ describe('OpenAI Retry Resilience Utility', () => {
 
   describe('calculateBackoffDelay exponential formula', () => {
     it('applies exponential backoff formula: min(baseDelay * 2^attempt + jitter, maxDelay)', () => {
-      // baseDelay 500, maxDelay 3000, jitter 0
-      expect(calculateBackoffDelay(0, 500, 3000, 0)).toBe(500); // 500 * 1
-      expect(calculateBackoffDelay(1, 500, 3000, 0)).toBe(1000); // 500 * 2
-      expect(calculateBackoffDelay(2, 500, 3000, 0)).toBe(2000); // 500 * 4
-      expect(calculateBackoffDelay(3, 500, 3000, 0)).toBe(3000); // 500 * 8 = 4000 -> clamped to 3000
+      expect(calculateBackoffDelay(0, 500, 3000, 0)).toBe(500);
+      expect(calculateBackoffDelay(1, 500, 3000, 0)).toBe(1000);
+      expect(calculateBackoffDelay(2, 500, 3000, 0)).toBe(2000);
+      expect(calculateBackoffDelay(3, 500, 3000, 0)).toBe(3000);
     });
 
     it('adds jitter value while respecting maxDelayMs ceiling', () => {
       expect(calculateBackoffDelay(0, 500, 3000, 50)).toBe(550);
       expect(calculateBackoffDelay(1, 500, 3000, 25)).toBe(1025);
-      expect(calculateBackoffDelay(3, 500, 3000, 100)).toBe(3000); // Clamped
+      expect(calculateBackoffDelay(3, 500, 3000, 100)).toBe(3000);
     });
   });
 
   describe('withOpenAiRetry execution flow', () => {
     it('executes successfully on the first attempt without retry', async () => {
-      const mockFn = vi.fn().mockResolvedValue('immediate-success');
-      const onRetry = vi.fn();
+      const mockFn = mock().mockResolvedValue('immediate-success');
+      const onRetry = mock();
 
       const result = await withOpenAiRetry(mockFn, { onRetry });
 
@@ -83,13 +87,12 @@ describe('OpenAI Retry Resilience Utility', () => {
       const error429 = Object.assign(new Error('Rate limited'), { status: 429 });
       const error503 = Object.assign(new Error('Service unavailable'), { status: 503 });
 
-      const mockFn = vi
-        .fn()
+      const mockFn = mock()
         .mockRejectedValueOnce(error429)
         .mockRejectedValueOnce(error503)
         .mockResolvedValueOnce('recovered-payload');
 
-      const onRetry = vi.fn();
+      const onRetry = mock();
       const result = await withOpenAiRetry(mockFn, {
         maxRetries: 3,
         baseDelayMs: 10,
@@ -102,22 +105,21 @@ describe('OpenAI Retry Resilience Utility', () => {
       expect(mockFn).toHaveBeenCalledTimes(3);
       expect(onRetry).toHaveBeenCalledTimes(2);
 
-      // Verify retry callback received correct attempt numbers and delays
       expect(onRetry).toHaveBeenNthCalledWith(1, error429, 1, 10);
       expect(onRetry).toHaveBeenNthCalledWith(2, error503, 2, 20);
     });
 
     it('rejects immediately without retry when receiving HTTP 400 or 401', async () => {
       const error400 = Object.assign(new Error('Bad Request: Invalid prompt parameters'), { status: 400 });
-      const mockFn400 = vi.fn().mockRejectedValueOnce(error400);
-      const onRetry = vi.fn();
+      const mockFn400 = mock().mockRejectedValueOnce(error400);
+      const onRetry = mock();
 
       await expect(withOpenAiRetry(mockFn400, { onRetry })).rejects.toThrow('Bad Request');
       expect(mockFn400).toHaveBeenCalledTimes(1);
       expect(onRetry).not.toHaveBeenCalled();
 
       const error401 = Object.assign(new Error('Unauthorized: Invalid API Key'), { status: 401 });
-      const mockFn401 = vi.fn().mockRejectedValueOnce(error401);
+      const mockFn401 = mock().mockRejectedValueOnce(error401);
 
       await expect(withOpenAiRetry(mockFn401, { onRetry })).rejects.toThrow('Unauthorized');
       expect(mockFn401).toHaveBeenCalledTimes(1);
@@ -126,8 +128,8 @@ describe('OpenAI Retry Resilience Utility', () => {
 
     it('throws the final error when retry limit is exhausted', async () => {
       const persistentError = Object.assign(new Error('Persistent 503 gateway outage'), { status: 503 });
-      const mockFn = vi.fn().mockRejectedValue(persistentError);
-      const onRetry = vi.fn();
+      const mockFn = mock().mockRejectedValue(persistentError);
+      const onRetry = mock();
 
       await expect(
         withOpenAiRetry(mockFn, {
@@ -138,24 +140,23 @@ describe('OpenAI Retry Resilience Utility', () => {
         })
       ).rejects.toThrow('Persistent 503 gateway outage');
 
-      // 1 initial attempt + 3 retries = 4 total calls
       expect(mockFn).toHaveBeenCalledTimes(4);
       expect(onRetry).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('Payload & Reference Image Validation (4 MB Limit)', () => {
-    let mockEdit: ReturnType<typeof vi.fn>;
+    let mockEdit: ReturnType<typeof mock>;
 
     beforeEach(() => {
-      mockEdit = vi.fn();
+      mockEdit = mock();
       setOpenAIClientForTesting({
         images: {
           edit: mockEdit,
         },
       } as unknown as OpenAI);
 
-      vi.spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
+      spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
         publicId: 'pinoka/mockups/test',
         secureUrl: 'https://res.cloudinary.com/test.webp',
         bytes: 1024,
@@ -173,7 +174,6 @@ describe('OpenAI Retry Resilience Utility', () => {
         generateProductMockup(oversizedBuffer, 'Clean luxury perfume bottle')
       ).rejects.toThrow('Image reference size exceeds 4 MB limit');
 
-      // Ensure OpenAI API is never invoked when payload is oversized
       expect(mockEdit).not.toHaveBeenCalled();
     });
 

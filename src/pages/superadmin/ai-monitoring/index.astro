@@ -1,0 +1,42 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { getAuthenticatedUser, isSuperAdmin } from "@/lib/auth";
+import AiMonitoringDashboard from "@/components/admin/ai/AiMonitoringDashboard.svelte";
+import { getAiMonitoringDashboardData } from "@/services/ai/monitoring.service";
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user || !isSuperAdmin(user)) {
+  return Astro.redirect("/auth/login?redirect=/superadmin/ai-monitoring");
+}
+
+const initialData = await getAiMonitoringDashboardData();
+---
+
+<DashboardLayout title="Monitoring AI" breadcrumb="Super Admin / Monitoring AI">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
+    >
+      <div>
+        <h1
+          class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5"
+        >
+          <span>Monitoring AI Platform</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau seluruh aktivitas generasi AI, konsumsi token, efisiensi biaya,
+          deposit saldo, dan audit pengujian secara real-time.
+        </p>
+      </div>
+    </div>
+
+    <!-- Master AI Monitoring Overview with Period Filter, Statcards & Table -->
+    <AiMonitoringDashboard
+      client:load
+      initialData={initialData}
+      isSuperAdmin={true}
+    />
+  </div>
+</DashboardLayout>

@@ -275,7 +275,7 @@
         </Card>
       </a>
 
-      <a href="/admin/ai-monitoring" class="block w-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-3xl">
+      <a href="/superadmin/ai-monitoring" class="block w-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-3xl">
         <Card hoverable padding="md" class="h-full flex items-center justify-between group bg-card border border-light">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-2xl bg-nested text-primary flex items-center justify-center transition-transform group-hover:scale-110">

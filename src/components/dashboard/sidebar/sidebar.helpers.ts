@@ -107,7 +107,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Pengaturan Sistem',
         items: [
-          { label: 'Monitoring AI', href: '/admin/ai-monitoring', icon: 'smart_toy', group: 'Pengaturan Sistem' },
+          { label: 'Monitoring AI', href: '/superadmin/ai-monitoring', icon: 'smart_toy', group: 'Pengaturan Sistem' },
           { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: 'receipt_long', group: 'Pengaturan Sistem' },
           { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: 'tune', group: 'Pengaturan Sistem' },
           { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'history', group: 'Pengaturan Sistem' },

@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client';
 import {
   getAiMonitoringSummary,
   getAiRecentLogs,
+  getAiDepositHistory,
   getAiMonitoringDashboardData,
 } from '@/services/ai/monitoring.service';
 
@@ -22,6 +23,7 @@ describe('AI Monitoring Service', () => {
 
   describe('getAiMonitoringSummary', () => {
     it('aggregates AI generation logs correctly with numbers and success rate', async () => {
+      // 1. Logs aggregation
       mockSelect.mockReturnValueOnce({
         from: vi.fn().mockResolvedValue([
           {
@@ -38,9 +40,28 @@ describe('AI Monitoring Service', () => {
         ]),
       });
 
+      // 2. Deposit sum aggregation
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockResolvedValue([
+          {
+            totalDepositUsd: 10,
+            totalDepositIdr: 165000,
+          },
+        ]),
+      });
+
+      // 3. Latest exchange rate
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ exchangeRate: 16500 }]),
+          }),
+        }),
+      });
+
       const result = await getAiMonitoringSummary();
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         totalExecutions: 10,
         totalCostIdr: 6500,
         totalCostUsd: 0.4,
@@ -54,10 +75,17 @@ describe('AI Monitoring Service', () => {
           processing: 0,
         },
         successRate: 80,
+        totalDepositUsd: 10,
+        totalDepositIdr: 165000,
+        remainingDepositUsd: 9.6,
+        remainingDepositIdr: 158400,
+        remainingTokens: 960000,
+        activeExchangeRate: 16500,
       });
     });
 
     it('handles empty database gracefully with zero defaults', async () => {
+      // 1. Logs aggregation (zeroes)
       mockSelect.mockReturnValueOnce({
         from: vi.fn().mockResolvedValue([
           {
@@ -74,9 +102,28 @@ describe('AI Monitoring Service', () => {
         ]),
       });
 
+      // 2. Deposit sum (zeroes)
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockResolvedValue([
+          {
+            totalDepositUsd: 0,
+            totalDepositIdr: 0,
+          },
+        ]),
+      });
+
+      // 3. Latest exchange rate (empty -> fallback 16200)
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
       const result = await getAiMonitoringSummary();
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         totalExecutions: 0,
         totalCostIdr: 0,
         totalCostUsd: 0,
@@ -90,6 +137,12 @@ describe('AI Monitoring Service', () => {
           processing: 0,
         },
         successRate: 0,
+        totalDepositUsd: 0,
+        totalDepositIdr: 0,
+        remainingDepositUsd: 0,
+        remainingDepositIdr: 0,
+        remainingTokens: 0,
+        activeExchangeRate: 16200,
       });
     });
   });
@@ -147,9 +200,50 @@ describe('AI Monitoring Service', () => {
     });
   });
 
+  describe('getAiDepositHistory', () => {
+    it('retrieves and formats deposit history with user creator info', async () => {
+      const mockCreatedAt = new Date('2026-10-19T08:00:00.000Z');
+
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([
+                {
+                  id: 'dep_001',
+                  amountUsd: 10,
+                  amountIdr: 165000,
+                  exchangeRate: 16500,
+                  description: 'Top up AI',
+                  createdAt: mockCreatedAt,
+                  createdByName: 'Super Admin',
+                  createdByEmail: 'admin@platform.com',
+                },
+              ]),
+            }),
+          }),
+        }),
+      });
+
+      const result = await getAiDepositHistory(10);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        id: 'dep_001',
+        amountUsd: 10,
+        amountIdr: 165000,
+        exchangeRate: 16500,
+        description: 'Top up AI',
+        createdAt: mockCreatedAt.toISOString(),
+        createdByName: 'Super Admin',
+        createdByEmail: 'admin@platform.com',
+      });
+    });
+  });
+
   describe('getAiMonitoringDashboardData', () => {
-    it('combines summary and recent logs into unified dashboard data', async () => {
-      // Mock summary query
+    it('combines summary, recent logs, and deposit history into unified dashboard data', async () => {
+      // Mock summary queries (3 selects)
       mockSelect.mockReturnValueOnce({
         from: vi.fn().mockResolvedValue([
           {
@@ -165,8 +259,23 @@ describe('AI Monitoring Service', () => {
           },
         ]),
       });
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockResolvedValue([
+          {
+            totalDepositUsd: 10,
+            totalDepositIdr: 165000,
+          },
+        ]),
+      });
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ exchangeRate: 16500 }]),
+          }),
+        }),
+      });
 
-      // Mock recent logs query
+      // Mock recent logs query (1 select)
       mockSelect.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
           leftJoin: vi.fn().mockReturnValue({
@@ -179,11 +288,24 @@ describe('AI Monitoring Service', () => {
         }),
       });
 
+      // Mock deposit history query (1 select)
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
+
       const result = await getAiMonitoringDashboardData();
 
       expect(result.summary.totalExecutions).toBe(5);
       expect(result.summary.successRate).toBe(100);
+      expect(result.summary.remainingTokens).toBeGreaterThan(0);
       expect(result.recentLogs).toEqual([]);
+      expect(result.depositHistory).toEqual([]);
     });
   });
 });

@@ -12,10 +12,10 @@ if (!user || !isAuthorizedAdmin(user)) {
 }
 
 const initialData = await getAiMonitoringDashboardData();
-const breadcrumb =
-  user.role === "superadmin"
-    ? "Super Admin / Monitoring AI"
-    : "Admin / Monitoring AI";
+const isSuperAdmin = user.role === "superadmin";
+const breadcrumb = isSuperAdmin
+  ? "Super Admin / Monitoring AI"
+  : "Admin / Monitoring AI";
 ---
 
 <DashboardLayout title="Monitoring AI" breadcrumb={breadcrumb}>
@@ -37,6 +37,10 @@ const breadcrumb =
     </div>
 
     <!-- Master AI Monitoring Overview with Period Filter, Statcards & Table -->
-    <AiMonitoringDashboard client:load initialData={initialData} />
+    <AiMonitoringDashboard
+      client:load
+      initialData={initialData}
+      isSuperAdmin={isSuperAdmin}
+    />
   </div>
 </DashboardLayout>

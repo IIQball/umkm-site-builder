@@ -1,38 +1,40 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
 import OpenAI from 'openai';
 import * as openaiUploads from 'openai/uploads';
 import { generateProductMockup } from '@/services/ai/product-mockup.service';
 import * as cloudinaryUploader from '@/services/media/cloudinary-uploader';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 
-describe('ProductMockupService - generateProductMockup', () => {
-  const mockEdit = vi.fn();
+describe('ProductMockupService - generateProductMockup (bun:test)', () => {
+  const mockEdit = mock();
   const mockClient = {
     images: {
       edit: mockEdit,
     },
   } as unknown as OpenAI;
 
-  let uploadBase64ImageSpy: ReturnType<typeof vi.spyOn>;
-  let toFileSpy: ReturnType<typeof vi.spyOn>;
+  let uploadBase64ImageSpy: ReturnType<typeof spyOn>;
+  let toFileSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockEdit.mockReset();
     setOpenAIClientForTesting(mockClient);
 
-    toFileSpy = vi.spyOn(openaiUploads, 'toFile');
-    uploadBase64ImageSpy = vi.spyOn(cloudinaryUploader, 'uploadBase64Image');
+    toFileSpy = spyOn(openaiUploads, 'toFile');
+    uploadBase64ImageSpy = spyOn(cloudinaryUploader, 'uploadBase64Image');
   });
 
   afterEach(() => {
     resetOpenAIClient();
-    vi.restoreAllMocks();
+    toFileSpy.mockRestore();
+    uploadBase64ImageSpy.mockRestore();
   });
 
   describe('Happy path & Model Parameters', () => {
     it('processes image buffer via toFile, calls gpt-image-2.5-sunburst, uploads to Cloudinary, and returns structured DTO', async () => {
       const inputBuffer = Buffer.from('fake-product-raw-pixels');
-      const fakeRenderedBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const fakeRenderedBase64 =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       mockEdit.mockResolvedValueOnce({
         created: 1729420000,
@@ -51,11 +53,13 @@ describe('ProductMockupService - generateProductMockup', () => {
 
       uploadBase64ImageSpy.mockResolvedValueOnce({
         publicId: 'pinoka/mockups/mockup_sample_01',
-        secureUrl: 'https://res.cloudinary.com/test-cloud/image/upload/v1/pinoka/mockups/mockup_sample_01.png',
+        secureUrl:
+          'https://res.cloudinary.com/test-cloud/image/upload/v1/pinoka/mockups/mockup_sample_01.png',
         bytes: 10240,
       });
 
-      const prompt = 'Clean minimalist cosmetic bottle mockup on stone pedestal with soft morning lighting';
+      const prompt =
+        'Clean minimalist cosmetic bottle mockup on stone pedestal with soft morning lighting';
       const result = await generateProductMockup(inputBuffer, prompt);
 
       // 1. Verify imageBuffer processed through toFile
@@ -80,7 +84,8 @@ describe('ProductMockupService - generateProductMockup', () => {
 
       // 4. Verify structured DTO returned to caller
       expect(result).toEqual({
-        imageUrl: 'https://res.cloudinary.com/test-cloud/image/upload/v1/pinoka/mockups/mockup_sample_01.png',
+        imageUrl:
+          'https://res.cloudinary.com/test-cloud/image/upload/v1/pinoka/mockups/mockup_sample_01.png',
         publicId: 'pinoka/mockups/mockup_sample_01',
         inputTokens: 140,
         outputTokens: 650,
@@ -108,7 +113,9 @@ describe('ProductMockupService - generateProductMockup', () => {
       const editPayload = mockEdit.mock.calls[0][0];
       expect(editPayload.size).toBe('1024x1536');
       expect(editPayload.model).toBe('gpt-image-2.5-sunburst');
-      expect(result.imageUrl).toBe('https://res.cloudinary.com/test-cloud/image/upload/portrait.png');
+      expect(result.imageUrl).toBe(
+        'https://res.cloudinary.com/test-cloud/image/upload/portrait.png'
+      );
     });
 
     it('defaults token counts to 0 when OpenAI response omits usage data', async () => {
@@ -134,9 +141,9 @@ describe('ProductMockupService - generateProductMockup', () => {
     it('throws error when image buffer is empty', async () => {
       const emptyBuffer = Buffer.alloc(0);
 
-      await expect(
-        generateProductMockup(emptyBuffer, 'Valid prompt')
-      ).rejects.toThrow('Image buffer is required and cannot be empty');
+      await expect(generateProductMockup(emptyBuffer, 'Valid prompt')).rejects.toThrow(
+        'Image buffer is required and cannot be empty'
+      );
 
       expect(mockEdit).not.toHaveBeenCalled();
       expect(uploadBase64ImageSpy).not.toHaveBeenCalled();
@@ -147,9 +154,9 @@ describe('ProductMockupService - generateProductMockup', () => {
         'Image buffer is required and cannot be empty'
       );
 
-      await expect(generateProductMockup('not-a-buffer' as unknown as Buffer, 'Valid prompt')).rejects.toThrow(
-        'Image buffer is required and cannot be empty'
-      );
+      await expect(
+        generateProductMockup('not-a-buffer' as unknown as Buffer, 'Valid prompt')
+      ).rejects.toThrow('Image buffer is required and cannot be empty');
     });
 
     it('throws error when prompt is empty string or only whitespace', async () => {
@@ -208,9 +215,9 @@ describe('ProductMockupService - generateProductMockup', () => {
         new Error('Cloudinary upload failed: Connection to Cloudinary timed out')
       );
 
-      await expect(
-        generateProductMockup(inputBuffer, 'Coffee cup mockup')
-      ).rejects.toThrow('Cloudinary upload failed: Connection to Cloudinary timed out');
+      await expect(generateProductMockup(inputBuffer, 'Coffee cup mockup')).rejects.toThrow(
+        'Cloudinary upload failed: Connection to Cloudinary timed out'
+      );
     });
   });
 

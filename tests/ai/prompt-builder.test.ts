@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import { buildLogoPrompt } from '@/services/ai/prompt-builder.service';
 import { ValidationError } from '@/lib/utils/validation';
 import {
@@ -13,7 +13,7 @@ import {
   setOpenAIClientForTesting,
 } from '@/lib/openai';
 
-const mockCreate = vi.fn();
+const mockCreate = mock();
 
 class MockAPIError extends Error {
   status?: number;
@@ -24,7 +24,7 @@ class MockAPIError extends Error {
   }
 }
 
-const MockOpenAI = vi.fn().mockImplementation(() => ({
+const MockOpenAI = mock(() => ({
   chat: {
     completions: {
       create: mockCreate,
@@ -34,15 +34,15 @@ const MockOpenAI = vi.fn().mockImplementation(() => ({
 
 (MockOpenAI as unknown as Record<string, unknown>).APIError = MockAPIError;
 
-vi.mock('openai', () => ({
+mock.module('openai', () => ({
   default: MockOpenAI,
   OpenAI: MockOpenAI,
   APIError: MockAPIError,
 }));
 
-describe('PromptBuilderService - buildLogoPrompt', () => {
+describe('PromptBuilderService - buildLogoPrompt (bun:test)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreate.mockReset();
     resetOpenAIClient();
   });
 
@@ -162,6 +162,25 @@ describe('PromptBuilderService - buildLogoPrompt', () => {
       expect(result).toContain('negative space');
       expect(result).toContain('pure white background');
       expect(result).toContain('Kue Ibu');
+    });
+
+    it('appends brand name reference if missing from raw model output', async () => {
+      mockCreate.mockResolvedValueOnce({
+        choices: [
+          {
+            message: {
+              content: 'Minimalist flat vector abstract coffee symbol, negative space, pure white background',
+            },
+          },
+        ],
+      });
+
+      const result = await buildLogoPrompt({
+        storeName: 'Kopi Kenangan Asli',
+        category: 'Kopi & Kafe',
+      });
+
+      expect(result).toContain('brand: "Kopi Kenangan Asli"');
     });
   });
 

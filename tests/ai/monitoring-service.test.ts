@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { db } from '@/lib/db/client';
 import {
   getAiMonitoringSummary,
@@ -7,25 +7,24 @@ import {
   getAiMonitoringDashboardData,
 } from '@/services/ai/monitoring.service';
 
-vi.mock('@/lib/db/client', () => {
-  const mockDb = {
-    select: vi.fn(),
-  };
-  return { db: mockDb };
-});
+mock.module('@/lib/db/client', () => ({
+  db: {
+    select: mock(),
+  },
+}));
 
-describe('AI Monitoring Service', () => {
+describe('AI Monitoring Service (bun:test)', () => {
   const mockSelect = db.select as unknown as Mock;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockSelect.mockReset();
   });
 
   describe('getAiMonitoringSummary', () => {
     it('aggregates AI generation logs correctly with numbers and success rate', async () => {
       // 1. Logs aggregation
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalExecutions: 10,
             totalCostIdr: 6500,
@@ -42,7 +41,7 @@ describe('AI Monitoring Service', () => {
 
       // 2. Deposit sum aggregation
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalDepositUsd: 10,
             totalDepositIdr: 165000,
@@ -52,9 +51,9 @@ describe('AI Monitoring Service', () => {
 
       // 3. Latest exchange rate
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ exchangeRate: 16500 }]),
+        from: () => ({
+          orderBy: () => ({
+            limit: () => Promise.resolve([{ exchangeRate: 16500 }]),
           }),
         }),
       });
@@ -85,9 +84,8 @@ describe('AI Monitoring Service', () => {
     });
 
     it('handles empty database gracefully with zero defaults', async () => {
-      // 1. Logs aggregation (zeroes)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalExecutions: 0,
             totalCostIdr: 0,
@@ -102,9 +100,8 @@ describe('AI Monitoring Service', () => {
         ]),
       });
 
-      // 2. Deposit sum (zeroes)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalDepositUsd: 0,
             totalDepositIdr: 0,
@@ -112,11 +109,10 @@ describe('AI Monitoring Service', () => {
         ]),
       });
 
-      // 3. Latest exchange rate (empty -> fallback 16200)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
+        from: () => ({
+          orderBy: () => ({
+            limit: () => Promise.resolve([]),
           }),
         }),
       });
@@ -152,27 +148,28 @@ describe('AI Monitoring Service', () => {
       const mockCreatedAt = new Date('2026-10-18T10:00:00.000Z');
 
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            leftJoin: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([
-                  {
-                    id: 'log_001',
-                    featureType: 'logo',
-                    modelUsed: 'gpt-image-2.5-sunburst',
-                    status: 'success',
-                    costIdr: 650,
-                    costUsd: 0.04,
-                    inputTokens: 120,
-                    outputTokens: 450,
-                    creditsDeducted: 1,
-                    errorMessage: null,
-                    createdAt: mockCreatedAt,
-                    storeName: 'Kopi Kenangan',
-                    userName: 'John Doe',
-                  },
-                ]),
+        from: () => ({
+          leftJoin: () => ({
+            leftJoin: () => ({
+              orderBy: () => ({
+                limit: () =>
+                  Promise.resolve([
+                    {
+                      id: 'log_001',
+                      featureType: 'logo',
+                      modelUsed: 'gpt-image-2.5-sunburst',
+                      status: 'success',
+                      costIdr: 650,
+                      costUsd: 0.04,
+                      inputTokens: 120,
+                      outputTokens: 450,
+                      creditsDeducted: 1,
+                      errorMessage: null,
+                      createdAt: mockCreatedAt,
+                      storeName: 'Kopi Kenangan',
+                      userName: 'John Doe',
+                    },
+                  ]),
               }),
             }),
           }),
@@ -205,21 +202,22 @@ describe('AI Monitoring Service', () => {
       const mockCreatedAt = new Date('2026-10-19T08:00:00.000Z');
 
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([
-                {
-                  id: 'dep_001',
-                  amountUsd: 10,
-                  amountIdr: 165000,
-                  exchangeRate: 16500,
-                  description: 'Top up AI',
-                  createdAt: mockCreatedAt,
-                  createdByName: 'Super Admin',
-                  createdByEmail: 'admin@platform.com',
-                },
-              ]),
+        from: () => ({
+          leftJoin: () => ({
+            orderBy: () => ({
+              limit: () =>
+                Promise.resolve([
+                  {
+                    id: 'dep_001',
+                    amountUsd: 10,
+                    amountIdr: 165000,
+                    exchangeRate: 16500,
+                    description: 'Top up AI',
+                    createdAt: mockCreatedAt,
+                    createdByName: 'Super Admin',
+                    createdByEmail: 'admin@platform.com',
+                  },
+                ]),
             }),
           }),
         }),
@@ -243,9 +241,8 @@ describe('AI Monitoring Service', () => {
 
   describe('getAiMonitoringDashboardData', () => {
     it('combines summary, recent logs, and deposit history into unified dashboard data', async () => {
-      // Mock summary queries (3 selects)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalExecutions: 5,
             totalCostIdr: 3250,
@@ -260,7 +257,7 @@ describe('AI Monitoring Service', () => {
         ]),
       });
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockResolvedValue([
+        from: mock().mockResolvedValue([
           {
             totalDepositUsd: 10,
             totalDepositIdr: 165000,
@@ -268,32 +265,30 @@ describe('AI Monitoring Service', () => {
         ]),
       });
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ exchangeRate: 16500 }]),
+        from: () => ({
+          orderBy: () => ({
+            limit: () => Promise.resolve([{ exchangeRate: 16500 }]),
           }),
         }),
       });
 
-      // Mock recent logs query (1 select)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            leftJoin: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([]),
+        from: () => ({
+          leftJoin: () => ({
+            leftJoin: () => ({
+              orderBy: () => ({
+                limit: () => Promise.resolve([]),
               }),
             }),
           }),
         }),
       });
 
-      // Mock deposit history query (1 select)
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([]),
+        from: () => ({
+          leftJoin: () => ({
+            orderBy: () => ({
+              limit: () => Promise.resolve([]),
             }),
           }),
         }),

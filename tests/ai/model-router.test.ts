@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { db } from '@/db';
 import { resolveStoreAiModel } from '@/services/ai/model-router.service';
 
-vi.mock('@/db', () => ({
+mock.module('@/db', () => ({
   db: {
-    select: vi.fn(),
+    select: mock(),
   },
 }));
 
-describe('AI Store Model Router Service', () => {
+describe('AI Store Model Router Service (bun:test)', () => {
   const mockSelect = db.select as unknown as Mock;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockSelect.mockReset();
   });
 
   const setupMockQueries = (
@@ -75,6 +75,25 @@ describe('AI Store Model Router Service', () => {
       expect(result.requiredCredits).toBe(1);
       expect(result.tier).toBe('trial');
     });
+
+    it('falls back to default trial flare when package name does not match any known keyword', async () => {
+      setupMockQueries(
+        {
+          id: 'pur_custom',
+          packageId: 'pkg_custom_99',
+          packageName: 'Paket Ekstra Kustom',
+          packageSlug: 'paket-ekstra-kustom',
+        },
+        { id: 'cred_custom', balance: 10, totalPurchased: 10 }
+      );
+
+      const result = await resolveStoreAiModel('store_custom_1');
+
+      expect(result.model).toBe('gpt-image-2.5-flare');
+      expect(result.requiredCredits).toBe(1);
+      expect(result.tier).toBe('trial');
+      expect(result.packageName).toBe('Paket Trial / Belum Beli');
+    });
   });
 
   describe('Paket Hemat -> gpt-image-2.5-flare (1 kredit)', () => {
@@ -128,6 +147,24 @@ describe('AI Store Model Router Service', () => {
       );
 
       const result = await resolveStoreAiModel('store_reguler_1');
+
+      expect(result.model).toBe('gpt-image-2.5-sunburst');
+      expect(result.requiredCredits).toBe(2);
+      expect(result.tier).toBe('reguler');
+    });
+
+    it('routes package with pro in packageId to sunburst (2 credits)', async () => {
+      setupMockQueries(
+        {
+          id: 'pur_pro',
+          packageId: 'pkg_pro_unlimited',
+          packageName: 'Paket Enterprise Special',
+          packageSlug: 'enterprise-special',
+        },
+        { id: 'cred_pro', balance: 50, totalPurchased: 50 }
+      );
+
+      const result = await resolveStoreAiModel('store_pro_1');
 
       expect(result.model).toBe('gpt-image-2.5-sunburst');
       expect(result.requiredCredits).toBe(2);

@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
 import OpenAI from 'openai';
 import { generateLogoImage } from '@/services/ai/logo-generator.service';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 
-describe('LogoGeneratorService - generateLogoImage', () => {
-  const mockGenerate = vi.fn();
+describe('LogoGeneratorService - generateLogoImage (bun:test)', () => {
+  const mockGenerate = mock();
   const mockClient = {
     images: {
       generate: mockGenerate,
@@ -12,7 +12,7 @@ describe('LogoGeneratorService - generateLogoImage', () => {
   } as unknown as OpenAI;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGenerate.mockReset();
     setOpenAIClientForTesting(mockClient);
   });
 
@@ -22,7 +22,8 @@ describe('LogoGeneratorService - generateLogoImage', () => {
 
   describe('Happy path & Payload Specification', () => {
     it('sends mandatory payload with gpt-image-2.5-sunburst, transparent background, and png format', async () => {
-      const fakeBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const fakeBase64 =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       mockGenerate.mockResolvedValueOnce({
         created: 1729250000,
         background: 'transparent',
@@ -111,7 +112,9 @@ describe('LogoGeneratorService - generateLogoImage', () => {
   describe('Validation & Edge Cases', () => {
     it('throws an error if prompt is empty string or whitespace only', async () => {
       await expect(generateLogoImage('')).rejects.toThrow('Prompt is required and cannot be empty');
-      await expect(generateLogoImage('   \n\t  ')).rejects.toThrow('Prompt is required and cannot be empty');
+      await expect(generateLogoImage('   \n\t  ')).rejects.toThrow(
+        'Prompt is required and cannot be empty'
+      );
       expect(mockGenerate).not.toHaveBeenCalled();
     });
 
@@ -143,7 +146,8 @@ describe('LogoGeneratorService - generateLogoImage', () => {
       const moderationError = new OpenAI.APIError(
         400,
         {
-          message: 'Your prompt was flagged by our content moderation policy and violates safety guidelines.',
+          message:
+            'Your prompt was flagged by our content moderation policy and violates safety guidelines.',
           type: 'content_policy_violation',
           code: 'content_policy_violation',
         },

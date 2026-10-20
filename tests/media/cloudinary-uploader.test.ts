@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { UploadApiResponse } from 'cloudinary';
 import { uploadBase64Image } from '@/services/media/cloudinary-uploader';
-import { cloudinary } from '@/lib/cloudinary';
+import { cloudinary } from '@/lib/cloudinary.server';
 
 describe('CloudinaryUploader - uploadBase64Image', () => {
   let uploadSpy: ReturnType<typeof vi.spyOn>;

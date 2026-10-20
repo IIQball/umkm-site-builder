@@ -1,7 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { Card, Table, Pagination, Button } from "@/components/ui";
+  import { Card, Table, Pagination, Button, Badge, Input } from "@/components/ui";
+  import type { BadgeVariant } from "@/components/tokens/colors";
   import { formatDate, formatSmartIDR } from "@/lib/utils/format";
+  import { Bot, Search, RefreshCw, Sparkles } from "lucide-svelte";
   import type { AiMonitoringRecentLog } from "@/types/admin/ai-monitoring.types";
 
   export let logs: AiMonitoringRecentLog[] = [];
@@ -29,39 +31,25 @@
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): { label: string; variant: BadgeVariant } => {
     switch (status) {
       case "success":
-        return {
-          label: "Sukses",
-          cls: "bg-success/10 text-success border-success/20",
-        };
+        return { label: "Sukses", variant: "success" };
       case "failed":
-        return {
-          label: "Gagal",
-          cls: "bg-error/10 text-error border-error/20",
-        };
+        return { label: "Gagal", variant: "error" };
       case "processing":
-        return {
-          label: "Diproses",
-          cls: "bg-primary/10 text-primary border-primary/20",
-        };
+        return { label: "Diproses", variant: "primary" };
       case "pending":
-        return {
-          label: "Menunggu",
-          cls: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-        };
+        return { label: "Menunggu", variant: "warning" };
       default:
-        return { label: status, cls: "bg-nested text-secondary border-light" };
+        return { label: status, variant: "secondary" };
     }
   };
 
   $: counts = {
     total: logs.length,
     success: logs.filter((l) => l.status === "success").length,
-    pending: logs.filter(
-      (l) => l.status === "pending" || l.status === "processing",
-    ).length,
+    pending: logs.filter((l) => l.status === "pending" || l.status === "processing").length,
     failed: logs.filter((l) => l.status === "failed").length,
   };
 
@@ -114,7 +102,7 @@
   radius="2xl"
   className="shadow-xs overflow-hidden"
 >
-  <!-- Table Header & Controls (Matching superadmin/transactions) -->
+  <!-- Table Header & Controls -->
   <div
     class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4"
   >
@@ -122,12 +110,10 @@
       <div
         class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs"
       >
-        <span class="material-symbols-outlined text-xl">smart_toy</span>
+        <Bot size={20} />
       </div>
       <div>
-        <h3
-          class="text-heading-md text-main font-bold font-heading leading-tight"
-        >
+        <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
           Riwayat Eksekusi Generasi AI
         </h3>
         <p class="text-body-sm text-secondary mt-0.5 font-sans">
@@ -139,29 +125,27 @@
 
     <!-- Actions & Filter Pills -->
     <div class="flex flex-wrap items-center gap-2.5">
-      <div class="relative">
-        <span
-          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none text-sm"
-          >search</span
-        >
-        <input
+      <div class="w-48 sm:w-60">
+        <Input
           type="text"
+          size="sm"
+          fullWidth={false}
           bind:value={searchQuery}
           placeholder="Cari fitur / merchant / model..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-60"
-        />
+          class="!rounded-full"
+        >
+          <svelte:fragment slot="prefix">
+            <Search size={14} class="text-muted" />
+          </svelte:fragment>
+        </Input>
       </div>
 
       <!-- Segmented Status Filter -->
-      <div
-        class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto"
-      >
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
         <Button
           size="xs"
           variant={selectedStatus === "all" ? "dark" : "ghost"}
-          class="!rounded-full !px-3.5 font-bold {selectedStatus === 'all'
-            ? 'shadow-2xs'
-            : 'text-muted hover:text-main'}"
+          class="!rounded-full !px-3.5 font-bold {selectedStatus === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = "all")}
         >
           Semua ({counts.total})
@@ -169,10 +153,7 @@
         <Button
           size="xs"
           variant={selectedStatus === "success" ? "dark" : "ghost"}
-          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus ===
-          'success'
-            ? 'shadow-2xs'
-            : 'text-muted hover:text-main'}"
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'success' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = "success")}
         >
           <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
@@ -181,10 +162,7 @@
         <Button
           size="xs"
           variant={selectedStatus === "pending" ? "dark" : "ghost"}
-          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus ===
-          'pending'
-            ? 'shadow-2xs'
-            : 'text-muted hover:text-main'}"
+          class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'pending' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
           on:click={() => (selectedStatus = "pending")}
         >
           <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
@@ -194,10 +172,7 @@
           <Button
             size="xs"
             variant={selectedStatus === "failed" ? "dark" : "ghost"}
-            class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus ===
-            'failed'
-              ? 'shadow-2xs'
-              : 'text-muted hover:text-main'}"
+            class="!rounded-full !px-3.5 font-bold flex items-center gap-1.5 {selectedStatus === 'failed' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
             on:click={() => (selectedStatus = "failed")}
           >
             <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
@@ -214,14 +189,12 @@
       <div
         class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs"
       >
-        <span class="material-symbols-outlined text-2xl">smart_toy</span>
+        <Bot size={26} />
       </div>
       <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">
         Tidak Ada Riwayat Aktivitas AI
       </h4>
-      <p
-        class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans"
-      >
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
         {searchQuery || selectedStatus !== "all"
           ? "Tidak ada aktivitas AI yang sesuai dengan filter pencarian Anda."
           : "Belum ada log aktivitas generasi AI yang tercatat pada sistem."}
@@ -234,11 +207,7 @@
             class="!rounded-full gap-2 font-bold shadow-xs cursor-pointer"
             on:click={() => dispatch("refresh")}
           >
-            <span
-              class="material-symbols-outlined text-base {isRefreshing
-                ? 'animate-spin'
-                : ''}">refresh</span
-            >
+            <RefreshCw size={14} class={isRefreshing ? "animate-spin" : ""} />
             <span>{isRefreshing ? "Memperbarui..." : "Perbarui Data AI"}</span>
           </Button>
         </div>
@@ -270,12 +239,8 @@
             </div>
           </td>
           <td class="py-3.5 px-6">
-            <div
-              class="inline-flex items-center gap-1.5 font-medium text-xs text-main"
-            >
-              <span class="material-symbols-outlined text-xs text-primary"
-                >auto_awesome</span
-              >
+            <div class="inline-flex items-center gap-1.5 font-medium text-xs text-main">
+              <Sparkles size={14} class="text-primary shrink-0" />
               <span>{getFeatureLabel(log.featureType)}</span>
             </div>
             <div class="text-2xs font-mono text-secondary mt-0.5">
@@ -291,11 +256,9 @@
             </div>
           </td>
           <td class="py-3.5 px-6 text-center whitespace-nowrap">
-            <span
-              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-2xs font-bold {badge.cls}"
-            >
-              <span>{badge.label}</span>
-            </span>
+            <Badge variant={badge.variant} size="sm" dot={true}>
+              {badge.label}
+            </Badge>
             {#if log.errorMessage}
               <p
                 class="text-3xs text-error font-mono truncate max-w-[140px] mx-auto mt-0.5"

@@ -1,9 +1,11 @@
 import { db } from '@/lib/db/client';
-import { aiGenerationLogs, stores, users } from '@/db/schema';
+import { aiGenerationLogs, aiDepositHistory, stores, users } from '@/db/schema';
 import { count, sql, desc, eq, and, or, ilike, type SQL } from 'drizzle-orm';
+import { getActiveExchangeRate } from './cost-calculator.service';
 import type {
   AiMonitoringSummary,
   AiMonitoringRecentLog,
+  AiDepositHistoryItem,
   AiMonitoringDashboardData,
   AiAuditLogItem,
   GetAiLogsQueryOptions,
@@ -18,19 +20,31 @@ type AiFeatureTypeValue = (typeof aiFeatureTypeEnum.enumValues)[number];
  * Single-pass query using SQL aggregations for maximum performance.
  */
 export async function getAiMonitoringSummary(): Promise<AiMonitoringSummary> {
-  const [row] = await db
-    .select({
-      totalExecutions: count(aiGenerationLogs.id),
-      totalCostIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
-      totalCostUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
-      totalInputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.inputTokens}), 0)`.mapWith(Number),
-      totalOutputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.outputTokens}), 0)`.mapWith(Number),
-      successCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'success' then 1 end)`.mapWith(Number),
-      failedCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'failed' then 1 end)`.mapWith(Number),
-      pendingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'pending' then 1 end)`.mapWith(Number),
-      processingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'processing' then 1 end)`.mapWith(Number),
-    })
-    .from(aiGenerationLogs);
+  const [logsResult, depositResult, activeExchangeRate] = await Promise.all([
+    db
+      .select({
+        totalExecutions: count(aiGenerationLogs.id),
+        totalCostIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
+        totalCostUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
+        totalInputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.inputTokens}), 0)`.mapWith(Number),
+        totalOutputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.outputTokens}), 0)`.mapWith(Number),
+        successCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'success' then 1 end)`.mapWith(Number),
+        failedCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'failed' then 1 end)`.mapWith(Number),
+        pendingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'pending' then 1 end)`.mapWith(Number),
+        processingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'processing' then 1 end)`.mapWith(Number),
+      })
+      .from(aiGenerationLogs),
+    db
+      .select({
+        totalDepositUsd: sql<number>`coalesce(sum(${aiDepositHistory.amountUsd}), 0)`.mapWith(Number),
+        totalDepositIdr: sql<number>`coalesce(sum(${aiDepositHistory.amountIdr}), 0)`.mapWith(Number),
+      })
+      .from(aiDepositHistory),
+    getActiveExchangeRate(),
+  ]);
+
+  const [row] = logsResult;
+  const [dep] = depositResult;
 
   const totalExecutions = row?.totalExecutions || 0;
   const successCount = row?.successCount || 0;
@@ -42,6 +56,13 @@ export async function getAiMonitoringSummary(): Promise<AiMonitoringSummary> {
   const totalInputTokens = row?.totalInputTokens || 0;
   const totalOutputTokens = row?.totalOutputTokens || 0;
   const totalTokens = totalInputTokens + totalOutputTokens;
+
+  const totalDepositUsd = dep?.totalDepositUsd || 0;
+  const totalDepositIdr = dep?.totalDepositIdr || 0;
+
+  const remainingDepositUsd = Math.max(0, Number((totalDepositUsd - totalCostUsd).toFixed(4)));
+  const remainingDepositIdr = Math.max(0, Math.round(remainingDepositUsd * activeExchangeRate));
+  const remainingTokens = Math.max(0, Math.round(remainingDepositUsd / 0.000010));
 
   const successRate =
     totalExecutions > 0 ? Number(((successCount / totalExecutions) * 100).toFixed(1)) : 0;
@@ -60,6 +81,12 @@ export async function getAiMonitoringSummary(): Promise<AiMonitoringSummary> {
       processing: processingCount,
     },
     successRate,
+    totalDepositUsd,
+    totalDepositIdr,
+    remainingDepositUsd,
+    remainingDepositIdr,
+    remainingTokens,
+    activeExchangeRate,
   };
 }
 
@@ -230,17 +257,50 @@ export async function getAiLogs(
 }
 
 /**
+ * Retrieves latest AI deposit history with creator info.
+ */
+export async function getAiDepositHistory(limit = 50): Promise<AiDepositHistoryItem[]> {
+  const rows = await db
+    .select({
+      id: aiDepositHistory.id,
+      amountUsd: aiDepositHistory.amountUsd,
+      amountIdr: aiDepositHistory.amountIdr,
+      exchangeRate: aiDepositHistory.exchangeRate,
+      description: aiDepositHistory.description,
+      createdAt: aiDepositHistory.createdAt,
+      createdByName: users.name,
+      createdByEmail: users.email,
+    })
+    .from(aiDepositHistory)
+    .leftJoin(users, eq(aiDepositHistory.createdBy, users.id))
+    .orderBy(desc(aiDepositHistory.createdAt))
+    .limit(limit);
+
+  return rows.map((r) => ({
+    id: r.id,
+    amountUsd: Number(r.amountUsd || 0),
+    amountIdr: Number(r.amountIdr || 0),
+    exchangeRate: Number(r.exchangeRate || 0),
+    description: r.description || null,
+    createdAt: r.createdAt ? r.createdAt.toISOString() : new Date().toISOString(),
+    createdByName: r.createdByName || 'Superadmin',
+    createdByEmail: r.createdByEmail || null,
+  }));
+}
+
+/**
  * Unified getter for initial dashboard rendering.
  */
 export async function getAiMonitoringDashboardData(): Promise<AiMonitoringDashboardData> {
-  const [summary, recentLogs] = await Promise.all([
+  const [summary, recentLogs, depositHistory] = await Promise.all([
     getAiMonitoringSummary(),
     getAiRecentLogs(10),
+    getAiDepositHistory(50),
   ]);
 
   return {
     summary,
     recentLogs,
+    depositHistory,
   };
 }
-

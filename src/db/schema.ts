@@ -484,6 +484,19 @@ export const aiGenerationLogs = pgTable('ai_generation_logs', {
   aiGenerationLogsCreatedAtIdx: index('ai_generation_logs_created_at_idx').on(table.createdAt),
 }));
 
+export const aiDepositHistory = pgTable('ai_deposit_history', {
+  id: text('id').primaryKey(),
+  amountUsd: doublePrecision('amount_usd').notNull(),
+  amountIdr: bigint('amount_idr', { mode: 'number' }).notNull(),
+  exchangeRate: integer('exchange_rate').notNull(),
+  description: text('description'),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  aiDepositHistoryCreatedByIdx: index('ai_deposit_history_created_by_idx').on(table.createdBy),
+  aiDepositHistoryCreatedAtIdx: index('ai_deposit_history_created_at_idx').on(table.createdAt),
+}));
+
 export const storeQuotaPackages = pgTable('store_quota_packages', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -543,6 +556,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   notifications: many(notifications),
   aiCredits: one(tenantAiCredits, { fields: [users.id], references: [tenantAiCredits.userId] }),
   aiLogs: many(aiGenerationLogs),
+  aiDeposits: many(aiDepositHistory),
   quotaPurchases: many(storeQuotaPurchases),
 }));
 
@@ -697,4 +711,8 @@ export const storeQuotaPurchasesRelations = relations(storeQuotaPurchases, ({ on
   user: one(users, { fields: [storeQuotaPurchases.userId], references: [users.id] }),
   package: one(storeQuotaPackages, { fields: [storeQuotaPurchases.packageId], references: [storeQuotaPackages.id] }),
   transaction: one(transactions, { fields: [storeQuotaPurchases.transactionId], references: [transactions.id] }),
+}));
+
+export const aiDepositHistoryRelations = relations(aiDepositHistory, ({ one }) => ({
+  creator: one(users, { fields: [aiDepositHistory.createdBy], references: [users.id] }),
 }));

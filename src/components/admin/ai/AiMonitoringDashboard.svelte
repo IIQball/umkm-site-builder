@@ -7,9 +7,11 @@
   } from "@/types/admin/ai-monitoring.types";
   import AiKeyMetrics from "./AiKeyMetrics.svelte";
   import AiRecentLogsTable from "./AiRecentLogsTable.svelte";
+  import AiTestAuditTable from "./AiTestAuditTable.svelte";
 
   export let initialData: AiMonitoringDashboardData;
 
+  let activeTab: 'recent' | 'audit' = 'recent';
   let summary: AiMonitoringSummary = initialData.summary;
   let recentLogs = initialData.recentLogs || [];
   let isRefreshing = false;
@@ -105,12 +107,35 @@
   <!-- Reactive Statcards Grid (4 cards: Dark, Default White, Blue, Pink) -->
   <AiKeyMetrics summary={activeSummary} />
 
-  <!-- Interactive Table with Search, Segmented Status Filter, and Empty State -->
+  <!-- Navigation Tab between Recent Logs and Test Audit Table -->
+  <div class="flex items-center gap-2 border-b border-light pb-2">
+    <button
+      type="button"
+      class="px-4 py-2 text-sm font-semibold rounded-xl transition-all {activeTab === 'recent' ? 'bg-main text-canvas shadow-xs' : 'text-secondary hover:text-main hover:bg-nested'}"
+      on:click={() => { activeTab = 'recent'; }}
+    >
+      Log Aktivitas Terbaru
+    </button>
+    <button
+      type="button"
+      class="px-4 py-2 text-sm font-semibold rounded-xl transition-all {activeTab === 'audit' ? 'bg-main text-canvas shadow-xs' : 'text-secondary hover:text-main hover:bg-nested'}"
+      on:click={() => { activeTab = 'audit'; }}
+    >
+      Audit Log Pengujian (Testing)
+    </button>
+  </div>
+
+  <!-- Interactive Table Views -->
   <div class="animate-fade-in-up delay-300">
-    <AiRecentLogsTable
-      logs={filteredLogs}
-      {isRefreshing}
-      on:refresh={handleRefresh}
-    />
+    {#if activeTab === 'recent'}
+      <AiRecentLogsTable
+        logs={filteredLogs}
+        {isRefreshing}
+        on:refresh={handleRefresh}
+      />
+    {:else}
+      <AiTestAuditTable defaultIsTesting="true" />
+    {/if}
   </div>
 </div>
+

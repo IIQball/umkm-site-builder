@@ -35,9 +35,55 @@ export interface AiMonitoringRecentLog {
   createdAt: string;
   storeName?: string | null;
   userName?: string | null;
+  isTesting?: boolean;
+  sizeRatio?: string | null;
+  qualityTier?: string | null;
+}
+
+export interface AiAuditLogItem {
+  id: string;
+  isTesting: boolean;
+  featureType: string;
+  modelUsed: string;
+  sizeRatio?: string | null;
+  qualityTier?: string | null;
+  promptFinal: string;
+  inputTokens: number;
+  outputTokens: number;
+  creditsDeducted: number;
+  costUsd: number;
+  costIdr: number;
+  cloudinaryUrl?: string | null;
+  status: string;
+  errorMessage?: string | null;
+  createdAt: string;
+  storeName?: string | null;
+  userName?: string | null;
+}
+
+export interface GetAiLogsQueryOptions {
+  isTesting?: boolean;
+  page?: number;
+  limit?: number;
+  status?: string;
+  featureType?: string;
+  search?: string;
+}
+
+export interface AiLogsPaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedAiLogsResponse {
+  logs: AiAuditLogItem[];
+  pagination: AiLogsPaginationMeta;
 }
 
 export interface AiMonitoringDashboardData {
   summary: AiMonitoringSummary;
   recentLogs: AiMonitoringRecentLog[];
 }
+

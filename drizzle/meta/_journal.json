@@ -71,6 +71,13 @@
       "when": 1792218803709,
       "tag": "0009_same_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792478400000,
+      "tag": "0010_ai_generation_logs_is_testing_idx",
+      "breakpoints": true
     }
   ]
 }

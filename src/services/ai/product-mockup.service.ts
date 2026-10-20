@@ -1,6 +1,7 @@
 import { toFile } from 'openai/uploads';
 import { getOpenAIClient, handleOpenAIError } from '@/lib/openai';
 import { sanitizeText } from '@/lib/utils/format';
+import { withOpenAiRetry } from '@/lib/resilience/openai-retry';
 import { uploadBase64Image } from '@/services/media/cloudinary-uploader';
 
 export interface GenerateProductMockupOptions {
@@ -14,6 +15,8 @@ export interface GeneratedProductMockupResult {
   inputTokens: number;
   outputTokens: number;
 }
+
+export const MAX_REFERENCE_IMAGE_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB
 
 const DEFAULT_MODEL = 'gpt-image-2.5-sunburst';
 const DEFAULT_SIZE = '1024x1024';
@@ -37,6 +40,10 @@ export async function generateProductMockup(
     throw new Error('Image buffer is required and cannot be empty');
   }
 
+  if (imageBuffer.length > MAX_REFERENCE_IMAGE_SIZE_BYTES) {
+    throw new Error('Image reference size exceeds 4 MB limit');
+  }
+
   const sanitizedPrompt = typeof prompt === 'string' ? sanitizeText(prompt) : '';
   if (!sanitizedPrompt) {
     throw new Error('Prompt is required and cannot be empty');
@@ -51,15 +58,17 @@ export async function generateProductMockup(
   let outputTokens = 0;
 
   try {
-    const uploadableFile = await toFile(imageBuffer, 'product-input.png', {
-      type: 'image/png',
-    });
+    const response = await withOpenAiRetry(async () => {
+      const uploadableFile = await toFile(imageBuffer, 'product-input.png', {
+        type: 'image/png',
+      });
 
-    const response = await client.images.edit({
-      model,
-      image: uploadableFile,
-      prompt: sanitizedPrompt,
-      size,
+      return client.images.edit({
+        model,
+        image: uploadableFile,
+        prompt: sanitizedPrompt,
+        size,
+      });
     });
 
     const extractedBase64 = response.data?.[0]?.b64_json;

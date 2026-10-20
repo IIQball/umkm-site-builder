@@ -46,6 +46,7 @@ export async function uploadBase64Image(
     const result = await cloudinary.uploader.upload(dataUri, {
       folder: sanitizedFolder,
       resource_type: 'image',
+      format: 'webp',
     });
 
     return {

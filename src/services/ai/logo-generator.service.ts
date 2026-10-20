@@ -1,4 +1,5 @@
 import { getOpenAIClient, handleOpenAIError } from '@/lib/openai';
+import { withOpenAiRetry } from '@/lib/resilience/openai-retry';
 import type { GenerateLogoImageOptions, GeneratedLogoResult } from '@/types/ai';
 
 export { type GenerateLogoImageOptions, type GeneratedLogoResult } from '@/types/ai';
@@ -31,14 +32,16 @@ export async function generateLogoImage(
   const model = options?.model ?? DEFAULT_MODEL;
 
   try {
-    const response = await client.images.generate({
-      model,
-      prompt: sanitizedPrompt,
-      size: DEFAULT_SIZE,
-      quality,
-      background: DEFAULT_BACKGROUND,
-      output_format: DEFAULT_OUTPUT_FORMAT,
-    });
+    const response = await withOpenAiRetry(() =>
+      client.images.generate({
+        model,
+        prompt: sanitizedPrompt,
+        size: DEFAULT_SIZE,
+        quality,
+        background: DEFAULT_BACKGROUND,
+        output_format: DEFAULT_OUTPUT_FORMAT,
+      })
+    );
 
     const imageData = response.data?.[0]?.b64_json;
     if (!imageData) {

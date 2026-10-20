@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { getOpenAIClient, handleOpenAIError } from '@/lib/openai';
+import { withOpenAiRetry } from '@/lib/resilience/openai-retry';
 import { ValidationError, validate } from '@/lib/utils/validation';
 import { sanitizeText } from '@/lib/utils/format';
 import {
@@ -108,15 +109,17 @@ export async function buildLogoPrompt(input: GenerateLogoPromptInput): Promise<s
   ].join('\n');
 
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      temperature: 0.3,
-      max_tokens: 200,
-      messages: [
-        { role: 'system', content: KAAN_KIZILTUG_SYSTEM_PROMPT },
-        { role: 'user', content: userContent },
-      ],
-    });
+    const response = await withOpenAiRetry(() =>
+      client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        temperature: 0.3,
+        max_tokens: 200,
+        messages: [
+          { role: 'system', content: KAAN_KIZILTUG_SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+      })
+    );
 
     const rawPrompt = response.choices[0]?.message?.content?.trim();
     if (!rawPrompt) {

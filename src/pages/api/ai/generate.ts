@@ -93,6 +93,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Gambar produk wajib disertakan untuk fitur mockup', 400);
     }
 
+    if (imageBuffer && imageBuffer.length > 4 * 1024 * 1024) {
+      throw new AppError('Ukuran gambar referensi melebihi batas 4 MB', 400);
+    }
+
     const isTestingExecution = Boolean(isTesting) && user.role === 'superadmin';
 
     // 3. Ambil toko milik user / store target
@@ -135,95 +139,105 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
 
     // 6. Eksekusi transaksi atomik Drizzle (db.transaction)
-    const result = await db.transaction(async (tx) => {
-      let remainingCredits = creditRecord?.balance ?? 0;
+    let result;
+    try {
+      result = await db.transaction(async (tx) => {
+        let remainingCredits = creditRecord?.balance ?? 0;
 
-      // Pemotongan saldo kredit hanya untuk alur normal non-testing
-      if (!isTestingExecution && creditRecord) {
-        const [updatedCredit] = await tx
-          .update(tenantAiCredits)
-          .set({
-            balance: sql`${tenantAiCredits.balance} - ${requiredCredits}`,
-            totalUsed: sql`${tenantAiCredits.totalUsed} + ${requiredCredits}`,
-            updatedAt: new Date(),
+        // Pemotongan saldo kredit hanya untuk alur normal non-testing
+        if (!isTestingExecution && creditRecord) {
+          const [updatedCredit] = await tx
+            .update(tenantAiCredits)
+            .set({
+              balance: sql`${tenantAiCredits.balance} - ${requiredCredits}`,
+              totalUsed: sql`${tenantAiCredits.totalUsed} + ${requiredCredits}`,
+              updatedAt: new Date(),
+            })
+            .where(and(eq(tenantAiCredits.id, creditRecord.id), gte(tenantAiCredits.balance, requiredCredits)))
+            .returning();
+
+          if (!updatedCredit) {
+            throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
+          }
+          remainingCredits = updatedCredit.balance;
+        }
+
+        // Arahkan ke service yang sesuai dengan model terpilih
+        let imageUrl = '';
+        let inputTokens = 0;
+        let outputTokens = 0;
+
+        if (featureType === 'logo') {
+          const logoResult = await generateLogoImage(sanitizedPrompt, {
+            quality: qualityTier,
+            model: selectedModel,
+          });
+          inputTokens = logoResult.inputTokens;
+          outputTokens = logoResult.outputTokens;
+
+          const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
+          imageUrl = uploadResult.secureUrl;
+        } else {
+          const mockupResult = await generateProductMockup(imageBuffer!, sanitizedPrompt, {
+            size: sizeRatio,
+            model: selectedModel,
+          });
+          imageUrl = mockupResult.imageUrl;
+          inputTokens = mockupResult.inputTokens;
+          outputTokens = mockupResult.outputTokens;
+        }
+
+        // Hitung biaya riil dengan kurs aktif (tanpa external live rate call)
+        const costResult = await calculateCost(inputTokens, outputTokens, selectedModel);
+
+        // Catat entri baru pada tabel ai_generation_logs
+        const logId = `log_${crypto.randomUUID()}`;
+        const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
+
+        const [logEntry] = await tx
+          .insert(aiGenerationLogs)
+          .values({
+            id: logId,
+            tenantId: store.id,
+            userId: user.id,
+            isTesting: isTestingExecution,
+            featureType,
+            modelUsed: selectedModel,
+            sizeRatio,
+            qualityTier,
+            promptFinal: sanitizedPrompt,
+            inputTokens,
+            outputTokens,
+            creditsDeducted,
+            costUsd: costResult.costUsd,
+            costIdr: costResult.costIdr,
+            cloudinaryUrl: imageUrl,
+            status: 'success',
+            errorMessage: null,
           })
-          .where(and(eq(tenantAiCredits.id, creditRecord.id), gte(tenantAiCredits.balance, requiredCredits)))
           .returning();
 
-        if (!updatedCredit) {
-          throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
-        }
-        remainingCredits = updatedCredit.balance;
-      }
-
-      // Arahkan ke service yang sesuai dengan model terpilih
-      let imageUrl = '';
-      let inputTokens = 0;
-      let outputTokens = 0;
-
-      if (featureType === 'logo') {
-        const logoResult = await generateLogoImage(sanitizedPrompt, {
-          quality: qualityTier,
-          model: selectedModel,
-        });
-        inputTokens = logoResult.inputTokens;
-        outputTokens = logoResult.outputTokens;
-
-        const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
-        imageUrl = uploadResult.secureUrl;
-      } else {
-        const mockupResult = await generateProductMockup(imageBuffer!, sanitizedPrompt, {
-          size: sizeRatio,
-          model: selectedModel,
-        });
-        imageUrl = mockupResult.imageUrl;
-        inputTokens = mockupResult.inputTokens;
-        outputTokens = mockupResult.outputTokens;
-      }
-
-      // Hitung biaya riil dengan kurs aktif (tanpa external live rate call)
-      const costResult = await calculateCost(inputTokens, outputTokens, selectedModel);
-
-      // Catat entri baru pada tabel ai_generation_logs
-      const logId = `log_${crypto.randomUUID()}`;
-      const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
-
-      const [logEntry] = await tx
-        .insert(aiGenerationLogs)
-        .values({
-          id: logId,
-          tenantId: store.id,
-          userId: user.id,
-          isTesting: isTestingExecution,
-          featureType,
-          modelUsed: selectedModel,
-          sizeRatio,
-          qualityTier,
-          promptFinal: sanitizedPrompt,
+        return {
+          imageUrl,
           inputTokens,
           outputTokens,
-          creditsDeducted,
           costUsd: costResult.costUsd,
           costIdr: costResult.costIdr,
-          cloudinaryUrl: imageUrl,
-          status: 'success',
-          errorMessage: null,
-        })
-        .returning();
-
-      return {
-        imageUrl,
-        inputTokens,
-        outputTokens,
-        costUsd: costResult.costUsd,
-        costIdr: costResult.costIdr,
-        remainingCredits,
-        logId: logEntry.id,
-        isTesting: isTestingExecution,
-        modelUsed: selectedModel,
-        creditsDeducted,
-      };
-    });
+          remainingCredits,
+          logId: logEntry.id,
+          isTesting: isTestingExecution,
+          modelUsed: selectedModel,
+          creditsDeducted,
+        };
+      });
+    } catch (transactionError: unknown) {
+      if (transactionError instanceof AppError) {
+        throw transactionError;
+      }
+      const rawMessage =
+        transactionError instanceof Error ? transactionError.message : String(transactionError);
+      throw new AppError(`Gagal memproses generasi AI: ${rawMessage}`, 500);
+    }
 
     return jsonSuccess(result, 201);
   });

@@ -168,7 +168,7 @@ describe('LogoGeneratorService - generateLogoImage', () => {
         'insufficient_quota',
         new Headers()
       );
-      mockGenerate.mockRejectedValueOnce(quotaError);
+      mockGenerate.mockRejectedValue(quotaError);
 
       await expect(generateLogoImage('Clean coffee logo')).rejects.toThrow(
         /OpenAI API Error \[429\]:.*exceeded your monthly quota/i
@@ -177,7 +177,7 @@ describe('LogoGeneratorService - generateLogoImage', () => {
 
     it('handles network connection timeout properly', async () => {
       const timeoutError = new Error('ETIMEDOUT: Connection to api.openai.com timed out');
-      mockGenerate.mockRejectedValueOnce(timeoutError);
+      mockGenerate.mockRejectedValue(timeoutError);
 
       await expect(generateLogoImage('Clean coffee logo')).rejects.toThrow(
         'ETIMEDOUT: Connection to api.openai.com timed out'

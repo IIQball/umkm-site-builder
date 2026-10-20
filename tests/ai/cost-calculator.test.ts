@@ -97,11 +97,29 @@ describe('AI Cost Calculator Service', () => {
       expect(result.exchangeRateUsed).toBe(16000);
     });
 
-    it('ensures token pricing constants are defined with positive values', () => {
-      const pricing = MODEL_TOKEN_PRICING['gpt-image-2.5-sunburst'];
-      expect(pricing).toBeDefined();
-      expect(pricing.inputCostPerToken).toBeGreaterThan(0);
-      expect(pricing.outputCostPerToken).toBeGreaterThan(0);
+    it('calculates USD and IDR costs accurately for gpt-image-2.5-flare with active rate', async () => {
+      const mockLimit = vi.fn().mockResolvedValue([{ exchangeRate: 16500 }]);
+      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
+      const mockFrom = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
+      mockSelect.mockReturnValue({ from: mockFrom });
+
+      const result = await calculateCost(1000, 1000, 'gpt-image-2.5-flare');
+
+      expect(result.costUsd).toBe(0.01);
+      expect(result.exchangeRateUsed).toBe(16500);
+      expect(result.costIdr).toBe(165);
+    });
+
+    it('ensures token pricing constants are defined with positive values for all supported models', () => {
+      const sunburst = MODEL_TOKEN_PRICING['gpt-image-2.5-sunburst'];
+      expect(sunburst).toBeDefined();
+      expect(sunburst.inputCostPerToken).toBeGreaterThan(0);
+      expect(sunburst.outputCostPerToken).toBeGreaterThan(0);
+
+      const flare = MODEL_TOKEN_PRICING['gpt-image-2.5-flare'];
+      expect(flare).toBeDefined();
+      expect(flare.inputCostPerToken).toBeGreaterThan(0);
+      expect(flare.outputCostPerToken).toBeGreaterThan(0);
     });
   });
 });

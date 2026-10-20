@@ -4,7 +4,7 @@ import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 import { db } from '@/db';
 import { stores, tenantAiCredits, aiGenerationLogs } from '@/db/schema';
 import { eq, and, gte, sql } from 'drizzle-orm';
-import { generateLogoImage, generateProductMockup, calculateCost } from '@/services/ai';
+import { generateLogoImage, generateProductMockup, calculateCost, resolveStoreAiModel } from '@/services/ai';
 import { uploadBase64Image } from '@/services/media';
 
 export const prerender = false;
@@ -13,6 +13,8 @@ interface GenerateRequestBody {
   featureType?: 'logo' | 'packaging_mockup' | 'product_poster';
   prompt?: string;
   image?: string;
+  isTesting?: boolean;
+  storeId?: string;
   options?: {
     quality?: 'medium' | 'high';
     size?: '1024x1024' | '1024x1536';
@@ -21,40 +23,20 @@ interface GenerateRequestBody {
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
-    // 1. Validasi sesi login merchant
+    // 1. Validasi sesi login user
     const user = await getAuthenticatedUser(context.request);
     if (!user) {
       throw new AppError('Silakan login terlebih dahulu', 401);
     }
 
-    // Ambil toko milik merchant
-    const [store] = await db
-      .select()
-      .from(stores)
-      .where(eq(stores.userId, user.id))
-      .limit(1);
-
-    if (!store) {
-      throw new AppError('Toko merchant tidak ditemukan', 404);
-    }
-
-    // 2. Validasi kecukupan saldo di tenant_ai_credits sebelum pemanggilan AI
-    const [creditRecord] = await db
-      .select()
-      .from(tenantAiCredits)
-      .where(eq(tenantAiCredits.tenantId, store.id))
-      .limit(1);
-
-    if (!creditRecord || creditRecord.balance < 1) {
-      throw new AppError('Kredit AI tidak mencukupi', 402);
-    }
-
-    // Parse payload JSON atau FormData
+    // 2. Parse payload JSON atau FormData
     let featureType: 'logo' | 'packaging_mockup' | 'product_poster' = 'logo';
     let prompt = '';
     let imageBuffer: Buffer | null = null;
     let qualityTier: 'medium' | 'high' = 'high';
     let sizeRatio: '1024x1024' | '1024x1536' = '1024x1024';
+    let isTesting = false;
+    let explicitStoreId: string | undefined;
 
     const contentType = context.request.headers.get('content-type') || '';
 
@@ -73,6 +55,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       if (rawSize === '1024x1024' || rawSize === '1024x1536') {
         sizeRatio = rawSize;
       }
+      const rawTesting = formData.get('isTesting');
+      isTesting = rawTesting === 'true' || rawTesting === '1';
+      explicitStoreId = (formData.get('storeId') as string) || undefined;
 
       const file = formData.get('image');
       if (file && typeof file === 'object' && 'arrayBuffer' in file) {
@@ -95,6 +80,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         const cleanB64 = body.image.replace(/^data:image\/\w+;base64,/, '');
         imageBuffer = Buffer.from(cleanB64, 'base64');
       }
+      isTesting = Boolean(body.isTesting);
+      explicitStoreId = body.storeId;
     }
 
     const sanitizedPrompt = typeof prompt === 'string' ? prompt.trim() : '';
@@ -106,27 +93,70 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Gambar produk wajib disertakan untuk fitur mockup', 400);
     }
 
-    // 3. Eksekusi transaksi atomik Drizzle (db.transaction)
-    // Pemotongan saldo dan pencatatan log dilakukan dalam transaksi.
-    // Jika proses generasi atau upload Cloudinary gagal, transaksi di-rollback otomatis
-    // sehingga kredit toko tidak berkurang.
-    const result = await db.transaction(async (tx) => {
-      // Potong saldo kredit toko
-      const [updatedCredit] = await tx
-        .update(tenantAiCredits)
-        .set({
-          balance: sql`${tenantAiCredits.balance} - 1`,
-          totalUsed: sql`${tenantAiCredits.totalUsed} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(tenantAiCredits.id, creditRecord.id), gte(tenantAiCredits.balance, 1)))
-        .returning();
+    const isTestingExecution = Boolean(isTesting) && user.role === 'superadmin';
 
-      if (!updatedCredit) {
-        throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
+    // 3. Ambil toko milik user / store target
+    let [store] = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.userId, user.id))
+      .limit(1);
+
+    if (!store && isTestingExecution) {
+      if (explicitStoreId) {
+        const [foundStore] = await db.select().from(stores).where(eq(stores.id, explicitStoreId)).limit(1);
+        store = foundStore || ({ id: explicitStoreId, userId: user.id } as typeof store);
+      } else {
+        store = { id: 'store_superadmin_test', userId: user.id } as typeof store;
+      }
+    } else if (!store) {
+      throw new AppError('Toko merchant tidak ditemukan', 404);
+    }
+
+    // 4. Resolusi model & kuota dinamis berdasarkan tiering toko
+    const resolvedModel = await resolveStoreAiModel(store.id);
+    const selectedModel = resolvedModel.model;
+    const requiredCredits = resolvedModel.requiredCredits;
+
+    // 5. Validasi kecukupan saldo (dilewati jika mode testing superadmin)
+    let creditRecord: typeof tenantAiCredits.$inferSelect | undefined;
+
+    if (!isTestingExecution) {
+      const [foundCredits] = await db
+        .select()
+        .from(tenantAiCredits)
+        .where(eq(tenantAiCredits.tenantId, store.id))
+        .limit(1);
+
+      if (!foundCredits || foundCredits.balance < requiredCredits) {
+        throw new AppError('Kredit AI tidak mencukupi', 402);
+      }
+      creditRecord = foundCredits;
+    }
+
+    // 6. Eksekusi transaksi atomik Drizzle (db.transaction)
+    const result = await db.transaction(async (tx) => {
+      let remainingCredits = creditRecord?.balance ?? 0;
+
+      // Pemotongan saldo kredit hanya untuk alur normal non-testing
+      if (!isTestingExecution && creditRecord) {
+        const [updatedCredit] = await tx
+          .update(tenantAiCredits)
+          .set({
+            balance: sql`${tenantAiCredits.balance} - ${requiredCredits}`,
+            totalUsed: sql`${tenantAiCredits.totalUsed} + ${requiredCredits}`,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(tenantAiCredits.id, creditRecord.id), gte(tenantAiCredits.balance, requiredCredits)))
+          .returning();
+
+        if (!updatedCredit) {
+          throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
+        }
+        remainingCredits = updatedCredit.balance;
       }
 
-      // Arahkan ke service yang sesuai
+      // Arahkan ke service yang sesuai dengan model terpilih
       let imageUrl = '';
       let inputTokens = 0;
       let outputTokens = 0;
@@ -134,6 +164,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       if (featureType === 'logo') {
         const logoResult = await generateLogoImage(sanitizedPrompt, {
           quality: qualityTier,
+          model: selectedModel,
         });
         inputTokens = logoResult.inputTokens;
         outputTokens = logoResult.outputTokens;
@@ -143,6 +174,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       } else {
         const mockupResult = await generateProductMockup(imageBuffer!, sanitizedPrompt, {
           size: sizeRatio,
+          model: selectedModel,
         });
         imageUrl = mockupResult.imageUrl;
         inputTokens = mockupResult.inputTokens;
@@ -150,25 +182,27 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
 
       // Hitung biaya riil dengan kurs aktif (tanpa external live rate call)
-      const costResult = await calculateCost(inputTokens, outputTokens, 'gpt-image-2.5-sunburst');
+      const costResult = await calculateCost(inputTokens, outputTokens, selectedModel);
 
       // Catat entri baru pada tabel ai_generation_logs
       const logId = `log_${crypto.randomUUID()}`;
+      const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
+
       const [logEntry] = await tx
         .insert(aiGenerationLogs)
         .values({
           id: logId,
           tenantId: store.id,
           userId: user.id,
-          isTesting: false,
+          isTesting: isTestingExecution,
           featureType,
-          modelUsed: 'gpt-image-2.5-sunburst',
+          modelUsed: selectedModel,
           sizeRatio,
           qualityTier,
           promptFinal: sanitizedPrompt,
           inputTokens,
           outputTokens,
-          creditsDeducted: 1,
+          creditsDeducted,
           costUsd: costResult.costUsd,
           costIdr: costResult.costIdr,
           cloudinaryUrl: imageUrl,
@@ -183,8 +217,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         outputTokens,
         costUsd: costResult.costUsd,
         costIdr: costResult.costIdr,
-        remainingCredits: updatedCredit.balance,
+        remainingCredits,
         logId: logEntry.id,
+        isTesting: isTestingExecution,
+        modelUsed: selectedModel,
+        creditsDeducted,
       };
     });
 

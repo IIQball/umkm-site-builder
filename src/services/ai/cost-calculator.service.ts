@@ -4,6 +4,8 @@ import { desc } from 'drizzle-orm';
 
 export const DEFAULT_FALLBACK_EXCHANGE_RATE = 16200;
 export const DEFAULT_AI_MODEL = 'gpt-image-2.5-sunburst';
+export const FLARE_AI_MODEL = 'gpt-image-2.5-flare';
+export const SUNBURST_AI_MODEL = 'gpt-image-2.5-sunburst';
 
 export interface ModelPricing {
   inputCostPerToken: number;
@@ -13,11 +15,16 @@ export interface ModelPricing {
 /**
  * Token pricing in USD per token.
  * gpt-image-2.5-sunburst: $0.005/1K input ($0.000005/token), $0.015/1K output ($0.000015/token).
+ * gpt-image-2.5-flare: $0.0025/1K input ($0.0000025/token), $0.0075/1K output ($0.0000075/token).
  */
 export const MODEL_TOKEN_PRICING: Record<string, ModelPricing> = {
   'gpt-image-2.5-sunburst': {
     inputCostPerToken: 0.000005,
     outputCostPerToken: 0.000015,
+  },
+  'gpt-image-2.5-flare': {
+    inputCostPerToken: 0.0000025,
+    outputCostPerToken: 0.0000075,
   },
   'recraft-v3': {
     inputCostPerToken: 0.000005,

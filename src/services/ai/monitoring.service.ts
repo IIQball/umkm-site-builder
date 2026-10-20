@@ -47,18 +47,12 @@ export async function getAiMonitoringSummary(): Promise<AiMonitoringSummary> {
   const [dep] = depositResult;
 
   const totalExecutions = row?.totalExecutions || 0;
-  const successCount = row?.successCount || 0;
-  const failedCount = row?.failedCount || 0;
-  const pendingCount = row?.pendingCount || 0;
-  const processingCount = row?.processingCount || 0;
-  const totalCostIdr = row?.totalCostIdr || 0;
-  const totalCostUsd = row?.totalCostUsd || 0;
-  const totalInputTokens = row?.totalInputTokens || 0;
-  const totalOutputTokens = row?.totalOutputTokens || 0;
+  const successCount = row?.successCount || 0, failedCount = row?.failedCount || 0;
+  const pendingCount = row?.pendingCount || 0, processingCount = row?.processingCount || 0;
+  const totalCostIdr = row?.totalCostIdr || 0, totalCostUsd = row?.totalCostUsd || 0;
+  const totalInputTokens = row?.totalInputTokens || 0, totalOutputTokens = row?.totalOutputTokens || 0;
   const totalTokens = totalInputTokens + totalOutputTokens;
-
-  const totalDepositUsd = dep?.totalDepositUsd || 0;
-  const totalDepositIdr = dep?.totalDepositIdr || 0;
+  const totalDepositUsd = dep?.totalDepositUsd || 0, totalDepositIdr = dep?.totalDepositIdr || 0;
 
   const remainingDepositUsd = Math.max(0, Number((totalDepositUsd - totalCostUsd).toFixed(4)));
   const remainingDepositIdr = Math.max(0, Math.round(remainingDepositUsd * activeExchangeRate));
@@ -297,10 +291,5 @@ export async function getAiMonitoringDashboardData(): Promise<AiMonitoringDashbo
     getAiRecentLogs(10),
     getAiDepositHistory(50),
   ]);
-
-  return {
-    summary,
-    recentLogs,
-    depositHistory,
-  };
+  return { summary, recentLogs, depositHistory };
 }

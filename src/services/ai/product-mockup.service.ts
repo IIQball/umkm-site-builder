@@ -5,6 +5,7 @@ import { uploadBase64Image } from '@/services/media/cloudinary-uploader';
 
 export interface GenerateProductMockupOptions {
   size?: '1024x1024' | '1024x1536';
+  model?: string;
 }
 
 export interface GeneratedProductMockupResult {
@@ -43,6 +44,7 @@ export async function generateProductMockup(
 
   const client = getOpenAIClient();
   const size = options?.size ?? DEFAULT_SIZE;
+  const model = options?.model ?? DEFAULT_MODEL;
 
   let b64Data: string;
   let inputTokens = 0;
@@ -54,7 +56,7 @@ export async function generateProductMockup(
     });
 
     const response = await client.images.edit({
-      model: DEFAULT_MODEL,
+      model,
       image: uploadableFile,
       prompt: sanitizedPrompt,
       size,

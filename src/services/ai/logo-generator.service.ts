@@ -28,10 +28,11 @@ export async function generateLogoImage(
 
   const client = getOpenAIClient();
   const quality = options?.quality ?? DEFAULT_QUALITY;
+  const model = options?.model ?? DEFAULT_MODEL;
 
   try {
     const response = await client.images.generate({
-      model: DEFAULT_MODEL,
+      model,
       prompt: sanitizedPrompt,
       size: DEFAULT_SIZE,
       quality,

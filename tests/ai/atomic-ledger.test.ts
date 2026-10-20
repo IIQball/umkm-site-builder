@@ -24,6 +24,14 @@ vi.mock('@/db', () => ({
 type DepositContext = Parameters<typeof handleDepositPost>[0];
 type GenerateContext = Parameters<typeof handleGeneratePost>[0];
 
+interface RecordedLogPayload {
+  id?: string;
+  isTesting?: boolean;
+  creditsDeducted?: number;
+  modelUsed?: string;
+  status?: string;
+}
+
 describe('Atomic Ledger & AI Generation Integration', () => {
   const mockGetAuthUser = getAuthenticatedUser as unknown as Mock;
   const mockIsSuperAdmin = isAuthorizedSuperAdmin as unknown as Mock;
@@ -34,14 +42,125 @@ describe('Atomic Ledger & AI Generation Integration', () => {
   let mockGenerate: ReturnType<typeof vi.fn>;
   let mockOpenAiClient: OpenAI;
 
-  const mockStoreAndCredit = (balance: number) => {
-    mockSelect
-      .mockReturnValueOnce({
-        from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'store_1', userId: 'tenant_1' }]) }) }),
-      })
-      .mockReturnValueOnce({
-        from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance }]) }) }),
-      });
+  const mockStoreAndTier = ({
+    balance = 2,
+    packageTier = null as string | null,
+    userId = 'tenant_1',
+    storeId = 'store_1',
+    exchangeRate = 16200,
+  } = {}) => {
+    // 1. stores
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: storeId, userId }]) }) }),
+    });
+
+    // 2. storeQuotaPurchases in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({
+        leftJoin: () => ({
+          where: () => ({
+            orderBy: () => ({
+              limit: () => Promise.resolve(packageTier ? [{
+                id: 'pur_1',
+                packageId: `pkg_${packageTier.toLowerCase()}`,
+                packageName: `Paket ${packageTier}`,
+                packageSlug: `paket-${packageTier.toLowerCase()}`,
+              }] : []),
+            }),
+          }),
+        }),
+      }),
+    });
+
+    // 3. tenantAiCredits in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance, totalPurchased: packageTier ? 1 : 0 }]) }) }),
+    });
+
+    // 4. tenantAiCredits in generate.ts credit check
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance }]) }) }),
+    });
+
+    // 5. aiDepositHistory in calculateCost
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ orderBy: () => ({ limit: () => Promise.resolve([{ exchangeRate }]) }) }),
+    });
+  };
+
+  const mockInsufficientCredit = (packageTier: string | null = null, balance = 0) => {
+    // 1. stores
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'store_1', userId: 'tenant_1' }]) }) }),
+    });
+
+    // 2. storeQuotaPurchases in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({
+        leftJoin: () => ({
+          where: () => ({
+            orderBy: () => ({
+              limit: () => Promise.resolve(packageTier ? [{
+                id: 'pur_1',
+                packageId: `pkg_${packageTier.toLowerCase()}`,
+                packageName: `Paket ${packageTier}`,
+                packageSlug: `paket-${packageTier.toLowerCase()}`,
+              }] : []),
+            }),
+          }),
+        }),
+      }),
+    });
+
+    // 3. tenantAiCredits in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance, totalPurchased: packageTier ? 1 : 0 }]) }) }),
+    });
+
+    // 4. tenantAiCredits in generate.ts credit check
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance }]) }) }),
+    });
+  };
+
+  const mockSuperadminTesting = ({
+    packageTier = null as string | null,
+    userId = 'super_1',
+    storeId = 'store_1',
+    exchangeRate = 16200,
+  } = {}) => {
+    // 1. stores
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: storeId, userId }]) }) }),
+    });
+
+    // 2. storeQuotaPurchases in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({
+        leftJoin: () => ({
+          where: () => ({
+            orderBy: () => ({
+              limit: () => Promise.resolve(packageTier ? [{
+                id: 'pur_1',
+                packageId: `pkg_${packageTier.toLowerCase()}`,
+                packageName: `Paket ${packageTier}`,
+                packageSlug: `paket-${packageTier.toLowerCase()}`,
+              }] : []),
+            }),
+          }),
+        }),
+      }),
+    });
+
+    // 3. tenantAiCredits in resolveStoreAiModel
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ where: () => ({ limit: () => Promise.resolve([{ id: 'cred_1', balance: 5, totalPurchased: packageTier ? 1 : 0 }]) }) }),
+    });
+
+    // 4. aiDepositHistory in calculateCost (credit check in generate.ts is skipped in testing mode)
+    mockSelect.mockReturnValueOnce({
+      from: () => ({ orderBy: () => ({ limit: () => Promise.resolve([{ exchangeRate }]) }) }),
+    });
   };
 
   beforeEach(() => {
@@ -155,9 +274,9 @@ describe('Atomic Ledger & AI Generation Integration', () => {
       expect(res.status).toBe(401);
     });
 
-    it('returns 402/400 when credit balance is insufficient before AI call', async () => {
-      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant' });
-      mockStoreAndCredit(0);
+    it('returns 402 when credit balance is insufficient before AI call', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockInsufficientCredit(null, 0);
 
       const request = new Request('http://localhost/api/ai/generate', {
         method: 'POST',
@@ -174,13 +293,28 @@ describe('Atomic Ledger & AI Generation Integration', () => {
       expect(mockTransaction).not.toHaveBeenCalled();
     });
 
-    it('executes atomic transaction successfully deducting 1 credit and recording log', async () => {
-      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant' });
-      mockStoreAndCredit(2);
+    it('rejects with HTTP 402 when store has only 1 credit but tries to run sunburst model (Reguler/Juragan tier needs 2 credits)', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockInsufficientCredit('Reguler', 1);
 
-      mockSelect.mockReturnValueOnce({
-        from: () => ({ orderBy: () => ({ limit: () => Promise.resolve([{ exchangeRate: 16200 }]) }) }),
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: 'Logo kopi premium' }),
       });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(402);
+      const json = await res.json();
+      expect(json.ok).toBe(false);
+      expect(json.error.message).toContain('Kredit AI tidak mencukupi');
+      expect(mockGenerate).not.toHaveBeenCalled();
+      expect(mockTransaction).not.toHaveBeenCalled();
+    });
+
+    it('executes atomic transaction successfully deducting 1 credit for flare model (Hemat/Trial)', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 2, packageTier: 'Hemat' });
 
       mockGenerate.mockResolvedValueOnce({
         data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
@@ -223,14 +357,184 @@ describe('Atomic Ledger & AI Generation Integration', () => {
       const json = await res.json();
       expect(json.ok).toBe(true);
       expect(json.data.remainingCredits).toBe(1);
+      expect(json.data.creditsDeducted).toBe(1);
+      expect(json.data.modelUsed).toBe('gpt-image-2.5-flare');
       expect(json.data.imageUrl).toBe('https://res.cloudinary.com/pinoka/logo.png');
       expect(mockTx.update).toHaveBeenCalled();
       expect(mockTx.insert).toHaveBeenCalled();
     });
 
+    it('executes atomic transaction successfully deducting 2 credits for sunburst model (Reguler/Juragan)', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 5, packageTier: 'Reguler' });
+
+      mockGenerate.mockResolvedValueOnce({
+        data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
+        usage: { input_tokens: 300, output_tokens: 800 },
+      });
+
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/logos/logo_2',
+        secure_url: 'https://res.cloudinary.com/pinoka/logo2.png',
+        bytes: 2048,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      const mockTx = {
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_sunburst123' }]),
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'logo',
+          prompt: 'Exclusive jewelry logo',
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      expect(json.data.remainingCredits).toBe(3);
+      expect(json.data.creditsDeducted).toBe(2);
+      expect(json.data.modelUsed).toBe('gpt-image-2.5-sunburst');
+      expect(mockTx.update).toHaveBeenCalled();
+      expect(mockTx.insert).toHaveBeenCalled();
+    });
+
+    it('allows superadmin with isTesting flag to execute AI without deducting credits and logs audit entry with isTesting true', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'super_1', role: 'superadmin', status: 'active' });
+      mockIsSuperAdmin.mockReturnValue(true);
+      mockSuperadminTesting({ packageTier: 'Juragan', userId: 'super_1' });
+
+      mockGenerate.mockResolvedValueOnce({
+        data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
+        usage: { input_tokens: 200, output_tokens: 500 },
+      });
+
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/logos/test_logo',
+        secure_url: 'https://res.cloudinary.com/pinoka/test_logo.png',
+        bytes: 1024,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      let auditLogVal: Partial<RecordedLogPayload> = {};
+      const mockTx = {
+        update: vi.fn(),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((val: RecordedLogPayload) => {
+            auditLogVal = val;
+            return {
+              returning: vi.fn().mockResolvedValue([{ id: 'log_test_audit', ...val }]),
+            };
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'logo',
+          prompt: 'Superadmin test prompt',
+          isTesting: true,
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      expect(json.data.isTesting).toBe(true);
+      expect(json.data.creditsDeducted).toBe(0);
+      expect(mockTx.update).not.toHaveBeenCalled();
+      expect(mockTx.insert).toHaveBeenCalled();
+      expect(auditLogVal.isTesting).toBe(true);
+      expect(auditLogVal.creditsDeducted).toBe(0);
+      expect(auditLogVal.status).toBe('success');
+    });
+
+    it('prevents non-superadmin payload tampering: ignores isTesting flag from regular merchant and deducts credits normally', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_tamper_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 5, packageTier: 'Reguler', userId: 'tenant_tamper_1' });
+
+      mockGenerate.mockResolvedValueOnce({
+        data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
+        usage: { input_tokens: 300, output_tokens: 800 },
+      });
+
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/logos/tamper_logo',
+        secure_url: 'https://res.cloudinary.com/pinoka/tamper.png',
+        bytes: 1024,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      let recordedLogPayload: Partial<RecordedLogPayload> = {};
+      const mockTx = {
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((val: RecordedLogPayload) => {
+            recordedLogPayload = val;
+            return {
+              returning: vi.fn().mockResolvedValue([{ id: 'log_tamper_123', ...val }]),
+            };
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'logo',
+          prompt: 'Attempted credit bypass logo',
+          isTesting: true, // Non-superadmin merchant tries to bypass credit deduction
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+
+      // Verify that bypass was rejected:
+      expect(json.data.isTesting).toBe(false);
+      expect(json.data.creditsDeducted).toBe(2); // Paket Reguler = 2 credits
+      expect(json.data.remainingCredits).toBe(3); // 5 - 2 = 3
+      expect(mockTx.update).toHaveBeenCalled(); // Credit MUST be deducted
+      expect(mockTx.insert).toHaveBeenCalled();
+
+      // Verify log entry on ai_generation_logs table
+      expect(recordedLogPayload).toBeDefined();
+      expect(recordedLogPayload.isTesting).toBe(false);
+      expect(recordedLogPayload.creditsDeducted).toBe(2);
+      expect(recordedLogPayload.modelUsed).toBe('gpt-image-2.5-sunburst');
+    });
+
     it('rolls back database transaction and does not leak credits when third-party API fails', async () => {
-      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant' });
-      mockStoreAndCredit(2);
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 2, packageTier: null });
 
       mockGenerate.mockRejectedValueOnce(new Error('OpenAI 503 Service Unavailable'));
 

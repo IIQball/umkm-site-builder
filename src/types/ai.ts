@@ -107,6 +107,7 @@ export interface GenerateLogoPromptInput {
 
 export interface GenerateLogoImageOptions {
   quality?: 'medium' | 'high';
+  model?: string;
 }
 
 export interface GeneratedLogoResult {

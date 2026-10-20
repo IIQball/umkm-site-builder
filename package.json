@@ -13,6 +13,7 @@
     "astro": "astro",
     "type-check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint src tests --ext .ts,.js,.astro,.svelte --max-warnings 0",
+    "db:migrate": "bun run scripts/migrate.ts",
     "db:seed": "bun run src/db/seed.ts",
     "seed": "bun run src/db/seed.ts",
     "seed:superadmin": "bun run src/db/seed.ts",

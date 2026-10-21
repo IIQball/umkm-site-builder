@@ -30,7 +30,7 @@
 
 <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
   {#if isLoading}
-    <div class="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-blue-600" />
+    <div class="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-blue-600"></div>
     <span class="text-sm text-blue-700 dark:text-blue-300">Memuat...</span>
   {:else if error}
     <Zap size={18} class="text-orange-500" />

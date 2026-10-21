@@ -3,6 +3,8 @@
  * Used by Superadmin / Admin AI Monitoring Dashboard & APIs
  */
 
+import type { AiFeatureType } from '../ai';
+
 export interface AiStatusCounts {
   success: number;
   failed: number;
@@ -103,5 +105,24 @@ export interface AiMonitoringDashboardData {
   summary: AiMonitoringSummary;
   recentLogs: AiMonitoringRecentLog[];
   depositHistory?: AiDepositHistoryItem[];
+  featureDistribution?: AiFeatureDistributionData;
+}
+
+export interface AiFeatureDistributionItem {
+  featureType: AiFeatureType;
+  label: string;
+  totalRequests: number;
+  successRequests: number;
+  totalCostIdr: number;
+  totalCostUsd: number;
+  requestPercentage: number;
+  costPercentage: number;
+}
+
+export interface AiFeatureDistributionData {
+  totalRequests: number;
+  totalCostIdr: number;
+  totalCostUsd: number;
+  distribution: AiFeatureDistributionItem[];
 }
 

@@ -21,8 +21,20 @@ export interface ResolvedStoreAiModel {
  * - Paket Reguler and Paket Juragan -> gpt-image-2.5-sunburst (2 credits)
  * - Fallback to gpt-image-2.5-flare (1 credit) if store data or history is not found
  */
-export async function resolveStoreAiModel(storeId: string): Promise<ResolvedStoreAiModel> {
+export async function resolveStoreAiModel(
+  storeId: string,
+  requestedQualityTier?: 'standard' | 'high' | 'hd'
+): Promise<ResolvedStoreAiModel> {
   if (!storeId) {
+    if (requestedQualityTier === 'high' || requestedQualityTier === 'hd') {
+      return {
+        model: SUNBURST_AI_MODEL,
+        requiredCredits: 2,
+        creditsRequired: 2,
+        tier: 'juragan',
+        packageName: 'Kualitas HD Studio (Sunburst)',
+      };
+    }
     return {
       model: FLARE_AI_MODEL,
       requiredCredits: 1,
@@ -61,6 +73,27 @@ export async function resolveStoreAiModel(storeId: string): Promise<ResolvedStor
       .limit(1);
 
     const creditRecord = credits?.[0];
+
+    // Override jika requestedQualityTier diberikan secara eksplisit
+    if (requestedQualityTier === 'standard') {
+      return {
+        model: FLARE_AI_MODEL,
+        requiredCredits: 1,
+        creditsRequired: 1,
+        tier: 'trial',
+        packageName: 'Kualitas Standar (Flare)',
+      };
+    }
+
+    if (requestedQualityTier === 'high' || requestedQualityTier === 'hd') {
+      return {
+        model: SUNBURST_AI_MODEL,
+        requiredCredits: 2,
+        creditsRequired: 2,
+        tier: 'juragan',
+        packageName: 'Kualitas HD Studio (Sunburst)',
+      };
+    }
 
     // Jika storeId sama sekali tidak memiliki catatan transaksi dan tidak ada data kredit
     if (!creditRecord && !latestPurchase) {

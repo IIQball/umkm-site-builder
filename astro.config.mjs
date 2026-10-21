@@ -21,10 +21,10 @@ export default defineConfig({
       'process.env': {},
     },
     optimizeDeps: {
-      exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js', 'cloudinary'],
+      exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js'],
     },
     ssr: {
-      noExternal: ['worker-mailer', 'cloudinary'],
+      noExternal: ['worker-mailer'],
     },
     build: {
       chunkSizeWarningLimit: 2000,

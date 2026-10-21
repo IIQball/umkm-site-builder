@@ -50,9 +50,9 @@ export const config = {
   },
 
   media: {
-    cloudinaryName: env('CLOUDINARY_NAME'),
+    cloudinaryName: env('CLOUDINARY_NAME') || env('CLOUDINARY_CLOUD_NAME'),
     cloudinaryApiKey: env('CLOUDINARY_API_KEY'),
-    cloudinarySecret: env('CLOUDINARY_SECRET'),
+    cloudinarySecret: env('CLOUDINARY_SECRET') || env('CLOUDINARY_API_SECRET'),
   },
 
   ai: {

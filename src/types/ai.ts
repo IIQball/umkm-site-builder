@@ -24,7 +24,7 @@ export type AiGenerationStatus = (typeof AI_GENERATION_STATUSES)[number];
 
 export type AiSizeRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 
-export type AiQualityTier = 'standard' | 'hd' | 'ultra';
+export type AiQualityTier = 'standard' | 'high' | 'hd' | 'ultra';
 
 // 2. DATABASE ENTITY / MODEL INTERFACES
 
@@ -100,9 +100,15 @@ export interface GenerateAiImageRequest {
 
 export interface GenerateLogoPromptInput {
   storeName: string;
-  category: string;
+  category?: string;
   visualStyle?: string;
+  conceptType?: string;
+  businessCategory?: string;
+  logoText?: string;
   colorPalette?: string;
+  lockupType?: 'icon_only' | 'vertical' | 'horizontal';
+  fontFamily?: 'Poppins' | 'Plus Jakarta Sans' | 'Space Grotesk' | 'Fraunces' | 'Outfit' | 'Playfair Display';
+  focalSubject?: string;
 }
 
 export interface GenerateLogoImageOptions {

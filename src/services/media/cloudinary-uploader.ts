@@ -38,12 +38,13 @@ export async function uploadBase64Image(
   // Ensure Cloudinary SDK is initialized with environment credentials
   getCloudinaryServer();
 
-  const dataUri = sanitizedBase64.startsWith('data:')
+  const isRemoteUrl = sanitizedBase64.startsWith('http://') || sanitizedBase64.startsWith('https://');
+  const uploadPayload = sanitizedBase64.startsWith('data:') || isRemoteUrl
     ? sanitizedBase64
     : `data:image/png;base64,${sanitizedBase64}`;
 
   try {
-    const result = await cloudinary.uploader.upload(dataUri, {
+    const result = await cloudinary.uploader.upload(uploadPayload, {
       folder: sanitizedFolder,
       resource_type: 'image',
       format: 'webp',

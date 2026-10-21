@@ -56,6 +56,10 @@ describe('LogoGeneratorService - generateLogoImage (bun:test)', () => {
       expect(payload.quality).toBe('high');
       expect(payload.prompt).toBe(prompt);
 
+      // Validate client timeout and maxRetries options (120s timeout, 0 retries)
+      const requestOptions = mockGenerate.mock.calls[0][1];
+      expect(requestOptions).toEqual({ timeout: 120000, maxRetries: 0 });
+
       // Validate structured return value according to ai domain contract
       expect(result).toEqual({
         base64: fakeBase64,
@@ -196,4 +200,47 @@ describe('LogoGeneratorService - generateLogoImage (bun:test)', () => {
       );
     });
   });
+
+  describe('Official OpenAI Model Adapter Fallback', () => {
+    it('adapts and falls back to dall-e-3 when custom model is rejected by OpenAI API', async () => {
+      const modelNotFoundError = new OpenAI.APIError(
+        400,
+        {
+          message: "The model 'gpt-image-2.5-sunburst' does not exist.",
+          type: 'invalid_request_error',
+          code: 'model_not_found',
+        },
+        'model_not_found',
+        new Headers()
+      );
+
+      // First call (gpt-image-2.5-sunburst) fails with model rejection
+      mockGenerate.mockRejectedValueOnce(modelNotFoundError);
+
+      // Second call (dall-e-3 fallback) succeeds
+      mockGenerate.mockResolvedValueOnce({
+        created: 1729250000,
+        data: [{ b64_json: 'dall-e-3-fallback-base64' }],
+      });
+
+      const result = await generateLogoImage('Minimalist bakery logo');
+
+      expect(mockGenerate).toHaveBeenCalledTimes(2);
+
+      // Verify second call was adapted to dall-e-3
+      const fallbackCall = mockGenerate.mock.calls[1][0];
+      expect(fallbackCall.model).toBe('dall-e-3');
+      expect(fallbackCall.response_format).toBe('b64_json');
+      expect(fallbackCall.prompt).toBe('Minimalist bakery logo');
+      expect(fallbackCall.background).toBeUndefined();
+      expect(fallbackCall.output_format).toBeUndefined();
+
+      const fallbackOptions = mockGenerate.mock.calls[1][1];
+      expect(fallbackOptions).toEqual({ timeout: 120000, maxRetries: 0 });
+
+      expect(result.base64).toBe('dall-e-3-fallback-base64');
+      expect(result.format).toBe('png');
+    });
+  });
 });
+

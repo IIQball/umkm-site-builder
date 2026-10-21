@@ -1,4 +1,4 @@
-async function generateSignature(params: Record<string, string>, apiSecret: string) {
+export async function generateSignature(params: Record<string, string>, apiSecret: string) {
   const sortedKeys = Object.keys(params).sort();
   const queryToSign = sortedKeys.map((key) => `${key}=${params[key]}`).join('&');
   const stringToSign = queryToSign + apiSecret;
@@ -13,15 +13,26 @@ async function generateSignature(params: Record<string, string>, apiSecret: stri
 }
 
 export function getCloudinaryConfig() {
+  const envMeta = (typeof import.meta !== 'undefined' && import.meta.env)
+    ? (import.meta.env as unknown as Record<string, string | undefined>)
+    : undefined;
+  const envProc = typeof process !== 'undefined' && process.env ? process.env : undefined;
+
   const cloudName =
-    (typeof process !== 'undefined' ? process.env?.CLOUDINARY_NAME : undefined) ||
-    (import.meta.env as unknown as Record<string, string | undefined>)?.CLOUDINARY_NAME;
+    envProc?.CLOUDINARY_NAME ||
+    envProc?.CLOUDINARY_CLOUD_NAME ||
+    envMeta?.CLOUDINARY_NAME ||
+    envMeta?.CLOUDINARY_CLOUD_NAME;
+
   const apiKey =
-    (typeof process !== 'undefined' ? process.env?.CLOUDINARY_API_KEY : undefined) ||
-    (import.meta.env as unknown as Record<string, string | undefined>)?.CLOUDINARY_API_KEY;
+    envProc?.CLOUDINARY_API_KEY ||
+    envMeta?.CLOUDINARY_API_KEY;
+
   const apiSecret =
-    (typeof process !== 'undefined' ? process.env?.CLOUDINARY_SECRET : undefined) ||
-    (import.meta.env as unknown as Record<string, string | undefined>)?.CLOUDINARY_SECRET;
+    envProc?.CLOUDINARY_SECRET ||
+    envProc?.CLOUDINARY_API_SECRET ||
+    envMeta?.CLOUDINARY_SECRET ||
+    envMeta?.CLOUDINARY_API_SECRET;
 
   if (!cloudName || !apiKey || !apiSecret) {
     throw new Error("Missing Cloudinary configuration");

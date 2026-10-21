@@ -251,8 +251,8 @@ describe('AI Image Model Validation Harness Runner (bun:test)', () => {
       });
 
       const result = await calculateCost(1000, 1000, 'unregistered_experimental_model');
-      expect(result.costUsd).toBe(0.02);
-      expect(result.costIdr).toBe(320);
+      expect(result.costUsd).toBe(0.1);
+      expect(result.costIdr).toBe(1600);
     });
   });
 

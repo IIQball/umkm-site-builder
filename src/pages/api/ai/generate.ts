@@ -4,241 +4,273 @@ import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 import { db } from '@/db';
 import { stores, tenantAiCredits, aiGenerationLogs } from '@/db/schema';
 import { eq, and, gte, sql } from 'drizzle-orm';
-import { generateLogoImage, generateProductMockup, calculateCost, resolveStoreAiModel } from '@/services/ai';
-import { uploadBase64Image } from '@/services/media';
+import {
+  buildLogoPrompt,
+  generateLogoImage,
+  buildProductPosterPrompt,
+  generateProductPoster,
+  buildProductMockupPrompt,
+  generateProductMockup,
+  calculateCost,
+  resolveStoreAiModel,
+} from '@/services/ai';
+import { uploadBase64Image } from '@/services/media/cloudinary-uploader';
+import {
+  type AiPhase,
+  parseGeneratePayload,
+  rollbackAiCredits,
+  handleGenerateError,
+} from './generate.helpers';
 
 export const prerender = false;
 
-interface GenerateRequestBody {
-  featureType?: 'logo' | 'packaging_mockup' | 'product_poster';
-  prompt?: string;
-  image?: string;
-  isTesting?: boolean;
-  storeId?: string;
-  options?: {
-    quality?: 'medium' | 'high';
-    size?: '1024x1024' | '1024x1536';
-  };
-}
-
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
-    // 1. Validasi sesi login user
-    const user = await getAuthenticatedUser(context.request);
-    if (!user) {
-      throw new AppError('Silakan login terlebih dahulu', 401);
-    }
+    let currentPhase: AiPhase = 'STORE_AUTH';
+    let creditDeducted = false;
+    let requiredCredits = 0;
+    let targetStoreId: string | undefined;
 
-    // 2. Parse payload JSON atau FormData
-    let featureType: 'logo' | 'packaging_mockup' | 'product_poster' = 'logo';
-    let prompt = '';
-    let imageBuffer: Buffer | null = null;
-    let qualityTier: 'medium' | 'high' = 'high';
-    let sizeRatio: '1024x1024' | '1024x1536' = '1024x1024';
-    let isTesting = false;
-    let explicitStoreId: string | undefined;
-
-    const contentType = context.request.headers.get('content-type') || '';
-
-    if (contentType.includes('multipart/form-data')) {
-      const formData = await context.request.formData();
-      const rawFeature = formData.get('featureType') as string;
-      if (rawFeature === 'packaging_mockup' || rawFeature === 'product_poster' || rawFeature === 'logo') {
-        featureType = rawFeature;
-      }
-      prompt = (formData.get('prompt') as string) || '';
-      const rawQuality = formData.get('quality') as string;
-      if (rawQuality === 'medium' || rawQuality === 'high') {
-        qualityTier = rawQuality;
-      }
-      const rawSize = formData.get('size') as string;
-      if (rawSize === '1024x1024' || rawSize === '1024x1536') {
-        sizeRatio = rawSize;
-      }
-      const rawTesting = formData.get('isTesting');
-      isTesting = rawTesting === 'true' || rawTesting === '1';
-      explicitStoreId = (formData.get('storeId') as string) || undefined;
-
-      const file = formData.get('image');
-      if (file && typeof file === 'object' && 'arrayBuffer' in file) {
-        const arrayBuf = await (file as Blob).arrayBuffer();
-        imageBuffer = Buffer.from(arrayBuf);
-      }
-    } else {
-      const body = (await context.request.json().catch(() => ({}))) as GenerateRequestBody;
-      if (body.featureType) {
-        featureType = body.featureType;
-      }
-      prompt = body.prompt || '';
-      if (body.options?.quality) {
-        qualityTier = body.options.quality;
-      }
-      if (body.options?.size) {
-        sizeRatio = body.options.size;
-      }
-      if (body.image) {
-        const cleanB64 = body.image.replace(/^data:image\/\w+;base64,/, '');
-        imageBuffer = Buffer.from(cleanB64, 'base64');
-      }
-      isTesting = Boolean(body.isTesting);
-      explicitStoreId = body.storeId;
-    }
-
-    const sanitizedPrompt = typeof prompt === 'string' ? prompt.trim() : '';
-    if (!sanitizedPrompt) {
-      throw new AppError('Prompt wajib diisi', 400);
-    }
-
-    if (featureType !== 'logo' && (!imageBuffer || imageBuffer.length === 0)) {
-      throw new AppError('Gambar produk wajib disertakan untuk fitur mockup', 400);
-    }
-
-    if (imageBuffer && imageBuffer.length > 4 * 1024 * 1024) {
-      throw new AppError('Ukuran gambar referensi melebihi batas 4 MB', 400);
-    }
-
-    const isTestingExecution = Boolean(isTesting) && user.role === 'superadmin';
-
-    // 3. Ambil toko milik user / store target
-    let [store] = await db
-      .select()
-      .from(stores)
-      .where(eq(stores.userId, user.id))
-      .limit(1);
-
-    if (!store && isTestingExecution) {
-      if (explicitStoreId) {
-        const [foundStore] = await db.select().from(stores).where(eq(stores.id, explicitStoreId)).limit(1);
-        store = foundStore || ({ id: explicitStoreId, userId: user.id } as typeof store);
-      } else {
-        store = { id: 'store_superadmin_test', userId: user.id } as typeof store;
-      }
-    } else if (!store) {
-      throw new AppError('Toko merchant tidak ditemukan', 404);
-    }
-
-    // 4. Resolusi model & kuota dinamis berdasarkan tiering toko
-    const resolvedModel = await resolveStoreAiModel(store.id);
-    const selectedModel = resolvedModel.model;
-    const requiredCredits = resolvedModel.requiredCredits;
-
-    // 5. Validasi kecukupan saldo (dilewati jika mode testing superadmin)
-    let creditRecord: typeof tenantAiCredits.$inferSelect | undefined;
-
-    if (!isTestingExecution) {
-      const [foundCredits] = await db
-        .select()
-        .from(tenantAiCredits)
-        .where(eq(tenantAiCredits.tenantId, store.id))
-        .limit(1);
-
-      if (!foundCredits || foundCredits.balance < requiredCredits) {
-        throw new AppError('Kredit AI tidak mencukupi', 402);
-      }
-      creditRecord = foundCredits;
-    }
-
-    // 6. Eksekusi transaksi atomik Drizzle (db.transaction)
-    let result;
     try {
-      result = await db.transaction(async (tx) => {
-        let remainingCredits = creditRecord?.balance ?? 0;
+      // 1. Validasi sesi login user
+      const user = await getAuthenticatedUser(context.request);
+      if (!user) {
+        throw new AppError('Silakan login terlebih dahulu', 401);
+      }
 
-        // Pemotongan saldo kredit hanya untuk alur normal non-testing
-        if (!isTestingExecution && creditRecord) {
-          const [updatedCredit] = await tx
-            .update(tenantAiCredits)
-            .set({
-              balance: sql`${tenantAiCredits.balance} - ${requiredCredits}`,
-              totalUsed: sql`${tenantAiCredits.totalUsed} + ${requiredCredits}`,
-              updatedAt: new Date(),
-            })
-            .where(and(eq(tenantAiCredits.id, creditRecord.id), gte(tenantAiCredits.balance, requiredCredits)))
-            .returning();
+      // 2. Parse payload request
+      currentPhase = 'PROMPT_BUILDER';
+      const {
+        featureType,
+        prompt,
+        imageBuffer,
+        requestedQualityTier,
+        sizeRatio,
+        isTesting,
+        explicitStoreId,
+        storeNameInput,
+        categoryInput,
+        businessCategoryInput,
+        conceptTypeInput,
+        logoTextInput,
+        lockupTypeInput,
+        fontFamilyInput,
+        packagingTypeInput,
+        productLabelInput,
+        presentationStyleInput,
+        posterStyleInput,
+        productNameInput,
+        titleTextInput,
+        subTextInput,
+        visualStyleInput,
+        colorPaletteInput,
+        focalSubjectInput,
+      } = await parseGeneratePayload(context.request);
 
-          if (!updatedCredit) {
-            throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
-          }
-          remainingCredits = updatedCredit.balance;
-        }
+      const sanitizedPrompt = typeof prompt === 'string' ? prompt.trim() : '';
+      if (!sanitizedPrompt) {
+        throw new AppError('Prompt wajib diisi', 400);
+      }
 
-        // Arahkan ke service yang sesuai dengan model terpilih
-        let imageUrl = '';
-        let inputTokens = 0;
-        let outputTokens = 0;
+      if (featureType === 'packaging_mockup' && (!imageBuffer || imageBuffer.length === 0)) {
+        throw new AppError('Gambar produk wajib disertakan untuk fitur mockup', 400);
+      }
 
-        if (featureType === 'logo') {
-          const logoResult = await generateLogoImage(sanitizedPrompt, {
-            quality: qualityTier,
-            model: selectedModel,
-          });
-          inputTokens = logoResult.inputTokens;
-          outputTokens = logoResult.outputTokens;
+      if (imageBuffer && imageBuffer.length > 4 * 1024 * 1024) {
+        throw new AppError('Ukuran gambar referensi melebihi batas 4 MB', 400);
+      }
 
-          const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
-          imageUrl = uploadResult.secureUrl;
+      const isTestingExecution = Boolean(isTesting) && user.role === 'superadmin';
+
+      // 3. Ambil toko milik user / store target
+      currentPhase = 'STORE_AUTH';
+      let [store] = await db.select().from(stores).where(eq(stores.userId, user.id)).limit(1);
+
+      if (!store && isTestingExecution) {
+        if (explicitStoreId) {
+          const [foundStore] = await db.select().from(stores).where(eq(stores.id, explicitStoreId)).limit(1);
+          store = foundStore || ({ id: explicitStoreId, userId: user.id } as typeof store);
         } else {
-          const mockupResult = await generateProductMockup(imageBuffer!, sanitizedPrompt, {
-            size: sizeRatio,
-            model: selectedModel,
-          });
-          imageUrl = mockupResult.imageUrl;
-          inputTokens = mockupResult.inputTokens;
-          outputTokens = mockupResult.outputTokens;
+          store = { id: 'store_superadmin_test', userId: user.id } as typeof store;
         }
+      } else if (!store) {
+        throw new AppError('Toko merchant tidak ditemukan', 404);
+      }
+      targetStoreId = store.id;
 
-        // Hitung biaya riil dengan kurs aktif (tanpa external live rate call)
-        const costResult = await calculateCost(inputTokens, outputTokens, selectedModel);
+      // 4. Resolusi model & kuota dinamis berdasarkan tiering toko
+      currentPhase = 'MODEL_ROUTER';
+      const resolvedModel = await resolveStoreAiModel(store.id, requestedQualityTier);
+      const selectedModel = resolvedModel.model;
+      requiredCredits = resolvedModel.requiredCredits;
+      const effectiveQualityTier =
+        requestedQualityTier || (resolvedModel.model === 'gpt-image-2.5-flare' ? 'standard' : 'high');
 
-        // Catat entri baru pada tabel ai_generation_logs
-        const logId = `log_${crypto.randomUUID()}`;
-        const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
+      // 5. Validasi kecukupan saldo
+      let creditRecord: typeof tenantAiCredits.$inferSelect | undefined;
+      if (!isTestingExecution) {
+        const [foundCredits] = await db
+          .select()
+          .from(tenantAiCredits)
+          .where(eq(tenantAiCredits.tenantId, store.id))
+          .limit(1);
 
-        const [logEntry] = await tx
-          .insert(aiGenerationLogs)
-          .values({
-            id: logId,
-            tenantId: store.id,
-            userId: user.id,
-            isTesting: isTestingExecution,
-            featureType,
-            modelUsed: selectedModel,
-            sizeRatio,
-            qualityTier,
-            promptFinal: sanitizedPrompt,
-            inputTokens,
-            outputTokens,
-            creditsDeducted,
-            costUsd: costResult.costUsd,
-            costIdr: costResult.costIdr,
-            cloudinaryUrl: imageUrl,
-            status: 'success',
-            errorMessage: null,
+        if (!foundCredits || foundCredits.balance < requiredCredits) {
+          throw new AppError('Kredit AI tidak mencukupi', 402);
+        }
+        creditRecord = foundCredits;
+      }
+
+      // 6. Eksekusi pemotongan kredit atomik
+      creditDeducted = false;
+      let remainingCredits = creditRecord?.balance ?? 0;
+
+      if (!isTestingExecution && creditRecord) {
+        const [updatedCredit] = await db
+          .update(tenantAiCredits)
+          .set({
+            balance: sql`${tenantAiCredits.balance} - ${requiredCredits}`,
+            totalUsed: sql`${tenantAiCredits.totalUsed} + ${requiredCredits}`,
+            updatedAt: new Date(),
           })
+          .where(and(eq(tenantAiCredits.tenantId, store.id), gte(tenantAiCredits.balance, requiredCredits)))
           .returning();
 
-        return {
+        if (!updatedCredit) {
+          throw new AppError('Kredit AI tidak mencukupi saat pemotongan', 402);
+        }
+        creditDeducted = true;
+        remainingCredits = updatedCredit.balance;
+      }
+
+      // 7. Eksekusi generasi visual sesuai jenis fitur
+      let imageUrl = '';
+      let inputTokens = 0;
+      let outputTokens = 0;
+      let promptFinal = sanitizedPrompt;
+
+      if (featureType === 'logo') {
+        currentPhase = 'PROMPT_BUILDER';
+        const effectiveStoreName =
+          storeNameInput || (sanitizedPrompt.match(/for "([^"]+)"/i)?.[1]) || store.name || 'Store';
+        const effectiveCategory = businessCategoryInput || categoryInput || 'General Store';
+        const effectiveVisualStyle =
+          visualStyleInput || (sanitizedPrompt.match(/visual style:\s*([^,.]+)/i)?.[1]?.trim());
+        const effectiveColorPalette =
+          colorPaletteInput || (sanitizedPrompt.match(/color discipline:\s*([^,.]+)/i)?.[1]?.trim());
+
+        const compiledLogoPrompt = await buildLogoPrompt({
+          storeName: effectiveStoreName,
+          category: effectiveCategory,
+          businessCategory: businessCategoryInput,
+          conceptType: conceptTypeInput,
+          logoText: logoTextInput,
+          lockupType: lockupTypeInput,
+          fontFamily: fontFamilyInput,
+          visualStyle: effectiveVisualStyle,
+          colorPalette: effectiveColorPalette,
+          focalSubject: focalSubjectInput,
+        });
+        promptFinal = compiledLogoPrompt;
+
+        currentPhase = 'IMAGE_GENERATOR';
+        const logoResult = await generateLogoImage(compiledLogoPrompt, {
+          quality: effectiveQualityTier === 'standard' ? 'medium' : 'high',
+          model: selectedModel,
+        });
+        inputTokens = logoResult.inputTokens;
+        outputTokens = logoResult.outputTokens;
+
+        currentPhase = 'CLOUDINARY_UPLOADER';
+        const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
+        imageUrl = uploadResult.secureUrl;
+      } else if (featureType === 'product_poster') {
+        currentPhase = 'IMAGE_GENERATOR';
+        const effectiveHeadline = titleTextInput || productNameInput || sanitizedPrompt;
+        const compiledPosterPrompt = buildProductPosterPrompt({
+          productName: productNameInput,
+          titleText: effectiveHeadline,
+          subText: subTextInput,
+          posterStyle: posterStyleInput,
+        });
+        promptFinal = compiledPosterPrompt;
+
+        const posterResult = await generateProductPoster(compiledPosterPrompt, {
+          size: sizeRatio,
+          quality: effectiveQualityTier === 'standard' ? 'medium' : 'high',
+          model: selectedModel,
+          imageBuffer,
+        });
+        imageUrl = posterResult.imageUrl;
+        inputTokens = posterResult.inputTokens;
+        outputTokens = posterResult.outputTokens;
+      } else {
+        currentPhase = 'IMAGE_GENERATOR';
+        const compiledMockupPrompt = buildProductMockupPrompt({
+          packagingType: packagingTypeInput,
+          productLabel: productLabelInput,
+          presentationStyle: presentationStyleInput,
+          basePrompt: sanitizedPrompt,
+        });
+        promptFinal = compiledMockupPrompt;
+
+        const mockupResult = await generateProductMockup(imageBuffer!, compiledMockupPrompt, {
+          size: sizeRatio,
+          model: selectedModel,
+        });
+        imageUrl = mockupResult.imageUrl;
+        inputTokens = mockupResult.inputTokens;
+        outputTokens = mockupResult.outputTokens;
+      }
+
+      currentPhase = 'LEDGER_RECORDING';
+      const costResult = await calculateCost(inputTokens, outputTokens, selectedModel, effectiveQualityTier);
+      const logId = `log_${crypto.randomUUID()}`;
+      const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
+
+      const [logEntry] = await db
+        .insert(aiGenerationLogs)
+        .values({
+          id: logId,
+          tenantId: store.id,
+          userId: user.id,
+          isTesting: isTestingExecution,
+          featureType,
+          modelUsed: selectedModel,
+          sizeRatio,
+          qualityTier: effectiveQualityTier,
+          promptFinal,
+          inputTokens,
+          outputTokens,
+          creditsDeducted,
+          costUsd: costResult.costUsd,
+          costIdr: costResult.costIdr,
+          cloudinaryUrl: imageUrl,
+          status: 'success',
+          errorMessage: null,
+        })
+        .returning();
+
+      return jsonSuccess(
+        {
           imageUrl,
           inputTokens,
           outputTokens,
           costUsd: costResult.costUsd,
           costIdr: costResult.costIdr,
           remainingCredits,
-          logId: logEntry.id,
+          logId: logEntry?.id || logId,
           isTesting: isTestingExecution,
           modelUsed: selectedModel,
           creditsDeducted,
-        };
-      });
-    } catch (transactionError: unknown) {
-      if (transactionError instanceof AppError) {
-        throw transactionError;
+        },
+        201
+      );
+    } catch (error: unknown) {
+      if (creditDeducted && targetStoreId && requiredCredits > 0) {
+        await rollbackAiCredits(targetStoreId, requiredCredits);
       }
-      const rawMessage =
-        transactionError instanceof Error ? transactionError.message : String(transactionError);
-      throw new AppError(`Gagal memproses generasi AI: ${rawMessage}`, 500);
+      return handleGenerateError(error, currentPhase);
     }
-
-    return jsonSuccess(result, 201);
   });
 };

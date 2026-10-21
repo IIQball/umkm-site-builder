@@ -1,0 +1,43 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import AiStudioDashboard from '@/components/merchant/ai/AiStudioDashboard.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/db';
+import { stores } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
+if (user.role === 'admin') return Astro.redirect('/admin');
+
+const [store] = await db
+  .select({ id: stores.id, name: stores.name })
+  .from(stores)
+  .where(eq(stores.userId, user.id))
+  .limit(1);
+---
+
+<DashboardLayout title="Studio Desain AI" breadcrumb="Studio AI Pedagang">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header Studio dengan Tipografi Baku Sistem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1">
+      <div>
+        <h1 class="text-heading-md sm:text-heading-lg text-main">
+          Studio Desain & Kreatif
+        </h1>
+        <p class="desc-section text-secondary mt-1">
+          Rancang logo toko minimalis, mockup kemasan produk 3D, dan poster promosi secara instan untuk UMKM Anda.
+        </p>
+      </div>
+    </div>
+
+    <!-- Orchestrator Studio AI -->
+    <AiStudioDashboard
+      client:only="svelte"
+      storeId={store?.id || ''}
+      storeName={store?.name || ''}
+    />
+  </div>
+</DashboardLayout>

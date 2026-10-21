@@ -151,4 +151,21 @@ describe('Business Categories API, Schemas & Navigation', () => {
       expect(bizLink?.label).toBe('Kategori Bisnis');
     });
   });
+
+  describe('Tenant Sidebar Navigation', () => {
+    it('includes Studio AI in tenant sidebar nav items below Katalog Produk', () => {
+      const navGroups = getNavGroups('tenant');
+      const storeGroup = navGroups.find((g) => g.title === 'Manajemen Toko');
+      expect(storeGroup).toBeDefined();
+
+      const aiItem = storeGroup?.items.find((item) => item.href === '/dashboard/ai');
+      expect(aiItem).toBeDefined();
+      expect(aiItem?.label).toBe('Studio AI');
+      expect(aiItem?.icon).toBe('auto_awesome');
+
+      const productIdx = storeGroup?.items.findIndex((item) => item.href === '/dashboard/products');
+      const aiIdx = storeGroup?.items.findIndex((item) => item.href === '/dashboard/ai');
+      expect(aiIdx).toBe((productIdx ?? -1) + 1);
+    });
+  });
 });

@@ -296,10 +296,10 @@ describe('AI Monitoring Service (bun:test)', () => {
 
       // Count query mock
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            leftJoin: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue([{ total: 15 }]),
+        from: mock().mockReturnValue({
+          leftJoin: mock().mockReturnValue({
+            leftJoin: mock().mockReturnValue({
+              where: mock().mockResolvedValue([{ total: 15 }]),
             }),
           }),
         }),
@@ -307,13 +307,13 @@ describe('AI Monitoring Service (bun:test)', () => {
 
       // Data query mock
       mockSelect.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          leftJoin: vi.fn().mockReturnValue({
-            leftJoin: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockReturnValue({
-                  offset: vi.fn().mockReturnValue({
-                    where: vi.fn().mockResolvedValue([
+        from: mock().mockReturnValue({
+          leftJoin: mock().mockReturnValue({
+            leftJoin: mock().mockReturnValue({
+              orderBy: mock().mockReturnValue({
+                limit: mock().mockReturnValue({
+                  offset: mock().mockReturnValue({
+                    where: mock().mockResolvedValue([
                       {
                         id: 'log_test_01',
                         isTesting: true,

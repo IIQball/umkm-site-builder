@@ -9,6 +9,7 @@
     AiDepositHistoryItem,
   } from "@/types/admin/ai-monitoring.types";
   import AiKeyMetrics from "./AiKeyMetrics.svelte";
+  import CostTrendChart from "./CostTrendChart.svelte";
   import AiRecentLogsTable from "./AiRecentLogsTable.svelte";
   import AiTestAuditTable from "./AiTestAuditTable.svelte";
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
@@ -143,6 +144,9 @@
 
   <!-- Reactive Statcards Grid (5 cards) -->
   <AiKeyMetrics summary={activeSummary} />
+
+  <!-- Daily AI Cost Trends & Quota Chart -->
+  <CostTrendChart />
 
   <!-- Tab Navigation & Action Bar -->
   <div

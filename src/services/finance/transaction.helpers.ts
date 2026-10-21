@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { transactions, templates, userTemplates, commissions, notifications, users } from '@/db/schema';
+import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { eq, and, desc, inArray } from 'drizzle-orm';
@@ -107,6 +107,63 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       } catch {
         // Non-blocking notification dispatch
       }
+    }
+  } else if (transaction.type === 'ai_credit_purchase' && transaction.userId) {
+    // Handle AI credit purchase fulfillment
+    try {
+      // Extract credits from transaction metadata or use default calculation
+      const metadata = transaction.metadata as { credits?: number } | undefined;
+      const credits = metadata?.credits || Math.floor(transaction.amount / 5000);
+      
+      // Get or create tenant AI credits record
+      const existingCredit = await db.select()
+        .from(tenantAiCredits)
+        .where(eq(tenantAiCredits.userId, transaction.userId))
+        .limit(1);
+      
+      const now = new Date();
+      
+      if (existingCredit.length > 0) {
+        // Update existing record
+        const current = existingCredit[0];
+        await db.update(tenantAiCredits)
+          .set({
+            balance: current.balance + credits,
+            totalPurchased: current.totalPurchased + credits,
+            updatedAt: now,
+          })
+          .where(eq(tenantAiCredits.id, current.id));
+      } else {
+        // Create new record for tenant
+        const tenantId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        await db.insert(tenantAiCredits).values({
+          id: tenantId,
+          userId: transaction.userId,
+          tenantId: transaction.storeId || transaction.userId,
+          balance: credits,
+          totalPurchased: credits,
+          totalUsed: 0,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+
+      // Send notification to user
+      try {
+        await db.insert(notifications).values({
+          id: `notif_${Date.now()}_credit_${Math.random().toString(36).slice(2, 7)}`,
+          userId: transaction.userId,
+          type: 'credit_purchased',
+          title: 'Kredit AI Berhasil Ditambahkan',
+          message: `Anda telah berhasil membeli ${credits} kredit AI. Kredit sudah siap digunakan untuk semua fitur AI.`,
+          metadata: { credits, transactionId: transaction.id, amount: transaction.amount }
+        });
+      } catch {
+        // Non-blocking notification dispatch
+      }
+    } catch (error) {
+      console.error('[FULFILL_CREDIT_PURCHASE] error:', error);
+      throw error;
     }
   }
 }

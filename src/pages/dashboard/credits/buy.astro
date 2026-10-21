@@ -136,6 +136,7 @@ try {
             data-package-id={pkg.id}
             data-package-slug={pkg.slug}
             data-package-price={pkg.price}
+            data-package-credits={pkg.credits}
           >
             Beli Sekarang
           </button>
@@ -210,10 +211,9 @@ try {
 
   <script define:vars={{ packages }}>
     let selectedPackage = null;
-    let modalOpen = false;
     let loading = false;
 
-    // Get modal and initialize
+    // Get modal element
     const modal = document.querySelector('[data-checkout-modal]');
     
     // Handle package button clicks
@@ -223,9 +223,8 @@ try {
         const found = packages.find((p) => p.id === packageId);
         if (found) {
           selectedPackage = found;
-          modalOpen = true;
-          // Trigger Svelte component reactivity
-          modal?.dispatchEvent(new CustomEvent('open-modal', { detail: found }));
+          // Trigger Svelte component to open modal
+          window.dispatchEvent(new CustomEvent('open-modal', { detail: found }));
         }
       });
     });
@@ -252,10 +251,15 @@ try {
 
         const result = await response.json();
         if (result.ok && result.data?.paymentUrl) {
+          // Store status URL for redirect back after payment
+          const statusUrl = result.data?.statusUrl || `/dashboard/credits/status?invoiceId=${result.data?.invoiceId}&status=pending`;
+          sessionStorage.setItem('checkout_status_url', statusUrl);
+          
           // Redirect to Xendit payment page
           window.location.href = result.data.paymentUrl;
         } else {
           console.error('Invalid checkout response:', result);
+          alert('Terjadi kesalahan saat memproses checkout. Silakan coba lagi.');
         }
       } catch (error) {
         console.error('[CHECKOUT] error:', error);

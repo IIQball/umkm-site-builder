@@ -42,11 +42,15 @@ export const POST: APIRoute = async (context): Promise<Response> =>
       idempotencyKey
     );
 
+    // Provide status page URL for redirect after payment
+    const statusUrl = `${baseUrl}/dashboard/credits/status?invoiceId=${result.invoiceId}&status=pending`;
+
     return Response.json({
       ok: true,
       data: {
         invoiceId: result.invoiceId,
         paymentUrl: result.paymentUrl,
+        statusUrl,
         packageId,
         credits,
         amount,

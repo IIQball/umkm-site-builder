@@ -84,6 +84,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const payload = validate(XenditWebhookPayloadSchema, rawBody);
 
     // Process webhook with business logic & fulfillment
+    // Handles: template_purchase, ai_credit_purchase, store_quota_purchase
     const result = await transactionService.processWebhook(payload);
 
     return Response.json({

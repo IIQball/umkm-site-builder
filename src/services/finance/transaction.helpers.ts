@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client';
-import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits, stores } from '@/db/schema';
+import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
 import { eq, and, desc, inArray } from 'drizzle-orm';
@@ -112,7 +112,8 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
     // Handle AI credit purchase fulfillment
     try {
       // Extract credits from transaction metadata or use default calculation
-      const credits = (transaction as any).metadata?.credits || Math.floor(transaction.amount / 5000);
+      const metadata = transaction.metadata as { credits?: number } | undefined;
+      const credits = metadata?.credits || Math.floor(transaction.amount / 5000);
       
       // Get or create tenant AI credits record
       const existingCredit = await db.select()
@@ -149,12 +150,6 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
 
       // Send notification to user
       try {
-        const buyer = await db
-          .select({ name: users.name })
-          .from(users)
-          .where(eq(users.id, transaction.userId))
-          .limit(1);
-        
         await db.insert(notifications).values({
           id: `notif_${Date.now()}_credit_${Math.random().toString(36).slice(2, 7)}`,
           userId: transaction.userId,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import PeriodFilter from "@/components/common/PeriodFilter.svelte";
   import { Button } from "@/components/ui";
-  import { Bot, Wallet, Plus } from "lucide-svelte";
+  import { Bot, Wallet, Plus, Sparkles } from "lucide-svelte";
   import { filterByPeriod, computeAvailableYears } from "@/lib/utils/format";
   import type {
     AiMonitoringDashboardData,
@@ -10,16 +10,17 @@
   } from "@/types/admin/ai-monitoring.types";
   import AiKeyMetrics from "./AiKeyMetrics.svelte";
   import AiRecentLogsTable from "./AiRecentLogsTable.svelte";
+  import AiTestAuditTable from "./AiTestAuditTable.svelte";
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
   import AiDepositModal from "./AiDepositModal.svelte";
 
   export let initialData: AiMonitoringDashboardData;
   export let isSuperAdmin: boolean = false;
 
+  let activeTab: "logs" | "audit" | "deposits" = "logs";
   let summary: AiMonitoringSummary = initialData.summary;
   let recentLogs = initialData.recentLogs || [];
   let depositHistory: AiDepositHistoryItem[] = initialData.depositHistory || [];
-  let activeTab: "logs" | "deposits" = "logs";
   let isRefreshing = false;
   let showDepositModal = false;
 
@@ -151,7 +152,7 @@
       <Button
         variant={activeTab === 'logs' ? 'dark' : 'ghost'}
         size="sm"
-        class="!rounded-xl gap-2 font-bold cursor-pointer"
+        class="!rounded-xl gap-2 font-bold cursor-pointer shrink-0"
         on:click={() => (activeTab = 'logs')}
       >
         <Bot size={16} />
@@ -166,9 +167,19 @@
       </Button>
 
       <Button
+        variant={activeTab === 'audit' ? 'dark' : 'ghost'}
+        size="sm"
+        class="!rounded-xl gap-2 font-bold cursor-pointer shrink-0"
+        on:click={() => (activeTab = 'audit')}
+      >
+        <Sparkles size={16} />
+        <span>Audit Pengujian (Testing)</span>
+      </Button>
+
+      <Button
         variant={activeTab === 'deposits' ? 'dark' : 'ghost'}
         size="sm"
-        class="!rounded-xl gap-2 font-bold cursor-pointer"
+        class="!rounded-xl gap-2 font-bold cursor-pointer shrink-0"
         on:click={() => (activeTab = 'deposits')}
       >
         <Wallet size={16} />
@@ -204,6 +215,8 @@
         {isRefreshing}
         on:refresh={handleRefresh}
       />
+    {:else if activeTab === "audit"}
+      <AiTestAuditTable defaultIsTesting="true" />
     {:else}
       <AiDepositHistoryTable
         deposits={filteredDeposits}

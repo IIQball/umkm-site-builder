@@ -5,6 +5,7 @@ import {
   getAiRecentLogs,
   getAiDepositHistory,
   getAiMonitoringDashboardData,
+  getAiLogs,
 } from '@/services/ai/monitoring.service';
 
 mock.module('@/lib/db/client', () => ({
@@ -193,6 +194,9 @@ describe('AI Monitoring Service (bun:test)', () => {
         createdAt: mockCreatedAt.toISOString(),
         storeName: 'Kopi Kenangan',
         userName: 'John Doe',
+        isTesting: false,
+        sizeRatio: undefined,
+        qualityTier: undefined,
       });
     });
   });
@@ -303,4 +307,79 @@ describe('AI Monitoring Service (bun:test)', () => {
       expect(result.depositHistory).toEqual([]);
     });
   });
+
+  describe('getAiLogs', () => {
+    it('retrieves paginated AI logs with isTesting filter and computes pagination', async () => {
+      const mockDate = new Date('2026-10-20T10:00:00.000Z');
+
+      // Count query mock
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            leftJoin: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ total: 15 }]),
+            }),
+          }),
+        }),
+      });
+
+      // Data query mock
+      mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            leftJoin: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  offset: vi.fn().mockReturnValue({
+                    where: vi.fn().mockResolvedValue([
+                      {
+                        id: 'log_test_01',
+                        isTesting: true,
+                        featureType: 'logo',
+                        modelUsed: 'gpt-image-2.5-sunburst',
+                        sizeRatio: '1:1',
+                        qualityTier: 'standard',
+                        promptFinal: 'Logo Kopi Kenangan',
+                        inputTokens: 100,
+                        outputTokens: 400,
+                        creditsDeducted: 1,
+                        costUsd: 0.04,
+                        costIdr: 650,
+                        cloudinaryUrl: 'https://cloudinary.com/test.png',
+                        status: 'success',
+                        errorMessage: null,
+                        createdAt: mockDate,
+                        storeName: 'Kopi Kenangan',
+                        userName: 'Tester Admin',
+                      },
+                    ]),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const result = await getAiLogs({
+        isTesting: true,
+        page: 1,
+        limit: 10,
+      });
+
+      expect(result.pagination).toEqual({
+        total: 15,
+        page: 1,
+        limit: 10,
+        totalPages: 2,
+      });
+      expect(result.logs).toHaveLength(1);
+      expect(result.logs[0].id).toBe('log_test_01');
+      expect(result.logs[0].isTesting).toBe(true);
+      expect(result.logs[0].sizeRatio).toBe('1:1');
+      expect(result.logs[0].qualityTier).toBe('standard');
+      expect(result.logs[0].costIdr).toBe(650);
+    });
+  });
 });
+

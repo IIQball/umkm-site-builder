@@ -3,6 +3,8 @@
  * Used by Superadmin / Admin AI Monitoring Dashboard & APIs
  */
 
+import type { AiFeatureType } from '../ai';
+
 export interface AiStatusCounts {
   success: number;
   failed: number;
@@ -105,8 +107,6 @@ export interface AiMonitoringDashboardData {
   depositHistory?: AiDepositHistoryItem[];
   featureDistribution?: AiFeatureDistributionData;
 }
-
-export type AiFeatureType = 'logo' | 'packaging_mockup' | 'product_poster';
 
 export interface AiFeatureDistributionItem {
   featureType: AiFeatureType;

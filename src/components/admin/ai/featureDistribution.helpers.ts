@@ -1,10 +1,8 @@
 import type ApexCharts from 'apexcharts';
 import { formatIDR, formatNumber } from '@/lib/utils/format';
 import { Image, Package, Palette } from 'lucide-svelte';
-import type {
-  AiFeatureDistributionItem,
-  AiFeatureType,
-} from '@/types/admin/ai-monitoring.types';
+import type { AiFeatureDistributionItem } from '@/types/admin/ai-monitoring.types';
+import type { AiFeatureType } from '@/types/ai';
 
 export const FEATURE_COLORS: Record<AiFeatureType, string> = {
   logo: '#6366f1',

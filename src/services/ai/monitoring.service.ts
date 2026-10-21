@@ -8,13 +8,13 @@ import type {
   AiMonitoringRecentLog,
   AiDepositHistoryItem,
   AiMonitoringDashboardData,
-  AiFeatureType,
   AiFeatureDistributionItem,
   AiFeatureDistributionData,
   AiAuditLogItem,
   GetAiLogsQueryOptions,
   PaginatedAiLogsResponse,
 } from '@/types/admin/ai-monitoring.types';
+import type { AiFeatureType } from '@/types/ai';
 import type { aiFeatureTypeEnum } from '@/db/schema';
 
 type AiFeatureTypeValue = (typeof aiFeatureTypeEnum.enumValues)[number];

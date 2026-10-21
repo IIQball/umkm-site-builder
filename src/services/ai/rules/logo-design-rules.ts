@@ -34,34 +34,53 @@ export const CATEGORY_RED_FLAGS = {
     'crossed wrench and hammer',
   ],
   general: [
+    'text or lettering inside the image',
+    'human faces or facial features',
+    'cartoon mascot tropes',
     'clipart style illustrations',
+    'emblem badge frames or shield borders',
     'intricate photorealistic textures',
     'thin delicate hairlines that disappear at small scale',
-    'generic leaves or globes',
-    'complex 3D renders',
+    'complex 3D renders or gradients',
   ],
 } as const;
 
 export const MARK_TYPES = {
-  LETTERFORM_MONOGRAM: {
-    name: 'Letterform/Monogram',
+  LETTER_FUSION: {
+    name: 'Letter Fusion (Letterform + Object)',
     description:
-      'Geometric monogram created from brand initials, employing bold negative space geometry and architectural balance.',
+      'Brand initial letterform cleverly fused with a distinct business category object in negative space or shared geometry (e.g., initial H merged with chair, initial T merged with book). Standalone architectural glyph.',
+  },
+  ANIMAL_CHARACTER: {
+    name: 'Animal / Character Silhouette',
+    description:
+      'Minimalist animal silhouette or graphic character profile constructed strictly from bold geometric flat planes (like Loafwright or Bramble Vet), zero human faces, zero micro-facial lines, zero cartoon eyes.',
   },
   PICTORIAL_SYMBOL: {
     name: 'Pictorial Symbol',
     description:
-      'Radical minimalist symbolic icon capturing the brand soul through pure geometric abstraction, avoiding literal clichés.',
+      'Radical minimalist symbolic mark capturing 1 iconic business category object reduced into pure geometric primitives (arcs, circles, clean angles) and negative space, avoiding literal clipart.',
+  },
+  ABSTRACT_MARK: {
+    name: 'Abstract Geometric Mark',
+    description:
+      'Modern geometric mark with meaningful negative space and architectural balance conveying phenomena like connection, growth, stability, or flow.',
+  },
+  // Legacy aliases for backward compatibility
+  LETTERFORM_MONOGRAM: {
+    name: 'Letterform/Monogram',
+    description:
+      'Geometric monogram created from brand initials, employing bold negative space geometry and architectural balance. Standalone abstract glyph.',
   },
   MASCOT_SILHOUETTE: {
     name: 'Mascot Silhouette',
     description:
-      'Sturdy graphic silhouette or geometric vector profile with zero micro-facial lines, zero cartoon eyes, and pure solid shapes.',
+      'Sturdy graphic silhouette or animal vector profile with pure solid shapes, zero human faces, zero micro-facial lines, and zero cartoon eyes.',
   },
   NEO_HERITAGE_MINIMALIST: {
     name: 'Neo-Heritage Minimalist',
     description:
-      'Indonesian cultural heritage motifs (batik, tenun, nusantara crafts) distilled into ultra-modern, clean geometric vector lines.',
+      'Indonesian cultural heritage motifs distilled into ultra-modern, clean geometric vector lines without traditional clutter.',
   },
 } as const;
 
@@ -79,6 +98,12 @@ export const COLOR_DISCIPLINE_RULES = [
   'Strict maximum of 2 to 3 solid flat colors (including brand hue and pure white background)',
   'Zero 3D gradients, zero drop shadows, zero glossy plastic reflections, zero skeuomorphism',
   'Must pass the 1-color stamp test: 100% identifiable when printed as a monochrome single-color stamp',
+] as const;
+
+export const CANVAS_DISCIPLINE_RULES = [
+  '100% canvas focus on a single isolated, centered geometric symbol mark',
+  'Strictly NO text, NO letters, NO words, NO typography inside the image',
+  'Strictly NO cartoon mascots, NO human faces, NO clipart, NO emblem or shield borders',
 ] as const;
 
 export const UMKM_COLOR_PALETTES = {
@@ -153,17 +178,35 @@ export function getCategoryRedFlags(category: string): string[] {
 /**
  * Resolves mark type guidance based on style preference or fallback.
  */
-export function resolveMarkTypeGuide(visualStyle?: string): string {
-  if (!visualStyle) {
+export function resolveMarkTypeGuide(styleOrConcept?: string): string {
+  if (!styleOrConcept) {
     return `${MARK_TYPES.PICTORIAL_SYMBOL.name}: ${MARK_TYPES.PICTORIAL_SYMBOL.description}`;
   }
 
-  const normalized = visualStyle.toLowerCase();
-  if (normalized.includes('monogram') || normalized.includes('letter')) {
-    return `${MARK_TYPES.LETTERFORM_MONOGRAM.name}: ${MARK_TYPES.LETTERFORM_MONOGRAM.description}`;
+  const normalized = styleOrConcept.toLowerCase().trim();
+  if (
+    normalized === 'letter_fusion' ||
+    normalized.includes('fusion') ||
+    normalized.includes('monogram') ||
+    normalized.includes('letter') ||
+    normalized.includes('tipografi')
+  ) {
+    return `${MARK_TYPES.LETTER_FUSION.name}: ${MARK_TYPES.LETTER_FUSION.description}`;
   }
-  if (normalized.includes('mascot') || normalized.includes('maskot')) {
-    return `${MARK_TYPES.MASCOT_SILHOUETTE.name}: ${MARK_TYPES.MASCOT_SILHOUETTE.description}`;
+  if (
+    normalized === 'animal_character' ||
+    normalized.includes('animal') ||
+    normalized.includes('mascot') ||
+    normalized.includes('maskot')
+  ) {
+    return `${MARK_TYPES.ANIMAL_CHARACTER.name}: ${MARK_TYPES.ANIMAL_CHARACTER.description}`;
+  }
+  if (
+    normalized === 'abstract_mark' ||
+    normalized.includes('abstract') ||
+    normalized.includes('minimalis')
+  ) {
+    return `${MARK_TYPES.ABSTRACT_MARK.name}: ${MARK_TYPES.ABSTRACT_MARK.description}`;
   }
   if (
     normalized.includes('heritage') ||
@@ -180,30 +223,41 @@ export function resolveMarkTypeGuide(visualStyle?: string): string {
 /**
  * Master System Prompt embedding Kaan Kiziltug design principles for gpt-4o-mini.
  */
-export const KAAN_KIZILTUG_SYSTEM_PROMPT = `You are a world-class brand identity designer adhering strictly to Kaan Kiziltug's radical minimalism.
-You generate precise, high-performance text-to-image prompts in English for crafting timeless UMKM brand logos.
+export const KAAN_KIZILTUG_SYSTEM_PROMPT = `You are a world-class brand identity designer adhering strictly to Kaan Kiziltug's radical minimalism and Swiss graphic design principles.
+You generate precise, high-performance text-to-image prompts in English for diffusion models (DALL-E 3) to craft timeless brand logos.
 
-CORE DESIGN RULES:
-1. SCALABILITY AT 16PX:
-   - Sturdy, confident vector silhouette with bold negative space.
-   - Zero micro-details, zero fine lines, zero intricate decorative patterns.
-   - Highly legible at 16x16px favicon and circular WhatsApp avatar.
+CORE DESIGN DIRECTIVES:
+1. BRIEF -> VISUAL METAPHOR -> RADICAL SWISS ABSTRACTION:
+   - Analyze the Business Category + Brand Concept + Mark Type to create 1 concrete, clever visual hook uniting them.
+   - If Concept is 'letter_fusion': Fuse the initial letter of the brand in negative space or shared geometry with 1 iconic object from the category (e.g., initial H merged with chair, initial T merged with book).
+   - If Concept is 'animal_character': Form an iconic silhouette of an animal or character from bold flat geometric planes (like Loafwright or Bramble Vet), strictly no cartoon facial features.
+   - If Concept is 'pictorial_symbol': Geometrically reduce 1 iconic object from the business category into a flat vector mark.
+   - If Concept is 'abstract_mark': Modern geometric glyph with meaningful negative space (connection, growth, flow).
+   - NEVER output the raw brand name in quotes or say for "Brand".
+   - NEVER output literal cartoon trigger words (e.g. 'princess', 'queen', 'girl', 'woman', 'crown', 'food', 'dish', 'plate', 'bowl').
 
-2. COLOR DISCIPLINE:
-   - Maximum 2 to 3 solid flat colors.
+2. SCALABILITY AT 16PX & CANVAS FOCUS:
+   - 100% of the canvas is focused on the central geometric symbol mark with solid visual mass.
+   - Ample clean negative space, centered composition, near-square footprint.
+   - Flawlessly legible at 16x16px favicon scale and inside circular WhatsApp profile avatars.
+
+3. TYPOGRAPHY & WORDMARK LOCKUP (CONDITIONAL):
+   - If short logo text (1-2 words) is specified in user brief, include: 'bold geometric sans-serif wordmark lockup cleanly placed below the central icon'.
+   - If NO logo text was requested, strictly mandate: 'no text, no letters, no wordmark, single centered graphic symbol'.
+
+4. COLOR DISCIPLINE:
+   - Maximum 2 to 3 solid flat colors on pure white background (#FFFFFF).
    - Strictly NO 3D gradients, NO drop shadows, NO glossy plastic highlights, NO bevels.
-   - Must pass the 1-color stamp test (flawless in monochrome black).
+   - Must pass the 1-color stamp test: 100% identifiable when printed as a monochrome single-color stamp.
 
-3. FORBIDDEN CLICHÉS (Category Red Flags):
-   - Food/Culinary: NO chef hats, NO crossed forks/spoons, NO smiling cartoon plates.
-   - Coffee: NO cliché steaming mugs with wavy steam lines, NO generic scattered coffee beans.
-   - Retail: NO generic shopping bags, NO wire hangers, NO shopping carts.
+5. FORBIDDEN CLICHÉS:
+   - NO chef hats, NO crossed forks/spoons, NO smiling cartoon plates.
+   - NO steaming mugs with wavy steam lines, NO generic scattered beans.
+   - NO shopping carts, NO wire hangers, NO handshake clipart.
 
-4. MANDATORY KEYWORDS & SPECS:
-   - Must explicitly mandate: flat vector, negative space, pure white background, and the brand name.
+6. MANDATORY KEYWORDS & SPECS:
+   - Must mandate: flat vector, negative space, pure white background, single geometric symbol.
 
 OUTPUT CONSTRAINTS:
 - Return ONLY the raw technical prompt string in English.
-- NO conversational filler (never say "Here is your prompt", "Sure", etc.).
-- NO surrounding quotation marks.
-- NO markdown formatting or code blocks.`;
+- NO conversational filler. NO surrounding quotation marks. NO markdown.`;

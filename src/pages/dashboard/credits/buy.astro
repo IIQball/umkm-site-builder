@@ -1,0 +1,208 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser } from '@/lib/auth';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
+if (user.role === 'admin') return Astro.redirect('/admin');
+
+// Fetch packages dari API
+let packages: Array<{
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  credits: number;
+  description: string;
+  benefits: string[];
+  isPopular: boolean;
+}> = [];
+
+try {
+  const response = await fetch(`${Astro.url.origin}/api/tenant/credits/packages`);
+  if (response.ok) {
+    const result = await response.json();
+    packages = result.data?.packages || [];
+  }
+} catch (error) {
+  console.error('[BUY_CREDITS] fetch packages error:', error);
+}
+---
+
+<DashboardLayout title="Beli Kredit AI">
+  <div class="min-h-full space-y-8 pb-10">
+    <!-- Header -->
+    <div class="flex flex-col gap-2 pb-4">
+      <h1 class="text-heading-lg text-main font-bold tracking-tight">
+        Beli Kredit AI
+      </h1>
+      <p class="text-body-base text-secondary max-w-2xl leading-relaxed">
+        Pilih paket kredit yang sesuai dengan kebutuhan bisnis Anda dan nikmati fitur AI canggih untuk mengembangkan produk dan brand Anda.
+      </p>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {packages.map((pkg) => (
+        <div
+          class={`relative rounded-3xl border shadow-xs hover:shadow-md transition-all p-6 flex flex-col ${
+            pkg.isPopular
+              ? 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/40'
+              : 'bg-card border-light'
+          }`}
+        >
+          {/* Popular Badge */}
+          {pkg.isPopular && (
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-primary text-white">
+                Paling Populer
+              </span>
+            </div>
+          )}
+
+          {/* Package Info */}
+          <div class="mb-6 pt-4">
+            <h2 class="text-heading-sm text-main font-bold mb-2">
+              {pkg.name}
+            </h2>
+            <p class="text-body-sm text-secondary mb-4">
+              {pkg.description}
+            </p>
+
+            {/* Price & Credits */}
+            <div class="space-y-2">
+              <div class="flex items-baseline gap-2">
+                <span class="text-display-sm text-main font-bold">
+                  Rp{pkg.price.toLocaleString('id-ID')}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-body-sm text-secondary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="font-semibold text-main">{pkg.credits} kredit AI</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Benefits List */}
+          <div class="mb-8 flex-1">
+            <ul class="space-y-3">
+              {pkg.benefits.map((benefit) => (
+                <li class="flex items-start gap-2.5 text-body-sm text-secondary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="mt-0.5 flex-shrink-0 text-success"
+                    aria-hidden="true"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            class={`w-full py-3 px-4 rounded-2xl font-bold text-body-sm transition-all ${
+              pkg.isPopular
+                ? 'bg-primary text-white hover:bg-primary/90 shadow-md'
+                : 'bg-light text-main hover:bg-light/80 border border-light'
+            }`}
+            data-package-id={pkg.id}
+            data-package-slug={pkg.slug}
+            data-package-price={pkg.price}
+          >
+            Beli Sekarang
+          </button>
+        </div>
+      ))}
+    </div>
+
+    {/* Info Section */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+      <div class="p-6 rounded-3xl bg-card border border-light">
+        <div class="flex items-start gap-4">
+          <div class="p-2 rounded-lg bg-primary/10">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-primary"
+              aria-hidden="true"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-heading-sm text-main font-bold mb-1">
+              Pembayaran Aman
+            </h3>
+            <p class="text-body-sm text-secondary">
+              Semua transaksi dienkripsi dan diproses melalui gateway pembayaran terpercaya.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-card border border-light">
+        <div class="flex items-start gap-4">
+          <div class="p-2 rounded-lg bg-primary/10">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-primary"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="1"></circle>
+              <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m6.08 0l4.24-4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m6.08 0l4.24 4.24"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-heading-sm text-main font-bold mb-1">
+              Kredit Tidak Hangus
+            </h3>
+            <p class="text-body-sm text-secondary">
+              Kredit yang Anda beli tidak memiliki batas waktu penggunaan. Gunakan kapan saja sesuai kebutuhan.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

@@ -11,14 +11,14 @@ if (!user || !isAuthorizedAdmin(user)) {
   return Astro.redirect("/auth/login?redirect=/admin/ai-monitoring");
 }
 
+if (user.role === "superadmin") {
+  return Astro.redirect("/superadmin/ai-monitoring");
+}
+
 const initialData = await getAiMonitoringDashboardData();
-const isSuperAdmin = user.role === "superadmin";
-const breadcrumb = isSuperAdmin
-  ? "Super Admin / Monitoring AI"
-  : "Admin / Monitoring AI";
 ---
 
-<DashboardLayout title="Monitoring AI" breadcrumb={breadcrumb}>
+<DashboardLayout title="Monitoring AI" breadcrumb="Admin / Monitoring AI">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
     <div
       class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2"
@@ -40,7 +40,7 @@ const breadcrumb = isSuperAdmin
     <AiMonitoringDashboard
       client:load
       initialData={initialData}
-      isSuperAdmin={isSuperAdmin}
+      isSuperAdmin={false}
     />
   </div>
 </DashboardLayout>

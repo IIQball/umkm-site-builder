@@ -3,5 +3,7 @@ export * from './rules/logo-design-rules';
 export * from './logo-generator.service';
 export * from './monitoring.service';
 export * from './product-mockup.service';
+export * from './product-poster.service';
 export * from './cost-calculator.service';
 export * from './model-router.service';
+export * from './model-adapter';

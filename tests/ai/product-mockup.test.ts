@@ -74,9 +74,13 @@ describe('ProductMockupService - generateProductMockup (bun:test)', () => {
       expect(mockEdit).toHaveBeenCalledTimes(1);
       const editPayload = mockEdit.mock.calls[0][0];
       expect(editPayload.model).toBe('gpt-image-2.5-sunburst');
-      expect(editPayload.prompt).toBe(prompt);
+      expect(editPayload.prompt).toContain(prompt);
+      expect(editPayload.prompt).toContain('LABEL DISCIPLINE & COMPOSITION');
       expect(editPayload.size).toBe('1024x1024');
       expect(editPayload.image).toBeDefined();
+
+      const editOptions = mockEdit.mock.calls[0][1];
+      expect(editOptions).toEqual({ timeout: 120000, maxRetries: 0 });
 
       // 3. Verify Cloudinary uploadBase64Image payload
       expect(uploadBase64ImageSpy).toHaveBeenCalledTimes(1);

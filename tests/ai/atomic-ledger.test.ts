@@ -17,6 +17,7 @@ mock.module('@/db', () => ({
   db: {
     select: mock(),
     insert: mock(),
+    update: mock(),
     transaction: mock(),
   },
 }));
@@ -40,10 +41,15 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
   const mockIsSuperAdmin = isAuthorizedSuperAdmin as unknown as Mock;
   const mockSelect = db.select as unknown as Mock;
   const mockInsert = db.insert as unknown as Mock;
+  const mockUpdate = (db as unknown as { update: Mock }).update;
   const mockTransaction = db.transaction as unknown as Mock;
+
+  let activeMockTx: { update?: Mock; insert?: Mock } | null = null;
+  let txErrorToThrow: Error | null = null;
 
   let mockGenerate: ReturnType<typeof mock>;
   let mockEdit: ReturnType<typeof mock>;
+  let mockChatCreate: ReturnType<typeof mock>;
   let mockOpenAiClient: OpenAI;
 
   const mockStoreAndTier = ({
@@ -210,14 +216,76 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
     mockIsSuperAdmin.mockReset();
     mockSelect.mockReset();
     mockInsert.mockReset();
+    mockUpdate.mockReset();
     mockTransaction.mockReset();
+
+    activeMockTx = null;
+    txErrorToThrow = null;
+
+    Object.defineProperty(mockTransaction, 'mockImplementation', {
+      value: (fn: (tx: unknown) => unknown) => {
+        txErrorToThrow = null;
+        activeMockTx = null;
+        try {
+          const res = fn((tx: unknown) => {
+            activeMockTx = tx as { update?: Mock; insert?: Mock };
+            return tx;
+          });
+          if (res && typeof (res as Promise<unknown>).then === 'function') {
+            (res as Promise<unknown>).catch((err: Error) => {
+              txErrorToThrow = err;
+            });
+          }
+        } catch (err: unknown) {
+          txErrorToThrow = err as Error;
+        }
+        return mockTransaction;
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    mockUpdate.mockImplementation((...args: unknown[]) => {
+      if (txErrorToThrow) {
+        throw txErrorToThrow;
+      }
+      if (activeMockTx?.update) {
+        return activeMockTx.update(...args);
+      }
+      return {
+        set: mock().mockReturnValue({
+          where: mock().mockReturnValue({
+            returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+          }),
+        }),
+      };
+    });
+
+    mockInsert.mockImplementation((...args: unknown[]) => {
+      if (activeMockTx?.insert) {
+        return activeMockTx.insert(...args);
+      }
+      return {
+        values: mock().mockReturnValue({
+          returning: mock().mockResolvedValue([{ id: 'log_mock_default' }]),
+        }),
+      };
+    });
 
     mockGenerate = mock();
     mockEdit = mock();
+    mockChatCreate = mock().mockResolvedValue({
+      choices: [{ message: { content: 'Swiss minimal geometric vector logo symbol, pure white background' } }],
+    });
     mockOpenAiClient = {
       images: {
         generate: mockGenerate,
         edit: mockEdit,
+      },
+      chat: {
+        completions: {
+          create: mockChatCreate,
+        },
       },
     } as unknown as OpenAI;
     setOpenAIClientForTesting(mockOpenAiClient);
@@ -718,6 +786,56 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       expect(mockEdit).toHaveBeenCalled();
     });
 
+    it('executes product_poster generation without product image upload using text-to-image generate', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_poster', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 5, packageTier: 'Reguler', userId: 'tenant_poster' });
+
+      mockGenerate.mockResolvedValueOnce({
+        data: [{ b64_json: TINY_B64_PNG }],
+        usage: { input_tokens: 120, output_tokens: 380 },
+      });
+
+      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/posters/poster_food',
+        secure_url: 'https://res.cloudinary.com/pinoka/poster_food.webp',
+        bytes: 4096,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      const mockTx = {
+        update: mock().mockReturnValue({
+          set: mock().mockReturnValue({
+            where: mock().mockReturnValue({
+              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+            }),
+          }),
+        }),
+        insert: mock().mockReturnValue({
+          values: mock().mockReturnValue({
+            returning: mock().mockResolvedValue([{ id: 'log_poster_123' }]),
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'product_poster',
+          prompt: 'Modern bold food discount poster with typography',
+          options: { quality: 'medium', size: '1024x1536' },
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      expect(json.data.imageUrl).toContain('poster_food.webp');
+      expect(mockGenerate).toHaveBeenCalled();
+      expect(mockEdit).not.toHaveBeenCalled();
+    });
+
     it('allows superadmin with isTesting flag to execute AI without deducting credits and logs audit entry with isTesting true', async () => {
       mockGetAuthUser.mockResolvedValue({ id: 'super_1', role: 'superadmin', status: 'active' });
       mockIsSuperAdmin.mockReturnValue(true);
@@ -882,9 +1000,11 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       mockGenerate.mockRejectedValueOnce(new Error('OpenAI 503 Service Unavailable'));
 
       let creditDeductedInDb = false;
+      let updateCalls = 0;
       const mockTx = {
         update: mock().mockImplementation(() => {
-          creditDeductedInDb = true;
+          updateCalls++;
+          creditDeductedInDb = updateCalls === 1;
           return {
             set: mock().mockReturnValue({
               where: mock().mockReturnValue({
@@ -896,14 +1016,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         insert: mock(),
       };
 
-      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
-        try {
-          return await callback(mockTx);
-        } catch (error) {
-          creditDeductedInDb = false;
-          throw error;
-        }
-      });
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
 
       const request = new Request('http://localhost/api/ai/generate', {
         method: 'POST',
@@ -917,6 +1030,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(500);
       expect(creditDeductedInDb).toBe(false);
+      expect(updateCalls).toBe(2);
       expect(mockTx.insert).not.toHaveBeenCalled();
     });
 
@@ -938,6 +1052,101 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       expect(res.status).toBe(500);
       const json = await res.json();
       expect(json.error.message).toContain('Gagal memproses generasi AI: Database transaction lock conflict');
+    });
+
+    it('executes product_poster text-to-image calling images.generate when no image is provided', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 3, packageTier: 'Reguler' });
+
+      mockGenerate.mockResolvedValueOnce({
+        data: [{ b64_json: TINY_B64_PNG }],
+        usage: { input_tokens: 200, output_tokens: 500 },
+      });
+
+      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/posters/poster_1',
+        secure_url: 'https://res.cloudinary.com/pinoka/poster.png',
+        bytes: 1024,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      const mockTx = {
+        update: mock().mockReturnValue({
+          set: mock().mockReturnValue({
+            where: mock().mockReturnValue({
+              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+            }),
+          }),
+        }),
+        insert: mock().mockReturnValue({
+          values: mock().mockReturnValue({
+            returning: mock().mockResolvedValue([{ id: 'log_poster_1' }]),
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'product_poster',
+          prompt: 'Promotional culinary poster',
+          productName: 'Sambal Korek',
+          options: { size: '1024x1024' },
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      expect(mockGenerate).toHaveBeenCalled();
+      expect(mockEdit).not.toHaveBeenCalled();
+    });
+
+    it('executes product_poster with image calling images.edit when image is provided', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'tenant_1', role: 'tenant', status: 'active' });
+      mockStoreAndTier({ balance: 3, packageTier: 'Reguler' });
+
+      mockEdit.mockResolvedValueOnce({
+        data: [{ b64_json: TINY_B64_PNG }],
+      });
+
+      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+        public_id: 'pinoka/posters/poster_2',
+        secure_url: 'https://res.cloudinary.com/pinoka/poster_edited.png',
+        bytes: 2048,
+      } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
+
+      const mockTx = {
+        update: mock().mockReturnValue({
+          set: mock().mockReturnValue({
+            where: mock().mockReturnValue({
+              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+            }),
+          }),
+        }),
+        insert: mock().mockReturnValue({
+          values: mock().mockReturnValue({
+            returning: mock().mockResolvedValue([{ id: 'log_poster_2' }]),
+          }),
+        }),
+      };
+      mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
+
+      const request = new Request('http://localhost/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          featureType: 'product_poster',
+          prompt: 'Promotional culinary poster with product photo',
+          image: `data:image/png;base64,${TINY_B64_PNG}`,
+          options: { size: '1024x1024' },
+        }),
+      });
+
+      const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
+      expect(res.status).toBe(201);
+      expect(mockEdit).toHaveBeenCalled();
+      expect(mockGenerate).not.toHaveBeenCalled();
     });
   });
 });

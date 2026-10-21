@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import CreditCheckoutModal from '@/components/dashboard/CreditCheckoutModal.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -32,6 +33,7 @@ try {
 ---
 
 <DashboardLayout title="Beli Kredit AI">
+  <CreditCheckoutModal client:load />
   <div class="min-h-full space-y-8 pb-10">
     <!-- Header -->
     <div class="flex flex-col gap-2 pb-4">
@@ -205,4 +207,62 @@ try {
       </div>
     </div>
   </div>
+
+  <script define:vars={{ packages }}>
+    let selectedPackage = null;
+    let modalOpen = false;
+    let loading = false;
+
+    // Get modal and initialize
+    const modal = document.querySelector('[data-checkout-modal]');
+    
+    // Handle package button clicks
+    document.querySelectorAll('[data-package-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const packageId = btn.dataset.packageId;
+        const found = packages.find((p) => p.id === packageId);
+        if (found) {
+          selectedPackage = found;
+          modalOpen = true;
+          // Trigger Svelte component reactivity
+          modal?.dispatchEvent(new CustomEvent('open-modal', { detail: found }));
+        }
+      });
+    });
+
+    // Listen for modal confirmation
+    window.addEventListener('checkout-confirm', async (e) => {
+      if (!selectedPackage) return;
+      loading = true;
+
+      try {
+        const response = await fetch('/api/tenant/credits/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            packageId: selectedPackage.id,
+            amount: selectedPackage.price,
+            credits: selectedPackage.credits,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Checkout failed');
+        }
+
+        const result = await response.json();
+        if (result.ok && result.data?.paymentUrl) {
+          // Redirect to Xendit payment page
+          window.location.href = result.data.paymentUrl;
+        } else {
+          console.error('Invalid checkout response:', result);
+        }
+      } catch (error) {
+        console.error('[CHECKOUT] error:', error);
+        alert('Terjadi kesalahan saat memproses checkout. Silakan coba lagi.');
+      } finally {
+        loading = false;
+      }
+    });
+  </script>
 </DashboardLayout>

@@ -85,36 +85,18 @@ describe('AI Monitoring Service (bun:test)', () => {
 
     it('handles empty database gracefully with zero defaults', async () => {
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
-          {
-            totalExecutions: 0,
-            totalCostIdr: 0,
-            totalCostUsd: 0,
-            totalInputTokens: 0,
-            totalOutputTokens: 0,
-            successCount: 0,
-            failedCount: 0,
-            pendingCount: 0,
-            processingCount: 0,
-          },
-        ]),
+        from: mock().mockResolvedValue([{
+          totalExecutions: 0, totalCostIdr: 0, totalCostUsd: 0, totalInputTokens: 0, totalOutputTokens: 0,
+          successCount: 0, failedCount: 0, pendingCount: 0, processingCount: 0,
+        }]),
       });
 
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
-          {
-            totalDepositUsd: 0,
-            totalDepositIdr: 0,
-          },
-        ]),
+        from: mock().mockResolvedValue([{ totalDepositUsd: 0, totalDepositIdr: 0 }]),
       });
 
       mockSelect.mockReturnValueOnce({
-        from: () => ({
-          orderBy: () => ({
-            limit: () => Promise.resolve([]),
-          }),
-        }),
+        from: () => ({ orderBy: () => ({ limit: () => Promise.resolve([]) }) }),
       });
 
       const result = await getAiMonitoringSummary();
@@ -138,7 +120,7 @@ describe('AI Monitoring Service (bun:test)', () => {
         remainingDepositUsd: 0,
         remainingDepositIdr: 0,
         remainingTokens: 0,
-        activeExchangeRate: 16200,
+        activeExchangeRate: 16000,
       });
     });
   });

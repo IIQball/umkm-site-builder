@@ -58,4 +58,26 @@ export interface AiMonitoringDashboardData {
   summary: AiMonitoringSummary;
   recentLogs: AiMonitoringRecentLog[];
   depositHistory?: AiDepositHistoryItem[];
+  featureDistribution?: AiFeatureDistributionData;
 }
+
+export type AiFeatureType = 'logo' | 'packaging_mockup' | 'product_poster';
+
+export interface AiFeatureDistributionItem {
+  featureType: AiFeatureType;
+  label: string;
+  totalRequests: number;
+  successRequests: number;
+  totalCostIdr: number;
+  totalCostUsd: number;
+  requestPercentage: number;
+  costPercentage: number;
+}
+
+export interface AiFeatureDistributionData {
+  totalRequests: number;
+  totalCostIdr: number;
+  totalCostUsd: number;
+  distribution: AiFeatureDistributionItem[];
+}
+

@@ -5,6 +5,7 @@ import {
   getAiRecentLogs,
   getAiDepositHistory,
   getAiMonitoringDashboardData,
+  getAiFeatureDistribution,
 } from '@/services/ai/monitoring.service';
 
 mock.module('@/lib/db/client', () => ({
@@ -294,6 +295,12 @@ describe('AI Monitoring Service (bun:test)', () => {
         }),
       });
 
+      mockSelect.mockReturnValueOnce({
+        from: () => ({
+          groupBy: () => Promise.resolve([]),
+        }),
+      });
+
       const result = await getAiMonitoringDashboardData();
 
       expect(result.summary.totalExecutions).toBe(5);
@@ -301,6 +308,110 @@ describe('AI Monitoring Service (bun:test)', () => {
       expect(result.summary.remainingTokens).toBeGreaterThan(0);
       expect(result.recentLogs).toEqual([]);
       expect(result.depositHistory).toEqual([]);
+      expect(result.featureDistribution).toBeDefined();
+      expect(result.featureDistribution?.distribution).toHaveLength(3);
+    });
+  });
+
+  describe('getAiFeatureDistribution', () => {
+    it('aggregates total requests, nominal rupiah, and percentages correctly', async () => {
+      mockSelect.mockReturnValueOnce({
+        from: () => ({
+          groupBy: () =>
+            Promise.resolve([
+              {
+                featureType: 'logo',
+                totalRequests: 50,
+                totalCostIdr: 50000,
+                totalCostUsd: 3.0,
+                successRequests: 48,
+              },
+              {
+                featureType: 'packaging_mockup',
+                totalRequests: 30,
+                totalCostIdr: 60000,
+                totalCostUsd: 3.6,
+                successRequests: 28,
+              },
+              {
+                featureType: 'product_poster',
+                totalRequests: 20,
+                totalCostIdr: 40000,
+                totalCostUsd: 2.4,
+                successRequests: 20,
+              },
+            ]),
+        }),
+      });
+
+      const res = await getAiFeatureDistribution();
+
+      expect(res.totalRequests).toBe(100);
+      expect(res.totalCostIdr).toBe(150000);
+      expect(res.totalCostUsd).toBe(9.0);
+      expect(res.distribution).toHaveLength(3);
+
+      const [logo, packaging, poster] = res.distribution;
+      expect(logo.featureType).toBe('logo');
+      expect(logo.label).toBe('Logo UMKM');
+      expect(logo.totalRequests).toBe(50);
+      expect(logo.requestPercentage).toBe(50.0);
+      expect(logo.totalCostIdr).toBe(50000);
+      expect(logo.costPercentage).toBe(33.3);
+
+      expect(packaging.featureType).toBe('packaging_mockup');
+      expect(packaging.label).toBe('Kemasan Produk');
+      expect(packaging.totalRequests).toBe(30);
+      expect(packaging.requestPercentage).toBe(30.0);
+      expect(packaging.totalCostIdr).toBe(60000);
+      expect(packaging.costPercentage).toBe(40.0);
+
+      expect(poster.featureType).toBe('product_poster');
+      expect(poster.label).toBe('Poster Produk');
+      expect(poster.totalRequests).toBe(20);
+      expect(poster.requestPercentage).toBe(20.0);
+      expect(poster.totalCostIdr).toBe(40000);
+      expect(poster.costPercentage).toBe(26.7);
+    });
+
+    it('handles empty database with 0 values for all 3 features', async () => {
+      mockSelect.mockReturnValueOnce({
+        from: () => ({
+          groupBy: () => Promise.resolve([]),
+        }),
+      });
+
+      const res = await getAiFeatureDistribution();
+
+      expect(res.totalRequests).toBe(0);
+      expect(res.totalCostIdr).toBe(0);
+      expect(res.distribution).toHaveLength(3);
+      for (const item of res.distribution) {
+        expect(item.totalRequests).toBe(0);
+        expect(item.requestPercentage).toBe(0);
+        expect(item.totalCostIdr).toBe(0);
+        expect(item.costPercentage).toBe(0);
+      }
+    });
+
+    it('applies period filtering conditions when year and month are supplied', async () => {
+      let whereCalled = false;
+      mockSelect.mockReturnValueOnce({
+        from: () => ({
+          where: () => {
+            whereCalled = true;
+            return {
+              groupBy: () => Promise.resolve([]),
+            };
+          },
+        }),
+      });
+
+      const res = await getAiFeatureDistribution({ year: 2026, month: 10 });
+
+      expect(whereCalled).toBe(true);
+      expect(res.totalRequests).toBe(0);
     });
   });
 });
+

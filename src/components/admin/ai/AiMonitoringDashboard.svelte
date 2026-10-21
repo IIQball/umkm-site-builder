@@ -12,6 +12,7 @@
   import AiRecentLogsTable from "./AiRecentLogsTable.svelte";
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
   import AiDepositModal from "./AiDepositModal.svelte";
+  import FeatureDistributionChart from "./FeatureDistributionChart.svelte";
 
   export let initialData: AiMonitoringDashboardData;
   export let isSuperAdmin: boolean = false;
@@ -142,6 +143,13 @@
 
   <!-- Reactive Statcards Grid (5 cards) -->
   <AiKeyMetrics summary={activeSummary} />
+
+  <!-- AI Feature Distribution Donut Chart (Requests & Rupiah) -->
+  <FeatureDistributionChart
+    initialData={initialData.featureDistribution}
+    {selectedYear}
+    {selectedMonth}
+  />
 
   <!-- Tab Navigation & Action Bar -->
   <div

@@ -112,7 +112,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
     // Handle AI credit purchase fulfillment
     try {
       // Extract credits from transaction metadata or use default calculation
-      const metadata = transaction.metadata as { credits?: number } | undefined;
+      const metadata = (transaction as unknown as { metadata?: { credits?: number } }).metadata;
       const credits = metadata?.credits || Math.floor(transaction.amount / 5000);
       
       // Get or create tenant AI credits record
@@ -153,7 +153,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         await db.insert(notifications).values({
           id: `notif_${Date.now()}_credit_${Math.random().toString(36).slice(2, 7)}`,
           userId: transaction.userId,
-          type: 'credit_purchased',
+          type: 'quota_upgrade_request',
           title: 'Kredit AI Berhasil Ditambahkan',
           message: `Anda telah berhasil membeli ${credits} kredit AI. Kredit sudah siap digunakan untuk semua fitur AI.`,
           metadata: { credits, transactionId: transaction.id, amount: transaction.amount }

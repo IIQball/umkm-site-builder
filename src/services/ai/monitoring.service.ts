@@ -1,16 +1,20 @@
 import { db } from '@/lib/db/client';
 import { aiGenerationLogs, aiDepositHistory, stores, users } from '@/db/schema';
-import { count, sql, desc, eq, and, or, ilike, type SQL } from 'drizzle-orm';
+import { count, sql, desc, eq, and, or, ilike, gte, lte, type SQL } from 'drizzle-orm';
 import { getActiveExchangeRate } from './cost-calculator.service';
+import { getPeriodBounds } from '@/lib/utils/format';
 import type {
   AiMonitoringSummary,
   AiMonitoringRecentLog,
   AiDepositHistoryItem,
   AiMonitoringDashboardData,
+  AiFeatureDistributionItem,
+  AiFeatureDistributionData,
   AiAuditLogItem,
   GetAiLogsQueryOptions,
   PaginatedAiLogsResponse,
 } from '@/types/admin/ai-monitoring.types';
+import type { AiFeatureType } from '@/types/ai';
 import type { aiFeatureTypeEnum } from '@/db/schema';
 
 type AiFeatureTypeValue = (typeof aiFeatureTypeEnum.enumValues)[number];
@@ -282,14 +286,131 @@ export async function getAiDepositHistory(limit = 50): Promise<AiDepositHistoryI
   }));
 }
 
+export interface FeatureDistributionFilter {
+  year?: number;
+  month?: number | 'all';
+  startDate?: Date;
+  endDate?: Date;
+}
+
+const FEATURE_METADATA: Record<AiFeatureType, { label: string }> = {
+  logo: { label: 'Logo UMKM' },
+  packaging_mockup: { label: 'Kemasan Produk' },
+  product_poster: { label: 'Poster Produk' },
+};
+
+/**
+ * Aggregates AI feature distribution (total requests & costs) directly in PostgreSQL.
+ * Ultra-fast single-pass GROUP BY query on indexed feature_type column.
+ */
+export async function getAiFeatureDistribution(
+  filter?: FeatureDistributionFilter
+): Promise<AiFeatureDistributionData> {
+  const conditions = [];
+
+  if (filter?.year) {
+    const { start, end } = getPeriodBounds(filter.year, filter.month ?? 'all');
+    conditions.push(gte(aiGenerationLogs.createdAt, start));
+    conditions.push(lte(aiGenerationLogs.createdAt, end));
+  } else if (filter?.startDate && filter?.endDate) {
+    conditions.push(gte(aiGenerationLogs.createdAt, filter.startDate));
+    conditions.push(lte(aiGenerationLogs.createdAt, filter.endDate));
+  }
+
+  const baseQuery = db
+    .select({
+      featureType: aiGenerationLogs.featureType,
+      totalRequests: count(aiGenerationLogs.id),
+      totalCostIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
+      totalCostUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
+      successRequests: sql<number>`count(case when ${aiGenerationLogs.status} = 'success' then 1 end)`.mapWith(Number),
+    })
+    .from(aiGenerationLogs);
+
+  const rows = conditions.length > 0
+    ? await baseQuery.where(and(...conditions)).groupBy(aiGenerationLogs.featureType)
+    : await baseQuery.groupBy(aiGenerationLogs.featureType);
+
+  const rowMap = new Map<string, {
+    featureType: string;
+    totalRequests: number;
+    totalCostIdr: number;
+    totalCostUsd: number;
+    successRequests: number;
+  }>();
+
+  for (const r of rows) {
+    rowMap.set(r.featureType, {
+      featureType: r.featureType,
+      totalRequests: Number(r.totalRequests || 0),
+      totalCostIdr: Number(r.totalCostIdr || 0),
+      totalCostUsd: Number(r.totalCostUsd || 0),
+      successRequests: Number(r.successRequests || 0),
+    });
+  }
+
+  const featureKeys: AiFeatureType[] = ['logo', 'packaging_mockup', 'product_poster'];
+
+  let grandTotalRequests = 0;
+  let grandTotalCostIdr = 0;
+  let grandTotalCostUsd = 0;
+
+  const rawItems = featureKeys.map((type) => {
+    const row = rowMap.get(type);
+    const totalRequests = row?.totalRequests || 0;
+    const totalCostIdr = row?.totalCostIdr || 0;
+    const totalCostUsd = row?.totalCostUsd || 0;
+    const successRequests = row?.successRequests || 0;
+
+    grandTotalRequests += totalRequests;
+    grandTotalCostIdr += totalCostIdr;
+    grandTotalCostUsd += totalCostUsd;
+
+    return {
+      featureType: type,
+      label: FEATURE_METADATA[type].label,
+      totalRequests,
+      successRequests,
+      totalCostIdr,
+      totalCostUsd,
+    };
+  });
+
+  const distribution: AiFeatureDistributionItem[] = rawItems.map((item) => ({
+    ...item,
+    requestPercentage:
+      grandTotalRequests > 0
+        ? Number(((item.totalRequests / grandTotalRequests) * 100).toFixed(1))
+        : 0,
+    costPercentage:
+      grandTotalCostIdr > 0
+        ? Number(((item.totalCostIdr / grandTotalCostIdr) * 100).toFixed(1))
+        : 0,
+  }));
+
+  return {
+    totalRequests: grandTotalRequests,
+    totalCostIdr: grandTotalCostIdr,
+    totalCostUsd: Number(grandTotalCostUsd.toFixed(4)),
+    distribution,
+  };
+}
+
 /**
  * Unified getter for initial dashboard rendering.
  */
 export async function getAiMonitoringDashboardData(): Promise<AiMonitoringDashboardData> {
-  const [summary, recentLogs, depositHistory] = await Promise.all([
+  const [summary, recentLogs, depositHistory, featureDistribution] = await Promise.all([
     getAiMonitoringSummary(),
     getAiRecentLogs(10),
     getAiDepositHistory(50),
+    getAiFeatureDistribution(),
   ]);
-  return { summary, recentLogs, depositHistory };
+  return {
+    summary,
+    recentLogs,
+    depositHistory,
+    featureDistribution,
+  };
 }
+

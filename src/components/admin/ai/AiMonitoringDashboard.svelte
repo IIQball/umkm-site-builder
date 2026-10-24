@@ -14,6 +14,7 @@
   import AiTestAuditTable from "./AiTestAuditTable.svelte";
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
   import AiDepositModal from "./AiDepositModal.svelte";
+  import FeatureDistributionChart from "./FeatureDistributionChart.svelte";
 
   export let initialData: AiMonitoringDashboardData;
   export let isSuperAdmin: boolean = false;
@@ -147,6 +148,13 @@
 
   <!-- Daily AI Cost Trends & Quota Chart -->
   <CostTrendChart />
+
+  <!-- AI Feature Distribution Donut Chart (Requests & Rupiah) -->
+  <FeatureDistributionChart
+    initialData={initialData.featureDistribution}
+    {selectedYear}
+    {selectedMonth}
+  />
 
   <!-- Tab Navigation & Action Bar -->
   <div

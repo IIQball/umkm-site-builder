@@ -1,0 +1,203 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { transactionService } from '@/services';
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
+if (user.role === 'admin') return Astro.redirect('/admin');
+
+// Get status from URL query parameter
+const invoiceId = Astro.url.searchParams.get('invoiceId');
+const status = Astro.url.searchParams.get('status') || 'pending';
+
+let transactionDetails = null;
+let errorMessage = '';
+
+if (invoiceId) {
+  try {
+    transactionDetails = await transactionService.getTransactionDetails(invoiceId);
+  } catch (error) {
+    console.error('[CHECKOUT_STATUS] fetch transaction error:', error);
+    errorMessage = 'Gagal mengambil detail transaksi. Silakan coba lagi atau hubungi support.';
+  }
+}
+
+const isSuccess = status === 'success' || transactionDetails?.status === 'success';
+const isFailed = status === 'failed' || transactionDetails?.status === 'failed';
+const isPending = !isSuccess && !isFailed;
+---
+
+<DashboardLayout title="Status Pembayaran Kredit">
+  <div class="min-h-full flex items-center justify-center py-10">
+    <div class="w-full max-w-md">
+      <!-- Success State -->
+      {isSuccess && (
+        <div class="space-y-6">
+          <!-- Success Icon -->
+          <div class="flex justify-center">
+            <div class="w-20 h-20 rounded-full bg-success/15 border-2 border-success flex items-center justify-center animate-scale-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-success" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div class="text-center space-y-2">
+            <h1 class="text-heading-lg text-main font-bold">Pembayaran Berhasil!</h1>
+            <p class="text-body-sm text-secondary">
+              Kredit AI Anda telah ditambahkan ke akun. Anda siap untuk menggunakan semua fitur AI.
+            </p>
+          </div>
+
+          <!-- Transaction Details -->
+          {transactionDetails && (
+            <div class="bg-card border border-light rounded-2xl p-6 space-y-4">
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-secondary">Invoice ID</span>
+                  <p class="font-semibold text-main truncate font-mono text-xs">{transactionDetails.externalId}</p>
+                </div>
+                <div>
+                  <span class="text-secondary">Jumlah</span>
+                  <p class="font-semibold text-main">Rp{transactionDetails.amount.toLocaleString('id-ID')}</p>
+                </div>
+              </div>
+              <div class="text-xs text-secondary border-t border-light pt-3">
+                Waktu transaksi: {new Date(transactionDetails.createdAt).toLocaleString('id-ID')}
+              </div>
+            </div>
+          )}
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <a href="/dashboard/credits/buy" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+              Beli Kredit Lagi
+            </a>
+            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all text-center">
+              Kembali ke Dashboard
+            </a>
+          </div>
+        </div>
+      )}
+
+      <!-- Failed State -->
+      {isFailed && (
+        <div class="space-y-6">
+          <!-- Error Icon -->
+          <div class="flex justify-center">
+            <div class="w-20 h-20 rounded-full bg-error/15 border-2 border-error flex items-center justify-center animate-scale-in">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-error" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div class="text-center space-y-2">
+            <h1 class="text-heading-lg text-main font-bold">Pembayaran Gagal</h1>
+            <p class="text-body-sm text-secondary">
+              Terjadi masalah saat memproses pembayaran Anda. Silakan coba lagi atau hubungi support jika masalah berlanjut.
+            </p>
+          </div>
+
+          <!-- Transaction Details -->
+          {transactionDetails && (
+            <div class="bg-card border border-light rounded-2xl p-6 space-y-4">
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-secondary">Invoice ID</span>
+                  <p class="font-semibold text-main truncate font-mono text-xs">{transactionDetails.externalId}</p>
+                </div>
+                <div>
+                  <span class="text-secondary">Jumlah</span>
+                  <p class="font-semibold text-main">Rp{transactionDetails.amount.toLocaleString('id-ID')}</p>
+                </div>
+              </div>
+              <div class="text-xs text-secondary border-t border-light pt-3">
+                Status: <span class="font-semibold text-error uppercase">{transactionDetails.status}</span>
+              </div>
+            </div>
+          )}
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <a href="/dashboard/credits/buy" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all text-center">
+              Coba Lagi
+            </a>
+            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+              Kembali
+            </a>
+          </div>
+        </div>
+      )}
+
+      <!-- Pending State -->
+      {isPending && (
+        <div class="space-y-6">
+          <!-- Loading Icon -->
+          <div class="flex justify-center">
+            <div class="w-20 h-20 rounded-full bg-primary/15 border-2 border-primary flex items-center justify-center animate-spin">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary" aria-hidden="true">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Pending Message -->
+          <div class="text-center space-y-2">
+            <h1 class="text-heading-lg text-main font-bold">Memproses Pembayaran...</h1>
+            <p class="text-body-sm text-secondary">
+              Kami sedang memverifikasi pembayaran Anda. Halaman akan diperbarui secara otomatis dalam beberapa detik.
+            </p>
+          </div>
+
+          {errorMessage && (
+            <div class="bg-error/10 border border-error/25 rounded-xl p-4">
+              <p class="text-sm text-error">{errorMessage}</p>
+            </div>
+          )}
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <button onclick="window.location.reload()" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all">
+              Segarkan Halaman
+            </button>
+            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+              Kembali ke Dashboard
+            </a>
+          </div>
+
+          <p class="text-xs text-secondary text-center">
+            Jangan tutup halaman ini. Pembayaran sedang diproses...
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <script>
+    // Auto-refresh for pending status
+    if (new URL(window.location).searchParams.get('status') === 'pending') {
+      const checkInterval = setInterval(() => {
+        fetch(window.location.href)
+          .then(res => res.text())
+          .then(html => {
+            // Check if page has success indicator
+            if (html.includes('Pembayaran Berhasil')) {
+              window.location.reload();
+            }
+          })
+          .catch(err => console.error('[STATUS_CHECK] error:', err));
+      }, 3000);
+
+      // Clear interval after 5 minutes
+      setTimeout(() => clearInterval(checkInterval), 5 * 60 * 1000);
+    }
+  </script>
+</DashboardLayout>

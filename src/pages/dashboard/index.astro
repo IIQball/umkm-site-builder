@@ -2,6 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import StatCard from '@/components/ui/StatCard.svelte';
 import ChartWidget from '@/components/dashboard/ChartWidget.svelte';
+import TenantUsageChart from '@/components/tenant/ai/TenantUsageChart.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
@@ -150,6 +151,11 @@ if (currentHour >= 4 && currentHour < 11) {
         initialPoints={initialPoints}
         initialFailed={initialPointsFailed}
       />
+    </div>
+
+    <!-- AI Credit Usage Chart Widget -->
+    <div class="animate-fade-in-up delay-400">
+      <TenantUsageChart client:load />
     </div>
 
     <!-- Store Settings Link -->

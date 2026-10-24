@@ -5,7 +5,8 @@
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
   import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
   import OnboardingStepSettings from './wizard/OnboardingStepSettings.svelte';
-  import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
+  // Catatan TA: OnboardingStepContent disembunyikan sementara untuk fokus topik TA Template Builder.
+  // import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
   import OnboardingStepper from './wizard/OnboardingStepper.svelte';
   import OnboardingSuccessStep from './wizard/OnboardingSuccessStep.svelte';
   import type {
@@ -69,7 +70,7 @@
 
     const state = loadSavedOnboardingState();
     if (state) {
-      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 4) currentStep = state.currentStep;
+      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 3) currentStep = state.currentStep;
       subdomain = state.subdomain || '';
       storeName = state.storeName || '';
       categoryId = state.categoryId || '';
@@ -176,8 +177,11 @@
         saveState();
       }
     } else if (currentStep === 3) {
-      currentStep = 4;
-      saveState();
+      if (isEdit) {
+        handleEditSubmit();
+      } else {
+        handleOnboardSubmit();
+      }
     }
   }
 
@@ -212,7 +216,7 @@
     }
 
     submitStatus = 'success';
-    currentStep = 5;
+    currentStep = 4;
     clearOnboardingState();
   }
 
@@ -236,7 +240,7 @@
     }
 
     submitStatus = 'success';
-    currentStep = 5;
+    currentStep = 4;
   }
 </script>
 
@@ -268,22 +272,15 @@
           bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
           {categories} {storeName} {waNumber} {address} {googleMapsUrl}
           {branchMode} {branches} customization={contentCustomization}
-          onPrev={prevStep} onSave={handleEditSubmit} onNext={nextStep}
+          onPrev={prevStep} onSave={handleEditSubmit}
         />
       {:else}
         <OnboardingStepTemplate
           {templates} bind:selectedTemplateId {storeName} {subdomain}
-          {submitStatus} {submitError} onPrev={prevStep} onNext={nextStep}
+          {submitStatus} {submitError} onPrev={prevStep} onNext={handleOnboardSubmit}
         />
       {/if}
     {:else if currentStep === 4}
-      <OnboardingStepContent
-        {templates} {categories} {selectedTemplateId} {subdomain} {storeName}
-        {waNumber} {address} {googleMapsUrl} {branchMode} {branches} {isEdit}
-        bind:customization={contentCustomization} {submitStatus} {submitError}
-        onPrev={prevStep} onSubmit={isEdit ? handleEditSubmit : handleOnboardSubmit}
-      />
-    {:else if currentStep === 5}
       <OnboardingSuccessStep
         {isEdit} {subdomain} {storeName} {address} onResetStep={() => { currentStep = 1; }}
       />

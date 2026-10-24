@@ -1175,3 +1175,36 @@ Berikut adalah rekapitulasi status fitur yang telah aktif serta rekomendasi peng
      * *Tujuan*: Menyediakan bundle tema siap pakai 1-klik (seperti *"Classic Clean"*, *"Emerald Organic"*, *"Cyber Tech"*, *"Sunset Warm"*) di `GlobalThemeInspector` untuk mempercepat proses perancangan bagi desainer pemula.
   4. **Keyboard Shortcuts Suite**:
      * *Tujuan*: Menambahkan pintasan keyboard terpadu untuk efisiensi workflow desainer: `Ctrl+Z` (Undo), `Ctrl+Y` (Redo), `Ctrl+S` (Save), `Ctrl+G` (Toggle Grid), `Ctrl+\` (Toggle Layer Panel), `Ctrl+/` (Toggle Inspector), dan `Delete` (Hapus Section/Node).
+
+---
+
+### 8. Catatan Status Fitur Khusus TA: Penyembunyian Kustomisasi Onboarding
+
+> [!IMPORTANT]
+> **Status Fitur (Fokus Tugas Akhir / TA):**
+> Fitur kustomisasi konten & gaya (warna tema, tipografi, penyesuaian teks seksi hero/header/faq/dll.) pada alur **Onboarding Tenant** (src/components/onboarding/) sengaja **disembunyikan sementara** dari tampilan antarmuka (UI).
+
+#### Alasan Arsitektur & Akademis
+1. **Fokus Topik TA Mahasiswa (Virda Febriyanti - TRPL Poliwangi)**:
+   Topik TA mengangkat *"Rancang Bangun Modul Template Builder Berbasis Komponen Modular (Section-Based) dengan Pola Component Registry pada Platform Pinoka"*.
+2. **Kesesuaian Masalah & Alur Pengguna**:
+   Pada alur dasar Pinoka, pedagang UMKM cukup mengisi data usaha dasar (Subdomain -> Profil Usaha -> Pilih Template -> Selesai), dan toko langsung aktif secara otomatis tanpa beban kustomisasi desain rumit.
+3. **Pemisahan Peran (Role Separation)**:
+   Hak dan kebebasan untuk mengonfigurasi komponen, tata letak preset, tipografi, dan warna diserahkan seutuhnya kepada **Role Designer** melalui **Template Builder Studio** (src/components/builder/), bukan di onboarding pedagang UMKM.
+
+#### Daftar Berkas yang Dipreservasi (JANGAN DIHAPUS):
+Walaupun disembunyikan dari UI stepper onboarding, berkas-berkas berikut **DILARANG DIHAPUS** karena tetap menjadi modul fungsional bawaan, penyedia payload default API, serta aset penting untuk re-integrasi pasca-TA:
+* src/components/onboarding/wizard/OnboardingStepContent.svelte — Komponen kontainer tab kustomisasi konten & preview live onboarding.
+* src/components/onboarding/wizard/content/ContentDesignTab.svelte — Tab pemilih palet warna tema & hex kustom.
+* src/components/onboarding/wizard/content/ContentHeaderTab.svelte — Tab kustomisasi logo & teks pengumuman header.
+* src/components/onboarding/wizard/content/ContentHeroTab.svelte — Tab kustomisasi judul, badge, tombol CTA, dan banner hero.
+* src/components/onboarding/wizard/content/ContentFeaturesTab.svelte — Tab repeater keunggulan fitur toko & pilihan icon.
+* src/components/onboarding/wizard/content/ContentTestimonialsTab.svelte — Tab manajemen ulasan/testimoni pelanggan.
+* src/components/onboarding/wizard/content/ContentFaqTab.svelte — Tab daftar pertanyaan tanya-jawab FAQ toko.
+* src/components/onboarding/wizard/content/ContentFooterTab.svelte — Tab kustomisasi tagline, jam operasional, dan info footer.
+* src/components/onboarding/wizard/content/contentCustomization.constants.ts — Konstanta pilihan ikon dan preset gambar.
+* src/components/onboarding/wizard/content/contentCustomization.defaults.ts — Generator data default konten toko baru.
+* src/components/onboarding/wizard/content/contentCustomization.extract.ts — Parser ekstraksi data kustomisasi dari database ke form.
+* src/components/onboarding/wizard/content/contentCustomization.helpers.ts — Barrel export helper konten onboarding.
+* src/components/onboarding/wizard/content/contentCustomization.payload.ts — Serializer payload kustomisasi ke format database JSON.* src/components/onboarding/wizard/SettingsTemplatePicker.svelte - Komponen picker daftar koleksi template pada pengaturan toko.
+* src/components/onboarding/wizard/OnboardingContentPreview.svelte - Komponen live storefront preview interaktif pada pengaturan toko.

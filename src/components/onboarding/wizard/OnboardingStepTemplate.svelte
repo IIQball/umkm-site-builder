@@ -188,9 +188,9 @@
     >
       {#if submitStatus === "submitting"}
         <Loader2 size={16} class="animate-spin" />
-        Memproses...
+        Menyimpan...
       {:else}
-        Lanjut Kustomisasi Konten
+        Gunakan Template & Selesaikan
         <ArrowRight size={16} />
       {/if}
     </Button>

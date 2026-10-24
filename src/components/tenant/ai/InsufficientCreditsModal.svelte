@@ -8,7 +8,8 @@
   export let featureType: string = 'AI feature';
   export let onClose: () => void = () => {};
   export let onTopUp: () => void = () => {
-    window.location.href = '/dashboard/tenant/ai-topup';
+    const url = storeId ? `/dashboard/tenant/ai-topup?storeId=${storeId}` : '/dashboard/tenant/ai-topup';
+    window.location.href = url;
   };
 
   $: isInsufficient = creditBalance < requiredCredit;

@@ -1,3 +1,14 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding/Pengaturan Toko
+  untuk keperluan fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pratinjau visual dan kustomisasi desain dipusatkan pada modul Template Builder.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai komponen preview live
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Monitor, Tablet, Smartphone, Layout } from 'lucide-svelte';

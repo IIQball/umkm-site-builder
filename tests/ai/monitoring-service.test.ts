@@ -9,8 +9,6 @@ import {
   getAiLogs,
 } from '@/services/ai/monitoring.service';
 
-const vi = { fn: mock };
-
 mock.module('@/lib/db/client', () => ({
   db: {
     select: mock(),

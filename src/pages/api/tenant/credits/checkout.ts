@@ -36,10 +36,10 @@ export const POST: APIRoute = async (context): Promise<Response> =>
       {
         amount,
         type: 'ai_credit_purchase',
-        idempotencyKey: idempotencyKey || undefined,
+        idempotencyKey: idempotencyKey ?? undefined,
       },
       baseUrl,
-      idempotencyKey || undefined
+      idempotencyKey ?? undefined
     );
 
     // Provide status page URL for redirect after payment

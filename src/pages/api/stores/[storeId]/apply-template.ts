@@ -4,6 +4,7 @@ import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler'
 import { validate } from '@/lib/utils/validation';
 import { validateTemplateOwnership, applyTemplateToStore } from '@/services/store-template.service';
 import { migrateTemplateConfig } from '@/lib/templates';
+import { logActivity } from '@/services/audit.service';
 import { z } from 'zod';
 
 const ApplyTemplateSchema = z.object({
@@ -41,6 +42,16 @@ export const POST: APIRoute = async ({ params, request }) => {
     // Terapkan template ke store menggunakan service layer dengan config yang termigrasi
     const migratedConfig = migrateTemplateConfig(result.template.config);
     await applyTemplateToStore(storeId, templateId, migratedConfig, user.id);
+
+    await logActivity({
+      userId: user.id,
+      storeId,
+      action: 'Apply Template',
+      details: {
+        templateId,
+        templateName: result.template.name,
+      },
+    });
 
     return jsonSuccess({
       storeId,

@@ -6,6 +6,7 @@ import {
   updateBusinessCategory,
   deleteBusinessCategory,
 } from '@/services/business-categories';
+import { logActivity } from '@/services/audit.service';
 
 export const PUT: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -23,6 +24,16 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
     const input = validate(BusinessCategoryUpdateSchema, body);
 
     const updated = await updateBusinessCategory(id, input);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Update Business Category',
+      details: {
+        categoryId: id,
+        name: updated.name,
+      },
+    });
+
     return jsonSuccess(updated);
   });
 };
@@ -40,6 +51,15 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     }
 
     const result = await deleteBusinessCategory(id);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Delete Business Category',
+      details: {
+        categoryId: id,
+      },
+    });
+
     return jsonSuccess(result);
   });
 };

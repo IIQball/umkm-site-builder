@@ -1,4 +1,4 @@
-import { toFile } from 'openai/uploads';
+import { toFile } from 'openai';
 import { getOpenAIClient, handleOpenAIError, OPENAI_IMAGE_REQUEST_OPTIONS } from '@/lib/openai';
 import { sanitizeText } from '@/lib/utils/format';
 import { withOpenAiRetry } from '@/lib/resilience/openai-retry';

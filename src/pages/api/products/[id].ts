@@ -8,6 +8,7 @@ import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 import { deleteFromCloudinary } from '../../../lib/cloudinary';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
+import { logActivity } from '@/services/audit.service';
 
 const productUpdateInput = z.object({
   storeId: z.string().min(1).optional(),
@@ -59,6 +60,16 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
       .where(eq(stores.id, store.id));
 
+    await logActivity({
+      userId: (locals.user as AuthenticatedUser).id,
+      storeId: store.id,
+      action: 'Update Product',
+      details: {
+        productId: id,
+        name: updated[0].name,
+      },
+    });
+
     return jsonSuccess(updated[0], 200);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -101,6 +112,16 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     if (imageUrls && imageUrls.length > 0 && imageUrls[0].publicId) {
       await deleteFromCloudinary(imageUrls[0].publicId);
     }
+
+    await logActivity({
+      userId: (locals.user as AuthenticatedUser).id,
+      storeId: store.id,
+      action: 'Delete Product',
+      details: {
+        productId: id,
+        name: existingProduct[0].name,
+      },
+    });
 
     return jsonSuccess({ id }, 200);
   } catch (error: unknown) {

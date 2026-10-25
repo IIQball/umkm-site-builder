@@ -1,6 +1,6 @@
 import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
 import OpenAI from 'openai';
-import * as openaiUploads from 'openai/uploads';
+import * as openaiModule from 'openai';
 import { generateProductMockup } from '@/services/ai/product-mockup.service';
 import * as cloudinaryUploader from '@/services/media/cloudinary-uploader';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
@@ -20,7 +20,7 @@ describe('ProductMockupService - generateProductMockup (bun:test)', () => {
     mockEdit.mockReset();
     setOpenAIClientForTesting(mockClient);
 
-    toFileSpy = spyOn(openaiUploads, 'toFile');
+    toFileSpy = spyOn(openaiModule, 'toFile');
     uploadBase64ImageSpy = spyOn(cloudinaryUploader, 'uploadBase64Image');
   });
 

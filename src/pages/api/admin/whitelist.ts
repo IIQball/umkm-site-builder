@@ -20,9 +20,29 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       createdAt: users.createdAt,
     })
     .from(users)
-    .innerJoin(adminWhitelist, eq(users.email, adminWhitelist.email))
     .where(eq(users.role, 'admin'))
     .orderBy(desc(users.createdAt));
+
+    // Ensure all registered admins are synchronized into admin_whitelist table
+    const existingWhitelist = await db.select({ email: adminWhitelist.email }).from(adminWhitelist);
+    const whitelistedEmails = new Set(existingWhitelist.map(w => w.email.toLowerCase()));
+
+    for (const admin of admins) {
+      if (!whitelistedEmails.has(admin.email.toLowerCase())) {
+        try {
+          await db.insert(adminWhitelist).values({
+            id: crypto.randomUUID(),
+            email: admin.email,
+            role: 'admin',
+            addedBy: user.id,
+            createdAt: admin.createdAt || new Date(),
+          });
+          whitelistedEmails.add(admin.email.toLowerCase());
+        } catch {
+          // Ignore unique collision if added concurrently
+        }
+      }
+    }
 
     return jsonSuccess(admins);
   });

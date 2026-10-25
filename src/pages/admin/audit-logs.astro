@@ -2,7 +2,7 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import AuditLogTable from '@/components/admin/AuditLogTable.svelte';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { getAuditLogs } from '@/services/audit.service';
+import { getAuditLogs, getDistinctAuditActions } from '@/services/audit.service';
 
 export const prerender = false;
 
@@ -18,22 +18,27 @@ const roleFilter = Astro.url.searchParams.get('role') || 'all';
 
 let initialLogs: any[] = [];
 let total = 0;
+let availableActions: string[] = [];
 
 try {
-  const result = await getAuditLogs({ 
-    page, 
-    limit,
-    callerRole: user.role,
-    callerId: user.id,
-    actionFilter,
-    roleFilter
-  });
+  const [result, actions] = await Promise.all([
+    getAuditLogs({ 
+      page, 
+      limit,
+      callerRole: user.role,
+      callerId: user.id,
+      actionFilter,
+      roleFilter
+    }),
+    getDistinctAuditActions()
+  ]);
   
   initialLogs = result.data.map(log => ({
     ...log,
     createdAt: log.createdAt ? log.createdAt.toISOString() : new Date().toISOString()
   }));
   total = result.meta.total;
+  availableActions = actions;
 } catch (error) {
   console.error('[AdminAuditLogs] Failed to query audit logs:', error);
 }
@@ -59,6 +64,7 @@ try {
       currentPage={page}
       initialActionFilter={actionFilter}
       initialRoleFilter={roleFilter}
+      availableActions={availableActions}
     />
   </div>
 </DashboardLayout>

@@ -206,7 +206,7 @@ describe('TransactionService', () => {
       const result = await transactionService.purchaseTemplate('user_123', 'tpl_free', 'http://localhost:3000', 'admin_456');
       
       expect(result.isFree).toBe(true);
-      expect(mockDb.insert).toHaveBeenCalledTimes(3); // 1 for userTemplates, 2 for notifications (designer & tenant)
+      expect(mockDb.insert).toHaveBeenCalledTimes(4); // 1 for userTemplates, 2 for notifications (designer & tenant), 1 for activity log
     });
 
     it('should successfully create invoice for paid template and pass assistedBy metadata', async () => {
@@ -288,8 +288,8 @@ describe('TransactionService', () => {
         createdAt: new Date(),
       });
 
-      // db.insert is called for: userTemplates, commission, creditWallet (designer) [mutation], creditWallet (admin) [mutation], notification (designer), notification (tenant)
-      expect(mockDb.insert).toHaveBeenCalledTimes(6);
+      // db.insert is called for: userTemplates, commission, creditWallet (designer) [mutation], creditWallet (admin) [mutation], notification (designer), notification (tenant), activity log
+      expect(mockDb.insert).toHaveBeenCalledTimes(7);
     });
   });
 

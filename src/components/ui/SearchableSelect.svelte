@@ -182,7 +182,7 @@
     on:click={toggleDropdown}
     on:keydown={handleKeyDown}
   >
-    <span class="whitespace-nowrap pr-2 {selectedOption ? 'text-main font-medium' : 'text-muted italic'}">
+    <span class="truncate min-w-0 flex-1 pr-2 {selectedOption ? 'text-main font-medium' : 'text-muted italic'}">
       {selectedOption ? selectedOption.label : placeholder}
     </span>
 

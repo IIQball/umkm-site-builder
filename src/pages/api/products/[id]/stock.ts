@@ -3,6 +3,7 @@ import { db } from '@/db/index';
 import { products, stores } from '@/db/schema';
 import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
+import { logActivity } from '@/services/audit.service';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -46,6 +47,17 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     await db.update(stores)
       .set({ lastEditedBy: user.id, updatedAt: new Date() })
       .where(eq(stores.id, store.id));
+
+    await logActivity({
+      userId: user.id,
+      storeId: store.id,
+      action: 'Update Product Stock',
+      details: {
+        productId: id,
+        productName: targetProduct[0].name,
+        isAvailable: validated.isAvailable,
+      },
+    });
 
     return jsonSuccess({ id, isAvailable: validated.isAvailable });
   });

@@ -11,4 +11,6 @@ export * from './store-template.service';
 export * from './stores';
 export * from './business-categories';
 export * from './ai';
+export * from './audit.service';
+export * from './audit.constants';
 

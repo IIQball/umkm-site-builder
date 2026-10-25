@@ -6,6 +6,7 @@ import { StoreSettingsInput } from '@/lib/stores/schemas';
 import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
+import { logActivity } from '@/services/audit.service';
 import { ZodError } from 'zod';
 
 export const PUT: APIRoute = async (context) => {
@@ -101,6 +102,17 @@ export const PUT: APIRoute = async (context) => {
         metadata: { storeId: existingStore.id }
       });
     }
+
+    await logActivity({
+      userId: user.id,
+      storeId: existingStore.id,
+      action: 'Update Store Settings',
+      details: {
+        storeName: data.name,
+        waNumber: data.waNumber,
+        address: data.address,
+      },
+    });
 
     return new Response(JSON.stringify({ ok: true, success: true, data: { message: 'Settings updated successfully' } }), {
       status: 200,

@@ -15,6 +15,7 @@
 
   const dispatch = createEventDispatcher<{
     openDetail: AiAssetItem;
+    attach: AiAssetItem;
   }>();
 
   let isDownloading = false;
@@ -41,6 +42,11 @@
       isDownloading = false;
       downloadFormat = null;
     }
+  }
+
+  function handleAttachClick(e: MouseEvent) {
+    e.stopPropagation();
+    dispatch('attach', asset);
   }
 
   $: badge = getFeatureTypeBadgeConfig(asset.featureType);
@@ -93,38 +99,54 @@
         </p>
       </div>
 
-      <!-- Tombol Unduh Langsung (PNG & JPG) -->
-      <div class="pt-2 border-t border-light grid grid-cols-2 gap-2">
-        <Button
-          variant="secondary"
-          size="xs"
-          fullWidth
-          disabled={isDownloading}
-          on:click={(e) => handleDownload('png', e)}
-          title="Unduh berkas gambar PNG kualitas tinggi"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          <span>{isDownloading && downloadFormat === 'png' ? '...' : 'Unduh PNG'}</span>
-        </Button>
+      <!-- Tombol Aksi: Unduh & Pasang ke Produk -->
+      <div class="pt-2 border-t border-light space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <Button
+            variant="secondary"
+            size="xs"
+            fullWidth
+            disabled={isDownloading}
+            on:click={(e) => handleDownload('png', e)}
+            title="Unduh berkas gambar PNG kualitas tinggi"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>{isDownloading && downloadFormat === 'png' ? '...' : 'Unduh PNG'}</span>
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="xs"
+            fullWidth
+            disabled={isDownloading}
+            on:click={(e) => handleDownload('jpg', e)}
+            title="Unduh berkas gambar JPG"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>{isDownloading && downloadFormat === 'jpg' ? '...' : 'Unduh JPG'}</span>
+          </Button>
+        </div>
 
         <Button
-          variant="secondary"
+          variant="primary"
           size="xs"
           fullWidth
           disabled={isDownloading}
-          on:click={(e) => handleDownload('jpg', e)}
-          title="Unduh berkas gambar JPG"
+          on:click={handleAttachClick}
+          title="Pasang langsung ke produk tanpa download"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+            <path d="M12 5v14M5 12h14"/>
           </svg>
-          <span>{isDownloading && downloadFormat === 'jpg' ? '...' : 'Unduh JPG'}</span>
+          <span>Pasang ke Produk</span>
         </Button>
       </div>
     </div>

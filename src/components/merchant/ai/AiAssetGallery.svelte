@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Card, Button } from '@/components/ui';
   import AiAssetDetailModal from './AiAssetDetailModal.svelte';
+  import AiAssetAttachModal from './AiAssetAttachModal.svelte';
   import AiGalleryCard from './AiGalleryCard.svelte';
   import {
     GALLERY_CATEGORY_TABS,
@@ -9,16 +10,20 @@
   } from './gallery.constants';
 
   export let assets: AiAssetItem[] = [];
+  export let products: Array<{ id: string; name: string }> = [];
   export let loading: boolean = false;
 
   const dispatch = createEventDispatcher<{
     create: void;
     refresh: void;
+    attach: { productId: string; cloudinaryUrl: string; attachmentType: string };
   }>();
 
   let activeCategory: string = 'all';
   let selectedAsset: AiAssetItem | null = null;
   let isDetailOpen = false;
+  let isAttachOpen = false;
+  let isAttaching = false;
 
   $: filteredAssets = assets.filter((asset) => {
     if (activeCategory === 'all') return true;
@@ -28,6 +33,21 @@
   function handleOpenDetail(asset: AiAssetItem) {
     selectedAsset = asset;
     isDetailOpen = true;
+  }
+
+  function handleOpenAttach(asset: AiAssetItem) {
+    selectedAsset = asset;
+    isAttachOpen = true;
+  }
+
+  async function handleAttach(event: CustomEvent<{ productId: string; cloudinaryUrl: string; attachmentType: string }>) {
+    isAttaching = true;
+    try {
+      dispatch('attach', event.detail);
+    } finally {
+      isAttaching = false;
+      isAttachOpen = false;
+    }
   }
 </script>
 
@@ -118,5 +138,15 @@
     open={isDetailOpen}
     asset={selectedAsset}
     on:close={() => (isDetailOpen = false)}
+  />
+
+  <!-- Attach Modal -->
+  <AiAssetAttachModal
+    open={isAttachOpen}
+    asset={selectedAsset}
+    {products}
+    loading={isAttaching}
+    on:close={() => (isAttachOpen = false)}
+    on:attach={handleAttach}
   />
 </div>

@@ -147,6 +147,7 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
 
   describe('Payload & Reference Image Validation (4 MB Limit)', () => {
     let mockEdit: ReturnType<typeof mock>;
+    let uploadSpy: { mockRestore: () => void } | undefined;
 
     beforeEach(() => {
       mockEdit = mock();
@@ -156,7 +157,7 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
         },
       } as unknown as OpenAI);
 
-      spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
+      uploadSpy = spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
         publicId: 'pinoka/mockups/test',
         secureUrl: 'https://res.cloudinary.com/test.webp',
         bytes: 1024,
@@ -165,6 +166,7 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
 
     afterEach(() => {
       resetOpenAIClient();
+      uploadSpy?.mockRestore();
     });
 
     it('rejects reference image payloads strictly exceeding 4 MB limit', async () => {

@@ -17,6 +17,8 @@ export { default as AiAssetDetailModal } from './AiAssetDetailModal.svelte';
 export { default as AiAssetGallery } from './AiAssetGallery.svelte';
 export { default as AiGalleryCard } from './AiGalleryCard.svelte';
 export { default as AiStudioDashboard } from './AiStudioDashboard.svelte';
+export { default as LogoWizardModal } from './LogoWizardModal.svelte';
+export { default as AiResultPreview } from './AiResultPreview.svelte';
 export * from './logo-wizard.constants';
 export * from './packaging-wizard.constants';
 export * from './poster-wizard.constants';

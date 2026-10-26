@@ -75,10 +75,11 @@
 
       <!-- Pilihan Produk -->
       <div class="space-y-2">
-        <label class="block text-label-caps text-muted">
+        <label for="product-select" class="block text-label-caps text-muted">
           Pilih Produk untuk Dipasang <span class="text-error">*</span>
         </label>
         <Select
+          id="product-select"
           bind:value={selectedProductId}
           placeholder="Pilih produk..."
           options={products.map(p => ({ value: p.id, label: p.name }))}

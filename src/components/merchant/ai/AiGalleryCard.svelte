@@ -44,8 +44,10 @@
     }
   }
 
-  function handleAttachClick(e: MouseEvent) {
-    e.stopPropagation();
+  function handleAttachClick(e: Event) {
+    if (e instanceof MouseEvent) {
+      e.stopPropagation();
+    }
     dispatch('attach', asset);
   }
 

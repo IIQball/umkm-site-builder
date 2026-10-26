@@ -35,11 +35,6 @@
     isDetailOpen = true;
   }
 
-  function handleOpenAttach(asset: AiAssetItem) {
-    selectedAsset = asset;
-    isAttachOpen = true;
-  }
-
   async function handleAttach(event: CustomEvent<{ productId: string; cloudinaryUrl: string; attachmentType: string }>) {
     isAttaching = true;
     try {

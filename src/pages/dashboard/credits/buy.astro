@@ -1,6 +1,7 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import CreditCheckoutModal from '@/components/dashboard/CreditCheckoutModal.svelte';
+import CreditQuotaGauge from '@/components/tenant/ai/CreditQuotaGauge.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -36,13 +37,22 @@ try {
   <CreditCheckoutModal client:load />
   <div class="min-h-full space-y-8 pb-10">
     <!-- Header -->
-    <div class="flex flex-col gap-2 pb-4">
+    <div class="flex flex-col gap-2 pb-2">
       <h1 class="text-heading-lg text-main font-bold tracking-tight">
-        Beli Kredit AI
+        Kredit & Kuota AI Toko
       </h1>
       <p class="text-body-base text-secondary max-w-2xl leading-relaxed">
-        Pilih paket kredit yang sesuai dengan kebutuhan bisnis Anda dan nikmati fitur AI canggih untuk mengembangkan produk dan brand Anda.
+        Pantau sisa kuota, riwayat mutasi kredit, dan pilih paket isi ulang kredit AI untuk mendukung kebutuhan desain produk UMKM Anda.
       </p>
+    </div>
+
+    <!-- Visual Quota Gauge & Mutation History -->
+    <CreditQuotaGauge client:load />
+
+    <!-- Packages Section Header -->
+    <div class="pt-4 border-t border-light">
+      <h2 class="text-heading-md text-main font-bold">Pilih Paket Isi Ulang Kredit</h2>
+      <p class="text-body-sm text-secondary mt-1">Kredit langsung otomatis ditambahkan ke saldo kuota setelah pembayaran berhasil.</p>
     </div>
 
     <!-- Packages Grid -->

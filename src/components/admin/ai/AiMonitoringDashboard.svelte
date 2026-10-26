@@ -15,6 +15,7 @@
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
   import AiDepositModal from "./AiDepositModal.svelte";
   import FeatureDistributionChart from "./FeatureDistributionChart.svelte";
+  import TopMerchantsAiTable from "./TopMerchantsAiTable.svelte";
 
   export let initialData: AiMonitoringDashboardData;
   export let isSuperAdmin: boolean = false;
@@ -152,6 +153,12 @@
   <!-- AI Feature Distribution Donut Chart (Requests & Rupiah) -->
   <FeatureDistributionChart
     initialData={initialData.featureDistribution}
+    {selectedYear}
+    {selectedMonth}
+  />
+
+  <!-- Top Active Merchants Ranking Table -->
+  <TopMerchantsAiTable
     {selectedYear}
     {selectedMonth}
   />

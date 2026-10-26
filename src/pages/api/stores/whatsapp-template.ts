@@ -3,6 +3,7 @@ import { db } from '../../../db';
 import { stores } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser, canManageStore } from '../../../lib/auth';
+import { logActivity } from '@/services/audit.service';
 
 export const PUT: APIRoute = async ({ request, url }) => {
   try {
@@ -25,6 +26,13 @@ export const PUT: APIRoute = async ({ request, url }) => {
     await db.update(stores)
       .set({ customization, updatedAt: new Date(), lastEditedBy: user.id })
       .where(eq(stores.id, store.id));
+
+    await logActivity({
+      userId: user.id,
+      storeId: store.id,
+      action: 'Update WhatsApp Template',
+      details: { storeId: store.id },
+    });
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch {

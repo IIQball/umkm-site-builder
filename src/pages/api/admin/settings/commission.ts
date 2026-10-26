@@ -3,6 +3,7 @@ import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { commissionSettingsSchema } from '@/schemas';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import { getPlatformSettings, updatePlatformSettings } from '@/services/finance';
+import { logActivity } from '@/services/audit.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -41,6 +42,17 @@ export const saveSettings: APIRoute = async (context): Promise<Response> => {
     const validated = validate(commissionSettingsSchema, body);
 
     const updatedRecord = await updatePlatformSettings(validated, user.id);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Update Platform Settings',
+      details: {
+        platformFeePercentage: validated.platformFeePercentage,
+        adminServiceFee: validated.adminServiceFee,
+        payoutMinimumBalance: validated.payoutMinimumBalance,
+        settlementDelayDays: validated.settlementDelayDays,
+      },
+    });
 
     return jsonSuccess(updatedRecord);
   });

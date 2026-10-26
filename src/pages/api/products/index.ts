@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
+import { logActivity } from '@/services/audit.service';
 
 const productInput = z.object({
   storeId: z.string().min(1),
@@ -85,6 +86,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
     await db.update(stores)
       .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
       .where(eq(stores.id, store.id));
+
+    await logActivity({
+      userId: (locals.user as AuthenticatedUser).id,
+      storeId: store.id,
+      action: 'Create Product',
+      details: {
+        productId: inserted[0].id,
+        name: inserted[0].name,
+        basePrice: inserted[0].basePrice,
+      },
+    });
 
     return jsonSuccess(inserted[0], 201);
   } catch (error: unknown) {

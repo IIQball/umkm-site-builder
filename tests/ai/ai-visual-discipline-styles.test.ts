@@ -1,6 +1,5 @@
 import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
-import OpenAI from 'openai';
-import * as openaiUploads from 'openai/uploads';
+import OpenAI, * as openaiModule from 'openai';
 import {
   buildProductPosterPrompt,
   generateProductPoster,
@@ -47,7 +46,7 @@ describe('AI Visual Discipline & Anti-Slop (bun:test)', () => {
     mockCreate.mockReset();
     setOpenAIClientForTesting(mockClient);
 
-    toFileSpy = spyOn(openaiUploads, 'toFile');
+    toFileSpy = spyOn(openaiModule, 'toFile');
     uploadBase64ImageSpy = spyOn(cloudinaryUploader, 'uploadBase64Image');
   });
 

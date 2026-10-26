@@ -29,6 +29,7 @@ mock.module('openai', () => ({
 
 describe('PromptBuilderService - buildLogoPrompt (bun:test)', () => {
   beforeEach(() => {
+    process.env.OPENAI_API_KEY = 'mock-key';
     mockCreate.mockReset();
     resetOpenAIClient();
   });

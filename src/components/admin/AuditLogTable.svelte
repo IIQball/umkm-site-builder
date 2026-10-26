@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { Pagination, Badge, Select, Table, Modal, Button, Card } from '@/components/ui';
+  import { Pagination, Badge, Select, Table, Modal, Button, Card, SearchableSelect } from '@/components/ui';
   import { User, Monitor, Info } from 'lucide-svelte';
   import { formatDate } from '@/lib/utils/format';
+  import { DEFAULT_AUDIT_ACTIONS } from '@/services/audit.constants';
 
   export let initialLogs: Array<{
     id: string;
@@ -23,6 +24,7 @@
   export let currentPage: number = 1;
   export let initialActionFilter: string = 'all';
   export let initialRoleFilter: string = 'all';
+  export let availableActions: string[] = [];
 
   let logs = initialLogs;
   let actionFilter = initialActionFilter;
@@ -40,13 +42,19 @@
     window.location.href = `?${params.toString()}`;
   };
 
-  const actionOptions = [
+  const handleActionChange = (e: CustomEvent<{ value: string | number }>) => {
+    actionFilter = String(e.detail.value || 'all');
+    handleFilterChange();
+  };
+
+  $: actions = availableActions && availableActions.length > 0 ? availableActions : DEFAULT_AUDIT_ACTIONS;
+
+  $: actionOptions = [
     { value: 'all', label: 'Semua Aksi' },
-    { value: 'USER_ACTIVATED', label: 'USER ACTIVATED' },
-    { value: 'USER_SUSPENDED', label: 'USER SUSPENDED' },
-    { value: 'Register Admin', label: 'REGISTER ADMIN' },
-    { value: 'Register Merchant', label: 'REGISTER MERCHANT' },
-    { value: 'Delete User', label: 'DELETE USER' }
+    ...actions.map((action) => ({
+      value: action,
+      label: action.replace(/_/g, ' ').toUpperCase(),
+    })),
   ];
 
   const roleOptions = [
@@ -59,10 +67,11 @@
 
   const getActionColor = (action: string) => {
     const act = action.toLowerCase();
-    if (act.includes('create') || act.includes('add') || act.includes('activated')) return 'success';
-    if (act.includes('delete') || act.includes('remove') || act.includes('fail') || act.includes('suspended')) return 'error';
-    if (act.includes('update') || act.includes('edit')) return 'warning';
-    if (act.includes('register')) return 'primary';
+    if (act.includes('create') || act.includes('add') || act.includes('activated') || act.includes('approve') || act.includes('apply')) return 'success';
+    if (act.includes('delete') || act.includes('remove') || act.includes('fail') || act.includes('suspended') || act.includes('reject')) return 'error';
+    if (act.includes('update') || act.includes('edit') || act.includes('save') || act.includes('stock') || act.includes('quota')) return 'warning';
+    if (act.includes('purchase') || act.includes('download') || act.includes('order') || act.includes('payout')) return 'primary';
+    if (act.includes('register') || act.includes('submit')) return 'primary';
     return 'secondary';
   };
 </script>
@@ -86,11 +95,14 @@
 
     <!-- Filters & Badge on the right -->
     <div class="flex flex-wrap items-center gap-2.5">
-      <div class="w-44 sm:w-48">
-        <Select 
+      <div class="w-52 sm:w-60">
+        <SearchableSelect 
           options={actionOptions} 
           bind:value={actionFilter} 
-          on:change={handleFilterChange} 
+          placeholder="Semua Aksi"
+          searchPlaceholder="Cari aksi..."
+          clearable={false}
+          on:change={handleActionChange} 
         />
       </div>
       

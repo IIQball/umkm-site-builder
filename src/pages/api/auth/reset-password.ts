@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { db, users, sessions, tenantInvitations, verifications } from '@/db/index';
+import { logActivity } from '@/services/audit.service';
 import { eq, or } from 'drizzle-orm';
 
 const resetPasswordSchema = z.object({
@@ -56,6 +57,8 @@ export const POST: APIRoute = async ({ request }) => {
         userEmail = targetUser[0].email;
         userRole = targetUser[0].role;
         
+        const wasPending = targetUser[0].status === 'pending';
+
         // Ensure user status is activated upon setting password
         await db.update(users).set({ status: 'active' }).where(eq(users.id, targetUid));
 
@@ -84,6 +87,15 @@ export const POST: APIRoute = async ({ request }) => {
         await db
           .delete(tenantInvitations)
           .where(eq(tenantInvitations.email, userEmail));
+
+        await logActivity({
+          userId: targetUid,
+          action: wasPending ? 'USER_ACTIVATED' : 'Reset Password',
+          details: {
+            email: userEmail,
+            role: userRole,
+          },
+        });
       }
     }
 

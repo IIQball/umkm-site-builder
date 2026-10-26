@@ -8,6 +8,7 @@ import { getMaxStoreBranches } from '@/services/finance';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
+import { logActivity } from '@/services/audit.service';
 
 
 
@@ -107,6 +108,20 @@ export const POST: APIRoute = async ({ request }) => {
       },
       registeredBy,
       lastEditedBy,
+    });
+
+    await logActivity({
+      userId: user.id,
+      storeId,
+      action: 'Create Store',
+      details: {
+        name,
+        subdomain,
+        categoryId,
+        tenantId: targetUserId,
+        registeredBy: registeredBy || null,
+        assistedByAdmin: !!isAdminOrSuper,
+      },
     });
 
     return jsonSuccess({ storeId, subdomain, name }, 201);

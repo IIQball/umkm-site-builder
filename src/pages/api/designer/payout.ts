@@ -9,6 +9,7 @@ import { payoutSchema } from '@/schemas';
 import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { formatIDR } from '@/lib/currency';
 import { idempotencyManager, extractIdempotencyKey } from '@/lib/finance/idempotency';
+import { logActivity } from '@/services/audit.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -191,6 +192,17 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           checkDb,
         })
       : await executePayout();
+
+    await logActivity({
+      userId: user.id,
+      action: 'Request Payout',
+      details: {
+        payoutId: payoutRecord.id,
+        amount: payoutRecord.amount,
+        bankAccountId: payoutRecord.bankAccountId,
+        status: payoutRecord.status,
+      },
+    });
 
     return jsonSuccess(payoutRecord);
   });

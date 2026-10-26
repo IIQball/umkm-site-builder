@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions, tenantInvitations, activityLogs } from '@/db/index';
+import { db, users, sessions, tenantInvitations, activityLogs, adminWhitelist } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin, auth } from '@/lib/auth';
 import { manualUserRegistrationSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -80,6 +80,24 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           invitedBy: user.id,
           expiresAt: expiresAt,
         });
+
+        // If registered user is an admin, also insert into adminWhitelist table
+        if (validated.role === 'admin') {
+          const existingWhitelist = await db
+            .select()
+            .from(adminWhitelist)
+            .where(eq(adminWhitelist.email, validated.email))
+            .limit(1);
+
+          if (existingWhitelist.length === 0) {
+            await db.insert(adminWhitelist).values({
+              id: crypto.randomUUID(),
+              email: validated.email,
+              role: 'admin',
+              addedBy: user.id,
+            });
+          }
+        }
 
         // Add activity log
         await db.insert(activityLogs).values({

@@ -8,6 +8,7 @@ import {
   deleteUserBankAccount,
   setPrimaryBankAccount,
 } from '@/services/finance/bank-account.service';
+import { logActivity } from '@/services/audit.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -41,6 +42,17 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const validated = validate(bankAccountSchema, body);
 
     const result = await addUserBankAccount(user.id, validated);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Add Bank Account',
+      details: {
+        bankCode: validated.bankCode,
+        accountNumber: validated.accountNumber,
+        accountHolder: validated.accountHolder,
+      },
+    });
+
     return jsonSuccess(result);
   });
 };
@@ -61,6 +73,15 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     }
 
     await deleteUserBankAccount(user.id, accountId);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Delete Bank Account',
+      details: {
+        bankAccountId: accountId,
+      },
+    });
+
     return jsonSuccess({ success: true, message: 'Rekening bank berhasil dihapus' });
   });
 };
@@ -80,6 +101,15 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     }
 
     const result = await setPrimaryBankAccount(user.id, accountId);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Set Primary Bank Account',
+      details: {
+        bankAccountId: accountId,
+      },
+    });
+
     return jsonSuccess(result);
   });
 };

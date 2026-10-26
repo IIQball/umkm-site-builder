@@ -6,6 +6,7 @@ import { db, notifications, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { SubmitReviewSchema } from '@/schemas';
 import { InMemoryRateLimiter } from '@/lib/utils/rate-limiter';
+import { logActivity } from '@/services/audit.service';
 
 // Rate Limiter: Maksimal 10 pengajuan template / revisi per desainer dalam 1 jam
 export const templateSubmitLimiter = new InMemoryRateLimiter(10, 60 * 60 * 1000);
@@ -56,6 +57,17 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         }) as typeof notifications.$inferInsert)
       );
     }
+
+    await logActivity({
+      userId: user.id,
+      action: 'Submit Template Review',
+      details: {
+        templateId,
+        templateName: updated.name,
+        isRevision: Boolean(revisionNotes || (updated.revisionCount && updated.revisionCount > 0)),
+        revisionCount: updated.revisionCount || 0,
+      },
+    });
 
     return Response.json({
       success: true,

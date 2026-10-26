@@ -7,6 +7,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
+import { logActivity } from '@/services/audit.service';
 
 
 async function hasExistingStore(userId: string): Promise<boolean> {
@@ -74,6 +75,18 @@ export const POST: APIRoute = async ({ request }) => {
       status: 'active',
       registeredBy,
       lastEditedBy,
+    });
+
+    await logActivity({
+      userId: user.id,
+      storeId,
+      action: 'Register Subdomain',
+      details: {
+        subdomain,
+        tenantId: targetUserId,
+        registeredBy: registeredBy || null,
+        assistedByAdmin: !!isAdminOrSuper,
+      },
     });
 
     return jsonSuccess({ storeId, subdomain }, 201);

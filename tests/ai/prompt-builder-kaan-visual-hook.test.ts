@@ -15,6 +15,7 @@ mock.module('openai', () => ({
 
 describe('PromptBuilderService - Kaan Kiziltug Visual Hook & Wordmark (bun:test)', () => {
   beforeEach(() => {
+    process.env.OPENAI_API_KEY = 'mock-key';
     mockCreate.mockReset();
     resetOpenAIClient();
   });

@@ -6,6 +6,7 @@ import { eq, and, desc, inArray } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
 import type { TransactionRecord } from '@/types';
 import { formatIDR } from '@/lib/currency';
+import { logActivity } from '@/services/audit.service';
 
 export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): TransactionRecord {
   return {
@@ -107,6 +108,23 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       } catch {
         // Non-blocking notification dispatch
       }
+
+      await logActivity({
+        userId: transaction.userId,
+        storeId: transaction.storeId || null,
+        action: 'Purchase Template',
+        details: {
+          transactionId: transaction.id,
+          templateId: template.id,
+          templateName: template.name,
+          amount: transaction.amount,
+          designerAmount,
+          platformFee,
+          adminFee: adminAmount,
+          assistedBy: transaction.assistedBy || null,
+          paymentChannel: transaction.paymentChannel || null,
+        },
+      });
     }
   } else if (transaction.type === 'ai_credit_purchase' && transaction.userId) {
     // Handle AI credit purchase fulfillment
@@ -161,6 +179,18 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       } catch {
         // Non-blocking notification dispatch
       }
+
+      await logActivity({
+        userId: transaction.userId,
+        storeId: transaction.storeId || null,
+        action: 'Purchase AI Credit',
+        details: {
+          transactionId: transaction.id,
+          amount: transaction.amount,
+          credits,
+          paymentChannel: transaction.paymentChannel || null,
+        },
+      });
     } catch (error) {
       console.error('[FULFILL_CREDIT_PURCHASE] error:', error);
       throw error;
@@ -313,6 +343,17 @@ export async function grantFreeTemplate(
       metadata: { templateId: template.id },
     });
   }
+
+  await logActivity({
+    userId,
+    action: 'Download Free Template',
+    details: {
+      templateId: template.id,
+      templateName: template.name,
+      buyerName,
+      assistedBy: assistedBy || null,
+    },
+  });
 
   return { isFree: true, message: 'Free template added to your account successfully' };
 }

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, activityLogs } from '@/db/index';
+import { db, users, activityLogs, adminWhitelist } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
 import { handleApiRoute, jsonSuccess, AppError } from '@/lib/utils';
 import { eq } from 'drizzle-orm';
@@ -44,6 +44,10 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     // Also delete any tenant invitations sent by this user
     const { tenantInvitations } = await import('@/db/schema');
     await db.delete(tenantInvitations).where(eq(tenantInvitations.invitedBy, userId));
+    
+    if (target.role === 'admin') {
+      await db.delete(adminWhitelist).where(eq(adminWhitelist.email, target.email));
+    }
     
     await db.delete(users).where(eq(users.id, userId));
 

@@ -7,7 +7,9 @@
   import AiLoadingProgress from './AiLoadingProgress.svelte';
   import AiAssetGallery from './AiAssetGallery.svelte';
   import AiDeveloperTestBar from './AiDeveloperTestBar.svelte';
+  import { generateAiAssetClient } from '@/lib/api/ai-client';
   import { formatAiErrorMessage } from '@/lib/errors/ai-error';
+  import { toast } from '@/lib/toast';
   import type { AiAssetItem } from './gallery.constants';
   import type { AiLogoInput } from '@/lib/validators/ai-logo';
   import type { AiPackagingInput } from '@/lib/validators/ai-packaging';
@@ -67,33 +69,22 @@
     successNotice = '';
 
     try {
-      const res = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...payload,
-          storeId,
-          qualityTier: payload.qualityTier || 'high',
-          isTesting: isTestMode && isTesting,
-          options: {
-            size: payload.size || '1024x1024',
-            qualityTier: payload.qualityTier || 'high',
-          },
-        }),
+      await generateAiAssetClient({
+        ...payload,
+        storeId,
+        qualityTier: payload.qualityTier || 'high',
+        isTesting: isTestMode && isTesting,
+        size: payload.size || '1024x1024',
       });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || (!data.ok && !data.success)) {
-        const rawErrMsg = data.error?.message || data.error || data.message || res.status;
-        throw new Error(formatAiErrorMessage(rawErrMsg));
-      }
 
       generationProgress = 100;
       successNotice = 'Desain visual AI berhasil dibuat dan disimpan ke galeri!';
+      toast.success(successNotice);
       await fetchAssetHistory();
       mainTab = 'gallery';
     } catch (err: unknown) {
       generalError = formatAiErrorMessage(err);
+      toast.error(generalError);
     } finally {
       isGenerating = false;
     }
@@ -185,20 +176,30 @@
   {#if generalError}
     <div class="p-3.5 bg-error/10 border border-error/20 rounded-2xl text-error text-xs flex items-center justify-between gap-3">
       <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span>{generalError}</span>
       </div>
-      <button type="button" class="text-error hover:opacity-80 p-1 cursor-pointer" on:click={() => (generalError = '')} aria-label="Tutup error">✕</button>
+      <button type="button" class="text-error hover:opacity-80 p-1 cursor-pointer flex items-center justify-center rounded-lg" on:click={() => (generalError = '')} aria-label="Tutup error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
   {/if}
 
   {#if successNotice}
     <div class="p-3.5 bg-success/10 border border-success/20 rounded-2xl text-success text-xs flex items-center justify-between gap-3">
       <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span>{successNotice}</span>
       </div>
-      <button type="button" class="text-success hover:opacity-80 p-1 cursor-pointer" on:click={() => (successNotice = '')} aria-label="Tutup notifikasi">✕</button>
+      <button type="button" class="text-success hover:opacity-80 p-1 cursor-pointer flex items-center justify-center rounded-lg" on:click={() => (successNotice = '')} aria-label="Tutup notifikasi">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
   {/if}
 

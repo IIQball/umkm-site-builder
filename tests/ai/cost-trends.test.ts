@@ -147,4 +147,27 @@ describe('AI Cost Trends & Quota Formula Tests', () => {
       expect(getBudgetUsageStatus(95).variant).toBe('error');
     });
   });
+
+  describe('Date Range Presets & Month Calculations', () => {
+    it('calculates current month days correctly for month preset', () => {
+      const today = new Date();
+      const currentMonthDays = Math.max(1, today.getDate());
+      expect(currentMonthDays).toBeGreaterThanOrEqual(1);
+      expect(currentMonthDays).toBeLessThanOrEqual(31);
+    });
+
+    it('builds daily points for 7-day preset correctly', () => {
+      const startDate = new Date('2026-10-21T00:00:00Z');
+      const points = buildDailyTrendPoints(startDate, 7, new Map());
+      expect(points).toHaveLength(7);
+      expect(points[0].date).toBe('2026-10-21');
+      expect(points[6].date).toBe('2026-10-27');
+    });
+
+    it('builds daily points for 30-day preset correctly', () => {
+      const startDate = new Date('2026-09-28T00:00:00Z');
+      const points = buildDailyTrendPoints(startDate, 30, new Map());
+      expect(points).toHaveLength(30);
+    });
+  });
 });

@@ -19,11 +19,13 @@ export function getDb(): Database {
     return dbInstance;
   }
 
-  if (!config.database.url) {
+  const dbUrl = config.database.url || (process.env.NODE_ENV === 'test' ? 'postgresql://mock:mock@localhost:5432/mock' : '');
+
+  if (!dbUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  dbInstance = drizzle(neon(config.database.url), { schema });
+  dbInstance = drizzle(neon(dbUrl), { schema });
   return dbInstance;
 }
 

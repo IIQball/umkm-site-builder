@@ -13,11 +13,26 @@
 
   export let initialData: AiCostTrendsData | null = null;
 
-  let selectedDays: 7 | 14 | 30 = 14;
+  type DateRangePreset = '7d' | '30d' | 'month';
+
+  let selectedPreset: DateRangePreset = initialData?.period?.days === 7 ? '7d' : '30d';
   let data: AiCostTrendsData | null = initialData;
   let isLoading = false;
   let hoveredBar: BarChartPoint | null = null;
   let hoveredIndex: number | null = null;
+
+  $: currentMonthDays = Math.max(1, new Date().getDate());
+  $: selectedDays = selectedPreset === 'month'
+    ? currentMonthDays
+    : selectedPreset === '7d'
+      ? 7
+      : 30;
+
+  $: rangeTitle = selectedPreset === 'month'
+    ? 'Bulan Berjalan'
+    : selectedPreset === '7d'
+      ? '7 Hari Terakhir'
+      : '30 Hari Terakhir';
 
   $: summary = data?.summary || {
     totalSpentIdr: 0,
@@ -40,10 +55,15 @@
   $: chartLayout = computeBarChartLayout(dailyTrends, 800, 240);
   $: budgetStatus = getBudgetUsageStatus(summary.budgetUsedPercentage);
 
-  async function fetchTrends(days: number) {
+  async function fetchTrends(preset: DateRangePreset) {
     isLoading = true;
     try {
-      const res = await fetch(`/api/admin/ai/cost-trends?days=${days}`);
+      const days = preset === 'month'
+        ? Math.max(1, new Date().getDate())
+        : preset === '7d'
+          ? 7
+          : 30;
+      const res = await fetch(`/api/admin/ai/cost-trends?days=${days}&range=${preset}`);
       if (res.ok) {
         const json = await res.json();
         if (json.ok && json.data) {
@@ -57,15 +77,15 @@
     }
   }
 
-  function handlePeriodChange(days: 7 | 14 | 30) {
-    if (selectedDays === days && data) return;
-    selectedDays = days;
-    fetchTrends(days);
+  function handlePresetChange(preset: DateRangePreset) {
+    if (selectedPreset === preset && data) return;
+    selectedPreset = preset;
+    fetchTrends(preset);
   }
 
   onMount(() => {
     if (!data) {
-      fetchTrends(selectedDays);
+      fetchTrends(selectedPreset);
     }
   });
 </script>
@@ -88,27 +108,27 @@
     </div>
 
     <div class="flex items-center gap-2 self-start sm:self-auto">
-      <div class="inline-flex items-center p-1 bg-nested rounded-xl border border-light">
+      <div class="inline-flex items-center p-1 bg-nested rounded-xl border border-light" role="group" aria-label="Pilih rentang tanggal">
         <button
           type="button"
-          class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer {selectedDays === 7 ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePeriodChange(7)}
+          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === '7d' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
+          on:click={() => handlePresetChange('7d')}
         >
-          7 Hari
+          7 Hari Terakhir
         </button>
         <button
           type="button"
-          class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer {selectedDays === 14 ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePeriodChange(14)}
+          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === '30d' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
+          on:click={() => handlePresetChange('30d')}
         >
-          14 Hari
+          30 Hari Terakhir
         </button>
         <button
           type="button"
-          class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer {selectedDays === 30 ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePeriodChange(30)}
+          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === 'month' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
+          on:click={() => handlePresetChange('month')}
         >
-          30 Hari
+          Bulan Berjalan
         </button>
       </div>
 
@@ -117,7 +137,7 @@
         size="sm"
         class="!p-2 !rounded-xl text-secondary hover:text-main cursor-pointer"
         disabled={isLoading}
-        on:click={() => fetchTrends(selectedDays)}
+        on:click={() => fetchTrends(selectedPreset)}
         aria-label="Refresh tren pengeluaran"
       >
         <RefreshCw size={16} class={isLoading ? 'animate-spin' : ''} />
@@ -134,7 +154,7 @@
       <div class="flex items-center gap-2">
         <Calendar size={16} class="text-secondary" />
         <h3 class="text-body-sm font-bold text-main">
-          Fluktuasi Biaya ({selectedDays} Hari Terakhir)
+          Fluktuasi Biaya ({rangeTitle})
         </h3>
       </div>
       <span class="text-2xs text-muted font-mono font-medium">

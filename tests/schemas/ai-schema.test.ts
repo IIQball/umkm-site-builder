@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getTableConfig } from 'drizzle-orm/pg-core';
 import {
   transactionTypeEnum,
   aiFeatureTypeEnum,
@@ -62,6 +63,12 @@ describe('AI & Quota Schema Specifications', () => {
     expect(aiGenerationLogs.status).toBeDefined();
     expect(aiGenerationLogs.errorMessage).toBeDefined();
     expect(aiGenerationLogs.createdAt).toBeDefined();
+  });
+
+  it('should define composite index on (tenantId, createdAt) for aiGenerationLogs', () => {
+    const tableConfig = getTableConfig(aiGenerationLogs);
+    const indexNames = tableConfig.indexes.map((idx) => idx.config.name);
+    expect(indexNames).toContain('ai_generation_logs_tenant_id_created_at_idx');
   });
 
   it('should have correct columns in storeQuotaPackages and storeQuotaPurchases', () => {

@@ -1,11 +1,18 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-10-09 by feature/h14-fauzan-stress-test
+Status: LIVE · Updated: 2026-10-27 by feature/h8-deisa-chart-unit-tests
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
 
 Keep it short and current. This is a checkpoint, not a changelog.
+
+- **H8 Admin Analytics Formula Unit Tests & Responsive Chart Reactivity ([`tests/admin/analytics-formula.test.ts`](tests/admin/analytics-formula.test.ts), [`src/components/admin/ai/CostTrendChart.svelte`](src/components/admin/ai/CostTrendChart.svelte)):**
+  - **Comprehensive Backend Unit Testing**: Created `tests/admin/analytics-formula.test.ts` (31 tests, 223 assertions) strictly validating `calculateBudgetUsedPercentage` and `calculateCostPerPercentUsage` under edge cases: zero division (limit = 0, spent = 0), negative nominals, non-finite inputs (NaN, Infinity), micro-spending rounding, over-budget ratios (>100%, 150%, 500%), and enterprise scale (billions IDR).
+  - **Frontend Chart Layout Reactivity**: Tested `computeBarChartLayout` across mobile viewports (320px, 375px, 414px, 480px) and wide screens (768px, 1024px, 1440px, 1920px), verifying strictly positive usable dimensions, bar width limits (4px to 36px), centered slot positions, ascending coordinate order, and bounded tooltip ratio coordinates [0%, 100%].
+  - **Mobile Tooltip Alignment Fix**: Moved floating tooltip card inside the scrollable relative container (`min-w-[500px] relative`) in `CostTrendChart.svelte`, preventing tooltip position offset from drifting during horizontal scroll on small screens.
+  - **Quality Gates**: All tests passing (`bun test`), all files strictly under 300 lines (`analytics-formula.test.ts` 274 lines, `CostTrendChart.svelte` 257 lines).
+
 
 - **H14 Multi-Domain SSR Stress Test & CLS Optimization ([`scripts/load-test.ts`](scripts/load-test.ts), [`src/lib/performance/cls.helpers.ts`](src/lib/performance/cls.helpers.ts), [`src/components/storefront/StorefrontDynamicPage.svelte`](src/components/storefront/StorefrontDynamicPage.svelte), [`docs/prd/features/h14-stress-test.md`](docs/prd/features/h14-stress-test.md)):**
   - **Load Testing Script**: `scripts/load-test.ts` simulates 50 concurrent store domains with 5 requests each (250 total). Validates SSR response time SLA: p95 < 1000ms, success rate ≥ 95%. Run via `bun run load-test`.

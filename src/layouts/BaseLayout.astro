@@ -14,6 +14,7 @@ interface Props {
   noindex?: boolean
   hideNavbar?: boolean
   customMarquee?: boolean
+  hideToasts?: boolean
 }
 
 const {
@@ -23,7 +24,8 @@ const {
   type = 'website',
   noindex = false,
   hideNavbar = false,
-  customMarquee = false
+  customMarquee = false,
+  hideToasts = false
 } = Astro.props
 
 const siteUrl = Astro.url.origin
@@ -106,18 +108,84 @@ const ogImageUrl = new URL(image, siteUrl).href
     <!-- Preconnect to Google Fonts CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@700..800&family=Poppins:wght@400..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@700..800&family=Poppins:wght@400..600&display=swap" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" media="print" onload="this.media='all'">
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@700..800&family=Poppins:wght@400..600&display=swap">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     </noscript>
 
-    <!-- Preload Hero Sequence Frame 1 -->
-    <link rel="preload" as="image" href="/frames/frame_0001.webp" fetchpriority="high" type="image/webp" />
+    <!-- Preload Hero Sequence Frame 1 (Responsive for Desktop & Mobile) -->
+    <link
+      rel="preload"
+      as="image"
+      href="/frames/frame_0001_sm.webp"
+      media="(max-width: 768px)"
+      fetchpriority="high"
+      type="image/webp"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/frames/frame_0001.webp"
+      media="(min-width: 769px)"
+      fetchpriority="high"
+      type="image/webp"
+    />
 
-    <!-- Preload 3D Banyuwangi Map Model in Background for Instant Synergy Section Display -->
-    <link rel="preload" href="/assets/3d/banyuwangi_map.glb" as="fetch" crossorigin="anonymous" fetchpriority="low" />
+    <!-- Preload Critical Above-The-Fold Heading & Body Fonts (Instant LCP) -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/hostgrotesk/v5/co3BmWBnlCJ3U42vbbfdwMjZpFjm.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2"
+      crossorigin
+    />
+
+    <!-- Inlined Critical @font-face to eliminate font discovery delay for instant paint -->
+    <style is:inline>
+      @font-face {
+        font-family: 'Host Grotesk';
+        font-style: normal;
+        font-weight: 700 800;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/hostgrotesk/v5/co3BmWBnlCJ3U42vbbfdwMjZpFjm.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      astro-island {
+        display: block;
+      }
+    </style>
     
     <!-- Anti-flicker theme script - runs before DOM renders -->
     <script is:inline>
@@ -132,8 +200,8 @@ const ogImageUrl = new URL(image, siteUrl).href
   </head>
   <body class="overflow-x-clip">
     <SmoothScroll client:load />
-    <ToastContainer client:idle />
-    <RateLimitAlert client:idle />
+    {!hideToasts && <ToastContainer client:idle />}
+    {!hideToasts && <RateLimitAlert client:idle />}
     {hideNavbar && !customMarquee && <LandingMarquee client:load />}
     {!hideNavbar && (
       <div class="sticky top-0 inset-x-0 z-50 w-full flex flex-col">

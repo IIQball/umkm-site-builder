@@ -1,11 +1,11 @@
 <script lang="ts">
   import { ChevronDown, Sparkles } from 'lucide-svelte'
-  import type { NavUser } from './navbar.helpers'
   import {
+    type NavUser,
     getRoleConfig,
     getDashboardHomePath,
     getSettingsHref
-  } from '@/components/dashboard/sidebar/sidebar.helpers'
+  } from './navbar.helpers'
 
   export let isOpen: boolean = false
   export let user: NavUser | null = null
@@ -75,7 +75,7 @@
         href="/umkm"
         on:click={onClose}
         class={currentPath.startsWith('/umkm')
-          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm'
+          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm'
           : 'flex-1 text-center py-2.5 rounded-full bg-nested/80 dark:bg-white/5 text-main dark:text-white label-caps font-medium tracking-wider border border-border dark:border-white/10'}
       >
         UMKM
@@ -84,7 +84,7 @@
         href="/templates"
         on:click={onClose}
         class={currentPath.startsWith('/templates')
-          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm'
+          ? 'flex-1 text-center py-2.5 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm'
           : 'flex-1 text-center py-2.5 rounded-full bg-nested/80 dark:bg-white/5 text-main dark:text-white label-caps font-medium tracking-wider border border-border dark:border-white/10'}
       >
         Template

@@ -1,0 +1,93 @@
+/* Base Styles & Resets */
+@layer base {
+  *, ::before, ::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-family);
+    font-size: 1rem;
+    line-height: 1.5;
+    background-color: var(--color-bg-base);
+    color: var(--color-text-main);
+    transition: background-color var(--transition-base);
+    overflow-x: clip;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0;
+    color: var(--color-text-main);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  a {
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  :where(a:not([class*="text-"]):not([class*="btn"]):not([class*="button"])) {
+    color: var(--color-primary);
+  }
+
+  :where(a:not([class*="text-"]):not([class*="btn"]):not([class*="button"])):hover {
+    color: var(--color-primary-dark);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-style: italic;
+    color: var(--color-text-light);
+    opacity: 0.8;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: var(--color-nested-base);
+    color: var(--color-text-main);
+    border-color: var(--color-border);
+  }
+}
+
+/* Micro-Typography Classes */
+.text-3xs {
+  font-size: 0.5625rem;
+  line-height: 0.75rem;
+}
+.text-2xs {
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+.text-xs-dense {
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+}
+.tracking-caps {
+  letter-spacing: 0.2em;
+}
+.font-heading {
+  font-family: var(--font-heading);
+}

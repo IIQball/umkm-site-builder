@@ -1,0 +1,101 @@
+@import 'leaflet/dist/leaflet.css';
+
+/* Leaflet Store & User Pin Marker Styles */
+.custom-store-pin,
+.custom-user-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Leaflet Popup Theme-Aware Card (Light & Dark Mode) */
+.leaflet-popup-content-wrapper {
+  background-color: var(--color-card-base, #ffffff) !important;
+  color: var(--color-text-main, #0f172a) !important;
+  border: 1px solid var(--color-border, rgba(15, 23, 42, 0.12)) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.12) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background-color: var(--color-card-base, #ffffff) !important;
+  border: 1px solid var(--color-border, rgba(15, 23, 42, 0.12)) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--color-text-muted, #64748b) !important;
+  top: 10px !important;
+  right: 12px !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  transition: color 150ms ease !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--color-text-main, #0f172a) !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-content a {
+  text-decoration: none !important;
+}
+
+/* KUNJUNGI Button (High Contrast in both Light and Dark Themes) */
+.popup-btn-visit {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  background-color: var(--color-text-main, #0f172a) !important;
+  color: var(--color-bg-base, #ffffff) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12) !important;
+  transition: all 150ms ease !important;
+  cursor: pointer !important;
+}
+
+html[data-theme="dark"] .popup-btn-visit,
+[data-theme="dark"] .popup-btn-visit,
+.dark .popup-btn-visit {
+  background-color: var(--color-text-main, #f8fafc) !important;
+  color: var(--color-bg-base, #0b0f19) !important;
+  box-shadow: 0 1px 3px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.popup-btn-visit:hover {
+  opacity: 0.92 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* WhatsApp Button (WhatsApp Green with Pure White Text in Both Themes) */
+.popup-btn-wa {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  background-color: var(--color-success, #16a34a) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12) !important;
+  transition: all 150ms ease !important;
+  cursor: pointer !important;
+}
+
+.popup-btn-wa:hover {
+  filter: brightness(0.9) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}

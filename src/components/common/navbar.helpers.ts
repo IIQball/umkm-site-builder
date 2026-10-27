@@ -1,17 +1,18 @@
 import {
-  Shield,
-  Users,
-  Palette,
-  Layers,
-  Receipt,
-  Settings,
-  Store,
-  ShoppingBag,
-  Wallet,
-  LayoutDashboard
-} from 'lucide-svelte'
+  type RoleConfig,
+  ROLE_CONFIGS,
+  getRoleConfig,
+  getDashboardHomePath,
+  getSettingsHref
+} from '@/components/dashboard/sidebar/sidebar.helpers'
 
-import type { ComponentType } from 'svelte'
+export {
+  type RoleConfig,
+  ROLE_CONFIGS,
+  getRoleConfig,
+  getDashboardHomePath,
+  getSettingsHref
+}
 
 export type NavUser = {
   id: string
@@ -24,40 +25,7 @@ export type NavUser = {
 export type NavSubItem = {
   label: string
   href: string
-  icon: ComponentType
-}
-
-export type RoleBadgeMeta = {
-  label: string
-  color: string
-}
-
-import { getDashboardHomePath } from '@/components/dashboard/sidebar/sidebar.helpers'
-
-export const getRoleBadge = (role?: string | null): RoleBadgeMeta => {
-  switch (role) {
-    case 'designer':
-      return {
-        label: 'Desainer',
-        color: 'bg-success/15 text-success border-success/30'
-      }
-    case 'admin':
-      return {
-        label: 'Admin Pendamping',
-        color: 'bg-info/15 text-info border-info/30'
-      }
-    case 'superadmin':
-      return {
-        label: 'Super Admin',
-        color: 'bg-error/15 text-error border-error/20'
-      }
-    case 'tenant':
-    default:
-      return {
-        label: 'Merchant',
-        color: 'bg-warning/15 text-warning border-warning/30'
-      }
-  }
+  icon?: unknown
 }
 
 export const getDashboardHref = getDashboardHomePath
@@ -65,62 +33,79 @@ export const getDashboardHref = getDashboardHomePath
 export const getDashboardLabel = (role?: string | null): string => {
   if (role === 'designer') return 'Studio Desainer'
   if (role === 'superadmin') return 'Panel Super Admin'
-  if (role === 'admin') return 'Panel Admin'
+  if (role === 'admin') return 'Dashboard Pendamping'
   return 'Dashboard Toko'
 }
 
 export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
-  switch (role) {
-    case 'superadmin':
-      return [
-        { label: 'Overview Dashboard', href: '/superadmin', icon: LayoutDashboard },
-        { label: 'Kelola Akses Admin', href: '/superadmin/whitelist', icon: Shield },
-        { label: 'Manajemen Pengguna', href: '/superadmin/users', icon: Users },
-        { label: 'Kurasi Template', href: '/superadmin/templates', icon: Palette },
-        { label: 'Kategori Template', href: '/superadmin/template-categories', icon: Layers },
-        { label: 'Kategori Bisnis', href: '/superadmin/business-categories', icon: Store },
-        { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: Receipt },
-        { label: 'Pengaturan Platform', href: '/superadmin/settings', icon: Settings }
-      ]
-    case 'admin':
-      return [
-        { label: 'Overview Dashboard', href: '/admin', icon: LayoutDashboard },
-        { label: 'Merchant Anda', href: '/admin/merchants', icon: Store },
-        { label: 'Dompet & Payout', href: '/admin/wallet', icon: Wallet },
-        { label: 'Riwayat Transaksi', href: '/admin/transactions', icon: Receipt },
-        { label: 'Marketplace Template', href: '/templates', icon: Palette }
-      ]
-    case 'designer':
-      return [
-        { label: 'Overview Dasbor', href: '/designer', icon: LayoutDashboard },
-        { label: 'Dompet & Finansial', href: '/designer/wallet', icon: Wallet },
-        { label: 'Koleksi Template', href: '/designer/templates', icon: Palette },
-        { label: 'Pesanan Masuk', href: '/designer/orders', icon: ShoppingBag },
-        { label: 'Marketplace Publik', href: '/templates', icon: Store }
-      ]
-    case 'tenant':
-    default:
-      return [
-        { label: 'Dashboard Toko', href: '/dashboard', icon: LayoutDashboard },
-        { label: 'Katalog Produk', href: '/dashboard/products', icon: ShoppingBag },
-        { label: 'Riwayat Pesanan', href: '/dashboard/orders', icon: Receipt },
-        { label: 'Katalog Template', href: '/templates', icon: Palette }
-      ]
+  const r = (role || 'tenant').toLowerCase().trim()
+  if (r === 'superadmin') {
+    return [
+      { label: 'Overview Dashboard', href: '/superadmin' },
+      { label: 'Kelola Akses Admin', href: '/superadmin/whitelist' },
+      { label: 'Manajemen Pengguna', href: '/superadmin/users' },
+      { label: 'Kurasi Template', href: '/superadmin/templates' },
+      { label: 'Kategori Template', href: '/superadmin/template-categories' },
+      { label: 'Kategori Bisnis', href: '/superadmin/business-categories' },
+      { label: 'Riwayat Transaksi', href: '/superadmin/transactions' },
+      { label: 'Pengaturan Platform', href: '/superadmin/settings' }
+    ]
   }
+  if (r === 'admin') {
+    return [
+      { label: 'Overview Dashboard', href: '/admin' },
+      { label: 'Merchant Anda', href: '/admin/merchants' },
+      { label: 'Dompet & Payout', href: '/admin/wallet' },
+      { label: 'Riwayat Transaksi', href: '/admin/transactions' },
+      { label: 'Marketplace Template', href: '/templates' }
+    ]
+  }
+  if (r === 'designer') {
+    return [
+      { label: 'Overview Dasbor', href: '/designer' },
+      { label: 'Dompet & Finansial', href: '/designer/wallet' },
+      { label: 'Koleksi Template', href: '/designer/templates' },
+      { label: 'Pesanan Masuk', href: '/designer/orders' },
+      { label: 'Marketplace Publik', href: '/templates' }
+    ]
+  }
+  return [
+    { label: 'Dashboard Toko', href: '/dashboard' },
+    { label: 'Katalog Produk', href: '/dashboard/products' },
+    { label: 'Riwayat Pesanan', href: '/dashboard/orders' },
+    { label: 'Katalog Template', href: '/templates' }
+  ]
 }
 
 export const berandaItems = [
   { label: 'Beranda Utama', href: '/#hero-scroll-track', desc: 'Kembali ke tampilan awal hero anime' },
   { label: 'Visi & Manifesto', href: '/#manifesto-reveal', desc: 'Misi digitalisasi potensi Banyuwangi' },
-  { label: 'Sinergi 3 Pilar', href: '/#synergy', desc: 'Kolaborasi Desainer, UMKM, dan Konsumen' },
-  { label: 'Alur Kerja (Value Matrix)', href: '/#value-matrix', desc: '3 langkah praktis operasional platform' },
-  { label: 'Ulasan & Testimoni', href: '/#testimonials', desc: 'Cerita sukses mitra perajin & UMKM' },
-  { label: 'Tanya Jawab (FAQ)', href: '/#faq', desc: 'Jawaban pertanyaan umum seputar platform' },
-  { label: 'Kontak & Gabung', href: '/contact', desc: 'Konsultasi langsung dengan tim Pinoka' }
+  { label: 'Sinergi Ekosistem', href: '/#synergy', desc: 'Kolaborasi 3 pilar: UMKM, Desainer, Konsumen' },
+  { label: 'Fitur Unggulan', href: '/#value-matrix', desc: 'Alur cepat mulai dari pilih desain hingga jualan' },
+  { label: 'Ulasan Pengguna', href: '/#testimonials', desc: 'Pengalaman nyata wirausaha dan kreator' },
+  { label: 'Tanya Jawab (FAQ)', href: '/#faq', desc: 'Pertanyaan umum seputar layanan Pinoka' }
 ]
 
 export const helpCenterItems = [
-  { label: 'Hubungi Kami', href: '/contact', desc: 'Tanya jawab & kontak tim via WhatsApp' },
+  { label: 'Pusat Bantuan', href: '/help', desc: 'Panduan lengkap penggunaan & tutorial toko' },
   { label: 'Syarat & Ketentuan', href: '/terms', desc: 'Aturan layanan & hak kekayaan intelektual' },
   { label: 'Kebijakan Privasi', href: '/privacy', desc: 'Perlindungan data pribadi & keamanan' }
 ]
+
+export const getNavModeState = (): 'transparent' | 'hidden' | 'normal' => {
+  if (typeof window === 'undefined') return 'normal'
+  if (window.scrollY <= 10) return 'transparent'
+
+  const footer = document.getElementById('contact') || document.querySelector('footer')
+  if (footer && footer.getBoundingClientRect().top <= 100) return 'hidden'
+
+  const heroTrack = document.getElementById('hero-scroll-track')
+  if (!heroTrack) return 'normal'
+
+  const rect = heroTrack.getBoundingClientRect()
+  const maxScroll = rect.height - window.innerHeight
+
+  if (window.scrollY <= 40 || -rect.top <= 40) return 'transparent'
+  if (rect.bottom > 80 && -rect.top < maxScroll) return 'hidden'
+  return 'normal'
+}

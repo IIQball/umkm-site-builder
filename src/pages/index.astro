@@ -21,6 +21,7 @@ const currentPath = Astro.url.pathname
   description="Platform kolaborasi modern yang mempertemukan UMKM Banyuwangi dan desainer kreatif untuk mendigitalisasi visual produk lokal."
   hideNavbar={true}
   customMarquee={true}
+  hideToasts={true}
 >
   <div
     class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
@@ -29,7 +30,7 @@ const currentPath = Astro.url.pathname
     <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none hero-enter-nav flex flex-col">
       <LandingMarquee client:load />
       <PublicNavbar
-        client:idle
+        client:load
         user={user
           ? {
               id: user.id,
@@ -139,10 +140,11 @@ const currentPath = Astro.url.pathname
 
     <!-- Theme-Responsive Architectural Post-Hero Sections -->
     <div
+      id="post-hero-sections"
       class="relative w-full z-20 transition-colors duration-300"
     >
       <TextRevealSection client:visible />
-      <SynergySection client:idle />
+      <SynergySection client:visible />
       <ValueMatrixSection client:visible />
       <TestimonialsSection client:visible />
       <FaqSection client:visible />
@@ -157,19 +159,15 @@ const currentPath = Astro.url.pathname
 .hero-enter-nav,
 .hero-enter-left,
 .hero-enter-right {
-  opacity: 1
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-enter-nav,
   .hero-enter-left,
   .hero-enter-right {
-    opacity: 1 !important
-  }
-  .hero-enter-nav,
-  .hero-enter-left,
-  .hero-enter-right {
-    transform: none !important
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 </style>

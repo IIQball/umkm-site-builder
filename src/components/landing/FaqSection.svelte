@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import gsap from 'gsap'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
   import { Plus, Minus } from 'lucide-svelte'
 
   const FAQS = [
@@ -36,7 +34,8 @@
   let rightColEl: HTMLElement
   let openIndex: number | null = 0
   let showAll: boolean = false
-  let ctx: gsap.Context | null = null
+  let ctx: any = null
+  let timer: any = null
 
   $: displayedFaqs = showAll ? FAQS : FAQS.slice(0, 4)
 
@@ -44,11 +43,19 @@
     openIndex = openIndex === index ? null : index
   }
 
-  onMount(() => {
-    gsap.registerPlugin(ScrollTrigger)
-
+  onMount(async () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return
+    if (!containerEl) return
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion || !containerEl) return
+    if (prefersReducedMotion) return
+
+    const [gsapMod, stMod] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger')
+    ])
+    const gsap = gsapMod.gsap || gsapMod.default || gsapMod
+    const ScrollTrigger = stMod.ScrollTrigger || stMod.default || stMod
+    gsap.registerPlugin(ScrollTrigger)
 
     ctx = gsap.context(() => {
       if (leftColEl) {
@@ -96,14 +103,13 @@
       }
     }, containerEl)
 
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh()
+    timer = setTimeout(() => {
+      ScrollTrigger?.refresh()
     }, 150)
-
-    return () => clearTimeout(timer)
   })
 
   onDestroy(() => {
+    if (timer) clearTimeout(timer)
     ctx?.revert()
   })
 </script>
@@ -117,10 +123,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
       <!-- Left Column: Modernist Bold Headline & Direct Contact -->
       <div bind:this={leftColEl} class="lg:col-span-5 flex flex-col">
-        <h2 class="heading-section text-neutral-950 dark:text-white">
+        <h2 class="heading-section text-main">
           Pertanyaan? Jawaban.
         </h2>
-        <p class="desc-section text-neutral-500 dark:text-neutral-400 mt-4 max-w-sm">
+        <p class="desc-section text-muted mt-4 max-w-sm">
           Semua jawaban mendasar seputar alur kerja, sistem bagi hasil, dan aktivasi toko digital di ekosistem Pinoka.
         </p>
       </div>
@@ -136,24 +142,24 @@
               aria-expanded={openIndex === index}
             >
               <!-- Minimal Left Icon (+ / -) -->
-              <span class="mt-0.5 sm:mt-1 shrink-0 text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+              <span class="mt-0.5 sm:mt-1 shrink-0 text-muted group-hover:text-main transition-colors">
                 {#if openIndex === index}
-                  <Minus size={18} strokeWidth={2.2} class="text-neutral-900 dark:text-white" />
+                  <Minus size={18} strokeWidth={2.2} class="text-main" />
                 {:else}
-                  <Plus size={18} strokeWidth={2.2} class="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white" />
+                  <Plus size={18} strokeWidth={2.2} class="text-muted group-hover:text-main" />
                 {/if}
               </span>
 
               <!-- Question & Expandable Answer -->
               <div class="flex-1 min-w-0">
-                <span class="heading-4 text-neutral-900 dark:text-white group-hover:text-orange transition-colors block">
+                <span class="heading-4 text-main group-hover:text-orange transition-colors block">
                   {faq.question}
                 </span>
 
                 <!-- Smooth Height Expansion -->
                 <div class="grid transition-all duration-300 ease-out {openIndex === index ? 'grid-rows-[1fr] opacity-100 pt-2.5 pb-2' : 'grid-rows-[0fr] opacity-0 pb-0'}">
                   <div class="overflow-hidden">
-                    <p class="body-base text-neutral-600 dark:text-neutral-400 max-w-2xl">
+                    <p class="body-base text-secondary max-w-2xl">
                       {faq.answer}
                     </p>
                   </div>
@@ -173,7 +179,7 @@
                 openIndex = null
               }
             }}
-            class="text-orange hover:text-orange/80 font-heading font-medium text-sm sm:text-base transition-colors cursor-pointer inline-flex items-center gap-1.5 focus:outline-none"
+            class="text-orange-dark dark:text-primary hover:underline font-heading font-medium text-sm sm:text-base transition-colors cursor-pointer inline-flex items-center gap-1.5 focus:outline-none"
           >
             <span>{showAll ? 'Tampilkan lebih sedikit' : 'Lihat lebih banyak'}</span>
           </button>

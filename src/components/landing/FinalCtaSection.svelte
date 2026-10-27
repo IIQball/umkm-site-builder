@@ -11,11 +11,11 @@
     class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden -z-0"
     aria-hidden="true"
   >
-    <span
-      class="font-heading font-black text-[22vw] sm:text-[18vw] md:text-[15vw] tracking-tighter text-neutral-950/[0.035] dark:text-white/[0.045] whitespace-nowrap leading-none select-none"
-    >
-      Pinoka
-    </span>
+    <svg class="w-full h-auto max-h-[85%] overflow-visible select-none" viewBox="0 0 600 180" fill="currentColor">
+      <text x="50%" y="60%" text-anchor="middle" dominant-baseline="middle" class="font-heading font-black text-[130px] tracking-tighter fill-main/[0.04]">
+        Pinoka
+      </text>
+    </svg>
   </div>
 
   <!-- Content Container (Flat, no nested card) -->

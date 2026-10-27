@@ -1,26 +1,43 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import Lenis from 'lenis';
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import type Lenis from 'lenis';
+  import type { gsap } from 'gsap';
+  import type { ScrollTrigger } from 'gsap/ScrollTrigger';
   import 'lenis/dist/lenis.css';
 
+  type GSAPType = typeof gsap;
+  type ScrollTriggerType = typeof ScrollTrigger;
+
   let lenis: Lenis | null = null;
+  let gsapInstance: GSAPType | null = null;
+  let ScrollTriggerInstance: ScrollTriggerType | null = null;
   let tickerFn: ((time: number) => void) | null = null;
   let onRefresh: (() => void) | null = null;
   let handleAnchorClick: ((e: MouseEvent) => void) | null = null;
 
-  onMount(() => {
-    // Hindari menjalankan di builder canvas editor untuk menjaga native drag-and-drop
-    if (window.location.pathname.startsWith('/builder')) {
+  onMount(async () => {
+    // Hindari menjalankan di builder canvas editor dan pada perangkat touch/mobile
+    const isTouchOrMobile = window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches;
+    if (window.location.pathname.startsWith('/builder') || isTouchOrMobile) {
       return;
     }
+
+    const [{ default: LenisClass }, gsapMod, stMod] = await Promise.all([
+      import('lenis'),
+      import('gsap'),
+      import('gsap/ScrollTrigger')
+    ]);
+
+    const gsap = gsapMod.gsap || gsapMod.default || gsapMod;
+    const ScrollTrigger = stMod.ScrollTrigger || stMod.default || stMod;
+    gsapInstance = gsap;
+    ScrollTriggerInstance = ScrollTrigger;
 
     gsap.registerPlugin(ScrollTrigger);
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    lenis = new Lenis({
+    lenis = new LenisClass({
       autoRaf: false,
       lerp: prefersReducedMotion ? 1 : 0.085,
       smoothWheel: !prefersReducedMotion,
@@ -42,7 +59,7 @@
       },
     });
 
-    (window as any).__lenis = lenis;
+    (window as Window & { __lenis?: Lenis | null }).__lenis = lenis;
 
     // Synchronize Lenis scroll position with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
@@ -83,18 +100,18 @@
     if (handleAnchorClick) {
       document.removeEventListener('click', handleAnchorClick);
     }
-    if (onRefresh) {
-      ScrollTrigger.removeEventListener('refresh', onRefresh);
+    if (onRefresh && ScrollTriggerInstance) {
+      ScrollTriggerInstance.removeEventListener('refresh', onRefresh);
     }
-    if (tickerFn) {
-      gsap.ticker.remove(tickerFn);
+    if (tickerFn && gsapInstance) {
+      gsapInstance.ticker.remove(tickerFn);
     }
     if (lenis) {
       lenis.destroy();
       lenis = null;
     }
     if (typeof window !== 'undefined') {
-      delete (window as any).__lenis;
+      delete (window as Window & { __lenis?: Lenis | null }).__lenis;
     }
   });
 </script>

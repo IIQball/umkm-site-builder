@@ -181,5 +181,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
   ) {
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
   }
+
+  // Optimalisasi pengiriman aset landing page
+  const contentType = response.headers.get('content-type') || '';
+
+  if ((pathname === '/' || pathname === '') && contentType.includes('text/html')) {
+    const html = await response.text();
+    // Non-render-blocking stylesheet with preload and onload activation
+    const optimizedHtml = html.replace(
+      /<link\s+rel="stylesheet"\s+href="(\/_astro\/[^"]+\.css)"\s*\/?>/gi,
+      '<link rel="preload" href="$1" as="style" onload="this.onload=null;this.rel=\'stylesheet\'"><noscript><link rel="stylesheet" href="$1"></noscript>'
+    );
+
+    const newHeaders = new Headers(response.headers);
+    newHeaders.delete('content-length');
+    return new Response(optimizedHtml, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: newHeaders,
+    });
+  }
+
   return response;
 });

@@ -1,32 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
+  import { getNavModeState } from '@/components/common/navbar.helpers'
 
   let isVisible = true
   let ticking = false
 
   const updateVisibility = () => {
-    const heroTrack = document.getElementById('hero-scroll-track')
-    if (!heroTrack) {
-      isVisible = true
-      return
-    }
-
-    const footer = document.getElementById('contact') || document.querySelector('footer')
-    if (footer && footer.getBoundingClientRect().top <= 100) {
-      isVisible = false
-      return
-    }
-
-    const rect = heroTrack.getBoundingClientRect()
-    const maxScroll = rect.height - window.innerHeight
-
-    if (window.scrollY <= 40 || -rect.top <= 40) {
-      isVisible = true
-    } else if (rect.bottom > 80 && -rect.top < maxScroll) {
-      isVisible = false
-    } else {
-      isVisible = true
-    }
+    isVisible = getNavModeState() !== 'hidden'
   }
 
   const onScroll = () => {
@@ -68,32 +48,32 @@
       <!-- Track Item 1 -->
       <div class="inline-flex items-center gap-4 sm:gap-6 px-4 shrink-0">
         <span
-          class="badge badge-warning badge-outline gap-1.5 font-mono text-xs uppercase"
+          class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-warning/30 text-warning font-mono text-xs uppercase"
         >
           <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
             <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"
             ></span>
             <span
-              class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"
+              class="relative inline-flex rounded-full h-1.5 w-1.5 bg-warning"
             ></span>
           </span>
           Uji Coba Publik
         </span>
 
-        <span class="text-xs text-main/90 dark:text-slate-200 font-normal tracking-wide">
+        <span class="text-xs text-main/90 dark:text-main font-normal tracking-wide">
           Sistem Pinoka dalam tahap pengembangan aktif.
         </span>
 
         <span class="text-secondary/40 dark:text-white/20 select-none text-xs" aria-hidden="true">✦</span>
 
-        <span class="text-xs text-main/90 dark:text-slate-200 font-normal tracking-wide">
+        <span class="text-xs text-main/90 dark:text-main font-normal tracking-wide">
           Seluruh fitur katalog dapat dicoba secara bebas.
         </span>
 
         <span class="text-secondary/40 dark:text-white/20 select-none text-xs" aria-hidden="true">✦</span>
 
-        <span class="text-xs text-secondary dark:text-slate-400 font-normal tracking-wide">
+        <span class="text-xs text-secondary dark:text-muted font-normal tracking-wide">
           Mohon hindari memasukkan informasi penting atau data sensitif.
         </span>
 
@@ -103,32 +83,32 @@
       <!-- Track Item 2 (Seamless Infinite Symmetrical Clone) -->
       <div class="inline-flex items-center gap-4 sm:gap-6 px-4 shrink-0" aria-hidden="true">
         <span
-          class="badge badge-warning badge-outline gap-1.5 font-mono text-xs uppercase"
+          class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-warning/30 text-warning font-mono text-xs uppercase"
         >
           <span class="relative flex h-1.5 w-1.5">
             <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"
             ></span>
             <span
-              class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"
+              class="relative inline-flex rounded-full h-1.5 w-1.5 bg-warning"
             ></span>
           </span>
           Uji Coba Publik
         </span>
 
-        <span class="text-xs text-main/90 dark:text-slate-200 font-normal tracking-wide">
+        <span class="text-xs text-main/90 dark:text-main font-normal tracking-wide">
           Sistem Pinoka dalam tahap pengembangan aktif.
         </span>
 
         <span class="text-secondary/40 dark:text-white/20 select-none text-xs">✦</span>
 
-        <span class="text-xs text-main/90 dark:text-slate-200 font-normal tracking-wide">
+        <span class="text-xs text-main/90 dark:text-main font-normal tracking-wide">
           Seluruh fitur katalog dapat dicoba secara bebas.
         </span>
 
         <span class="text-secondary/40 dark:text-white/20 select-none text-xs">✦</span>
 
-        <span class="text-xs text-secondary dark:text-slate-400 font-normal tracking-wide">
+        <span class="text-xs text-secondary dark:text-muted font-normal tracking-wide">
           Mohon hindari memasukkan informasi penting atau data sensitif.
         </span>
 

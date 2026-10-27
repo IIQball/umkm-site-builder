@@ -1,11 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { LocateFixed, Maximize2 } from 'lucide-svelte';
-  import { type DirectoryStore, getStoreUrl } from './directory.types';
+  import type { DirectoryStore } from './directory.types';
   import { DEFAULT_PLATFORM_REGION } from '@/config/platform';
-  import { generateWhatsAppLink } from '@/lib/whatsapp';
-  import { formatNumber } from '@/lib/currency';
-  import { escapeHtml } from '@/lib/utils/format';
+  import { renderPopupContent, renderUserLocationPopup } from './directoryPopup.helpers';
+  import './directoryMap.css';
 
   export let stores: DirectoryStore[] = [];
   export let userLocation: { lat: number; lng: number; label?: string } | null = null;
@@ -17,42 +16,6 @@
   let userMarker: any = null;
   let storeMarkers: Map<string, any> = new Map();
   let isMapReady = false;
-
-  function renderPopupContent(store: DirectoryStore): string {
-    const storeUrl = getStoreUrl(store.subdomain);
-    const safeName = escapeHtml(store.name);
-    const safeAddress = store.address ? escapeHtml(store.address) : '';
-    const safeCategory = store.category ? escapeHtml(store.category.name) : '';
-    const safeDistance = store.distance !== null ? escapeHtml(store.distance) : '';
-
-    const categoryHtml = safeCategory
-      ? `<span class="inline-block px-2 py-0.5 rounded-full text-2xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 mb-1.5">${safeCategory}</span>`
-      : '';
-    const viewsHtml = `<div class="flex items-center gap-1 text-2xs font-medium text-secondary mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> ${formatNumber(store.totalViews || 0)} Kunjungan</div>`;
-    const distanceHtml = safeDistance
-      ? `<div class="flex items-center gap-1 text-xs font-semibold text-secondary mb-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${safeDistance} km dari Anda</div>`
-      : '';
-    const addressHtml = safeAddress
-      ? `<div class="text-2xs text-muted mb-2 line-clamp-2 leading-tight">${safeAddress}</div>`
-      : '';
-    const waButton = store.waNumber
-      ? `<a href="${generateWhatsAppLink(store.waNumber, `Halo ${store.name}, saya menemukan toko Anda di Direktori UMKM.`)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-2xs font-semibold no-underline transition-colors shadow-2xs">WhatsApp</a>`
-      : '';
-
-    return `
-      <div class="min-w-[190px] max-w-[240px] p-1 font-sans text-main">
-        <div class="font-bold text-sm text-main mb-1 tracking-tight font-heading">${safeName}</div>
-        ${categoryHtml}
-        ${viewsHtml}
-        ${distanceHtml}
-        ${addressHtml}
-        <div class="flex gap-1.5 mt-2">
-          <a href="${storeUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/90 text-white text-2xs font-bold uppercase tracking-wider no-underline transition-colors shadow-2xs">Kunjungi</a>
-          ${waButton}
-        </div>
-      </div>
-    `;
-  }
 
   function updateMarkers() {
     if (!isMapReady || !map || !L) return;
@@ -82,7 +45,7 @@
           iconAnchor: [12, 12],
         });
         userMarker = L.marker(userLatLng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
-        userMarker.bindPopup(`<div class="text-xs font-semibold text-main p-0.5">${userLocation.label ? `Lokasi: ${escapeHtml(userLocation.label)}` : 'Lokasi Anda Saat Ini'}</div>`);
+        userMarker.bindPopup(renderUserLocationPopup(userLocation.label));
       } else {
         userMarker.setLatLng(userLatLng);
       }
@@ -103,7 +66,7 @@
         const storeIcon = L.divIcon({
           className: 'custom-store-pin',
           html: `
-            <div class="relative cursor-pointer flex items-center justify-center w-8 h-8 bg-secondary rounded-full border-2 border-white shadow-md text-white transition-transform hover:scale-110">
+            <div class="relative cursor-pointer flex items-center justify-center w-8 h-8 bg-main text-canvas dark:bg-white dark:text-main rounded-full border-2 border-canvas dark:border-main shadow-md transition-transform hover:scale-110">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
             </div>
           `,
@@ -157,15 +120,6 @@
   }
 
   onMount(async () => {
-    // Dynamically inject leaflet CSS if needed
-    if (!document.getElementById('leaflet-css')) {
-      const link = document.createElement('link');
-      link.id = 'leaflet-css';
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-    }
-
     try {
       const leafletModule = await import('leaflet');
       L = leafletModule.default || leafletModule;
@@ -247,16 +201,8 @@
   <!-- Bottom status pill -->
   <div class="absolute bottom-4 left-4 z-[400] pointer-events-none">
     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card/95 backdrop-blur-md border border-border text-xs text-secondary shadow-xs font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <span class="w-2 h-2 rounded-full bg-success"></span>
       <span>{stores.filter(s => (typeof s.latitude === 'number' || (typeof s.latitude === 'string' && !isNaN(parseFloat(s.latitude))))).length} UMKM berkoordinat</span>
     </div>
   </div>
 </div>
-
-<style>
-  :global(.custom-store-pin),
-  :global(.custom-user-marker) {
-    background: transparent !important;
-    border: none !important;
-  }
-</style>

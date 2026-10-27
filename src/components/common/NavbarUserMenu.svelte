@@ -5,8 +5,7 @@
     getRoleConfig,
     getDashboardHomePath,
     getSettingsHref,
-  } from "@/components/dashboard/sidebar/sidebar.helpers";
-  import { signOutAndRedirect } from "@/lib/auth-client";
+  } from "./navbar.helpers";
 
   export let user: NavUser;
   export let onSignOut: (() => void | Promise<void>) | undefined = undefined;
@@ -31,6 +30,7 @@
     if (onSignOut) {
       await onSignOut();
     } else {
+      const { signOutAndRedirect } = await import("@/lib/auth-client");
       await signOutAndRedirect();
     }
   };
@@ -41,8 +41,17 @@
         isOpen = false;
       }
     };
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        isOpen = false;
+      }
+    };
     window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+      window.removeEventListener("keydown", handleKeydown);
+    };
   });
 </script>
 

@@ -1,16 +1,21 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import gsap from 'gsap'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
   let containerRef: HTMLElement
-  let ctx: gsap.Context | null = null
+  let ctx: any = null
 
-  onMount(() => {
-    gsap.registerPlugin(ScrollTrigger)
+  onMount(async () => {
+    if (!containerRef) return
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!containerRef) return
+    const [gsapMod, stMod] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger')
+    ])
+    const gsap = gsapMod.gsap || gsapMod.default || gsapMod
+    const ScrollTrigger = stMod.ScrollTrigger || stMod.default || stMod
+    gsap.registerPlugin(ScrollTrigger)
 
     if (prefersReducedMotion) {
       gsap.set(['.reveal-wd', '.reveal-desc'], { yPercent: 0, opacity: 1 })
@@ -53,12 +58,6 @@
         '-=0.6'
       )
     }, containerRef)
-
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh()
-    }, 100)
-
-    return () => clearTimeout(refreshTimer)
   })
 
   onDestroy(() => {

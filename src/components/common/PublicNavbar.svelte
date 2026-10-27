@@ -4,21 +4,25 @@
 
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { signOutAndRedirect } from '@/lib/auth-client'
   import { Sun, Moon, X } from 'lucide-svelte'
   import {
     type NavUser,
     berandaItems,
-    helpCenterItems
+    helpCenterItems,
+    getNavModeState
   } from './navbar.helpers'
+  import Button from '@/components/ui/Button.svelte'
+  import NavbarDropdown from './NavbarDropdown.svelte'
   import NavbarUserMenu from './NavbarUserMenu.svelte'
   import NavbarMobileDrawer from './NavbarMobileDrawer.svelte'
-  import { Button } from '@/components/ui'
-  import NavbarDropdown from './NavbarDropdown.svelte'
   import { getStoredTheme, applyTheme } from '@/lib/utils/theme'
 
   export let user: NavUser | null = null
   export let currentPath: string = ''
+
+  const toggleMobileMenu = () => {
+    isMobileMenuOpen = !isMobileMenuOpen
+  }
 
   let isDark = true
   let isMobileMenuOpen = false
@@ -36,26 +40,7 @@
   }
 
   const updateNavMode = () => {
-    const footer = document.getElementById('contact') || document.querySelector('footer')
-    if (footer && footer.getBoundingClientRect().top <= 100) {
-      navMode = 'hidden'
-      return
-    }
-    const heroTrack = document.getElementById('hero-scroll-track')
-    if (!heroTrack) {
-      navMode = 'normal'
-      return
-    }
-    const rect = heroTrack.getBoundingClientRect()
-    const maxScroll = rect.height - window.innerHeight
-
-    if (window.scrollY <= 40 || -rect.top <= 40) {
-      navMode = 'transparent'
-    } else if (rect.bottom > 80 && -rect.top < maxScroll) {
-      navMode = 'hidden'
-    } else {
-      navMode = 'normal'
-    }
+    navMode = getNavModeState()
   }
 
   const onScroll = () => {
@@ -111,6 +96,7 @@
 
   const handleSignOut = async () => {
     isLoggingOut = true
+    const { signOutAndRedirect } = await import('@/lib/auth-client')
     await signOutAndRedirect()
   }
 
@@ -154,7 +140,7 @@
       <a
         href="/umkm"
         class={currentPath.startsWith('/umkm')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         UMKM
@@ -164,7 +150,7 @@
       <a
         href="/templates"
         class={currentPath.startsWith('/templates')
-          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-slate-950 label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
+          ? 'px-4 lg:px-5 py-2 rounded-full bg-main text-canvas dark:bg-white dark:text-main label-caps font-bold tracking-wider shadow-sm transition-all duration-200 shrink-0'
           : 'px-3.5 lg:px-4 py-2 rounded-full bg-card/70 hover:bg-card text-main/80 hover:text-main dark:bg-white/5 dark:hover:bg-white/15 dark:text-white/85 dark:hover:text-white label-caps font-medium tracking-wider border border-border/80 dark:border-white/15 backdrop-blur-sm transition-all duration-200 shrink-0'}
       >
         Template
@@ -253,7 +239,7 @@
       <div class="md:hidden shrink-0">
         <Button
           variant="ghost"
-          on:click={() => (isMobileMenuOpen = !isMobileMenuOpen)}
+          on:click={toggleMobileMenu}
           aria-label="Toggle Navigation Menu"
           class="!w-10 !h-10 !p-0 !rounded-full bg-card/70 hover:bg-card border border-light dark:border-white/10 text-main dark:bg-white/5 dark:text-white shadow-sm shrink-0"
         >
@@ -271,14 +257,16 @@
   </div>
 
   <!-- Mobile Drawer Menu -->
-  <NavbarMobileDrawer
-    isOpen={isMobileMenuOpen}
-    {user}
-    {berandaItems}
-    {helpCenterItems}
-    {currentPath}
-    onSignOut={handleSignOut}
-    {isLoggingOut}
-    onClose={() => (isMobileMenuOpen = false)}
-  />
+  {#if isMobileMenuOpen}
+    <NavbarMobileDrawer
+      isOpen={isMobileMenuOpen}
+      {user}
+      {berandaItems}
+      {helpCenterItems}
+      {currentPath}
+      onSignOut={handleSignOut}
+      {isLoggingOut}
+      onClose={() => (isMobileMenuOpen = false)}
+    />
+  {/if}
 </header>

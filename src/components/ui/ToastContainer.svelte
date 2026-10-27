@@ -70,7 +70,7 @@
 
 {#if $toast.length > 0}
   <div
-    class="toast toast-top toast-end z-[9999] p-4 flex flex-col gap-2.5 max-w-sm sm:max-w-md pointer-events-none"
+    class="fixed top-4 right-4 z-[9999] p-4 flex flex-col gap-2.5 max-w-sm sm:max-w-md pointer-events-none"
     aria-live="polite"
     aria-atomic="true"
   >
@@ -78,14 +78,14 @@
       <div
         in:fly={{ y: -20, duration: 250 }}
         out:fade={{ duration: 200 }}
-        class={`alert shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
+        class={`w-full shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
           item.type === 'success'
             ? 'bg-success text-white border-success/30 shadow-success/20'
             : item.type === 'error'
             ? 'bg-error text-white border-error/30 shadow-error/20'
             : item.type === 'warning'
             ? 'bg-orange text-white border-orange-light/30 shadow-orange/20'
-            : 'bg-primary text-slate-950 border-primary-light/30 shadow-primary/20'
+            : 'bg-primary text-main border-primary-light/30 shadow-primary/20'
         }`}
         role="alert"
       >

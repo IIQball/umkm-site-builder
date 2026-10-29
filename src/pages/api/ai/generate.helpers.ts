@@ -5,6 +5,7 @@ import { eq, sql } from 'drizzle-orm';
 import type { LogoLockupType, LogoFontFamily } from '@/lib/validators/ai-logo';
 import type { MockupPresentationStyle } from '@/lib/validators/ai-packaging';
 import type { PosterStyle } from '@/lib/validators/ai-poster';
+import { aiCreditRollbackService } from '@/services/ai-credit-rollback.service';
 
 export interface GenerateRequestBody {
   featureType?: 'logo' | 'packaging_mockup' | 'product_poster';
@@ -203,18 +204,30 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
   };
 }
 
-export async function rollbackAiCredits(tenantId: string, credits: number): Promise<void> {
+export async function rollbackAiCredits(tenantId: string, credits: number, userId?: string, logId?: string): Promise<void> {
   try {
-    await db
-      .update(tenantAiCredits)
-      .set({
-        balance: sql`${tenantAiCredits.balance} + ${credits}`,
-        totalUsed: sql`${tenantAiCredits.totalUsed} - ${credits}`,
-        updatedAt: new Date(),
-      })
-      .where(eq(tenantAiCredits.tenantId, tenantId));
-    // eslint-disable-next-line no-console
-    console.info(`[AI_CREDIT_COMPENSATION] Restored ${credits} credits for store ${tenantId}`);
+    // Use new rollback service with full audit trail support
+    if (userId && logId) {
+      await aiCreditRollbackService.rollbackAiCredit({
+        tenantId,
+        userId,
+        creditsDeducted: credits,
+        logId,
+        reason: 'Cloudinary upload gagal setelah pemotongan kredit',
+      });
+    } else {
+      // Fallback untuk kompatibilitas: direct update tanpa audit trail
+      await db
+        .update(tenantAiCredits)
+        .set({
+          balance: sql`${tenantAiCredits.balance} + ${credits}`,
+          totalUsed: sql`${tenantAiCredits.totalUsed} - ${credits}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(tenantAiCredits.tenantId, tenantId));
+      // eslint-disable-next-line no-console
+      console.info(`[AI_CREDIT_COMPENSATION] Restored ${credits} credits for store ${tenantId}`);
+    }
   } catch (rollbackError: unknown) {
     // eslint-disable-next-line no-console
     console.error(`[AI_CREDIT_COMPENSATION_FAILED] Failed to restore credits:`, rollbackError);

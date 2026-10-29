@@ -142,30 +142,30 @@
       </span>
     </div>
 
-    <div class="p-5 sm:p-6 relative select-none">
-      <!-- Floating Tooltip Card -->
-      {#if hoveredBar}
-        <div
-          class="absolute -top-2 transform -translate-x-1/2 pointer-events-none bg-main/95 backdrop-blur-md text-canvas px-3.5 py-2.5 rounded-xl shadow-xl border border-border z-30 transition-all duration-150 flex flex-col items-center gap-1 min-w-[150px]"
-          style="left: {(hoveredBar.x / chartLayout.svgWidth) * 100}%;"
-        >
-          <span class="text-2xs font-semibold text-canvas/70 uppercase tracking-wider">
-            {hoveredBar.label}
-          </span>
-          <span class="font-mono text-body-sm font-black text-canvas">
-            {formatSmartIDR(hoveredBar.costIdr)}
-          </span>
-          <div class="flex items-center gap-2 text-2xs text-canvas/80">
-            <span>{hoveredBar.executionCount} gen ({hoveredBar.successCount} sukses)</span>
-          </div>
-          <span class="text-3xs font-mono text-indigo-300">
-            {hoveredBar.tokens.toLocaleString('id-ID')} token
-          </span>
-        </div>
-      {/if}
-
+    <div class="p-5 sm:p-6 select-none">
       <div class="w-full h-60 sm:h-64 overflow-x-auto overflow-y-hidden">
-        <div class="w-full h-full min-w-[500px]">
+        <div class="w-full h-full min-w-[500px] relative">
+          <!-- Floating Tooltip Card -->
+          {#if hoveredBar}
+            <div
+              class="absolute -top-2 transform -translate-x-1/2 pointer-events-none bg-main/95 backdrop-blur-md text-canvas px-3.5 py-2.5 rounded-xl shadow-xl border border-border z-30 transition-all duration-150 flex flex-col items-center gap-1 min-w-[150px]"
+              style="left: {(hoveredBar.x / chartLayout.svgWidth) * 100}%;"
+            >
+              <span class="text-2xs font-semibold text-canvas/70 uppercase tracking-wider">
+                {hoveredBar.label}
+              </span>
+              <span class="font-mono text-body-sm font-black text-canvas">
+                {formatSmartIDR(hoveredBar.costIdr)}
+              </span>
+              <div class="flex items-center gap-2 text-2xs text-canvas/80">
+                <span>{hoveredBar.executionCount} gen ({hoveredBar.successCount} sukses)</span>
+              </div>
+              <span class="text-3xs font-mono text-indigo-300">
+                {hoveredBar.tokens.toLocaleString('id-ID')} token
+              </span>
+            </div>
+          {/if}
+
           <svg
             viewBox="0 0 800 240"
             preserveAspectRatio="none"

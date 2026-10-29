@@ -1,7 +1,7 @@
 <script lang="ts">
   import { TrendingUp, Coins } from 'lucide-svelte';
   import { Card, Badge } from '@/components/ui';
-  import { formatSmartIDR } from '@/lib/currency';
+  import { formatSmartIDR, formatIDR } from '@/lib/currency';
   import type { AiCostTrendsSummary } from '@/types/admin/ai-cost-trends.types';
 
   export let summary: AiCostTrendsSummary;
@@ -36,7 +36,7 @@
     </div>
     <div class="mt-3 pt-3 border-t border-light flex items-center justify-between text-2xs text-secondary">
       <span>Batas Deposit Bulanan</span>
-      <span class="font-mono font-bold text-main">{formatSmartIDR(summary.monthlyDepositLimitIdr)}</span>
+      <span class="font-mono font-bold text-main">{formatIDR(summary.monthlyDepositLimitIdr)}</span>
     </div>
   </Card>
 
@@ -67,8 +67,8 @@
     </div>
 
     <div class="mt-2.5 flex items-center justify-between text-2xs text-secondary">
-      <span>Terpakai: {formatSmartIDR(summary.totalSpentIdr)}</span>
-      <span>Sisa: {formatSmartIDR(summary.remainingDepositIdr)}</span>
+      <span>Terpakai: {formatIDR(summary.totalSpentIdr)}</span>
+      <span>Sisa: {formatIDR(summary.remainingDepositIdr)}</span>
     </div>
   </Card>
 
@@ -92,7 +92,7 @@
     </div>
     <div class="mt-3 pt-3 border-t border-light flex items-center justify-between text-2xs text-secondary">
       <span>Biaya Tertinggi (Peak)</span>
-      <span class="font-mono font-bold text-main">{formatSmartIDR(summary.peakDailyCostIdr)}</span>
+      <span class="font-mono font-bold text-main">{formatIDR(summary.peakDailyCostIdr)}</span>
     </div>
   </Card>
 </div>

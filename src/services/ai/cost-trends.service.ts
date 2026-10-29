@@ -74,7 +74,8 @@ export function buildDailyTrendPoints(
   const points: AiDailyCostPoint[] = [];
 
   for (let i = 0; i < days; i++) {
-    const current = new Date(startDate.getTime() + i * 86400000);
+    const current = new Date(startDate);
+    current.setDate(startDate.getDate() + i);
     const yyyy = current.getFullYear();
     const mm = String(current.getMonth() + 1).padStart(2, '0');
     const dd = String(current.getDate()).padStart(2, '0');
@@ -113,9 +114,9 @@ export async function getAiCostTrends(
   const days = Math.max(1, Math.min(90, options.days || 14));
   const now = new Date();
 
-  // Normalize startDate to start of day UTC/local
-  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1));
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Normalize startDate and startOfMonth to start of day (midnight)
+  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1), 0, 0, 0, 0);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
 
   const [dailyRows, monthlySpentRow, depositRows, activeExchangeRate] = await Promise.all([
     // 1. Grouped daily generation costs

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { BarChart3, RefreshCw, Calendar } from 'lucide-svelte';
   import { Card, Button } from '@/components/ui';
-  import { formatSmartIDR } from '@/lib/currency';
+  import { formatIDR } from '@/lib/currency';
   import type { AiCostTrendsData } from '@/types/admin/ai-cost-trends.types';
   import {
     computeBarChartLayout,
@@ -175,7 +175,7 @@
                 {hoveredBar.label}
               </span>
               <span class="font-mono text-body-sm font-black text-canvas">
-                {formatSmartIDR(hoveredBar.costIdr)}
+                {formatIDR(hoveredBar.costIdr)}
               </span>
               <div class="flex items-center gap-2 text-2xs text-canvas/80">
                 <span>{hoveredBar.executionCount} gen ({hoveredBar.successCount} sukses)</span>
@@ -231,7 +231,7 @@
               <g
                 role="button"
                 tabindex="0"
-                aria-label="{bar.label}: {formatSmartIDR(bar.costIdr)}"
+                aria-label="{bar.label}: {formatIDR(bar.costIdr)}"
                 class="cursor-pointer focus:outline-none"
                 on:mouseenter={() => { hoveredBar = bar; hoveredIndex = i; }}
                 on:mouseleave={() => { hoveredBar = null; hoveredIndex = null; }}

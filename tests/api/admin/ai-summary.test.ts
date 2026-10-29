@@ -75,7 +75,19 @@ describe('Admin AI Summary API Endpoint', () => {
       const body = await res.json();
       expect(body.ok).toBe(true);
       expect(body.data).toEqual(mockSummaryData);
-      expect(mockGetSummary).toHaveBeenCalledTimes(1);
+      expect(mockGetSummary).toHaveBeenCalledWith({ year: undefined, month: undefined });
+    });
+
+    it('passes year and month query parameters to getAiMonitoringSummary', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'admin_1', role: 'admin' });
+      mockIsAuthorizedAdmin.mockReturnValue(true);
+      mockGetSummary.mockResolvedValue({ totalExecutions: 10 });
+
+      const request = new Request('http://localhost/api/admin/ai/summary?year=2026&month=10');
+      const res = (await GET({ request, params: {} } as unknown as Parameters<typeof GET>[0])) as Response;
+
+      expect(res.status).toBe(200);
+      expect(mockGetSummary).toHaveBeenCalledWith({ year: 2026, month: 10 });
     });
   });
 });

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { toast } from '@/lib/toast';
 
   export let invoiceId: string;
   export let onStatusUpdate: (status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded') => void = () => {};
@@ -22,7 +23,21 @@
       if (result.ok && result.data) {
         const newStatus = result.data.status;
         if (newStatus !== status) {
+          const previousStatus = status;
           status = newStatus;
+          
+          // Show toast notification for AI credit purchase success
+          if (status === 'success' && previousStatus === 'pending') {
+            const transactionType = result.data?.type;
+            if (transactionType === 'ai_credit_purchase') {
+              const credits = result.data?.credits;
+              const creditsText = credits ? ` ${credits} kredit AI` : 'Kredit AI';
+              toast.success(`${creditsText} berhasil ditambahkan ke saldo toko Anda!`, undefined, 5000);
+            } else {
+              toast.success('Pembayaran berhasil! Terima kasih atas transaksi Anda.', undefined, 5000);
+            }
+          }
+          
           onStatusUpdate(status);
         }
       }

@@ -30,6 +30,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let creditDeducted = false;
     let requiredCredits = 0;
     let targetStoreId: string | undefined;
+    let logId: string | undefined;
+    let userId: string | undefined;
 
     try {
       // 1. Validasi sesi login user
@@ -37,6 +39,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       if (!user) {
         throw new AppError('Silakan login terlebih dahulu', 401);
       }
+      userId = user.id;
 
       // 2. Parse payload request
       currentPhase = 'PROMPT_BUILDER';
@@ -225,7 +228,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
 
       currentPhase = 'LEDGER_RECORDING';
       const costResult = await calculateCost(inputTokens, outputTokens, selectedModel, effectiveQualityTier);
-      const logId = `log_${crypto.randomUUID()}`;
+      logId = `log_${crypto.randomUUID()}`;
       const creditsDeducted = isTestingExecution ? 0 : requiredCredits;
 
       const [logEntry] = await db
@@ -268,7 +271,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     } catch (error: unknown) {
       if (creditDeducted && targetStoreId && requiredCredits > 0) {
-        await rollbackAiCredits(targetStoreId, requiredCredits);
+        await rollbackAiCredits(targetStoreId, requiredCredits, userId, logId);
       }
       return handleGenerateError(error, currentPhase);
     }

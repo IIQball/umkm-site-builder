@@ -479,6 +479,7 @@ export const aiGenerationLogs = pgTable('ai_generation_logs', {
   aiGenerationLogsUserIdIdx: index('ai_generation_logs_user_id_idx').on(table.userId),
   aiGenerationLogsIsTestingIdx: index('ai_generation_logs_is_testing_idx').on(table.isTesting),
   aiGenerationLogsIsTestingCreatedAtIdx: index('ai_generation_logs_is_testing_created_at_idx').on(table.isTesting, table.createdAt),
+  aiGenerationLogsTenantIdCreatedAtIdx: index('ai_generation_logs_tenant_id_created_at_idx').on(table.tenantId, table.createdAt),
   aiGenerationLogsFeatureTypeIdx: index('ai_generation_logs_feature_type_idx').on(table.featureType),
   aiGenerationLogsStatusIdx: index('ai_generation_logs_status_idx').on(table.status),
   aiGenerationLogsCreatedAtIdx: index('ai_generation_logs_created_at_idx').on(table.createdAt),

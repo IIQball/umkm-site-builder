@@ -85,6 +85,13 @@
       "when": 1792478400000,
       "tag": "0011_ai_generation_logs_is_testing_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792500000000,
+      "tag": "0012_ai_generation_logs_tenant_id_created_at_idx",
+      "breakpoints": true
     }
   ]
 }

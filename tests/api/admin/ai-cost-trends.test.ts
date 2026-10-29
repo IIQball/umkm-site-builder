@@ -1,3 +1,5 @@
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://mock:mock@localhost:5432/mock';
+
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { GET } from '@/pages/api/admin/ai/cost-trends';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
@@ -113,6 +115,37 @@ describe('Admin AI Cost Trends API Endpoint', () => {
       expect(mockGetTrends).toHaveBeenCalledWith({
         days: 7,
         depositLimitOverrideIdr: 2000000,
+      });
+    });
+
+    it('correctly parses range presets (7d, 30d, and month)', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'superadm_1', role: 'superadmin' });
+      mockIsAuthorizedAdmin.mockReturnValue(true);
+      mockGetTrends.mockResolvedValue({ summary: {}, dailyTrends: [] });
+
+      // 7d preset
+      const req7d = new Request('http://localhost/api/admin/ai/cost-trends?range=7d');
+      await GET({ request: req7d, params: {} } as unknown as Parameters<typeof GET>[0]);
+      expect(mockGetTrends).toHaveBeenCalledWith({
+        days: 7,
+        depositLimitOverrideIdr: undefined,
+      });
+
+      // 30d preset
+      const req30d = new Request('http://localhost/api/admin/ai/cost-trends?range=30d');
+      await GET({ request: req30d, params: {} } as unknown as Parameters<typeof GET>[0]);
+      expect(mockGetTrends).toHaveBeenCalledWith({
+        days: 30,
+        depositLimitOverrideIdr: undefined,
+      });
+
+      // month preset
+      const expectedMonthDays = Math.max(1, new Date().getDate());
+      const reqMonth = new Request('http://localhost/api/admin/ai/cost-trends?range=month');
+      await GET({ request: reqMonth, params: {} } as unknown as Parameters<typeof GET>[0]);
+      expect(mockGetTrends).toHaveBeenCalledWith({
+        days: expectedMonthDays,
+        depositLimitOverrideIdr: undefined,
       });
     });
   });

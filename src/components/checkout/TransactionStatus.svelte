@@ -32,13 +32,9 @@
             if (transactionType === 'ai_credit_purchase') {
               const credits = result.data?.credits;
               const creditsText = credits ? ` ${credits} kredit AI` : 'Kredit AI';
-              toast.success(`${creditsText} berhasil ditambahkan ke saldo toko Anda!`, {
-                duration: 5000,
-              });
+              toast.success(`${creditsText} berhasil ditambahkan ke saldo toko Anda!`, undefined, 5000);
             } else {
-              toast.success('Pembayaran berhasil! Terima kasih atas transaksi Anda.', {
-                duration: 5000,
-              });
+              toast.success('Pembayaran berhasil! Terima kasih atas transaksi Anda.', undefined, 5000);
             }
           }
           

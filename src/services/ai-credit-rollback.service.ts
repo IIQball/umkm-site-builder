@@ -31,7 +31,7 @@ export interface RollbackResult {
  * Logs the compensation in aiGenerationLogs for audit trail.
  */
 export async function rollbackAiCredit(params: RollbackParams): Promise<RollbackResult> {
-  const { tenantId, userId, creditsDeducted, logId, reason } = params;
+  const { tenantId, creditsDeducted, logId, reason } = params;
 
   try {
     // Get current credit balance
@@ -69,11 +69,11 @@ export async function rollbackAiCredit(params: RollbackParams): Promise<Rollback
       .set({
         status: 'failed',
         errorMessage: `Rollback: ${reason}. Kredit dikembalikan sebesar ${creditsDeducted}.`,
-        updatedAt: new Date(),
       })
       .where(eq(aiGenerationLogs.id, logId))
       .catch(() => {
         // Non-blocking: if log update fails, continue with compensation
+        // eslint-disable-next-line no-console
         console.warn(`[AI_CREDIT_ROLLBACK] Failed to update log ${logId}`);
       });
 
@@ -86,10 +86,12 @@ export async function rollbackAiCredit(params: RollbackParams): Promise<Rollback
       timestamp: new Date(),
     };
 
+    // eslint-disable-next-line no-console
     console.info(`[AI_CREDIT_ROLLBACK] Restored ${creditsDeducted} credits to tenant ${tenantId}. Balance: ${previousBalance} → ${newBalance}`);
 
     return result;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(`[AI_CREDIT_ROLLBACK] Error rolling back credits for tenant ${tenantId}:`, error);
     throw error;
   }
@@ -139,6 +141,7 @@ export async function verifyCreditsConsistency(tenantId: string): Promise<{
       failureReason: discrepancy > 0 ? `Saldo tidak cocok: ${balance} vs ${expectedBalance}` : undefined,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(`[AI_CREDIT_VERIFY] Error verifying credits for tenant ${tenantId}:`, error);
     throw error;
   }
@@ -165,6 +168,7 @@ export async function getCreditAuditTrail(tenantId: string, limit: number = 50) 
 
     return logs.slice(0, limit);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(`[AI_CREDIT_AUDIT] Error fetching audit trail for tenant ${tenantId}:`, error);
     throw error;
   }

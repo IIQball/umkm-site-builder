@@ -6,8 +6,9 @@ import TenantUsageChart from '@/components/tenant/ai/TenantUsageChart.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { getStoreTrafficSeries, type TrafficPoint } from '@/services/analytics.service';
+import { isStoreFullyOnboarded } from '@/services/stores';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -16,13 +17,17 @@ if (user.role === 'superadmin') return Astro.redirect('/superadmin');
 if (user.role === 'admin') return Astro.redirect('/admin');
 
 const store = await db.query.stores.findFirst({
-  where: eq(stores.userId, user.id),
+  where: and(eq(stores.userId, user.id), isNull(stores.deletedAt)),
   with: {
     registrar: {
       columns: { name: true },
     },
   },
 });
+
+if (!isStoreFullyOnboarded(store)) {
+  return Astro.redirect('/onboarding');
+}
 
 // Data awal grafik (12 bulan) dirender dari server supaya grafik langsung muncul.
 // Jika tabel statistik belum dibuat / query gagal, dashboard tetap tampil tanpa grafik error.

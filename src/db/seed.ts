@@ -7,10 +7,15 @@
  * Requires SEED_SUPERADMIN_EMAIL, SEED_SUPERADMIN_PASSWORD, and SEED_SUPERADMIN_NAME in .env.
  */
 import { withTransaction } from "@/lib/db/transaction";
-import { users, accounts, adminWhitelist, templateCategories, businessCategories } from "@/db/schema";
+import { users, accounts, adminWhitelist, templateCategories, businessCategories, templates, designers } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { randomBytes, scrypt } from "node:crypto";
-import { randomUUID } from "node:crypto";
+import { randomBytes, scrypt, randomUUID } from "node:crypto";
+import {
+  DEFAULT_TEMPLATE_ID,
+  DEFAULT_TEMPLATE_SLUG,
+  DEFAULT_TEMPLATE_NAME,
+  DEFAULT_TEMPLATE_CONFIG,
+} from "@/schemas";
 
 const DEFAULT_CATEGORIES = [
   { id: 'cat-kuliner', name: 'Kuliner & Makanan', slug: 'kuliner-makanan', description: 'Template khusus resto, kafe, dan kuliner nusantara', icon: 'restaurant' },
@@ -131,6 +136,52 @@ async function seed() {
           addedBy: userId,
           createdAt: now,
         });
+      }
+    }
+
+    // 3. Seed system designer and default universal template
+    const authorId = existingUser ? existingUser.id : (await tx.query.users.findFirst({ where: eq(users.email, email) }))?.id;
+    if (authorId) {
+      const existingDesigner = await tx.query.designers.findFirst({
+        where: eq(designers.userId, authorId),
+      });
+
+      if (!existingDesigner) {
+        await tx.insert(designers).values({
+          userId: authorId,
+          portfolioUrl: "https://pinoka.id",
+          isVerified: true,
+          createdAt: now,
+        });
+      }
+
+      const existingDefaultTpl = await tx.query.templates.findFirst({
+        where: eq(templates.id, DEFAULT_TEMPLATE_ID),
+      });
+
+      if (!existingDefaultTpl) {
+        await tx.insert(templates).values({
+          id: DEFAULT_TEMPLATE_ID,
+          name: DEFAULT_TEMPLATE_NAME,
+          slug: DEFAULT_TEMPLATE_SLUG,
+          description: "Template desain modular serbaguna dengan tata letak seimbang, tipografi netral, dan struktur profesional yang cocok untuk seluruh kategori bisnis UMKM.",
+          thumbnailUrl: "/images/templates/default-universal-preview.webp",
+          price: 0,
+          config: DEFAULT_TEMPLATE_CONFIG,
+          status: "approved",
+          designerId: authorId,
+          approvedBy: authorId,
+          createdAt: now,
+          updatedAt: now,
+        });
+      } else {
+        await tx.update(templates).set({
+          name: DEFAULT_TEMPLATE_NAME,
+          slug: DEFAULT_TEMPLATE_SLUG,
+          config: DEFAULT_TEMPLATE_CONFIG,
+          status: "approved",
+          updatedAt: now,
+        }).where(eq(templates.id, DEFAULT_TEMPLATE_ID));
       }
     }
   });

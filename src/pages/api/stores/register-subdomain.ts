@@ -1,32 +1,14 @@
 import type { APIRoute } from 'astro';
-import { db } from '@db/index';
-import { stores } from '@db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
-import { RegisterSubdomainInput } from '@lib/stores/schemas';
+import { db } from '@/db';
+import { stores } from '@/db/schema';
+import { RegisterSubdomainInput } from '@/lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { hasExistingStore, isSubdomainTaken } from '@/services/stores';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 import { logActivity } from '@/services/audit.service';
-
-
-async function hasExistingStore(userId: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.userId, userId), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
-
-async function isSubdomainTaken(subdomain: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.subdomain, subdomain), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
+import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
 export const POST: APIRoute = async ({ request }) => {
   const user = await getAuthenticatedUser(request);
@@ -67,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
       name: subdomain,
       subdomain,
       userId: targetUserId,
-      templateId: 'default',
+      templateId: DEFAULT_TEMPLATE_ID,
       waNumber: '',
       googleMapsUrl,
       latitude: coords.lat,

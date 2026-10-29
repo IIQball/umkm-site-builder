@@ -1,10 +1,11 @@
 import { defineMiddleware } from "astro:middleware";
 import { auth } from "@/lib/auth";
-import { db, users } from "@/db";
-import { eq } from "drizzle-orm";
+import { db, users, stores } from "@/db";
+import { eq, and, isNull } from "drizzle-orm";
 import { InMemoryRateLimiter } from "@/lib/utils/rate-limiter";
 import { extractSubdomain } from "@/lib/domain";
 import { jsonError } from "@/lib/utils/api-handler";
+import { isStoreFullyOnboarded } from "@/services/stores";
 
 // Inisialisasi Rate Limiter untuk API:
 // 1. Read (GET): Longgar untuk memuat data (30 request / menit)
@@ -107,6 +108,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (user?.role === 'superadmin') return context.redirect('/superadmin');
     if (user?.role === 'admin') return context.redirect('/admin');
     if (user?.role === 'designer') return context.redirect('/designer');
+    if (user?.role === 'tenant') {
+      const tenantStore = await db.query.stores.findFirst({
+        where: and(eq(stores.userId, user.id), isNull(stores.deletedAt)),
+        columns: { id: true, subdomain: true, templateId: true, status: true },
+      });
+      if (!isStoreFullyOnboarded(tenantStore)) {
+        return context.redirect('/onboarding');
+      }
+    }
   }
 
   // 1. Definisikan rute yang wajib diproteksi beserta role yang diizinkan

@@ -12,21 +12,32 @@
   }
 
   let stepsList: StepItem[] = [];
-  $: stepsList = [
-    { num: 1, label: 'Subdomain' },
-    { num: 2, label: 'Profil & Lokasi' },
-    { num: 3, label: isEdit ? 'Pengaturan Toko' : 'Pilih Template' },
-    { num: 4, label: 'Selesai' },
-  ];
+  $: stepsList = isEdit
+    ? [
+        { num: 1, label: 'Subdomain' },
+        { num: 2, label: 'Profil & Lokasi' },
+        { num: 3, label: 'Pengaturan Toko' },
+        { num: 4, label: 'Selesai' },
+      ]
+    : [
+        { num: 1, label: 'Subdomain' },
+        { num: 2, label: 'Profil & Lokasi' },
+        { num: 3, label: 'Selesai' },
+      ];
 
-  $: progressWidth =
-    currentStep === 1
-      ? '0%'
-      : currentStep === 2
-      ? '33%'
-      : currentStep === 3
-      ? '66%'
-      : '100%';
+  $: progressWidth = isEdit
+    ? (currentStep === 1
+        ? '0%'
+        : currentStep === 2
+        ? '33%'
+        : currentStep === 3
+        ? '66%'
+        : '100%')
+    : (currentStep === 1
+        ? '0%'
+        : currentStep === 2
+        ? '50%'
+        : '100%');
 </script>
 
 <div class="mb-8 px-2 sm:px-6">
@@ -44,9 +55,9 @@
           disabled={isEdit ? s.num === 4 && currentStep !== 4 : s.num >= currentStep}
           on:click={() => { if (isEdit ? s.num <= 3 : s.num < currentStep) onStepClick(s.num); }}
           class="w-8 h-8 rounded-full flex items-center justify-center font-bold font-sans text-xs transition-all duration-150 {currentStep > s.num
-            ? 'bg-primary text-white shadow-xs ring-4 ring-card cursor-pointer hover:scale-105'
+            ? 'bg-primary text-slate-950 shadow-xs ring-4 ring-card cursor-pointer hover:scale-105'
             : currentStep === s.num
-            ? 'bg-primary text-white shadow-sm ring-4 ring-primary/20 scale-105'
+            ? 'bg-primary text-slate-950 shadow-sm ring-4 ring-primary/20 scale-105'
             : isEdit && s.num <= 3
             ? 'bg-nested text-main border border-light ring-4 ring-card cursor-pointer hover:scale-105'
             : 'bg-nested text-muted border border-light ring-4 ring-card cursor-default'}"

@@ -3,7 +3,8 @@
   import { Card } from '@/components/ui';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
-  import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
+  // Catatan: Pemilihan template dinonaktifkan di onboarding baru; toko otomatis memakai template bawaan.
+  // import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
   import OnboardingStepSettings from './wizard/OnboardingStepSettings.svelte';
   // Catatan TA: OnboardingStepContent disembunyikan sementara untuk fokus topik TA Template Builder.
   // import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
@@ -23,6 +24,7 @@
     createDefaultContentCustomization, extractContentCustomizationFromStore,
     buildTemplateCustomizationPayload,
   } from './wizard/content/contentCustomization.helpers';
+  import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
   export let categories: Array<{ id: string; name: string }> = [];
   export let templates: TemplateItem[] = [];
@@ -56,7 +58,7 @@
       googleMapsUrl = existingStore.googleMapsUrl || '';
       address = existingStore.address || '';
       if (existingStore.regionData) regionData = { ...DEFAULT_REGION, ...existingStore.regionData };
-      selectedTemplateId = existingStore.templateId || (templates[0]?.id ?? '');
+      selectedTemplateId = existingStore.templateId || (templates.find((t) => t.id === DEFAULT_TEMPLATE_ID)?.id ?? templates[0]?.id ?? DEFAULT_TEMPLATE_ID);
       isOpen = existingStore.isOpen !== false;
       waCheckoutTemplate = existingStore.waCheckoutTemplate || DEFAULT_WA_CHECKOUT_TEMPLATE;
       const mapsCust = (existingStore.customization?.maps as any) || (existingStore.customization as any) || {};
@@ -70,7 +72,13 @@
 
     const state = loadSavedOnboardingState();
     if (state) {
-      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 3) currentStep = state.currentStep;
+      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 2) {
+        currentStep = state.currentStep;
+      } else if (!isEdit && state.currentStep && state.currentStep >= 3) {
+        currentStep = 2;
+      } else if (isEdit && state.currentStep && state.currentStep <= 3) {
+        currentStep = state.currentStep;
+      }
       subdomain = state.subdomain || '';
       storeName = state.storeName || '';
       categoryId = state.categoryId || '';
@@ -79,14 +87,14 @@
       address = state.address || '';
       if (state.branchMode) branchMode = state.branchMode;
       if (Array.isArray(state.branches)) branches = state.branches;
-      selectedTemplateId = state.selectedTemplateId || '';
+      selectedTemplateId = DEFAULT_TEMPLATE_ID;
       if (state.regionData) regionData = state.regionData;
       subdomainStatus = state.subdomainStatus || 'idle';
       subdomainMessage = state.subdomainMessage || '';
       if (state.contentCustomization) contentCustomization = state.contentCustomization;
       if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
     }
-    if (!selectedTemplateId && templates.length > 0) selectedTemplateId = templates[0].id;
+    selectedTemplateId = DEFAULT_TEMPLATE_ID;
   });
 
   function saveState() {
@@ -173,15 +181,16 @@
         }
         if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
         contentCustomization.maps = { branchMode, branches };
-        currentStep = 3;
-        saveState();
+        selectedTemplateId = DEFAULT_TEMPLATE_ID;
+        if (isEdit) {
+          currentStep = 3;
+          saveState();
+        } else {
+          handleOnboardSubmit();
+        }
       }
-    } else if (currentStep === 3) {
-      if (isEdit) {
-        handleEditSubmit();
-      } else {
-        handleOnboardSubmit();
-      }
+    } else if (currentStep === 3 && isEdit) {
+      handleEditSubmit();
     }
   }
 
@@ -200,7 +209,7 @@
     const res = await submitOnboardStore({
       subdomain, name: storeName.trim(), categoryId, waNumber: waNumber.trim(),
       googleMapsUrl: googleMapsUrl.trim(), address, regionData,
-      templateId: selectedTemplateId, tenantId, customization: custPayload,
+      templateId: DEFAULT_TEMPLATE_ID, tenantId, customization: custPayload,
     });
 
     if (!res.ok) {
@@ -216,7 +225,7 @@
     }
 
     submitStatus = 'success';
-    currentStep = 4;
+    currentStep = isEdit ? 4 : 3;
     clearOnboardingState();
   }
 
@@ -265,22 +274,15 @@
         {formErrors} {submitStatus} {submitError}
         onPrev={prevStep} onNext={nextStep}
       />
-    {:else if currentStep === 3}
-      {#if isEdit}
-        <OnboardingStepSettings
-          {templates} {subdomain} bind:selectedTemplateId
-          bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
-          {categories} {storeName} {waNumber} {address} {googleMapsUrl}
-          {branchMode} {branches} customization={contentCustomization}
-          onPrev={prevStep} onSave={handleEditSubmit}
-        />
-      {:else}
-        <OnboardingStepTemplate
-          {templates} bind:selectedTemplateId {storeName} {subdomain}
-          {submitStatus} {submitError} onPrev={prevStep} onNext={handleOnboardSubmit}
-        />
-      {/if}
-    {:else if currentStep === 4}
+    {:else if isEdit && currentStep === 3}
+      <OnboardingStepSettings
+        {templates} {subdomain} bind:selectedTemplateId
+        bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
+        {categories} {storeName} {waNumber} {address} {googleMapsUrl}
+        {branchMode} {branches} customization={contentCustomization}
+        onPrev={prevStep} onSave={handleEditSubmit}
+      />
+    {:else if (!isEdit && currentStep === 3) || currentStep === 4}
       <OnboardingSuccessStep
         {isEdit} {subdomain} {storeName} {address} onResetStep={() => { currentStep = 1; }}
       />

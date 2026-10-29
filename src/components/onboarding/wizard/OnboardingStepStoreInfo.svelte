@@ -6,6 +6,7 @@
     Phone,
     ArrowLeft,
     ArrowRight,
+    Check,
   } from 'lucide-svelte';
   import { Button, Input, SearchableSelect } from '@/components/ui';
   import RegionAddressSelector from './RegionAddressSelector.svelte';
@@ -172,8 +173,20 @@
       disabled={submitStatus === 'submitting' || isFormIncomplete}
       on:click={onNext}
     >
-      <span>{isEdit ? 'Lanjut ke Pengaturan & Template' : 'Lanjut Pilih Template'}</span>
-      <ArrowRight size={16} />
+      <span>
+        {#if submitStatus === 'submitting'}
+          Menyimpan Profil Toko...
+        {:else if isEdit}
+          Lanjut ke Pengaturan Toko
+        {:else}
+          Selesai & Buat Toko
+        {/if}
+      </span>
+      {#if !isEdit && submitStatus !== 'submitting'}
+        <Check size={16} />
+      {:else if submitStatus !== 'submitting'}
+        <ArrowRight size={16} />
+      {/if}
     </Button>
   </div>
 </div>

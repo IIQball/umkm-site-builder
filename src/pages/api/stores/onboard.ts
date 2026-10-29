@@ -1,34 +1,16 @@
 import type { APIRoute } from 'astro';
-import { db } from '@db/index';
-import { stores, templates } from '@db/schema';
+import { db } from '@/db';
+import { stores, templates } from '@/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
-import { OnboardStoreInput } from '@lib/stores/schemas';
+import { OnboardStoreInput } from '@/lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
+import { hasExistingStore, isSubdomainTaken } from '@/services/stores';
 import { ZodError } from 'zod';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 import { logActivity } from '@/services/audit.service';
-
-
-
-async function hasExistingStore(userId: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.userId, userId), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
-
-async function isSubdomainTaken(subdomain: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.subdomain, subdomain), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
+import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
 export const POST: APIRoute = async ({ request }) => {
   const user = await getAuthenticatedUser(request);
@@ -69,13 +51,16 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     let selectedTemplateId = templateId;
-    if (!selectedTemplateId) {
-      const [firstTpl] = await db
-        .select({ id: templates.id })
-        .from(templates)
-        .where(eq(templates.status, 'approved'))
-        .limit(1);
-      selectedTemplateId = firstTpl?.id || 'tpl_1789012356261_smzf9nzf0';
+    if (selectedTemplateId) {
+      const validTpl = await db.query.templates.findFirst({
+        where: and(eq(templates.id, selectedTemplateId), isNull(templates.deletedAt)),
+        columns: { id: true },
+      });
+      if (!validTpl) {
+        selectedTemplateId = DEFAULT_TEMPLATE_ID;
+      }
+    } else {
+      selectedTemplateId = DEFAULT_TEMPLATE_ID;
     }
 
     const storeId = crypto.randomUUID();

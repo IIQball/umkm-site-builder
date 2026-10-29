@@ -23,10 +23,10 @@ export function getShellSteps(role: string, isMobile: boolean): DriveStep[] {
         },
       },
       {
-        element: '#navbar-search',
+        element: '#navbar-breadcrumbs',
         popover: {
-          title: 'Pencarian Cepat Desain',
-          description: 'Cari template desain, nomor invoice pembeli, atau fitur sistem dalam sekejap.',
+          title: 'Penunjuk Halaman & Navigasi',
+          description: 'Pantau posisi halaman kerja Anda dan kembali ke beranda studio dengan satu klik.',
           side: 'bottom',
           align: 'start',
         },
@@ -64,10 +64,10 @@ export function getShellSteps(role: string, isMobile: boolean): DriveStep[] {
         },
       },
       {
-        element: '#navbar-search',
+        element: '#navbar-breadcrumbs',
         popover: {
-          title: 'Pencarian Global Platform',
-          description: 'Cari toko UMKM binaan, akun pengguna, template marketplace, atau mutasi data sistem.',
+          title: 'Jejak Navigasi Platform',
+          description: 'Ketahui hierarki modul yang sedang aktif dan navigasi kembali ke ringkasan utama.',
           side: 'bottom',
           align: 'start',
         },
@@ -105,10 +105,10 @@ export function getShellSteps(role: string, isMobile: boolean): DriveStep[] {
       },
     },
     {
-      element: '#navbar-search',
+      element: '#navbar-breadcrumbs',
       popover: {
-        title: 'Pencarian Menu & Fitur',
-        description: 'Ketik kata kunci apa pun untuk langsung menemukan fitur toko atau transaksi.',
+        title: 'Jejak Navigasi Toko',
+        description: 'Memudahkan Anda mengetahui posisi menu yang sedang dibuka dan kembali ke dasbor utama.',
         side: 'bottom',
         align: 'start',
       },

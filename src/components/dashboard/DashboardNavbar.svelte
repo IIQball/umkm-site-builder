@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import type { AuthenticatedUser } from "@/lib/auth";
+  import { Button } from "@/components/ui";
   import NavbarUserMenu from "@/components/common/NavbarUserMenu.svelte";
   import NavbarNotifications from "./navbar/NavbarNotifications.svelte";
   import { formatDate } from "@/lib/utils/format";
-  import { sanitizeSearchInput } from "@/components/builder/sections/header/headerSearch.helpers";
   import { getStoredTheme, applyTheme } from "@/lib/utils/theme";
+  import { getDashboardHomePath } from "@/components/common/navbar.helpers";
 
   export let userJson: string;
   export let breadcrumb: string | undefined = undefined;
@@ -13,15 +14,9 @@
   $: user = JSON.parse(userJson) as AuthenticatedUser;
 
   let isDark = false;
-  let rawSearchQuery = "";
-  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   onMount(() => {
     isDark = getStoredTheme() === "dark";
-  });
-
-  onDestroy(() => {
-    if (debounceTimer) clearTimeout(debounceTimer);
   });
 
   const toggleTheme = () => {
@@ -37,106 +32,165 @@
     });
   };
 
-  const handleSearchInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const { cleanQuery } = sanitizeSearchInput(target.value);
-    rawSearchQuery = cleanQuery;
+  $: homePath = getDashboardHomePath(user?.role);
+  $: homeLabel =
+    user?.role === "designer"
+      ? "Studio"
+      : user?.role === "superadmin"
+        ? "Super Admin"
+        : user?.role === "admin"
+          ? "Admin"
+          : "Dashboard";
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      window.dispatchEvent(
-        new CustomEvent("dashboard-search", { detail: { query: cleanQuery } }),
-      );
-    }, 300);
-  };
-
-  const handleClearSearch = () => {
-    rawSearchQuery = "";
-    if (debounceTimer) clearTimeout(debounceTimer);
-    window.dispatchEvent(
-      new CustomEvent("dashboard-search", { detail: { query: "" } }),
-    );
-  };
-
-  const handleSearchKeydown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      handleClearSearch();
+  $: breadcrumbItems = (() => {
+    if (!breadcrumb) {
+      return [{ label: homeLabel, href: homePath, isCurrent: true }];
     }
-  };
+
+    const rawParts = breadcrumb
+      .split(" / ")
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (
+      rawParts.length === 1 &&
+      rawParts[0].toLowerCase() === homeLabel.toLowerCase()
+    ) {
+      return [{ label: homeLabel, href: homePath, isCurrent: true }];
+    }
+
+    const firstLower = rawParts[0]?.toLowerCase();
+    const isFirstHome = [
+      "dashboard",
+      "super admin",
+      "superadmin",
+      "admin",
+      "desainer",
+      "designer",
+      "studio",
+    ].includes(firstLower);
+
+    const items: Array<{ label: string; href?: string; isCurrent: boolean }> = [];
+
+    if (isFirstHome) {
+      items.push({
+        label: rawParts[0],
+        href: homePath,
+        isCurrent: rawParts.length === 1,
+      });
+      for (let i = 1; i < rawParts.length; i++) {
+        items.push({
+          label: rawParts[i],
+          isCurrent: i === rawParts.length - 1,
+        });
+      }
+    } else {
+      items.push({
+        label: homeLabel,
+        href: homePath,
+        isCurrent: false,
+      });
+      for (let i = 0; i < rawParts.length; i++) {
+        items.push({
+          label: rawParts[i],
+          isCurrent: i === rawParts.length - 1,
+        });
+      }
+    }
+
+    return items;
+  })();
 </script>
 
 <header
-  class="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-8
-         bg-canvas/90 backdrop-blur-md border-b border-light flex-shrink-0"
+  class="sticky top-0 z-30 h-16 flex items-center justify-between px-3 sm:px-6 md:px-8
+         bg-canvas/90 backdrop-blur-md border-b border-light flex-shrink-0 gap-3"
 >
-  <!-- Left: search bar capsule + date pill badge -->
-  <div class="flex items-center gap-3 flex-1 min-w-0 max-w-md">
+  <!-- Left: Breadcrumb trail + Date pill badge -->
+  <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+    <nav
+      id="navbar-breadcrumbs"
+      aria-label="Breadcrumb"
+      class="flex items-center min-w-0"
+    >
+      <ol class="flex items-center gap-1.5 sm:gap-2 text-xs font-medium min-w-0">
+        {#each breadcrumbItems as item, index}
+          <li class="inline-flex items-center gap-1.5 sm:gap-2 min-w-0">
+            {#if index > 0}
+              <span
+                class="material-symbols-outlined text-xs text-muted/60 shrink-0 select-none"
+                aria-hidden="true"
+              >
+                chevron_right
+              </span>
+            {/if}
+            {#if item.isCurrent}
+              <span
+                class="font-semibold text-main truncate max-w-[130px] sm:max-w-[220px] md:max-w-[320px]"
+                title={item.label}
+                aria-current="page"
+              >
+                {item.label}
+              </span>
+            {:else if item.href}
+              <a
+                href={item.href}
+                class="text-secondary hover:text-main flex items-center gap-1 transition-colors hover:underline shrink-0"
+                title={`Kembali ke ${item.label}`}
+              >
+                {#if index === 0}
+                  <span
+                    class="material-symbols-outlined text-base text-primary shrink-0"
+                    aria-hidden="true"
+                  >
+                    dashboard
+                  </span>
+                {/if}
+                <span class="truncate max-w-[90px] sm:max-w-none">{item.label}</span>
+              </a>
+            {:else}
+              <span
+                class="text-secondary truncate max-w-[90px] sm:max-w-none"
+                title={item.label}
+              >
+                {item.label}
+              </span>
+            {/if}
+          </li>
+        {/each}
+      </ol>
+    </nav>
+
+    <!-- Date pill badge (Desktop only) -->
     <div
-      class="flex items-center gap-2.5 w-full bg-card border border-light rounded-full
-             px-4 py-2 hover:border-main/40 hover:bg-card transition-all shadow-xs group"
+      class="hidden lg:inline-flex items-center gap-2 bg-card border border-light px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shadow-xs hover:border-primary/30 transition-colors shrink-0"
     >
       <span
-        class="material-symbols-outlined text-base text-muted group-hover:text-primary transition-colors flex-shrink-0"
-        >search</span
+        class="material-symbols-outlined text-sm text-primary flex-shrink-0"
+        aria-hidden="true"
       >
-      <input
-        id="navbar-search"
-        type="text"
-        placeholder="Cari fitur, template, mutasi..."
-        class="bg-transparent border-none outline-none text-xs text-main
-               placeholder:text-muted w-full min-w-0"
-        value={rawSearchQuery}
-        on:input={handleSearchInput}
-        on:keydown={handleSearchKeydown}
-        autocomplete="off"
-        spellcheck="false"
-      />
-      {#if rawSearchQuery}
-        <button
-          type="button"
-          on:click={handleClearSearch}
-          class="text-muted hover:text-main text-xs p-0.5 rounded-full hover:bg-nested transition-colors"
-          title="Hapus pencarian (Esc)"
-        >
-          <span class="material-symbols-outlined text-xs block">close</span>
-        </button>
-      {/if}
-    </div>
-
-    <!-- Date pill badge -->
-    <div
-      class="hidden lg:inline-flex items-center gap-2 bg-card border border-light px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shadow-xs hover:border-primary/30 transition-colors"
-    >
-      <span class="material-symbols-outlined text-sm text-primary flex-shrink-0"
-        >calendar_today</span
-      >
-      <span class="text-secondary"
-        >Hari ini, <strong class="text-main font-semibold"
-          >{getTodayFormatted()}</strong
-        ></span
-      >
+        calendar_today
+      </span>
+      <span class="text-secondary">
+        Hari ini, <strong class="text-main font-semibold">{getTodayFormatted()}</strong>
+      </span>
     </div>
   </div>
 
   <!-- Right: notifications, theme toggle, and user dropdown -->
-  <div class="flex items-center gap-2.5 flex-shrink-0 ml-3">
-    <!-- Breadcrumb (mobile only) -->
-    {#if breadcrumb}
-      <span class="text-xs font-medium text-muted md:hidden truncate max-w-[120px]" title={breadcrumb}>
-        {breadcrumb}
-      </span>
-    {/if}
-
+  <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
     <!-- Notification Bell -->
     <div id="navbar-notifications" class="flex items-center">
       <NavbarNotifications {user} />
     </div>
 
     <!-- Theme Toggle -->
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       on:click={toggleTheme}
-      class="p-2 text-muted hover:text-main hover:bg-nested rounded-full transition-colors active:scale-95 group cursor-pointer"
+      class="rounded-full text-muted hover:text-main group"
       aria-label="Ganti mode tema"
       title={isDark ? "Ubah ke Mode Terang" : "Ubah ke Mode Gelap"}
     >
@@ -151,7 +205,7 @@
           >dark_mode</span
         >
       {/if}
-    </button>
+    </Button>
 
     <!-- Profile Chip & Dropdown Component -->
     <div id="navbar-user-menu" class="flex items-center">

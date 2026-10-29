@@ -48,14 +48,14 @@ describe('Dashboard App Tour Helpers', () => {
     const homeSteps = getDriverSteps('tenant', '/dashboard');
     expect(homeSteps.length).toBeGreaterThanOrEqual(5);
     expect(homeSteps[0].element).toBe('#dashboard-sidebar');
-    expect(homeSteps[1].element).toBe('#navbar-search');
+    expect(homeSteps[1].element).toBe('#navbar-breadcrumbs');
     expect(homeSteps[2].element).toBe('#navbar-notifications');
     expect(homeSteps[3].element).toBe('#navbar-user-menu');
 
     // 2. Sub-page does NOT include shell
     const productSteps = getDriverSteps('tenant', '/dashboard/products');
     expect(productSteps.every((s) => s.element !== '#dashboard-sidebar')).toBe(true);
-    expect(productSteps.every((s) => s.element !== '#navbar-search')).toBe(true);
+    expect(productSteps.every((s) => s.element !== '#navbar-breadcrumbs')).toBe(true);
     expect(productSteps.every((s) => s.element !== '#navbar-notifications')).toBe(true);
     expect(productSteps.every((s) => s.element !== '#navbar-user-menu')).toBe(true);
   });

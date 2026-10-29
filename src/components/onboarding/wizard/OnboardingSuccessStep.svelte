@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { CheckCircle, ArrowRight } from 'lucide-svelte';
+  import { CheckCircle, ArrowRight, ExternalLink } from 'lucide-svelte';
   import { Button } from '@/components/ui';
-  import { getMainDomain } from '@/lib/domain';
+  import { getMainDomain, getStoreDirectUrl } from '@/lib/domain';
 
   export let isEdit: boolean = false;
   export let subdomain: string = '';
@@ -15,7 +15,7 @@
     mainDomain = getMainDomain();
   });
 
-  $: storeUrl = `http://${subdomain}.${mainDomain}`;
+  $: storeUrl = getStoreDirectUrl(subdomain, mainDomain);
 </script>
 
 <div class="flex flex-col items-center text-center gap-5 py-8 animate-fade-in">
@@ -37,7 +37,30 @@
   <div class="bg-nested p-5 rounded-2xl w-full text-left border border-light space-y-3.5 my-2">
     <div>
       <span class="block text-label-caps text-muted mb-0.5">Alamat Subdomain Toko:</span>
-      <p class="font-mono font-bold text-main text-sm">{subdomain}.{mainDomain}</p>
+      <div class="flex items-center justify-between gap-3">
+        <a
+          href={storeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-mono font-bold text-main hover:text-primary text-sm hover:underline inline-flex items-center gap-1.5 transition-colors group truncate"
+          title="Buka subdomain toko di tab baru"
+        >
+          <span class="truncate">{subdomain}.{mainDomain}</span>
+          <ExternalLink size={14} class="shrink-0 text-muted group-hover:text-primary transition-colors" />
+        </a>
+        <Button
+          href={storeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="ghost"
+          size="xs"
+          class="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary border-transparent text-xs font-semibold shrink-0"
+          title="Buka subdomain toko di tab baru"
+        >
+          <span>Buka Toko</span>
+          <ExternalLink size={12} />
+        </Button>
+      </div>
     </div>
     <div class="border-t border-light pt-3">
       <span class="block text-label-caps text-muted mb-0.5">Nama Toko:</span>
@@ -70,9 +93,21 @@
         class="font-bold font-sans flex items-center justify-center gap-2"
       >
         <span>Lihat Toko Online</span>
-        <ArrowRight size={18} />
+        <ExternalLink size={18} />
       </Button>
     {:else}
+      <Button
+        href={storeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        variant="secondary"
+        size="lg"
+        fullWidth
+        class="font-bold font-sans flex items-center justify-center gap-2"
+      >
+        <span>Lihat Toko Online</span>
+        <ExternalLink size={18} />
+      </Button>
       <Button
         variant="primary"
         size="lg"

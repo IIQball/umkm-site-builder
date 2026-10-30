@@ -61,7 +61,9 @@ export class TransactionService {
         invoiceNum,
         amount: totalAmount,
         payerEmail: user[0].email,
-        description: 'Payment for Template Purchase',
+        description: input.type === 'ai_credit_purchase'
+          ? 'Pembelian Paket Kredit AI Toko'
+          : (input.type === 'store_quota_purchase' ? 'Pembelian Paket Kuota Toko' : 'Payment for Template Purchase'),
         expiryDate,
         successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
         failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,

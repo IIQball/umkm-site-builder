@@ -4,7 +4,7 @@ import TenantOrdersOverview from '@/components/dashboard/TenantOrdersOverview.sv
 import Button from '@/components/ui/Button.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 import { transactions, stores, users } from '@/db/schema';
 import { getPaginationParams, paginate } from '@/lib/pagination/server';
 import type { PaginatedResult } from '@/types/common';
@@ -23,7 +23,10 @@ if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin
 const { page } = getPaginationParams(Astro.url);
 const whereClause = and(
   eq(transactions.userId, user.id),
-  eq(transactions.type, 'template_purchase'),
+  or(
+    eq(transactions.type, 'template_purchase'),
+    eq(transactions.type, 'ai_credit_purchase')
+  )
 );
 
 let initialOrders: any[] = [];
@@ -119,8 +122,21 @@ const ordersWithMerchant = initialOrders.map((o) => {
 });
 ---
 
-<DashboardLayout title="Riwayat Pesanan Template" breadcrumb="Dashboard / Riwayat Pesanan">
+<DashboardLayout title="Riwayat Pesanan & Transaksi" breadcrumb="Dashboard / Riwayat Transaksi">
   <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <!-- Notifikasi Sukses Top Up Token AI -->
+    {Astro.url.searchParams.get('topup') === 'success' && (
+      <div class="p-4 rounded-2xl bg-success/10 border border-success/20 text-success text-xs sm:text-sm font-medium flex items-center justify-between gap-3 shadow-xs animate-fade-in-up">
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <span><strong>Top Up Token AI Berhasil!</strong> Saldo kuota kredit AI Anda telah bertambah dan siap dipakai untuk pembuatan mockup kemasan, logo, dan poster.</span>
+        </div>
+        <Button client:load href="/dashboard/ai" variant="primary" size="xs" class="!bg-success hover:!bg-success/90 text-white font-bold shrink-0">
+          Buka Studio AI
+        </Button>
+      </div>
+    )}
+
     <!-- Page Header (matching designer/wallet & designer/templates style) -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
@@ -128,7 +144,7 @@ const ordersWithMerchant = initialOrders.map((o) => {
           <span>Riwayat Pesanan & Tagihan</span>
         </h1>
         <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
-          Pantau status invoice pembayaran template toko online Anda, selesaikan tagihan pending, dan unduh bukti faktur resmi.
+          Pantau status invoice pembayaran template toko online dan top up kredit AI Anda, selesaikan tagihan pending, dan unduh bukti faktur resmi.
         </p>
       </div>
 

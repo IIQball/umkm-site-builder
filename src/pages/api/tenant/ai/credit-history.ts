@@ -1,11 +1,12 @@
 import type { APIRoute } from 'astro';
 import { db } from '@/db';
-import { stores, transactions, aiGenerationLogs } from '@/db/schema';
+import { stores, transactions, aiGenerationLogs, tenantAiCredits } from '@/db/schema';
 import { eq, and, desc, isNull, or } from 'drizzle-orm';
 import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatIDR } from '@/lib/currency';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { getOrInitializeAiCredit } from '@/services/ai-credit.service';
+import { getCreditPackageByAmount } from '@/services/ai';
 
 export const prerender = false;
 
@@ -36,10 +37,8 @@ const FEATURE_NAMES: Record<string, string> = {
 };
 
 function getCreditsFromAmount(amount: number): number {
-  if (amount === 15000) return 6;
-  if (amount === 25000) return 12;
-  if (amount === 50000) return 30;
-  return Math.max(1, Math.floor(amount / 2500));
+  const pkg = getCreditPackageByAmount(amount);
+  return pkg ? pkg.credits : Math.max(1, Math.floor(amount / 2500));
 }
 
 function resolveQuotaStatus(balance: number, percentage: number): 'plenty' | 'low' | 'critical' | 'empty' {
@@ -87,12 +86,21 @@ export const GET: APIRoute = async ({ request }) => {
     // Ambil saldo kredit AI toko menggunakan service terpusat yang sudah ada
     const credit = await getOrInitializeAiCredit(store.id);
 
-    const initialBonus = 2;
-    const balance = credit.balance;
+    // Normalisasi saldo akun lama yang belum pernah beli agar tidak menyimpan sisa 2 kredit bonus
+    let balance = credit.balance;
+    if (credit.totalPurchased === 0 && credit.totalUsed === 0 && balance > 0) {
+      await db
+        .update(tenantAiCredits)
+        .set({ balance: 0 })
+        .where(eq(tenantAiCredits.tenantId, store.id));
+      balance = 0;
+    }
+
+    const initialBonus = 0;
     const totalPurchased = credit.totalPurchased;
     const totalUsed = credit.totalUsed;
-    const totalQuota = Math.max(balance + totalUsed, totalPurchased + initialBonus, 1);
-    const percentage = Math.min(100, Math.max(0, Math.round((balance / totalQuota) * 100)));
+    const totalQuota = Math.max(totalPurchased, balance + totalUsed, 0);
+    const percentage = totalQuota > 0 ? Math.min(100, Math.max(0, Math.round((balance / totalQuota) * 100))) : 0;
     const status = resolveQuotaStatus(balance, percentage);
 
     // Ambil riwayat transaksi top-up sukses
@@ -134,16 +142,18 @@ export const GET: APIRoute = async ({ request }) => {
 
     const mutations: CreditMutationItem[] = [];
 
-    // 1. Bonus awal pembukaan akun/toko
-    mutations.push({
-      id: `bonus_${store.id}`,
-      type: 'CREDIT',
-      amount: initialBonus,
-      category: 'BONUS',
-      description: 'Bonus Kuota Awal UMKM (Starter)',
-      referenceId: null,
-      createdAt: (store.createdAt || new Date()).toISOString(),
-    });
+    // 1. Bonus awal (hanya dicatat jika initialBonus > 0)
+    if (initialBonus > 0) {
+      mutations.push({
+        id: `bonus_${store.id}`,
+        type: 'CREDIT',
+        amount: initialBonus,
+        category: 'BONUS',
+        description: 'Bonus Kuota Awal UMKM (Starter)',
+        referenceId: null,
+        createdAt: (store.createdAt || new Date()).toISOString(),
+      });
+    }
 
     // 2. Pembelian paket kredit
     let totalTopUpCredits = 0;
@@ -155,7 +165,7 @@ export const GET: APIRoute = async ({ request }) => {
         type: 'CREDIT',
         amount: credits,
         category: 'TOP_UP',
-        description: `Isi Ulang Paket Kredit AI (+${credits} Kredit - ${formatCurrency(tx.amount)})`,
+        description: `Isi Ulang Paket Kredit AI (+${credits} Kredit - ${formatIDR(tx.amount)})`,
         referenceId: tx.externalId || tx.id,
         createdAt: tx.createdAt.toISOString(),
       });

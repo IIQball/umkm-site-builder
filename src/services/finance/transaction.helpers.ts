@@ -1,12 +1,22 @@
 import { db } from '@/lib/db/client';
-import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits } from '@/db/schema';
+import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits, stores } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
-import { eq, and, desc, inArray } from 'drizzle-orm';
-import { xenditClient } from '@/lib/finance/xendit';
+import { eq, or } from 'drizzle-orm';
 import type { TransactionRecord } from '@/types';
 import { formatIDR } from '@/lib/currency';
 import { logActivity } from '@/services/audit.service';
+import { getCreditPackageByAmount } from '@/services/ai';
+
+export {
+  queryTenantOrders,
+  queryDesignerIncomingOrders,
+  getTransactionByExternalId,
+  formatInvoiceNum,
+  grantFreeTemplate,
+  invoiceUrlCache,
+  fetchInvoiceUrl,
+} from './transactionOrders.helpers';
 
 export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): TransactionRecord {
   return {
@@ -100,8 +110,8 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
             id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
             userId: transaction.userId,
             type: 'template_purchased',
-            title: 'Template Berhasil Dibeli',
-            message: `Admin telah membantu membelikan template "${template.name}" untuk toko Anda.`,
+            title: 'Pembelian Template Berhasil',
+            message: `Admin telah membantu pembelian template "${template.name}" untuk toko Anda. Template kini sudah aktif di dashboard.`,
             metadata: { templateId: template.id, transactionId: transaction.id }
           });
         }
@@ -111,53 +121,64 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
 
       await logActivity({
         userId: transaction.userId,
-        storeId: transaction.storeId || null,
         action: 'Purchase Template',
         details: {
-          transactionId: transaction.id,
           templateId: template.id,
           templateName: template.name,
           amount: transaction.amount,
-          designerAmount,
-          platformFee,
           adminFee: adminAmount,
           assistedBy: transaction.assistedBy || null,
-          paymentChannel: transaction.paymentChannel || null,
         },
       });
     }
   } else if (transaction.type === 'ai_credit_purchase' && transaction.userId) {
     // Handle AI credit purchase fulfillment
     try {
-      // Extract credits from transaction metadata or use default calculation
-      const metadata = (transaction as unknown as { metadata?: { credits?: number } }).metadata;
-      const credits = metadata?.credits || Math.floor(transaction.amount / 5000);
-      
-      // Get or create tenant AI credits record
+      // 1. Resolve exact credits from canonical package by amount
+      const canonicalPkg = getCreditPackageByAmount(Number(transaction.amount));
+      const credits = canonicalPkg ? canonicalPkg.credits : Math.max(1, Math.floor(Number(transaction.amount) / 2500));
+      const packageName = canonicalPkg?.name || 'Paket Kredit AI';
+
+      // 2. Resolve storeId
+      let targetStoreId = transaction.storeId;
+      if (!targetStoreId) {
+        const [foundStore] = await db
+          .select({ id: stores.id })
+          .from(stores)
+          .where(eq(stores.userId, transaction.userId))
+          .limit(1);
+        targetStoreId = foundStore?.id || transaction.userId;
+      }
+
+      // 3. Get or update tenant AI credits record
       const existingCredit = await db.select()
         .from(tenantAiCredits)
-        .where(eq(tenantAiCredits.userId, transaction.userId))
+        .where(
+          or(
+            eq(tenantAiCredits.tenantId, targetStoreId),
+            eq(tenantAiCredits.userId, transaction.userId)
+          )
+        )
         .limit(1);
-      
+
       const now = new Date();
-      
+
       if (existingCredit.length > 0) {
-        // Update existing record
         const current = existingCredit[0];
         await db.update(tenantAiCredits)
           .set({
+            tenantId: targetStoreId,
             balance: current.balance + credits,
             totalPurchased: current.totalPurchased + credits,
             updatedAt: now,
           })
           .where(eq(tenantAiCredits.id, current.id));
       } else {
-        // Create new record for tenant
-        const tenantId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const creditRecordId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
         await db.insert(tenantAiCredits).values({
-          id: tenantId,
+          id: creditRecordId,
           userId: transaction.userId,
-          tenantId: transaction.storeId || transaction.userId,
+          tenantId: targetStoreId,
           balance: credits,
           totalPurchased: credits,
           totalUsed: 0,
@@ -166,15 +187,15 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         });
       }
 
-      // Send notification to user
+      // 4. Send notification & audit log
       try {
         await db.insert(notifications).values({
-          id: `notif_${Date.now()}_credit_${Math.random().toString(36).slice(2, 7)}`,
+          id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           userId: transaction.userId,
           type: 'quota_upgrade_request',
           title: 'Kredit AI Berhasil Ditambahkan',
-          message: `Anda telah berhasil membeli ${credits} kredit AI. Kredit sudah siap digunakan untuk semua fitur AI.`,
-          metadata: { credits, transactionId: transaction.id, amount: transaction.amount }
+          message: `Pembelian ${packageName} berhasil! Saldo ${credits} kredit AI telah ditambahkan dan siap digunakan.`,
+          metadata: { credits, packageName, transactionId: transaction.id, amount: transaction.amount }
         });
       } catch {
         // Non-blocking notification dispatch
@@ -195,183 +216,5 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       console.error('[FULFILL_CREDIT_PURCHASE] error:', error);
       throw error;
     }
-  }
-}
-
-export async function queryTenantOrders(userId: string, limit: number = 10, offset: number = 0) {
-  return db.query.transactions.findMany({
-    where: and(
-      eq(transactions.userId, userId),
-      eq(transactions.type, 'template_purchase')
-    ),
-    columns: {
-      id: true,
-      userId: true,
-      type: true,
-      amount: true,
-      adminFee: true,
-      status: true,
-      storeId: true,
-      templateId: true,
-      assistedBy: true,
-      externalId: true,
-      paymentGatewayRef: true,
-      paymentChannel: true,
-      createdAt: true,
-    },
-    with: {
-      template: {
-        columns: {
-          id: true,
-          name: true,
-          thumbnailUrl: true,
-          price: true,
-        },
-      },
-      assistant: {
-        columns: { id: true, name: true, email: true },
-      },
-    },
-    orderBy: [desc(transactions.createdAt)],
-    limit,
-    offset,
-  });
-}
-
-export async function queryDesignerIncomingOrders(designerId: string, limit: number = 10, offset: number = 0) {
-  const designerTemplates = await db.query.templates.findMany({
-    where: eq(templates.designerId, designerId),
-    columns: { id: true },
-  });
-
-  if (!designerTemplates.length) return [];
-
-  const templateIds = designerTemplates.map((t: { id: string }) => t.id);
-
-  return db.query.transactions.findMany({
-    where: and(
-      inArray(transactions.templateId, templateIds),
-      eq(transactions.type, 'template_purchase')
-    ),
-    columns: {
-      id: true,
-      userId: true,
-      type: true,
-      amount: true,
-      adminFee: true,
-      status: true,
-      storeId: true,
-      templateId: true,
-      assistedBy: true,
-      externalId: true,
-      paymentGatewayRef: true,
-      paymentChannel: true,
-      createdAt: true,
-    },
-    with: {
-      template: {
-        columns: {
-          id: true,
-          name: true,
-          thumbnailUrl: true,
-          price: true,
-        },
-      },
-      user: {
-        columns: { id: true, name: true, email: true, image: true },
-      },
-      commission: {
-        columns: {
-          id: true,
-          designerAmount: true,
-          platformFee: true,
-          totalAmount: true,
-        },
-      },
-    },
-    orderBy: [desc(transactions.createdAt)],
-    limit,
-    offset,
-  });
-}
-export async function getTransactionByExternalId(externalId: string) {
-  const query = db.select().from(transactions).where(eq(transactions.externalId, externalId));
-  const hasLimit = 'limit' in query && typeof (query as { limit?: (n: number) => Promise<unknown> }).limit === 'function';
-  const rawResults = hasLimit ? await (query as { limit: (n: number) => Promise<unknown[]> }).limit(1) : await query;
-  const results = Array.isArray(rawResults) ? rawResults : [];
-  return (results[0] as typeof transactions.$inferSelect) || null;
-}
-
-export function formatInvoiceNum(userId: string, idempotencyKey?: string | null): { cleanKey: string | null; invoiceNum: string } {
-  const cleanKey = idempotencyKey?.trim() || null;
-  const invoiceNum = cleanKey
-    ? (cleanKey.startsWith('INV-') ? cleanKey : `INV-${cleanKey}`)
-    : `INV-${userId}-${Date.now()}`;
-  return { cleanKey, invoiceNum };
-}
-
-export async function grantFreeTemplate(
-  userId: string,
-  buyerName: string,
-  template: { id: string; designerId: string; name: string },
-  assistedBy?: string | null
-): Promise<{ isFree: true; message: string }> {
-  const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-  await db.insert(userTemplates).values({
-    id: userTemplateId,
-    userId,
-    templateId: template.id,
-    acquiredAt: new Date(),
-  });
-
-  await db.insert(notifications).values({
-    id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    userId: template.designerId,
-    type: 'template_purchased',
-    title: 'Template Diunduh',
-    message: `${buyerName} telah mengunduh template gratis Anda "${template.name}".`,
-    metadata: { templateId: template.id },
-  });
-
-  if (assistedBy) {
-    await db.insert(notifications).values({
-      id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
-      userId,
-      type: 'template_purchased',
-      title: 'Template Berhasil Diunduh',
-      message: `Admin telah membantu mengunduh template gratis "${template.name}" untuk toko Anda.`,
-      metadata: { templateId: template.id },
-    });
-  }
-
-  await logActivity({
-    userId,
-    action: 'Download Free Template',
-    details: {
-      templateId: template.id,
-      templateName: template.name,
-      buyerName,
-      assistedBy: assistedBy || null,
-    },
-  });
-
-  return { isFree: true, message: 'Free template added to your account successfully' };
-}
-
-export const invoiceUrlCache = new Map<string, string>();
-
-export async function fetchInvoiceUrl(externalId: string): Promise<string | null> {
-  try {
-    if (invoiceUrlCache.has(externalId)) return invoiceUrlCache.get(externalId) || null;
-
-    const tx = await getTransactionByExternalId(externalId);
-    if (!tx?.paymentGatewayRef) return null;
-
-    const xenditInvoice = await xenditClient.getInvoice(tx.paymentGatewayRef);
-    const invoiceUrl = xenditInvoice.invoiceUrl || null;
-    if (invoiceUrl) invoiceUrlCache.set(externalId, invoiceUrl);
-    return invoiceUrl;
-  } catch {
-    return null;
   }
 }

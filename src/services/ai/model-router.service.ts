@@ -1,7 +1,8 @@
 import { db } from '@/db';
-import { storeQuotaPurchases, storeQuotaPackages, tenantAiCredits } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { storeQuotaPurchases, storeQuotaPackages, tenantAiCredits, transactions } from '@/db/schema';
+import { eq, desc, and } from 'drizzle-orm';
 import { FLARE_AI_MODEL, SUNBURST_AI_MODEL } from './cost-calculator.service';
+import { getCreditPackageByAmount } from './ai-packages.constant';
 
 export type StoreAiModel = 'gpt-image-2.5-flare' | 'gpt-image-2.5-sunburst';
 
@@ -43,8 +44,29 @@ export async function resolveStoreAiModel(
     };
   }
 
+  // Override jika requestedQualityTier diberikan secara eksplisit
+  if (requestedQualityTier === 'standard') {
+    return {
+      model: FLARE_AI_MODEL,
+      requiredCredits: 1,
+      creditsRequired: 1,
+      tier: 'trial',
+      packageName: 'Kualitas Standar (Flare)',
+    };
+  }
+
+  if (requestedQualityTier === 'high' || requestedQualityTier === 'hd') {
+    return {
+      model: SUNBURST_AI_MODEL,
+      requiredCredits: 2,
+      creditsRequired: 2,
+      tier: 'juragan',
+      packageName: 'Kualitas HD Studio (Sunburst)',
+    };
+  }
+
   try {
-    // 1. Cek riwayat pembelian kuota toko terbaru (store_quota_purchases)
+    // 1. Cek riwayat pembelian kuota toko (store_quota_purchases)
     const purchases = await db
       .select({
         id: storeQuotaPurchases.id,
@@ -61,7 +83,7 @@ export async function resolveStoreAiModel(
 
     const latestPurchase = purchases?.[0];
 
-    // 2. Cek tenant_ai_credits untuk verifikasi keberadaan toko / status trial
+    // 2. Cek tenant_ai_credits untuk verifikasi saldo & riwayat pembelian
     const credits = await db
       .select({
         id: tenantAiCredits.id,
@@ -74,27 +96,6 @@ export async function resolveStoreAiModel(
 
     const creditRecord = credits?.[0];
 
-    // Override jika requestedQualityTier diberikan secara eksplisit
-    if (requestedQualityTier === 'standard') {
-      return {
-        model: FLARE_AI_MODEL,
-        requiredCredits: 1,
-        creditsRequired: 1,
-        tier: 'trial',
-        packageName: 'Kualitas Standar (Flare)',
-      };
-    }
-
-    if (requestedQualityTier === 'high' || requestedQualityTier === 'hd') {
-      return {
-        model: SUNBURST_AI_MODEL,
-        requiredCredits: 2,
-        creditsRequired: 2,
-        tier: 'juragan',
-        packageName: 'Kualitas HD Studio (Sunburst)',
-      };
-    }
-
     // Jika storeId sama sekali tidak memiliki catatan transaksi dan tidak ada data kredit
     if (!creditRecord && !latestPurchase) {
       return {
@@ -105,6 +106,7 @@ export async function resolveStoreAiModel(
       };
     }
 
+    // Resolusi dari storeQuotaPurchases
     if (latestPurchase) {
       const name = (latestPurchase.packageName || '').toLowerCase();
       const slug = (latestPurchase.packageSlug || '').toLowerCase();
@@ -158,6 +160,70 @@ export async function resolveStoreAiModel(
           tier: 'trial',
           packageName: latestPurchase.packageName ?? 'Paket Trial',
         };
+      }
+
+      return {
+        model: FLARE_AI_MODEL,
+        requiredCredits: 1,
+        creditsRequired: 1,
+        tier: 'trial',
+        packageName: 'Paket Trial / Belum Beli',
+      };
+    }
+
+    // 3. Jika storeQuotaPurchases belum mencatat, tetapi merchant pernah membeli kuota token AI (totalPurchased > 0)
+    if (creditRecord && creditRecord.totalPurchased > 0) {
+      try {
+        const aiTransactions = await db
+          .select({
+            amount: transactions.amount,
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.type, 'ai_credit_purchase'),
+              eq(transactions.status, 'success'),
+              eq(transactions.storeId, storeId)
+            )
+          )
+          .orderBy(desc(transactions.createdAt))
+          .limit(1);
+
+        const latestTx = aiTransactions?.[0];
+        if (latestTx) {
+          const matchedPkg = getCreditPackageByAmount(Number(latestTx.amount));
+          if (matchedPkg) {
+            if (matchedPkg.tier === 'juragan') {
+              return {
+                model: SUNBURST_AI_MODEL,
+                requiredCredits: 2,
+                creditsRequired: 2,
+                tier: 'juragan',
+                packageName: matchedPkg.name,
+              };
+            }
+            if (matchedPkg.tier === 'reguler') {
+              return {
+                model: SUNBURST_AI_MODEL,
+                requiredCredits: 2,
+                creditsRequired: 2,
+                tier: 'reguler',
+                packageName: matchedPkg.name,
+              };
+            }
+            if (matchedPkg.tier === 'hemat') {
+              return {
+                model: FLARE_AI_MODEL,
+                requiredCredits: 1,
+                creditsRequired: 1,
+                tier: 'hemat',
+                packageName: matchedPkg.name,
+              };
+            }
+          }
+        }
+      } catch {
+        // Fall through gracefully if transactions query fails
       }
     }
 

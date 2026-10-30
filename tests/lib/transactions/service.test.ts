@@ -4,6 +4,8 @@ import { fulfillPaidTransaction } from '@/services/finance/transaction.helpers';
 import type { TransactionInitiateInput } from '@/types';
 import { db } from '@/lib/db/client';
 import { xenditClient } from '@/lib/finance/xendit';
+import * as databaseTransactions from '@/lib/db/transaction';
+import type { DbExecutor } from '@/types/common/db';
 
 
 // Mock xenditClient
@@ -92,13 +94,18 @@ describe('TransactionService', () => {
     // Setup default mock chain for update
     mockDb.update.mockReturnValue({
       set: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ id: 'txn_claimed' }]),
+        }),
       }),
     });
+    vi.spyOn(databaseTransactions, 'withTransaction')
+      .mockImplementation((callback) => callback(mockDb as unknown as DbExecutor));
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
@@ -154,6 +161,37 @@ describe('TransactionService', () => {
       expect(result).toBeDefined();
       expect(result.invoiceId).toBe('INV-user_123-123456');
       expect(result.paymentUrl).toBe('https://xendit.co/invoices/xyz');
+    });
+
+    it('returns AI credit purchases to the merchant studio for balance refresh', async () => {
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ id: 'user_123', email: 'user@example.com' }]),
+          }),
+        }),
+      });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
+      (xenditClient.createInvoice as Mock).mockResolvedValueOnce({
+        id: 'xendit_credit_123',
+        invoiceNum: 'INV-user_123-credit',
+        invoiceUrl: 'https://xendit.co/invoices/credit',
+      });
+
+      await transactionService.initiateTransaction(
+        'user_123',
+        { amount: 50000, type: 'ai_credit_purchase', storeId: 'store_123' },
+        'https://merchant.example'
+      );
+
+      const invoiceRequest = (xenditClient.createInvoice as Mock).mock.calls[0][0];
+      const studioUrl = `https://merchant.example/dashboard/ai?creditPurchase=${encodeURIComponent(invoiceRequest.invoiceNum)}`;
+      expect(invoiceRequest.successRedirectUrl).toBe(studioUrl);
+      expect(invoiceRequest.failureRedirectUrl).toBe(studioUrl);
     });
 
     it('should reject if payment already in progress', async () => {
@@ -519,5 +557,3 @@ describe('TransactionService', () => {
     });
   });
 });
-
-

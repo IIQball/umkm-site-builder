@@ -140,7 +140,7 @@ Adding a code is deliberate. Document it here before using.
 - **Server-derived:** None (only updates existing transaction record)
 - **Success:** `{ ok: true, data: {} }`
 - **Errors:** VALIDATION_ERROR (signature invalid), NOT_FOUND (transaction not in DB)
-- **Idempotency:** Unique constraint on `transactions.externalId` prevents double-crediting
+- **Idempotency:** The transaction status claim and paid-transaction fulfillment run in one database transaction. A conditional status update only returns one winner; retries that observe `success` do not fulfill again. `transactions.externalId` uniquely identifies the invoice.
 - **Side effects:** Updates transaction status (pending → success/failed/expired); creates commission and updates designer wallet if applicable; sends email to user and notification to admin
 - **Rate limit:** None (webhook retries from Xendit)
 
@@ -482,13 +482,13 @@ Invalid input returns VALIDATION_ERROR with field-level messages.
 
 ## 6. Idempotency
 
-**Payment webhooks:** Unique constraint on `transactions.externalId` prevents double-crediting if webhook is retried.
+**Payment webhooks:** `transactions.externalId` uniquely identifies the invoice. The webhook conditionally changes the transaction to `success` and fulfills it in the same database transaction; concurrent/repeated callbacks cannot both claim the transition. AI credit upserts use atomic increments to preserve concurrent purchases.
 
 **Payout requests:** Unique constraint on `payout_requests.xenditPayoutId` prevents duplicate payouts.
 
 **Safe to retry (idempotent):**
 - POST /api/payments/initiate (if same amount/user, returns same invoiceId via externalId lookup)
-- POST /api/webhooks/xendit (retries are harmless due to unique externalId constraint)
+- POST /api/webhooks/xendit (retries are harmless due to the atomic success transition and fulfillment)
 - POST /api/admin/stores/setup (idempotent via subdomain uniqueness)
 
 **Not safe to retry (avoid retrying):**

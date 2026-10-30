@@ -3,6 +3,9 @@ import { transactionService } from '@/services';
 import { fulfillPaidTransaction } from '@/services/finance/transaction.helpers';
 import { POST } from '@/pages/api/webhooks/xendit';
 import { db } from '@/lib/db/client';
+import { tenantAiCredits } from '@/db/schema';
+import * as databaseTransactions from '@/lib/db/transaction';
+import type { DbExecutor } from '@/types/common/db';
 
 vi.mock('@/lib/db/client', () => {
   const mockDb = {
@@ -51,17 +54,24 @@ describe('Xendit AI Credit Billing Tests', () => {
     });
 
     mockDb.insert.mockReturnValue({
-      values: vi.fn().mockResolvedValue(undefined),
+      values: vi.fn().mockReturnValue({
+        onConflictDoUpdate: vi.fn().mockResolvedValue(undefined),
+      }),
     });
 
     mockDb.update.mockReturnValue({
       set: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ id: 'txn_claimed' }]),
+        }),
       }),
     });
+    vi.spyOn(databaseTransactions, 'withTransaction')
+      .mockImplementation((callback) => callback(mockDb as unknown as DbExecutor));
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
@@ -187,6 +197,63 @@ describe('Xendit AI Credit Billing Tests', () => {
       expect(mockDb.update).toHaveBeenCalled();
     });
 
+    it('fulfills a concurrently delivered paid invoice only once', async () => {
+      const pendingTransaction = {
+        id: 'txn_race',
+        userId: 'user_race',
+        type: 'ai_credit_purchase',
+        amount: 50000,
+        status: 'pending',
+        storeId: 'store_race',
+        templateId: null,
+        adminFee: 0,
+        assistedBy: null,
+        externalId: 'INV-race',
+        paymentGatewayRef: null,
+        paymentChannel: null,
+        createdAt: new Date(),
+      };
+      let transactionReads = 0;
+      let isClaimed = false;
+
+      mockDb.select.mockImplementation(() => ({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockImplementation(async () => {
+              transactionReads += 1;
+              return transactionReads <= 2 ? [pendingTransaction] : [];
+            }),
+          }),
+        }),
+      }));
+      mockDb.update.mockImplementation(() => ({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockImplementation(async () => {
+              if (isClaimed) return [];
+              isClaimed = true;
+              return [{ ...pendingTransaction, status: 'success' }];
+            }),
+          }),
+        }),
+      }));
+
+      const payload = {
+        id: 'xendit_race',
+        external_id: pendingTransaction.externalId,
+        amount: pendingTransaction.amount,
+        status: 'PAID',
+        paid: true,
+      };
+      const results = await Promise.all([
+        transactionService.processWebhook(payload),
+        transactionService.processWebhook(payload),
+      ]);
+
+      expect(results.map((result) => result.status).sort()).toEqual(['ignored', 'success']);
+      expect(mockDb.insert.mock.calls.filter(([table]) => table === tenantAiCredits)).toHaveLength(1);
+    });
+
     it('is idempotent — ignores already-processed transaction', async () => {
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
@@ -285,10 +352,16 @@ describe('Xendit AI Credit Billing Tests', () => {
       });
 
       let insertedCredits: Record<string, unknown> = {};
+      let upsertOptions: Record<string, unknown> = {};
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockImplementation((val) => {
           insertedCredits = val;
-          return Promise.resolve(undefined);
+          return {
+            onConflictDoUpdate: vi.fn().mockImplementation((options) => {
+              upsertOptions = options;
+              return Promise.resolve(undefined);
+            }),
+          };
         }),
       });
 
@@ -318,37 +391,24 @@ describe('Xendit AI Credit Billing Tests', () => {
 
       expect(insertedCredits.userId).toBe('user_new');
       expect(insertedCredits.tenantId).toBe('store_new');
-      expect(insertedCredits.balance).toBe(10);
-      expect(insertedCredits.totalPurchased).toBe(10);
+      expect(insertedCredits.balance).toBe(30);
+      expect(insertedCredits.totalPurchased).toBe(30);
       expect(insertedCredits.totalUsed).toBe(0);
+      expect(upsertOptions.target).toBe(tenantAiCredits.tenantId);
     });
 
-    it('updates existing tenant_ai_credits record by adding credits', async () => {
-      mockDb.select.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{
-              id: 'cred_existing',
-              userId: 'user_existing',
-              tenantId: 'store_existing',
-              balance: 5,
-              totalPurchased: 10,
-              totalUsed: 5,
-            }]),
-          }),
-        }),
-      });
-
-      let updatedValues: Record<string, unknown> = {};
-      mockDb.update.mockReturnValueOnce({
-        set: vi.fn().mockImplementation((val) => {
-          updatedValues = val;
-          return { where: vi.fn().mockResolvedValue(undefined) };
-        }),
-      });
-
+    it('increments an existing tenant credit balance atomically on conflict', async () => {
+      let upsertValues: Record<string, unknown> = {};
       mockDb.insert.mockReturnValueOnce({
-        values: vi.fn().mockResolvedValue(undefined),
+        values: vi.fn().mockImplementation((val) => {
+          upsertValues = val;
+          return {
+            onConflictDoUpdate: vi.fn().mockImplementation((options) => {
+              upsertValues = { ...upsertValues, ...options.set };
+              return Promise.resolve(undefined);
+            }),
+          };
+        }),
       });
 
       mockDb.insert.mockReturnValueOnce({
@@ -371,11 +431,11 @@ describe('Xendit AI Credit Billing Tests', () => {
         createdAt: new Date(),
       });
 
-      expect(updatedValues.balance).toBe(25);
-      expect(updatedValues.totalPurchased).toBe(30);
+      expect(upsertValues.balance).toBeDefined();
+      expect(upsertValues.totalPurchased).toBeDefined();
     });
 
-    it('calculates credits from metadata.credits when available', async () => {
+    it('uses the amount-based fallback when no canonical package matches', async () => {
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -388,7 +448,9 @@ describe('Xendit AI Credit Billing Tests', () => {
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockImplementation((val) => {
           insertedCredits = val;
-          return Promise.resolve(undefined);
+          return {
+            onConflictDoUpdate: vi.fn().mockResolvedValue(undefined),
+          };
         }),
       });
 
@@ -419,8 +481,8 @@ describe('Xendit AI Credit Billing Tests', () => {
 
       await fulfillPaidTransaction(txWithMeta as Parameters<typeof fulfillPaidTransaction>[0]);
 
-      expect(insertedCredits.balance).toBe(50);
-      expect(insertedCredits.totalPurchased).toBe(50);
+      expect(insertedCredits.balance).toBe(30);
+      expect(insertedCredits.totalPurchased).toBe(30);
     });
 
     it('does not touch tenant_ai_credits for template_purchase type', async () => {

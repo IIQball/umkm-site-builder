@@ -8,6 +8,7 @@
   import AiAssetGallery from './AiAssetGallery.svelte';
   import AiDeveloperTestBar from './AiDeveloperTestBar.svelte';
   import AiCreditTopupBanner from './AiCreditTopupBanner.svelte';
+  import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
   import { generateAiAssetClient } from '@/lib/api/ai-client';
   import { formatAiErrorMessage } from '@/lib/errors/ai-error';
   import { toast } from '@/lib/toast';
@@ -39,6 +40,7 @@
   let activeTier = 'trial';
   let activePackageName = 'Belum Ada Paket Aktif';
   let isCreditLoading = false;
+  let creditPurchaseInvoiceId = '';
 
   $: creditStatusStyle = creditBalance <= 0
     ? { badge: 'bg-error/10 text-error border-error/25 hover:bg-error/20', subtext: 'text-error/80' }
@@ -87,8 +89,19 @@
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       isTestMode = urlParams.get('testMode') === 'true';
+      creditPurchaseInvoiceId = urlParams.get('creditPurchase') || '';
     }
   });
+
+  function handleCreditPurchaseStatus(status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded') {
+    if (status !== 'success') return;
+
+    void fetchCreditBalance();
+    creditPurchaseInvoiceId = '';
+    const url = new URL(window.location.href);
+    url.searchParams.delete('creditPurchase');
+    window.history.replaceState(null, '', url);
+  }
 
   async function executeGeneration(payload: AiStudioGeneratePayload) {
     const reqCredits = payload.qualityTier === 'high' ? 2 : 1;
@@ -177,6 +190,15 @@
 </script>
 
 <div class="space-y-6">
+  {#if creditPurchaseInvoiceId}
+    <div class="rounded-2xl border border-light bg-card px-4 py-2">
+      <TransactionStatus
+        invoiceId={creditPurchaseInvoiceId}
+        onStatusUpdate={handleCreditPurchaseStatus}
+      />
+    </div>
+  {/if}
+
   {#if isTestMode}
     <AiDeveloperTestBar bind:isTesting />
   {/if}

@@ -6,9 +6,10 @@
 import { db } from '@/lib/db/client';
 import { transactions, users, templates, userTemplates } from '@/db/schema';
 import { xenditClient } from '@/lib/finance/xendit';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { AppError, formatCurrency } from '@/lib/utils';
 import { idempotencyManager } from '@/lib/finance/idempotency';
+import { withTransaction } from '@/lib/db/transaction';
 import type { TransactionInitiateInput, TransactionRecord, TransactionType, PaymentStatus } from '@/types';
 import {
   mapTransactionToRecord,
@@ -56,6 +57,12 @@ export class TransactionService {
         : 0;
       const totalAmount = input.adminFee !== undefined ? input.amount : input.amount + adminFee;
       const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const returnUrl = input.type === 'ai_credit_purchase'
+        ? `${baseUrl}/dashboard/ai?creditPurchase=${encodeURIComponent(invoiceNum)}`
+        : `${baseUrl}/checkout/${invoiceNum}?status=success`;
+      const failureUrl = input.type === 'ai_credit_purchase'
+        ? `${baseUrl}/dashboard/ai?creditPurchase=${encodeURIComponent(invoiceNum)}`
+        : `${baseUrl}/checkout/${invoiceNum}?status=failed`;
 
       const xenditInvoice = await xenditClient.createInvoice({
         invoiceNum,
@@ -65,8 +72,8 @@ export class TransactionService {
           ? 'Pembelian Paket Kredit AI Toko'
           : (input.type === 'store_quota_purchase' ? 'Pembelian Paket Kuota Toko' : 'Payment for Template Purchase'),
         expiryDate,
-        successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
-        failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+        successRedirectUrl: returnUrl,
+        failureRedirectUrl: failureUrl,
         metadata: {
           userId,
           type: input.type,
@@ -251,14 +258,25 @@ export class TransactionService {
     else if (status === 'EXPIRED') newStatus = 'expired';
     else if (status === 'CANCELED') newStatus = 'canceled';
 
-    await db.update(transactions).set({
-      status: newStatus,
-      paymentGatewayRef: payload.id,
-      paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
-    }).where(eq(transactions.id, transaction.id));
+    const processed = await withTransaction(async (tx) => {
+      const [claimedTransaction] = await tx.update(transactions).set({
+        status: newStatus,
+        paymentGatewayRef: payload.id,
+        paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
+      })
+        .where(and(
+          eq(transactions.id, transaction.id),
+          ne(transactions.status, 'success')
+        ))
+        .returning();
 
-    if (isPaid) {
-      await fulfillPaidTransaction(transaction);
+      if (!claimedTransaction) return false;
+      if (isPaid) await fulfillPaidTransaction(claimedTransaction, tx);
+      return true;
+    });
+
+    if (!processed) {
+      return { status: 'ignored', message: 'Already processed' };
     }
 
     return { status: 'success', message: 'Webhook processed successfully' };

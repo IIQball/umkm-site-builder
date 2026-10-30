@@ -445,7 +445,7 @@ export const tenantAiCredits = pgTable('tenant_ai_credits', {
   id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull().unique().references(() => stores.id, { onDelete: 'cascade' }),
   userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  balance: integer('balance').default(2).notNull(),
+  balance: integer('balance').default(0).notNull(),
   totalPurchased: integer('total_purchased').default(0).notNull(),
   totalUsed: integer('total_used').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

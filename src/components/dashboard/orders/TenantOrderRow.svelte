@@ -9,6 +9,7 @@
     ShieldCheck,
     Check,
     Copy,
+    Zap,
   } from 'lucide-svelte';
   import { Badge, Button } from '@/components/ui';
   import type { BadgeVariant } from '@/components/tokens/colors';
@@ -16,6 +17,7 @@
   import { formatIDR } from '@/lib/currency';
   import { formatDate } from '@/lib/utils/format';
   import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
+  import { getCreditPackageByAmount } from '@/services/ai';
 
   export let order: OrderTransactionItem;
   export let statusMeta: { variant: BadgeVariant; label: string };
@@ -29,7 +31,10 @@
   export let getPaymentUrl: (order: OrderTransactionItem) => string;
   export let onOpenInvoice: (order: OrderTransactionItem) => void = () => {};
 
-
+  $: isAiCredit = order.type === 'ai_credit_purchase';
+  $: aiPkg = isAiCredit ? getCreditPackageByAmount(Number(order.amount)) : null;
+  $: aiCredits = aiPkg ? aiPkg.credits : Math.max(1, Math.floor(Number(order.amount) / 2500));
+  $: aiTitle = aiPkg ? `${aiPkg.name} (${aiCredits} Kredit AI)` : `Top Up ${aiCredits} Kredit AI`;
   $: basePrice = order.basePrice !== undefined 
     ? Number(order.basePrice) 
     : Math.max(0, Number(order.amount) - Number(order.adminFee || 0));
@@ -76,7 +81,7 @@
               <ShieldCheck size={10} class="shrink-0 text-primary" />
               Admin Pembeli
             </Badge>
-            <div class="font-bold text-xs text-main truncate font-sans" title={order.adminName}>
+            <div class="font-bold text-xs text-main truncate" title={order.adminName}>
               {order.adminName || 'Admin Pendamping'}
             </div>
             {#if order.adminEmail}
@@ -95,7 +100,7 @@
               <Store size={10} class="shrink-0 text-secondary" />
               Merchant Binaan
             </Badge>
-            <div class="font-bold text-xs text-main truncate font-sans" title={order.merchantName}>
+            <div class="font-bold text-xs text-main truncate" title={order.merchantName}>
               {order.merchantName || '—'}
             </div>
             {#if order.merchantEmail}
@@ -116,7 +121,7 @@
             <User size={10} class="shrink-0 text-success" />
             Dibeli Mandiri (Tenant)
           </Badge>
-          <div class="font-bold text-xs text-main truncate font-sans" title={order.merchantName}>
+          <div class="font-bold text-xs text-main truncate" title={order.merchantName}>
             {order.merchantName || '—'}
           </div>
           {#if order.merchantEmail}
@@ -133,29 +138,53 @@
     </td>
   {/if}
 
-  <!-- Template Details -->
+  <!-- Item / Layanan Details -->
   <td class="px-4 py-4">
     <div class="flex items-center gap-3">
-      {#if order.template?.thumbnailUrl}
-        <img
-          src={getOptimizedCloudinaryUrl(order.template.thumbnailUrl, 160)}
-          alt={order.template.name}
-          class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
-          loading="lazy"
-        />
+      {#if isAiCredit}
+        <div class="w-12 h-9 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center text-primary flex-shrink-0 shadow-2xs">
+          <Zap size={18} />
+        </div>
+        <div class="min-w-0 max-w-xs">
+          <span class="font-bold text-xs text-main block truncate">
+            {aiTitle}
+          </span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <Badge variant="primary" size="sm" dot={false} class="!px-1.5 !py-0 text-[10px] font-bold">
+              Token AI
+            </Badge>
+            <span class="text-3xs text-muted font-mono truncate">
+              {order.paymentChannel || 'Xendit'}
+            </span>
+          </div>
+        </div>
       {:else}
-        <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
-          <Palette size={16} />
+        {#if order.template?.thumbnailUrl}
+          <img
+            src={getOptimizedCloudinaryUrl(order.template.thumbnailUrl, 160)}
+            alt={order.template.name}
+            class="w-12 h-9 rounded-xl object-cover border border-light flex-shrink-0 shadow-2xs"
+            loading="lazy"
+          />
+        {:else}
+          <div class="w-12 h-9 rounded-xl bg-nested border border-light flex items-center justify-center text-muted flex-shrink-0 shadow-2xs">
+            <Palette size={16} />
+          </div>
+        {/if}
+        <div class="min-w-0 max-w-xs">
+          <span class="font-bold text-xs text-main block truncate">
+            {order.template?.name || 'Template Desain Toko'}
+          </span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <Badge variant="secondary" size="sm" dot={false} class="!px-1.5 !py-0 text-[10px] font-bold">
+              Template Web
+            </Badge>
+            <span class="text-3xs text-muted uppercase font-mono">
+              #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
+            </span>
+          </div>
         </div>
       {/if}
-      <div class="min-w-0 max-w-xs">
-        <span class="font-bold text-xs text-main block truncate font-sans">
-          {order.template?.name || 'Template Desain Toko'}
-        </span>
-        <span class="text-xs text-muted block uppercase font-mono mt-0.5">
-          ID: #{order.template?.id ? order.template.id.slice(0, 8) : '—'}
-        </span>
-      </div>
     </div>
   </td>
 
@@ -220,7 +249,7 @@
   <!-- Actions -->
   <td class="px-6 py-4 text-right whitespace-nowrap">
     <div class="flex items-center justify-end gap-2 whitespace-nowrap">
-      {#if isReadOnly}
+      {#if isReadOnly || order.status === 'paid' || order.status === 'success' || order.status === 'completed'}
         <Button
           type="button"
           variant="secondary"
@@ -240,17 +269,6 @@
         >
           <CreditCard size={14} class="shrink-0" />
           <span class="whitespace-nowrap">Bayar Sekarang</span>
-        </Button>
-      {:else if order.status === 'paid' || order.status === 'success' || order.status === 'completed'}
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          class="font-bold whitespace-nowrap min-w-[136px] justify-center border-light hover:border-primary/40 active:scale-95 transition-all text-xs px-3.5"
-          on:click={() => onOpenInvoice(order)}
-        >
-          <FileText size={14} class="text-primary shrink-0" />
-          <span class="whitespace-nowrap">Lihat Nota</span>
         </Button>
       {:else}
         <Button

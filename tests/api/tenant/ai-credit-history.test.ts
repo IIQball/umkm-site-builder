@@ -167,8 +167,8 @@ describe('Tenant AI Credit History API - GET /api/tenant/ai/credit-history', () 
     expect(body.data.quota.percentage).toBe(93); // Math.round((13 / 14) * 100)
     expect(body.data.quota.status).toBe('plenty');
 
-    // 3 mutations: log_01 (DEBIT - 18 Oct), tx_01 (CREDIT - 15 Oct), bonus (CREDIT - 1 Oct)
-    expect(body.data.mutations).toHaveLength(3);
+    // 2 mutations: log_01 (DEBIT - 18 Oct), tx_01 (CREDIT - 15 Oct)
+    expect(body.data.mutations).toHaveLength(2);
     expect(body.data.mutations[0].id).toBe('gen_log_01');
     expect(body.data.mutations[0].type).toBe('DEBIT');
     expect(body.data.mutations[0].amount).toBe(1);
@@ -177,10 +177,6 @@ describe('Tenant AI Credit History API - GET /api/tenant/ai/credit-history', () 
     expect(body.data.mutations[1].type).toBe('CREDIT');
     expect(body.data.mutations[1].amount).toBe(12); // from 25000 pkg
     expect(body.data.mutations[1].description).toContain('Rp 25.000');
-
-    expect(body.data.mutations[2].id).toBe('bonus_store_tenant_01');
-    expect(body.data.mutations[2].category).toBe('BONUS');
-    expect(body.data.mutations[2].amount).toBe(2);
   });
 
   it('filters mutations by type CREDIT', async () => {
@@ -222,8 +218,8 @@ describe('Tenant AI Credit History API - GET /api/tenant/ai/credit-history', () 
 
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
-    // Only CREDIT (bonus and top-up) should remain, DEBIT filtered out
+    // Only CREDIT (top-up) should remain, DEBIT filtered out
     expect(body.data.mutations.every((m: { type: string }) => m.type === 'CREDIT')).toBe(true);
-    expect(body.data.mutations).toHaveLength(2);
+    expect(body.data.mutations).toHaveLength(1);
   });
 });

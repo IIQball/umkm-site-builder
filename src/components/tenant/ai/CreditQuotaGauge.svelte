@@ -15,16 +15,22 @@
     balance: 0,
     totalUsed: 0,
     totalPurchased: 0,
-    initialBonus: 2,
-    totalQuota: 2,
-    percentage: 100,
-    status: 'plenty',
+    initialBonus: 0,
+    totalQuota: 0,
+    percentage: 0,
+    status: 'empty',
   };
 
   let mutations: CreditMutationItem[] = initialData?.mutations ?? [];
   let loading = !initialData;
   let isRefreshing = false;
   let errorMessage = '';
+
+  $: barColor = quota.status === 'empty'
+    ? 'bg-error'
+    : quota.status === 'critical' || quota.status === 'low'
+    ? 'bg-warning'
+    : 'bg-success';
 
   async function loadData() {
     errorMessage = '';
@@ -80,14 +86,12 @@
             <h2 class="text-heading-md font-bold text-main font-heading">
               Sisa Kuota Kredit AI
             </h2>
-            {#if quota.status === 'critical'}
-              <Badge variant="error" size="sm">Kritis</Badge>
-            {:else if quota.status === 'low'}
-              <Badge variant="warning" size="sm">Menipis</Badge>
-            {:else if quota.status === 'empty'}
-              <Badge variant="slate" size="sm">Habis</Badge>
+            {#if quota.status === 'empty'}
+              <Badge variant="error" size="sm">Habis</Badge>
+            {:else if quota.status === 'critical' || quota.status === 'low'}
+              <Badge variant="warning" size="sm">Hampir Habis</Badge>
             {:else}
-              <Badge variant="success" size="sm">Tersedia</Badge>
+              <Badge variant="success" size="sm">Aman</Badge>
             {/if}
           </div>
           <p class="text-body-sm text-secondary mt-1">
@@ -103,8 +107,8 @@
           </div>
           <div class="h-2 w-full bg-nested rounded-full overflow-hidden border border-light">
             <div
-              class="h-full bg-primary rounded-full transition-all duration-700 ease-out"
-              style="width: {Math.max(4, Math.min(100, quota.percentage))}%;"
+              class="h-full {barColor} rounded-full transition-all duration-700 ease-out"
+              style="width: {quota.totalQuota > 0 ? Math.max(4, Math.min(100, quota.percentage)) : 0}%;"
             ></div>
           </div>
         </div>
@@ -113,7 +117,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1 max-w-xl">
           <div class="p-3 bg-nested/70 rounded-2xl border border-light/60">
             <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider">Tersedia</span>
-            <span class="text-lg font-heading font-bold text-main mt-0.5 block">{quota.balance}</span>
+            <span class="text-lg font-heading font-bold {quota.status === 'empty' ? 'text-error' : quota.status === 'critical' || quota.status === 'low' ? 'text-warning' : 'text-main'} mt-0.5 block">{quota.balance}</span>
           </div>
           <div class="p-3 bg-nested/70 rounded-2xl border border-light/60">
             <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider">Terpakai</span>

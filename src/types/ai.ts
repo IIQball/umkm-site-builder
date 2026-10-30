@@ -175,7 +175,7 @@ export const MOCK_TENANT_AI_CREDIT: TenantAiCredit = {
   id: 'credit_mock_001',
   tenantId: 'store_mock_001',
   userId: 'user_mock_001',
-  balance: 2,
+  balance: 0,
   totalPurchased: 0,
   totalUsed: 0,
   createdAt: '2026-10-17T00:00:00.000Z',

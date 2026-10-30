@@ -5,5 +5,7 @@ export * from './monitoring.service';
 export * from './product-mockup.service';
 export * from './product-poster.service';
 export * from './cost-calculator.service';
+export * from './ai-packages.constant';
+export * from './ai-capacity.service';
 export * from './model-router.service';
 export * from './model-adapter';

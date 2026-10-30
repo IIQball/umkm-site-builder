@@ -42,6 +42,7 @@
   {navGroups}
   {collapsed}
   {currentPath}
+  {isLoggingOut}
   on:toggleCollapse={toggleCollapse}
   on:signOut={handleSignOut}
 />

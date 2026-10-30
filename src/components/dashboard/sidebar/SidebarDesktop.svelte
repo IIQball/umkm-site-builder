@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { type NavGroup, getDashboardHomePath } from "./sidebar.helpers";
+  import { type NavGroup, getDashboardHomePath, isPathActive } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -8,6 +8,7 @@
   export let navGroups: NavGroup[] = [];
   export let collapsed = false;
   export let currentPath = "";
+  export let isLoggingOut = false;
 
   const dispatch = createEventDispatcher<{
     toggleCollapse: void;
@@ -16,23 +17,6 @@
 
   $: sidebarWidth = collapsed ? "76px" : "260px";
   $: homePath = getDashboardHomePath(user?.role);
-
-  const isActive = (href: string): boolean => {
-    if (!currentPath) return false;
-    const cleanCurrent = currentPath.replace(/\/$/, "") || "/";
-    const cleanHref = href.replace(/\/$/, "") || "/";
-    if (
-      cleanHref === "/dashboard" ||
-      cleanHref === "/admin" ||
-      cleanHref === "/superadmin" ||
-      cleanHref === "/designer"
-    ) {
-      return cleanCurrent === cleanHref;
-    }
-    return (
-      cleanCurrent === cleanHref || cleanCurrent.startsWith(cleanHref + "/")
-    );
-  };
 </script>
 
 <aside
@@ -112,7 +96,7 @@
   <nav
     class="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-4 scrollbar-none"
   >
-    {#each navGroups as group (group.title)}
+    {#each navGroups as group, groupIndex (group.title)}
       <div class="space-y-1">
         {#if !collapsed}
           <p
@@ -121,19 +105,24 @@
             {group.title}
           </p>
         {:else}
-          <div class="h-2"></div>
+          {#if groupIndex > 0}
+            <div class="my-2 mx-2 border-t border-light/60"></div>
+          {:else}
+            <div class="h-1"></div>
+          {/if}
         {/if}
 
         <div class="space-y-0.5">
           {#each group.items as item (item.href)}
-            {@const active = isActive(item.href)}
+            {@const active = isPathActive(currentPath, item.href)}
             <a
               href={item.href}
               title={collapsed ? item.label : undefined}
+              aria-label={item.label}
               class="group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 {collapsed
                 ? 'justify-center'
                 : ''} {active
-                ? 'bg-main text-canvas dark:bg-nested shadow-xs'
+                ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-xs'
                 : 'text-secondary hover:bg-nested hover:text-main'}"
             >
               <span
@@ -145,7 +134,7 @@
               {#if !collapsed}
                 <span
                   class="truncate leading-tight pb-[2px] {active
-                    ? 'font-bold text-white'
+                    ? 'font-bold text-white dark:text-white'
                     : ''}"
                 >
                   {item.label}
@@ -176,8 +165,26 @@
     {/each}
   </nav>
 
-  <!-- Bottom User Profile & Sign Out -->
+  <!-- Bottom Quota & Sign Out -->
   {#if user.role === "tenant"}
     <TenantQuota {collapsed} />
   {/if}
+
+  <div class="p-3 border-t border-light flex flex-col gap-2 shrink-0 {user.role === 'tenant' ? '' : 'mt-auto'}">
+    <button
+      type="button"
+      on:click={() => dispatch("signOut")}
+      disabled={isLoggingOut}
+      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer {collapsed ? 'justify-center px-0' : ''}"
+      title="Keluar"
+      aria-label="Keluar dari akun"
+    >
+      <span class="material-symbols-outlined text-base flex-shrink-0" class:animate-spin={isLoggingOut}>
+        power_settings_new
+      </span>
+      {#if !collapsed}
+        <span class="truncate">{isLoggingOut ? "Keluar..." : "Keluar"}</span>
+      {/if}
+    </button>
+  </div>
 </aside>

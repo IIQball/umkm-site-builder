@@ -19,6 +19,7 @@
 
   let searchQuery = '';
   let selectedStatus: 'all' | 'pending' | 'paid' | 'failed' = 'all';
+  let selectedType: 'all' | 'template_purchase' | 'ai_credit_purchase' = 'all';
   let currentPage = 1;
   $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
@@ -27,6 +28,12 @@
   let isInvoiceModalOpen = false;
 
   $: hasAdminAssistant = !isAdmin && orders.some((o) => Boolean(o.adminName || o.adminEmail || o.assistedBy));
+
+  $: typeCounts = {
+    all: orders.length,
+    template: orders.filter((o) => o.type !== 'ai_credit_purchase').length,
+    aiCredit: orders.filter((o) => o.type === 'ai_credit_purchase').length,
+  };
 
   $: counts = {
     total: orders.length,
@@ -45,6 +52,13 @@
         ? order.status === 'pending'
         : order.status !== 'paid' && order.status !== 'success' && order.status !== 'completed' && order.status !== 'pending';
 
+    const matchesType =
+      selectedType === 'all'
+        ? true
+        : selectedType === 'ai_credit_purchase'
+        ? order.type === 'ai_credit_purchase'
+        : order.type !== 'ai_credit_purchase';
+
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !q ||
@@ -57,12 +71,13 @@
       (order.adminEmail && order.adminEmail.toLowerCase().includes(q)) ||
       order.id.toLowerCase().includes(q);
 
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesType && matchesSearch;
   });
 
   $: {
     searchQuery;
     selectedStatus;
+    selectedType;
     if (!pagination) currentPage = 1;
   }
 
@@ -101,31 +116,13 @@
 
   $: tableHeaders = [
     { label: '#', align: 'center' as const, width: 'w-12' },
-    ...(isAdmin
-      ? [
-          { label: 'ID Invoice & Waktu' },
-          { label: 'Merchant & Toko', width: 'w-80' },
-          { label: 'Template Desain', width: 'w-56' },
-          { label: 'Rincian Biaya', align: 'right' as const, width: 'w-44' },
-          { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
-          { label: 'Aksi', align: 'right' as const, width: 'w-48' },
-        ]
-      : hasAdminAssistant
-      ? [
-          { label: 'ID Invoice & Waktu' },
-          { label: 'Template Desain', width: 'w-56' },
-          { label: 'Admin Pembeli', width: 'w-48' },
-          { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
-          { label: 'Status Tagihan', align: 'center' as const, width: 'w-32' },
-          { label: 'Aksi', align: 'right' as const, width: 'w-44' },
-        ]
-      : [
-          { label: 'ID Invoice & Waktu' },
-          { label: 'Template Desain', width: 'w-64' },
-          { label: 'Total Tagihan', align: 'right' as const, width: 'w-36' },
-          { label: 'Status Tagihan', align: 'center' as const, width: 'w-36' },
-          { label: 'Aksi', align: 'right' as const, width: 'w-48' },
-        ]),
+    { label: 'ID Invoice & Waktu' },
+    ...(isAdmin ? [{ label: 'Merchant & Toko', width: 'w-80' }] : []),
+    { label: 'Item / Layanan', width: isAdmin ? 'w-56' : hasAdminAssistant ? 'w-56' : 'w-64' },
+    ...(!isAdmin && hasAdminAssistant ? [{ label: 'Admin Pembeli', width: 'w-48' }] : []),
+    { label: isAdmin ? 'Rincian Biaya' : 'Total Tagihan', align: 'right' as const, width: isAdmin ? 'w-44' : 'w-36' },
+    { label: 'Status Tagihan', align: 'center' as const, width: isAdmin ? 'w-32' : 'w-36' },
+    { label: 'Aksi', align: 'right' as const, width: 'w-48' },
   ];
 </script>
 
@@ -140,7 +137,7 @@
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
           {tableTitle}
         </h3>
-        <p class="text-body-sm text-secondary mt-0.5 font-sans">
+        <p class="text-body-sm text-secondary mt-0.5">
           {tableSubtitle || (isAdmin 
             ? 'Daftar transaksi template untuk toko binaan, rincian biaya lisensi, dan fee pendampingan resmi'
             : 'Daftar seluruh invoice pembelian template, status transaksi, dan link pembayaran')}
@@ -156,8 +153,36 @@
           type="text"
           bind:value={searchQuery}
           placeholder={isAdmin ? "Cari invoice / merchant / toko..." : "Cari invoice / template..."}
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-48 sm:w-60"
+          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-44 sm:w-52"
         />
+      </div>
+
+      <!-- Segmented Type Filter (Template vs Token AI) -->
+      <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1 overflow-x-auto">
+        <Button
+          size="xs"
+          variant={selectedType === 'all' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-2.5 font-bold {selectedType === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
+          on:click={() => (selectedType = 'all')}
+        >
+          Semua ({typeCounts.all})
+        </Button>
+        <Button
+          size="xs"
+          variant={selectedType === 'template_purchase' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-2.5 font-bold {selectedType === 'template_purchase' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
+          on:click={() => (selectedType = 'template_purchase')}
+        >
+          Template ({typeCounts.template})
+        </Button>
+        <Button
+          size="xs"
+          variant={selectedType === 'ai_credit_purchase' ? 'dark' : 'ghost'}
+          class="!rounded-full !px-2.5 font-bold {selectedType === 'ai_credit_purchase' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
+          on:click={() => (selectedType = 'ai_credit_purchase')}
+        >
+          Token AI ({typeCounts.aiCredit})
+        </Button>
       </div>
 
       <!-- Segmented Status Filter -->
@@ -210,7 +235,7 @@
         <Receipt size={24} />
       </div>
       <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Tidak Ada Riwayat Transaksi</h4>
-      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
+      <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4">
         {searchQuery || selectedStatus !== 'all'
           ? 'Tidak ada pesanan yang sesuai dengan kata kunci pencarian Anda.'
           : 'Belum ada transaksi pembelian template yang tercatat pada sistem.'}

@@ -3,6 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import CreditCheckoutModal from '@/components/dashboard/CreditCheckoutModal.svelte';
 import CreditQuotaGauge from '@/components/tenant/ai/CreditQuotaGauge.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { getAllCreditPackages } from '@/services/ai';
 import { formatIDR } from '@/lib/currency';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -11,27 +12,8 @@ if (user.role === 'designer') return Astro.redirect('/designer');
 if (user.role === 'superadmin') return Astro.redirect('/superadmin');
 if (user.role === 'admin') return Astro.redirect('/admin');
 
-// Fetch packages dari API
-let packages: Array<{
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  credits: number;
-  description: string;
-  benefits: string[];
-  isPopular: boolean;
-}> = [];
-
-try {
-  const response = await fetch(`${Astro.url.origin}/api/tenant/credits/packages`);
-  if (response.ok) {
-    const result = await response.json();
-    packages = result.data?.packages || [];
-  }
-} catch (error) {
-  console.error('[BUY_CREDITS] fetch packages error:', error);
-}
+// Single source of truth paket kuota kredit AI
+const packages = getAllCreditPackages();
 ---
 
 <DashboardLayout title="Beli Kredit AI">
@@ -57,176 +39,184 @@ try {
         </svg>
         <span>Lihat Riwayat Lengkap</span>
       </a>
+    <div class="flex flex-col gap-2 pb-2">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full text-2xs font-bold bg-primary/10 text-primary border border-primary/20">
+          Studio Visual UMKM
+        </span>
+        <span class="text-xs text-muted font-medium">• Kuota Fleksibel Tanpa Kedaluwarsa</span>
+      </div>
+      <h1 class="text-heading-lg text-main font-bold tracking-tight">
+        Kredit & Kuota Studio AI Toko
+      </h1>
+      <p class="text-body-base text-secondary max-w-2xl leading-relaxed">
+        Tingkatkan konversi penjualan toko dengan foto kemasan produk 3D fotorealistis, logo toko modern, dan poster promosi berkelas studio.
+      </p>
     </div>
 
     <!-- Visual Quota Gauge & Mutation History -->
     <CreditQuotaGauge client:load />
 
     <!-- Packages Section Header -->
-    <div class="pt-4 border-t border-light">
-      <h2 class="text-heading-md text-main font-bold">Pilih Paket Isi Ulang Kredit</h2>
-      <p class="text-body-sm text-secondary mt-1">Kredit langsung otomatis ditambahkan ke saldo kuota setelah pembayaran berhasil.</p>
+    <div class="pt-6 border-t border-light flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <h2 class="text-heading-md text-main font-bold">Pilih Paket Isi Ulang Kredit</h2>
+        <p class="text-body-sm text-secondary mt-1">
+          Kredit otomatis ditambahkan ke saldo toko secara instan setelah pembayaran terverifikasi.
+        </p>
+      </div>
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-nested border border-light text-xs text-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-success" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <span>1 Kredit = 1 Desain Standar • 2 Kredit = HD Studio 3D</span>
+      </div>
     </div>
 
-    <!-- Packages Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {packages.map((pkg) => (
-        <div
-          class={`relative rounded-3xl border shadow-xs hover:shadow-md transition-all p-6 flex flex-col ${
-            pkg.isPopular
-              ? 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/40'
-              : 'bg-card border-light'
-          }`}
-        >
-          {/* Popular Badge */}
-          {pkg.isPopular && (
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-primary text-white">
-                Paling Populer
-              </span>
-            </div>
-          )}
-
-          {/* Package Info */}
-          <div class="mb-6 pt-4">
-            <h2 class="text-heading-sm text-main font-bold mb-2">
-              {pkg.name}
-            </h2>
-            <p class="text-body-sm text-secondary mb-4">
-              {pkg.description}
-            </p>
-
-            {/* Price & Credits */}
-            <div class="space-y-2">
-              <div class="flex items-baseline gap-2">
-                <span class="text-display-sm text-main font-bold">
-                  {formatIDR(pkg.price)}
+    <!-- Claude Code Tier Pricing Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4 items-stretch">
+      {packages.map((pkg) => {
+        const isMiddle = pkg.isPopular;
+        return (
+          <div
+            class={`relative rounded-3xl border transition-all p-6 flex flex-col justify-between ${
+              isMiddle
+                ? 'bg-gradient-to-b from-primary/10 via-card to-card border-primary shadow-lg ring-4 ring-primary/10 lg:-translate-y-2'
+                : 'bg-card border-light shadow-xs hover:border-primary/40 hover:shadow-md'
+            }`}
+          >
+            {/* Top Anchor Floating Badge */}
+            {isMiddle && (
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-2xs font-extrabold uppercase tracking-wider bg-primary text-primary-content shadow-sm">
+                  <span>⭐ Rekomendasi Utama • Paling Populer</span>
                 </span>
               </div>
-              <div class="flex items-center gap-2 text-body-sm text-secondary">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-                <span class="font-semibold text-main">{pkg.credits} kredit AI</span>
+            )}
+
+            <div>
+              {/* Header Info Paket */}
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-semibold text-secondary uppercase tracking-wider">
+                  {pkg.recommendedRole || (isMiddle ? 'Paling Populer' : 'Paket Kuota')}
+                </span>
+                {pkg.savingsPercent && (
+                  <span class="px-2 py-0.5 rounded-full text-2xs font-bold bg-success/15 text-success">
+                    Hemat {pkg.savingsPercent}%
+                  </span>
+                )}
+              </div>
+
+              <h2 class="text-heading-md text-main font-bold mb-1.5">
+                {pkg.name}
+              </h2>
+              <p class="text-body-sm text-secondary min-h-[40px] leading-relaxed mb-5">
+                {pkg.description}
+              </p>
+
+              {/* Price & Unit Breakdown */}
+              <div class="p-4 rounded-2xl bg-nested/80 border border-light/60 mb-6">
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-display-sm text-main font-bold tracking-tight">
+                    {formatIDR(pkg.price)}
+                  </span>
+                  <span class="text-2xs text-muted font-medium">/ paket</span>
+                </div>
+                <div class="mt-2 pt-2 border-t border-light/50 flex items-center justify-between text-xs">
+                  <span class="font-bold text-primary flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {pkg.credits} Kredit AI
+                  </span>
+                  <span class="font-mono text-muted text-2xs">
+                    {formatIDR(pkg.unitPrice)}/kredit
+                  </span>
+                </div>
+              </div>
+
+              {/* Benefits Checklist */}
+              <div class="space-y-3 mb-8">
+                <span class="text-2xs font-bold text-muted uppercase tracking-wider block">
+                  Fitur & Keunggulan:
+                </span>
+                <ul class="space-y-2.5">
+                  {pkg.benefits.map((benefit) => (
+                    <li class="flex items-start gap-2.5 text-body-sm text-secondary">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="mt-0.5 flex-shrink-0 text-success"
+                        aria-hidden="true"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <span class="leading-snug">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-          </div>
 
-          {/* Benefits List */}
-          <div class="mb-8 flex-1">
-            <ul class="space-y-3">
-              {pkg.benefits.map((benefit) => (
-                <li class="flex items-start gap-2.5 text-body-sm text-secondary">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="mt-0.5 flex-shrink-0 text-success"
-                    aria-hidden="true"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
+            {/* CTA Button */}
+            <button
+              type="button"
+              class={`w-full py-3.5 px-4 rounded-2xl font-bold text-body-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                isMiddle
+                  ? 'bg-primary text-primary-content hover:bg-primary/90 shadow-md ring-2 ring-primary/20'
+                  : 'bg-nested text-main hover:bg-card border border-light shadow-2xs'
+              }`}
+              data-package-id={pkg.id}
+              data-package-slug={pkg.slug}
+              data-package-price={pkg.price}
+              data-package-credits={pkg.credits}
+            >
+              <span>{isMiddle ? 'Pilih Paket Reguler (Paling Populer)' : `Beli ${pkg.name}`}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
           </div>
-
-          {/* CTA Button */}
-          <button
-            class={`w-full py-3 px-4 rounded-2xl font-bold text-body-sm transition-all ${
-              pkg.isPopular
-                ? 'bg-primary text-white hover:bg-primary/90 shadow-md'
-                : 'bg-light text-main hover:bg-light/80 border border-light'
-            }`}
-            data-package-id={pkg.id}
-            data-package-slug={pkg.slug}
-            data-package-price={pkg.price}
-            data-package-credits={pkg.credits}
-          >
-            Beli Sekarang
-          </button>
-        </div>
-      ))}
+        );
+      })}
     </div>
 
-    {/* Info Section */}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-      <div class="p-6 rounded-3xl bg-card border border-light">
-        <div class="flex items-start gap-4">
-          <div class="p-2 rounded-lg bg-primary/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="text-primary"
-              aria-hidden="true"
-            >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-heading-sm text-main font-bold mb-1">
-              Pembayaran Aman
-            </h3>
-            <p class="text-body-sm text-secondary">
-              Semua transaksi dienkripsi dan diproses melalui gateway pembayaran terpercaya.
-            </p>
-          </div>
+    <!-- Jaminan Keamanan & UMKM Trust Badges -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
+      <div class="p-5 rounded-3xl bg-card border border-light flex items-start gap-3.5">
+        <div class="p-2.5 rounded-2xl bg-primary/10 text-primary flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-main">Pembayaran Idempoten & Aman</h3>
+          <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+            Diproses aman lewat Xendit invoice berenkripsi tinggi, bebas risiko tagihan ganda.
+          </p>
         </div>
       </div>
 
-      <div class="p-6 rounded-3xl bg-card border border-light">
-        <div class="flex items-start gap-4">
-          <div class="p-2 rounded-lg bg-primary/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="text-primary"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="1"></circle>
-              <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m6.08 0l4.24-4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m6.08 0l4.24 4.24"></path>
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-heading-sm text-main font-bold mb-1">
-              Kredit Tidak Hangus
-            </h3>
-            <p class="text-body-sm text-secondary">
-              Kredit yang Anda beli tidak memiliki batas waktu penggunaan. Gunakan kapan saja sesuai kebutuhan.
-            </p>
-          </div>
+      <div class="p-5 rounded-3xl bg-card border border-light flex items-start gap-3.5">
+        <div class="p-2.5 rounded-2xl bg-success/10 text-success flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-main">Kredit Berlaku Selamanya</h3>
+          <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+            Kredit kuota tidak memiliki batas kedaluwarsa. Gunakan kapan saja saat Anda merilis produk baru.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-3xl bg-card border border-light flex items-start gap-3.5">
+        <div class="p-2.5 rounded-2xl bg-accent/10 text-accent flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-main">100% Hak Komersial UMKM</h3>
+          <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+            Semua hasil gambar logo, poster, dan kemasan bebas watermark serta legal digunakan untuk jualan.
+          </p>
         </div>
       </div>
     </div>
@@ -234,11 +224,8 @@ try {
 
   <script define:vars={{ packages }}>
     let selectedPackage = null;
-    let loading = false;
+    let isSubmitting = false;
 
-    // Get modal element
-    const modal = document.querySelector('[data-checkout-modal]');
-    
     // Handle package button clicks
     document.querySelectorAll('[data-package-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -246,49 +233,52 @@ try {
         const found = packages.find((p) => p.id === packageId);
         if (found) {
           selectedPackage = found;
-          // Trigger Svelte component to open modal
           window.dispatchEvent(new CustomEvent('open-modal', { detail: found }));
         }
       });
     });
 
-    // Listen for modal confirmation
-    window.addEventListener('checkout-confirm', async (e) => {
-      if (!selectedPackage) return;
-      loading = true;
+    // Listen for modal confirmation with strict idempotency key
+    window.addEventListener('checkout-confirm', async () => {
+      if (!selectedPackage || isSubmitting) return;
+      isSubmitting = true;
+
+      // Buat Idempotency Key unik per sesi checkout untuk mencegah double billing
+      const idempotencyKey = 'buy_' + selectedPackage.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 
       try {
         const response = await fetch('/api/tenant/credits/checkout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey,
+          },
           body: JSON.stringify({
             packageId: selectedPackage.id,
             amount: selectedPackage.price,
             credits: selectedPackage.credits,
+            idempotencyKey,
           }),
         });
 
         if (!response.ok) {
-          throw new Error('Checkout failed');
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || 'Checkout gagal');
         }
 
         const result = await response.json();
         if (result.ok && result.data?.paymentUrl) {
-          // Store status URL for redirect back after payment
-          const statusUrl = result.data?.statusUrl || `/dashboard/credits/status?invoiceId=${result.data?.invoiceId}&status=pending`;
+          const statusUrl = result.data.statusUrl || `/dashboard/credits/status?invoiceId=${result.data.invoiceId}&status=pending`;
           sessionStorage.setItem('checkout_status_url', statusUrl);
-          
-          // Redirect to Xendit payment page
           window.location.href = result.data.paymentUrl;
         } else {
-          console.error('Invalid checkout response:', result);
-          alert('Terjadi kesalahan saat memproses checkout. Silakan coba lagi.');
+          alert('Terjadi kendala saat memproses invoice. Silakan coba sesaat lagi.');
+          isSubmitting = false;
         }
       } catch (error) {
         console.error('[CHECKOUT] error:', error);
-        alert('Terjadi kesalahan saat memproses checkout. Silakan coba lagi.');
-      } finally {
-        loading = false;
+        alert(error instanceof Error ? error.message : 'Terjadi kesalahan saat memproses checkout.');
+        isSubmitting = false;
       }
     });
   </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AuthenticatedUser } from "@/lib/auth";
-  import { getRoleConfig, getDashboardHomePath, getSettingsHref, type NavGroup } from "./sidebar.helpers";
+  import { getDashboardHomePath, isPathActive, type NavGroup } from "./sidebar.helpers";
   import { createEventDispatcher } from "svelte";
   import TenantQuota from "./TenantQuota.svelte";
 
@@ -16,27 +16,7 @@
     signOut: void;
   }>();
 
-  $: userInitial = (user.name ?? user.email).charAt(0).toUpperCase();
-  $: roleCfg = getRoleConfig(user.role);
   $: homePath = getDashboardHomePath(user?.role);
-  $: settingsHref = getSettingsHref();
-
-  const isActive = (href: string): boolean => {
-    if (!currentPath) return false;
-    const cleanCurrent = currentPath.replace(/\/$/, "") || "/";
-    const cleanHref = href.replace(/\/$/, "") || "/";
-    if (
-      cleanHref === "/dashboard" ||
-      cleanHref === "/admin" ||
-      cleanHref === "/superadmin" ||
-      cleanHref === "/designer"
-    ) {
-      return cleanCurrent === cleanHref;
-    }
-    return (
-      cleanCurrent === cleanHref || cleanCurrent.startsWith(cleanHref + "/")
-    );
-  };
 </script>
 
 <!-- # MOBILE — FAB + SLIDE-OVER DRAWER -->
@@ -100,7 +80,7 @@
     aria-label="Menu utama mobile"
   >
     {#each navGroups as group (group.title)}
-      <div>
+      <div class="space-y-1">
         <p
           class="text-2xs font-bold font-heading uppercase tracking-wider text-muted px-2 pb-1.5"
         >
@@ -108,21 +88,22 @@
         </p>
         <div class="space-y-0.5">
           {#each group.items as item (item.href)}
-            {@const active = isActive(item.href)}
+            {@const active = isPathActive(currentPath, item.href)}
             <a
               href={item.href}
               on:click={() => dispatch("closeDrawer")}
+              aria-label={item.label}
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {active
-                ? 'bg-main text-canvas dark:bg-primary dark:text-white font-bold'
+                ? 'bg-main text-canvas dark:bg-primary dark:text-white font-bold shadow-xs'
                 : 'text-secondary hover:bg-nested hover:text-main'}"
             >
               <span
-                class="material-symbols-outlined text-sm"
+                class="material-symbols-outlined text-sm flex-shrink-0"
                 class:icon-filled={active}>{item.icon}</span
               >
-              <span class="flex-1">{item.label}</span>
+              <span class="flex-1 truncate">{item.label}</span>
               {#if active}
-                <span class="relative flex h-2 w-2">
+                <span class="relative flex h-2 w-2 flex-shrink-0">
                   <span
                     class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-75"
                   ></span>
@@ -143,56 +124,16 @@
     {/if}
   </nav>
 
-  <div class="border-t border-light p-3 space-y-2">
-    <!-- User Profile Card -->
-    <div
-      class="bg-nested/70 border border-light rounded-xl p-2.5 flex items-center gap-2.5 shadow-2xs"
-    >
-      <div class="relative flex-shrink-0">
-        <div
-          class="w-9 h-9 rounded-lg bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs shadow-xs"
-        >
-          {userInitial}
-        </div>
-        <span
-          class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-success rounded-full ring-2 ring-card"
-          title="Online"
-        ></span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-xs font-semibold text-main truncate leading-tight">
-          {user.name ?? user.email}
-        </p>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <span
-            class="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border {roleCfg.badgeBg} leading-none"
-          >
-            <span class="material-symbols-outlined text-[10px] leading-none"
-              >{roleCfg.icon}</span
-            >
-            <span>{roleCfg.badgeLabel}</span>
-          </span>
-        </div>
-      </div>
-      <a
-        href={settingsHref}
-        on:click={() => dispatch("closeDrawer")}
-        class="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-main hover:bg-card border border-transparent hover:border-light transition-colors flex-shrink-0"
-        title="Pengaturan"
-        aria-label="Pengaturan"
-      >
-        <span class="material-symbols-outlined text-sm">settings</span>
-      </a>
-    </div>
-
+  <div class="border-t border-light p-3">
     <!-- Sign Out Button -->
     <button
       type="button"
       on:click={() => dispatch("signOut")}
       disabled={isLoggingOut}
-      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+      aria-label="Keluar dari akun"
     >
-      <span class="material-symbols-outlined text-base" class:animate-spin={isLoggingOut}>power_settings_new</span>
+      <span class="material-symbols-outlined text-base flex-shrink-0" class:animate-spin={isLoggingOut}>power_settings_new</span>
       <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
     </button>
   </div>

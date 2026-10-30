@@ -96,7 +96,7 @@ describe('AI & Quota Shared Contract (src/types/ai.ts)', () => {
 
   it('should provide valid mock tenant AI credit data', () => {
     const mockCredit: TenantAiCredit = MOCK_TENANT_AI_CREDIT;
-    expect(mockCredit.balance).toBe(2);
+    expect(mockCredit.balance).toBe(0);
     expect(mockCredit.totalUsed).toBe(0);
     expect(mockCredit.tenantId).toBeTruthy();
   });

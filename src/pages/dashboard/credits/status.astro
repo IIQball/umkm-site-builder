@@ -4,6 +4,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services';
 import { formatIDR } from '@/lib/currency';
 import { formatDate } from '@/lib/utils/format';
+import { Button } from '@/components/ui';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -28,6 +29,9 @@ if (invoiceId) {
 }
 
 const isSuccess = status === 'success' || transactionDetails?.status === 'success';
+if (isSuccess) {
+  return Astro.redirect(`/dashboard/orders?topup=success&invoiceId=${encodeURIComponent(invoiceId || '')}`);
+}
 const isFailed = status === 'failed' || transactionDetails?.status === 'failed';
 const isPending = !isSuccess && !isFailed;
 ---
@@ -76,12 +80,12 @@ const isPending = !isSuccess && !isFailed;
 
           <!-- Action Buttons -->
           <div class="flex gap-3">
-            <a href="/dashboard/credits/buy" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+            <Button client:load href="/dashboard/credits/buy" variant="secondary" size="md" class="flex-1 font-bold justify-center">
               Beli Kredit Lagi
-            </a>
-            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all text-center">
+            </Button>
+            <Button client:load href="/dashboard" variant="primary" size="md" class="flex-1 font-bold justify-center">
               Kembali ke Dashboard
-            </a>
+            </Button>
           </div>
         </div>
       )}
@@ -132,12 +136,12 @@ const isPending = !isSuccess && !isFailed;
 
           <!-- Action Buttons -->
           <div class="flex gap-3">
-            <a href="/dashboard/credits/buy" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all text-center">
+            <Button client:load href="/dashboard/credits/buy" variant="primary" size="md" class="flex-1 font-bold justify-center">
               Coba Lagi
-            </a>
-            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+            </Button>
+            <Button client:load href="/dashboard" variant="secondary" size="md" class="flex-1 font-bold justify-center">
               Kembali
-            </a>
+            </Button>
           </div>
         </div>
       )}
@@ -170,12 +174,12 @@ const isPending = !isSuccess && !isFailed;
 
           <!-- Action Buttons -->
           <div class="flex gap-3">
-            <button onclick="window.location.reload()" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-primary text-white hover:bg-primary/90 transition-all">
+            <button onclick="window.location.reload()" class="flex-1 py-2.5 px-4 rounded-2xl font-bold text-sm bg-primary text-slate-950 hover:bg-primary/90 transition-all cursor-pointer">
               Segarkan Halaman
             </button>
-            <a href="/dashboard" class="flex-1 py-3 px-4 rounded-2xl font-bold text-body-sm bg-light text-main hover:bg-light/80 transition-all text-center">
+            <Button client:load href="/dashboard" variant="secondary" size="md" class="flex-1 font-bold justify-center">
               Kembali ke Dashboard
-            </a>
+            </Button>
           </div>
 
           <p class="text-xs text-secondary text-center">
@@ -188,7 +192,7 @@ const isPending = !isSuccess && !isFailed;
 
   <script>
     // Auto-refresh for pending status
-    if (new URL(window.location).searchParams.get('status') === 'pending') {
+    if (new URLSearchParams(window.location.search).get('status') === 'pending') {
       const checkInterval = setInterval(() => {
         fetch(window.location.href)
           .then(res => res.text())

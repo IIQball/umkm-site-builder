@@ -24,12 +24,16 @@
   let errorMsg: string | null = null;
   let metricMode: 'requests' | 'cost' = 'requests';
 
+  let lastRenderedData: AiFeatureDistributionData | null = null;
+  let lastRenderedMode: 'requests' | 'cost' | null = null;
+
   $: distribution = data?.distribution || [];
   $: grandTotalRequests = data?.totalRequests || 0;
   $: grandTotalCostIdr = data?.totalCostIdr || 0;
   $: hasData = grandTotalRequests > 0;
 
-  $: if (chart && data) {
+  // Reaktif render/update chart tanpa double-render lag
+  $: if (chart && data && (data !== lastRenderedData || metricMode !== lastRenderedMode)) {
     renderChart();
   }
 
@@ -72,6 +76,8 @@
       chart = new ApexCtor(chartElement, opts);
       await chart.render();
     }
+    lastRenderedData = data;
+    lastRenderedMode = metricMode;
   }
 
   onMount(async () => {

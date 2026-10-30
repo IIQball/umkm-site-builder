@@ -16,7 +16,14 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Admin access required', 403);
     }
 
-    const summary = await getAiMonitoringSummary();
+    const url = new URL(context.request.url);
+    const yearParam = url.searchParams.get('year');
+    const monthParam = url.searchParams.get('month');
+
+    const year = yearParam ? parseInt(yearParam, 10) : undefined;
+    const month = monthParam && monthParam !== 'all' ? parseInt(monthParam, 10) : undefined;
+
+    const summary = await getAiMonitoringSummary({ year, month });
     return jsonSuccess(summary);
   });
 };

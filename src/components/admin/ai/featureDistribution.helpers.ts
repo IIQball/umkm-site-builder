@@ -108,6 +108,16 @@ export function buildDonutChartOptions(
       style: { fontSize: '11px', fontWeight: 600, colors: ['#ffffff'] },
     },
     legend: { show: false },
+    noData: {
+      text: metricMode === 'requests' ? 'Belum ada data permintaan' : 'Belum ada data biaya',
+      align: 'center',
+      verticalAlign: 'middle',
+      style: {
+        color: text,
+        fontSize: '13px',
+        fontFamily: 'inherit',
+      },
+    },
     tooltip: {
       enabled: true,
       theme: isDark ? 'dark' : 'light',

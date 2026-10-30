@@ -50,64 +50,41 @@
     (d) => d.createdAt,
   );
 
-  // When period filtering is applied and logs exist, recalculate metrics dynamically
-  $: activeSummary =
-    selectedMonth !== "all" && recentLogs.length > 0
-      ? {
-          totalExecutions: filteredLogs.length,
-          totalCostIdr: filteredLogs.reduce(
-            (acc, l) => acc + (l.costIdr || 0),
-            0,
-          ),
-          totalCostUsd: filteredLogs.reduce(
-            (acc, l) => acc + (l.costUsd || 0),
-            0,
-          ),
-          totalInputTokens: filteredLogs.reduce(
-            (acc, l) => acc + (l.inputTokens || 0),
-            0,
-          ),
-          totalOutputTokens: filteredLogs.reduce(
-            (acc, l) => acc + (l.outputTokens || 0),
-            0,
-          ),
-          totalTokens: filteredLogs.reduce(
-            (acc, l) => acc + (l.inputTokens || 0) + (l.outputTokens || 0),
-            0,
-          ),
-          statusCounts: {
-            success: filteredLogs.filter((l) => l.status === "success").length,
-            failed: filteredLogs.filter((l) => l.status === "failed").length,
-            pending: filteredLogs.filter((l) => l.status === "pending").length,
-            processing: filteredLogs.filter((l) => l.status === "processing")
-              .length,
-          },
-          successRate:
-            filteredLogs.length > 0
-              ? Number(
-                  (
-                    (filteredLogs.filter((l) => l.status === "success").length /
-                      filteredLogs.length) *
-                    100
-                  ).toFixed(1),
-                )
-              : 0,
-          totalDepositUsd: summary.totalDepositUsd,
-          totalDepositIdr: summary.totalDepositIdr,
-          remainingDepositUsd: summary.remainingDepositUsd,
-          remainingDepositIdr: summary.remainingDepositIdr,
-          remainingTokens: summary.remainingTokens,
-          activeExchangeRate: summary.activeExchangeRate,
+  // Reaktif memuat agregasi metrik database yang akurat saat periode filter berubah
+  let lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
+  $: if (selectedYear !== undefined && `${selectedYear}-${selectedMonth}` !== lastFetchedPeriod) {
+    lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
+    fetchSummaryForPeriod(selectedYear, selectedMonth);
+  }
+
+  async function fetchSummaryForPeriod(year?: number, month?: number | 'all') {
+    try {
+      const params = new URLSearchParams();
+      if (year) params.set('year', String(year));
+      if (month && month !== 'all') params.set('month', String(month));
+      const res = await fetch(`/api/admin/ai/summary?${params.toString()}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.ok && json.data) {
+          summary = json.data;
         }
-      : summary;
+      }
+    } catch (err) {
+      console.error('[AiMonitoringDashboard] Failed to fetch period summary:', err);
+    }
+  }
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
     isRefreshing = true;
 
     try {
+      const params = new URLSearchParams();
+      if (selectedYear) params.set('year', String(selectedYear));
+      if (selectedMonth && selectedMonth !== 'all') params.set('month', String(selectedMonth));
+
       const [summaryRes, depositsRes] = await Promise.all([
-        fetch("/api/admin/ai/summary"),
+        fetch(`/api/admin/ai/summary?${params.toString()}`),
         fetch("/api/admin/ai/deposits"),
       ]);
 
@@ -145,7 +122,7 @@
   />
 
   <!-- Reactive Statcards Grid (5 cards) -->
-  <AiKeyMetrics summary={activeSummary} />
+  <AiKeyMetrics {summary} />
 
   <!-- Daily AI Cost Trends & Quota Chart -->
   <CostTrendChart />

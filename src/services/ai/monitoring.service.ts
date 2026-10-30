@@ -19,25 +19,46 @@ import type { aiFeatureTypeEnum } from '@/db/schema';
 
 type AiFeatureTypeValue = (typeof aiFeatureTypeEnum.enumValues)[number];
 
+export interface GetAiMonitoringSummaryOptions {
+  year?: number;
+  month?: number | 'all';
+  startDate?: Date;
+  endDate?: Date;
+}
+
 /**
  * Calculates aggregated AI generation metrics directly in the database.
  * Single-pass query using SQL aggregations for maximum performance.
+ * Supports period filtering across all raw rows with exact database consistency.
  */
-export async function getAiMonitoringSummary(): Promise<AiMonitoringSummary> {
+export async function getAiMonitoringSummary(
+  filter?: GetAiMonitoringSummaryOptions
+): Promise<AiMonitoringSummary> {
+  const logConditions = [];
+
+  if (filter?.year) {
+    const { start, end } = getPeriodBounds(filter.year, filter.month ?? 'all');
+    logConditions.push(gte(aiGenerationLogs.createdAt, start), lte(aiGenerationLogs.createdAt, end));
+  } else if (filter?.startDate && filter?.endDate) {
+    logConditions.push(gte(aiGenerationLogs.createdAt, filter.startDate), lte(aiGenerationLogs.createdAt, filter.endDate));
+  }
+
+  const logsQuery = db
+    .select({
+      totalExecutions: count(aiGenerationLogs.id),
+      totalCostIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
+      totalCostUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
+      totalInputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.inputTokens}), 0)`.mapWith(Number),
+      totalOutputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.outputTokens}), 0)`.mapWith(Number),
+      successCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'success' then 1 end)`.mapWith(Number),
+      failedCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'failed' then 1 end)`.mapWith(Number),
+      pendingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'pending' then 1 end)`.mapWith(Number),
+      processingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'processing' then 1 end)`.mapWith(Number),
+    })
+    .from(aiGenerationLogs);
+
   const [logsResult, depositResult, activeExchangeRate] = await Promise.all([
-    db
-      .select({
-        totalExecutions: count(aiGenerationLogs.id),
-        totalCostIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
-        totalCostUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
-        totalInputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.inputTokens}), 0)`.mapWith(Number),
-        totalOutputTokens: sql<number>`coalesce(sum(${aiGenerationLogs.outputTokens}), 0)`.mapWith(Number),
-        successCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'success' then 1 end)`.mapWith(Number),
-        failedCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'failed' then 1 end)`.mapWith(Number),
-        pendingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'pending' then 1 end)`.mapWith(Number),
-        processingCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'processing' then 1 end)`.mapWith(Number),
-      })
-      .from(aiGenerationLogs),
+    logConditions.length > 0 ? logsQuery.where(and(...logConditions)) : logsQuery,
     db
       .select({
         totalDepositUsd: sql<number>`coalesce(sum(${aiDepositHistory.amountUsd}), 0)`.mapWith(Number),

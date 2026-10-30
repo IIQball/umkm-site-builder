@@ -126,6 +126,9 @@ const isPending = !isSuccess && !isFailed;
                 </div>
               </div>
               <div class="text-xs text-secondary border-t border-light pt-3">
+                Waktu transaksi: {formatDate(transactionDetails.createdAt)}
+              </div>
+              <div class="text-xs text-secondary border-t border-light pt-3">
                 Status: <span class="font-semibold text-error uppercase">{transactionDetails.status}</span>
               </div>
             </div>

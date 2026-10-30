@@ -20,6 +20,25 @@ const packages = getAllCreditPackages();
   <CreditCheckoutModal client:load />
   <div class="min-h-full space-y-8 pb-10">
     <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          Kredit & Kuota AI Toko
+        </h1>
+        <p class="text-body-base text-secondary max-w-2xl leading-relaxed mt-1">
+          Pantau sisa kuota, riwayat mutasi kredit, dan pilih paket isi ulang kredit AI untuk mendukung kebutuhan desain produk UMKM Anda.
+        </p>
+      </div>
+      <a
+        href="/dashboard/credits/history"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-light bg-card text-main hover:bg-nested font-semibold text-body-sm transition-all shadow-xs shrink-0 self-start sm:self-auto"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Lihat Riwayat Lengkap</span>
+      </a>
     <div class="flex flex-col gap-2 pb-2">
       <div class="flex items-center gap-2">
         <span class="px-2.5 py-0.5 rounded-full text-2xs font-bold bg-primary/10 text-primary border border-primary/20">

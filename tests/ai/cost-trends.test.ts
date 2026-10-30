@@ -3,6 +3,7 @@ import {
   calculateBudgetUsedPercentage,
   calculateCostPerPercentUsage,
   buildDailyTrendPoints,
+  buildMonthlyTrendPoints,
 } from '@/services/ai/cost-trends.service';
 import {
   computeBarChartLayout,
@@ -168,6 +169,33 @@ describe('AI Cost Trends & Quota Formula Tests', () => {
       const startDate = new Date('2026-09-28T00:00:00Z');
       const points = buildDailyTrendPoints(startDate, 30, new Map());
       expect(points).toHaveLength(30);
+    });
+
+    it('builds 12 monthly trend points for full year period with accurate Indonesian labels', () => {
+      const year = 2026;
+      const aggregatedMap = new Map([
+        [
+          '2026-10',
+          {
+            costIdr: 125000,
+            costUsd: 7.81,
+            tokens: 45000,
+            executionCount: 15,
+            successCount: 14,
+            failedCount: 1,
+          },
+        ],
+      ]);
+
+      const monthlyPoints = buildMonthlyTrendPoints(year, aggregatedMap);
+
+      expect(monthlyPoints).toHaveLength(12);
+      expect(monthlyPoints[0].label).toBe('Jan');
+      expect(monthlyPoints[9].label).toBe('Okt');
+      expect(monthlyPoints[9].costIdr).toBe(125000);
+      expect(monthlyPoints[9].executionCount).toBe(15);
+      expect(monthlyPoints[0].costIdr).toBe(0);
+      expect(monthlyPoints[11].label).toBe('Des');
     });
   });
 });

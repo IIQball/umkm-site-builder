@@ -107,6 +107,10 @@ describe('Sidebar Navigation Across All Roles', () => {
 
       const systemGroup = groups.find((g) => g.title === 'Sistem & Akun');
       expect(systemGroup?.items.some((i) => i.href === '/admin/audit-logs')).toBe(true);
+
+      // Monitoring AI eksklusif untuk superadmin, tidak boleh muncul di menu admin
+      const allAdminItems = groups.flatMap((g) => g.items);
+      expect(allAdminItems.some((i) => i.href.includes('ai-monitoring') || i.label === 'Monitoring AI')).toBe(false);
     });
   });
 

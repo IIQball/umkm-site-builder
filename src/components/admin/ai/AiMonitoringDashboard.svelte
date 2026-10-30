@@ -176,11 +176,14 @@
     description="Sesuaikan seluruh riwayat dan statistik komputasi AI platform berdasarkan periode waktu."
   />
 
-  <!-- Reactive Statcards Grid (5 cards) -->
+  <!-- Reactive Statcards Grid (6 cards - 3x2 Platform Settings style) -->
   <AiKeyMetrics {summary} />
 
   <!-- Daily AI Cost Trends & Quota Chart -->
-  <CostTrendChart />
+  <CostTrendChart
+    {selectedYear}
+    {selectedMonth}
+  />
 
   <!-- AI Feature Distribution Donut Chart (Requests & Rupiah) -->
   <FeatureDistributionChart

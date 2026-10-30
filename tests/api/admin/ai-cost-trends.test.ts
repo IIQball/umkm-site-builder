@@ -148,5 +148,33 @@ describe('Admin AI Cost Trends API Endpoint', () => {
         depositLimitOverrideIdr: undefined,
       });
     });
+
+    it('correctly passes year and month query parameters to getAiCostTrends', async () => {
+      mockGetAuthUser.mockResolvedValue({ id: 'superadm_1', role: 'superadmin' });
+      mockIsAuthorizedAdmin.mockReturnValue(true);
+      mockGetTrends.mockResolvedValue({ summary: {}, dailyTrends: [] });
+
+      // Specific month in year
+      const reqYearMonth = new Request('http://localhost/api/admin/ai/cost-trends?year=2026&month=10');
+      const res1 = (await GET({ request: reqYearMonth, params: {} } as unknown as Parameters<typeof GET>[0])) as Response;
+      expect(res1.status).toBe(200);
+      expect(mockGetTrends).toHaveBeenCalledWith({
+        year: 2026,
+        month: 10,
+        days: undefined,
+        depositLimitOverrideIdr: undefined,
+      });
+
+      // Full year (all months)
+      const reqAllMonths = new Request('http://localhost/api/admin/ai/cost-trends?year=2026&month=all');
+      const res2 = (await GET({ request: reqAllMonths, params: {} } as unknown as Parameters<typeof GET>[0])) as Response;
+      expect(res2.status).toBe(200);
+      expect(mockGetTrends).toHaveBeenCalledWith({
+        year: 2026,
+        month: 'all',
+        days: undefined,
+        depositLimitOverrideIdr: undefined,
+      });
+    });
   });
 });

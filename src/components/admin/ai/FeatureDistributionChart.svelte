@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import type ApexCharts from 'apexcharts';
   import { formatIDR, formatNumber } from '@/lib/utils/format';
   import { Sparkles, AlertCircle } from 'lucide-svelte';
@@ -26,19 +26,43 @@
 
   let lastRenderedData: AiFeatureDistributionData | null = null;
   let lastRenderedMode: 'requests' | 'cost' | null = null;
+  let isRendering = false;
+  let renderPending = false;
 
   $: distribution = data?.distribution || [];
   $: grandTotalRequests = data?.totalRequests || 0;
   $: grandTotalCostIdr = data?.totalCostIdr || 0;
   $: hasData = grandTotalRequests > 0;
 
-  // Reaktif render/update chart tanpa double-render lag
-  $: if (chart && data && (data !== lastRenderedData || metricMode !== lastRenderedMode)) {
+  // Reaktif render/update chart terpusat dengan single execution lock
+  $: if (
+    ApexCtor &&
+    chartElement &&
+    hasData &&
+    (data !== lastRenderedData || metricMode !== lastRenderedMode)
+  ) {
     renderChart();
   }
 
-  $: if (selectedYear !== undefined) {
+  // Bersihkan chart saat data kosong
+  $: if (!hasData && chart) {
+    chart.destroy();
+    chart = null;
+  }
+
+  // Filter periode tahun & bulan
+  let lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
+  $: if (
+    selectedYear !== undefined &&
+    `${selectedYear}-${selectedMonth}` !== lastFetchedPeriod
+  ) {
+    lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
     fetchDistribution(selectedYear, selectedMonth);
+  }
+
+  function setMetricMode(mode: 'requests' | 'cost') {
+    if (metricMode === mode) return;
+    metricMode = mode;
   }
 
   async function fetchDistribution(year?: number, month?: number | 'all') {
@@ -63,21 +87,44 @@
   }
 
   async function renderChart() {
+    await tick();
     if (!ApexCtor || !chartElement || !hasData) return;
-    const opts = buildDonutChartOptions(
-      distribution,
-      grandTotalRequests,
-      grandTotalCostIdr,
-      metricMode
-    );
-    if (chart) {
-      await chart.updateOptions(opts, true, true);
-    } else {
+
+    if (isRendering) {
+      renderPending = true;
+      return;
+    }
+    isRendering = true;
+    renderPending = false;
+
+    try {
+      if (chart) {
+        chart.destroy();
+        chart = null;
+      }
+      if (chartElement) {
+        chartElement.innerHTML = '';
+      }
+
+      const opts = buildDonutChartOptions(
+        distribution,
+        grandTotalRequests,
+        grandTotalCostIdr,
+        metricMode
+      );
       chart = new ApexCtor(chartElement, opts);
       await chart.render();
+
+      lastRenderedData = data;
+      lastRenderedMode = metricMode;
+    } catch (err) {
+      console.error('[FeatureDistributionChart] Gagal merender grafik distribusi AI:', err);
+    } finally {
+      isRendering = false;
+      if (renderPending) {
+        renderChart();
+      }
     }
-    lastRenderedData = data;
-    lastRenderedMode = metricMode;
   }
 
   onMount(async () => {
@@ -86,12 +133,12 @@
 
     if (!data) {
       await fetchDistribution(selectedYear, selectedMonth);
-    } else if (hasData) {
-      await renderChart();
     }
 
     themeObserver = new MutationObserver(() => {
-      if (chart && hasData) renderChart();
+      if (ApexCtor && chartElement && hasData) {
+        renderChart();
+      }
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -130,10 +177,7 @@
         class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer {metricMode === 'requests'
           ? 'bg-card text-main shadow-xs'
           : 'text-muted hover:text-main'}"
-        on:click={() => {
-          metricMode = 'requests';
-          renderChart();
-        }}
+        on:click={() => setMetricMode('requests')}
       >
         Permintaan (Request)
       </button>
@@ -144,10 +188,7 @@
         class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer {metricMode === 'cost'
           ? 'bg-card text-main shadow-xs'
           : 'text-muted hover:text-main'}"
-        on:click={() => {
-          metricMode = 'cost';
-          renderChart();
-        }}
+        on:click={() => setMetricMode('cost')}
       >
         Biaya (Nominal Rp)
       </button>

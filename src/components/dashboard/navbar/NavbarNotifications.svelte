@@ -3,16 +3,26 @@
   import { fade, fly, scale, slide } from "svelte/transition";
   import { cubicOut, backOut } from "svelte/easing";
   import Button from "@/components/ui/Button.svelte";
-  import Modal from "@/components/ui/Modal.svelte";
   import { formatDate } from "@/lib/utils/format";
-  
-  export let user: any = null;
-  let notifications: any[] = [];
+  import type { AuthenticatedUser } from "@/lib/auth";
+  import {
+    getNotificationIcon,
+    getNotificationLink,
+    filterNotifications,
+    buildNotificationTabs,
+    type AppNotificationItem,
+  } from "./notification.helpers";
+  import NotificationDeleteModal from "./NotificationDeleteModal.svelte";
+
+  export let user: AuthenticatedUser | null = null;
+  let notifications: AppNotificationItem[] = [];
   let unreadCount = 0;
   let isOpen = false;
   let isLoading = true;
-  let activeTab = 'all'; // 'all', 'template', 'users'
+  let activeTab = "all";
   let notificationToDelete: string | null = null;
+  let containerRef: HTMLDivElement;
+  let modalClosedAt = 0;
 
   const toggleDropdown = () => {
     isOpen = !isOpen;
@@ -22,6 +32,27 @@
   };
 
   const closeDropdown = () => {
+    if (Date.now() - modalClosedAt < 350) return;
+    if (notificationToDelete) return;
+    isOpen = false;
+  };
+
+  const handleCancelModal = () => {
+    modalClosedAt = Date.now();
+    notificationToDelete = null;
+  };
+
+  const handleWindowClick = (e: MouseEvent) => {
+    if (!isOpen) return;
+    if (Date.now() - modalClosedAt < 350) return;
+    if (notificationToDelete) return;
+
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    if (containerRef && containerRef.contains(target)) return;
+    if (target.closest('.modal, [role="dialog"], [role="presentation"]')) return;
+
     isOpen = false;
   };
 
@@ -31,8 +62,8 @@
       const res = await fetch("/api/notifications");
       if (res.ok) {
         const json = await res.json();
-        notifications = json.data;
-        unreadCount = notifications.filter(n => !n.isRead).length;
+        notifications = json.data || [];
+        unreadCount = notifications.filter((n) => !n.isRead).length;
       }
     } catch (e) {
       console.error("Failed to fetch notifications", e);
@@ -41,22 +72,24 @@
     }
   };
 
-  const markAsRead = async (id: string, isRead: boolean) => {
-    if (isRead) return;
+  const markAsRead = async (id?: string, isRead?: boolean) => {
+    if (!id || isRead) return;
     try {
       await fetch(`/api/notifications/${id}/read`, { method: "POST" });
-      notifications = notifications.map(n => n.id === id ? { ...n, isRead: true } : n);
-      unreadCount = notifications.filter(n => !n.isRead).length;
+      notifications = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+      unreadCount = notifications.filter((n) => !n.isRead).length;
     } catch (e) {
       console.error("Failed to mark notification as read", e);
     }
   };
 
   const deleteNotification = async (id: string) => {
+    modalClosedAt = Date.now();
+    notificationToDelete = null;
     try {
       await fetch(`/api/notifications/${id}`, { method: "DELETE" });
-      notifications = notifications.filter(n => n.id !== id);
-      unreadCount = notifications.filter(n => !n.isRead).length;
+      notifications = notifications.filter((n) => n.id !== id);
+      unreadCount = notifications.filter((n) => !n.isRead).length;
     } catch (e) {
       console.error("Failed to delete notification", e);
     }
@@ -66,7 +99,7 @@
     if (unreadCount === 0) return;
     try {
       await fetch(`/api/notifications/read-all`, { method: "POST" });
-      notifications = notifications.map(n => ({ ...n, isRead: true }));
+      notifications = notifications.map((n) => ({ ...n, isRead: true }));
       unreadCount = 0;
     } catch (e) {
       console.error("Failed to mark all notifications as read", e);
@@ -75,250 +108,177 @@
 
   onMount(() => {
     fetchNotifications();
-    // Poll every 60 seconds to avoid dev server log spam
-    const interval = setInterval(fetchNotifications, 60000); 
+    const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   });
 
-  $: filteredNotifications = notifications.filter(n => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'users') return n.type === 'user_registered';
-    if (activeTab === 'sales') return n.type === 'template_purchased';
-    if (activeTab === 'template') return ['template_submitted', 'template_reviewed'].includes(n.type);
-    if (activeTab === 'store') return ['store_managed_by_admin', 'template_purchased'].includes(n.type);
-    if (activeTab === 'quota') return ['quota_upgrade_request'].includes(n.type);
-    return true;
-  });
-
-  $: allCount = notifications.filter(n => !n.isRead).length;
-  $: templateCount = notifications.filter(n => ['template_submitted', 'template_reviewed'].includes(n.type) && !n.isRead).length;
-  $: usersCount = notifications.filter(n => n.type === 'user_registered' && !n.isRead).length;
-  $: salesCount = notifications.filter(n => n.type === 'template_purchased' && !n.isRead).length;
-  $: storeCount = notifications.filter(n => ['store_managed_by_admin', 'template_purchased'].includes(n.type) && !n.isRead).length;
-  $: quotaCount = notifications.filter(n => ['quota_upgrade_request'].includes(n.type) && !n.isRead).length;
-
-  function getIcon(type: string) {
-    if (type === 'user_registered') return 'person_add';
-    if (type === 'template_submitted') return 'palette';
-    if (type === 'template_reviewed') return 'fact_check';
-    if (type === 'template_purchased') return 'shopping_cart';
-    if (type === 'store_managed_by_admin') return 'storefront';
-    if (type === 'quota_upgrade_request') return 'rocket_launch';
-    return 'notifications';
-  }
-
-  function getLink(notif: any) {
-    const type = notif.type;
-    if (type === 'user_registered') return '/superadmin/users';
-    if (type === 'template_submitted') return '/superadmin/templates';
-    if (type === 'template_reviewed') return '/designer/templates';
-    if (type === 'template_purchased') return user?.role === 'tenant' ? '/tenant/store' : '/designer/wallet';
-    if (type === 'store_managed_by_admin') return '/tenant/store';
-    if (type === 'quota_upgrade_request') {
-      if (user?.role === 'tenant') {
-        return '/tenant/store';
-      }
-      const { tenantId, requested } = notif.metadata || {};
-      if (tenantId) {
-        let url = `/superadmin/users?action=quota&tenantId=${tenantId}`;
-        if (requested?.productSlots) url += `&addProd=${requested.productSlots}`;
-        if (requested?.categorySlots) url += `&addCat=${requested.categorySlots}`;
-        return url;
-      }
-      return '/superadmin/users';
-    }
-    return '#';
-  }
+  $: filteredNotifications = filterNotifications(notifications, activeTab);
+  $: tabs = buildNotificationTabs(notifications, user?.role);
 </script>
 
-<svelte:window on:click={() => { if (isOpen && !notificationToDelete) isOpen = false; }} />
+<svelte:window on:click={handleWindowClick} />
 
-<div class="relative">
-  <!-- Notification Bell -->
+<div bind:this={containerRef} class="static sm:relative">
+  <!-- Notification Bell Button -->
   <Button
     variant="ghost"
     size="icon"
     on:click={(e) => { e.detail?.stopPropagation?.(); toggleDropdown(); }}
-    class="relative rounded-full text-muted hover:text-main"
+    class="relative rounded-full text-muted hover:text-main cursor-pointer"
     aria-label="Notifikasi"
     title="Notifikasi"
   >
     <span class="material-symbols-outlined text-lg">notifications</span>
     {#if unreadCount > 0}
-      <span 
+      <span
         in:scale={{ duration: 400, easing: backOut, start: 0.5 }}
         class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] px-1 flex items-center justify-center bg-error text-white text-[9px] font-bold rounded-full ring-2 ring-card leading-none"
       >
-        {unreadCount > 99 ? '99+' : unreadCount}
+        {unreadCount > 99 ? "99+" : unreadCount}
       </span>
     {/if}
   </Button>
 
-  <!-- Dropdown -->
+  <!-- Dropdown & Mobile Backdrop -->
   {#if isOpen}
+    <!-- Backdrop for mobile/clicking outside -->
+    <button
+      type="button"
+      tabindex="-1"
+      class="fixed inset-0 z-40 w-full h-full bg-black/25 sm:bg-transparent backdrop-blur-[1px] sm:backdrop-blur-none border-none cursor-default outline-none transition-opacity"
+      on:click={closeDropdown}
+      aria-label="Tutup notifikasi"
+    ></button>
+
+    <!-- Dropdown Panel (Responsive: full width on mobile with safe inset, popover on desktop) -->
     <div
       role="presentation"
-      in:fly={{ y: -10, duration: 250, easing: cubicOut }}
+      in:fly={{ y: -8, duration: 200, easing: cubicOut }}
       out:fade={{ duration: 150 }}
-      class="absolute right-0 top-full mt-2 w-[400px] max-w-[calc(100vw-2rem)] bg-card border border-light rounded-xl shadow-xl z-50 overflow-hidden flex flex-col"
+      class="absolute inset-x-2.5 sm:inset-x-auto sm:right-0 top-full mt-2 w-auto sm:w-[400px] max-w-[calc(100vw-1.25rem)] sm:max-w-[400px] bg-card border border-light rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
       on:click|stopPropagation
     >
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-light flex items-center justify-between">
-        <h3 class="text-base font-bold text-main tracking-tight">Notifikasi</h3>
-        <Button variant="ghost" size="icon" on:click={fetchNotifications} class="h-8 w-8 min-h-[32px] min-w-[32px] text-muted hover:text-main" title="Refresh">
+      <div class="px-4 py-3 border-b border-light flex items-center justify-between bg-card">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">notifications</span>
+          <h3 class="text-sm sm:text-base font-bold text-main font-heading tracking-tight">Notifikasi</h3>
+          {#if unreadCount > 0}
+            <span class="px-2 py-0.5 text-2xs font-bold rounded-full bg-primary/15 text-primary">
+              {unreadCount} baru
+            </span>
+          {/if}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          on:click={fetchNotifications}
+          class="h-8 w-8 min-h-[32px] min-w-[32px] rounded-xl text-muted hover:text-main cursor-pointer"
+          title="Refresh"
+        >
           <span class="material-symbols-outlined text-[18px]" class:animate-spin={isLoading}>sync</span>
         </Button>
       </div>
 
-      <!-- Tabs -->
-      <div class="px-4 py-2 border-b border-light">
-        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 -mb-1">
-          <Button 
-            variant="ghost" size="sm"
-            on:click={() => activeTab = 'all'} 
-            class="text-sm rounded-lg shrink-0 {activeTab === 'all' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
-          >
-            Semua
-            <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{allCount}</span>
-          </Button>
-          <Button 
-            variant="ghost" size="sm"
-            on:click={() => activeTab = 'template'} 
-            class="text-sm rounded-lg shrink-0 {activeTab === 'template' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
-          >
-            Template
-            <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{templateCount}</span>
-          </Button>
-          
-          {#if user?.role === 'superadmin'}
-            <Button 
-              variant="ghost" size="sm"
-              on:click={() => activeTab = 'users'} 
-              class="text-sm rounded-lg shrink-0 {activeTab === 'users' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
+      <!-- Category Filter Tabs -->
+      <div class="px-3 sm:px-4 py-2 border-b border-light bg-nested/30">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          {#each tabs as tab}
+            <button
+              type="button"
+              on:click={() => (activeTab = tab.id)}
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl shrink-0 transition-all cursor-pointer {activeTab === tab.id
+                ? 'bg-card text-main shadow-xs border border-light font-bold'
+                : 'text-muted hover:text-main hover:bg-nested/60 border border-transparent'}"
             >
-              Pengguna
-              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{usersCount}</span>
-            </Button>
-          {:else if user?.role === 'designer'}
-            <Button 
-              variant="ghost" size="sm"
-              on:click={() => activeTab = 'sales'} 
-              class="text-sm rounded-lg shrink-0 {activeTab === 'sales' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
-            >
-              Penjualan
-              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{salesCount}</span>
-            </Button>
-          {:else if user?.role === 'tenant'}
-            <Button 
-              variant="ghost" size="sm"
-              on:click={() => activeTab = 'store'} 
-              class="text-sm rounded-lg shrink-0 {activeTab === 'store' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
-            >
-              Toko
-              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{storeCount}</span>
-            </Button>
-          {/if}
-
-          {#if user?.role === 'superadmin' || user?.role === 'tenant'}
-            <Button 
-              variant="ghost" size="sm"
-              on:click={() => activeTab = 'quota'} 
-              class="text-sm rounded-lg shrink-0 {activeTab === 'quota' ? 'bg-nested text-main hover:bg-nested' : 'text-muted hover:text-main hover:bg-nested/50'}"
-            >
-              Kuota
-              <span class="bg-light/30 text-muted px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">{quotaCount}</span>
-            </Button>
-          {/if}
+              <span>{tab.label}</span>
+              <span class="px-1.5 py-0.5 rounded-full text-2xs min-w-[18px] text-center font-mono {activeTab === tab.id ? 'bg-primary/15 text-primary font-bold' : 'bg-light/40 text-muted'}">
+                {tab.count}
+              </span>
+            </button>
+          {/each}
         </div>
       </div>
 
-      <!-- Content -->
-      <div class="max-h-[300px] overflow-y-auto">
+      <!-- Notification List -->
+      <div class="max-h-[min(380px,calc(100vh-210px))] sm:max-h-[360px] overflow-y-auto divide-y divide-light/60">
         {#if isLoading && notifications.length === 0}
-          <div class="py-12 flex items-center justify-center text-sm text-muted">Memuat...</div>
+          <div class="py-12 flex items-center justify-center text-sm text-secondary">
+            <span class="loading loading-spinner loading-sm text-primary mr-2"></span>
+            <span>Memuat notifikasi...</span>
+          </div>
         {:else if filteredNotifications.length === 0}
-          <div class="py-16 flex items-center justify-center">
-            <p class="text-sm text-muted font-medium">Tidak ada notifikasi di kategori ini</p>
+          <div class="py-14 flex flex-col items-center justify-center gap-1 px-4 text-center">
+            <span class="material-symbols-outlined text-2xl text-muted/40 mb-1">notifications_off</span>
+            <p class="text-xs sm:text-sm text-main font-medium">Tidak ada notifikasi di kategori ini</p>
+            <p class="text-2xs text-muted">Semua update terkini akan muncul di sini</p>
           </div>
         {:else}
           {#each filteredNotifications as notif (notif.id)}
-            <div out:slide={{ duration: 200, easing: cubicOut }}>
+            <div out:slide={{ duration: 180, easing: cubicOut }}>
               <a
-                href={getLink(notif)}
+                href={getNotificationLink(notif, user?.role)}
                 on:click={() => markAsRead(notif.id, notif.isRead)}
-                class="flex items-start gap-2.5 px-4 py-3 border-b border-black/5 dark:border-white/5 last:border-b-0 hover:bg-nested transition-colors group {notif.isRead ? '' : 'bg-primary/5'}"
+                class="flex items-start gap-3 px-3.5 sm:px-4 py-3 hover:bg-nested transition-colors group {notif.isRead ? '' : 'bg-primary/5'}"
               >
-                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span class="material-symbols-outlined text-[15px]">{getIcon(notif.type)}</span>
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-[16px]">{getNotificationIcon(notif.type)}</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[13px] {notif.isRead ? 'font-medium text-secondary' : 'font-semibold text-main'} leading-tight">{notif.title}</p>
-                  <p class="text-[11.5px] leading-[1.4] {notif.isRead ? 'text-muted' : 'text-secondary'} line-clamp-2 mt-0.5">{notif.message}</p>
-                  <p class="text-xs text-muted mt-1 opacity-60">
-                    {formatDate(notif.createdAt, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  <div class="flex items-center justify-between gap-1.5">
+                    <p class="text-xs sm:text-[13px] {notif.isRead ? 'font-medium text-secondary' : 'font-bold text-main'} leading-tight truncate">
+                      {notif.title}
+                    </p>
+                    {#if !notif.isRead}
+                      <span class="w-2 h-2 rounded-full bg-primary shrink-0"></span>
+                    {/if}
+                  </div>
+                  <p class="text-[11.5px] leading-relaxed {notif.isRead ? 'text-muted' : 'text-secondary'} line-clamp-2 mt-0.5">
+                    {notif.message}
+                  </p>
+                  <p class="text-2xs text-muted/70 mt-1">
+                    {formatDate(notif.createdAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
-                {#if !notif.isRead}
-                  <div class="w-1.5 h-1.5 rounded-full bg-error flex-shrink-0 mt-1.5 shadow-sm"></div>
-                {/if}
-                <Button 
-                  variant="ghost" size="icon"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 min-w-[28px] min-h-[28px] rounded-md hover:bg-error/10 text-muted hover:text-error shrink-0"
-                  on:click={(e) => { e.detail?.preventDefault?.(); e.detail?.stopPropagation?.(); notificationToDelete = notif.id; }}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg hover:bg-error/10 text-muted hover:text-error shrink-0"
+                  on:click={(e) => { e.detail?.preventDefault?.(); e.detail?.stopPropagation?.(); notificationToDelete = notif.id ?? null; }}
                   title="Hapus notifikasi"
                 >
-                  <span class="material-symbols-outlined text-[16px]">delete</span>
+                  <span class="material-symbols-outlined text-[15px]">delete</span>
                 </Button>
               </a>
             </div>
           {/each}
         {/if}
       </div>
-      
+
       <!-- Footer -->
-      <div class="p-4 border-t border-light flex items-center justify-center bg-card">
-        <Button 
+      <div class="p-3 sm:p-3.5 border-t border-light flex items-center justify-between bg-card">
+        <span class="text-2xs text-muted font-sans">
+          {notifications.length} notifikasi
+        </span>
+        <Button
           variant="tertiary"
           on:click={markAllAsRead}
           disabled={unreadCount === 0}
+          class="text-xs font-bold text-primary hover:text-primary-focus cursor-pointer"
         >
           Tandai semua dibaca
         </Button>
       </div>
     </div>
-    
-    <!-- Backdrop for mobile/clicking outside -->
-    <button
-      type="button"
-      tabindex="-1"
-      class="fixed inset-0 z-40 w-full h-full bg-transparent border-none cursor-default outline-none" 
-      on:click={closeDropdown}
-      aria-label="Tutup dropdown"
-    ></button>
   {/if}
 </div>
 
-<Modal
-  open={!!notificationToDelete}
-  title="Hapus Notifikasi?"
-  size="xs"
-  borderless
-  on:close={() => notificationToDelete = null}
->
-  <p class="text-sm text-secondary leading-relaxed">
-    Apakah Anda yakin ingin menghapus notifikasi ini? Tindakan ini tidak dapat dibatalkan.
-  </p>
-  <svelte:fragment slot="footer">
-    <Button variant="secondary" on:click={() => notificationToDelete = null}>Batal</Button>
-    <Button 
-      variant="destructive" 
-      on:click={() => { 
-        if (notificationToDelete) deleteNotification(notificationToDelete); 
-        notificationToDelete = null; 
-      }}
-    >
-      Ya, Hapus
-    </Button>
-  </svelte:fragment>
-</Modal>
+<!-- Modal Konfirmasi Hapus Notifikasi -->
+<NotificationDeleteModal
+  bind:notificationToDelete
+  onConfirm={(id) => {
+    modalClosedAt = Date.now();
+    deleteNotification(id);
+  }}
+  onCancel={handleCancelModal}
+/>

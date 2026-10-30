@@ -7,8 +7,11 @@ import { getAiMonitoringDashboardData } from "@/services/ai/monitoring.service";
 export const prerender = false;
 
 const user = await getAuthenticatedUser(Astro.request);
-if (!user || !isSuperAdmin(user)) {
+if (!user) {
   return Astro.redirect("/auth/login?redirect=/superadmin/ai-monitoring");
+}
+if (!isSuperAdmin(user)) {
+  return Astro.redirect(user.role === "admin" ? "/admin" : "/dashboard");
 }
 
 const initialData = await getAiMonitoringDashboardData();

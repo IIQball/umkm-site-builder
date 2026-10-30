@@ -1,14 +1,15 @@
 import { db } from '@/lib/db/client';
 import { aiGenerationLogs, aiDepositHistory } from '@/db/schema';
-import { sql, gte, count } from 'drizzle-orm';
+import { sql, gte, lte, and, count } from 'drizzle-orm';
 import { getActiveExchangeRate } from './cost-calculator.service';
+import { getPeriodBounds } from '@/lib/utils/format';
 import type {
   AiCostTrendsData,
   AiDailyCostPoint,
   AiCostTrendsSummary,
 } from '@/types/admin/ai-cost-trends.types';
 
-const INDONESIAN_MONTHS = [
+export const INDONESIAN_MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
   'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
 ];
@@ -99,8 +100,40 @@ export function buildDailyTrendPoints(
   return points;
 }
 
+/**
+ * Builds 12 monthly trend points for a full year view.
+ */
+export function buildMonthlyTrendPoints(
+  year: number,
+  aggregatedMap: Map<string, Partial<AiDailyCostPoint>>
+): AiDailyCostPoint[] {
+  const points: AiDailyCostPoint[] = [];
+
+  for (let m = 0; m < 12; m++) {
+    const mm = String(m + 1).padStart(2, '0');
+    const key = `${year}-${mm}`;
+    const label = INDONESIAN_MONTHS[m];
+    const existing = aggregatedMap.get(key);
+
+    points.push({
+      date: `${year}-${mm}-01`,
+      label,
+      costIdr: Math.round(Number(existing?.costIdr || 0)),
+      costUsd: Number((existing?.costUsd || 0).toFixed(4)),
+      tokens: Math.round(Number(existing?.tokens || 0)),
+      executionCount: Math.round(Number(existing?.executionCount || 0)),
+      successCount: Math.round(Number(existing?.successCount || 0)),
+      failedCount: Math.round(Number(existing?.failedCount || 0)),
+    });
+  }
+
+  return points;
+}
+
 export interface GetAiCostTrendsOptions {
   days?: number;
+  year?: number;
+  month?: number | 'all';
   depositLimitOverrideIdr?: number;
 }
 
@@ -111,18 +144,37 @@ export interface GetAiCostTrendsOptions {
 export async function getAiCostTrends(
   options: GetAiCostTrendsOptions = {}
 ): Promise<AiCostTrendsData> {
-  const days = Math.max(1, Math.min(90, options.days || 14));
-  const now = new Date();
+  const isYearMode = Boolean(options.year);
+  const year = options.year || new Date().getFullYear();
+  const month = options.month ?? 'all';
+  const isAllMonths = month === 'all';
 
-  // Normalize startDate and startOfMonth to start of day (midnight)
-  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1), 0, 0, 0, 0);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  let startDate: Date;
+  let endDate: Date;
+  let days: number;
 
-  const [dailyRows, monthlySpentRow, depositRows, activeExchangeRate] = await Promise.all([
-    // 1. Grouped daily generation costs
+  if (isYearMode) {
+    const bounds = getPeriodBounds(year, month);
+    startDate = bounds.start;
+    endDate = bounds.end;
+    days = isAllMonths ? 12 : new Date(year, Number(month), 0).getDate();
+  } else {
+    days = Math.max(1, Math.min(90, options.days || 14));
+    const now = new Date();
+    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1), 0, 0, 0, 0);
+    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  }
+
+  const isMonthlyAggregate = isYearMode && isAllMonths;
+  const dateGroupSql = isMonthlyAggregate
+    ? sql`to_char(${aiGenerationLogs.createdAt}, 'YYYY-MM')`
+    : sql`to_char(${aiGenerationLogs.createdAt}, 'YYYY-MM-DD')`;
+
+  const [dailyRows, periodSpentRow, depositRows, activeExchangeRate] = await Promise.all([
+    // 1. Grouped generation costs
     db
       .select({
-        date: sql<string>`to_char(${aiGenerationLogs.createdAt}, 'YYYY-MM-DD')`.as('date'),
+        date: sql<string>`${dateGroupSql}`.as('date'),
         costIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
         costUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
         tokens: sql<number>`coalesce(sum(${aiGenerationLogs.inputTokens} + ${aiGenerationLogs.outputTokens}), 0)`.mapWith(Number),
@@ -131,24 +183,24 @@ export async function getAiCostTrends(
         failedCount: sql<number>`count(case when ${aiGenerationLogs.status} = 'failed' then 1 end)`.mapWith(Number),
       })
       .from(aiGenerationLogs)
-      .where(gte(aiGenerationLogs.createdAt, startDate))
-      .groupBy(sql`to_char(${aiGenerationLogs.createdAt}, 'YYYY-MM-DD')`)
-      .orderBy(sql`to_char(${aiGenerationLogs.createdAt}, 'YYYY-MM-DD')`),
+      .where(and(gte(aiGenerationLogs.createdAt, startDate), lte(aiGenerationLogs.createdAt, endDate)))
+      .groupBy(dateGroupSql)
+      .orderBy(dateGroupSql),
 
-    // 2. Spent in current month
+    // 2. Spent in current period
     db
       .select({
-        monthlySpentIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
-        monthlySpentUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
+        periodSpentIdr: sql<number>`coalesce(sum(${aiGenerationLogs.costIdr}), 0)`.mapWith(Number),
+        periodSpentUsd: sql<number>`coalesce(sum(${aiGenerationLogs.costUsd}), 0)`.mapWith(Number),
       })
       .from(aiGenerationLogs)
-      .where(gte(aiGenerationLogs.createdAt, startOfMonth)),
+      .where(and(gte(aiGenerationLogs.createdAt, startDate), lte(aiGenerationLogs.createdAt, endDate))),
 
-    // 3. Deposit history: current month & all-time
+    // 3. Deposit history: period & all-time
     db
       .select({
-        thisMonthDepositIdr: sql<number>`coalesce(sum(case when ${aiDepositHistory.createdAt} >= ${startOfMonth} then ${aiDepositHistory.amountIdr} else 0 end), 0)`.mapWith(Number),
-        thisMonthDepositUsd: sql<number>`coalesce(sum(case when ${aiDepositHistory.createdAt} >= ${startOfMonth} then ${aiDepositHistory.amountUsd} else 0 end), 0)`.mapWith(Number),
+        thisPeriodDepositIdr: sql<number>`coalesce(sum(case when ${aiDepositHistory.createdAt} >= ${startDate} and ${aiDepositHistory.createdAt} <= ${endDate} then ${aiDepositHistory.amountIdr} else 0 end), 0)`.mapWith(Number),
+        thisPeriodDepositUsd: sql<number>`coalesce(sum(case when ${aiDepositHistory.createdAt} >= ${startDate} and ${aiDepositHistory.createdAt} <= ${endDate} then ${aiDepositHistory.amountUsd} else 0 end), 0)`.mapWith(Number),
         allTimeDepositIdr: sql<number>`coalesce(sum(${aiDepositHistory.amountIdr}), 0)`.mapWith(Number),
         allTimeDepositUsd: sql<number>`coalesce(sum(${aiDepositHistory.amountUsd}), 0)`.mapWith(Number),
       })
@@ -157,23 +209,20 @@ export async function getAiCostTrends(
     getActiveExchangeRate(),
   ]);
 
-  const monthSpent = monthlySpentRow[0];
+  const spent = periodSpentRow[0];
   const deposits = depositRows[0];
 
-  const totalSpentIdr = Math.round(Number(monthSpent?.monthlySpentIdr || 0));
-  const totalSpentUsd = Number((monthSpent?.monthlySpentUsd || 0).toFixed(4));
+  const totalSpentIdr = Math.round(Number(spent?.periodSpentIdr || 0));
+  const totalSpentUsd = Number((spent?.periodSpentUsd || 0).toFixed(4));
 
-  // Determine monthly deposit limit:
-  // 1) Explicit override if provided
-  // 2) Deposits in current month
-  // 3) Fallback to all-time deposits if this month has no deposit yet
+  // Determine deposit limit
   let monthlyDepositLimitIdr = options.depositLimitOverrideIdr || 0;
   let monthlyDepositLimitUsd = 0;
 
   if (monthlyDepositLimitIdr <= 0) {
-    if (deposits?.thisMonthDepositIdr && deposits.thisMonthDepositIdr > 0) {
-      monthlyDepositLimitIdr = deposits.thisMonthDepositIdr;
-      monthlyDepositLimitUsd = deposits.thisMonthDepositUsd;
+    if (deposits?.thisPeriodDepositIdr && deposits.thisPeriodDepositIdr > 0) {
+      monthlyDepositLimitIdr = deposits.thisPeriodDepositIdr;
+      monthlyDepositLimitUsd = deposits.thisPeriodDepositUsd;
     } else {
       monthlyDepositLimitIdr = deposits?.allTimeDepositIdr || 0;
       monthlyDepositLimitUsd = deposits?.allTimeDepositUsd || 0;
@@ -190,7 +239,7 @@ export async function getAiCostTrends(
   const remainingDepositIdr = Math.max(0, monthlyDepositLimitIdr - totalSpentIdr);
   const remainingDepositUsd = Math.max(0, Number((monthlyDepositLimitUsd - totalSpentUsd).toFixed(4)));
 
-  // Map daily rows to continuous date array
+  // Map rows to map
   const rowMap = new Map<string, Partial<AiDailyCostPoint>>();
   for (const row of dailyRows) {
     if (row.date) {
@@ -198,7 +247,9 @@ export async function getAiCostTrends(
     }
   }
 
-  const dailyTrends = buildDailyTrendPoints(startDate, days, rowMap);
+  const dailyTrends = isMonthlyAggregate
+    ? buildMonthlyTrendPoints(year, rowMap)
+    : buildDailyTrendPoints(startDate, days, rowMap);
 
   // Aggregate statistics across trend points
   let peakDailyCostIdr = 0;
@@ -214,7 +265,7 @@ export async function getAiCostTrends(
   }
 
   const totalPeriodSpentIdr = dailyTrends.reduce((acc, p) => acc + p.costIdr, 0);
-  const averageDailyCostIdr = days > 0 ? Math.round(totalPeriodSpentIdr / days) : 0;
+  const averageDailyCostIdr = dailyTrends.length > 0 ? Math.round(totalPeriodSpentIdr / dailyTrends.length) : 0;
 
   const summary: AiCostTrendsSummary = {
     totalSpentIdr,
@@ -232,8 +283,6 @@ export async function getAiCostTrends(
     totalExecutions: totalPeriodExecutions,
     days,
   };
-
-  const endDate = new Date(startDate.getTime() + (days - 1) * 86400000);
 
   return {
     period: {

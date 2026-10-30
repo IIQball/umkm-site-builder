@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { BarChart3, RefreshCw, Calendar } from 'lucide-svelte';
-  import { Card, Button } from '@/components/ui';
+  import { BarChart3, Calendar } from 'lucide-svelte';
+  import { Card } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
   import type { AiCostTrendsData } from '@/types/admin/ai-cost-trends.types';
   import {
@@ -12,27 +12,27 @@
   import CostTrendMetricCards from './CostTrendMetricCards.svelte';
 
   export let initialData: AiCostTrendsData | null = null;
+  export let selectedYear: number | undefined = undefined;
+  export let selectedMonth: number | 'all' | undefined = undefined;
 
-  type DateRangePreset = '7d' | '30d' | 'month';
-
-  let selectedPreset: DateRangePreset = initialData?.period?.days === 7 ? '7d' : '30d';
   let data: AiCostTrendsData | null = initialData;
   let isLoading = false;
   let hoveredBar: BarChartPoint | null = null;
   let hoveredIndex: number | null = null;
 
-  $: currentMonthDays = Math.max(1, new Date().getDate());
-  $: selectedDays = selectedPreset === 'month'
-    ? currentMonthDays
-    : selectedPreset === '7d'
-      ? 7
-      : 30;
+  const MONTH_NAMES = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
 
-  $: rangeTitle = selectedPreset === 'month'
-    ? 'Bulan Berjalan'
-    : selectedPreset === '7d'
-      ? '7 Hari Terakhir'
-      : '30 Hari Terakhir';
+  $: rangeTitle = (() => {
+    const yr = selectedYear || new Date().getFullYear();
+    if (!selectedMonth || selectedMonth === 'all') {
+      return `Tahun ${yr}`;
+    }
+    const mIndex = Number(selectedMonth) - 1;
+    return `${MONTH_NAMES[mIndex] || ''} ${yr}`.trim();
+  })();
 
   $: summary = data?.summary || {
     totalSpentIdr: 0,
@@ -48,22 +48,32 @@
     peakDailyCostIdr: 0,
     totalTokens: 0,
     totalExecutions: 0,
-    days: selectedDays,
+    days: 0,
   };
 
   $: dailyTrends = data?.dailyTrends || [];
   $: chartLayout = computeBarChartLayout(dailyTrends, 800, 240);
   $: budgetStatus = getBudgetUsageStatus(summary.budgetUsedPercentage);
 
-  async function fetchTrends(preset: DateRangePreset) {
+  // Reaktif fetch tren biaya saat filter tahun / bulan berubah
+  let lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
+  $: if (
+    selectedYear !== undefined &&
+    `${selectedYear}-${selectedMonth}` !== lastFetchedPeriod
+  ) {
+    lastFetchedPeriod = `${selectedYear}-${selectedMonth}`;
+    fetchTrends(selectedYear, selectedMonth);
+  }
+
+  async function fetchTrends(year?: number, month?: number | 'all') {
     isLoading = true;
     try {
-      const days = preset === 'month'
-        ? Math.max(1, new Date().getDate())
-        : preset === '7d'
-          ? 7
-          : 30;
-      const res = await fetch(`/api/admin/ai/cost-trends?days=${days}&range=${preset}`);
+      const params = new URLSearchParams();
+      if (year) params.set('year', String(year));
+      if (month && month !== 'all') params.set('month', String(month));
+      else if (month === 'all') params.set('month', 'all');
+
+      const res = await fetch(`/api/admin/ai/cost-trends?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
         if (json.ok && json.data) {
@@ -77,21 +87,15 @@
     }
   }
 
-  function handlePresetChange(preset: DateRangePreset) {
-    if (selectedPreset === preset && data) return;
-    selectedPreset = preset;
-    fetchTrends(preset);
-  }
-
   onMount(() => {
     if (!data) {
-      fetchTrends(selectedPreset);
+      fetchTrends(selectedYear, selectedMonth);
     }
   });
 </script>
 
 <div class="space-y-5">
-  <!-- Top Bar: Title & Period Filter Controls -->
+  <!-- Top Bar: Title & Dynamic Period Label -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
@@ -106,43 +110,6 @@
         </p>
       </div>
     </div>
-
-    <div class="flex items-center gap-2 self-start sm:self-auto">
-      <div class="inline-flex items-center p-1 bg-nested rounded-xl border border-light" role="group" aria-label="Pilih rentang tanggal">
-        <button
-          type="button"
-          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === '7d' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePresetChange('7d')}
-        >
-          7 Hari Terakhir
-        </button>
-        <button
-          type="button"
-          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === '30d' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePresetChange('30d')}
-        >
-          30 Hari Terakhir
-        </button>
-        <button
-          type="button"
-          class="px-2.5 sm:px-3 py-1.5 text-2xs sm:text-xs font-bold rounded-lg transition-all cursor-pointer {selectedPreset === 'month' ? 'bg-card text-main shadow-xs' : 'text-secondary hover:text-main'}"
-          on:click={() => handlePresetChange('month')}
-        >
-          Bulan Berjalan
-        </button>
-      </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        class="!p-2 !rounded-xl text-secondary hover:text-main cursor-pointer"
-        disabled={isLoading}
-        on:click={() => fetchTrends(selectedPreset)}
-        aria-label="Refresh tren pengeluaran"
-      >
-        <RefreshCw size={16} class={isLoading ? 'animate-spin' : ''} />
-      </Button>
-    </div>
   </div>
 
   <!-- Metric Cards: Modular Component -->
@@ -156,6 +123,9 @@
         <h3 class="text-body-sm font-bold text-main">
           Fluktuasi Biaya ({rangeTitle})
         </h3>
+        {#if isLoading}
+          <span class="loading loading-spinner loading-xs text-primary"></span>
+        {/if}
       </div>
       <span class="text-2xs text-muted font-mono font-medium">
         Total {summary.totalExecutions} generasi ({summary.totalTokens.toLocaleString('id-ID')} token)
@@ -265,7 +235,7 @@
                   text-anchor="middle"
                   class="text-2xs font-sans font-medium transition-colors select-none {hoveredIndex === i ? 'fill-indigo-600 font-bold' : 'fill-secondary'}"
                 >
-                  {selectedDays > 14 && i % 2 !== 0 ? '' : bar.label.split(' ')[0]}
+                  {dailyTrends.length > 14 && i % 2 !== 0 ? '' : bar.label.split(' ')[0]}
                 </text>
               </g>
             {/each}

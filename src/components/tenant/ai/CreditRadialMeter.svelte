@@ -7,11 +7,12 @@
   export let size: number = 144;
   export let strokeWidth: number = 10;
 
-  $: safePercentage = Math.max(0, Math.min(100, percentage));
+  $: isZeroOrEmpty = status === 'empty' || balance <= 0;
+  $: safePercentage = isZeroOrEmpty ? 0 : Math.max(0, Math.min(100, percentage));
   $: radius = (size - strokeWidth) / 2;
   $: center = size / 2;
   $: circumference = 2 * Math.PI * radius;
-  $: strokeDashoffset = circumference - (safePercentage / 100) * circumference;
+  $: strokeDashoffset = isZeroOrEmpty ? circumference : circumference - (safePercentage / 100) * circumference;
 
   $: colorConfig = {
     plenty: {
@@ -24,18 +25,18 @@
       stroke: colors.semantic.warning.DEFAULT,
       glow: colors.semantic.warning.bg,
       badgeClass: 'bg-warning/10 text-warning border-warning/20',
-      label: 'Mulai Menipis',
+      label: 'Hampir Habis',
     },
     critical: {
+      stroke: colors.semantic.warning.dark,
+      glow: colors.semantic.warning.bg,
+      badgeClass: 'bg-warning/10 text-warning border-warning/20',
+      label: 'Hampir Habis',
+    },
+    empty: {
       stroke: colors.semantic.error.DEFAULT,
       glow: colors.semantic.error.bg,
       badgeClass: 'bg-error/10 text-error border-error/20',
-      label: 'Segera Isi Ulang',
-    },
-    empty: {
-      stroke: colors.neutrals.dark.textMuted,
-      glow: 'transparent',
-      badgeClass: 'bg-nested text-muted border-light',
       label: 'Kredit Habis',
     },
   }[status] || {
@@ -67,7 +68,7 @@
       aria-valuemax="100"
       aria-label="Pengukur sisa kuota kredit AI: {balance} kredit tersisa ({safePercentage} persen)"
     >
-      <!-- Background Track mengacu pada token border-light -->
+      <!-- Background Track mengacu pada token nested -->
       <circle
         cx={center}
         cy={center}
@@ -75,7 +76,7 @@
         fill="none"
         stroke="currentColor"
         stroke-width={strokeWidth}
-        class="text-light/80 dark:text-light/30"
+        class={isZeroOrEmpty ? "text-error/20 dark:text-error/30" : "text-nested dark:text-nested/60"}
       />
       <!-- Active Progress Arc -->
       <circle
@@ -94,7 +95,7 @@
 
     <!-- Center Numerical Display dengan tipografi desain sistem -->
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-      <span class="text-3xl sm:text-4xl font-heading font-black text-main tracking-tight leading-none">
+      <span class="text-3xl sm:text-4xl font-heading font-black {isZeroOrEmpty ? 'text-error' : status === 'critical' || status === 'low' ? 'text-warning' : 'text-main'} tracking-tight leading-none">
         {balance}
       </span>
       <span class="text-[10px] font-bold text-secondary uppercase tracking-widest mt-1">

@@ -41,8 +41,10 @@
     order?.paymentChannel ||
     (order?.paymentGatewayRef ? 'Xendit Invoice' : 'Transfer Bank / QRIS');
 
+  $: isAiCredit = order?.type === 'ai_credit_purchase';
   $: isAssisted = Boolean(order?.adminName || order?.assistedBy);
-  $: transactionType = isAssisted ? 'Pendampingan Admin' : 'Pembelian Mandiri';
+  $: transactionType = isAiCredit ? 'Top Up Token AI' : isAssisted ? 'Pendampingan Admin' : 'Pembelian Mandiri';
+  $: itemTitle = isAiCredit ? 'Top Up Saldo Kuota Token AI Toko' : (order?.template?.name || 'Lisensi Template Toko Online');
 
   function handlePrint() {
     if (!order) return;
@@ -95,7 +97,7 @@
         <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight font-heading">
           Halo, {customerName}
         </h2>
-        <p class="text-xs sm:text-sm text-secondary mt-1 leading-relaxed font-sans">
+        <p class="text-xs sm:text-sm text-secondary mt-1 leading-relaxed">
           Pembayaranmu sudah kami terima dan pesananmu tercatat lunas. Berikut rincian transaksinya.
         </p>
 
@@ -130,13 +132,13 @@
             <div class="flex items-start justify-between gap-4">
               <span class="text-secondary shrink-0">Paket / Layanan</span>
               <span class="font-medium text-main text-right">
-                {order.template?.name || 'Lisensi Template Toko Online'}
+                {itemTitle}
               </span>
             </div>
 
             <div class="flex items-start justify-between gap-4">
               <span class="text-secondary shrink-0">Jenis Pembelian</span>
-              <Badge variant={isAssisted ? 'primary' : 'success'} size="sm" dot={false} class="font-bold">
+              <Badge variant={isAiCredit ? 'primary' : isAssisted ? 'primary' : 'success'} size="sm" dot={false} class="font-bold">
                 {transactionType}
               </Badge>
             </div>
@@ -176,14 +178,14 @@
 
         <!-- Bagian: RINCIAN KOMPONEN -->
         <div class="mt-6">
-          <h4 class="text-2xs font-bold text-muted uppercase tracking-widest mb-3 font-sans">
+          <h4 class="label-caps text-muted mb-3">
             RINCIAN KOMPONEN
           </h4>
 
           <div class="space-y-2 text-xs sm:text-sm">
             <div class="flex items-center justify-between gap-4">
               <span class="text-secondary">
-                {order.template?.name || 'Lisensi Template Toko Online'} (Lisensi Selamanya) x1
+                {isAiCredit ? 'Paket Kuota Kredit AI Toko (Akses Studio AI UMKM) x1' : `${order.template?.name || 'Lisensi Template Toko Online'} (Lisensi Selamanya) x1`}
               </span>
               <span class="font-medium text-main text-right shrink-0">
                 {formatIDR(basePrice)}
@@ -223,7 +225,7 @@
         </div>
 
         <!-- Catatan Arsip PDF -->
-        <p class="text-2xs sm:text-xs text-muted mt-5 leading-relaxed font-sans">
+        <p class="text-2xs sm:text-xs text-muted mt-5 leading-relaxed">
           Invoice resmi terlampir pada email ini dalam bentuk PDF untuk keperluan arsip.
         </p>
 
@@ -231,12 +233,12 @@
         <div class="border-t border-light my-4"></div>
 
         <!-- Hubungi Bantuan -->
-        <p class="text-2xs sm:text-xs text-secondary font-sans leading-relaxed">
+        <p class="text-2xs sm:text-xs text-secondary leading-relaxed">
           Butuh bantuan? Hubungi kami di <strong class="text-main font-semibold">support@pinoka.id</strong> atau <strong class="text-main font-semibold">+62 812-3444-5565</strong>.
         </p>
 
         <!-- Footer Perusahaan di Dalam Kertas Nota -->
-        <div class="mt-6 pt-4 border-t border-dashed border-light text-center space-y-1 text-muted font-sans select-none">
+        <div class="mt-6 pt-4 border-t border-dashed border-light text-center space-y-1 text-muted select-none">
           <div class="text-xs tracking-wider">
             Instagram · Threads · X
           </div>

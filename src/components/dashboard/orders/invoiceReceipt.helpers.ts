@@ -4,6 +4,7 @@ import { formatDate, escapeHtml } from '@/lib/utils/format';
 export interface ReceiptOrderData {
   id?: string;
   externalId?: string | null;
+  type?: string | null;
   amount: number | string;
   adminFee?: number | string | null;
   basePrice?: number | string | null;
@@ -69,7 +70,11 @@ export function generateReceiptHtml(
     (order?.paymentGatewayRef ? 'Xendit Invoice' : 'Transfer Bank / QRIS');
   const paymentMethod = escapeHtml(rawPaymentMethod);
 
-  const templateName = escapeHtml(order?.template?.name || 'Lisensi Template Toko Online');
+  const isAiCredit = order?.type === 'ai_credit_purchase';
+  const rawTemplateName = isAiCredit
+    ? 'Top Up Saldo Kuota Token AI'
+    : (order?.template?.name || 'Lisensi Template Toko Online');
+  const templateName = escapeHtml(rawTemplateName);
   const storeName = escapeHtml(order?.storeName || '');
   const adminInfo = order?.adminName
     ? escapeHtml(`${order.adminName} ${order.adminEmail ? `(${order.adminEmail})` : ''}`)
@@ -79,7 +84,9 @@ export function generateReceiptHtml(
   const logoUrl = `${origin}/assets/logo/logo-pin.webp`;
 
   const isAssisted = Boolean(order?.adminName || order?.assistedBy);
-  const transactionType = escapeHtml(isAssisted ? 'Pendampingan Admin' : 'Pembelian Mandiri');
+  const transactionType = escapeHtml(
+    isAiCredit ? 'Top Up Token AI' : (isAssisted ? 'Pendampingan Admin' : 'Pembelian Mandiri')
+  );
 
   return `<!DOCTYPE html>
 <html lang="id">
@@ -198,7 +205,7 @@ export function generateReceiptHtml(
     <div class="section-subtitle">RINCIAN KOMPONEN</div>
     <table class="components-table">
       <tr class="comp-row">
-        <td class="comp-name">${templateName} (Lisensi Selamanya) x1</td>
+        <td class="comp-name">${isAiCredit ? 'Paket Kuota Kredit AI Toko (Akses Studio Visual AI UMKM) x1' : `${templateName} (Lisensi Selamanya) x1`}</td>
         <td class="comp-price">${formatIDR(basePrice)}</td>
       </tr>
       ${showAdminFee && adminFee > 0 ? `

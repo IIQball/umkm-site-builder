@@ -1,7 +1,7 @@
 <script lang="ts">
   import PeriodFilter from "@/components/common/PeriodFilter.svelte";
-  import { Button } from "@/components/ui";
-  import { Bot, Wallet, Plus, Sparkles } from "lucide-svelte";
+  import { Button, Badge } from "@/components/ui";
+  import { Bot, Wallet, Plus, Sparkles, AlertTriangle } from "lucide-svelte";
   import { filterByPeriod, computeAvailableYears } from "@/lib/utils/format";
   import type {
     AiMonitoringDashboardData,
@@ -26,6 +26,8 @@
   let depositHistory: AiDepositHistoryItem[] = initialData.depositHistory || [];
   let isRefreshing = false;
   let showDepositModal = false;
+
+  $: remainingUsd = summary?.remainingDepositUsd ?? 0;
 
   const currentYear = new Date().getFullYear();
   let selectedYear: number = currentYear;
@@ -112,6 +114,59 @@
 </script>
 
 <div class="space-y-8 md:space-y-10">
+  <!-- Peringatan Kritis Jika Saldo Token AI Platform Habis -->
+  {#if remainingUsd <= 0}
+    <div class="p-4 sm:p-5 rounded-3xl bg-error/10 border border-error/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-2xl bg-error/20 text-error flex items-center justify-center flex-shrink-0 mt-0.5">
+          <AlertTriangle size={22} />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-main font-heading">
+              PERINGATAN KRITIS: Saldo Kuota Token AI Platform Habis! ($0.00 USD)
+            </h3>
+            <Badge variant="error" size="sm" dot={false}>Darurat</Badge>
+          </div>
+          <p class="text-xs sm:text-body-sm text-secondary mt-1 leading-relaxed">
+            Seluruh transaksi checkout paket kredit AI oleh tenant diblokir otomatis untuk mencegah overbooking. Segera lakukan top up saldo deposit AI platform agar layanan pembuatan desain visual AI tetap berjalan normal.
+          </p>
+        </div>
+      </div>
+      {#if isSuperAdmin}
+        <Button variant="destructive" size="sm" class="font-bold flex-shrink-0 shadow-xs" on:click={() => (showDepositModal = true)}>
+          <Plus size={16} class="mr-1" />
+          <span>Top Up Deposit AI</span>
+        </Button>
+      {/if}
+    </div>
+  {:else if remainingUsd < 5}
+    <div class="p-4 rounded-3xl bg-warning/10 border border-warning/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-2xl bg-warning/20 text-warning flex items-center justify-center flex-shrink-0 mt-0.5">
+          <AlertTriangle size={20} />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-main font-heading">
+              Perhatian: Saldo Deposit Token AI Mulai Menipis (${remainingUsd.toFixed(2)} USD Tersisa)
+            </h3>
+            <Badge variant="warning" size="sm" dot={false}>Perlu Perhatian</Badge>
+          </div>
+          <p class="text-xs text-secondary mt-0.5 leading-relaxed">
+            Kapasitas kuota token AI sistem mendekati batas minimum. Pertimbangkan untuk melakukan deposit tambahan sebelum saldo habis.
+          </p>
+        </div>
+      </div>
+      {#if isSuperAdmin}
+        <Button variant="secondary" size="sm" class="font-bold flex-shrink-0 shadow-xs" on:click={() => (showDepositModal = true)}>
+          <Plus size={16} class="mr-1" />
+          <span>Tambah Deposit</span>
+        </Button>
+      {/if}
+    </div>
+  {/if}
+
   <!-- Period Filter -->
   <PeriodFilter
     {availableYears}

@@ -34,30 +34,39 @@ export async function getAiCreditBalance(tenantId: string): Promise<AiCreditBala
     );
   }
 
+  // Normalisasi akun legacy yang memiliki sisa bonus 2 kredit tanpa riwayat pembelian
+  if (credit.totalPurchased === 0 && credit.totalUsed === 0 && credit.balance > 0) {
+    await db
+      .update(tenantAiCredits)
+      .set({ balance: 0, updatedAt: new Date() })
+      .where(eq(tenantAiCredits.tenantId, tenantId));
+    credit.balance = 0;
+  }
+
   return credit;
 }
 
 /**
  * Get or initialize AI credit record for tenant.
- * If not exists, creates with default balance = 2.
+ * If not exists, creates with initial balance = 0 (prevents Sybil dummy account abuse).
  */
 export async function getOrInitializeAiCredit(tenantId: string): Promise<AiCreditBalance> {
   try {
     return await getAiCreditBalance(tenantId);
   } catch (error) {
     if (error instanceof AppError && error.code === 'AI_CREDIT_NOT_FOUND') {
-      // Initialize with default balance
+      // Initialize with 0 balance to protect against multi-account abuse
       await db.insert(tenantAiCredits).values({
         id: `aic_${crypto.randomUUID()}`,
         tenantId,
-        balance: 2,
+        balance: 0,
         totalPurchased: 0,
         totalUsed: 0,
       });
 
       return {
         tenantId,
-        balance: 2,
+        balance: 0,
         totalPurchased: 0,
         totalUsed: 0,
       };

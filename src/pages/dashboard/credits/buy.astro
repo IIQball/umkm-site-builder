@@ -40,20 +40,6 @@ const packages = getAllCreditPackages();
         <span>Lihat Riwayat Lengkap</span>
       </a>
     </div>
-    <div class="flex flex-col gap-2 pb-2">
-      <div class="flex items-center gap-2">
-        <span class="px-2.5 py-0.5 rounded-full text-2xs font-bold bg-primary/10 text-primary border border-primary/20">
-          Studio Visual UMKM
-        </span>
-        <span class="text-xs text-muted font-medium">• Kuota Fleksibel Tanpa Kedaluwarsa</span>
-      </div>
-      <h1 class="text-heading-lg text-main font-bold tracking-tight">
-        Kredit & Kuota Studio AI Toko
-      </h1>
-      <p class="text-body-base text-secondary max-w-2xl leading-relaxed">
-        Tingkatkan konversi penjualan toko dengan foto kemasan produk 3D fotorealistis, logo toko modern, dan poster promosi berkelas studio.
-      </p>
-    </div>
 
     <!-- Visual Quota Gauge & Mutation History -->
     <CreditQuotaGauge client:load />
@@ -88,7 +74,10 @@ const packages = getAllCreditPackages();
             {isMiddle && (
               <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-2xs font-extrabold uppercase tracking-wider bg-primary text-primary-content shadow-sm">
-                  <span>⭐ Rekomendasi Utama • Paling Populer</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-warning" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  <span>Rekomendasi Utama • Paling Populer</span>
                 </span>
               </div>
             )}
@@ -106,9 +95,9 @@ const packages = getAllCreditPackages();
                 )}
               </div>
 
-              <h2 class="text-heading-md text-main font-bold mb-1.5">
+              <h3 class="text-heading-md text-main font-bold mb-1.5">
                 {pkg.name}
-              </h2>
+              </h3>
               <p class="text-body-sm text-secondary min-h-[40px] leading-relaxed mb-5">
                 {pkg.description}
               </p>
@@ -170,6 +159,7 @@ const packages = getAllCreditPackages();
                   ? 'bg-primary text-primary-content hover:bg-primary/90 shadow-md ring-2 ring-primary/20'
                   : 'bg-nested text-main hover:bg-card border border-light shadow-2xs'
               }`}
+              data-package={JSON.stringify(pkg)}
               data-package-id={pkg.id}
               data-package-slug={pkg.slug}
               data-package-price={pkg.price}
@@ -223,18 +213,23 @@ const packages = getAllCreditPackages();
     </div>
   </div>
 
-  <script define:vars={{ packages }}>
-    let selectedPackage = null;
+  <script>
+    import type { AiCreditPackageConfig } from '@/services/ai/ai-packages.constant';
+
+    let selectedPackage: AiCreditPackageConfig | null = null;
     let isSubmitting = false;
 
     // Handle package button clicks
-    document.querySelectorAll('[data-package-id]').forEach((btn) => {
+    document.querySelectorAll<HTMLButtonElement>('[data-package]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const packageId = btn.dataset.packageId;
-        const found = packages.find((p) => p.id === packageId);
-        if (found) {
-          selectedPackage = found;
-          window.dispatchEvent(new CustomEvent('open-modal', { detail: found }));
+        const rawPackage = btn.dataset.package;
+        if (!rawPackage) return;
+        try {
+          const pkg = JSON.parse(rawPackage) as AiCreditPackageConfig;
+          selectedPackage = pkg;
+          window.dispatchEvent(new CustomEvent('open-modal', { detail: pkg }));
+        } catch (e) {
+          console.error('[CREDITS] parse error:', e);
         }
       });
     });

@@ -2,6 +2,8 @@
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { transactionService } from '@/services';
+import { formatIDR } from '@/lib/currency';
+import { formatDate } from '@/lib/utils/format';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect('/auth/login');
@@ -63,11 +65,11 @@ const isPending = !isSuccess && !isFailed;
                 </div>
                 <div>
                   <span class="text-secondary">Jumlah</span>
-                  <p class="font-semibold text-main">Rp{transactionDetails.amount.toLocaleString('id-ID')}</p>
+                  <p class="font-semibold text-main">{formatIDR(transactionDetails.amount)}</p>
                 </div>
               </div>
               <div class="text-xs text-secondary border-t border-light pt-3">
-                Waktu transaksi: {new Date(transactionDetails.createdAt).toLocaleString('id-ID')}
+                Waktu transaksi: {formatDate(transactionDetails.createdAt)}
               </div>
             </div>
           )}
@@ -116,8 +118,11 @@ const isPending = !isSuccess && !isFailed;
                 </div>
                 <div>
                   <span class="text-secondary">Jumlah</span>
-                  <p class="font-semibold text-main">Rp{transactionDetails.amount.toLocaleString('id-ID')}</p>
+                  <p class="font-semibold text-main">{formatIDR(transactionDetails.amount)}</p>
                 </div>
+              </div>
+              <div class="text-xs text-secondary border-t border-light pt-3">
+                Waktu transaksi: {formatDate(transactionDetails.createdAt)}
               </div>
               <div class="text-xs text-secondary border-t border-light pt-3">
                 Status: <span class="font-semibold text-error uppercase">{transactionDetails.status}</span>

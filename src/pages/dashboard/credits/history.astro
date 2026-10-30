@@ -1,0 +1,190 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import CreditQuotaGauge from '@/components/tenant/ai/CreditQuotaGauge.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { stores, transactions } from '@/db/schema';
+import { eq, and, or, desc } from 'drizzle-orm';
+import { formatIDR } from '@/lib/currency';
+import { formatDate } from '@/lib/utils/format';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
+if (user.role === 'admin') return Astro.redirect('/admin');
+
+// Dapatkan data toko tenant
+const [tenantStore] = await db
+  .select({ id: stores.id, name: stores.name })
+  .from(stores)
+  .where(eq(stores.userId, user.id))
+  .limit(1);
+
+const storeId = tenantStore?.id || '';
+
+// Ambil riwayat faktur / invoice pembayaran kredit AI via Xendit
+const invoiceTransactions = await db
+  .select({
+    id: transactions.id,
+    externalId: transactions.externalId,
+    amount: transactions.amount,
+    adminFee: transactions.adminFee,
+    status: transactions.status,
+    paymentChannel: transactions.paymentChannel,
+    paymentGatewayRef: transactions.paymentGatewayRef,
+    createdAt: transactions.createdAt,
+  })
+  .from(transactions)
+  .where(
+    and(
+      or(
+        storeId ? eq(transactions.storeId, storeId) : undefined,
+        eq(transactions.userId, user.id)
+      ),
+      eq(transactions.type, 'ai_credit_purchase')
+    )
+  )
+  .orderBy(desc(transactions.createdAt))
+  .limit(50);
+
+// Hitung metrik ringkasan
+const totalPaidAmount = invoiceTransactions
+  .filter((tx) => tx.status === 'success')
+  .reduce((acc, tx) => acc + tx.amount, 0);
+
+const successfulCount = invoiceTransactions.filter((tx) => tx.status === 'success').length;
+const pendingCount = invoiceTransactions.filter((tx) => tx.status === 'pending').length;
+
+function getStatusBadge(status: string) {
+  if (status === 'success') return { label: 'Lunas', class: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' };
+  if (status === 'pending') return { label: 'Menunggu Pembayaran', class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' };
+  if (status === 'expired') return { label: 'Kedaluwarsa', class: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20' };
+  return { label: 'Gagal', class: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' };
+}
+---
+
+<DashboardLayout title="Riwayat Top-up & Kuota AI" breadcrumb="Dashboard / Kuota AI / Riwayat">
+  <div class="min-h-full space-y-8 pb-12">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          Riwayat Kuota & Faktur AI
+        </h1>
+        <p class="text-body-base text-secondary max-w-2xl leading-relaxed mt-1">
+          Pantau mutasi saldo kredit AI, audit transaksi invoice Xendit yang sukses, dan unduh rincian pembayaran.
+        </p>
+      </div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <Button client:load href="/dashboard/credits/buy" variant="primary" size="md" class="shadow-xs font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Beli Paket Kredit</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Ringkasan Finansial Invoice Top-up -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-2">
+        <span class="text-xs font-bold text-muted uppercase tracking-wider block font-heading">Total Pembayaran Berhasil</span>
+        <div class="text-display-xs text-main font-bold font-heading">{formatIDR(totalPaidAmount)}</div>
+        <p class="text-[11px] text-secondary">Akumulasi seluruh paket kredit yang telah diselesaikan</p>
+      </div>
+      <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-2">
+        <span class="text-xs font-bold text-muted uppercase tracking-wider block font-heading">Faktur Lunas</span>
+        <div class="text-display-xs text-emerald-600 dark:text-emerald-400 font-bold font-heading">{successfulCount} Invoice</div>
+        <p class="text-[11px] text-secondary">Transaksi terverifikasi gateway Xendit</p>
+      </div>
+      <div class="p-6 rounded-3xl bg-card border border-light shadow-xs space-y-2">
+        <span class="text-xs font-bold text-muted uppercase tracking-wider block font-heading">Menunggu Pembayaran</span>
+        <div class="text-display-xs text-amber-600 dark:text-amber-400 font-bold font-heading">{pendingCount} Invoice</div>
+        <p class="text-[11px] text-secondary">Tagihan aktif yang belum diselesaikan</p>
+      </div>
+    </div>
+
+    <!-- Quota Gauge & Real-time Ledger -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-heading-sm font-bold text-main font-heading">Saldo Aktif & Mutasi Kuota</h2>
+          <p class="text-body-sm text-secondary">Rincian pemakaian generator AI dan kredit masuk toko</p>
+        </div>
+      </div>
+      <CreditQuotaGauge client:load />
+    </div>
+
+    <!-- Tabel Rincian Invoice Pembayaran Xendit -->
+    <div class="rounded-3xl bg-card border border-light shadow-xs overflow-hidden">
+      <div class="p-5 sm:p-6 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-heading-sm font-bold text-main font-heading">Daftar Invoice Pembayaran Kredit</h3>
+          <p class="text-body-sm text-secondary mt-0.5">Catatan riwayat faktur tagihan resmi dari payment gateway Xendit</p>
+        </div>
+      </div>
+
+      {invoiceTransactions.length === 0 ? (
+        <div class="py-14 text-center space-y-2 px-4">
+          <div class="w-12 h-12 rounded-2xl bg-nested border border-light flex items-center justify-center mx-auto text-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+              <path d="M3 9h18"></path>
+              <path d="M9 21V9"></path>
+            </svg>
+          </div>
+          <h4 class="text-sm font-bold text-main">Belum Ada Tagihan Invoice</h4>
+          <p class="text-xs text-secondary max-w-sm mx-auto">
+            Invoice pembelian paket kuota AI akan otomatis tercatat dan dapat dipantau di tabel ini.
+          </p>
+        </div>
+      ) : (
+        <div class="overflow-x-auto w-full">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-nested/60 border-b border-light text-muted uppercase font-heading font-semibold text-[10px] tracking-wider">
+                <th class="py-3.5 px-4 sm:px-6">No. Invoice</th>
+                <th class="py-3.5 px-4">Tanggal Tagihan</th>
+                <th class="py-3.5 px-4">Metode / Channel</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 sm:px-6 text-right">Total Tagihan</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-light">
+              {invoiceTransactions.map((tx) => {
+                const statusMeta = getStatusBadge(tx.status);
+                return (
+                  <tr class="hover:bg-nested/40 transition-colors">
+                    <td class="py-4 px-4 sm:px-6 font-mono font-bold text-main text-xs">
+                      <div class="flex items-center gap-2">
+                        <span class="text-primary font-mono">{tx.externalId}</span>
+                      </div>
+                    </td>
+                    <td class="py-4 px-4 text-secondary whitespace-nowrap">
+                      {formatDate(tx.createdAt)}
+                    </td>
+                    <td class="py-4 px-4 text-main uppercase font-medium">
+                      {tx.paymentChannel || 'Xendit Invoice'}
+                    </td>
+                    <td class="py-4 px-4">
+                      <span class={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusMeta.class}`}>
+                        {statusMeta.label}
+                      </span>
+                    </td>
+                    <td class="py-4 px-4 sm:px-6 text-right font-mono font-bold text-main text-sm whitespace-nowrap">
+                      {formatIDR(tx.amount)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</DashboardLayout>

@@ -1,11 +1,16 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-10-27 by feature/h8-deisa-chart-unit-tests
+Status: LIVE · Updated: 2026-10-30 by feature/h10-fauzan-final-biling-audit
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
 
 Keep it short and current. This is a checkpoint, not a changelog.
+
+- **Xendit Invoice Idempotency & Merchant Credit Refresh:**
+  - Invoice webhook status transition and fulfillment now run atomically; only one callback can claim a transaction's transition to `success`. AI credit balance and purchased totals use atomic upsert increments.
+  - AI credit checkout returns to `/dashboard/ai` with invoice status polling; once paid fulfillment commits, the merchant credit header refetches the balance.
+  - Added concurrent webhook and AI checkout return-flow coverage; API idempotency documentation updated.
 
 - **H8 Admin Analytics Formula Unit Tests & Responsive Chart Reactivity ([`tests/admin/analytics-formula.test.ts`](tests/admin/analytics-formula.test.ts), [`src/components/admin/ai/CostTrendChart.svelte`](src/components/admin/ai/CostTrendChart.svelte)):**
   - **Comprehensive Backend Unit Testing**: Created `tests/admin/analytics-formula.test.ts` (31 tests, 223 assertions) strictly validating `calculateBudgetUsedPercentage` and `calculateCostPerPercentUsage` under edge cases: zero division (limit = 0, spent = 0), negative nominals, non-finite inputs (NaN, Infinity), micro-spending rounding, over-budget ratios (>100%, 150%, 500%), and enterprise scale (billions IDR).

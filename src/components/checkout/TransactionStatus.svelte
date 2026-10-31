@@ -51,7 +51,7 @@
 
     const interval = setInterval(() => {
       pollCount++;
-      if (pollCount > maxPolls || status === 'success' || status === 'failed') {
+      if (pollCount > maxPolls || status !== 'pending') {
         clearInterval(interval);
         return;
       }

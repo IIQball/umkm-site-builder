@@ -2,8 +2,9 @@ import { db } from '@/lib/db/client';
 import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits, stores } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
-import { eq, or } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { TransactionRecord } from '@/types';
+import type { DbExecutor } from '@/types/common/db';
 import { formatIDR } from '@/lib/currency';
 import { logActivity } from '@/services/audit.service';
 import { getCreditPackageByAmount } from '@/services/ai';
@@ -36,11 +37,14 @@ export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): Tr
   };
 }
 
-export async function fulfillPaidTransaction(transaction: typeof transactions.$inferSelect): Promise<void> {
+export async function fulfillPaidTransaction(
+  transaction: typeof transactions.$inferSelect,
+  client: DbExecutor = db
+): Promise<void> {
   if (transaction.type === 'template_purchase' && transaction.templateId) {
     const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     try {
-      await db.insert(userTemplates).values({
+      await client.insert(userTemplates).values({
         id: userTemplateId,
         userId: transaction.userId,
         templateId: transaction.templateId,
@@ -50,7 +54,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       // Ignore duplicate record
     }
 
-    const templateList = await db.select().from(templates).where(eq(templates.id, transaction.templateId)).limit(1);
+    const templateList = await client.select().from(templates).where(eq(templates.id, transaction.templateId)).limit(1);
     if (templateList.length > 0) {
       const template = templateList[0];
       const adminAmount = Number(transaction.adminFee || 0);
@@ -58,7 +62,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       const { platformFee, designerAmount } = await calculateCommission(baseAmount);
 
       const commissionId = `comm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      await db.insert(commissions).values({
+      await client.insert(commissions).values({
         id: commissionId,
         designerId: template.designerId,
         adminId: transaction.assistedBy || null,
@@ -76,6 +80,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         amount: designerAmount,
         description: `Komisi Penjualan Template: ${template.name}`,
         referenceId: transaction.id,
+        tx: client,
       });
 
       if (adminAmount > 0 && transaction.assistedBy) {
@@ -84,19 +89,20 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
           amount: adminAmount,
           description: 'Fee Pendampingan Pembelian Template',
           referenceId: transaction.id,
+          tx: client,
         });
       }
       
       // Send notification to designer
       try {
-        const buyer = await db
+        const buyer = await client
           .select({ name: users.name })
           .from(users)
           .where(eq(users.id, transaction.userId))
           .limit(1);
         const buyerName = buyer.length > 0 && buyer[0].name ? buyer[0].name : 'Seseorang';
         
-        await db.insert(notifications).values({
+        await client.insert(notifications).values({
           id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           userId: template.designerId,
           type: 'template_purchased',
@@ -106,7 +112,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         });
 
         if (transaction.assistedBy) {
-          await db.insert(notifications).values({
+          await client.insert(notifications).values({
             id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
             userId: transaction.userId,
             type: 'template_purchased',
@@ -142,7 +148,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       // 2. Resolve storeId
       let targetStoreId = transaction.storeId;
       if (!targetStoreId) {
-        const [foundStore] = await db
+        const [foundStore] = await client
           .select({ id: stores.id })
           .from(stores)
           .where(eq(stores.userId, transaction.userId))
@@ -151,45 +157,30 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       }
 
       // 3. Get or update tenant AI credits record
-      const existingCredit = await db.select()
-        .from(tenantAiCredits)
-        .where(
-          or(
-            eq(tenantAiCredits.tenantId, targetStoreId),
-            eq(tenantAiCredits.userId, transaction.userId)
-          )
-        )
-        .limit(1);
-
       const now = new Date();
-
-      if (existingCredit.length > 0) {
-        const current = existingCredit[0];
-        await db.update(tenantAiCredits)
-          .set({
-            tenantId: targetStoreId,
-            balance: current.balance + credits,
-            totalPurchased: current.totalPurchased + credits,
-            updatedAt: now,
-          })
-          .where(eq(tenantAiCredits.id, current.id));
-      } else {
-        const creditRecordId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        await db.insert(tenantAiCredits).values({
-          id: creditRecordId,
+      const creditRecordId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      await client.insert(tenantAiCredits).values({
+        id: creditRecordId,
+        userId: transaction.userId,
+        tenantId: targetStoreId,
+        balance: credits,
+        totalPurchased: credits,
+        totalUsed: 0,
+        createdAt: now,
+        updatedAt: now,
+      }).onConflictDoUpdate({
+        target: tenantAiCredits.tenantId,
+        set: {
           userId: transaction.userId,
-          tenantId: targetStoreId,
-          balance: credits,
-          totalPurchased: credits,
-          totalUsed: 0,
-          createdAt: now,
+          balance: sql`${tenantAiCredits.balance} + ${credits}`,
+          totalPurchased: sql`${tenantAiCredits.totalPurchased} + ${credits}`,
           updatedAt: now,
-        });
-      }
+        },
+      });
 
       // 4. Send notification & audit log
       try {
-        await db.insert(notifications).values({
+        await client.insert(notifications).values({
           id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           userId: transaction.userId,
           type: 'quota_upgrade_request',

@@ -115,7 +115,7 @@ describe('Sidebar Navigation Across All Roles', () => {
   });
 
   describe('Superadmin Role Specific Navigation', () => {
-    it('groups superadmin items into logical categories and includes admin whitelist', () => {
+    it('groups superadmin items into logical categories and includes user management', () => {
       const groups = getNavGroups('superadmin');
       const titles = groups.map((g) => g.title);
 
@@ -127,10 +127,13 @@ describe('Sidebar Navigation Across All Roles', () => {
       ]);
 
       const platformGroup = groups.find((g) => g.title === 'Platform & Pengguna');
+      const userItem = platformGroup?.items.find((i) => i.href === '/superadmin/users');
+      expect(userItem).toBeDefined();
+      expect(userItem?.label).toBe('Manajemen Pengguna');
+      expect(userItem?.icon).toBe('group');
+
       const whitelistItem = platformGroup?.items.find((i) => i.href === '/superadmin/whitelist');
-      expect(whitelistItem).toBeDefined();
-      expect(whitelistItem?.label).toBe('Kelola Akses Admin');
-      expect(whitelistItem?.icon).toBe('admin_panel_settings');
+      expect(whitelistItem).toBeUndefined();
 
       const catalogGroup = groups.find((g) => g.title === 'Katalog & Template');
       expect(catalogGroup?.items.some((i) => i.href === '/superadmin/business-categories')).toBe(true);

@@ -394,12 +394,7 @@ umkm-site-builder/
 │   │   │   ├── platform-settings/          # Pengaturan Platform & Komisi
 │   │   │   │   ├── CommissionSettingsPanel.svelte
 │   │   │   │   └── CommissionSimulationCard.svelte
-│   │   │   ├── whitelist/                  # Whitelist Email Google Admin
-│   │   │   │   ├── AdminWhitelistPanel.svelte
-│   │   │   │   ├── AdminAddModal.svelte
-│   │   │   │   ├── AdminConfirmModal.svelte
-│   │   │   │   └── AdminDetailModal.svelte
-│   │   │   ├── user-management/            # Manajemen User & Role
+│   │   │   ├── user-management/            # Manajemen User & Role (terintegrasi kelola akses)
 │   │   │   │   ├── UserManagementPanel.svelte
 │   │   │   │   ├── AdminUserAddModal.svelte
 │   │   │   │   ├── AdminUserDetailModal.svelte
@@ -559,8 +554,7 @@ umkm-site-builder/
 │   │   │
 │   │   ├── superadmin/                     # Rute Portal Superadmin (/superadmin/*)
 │   │   │   ├── index.astro                 # Overview dashboard
-│   │   │   ├── users/index.astro           # Manajemen akun
-│   │   │   ├── whitelist/index.astro       # Whitelist admin
+│   │   │   ├── users/index.astro           # Manajemen akun & akses platform
 │   │   │   ├── settings/index.astro        # Komisi platform
 │   │   │   ├── template-categories/index.astro
 │   │   │   ├── business-categories/index.astro

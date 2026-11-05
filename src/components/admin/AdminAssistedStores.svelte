@@ -13,10 +13,11 @@
   export let pagination: PaginatedResult<any> | undefined = undefined;
 
   let searchQuery = "";
-  let activeFilter: "all" | "published" | "draft" | "nostore" = "all";
+  let activeFilter: "all" | "published" | "draft" | "suspended" | "nostore" = "all";
   let copiedId: string | null = null;
   let currentPage = 1;
   let suspendModalOpen = false;
+  let isUnsuspendModal = false;
   let selectedStoreForSuspend: AssistedStoreItem | null = null;
   $: if (pagination?.currentPage) currentPage = pagination.currentPage;
   const pageSize = 10;
@@ -52,7 +53,8 @@
   $: counts = {
     total: stores.length,
     published: stores.filter((s) => isStoreActive(s.status)).length,
-    draft: stores.filter((s) => s.id && !isStoreActive(s.status)).length,
+    draft: stores.filter((s) => s.id && !isStoreActive(s.status) && s.status !== "suspended").length,
+    suspended: stores.filter((s) => s.status === "suspended").length,
     noStore: stores.filter((s) => !s.id).length,
   };
 
@@ -63,8 +65,10 @@
         : activeFilter === "published"
           ? isStoreActive(s.status)
           : activeFilter === "draft"
-            ? s.id && !isStoreActive(s.status)
-            : !s.id;
+            ? s.id && !isStoreActive(s.status) && s.status !== "suspended"
+            : activeFilter === "suspended"
+              ? s.status === "suspended"
+              : !s.id;
 
     const q = searchQuery.toLowerCase().trim();
     const ownerName = (s.tenantName || s.owner?.name || "").toLowerCase();
@@ -108,6 +112,13 @@
 
   function handleSuspendClick(store: AssistedStoreItem) {
     selectedStoreForSuspend = store;
+    isUnsuspendModal = false;
+    suspendModalOpen = true;
+  }
+
+  function handleUnsuspendClick(store: AssistedStoreItem) {
+    selectedStoreForSuspend = store;
+    isUnsuspendModal = true;
     suspendModalOpen = true;
   }
 </script>
@@ -192,6 +203,19 @@
           <span class="w-1.5 h-1.5 rounded-full bg-info"></span>
           Draft ({counts.draft})
         </button>
+        {#if counts.suspended > 0}
+          <button
+            type="button"
+            on:click={() => (activeFilter = "suspended")}
+            class="px-3.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-1.5 {activeFilter ===
+            'suspended'
+              ? 'bg-main text-canvas dark:bg-primary shadow-2xs'
+              : 'text-muted hover:text-main'}"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+            Ditangguhkan ({counts.suspended})
+          </button>
+        {/if}
         <button
           type="button"
           on:click={() => (activeFilter = "nostore")}
@@ -237,6 +261,7 @@
           {formatDate}
           onCopyId={copyToClipboard}
           onSuspend={handleSuspendClick}
+          onUnsuspend={handleUnsuspendClick}
         />
       {/each}
     </Table>
@@ -253,5 +278,6 @@
 
 <AdminStoreSuspendModal
   bind:open={suspendModalOpen}
+  isUnsuspend={isUnsuspendModal}
   store={selectedStoreForSuspend}
 />

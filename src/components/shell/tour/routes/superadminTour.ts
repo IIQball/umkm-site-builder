@@ -173,38 +173,4 @@ export const superadminTourRoutes: RouteTourConfig[] = [
       },
     ],
   },
-
-  // 6. Whitelist Admin (/whitelist)
-  {
-    match: (path) => path.includes('/whitelist'),
-    steps: () => [
-      {
-        element: '#btn-add-admin-whitelist',
-        popover: {
-          title: 'Tombol Tambah Akun Administrator',
-          description: 'Daftarkan administrator baru untuk membantu mengelola operasional dan pendampingan merchant platform.',
-          side: 'bottom',
-          align: 'end',
-        },
-      },
-      {
-        element: '.grid.grid-cols-1.md\\:grid-cols-3',
-        popover: {
-          title: 'Statistik Administrator Platform',
-          description: 'Pantau jumlah administrator terdaftar, admin berstatus aktif, dan akun yang sedang diblokir.',
-          side: 'bottom',
-          align: 'center',
-        },
-      },
-      {
-        element: 'table',
-        popover: {
-          title: 'Tabel Manajemen Otoritas Admin',
-          description: 'Kelola status akses administrator, buka rincian akun, atau blokir akses administrator tertentu.',
-          side: 'top',
-          align: 'center',
-        },
-      },
-    ],
-  },
 ];

@@ -42,7 +42,7 @@
       const result = await res.json();
 
       if (res.ok && result.ok) {
-        const redirectUrl = `/activation?uid=${result.data.id}&name=${encodeURIComponent(newName)}`;
+        const redirectUrl = `/auth/activation?uid=${result.data.id}&name=${encodeURIComponent(newName)}`;
         const { error } = await authClient.requestPasswordReset({
           email: result.data.email || newEmail,
           redirectTo: redirectUrl,

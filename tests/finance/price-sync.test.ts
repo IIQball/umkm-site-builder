@@ -24,6 +24,10 @@ vi.mock('@/lib/db/client', () => {
   return { db: mockDb, getDb: () => mockDb };
 });
 
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(async <T>(fn: (tx: typeof db) => Promise<T>): Promise<T> => fn(db)),
+}));
+
 // Mock Xendit
 vi.mock('@/lib/finance/xendit', () => ({
   xenditClient: {
@@ -238,7 +242,11 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       // Update tx status to success
       mockDb.update.mockReturnValueOnce({
-        set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl_50k', type: 'template_purchase', status: 'success', templateId: 'tpl_123', userId: 'buyer_1', amount: 50000, adminFee: 0 }]),
+          }),
+        }),
       });
 
       // Insert userTemplate

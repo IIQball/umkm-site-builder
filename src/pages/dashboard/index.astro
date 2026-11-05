@@ -1,8 +1,8 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import StatCard from '@/components/ui/StatCard.svelte';
-import ChartWidget from '@/components/dashboard/ChartWidget.svelte';
-import TenantUsageChart from '@/components/tenant/ai/TenantUsageChart.svelte';
+import ChartWidget from '@/components/tenant/dashboard/ChartWidget.svelte';
+import TenantUsageChart from '@/components/tenant/ai-credits/TenantUsageChart.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';

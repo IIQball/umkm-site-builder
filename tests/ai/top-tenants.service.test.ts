@@ -220,7 +220,7 @@ describe('Top Tenants AI Service', () => {
 
   describe('topMerchants.helpers', () => {
     it('returns podium badge variants correctly for ranks 1, 2, 3, and default', async () => {
-      const { getRankBadgeInfo } = await import('@/components/admin/ai/topMerchants.helpers');
+      const { getRankBadgeInfo } = await import('@/components/superadmin/ai-monitoring/topMerchants.helpers');
       expect(getRankBadgeInfo(1)).toEqual({ label: '#1', variant: 'warning' });
       expect(getRankBadgeInfo(2)).toEqual({ label: '#2', variant: 'slate' });
       expect(getRankBadgeInfo(3)).toEqual({ label: '#3', variant: 'orange' });
@@ -229,7 +229,7 @@ describe('Top Tenants AI Service', () => {
     });
 
     it('returns semantic success rate variants correctly', async () => {
-      const { getSuccessRateVariant } = await import('@/components/admin/ai/topMerchants.helpers');
+      const { getSuccessRateVariant } = await import('@/components/superadmin/ai-monitoring/topMerchants.helpers');
       expect(getSuccessRateVariant(95)).toBe('success');
       expect(getSuccessRateVariant(90)).toBe('success');
       expect(getSuccessRateVariant(85)).toBe('info');
@@ -237,7 +237,7 @@ describe('Top Tenants AI Service', () => {
     });
 
     it('formats tokens compactly with formatCompactTokens', async () => {
-      const { formatCompactTokens } = await import('@/components/admin/ai/topMerchants.helpers');
+      const { formatCompactTokens } = await import('@/components/superadmin/ai-monitoring/topMerchants.helpers');
       expect(formatCompactTokens(0)).toBe('0');
       expect(formatCompactTokens(-10)).toBe('0');
       expect(formatCompactTokens(500)).toBe('500');

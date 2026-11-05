@@ -2,7 +2,7 @@
   import type { ProductItem } from '@/types';
   import { canvasStore } from '../../stores/editorStore';
   import { formatIDR } from '@/lib/currency';
-  import { resolveProductNodeStyle } from '../productCatalog.helpers';
+  import { resolveProductNodeStyle } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];

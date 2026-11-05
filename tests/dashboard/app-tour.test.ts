@@ -5,7 +5,7 @@ import {
   isTourCompleted,
   setTourCompleted,
   isDashboardHomePage,
-} from '@/components/dashboard/tour/tour.helpers';
+} from '@/components/shell/tour/tour.helpers';
 
 describe('Dashboard App Tour Helpers', () => {
   let localStorageMock: Record<string, string> = {};
@@ -112,11 +112,10 @@ describe('Dashboard App Tour Helpers', () => {
     expect(steps[0].popover?.title).toContain('Buat Undangan');
   });
 
-  it('provides tailored driver steps for admin whitelist page', () => {
-    const steps = getDriverSteps('admin', '/superadmin/whitelist');
+  it('provides tailored driver steps for admin merchants page', () => {
+    const steps = getDriverSteps('admin', '/admin/merchants');
     expect(steps.length).toBe(3);
-    expect(steps[0].element).toBe('#btn-add-admin-whitelist');
-    expect(steps[0].popover?.title).toContain('Tambah Akun Administrator');
+    expect(steps[0].popover?.title).toContain('Ringkasan Toko Binaan');
   });
 
   it('provides backwards-compatible getTourSteps helper', () => {

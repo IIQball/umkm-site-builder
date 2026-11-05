@@ -2,7 +2,7 @@ import type { TemplateConfig } from '@/schemas';
 import type { DocumentState, EditorTemplate } from './editorStore.types';
 import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
 import { getAddedSlotDefaultProps, getSectionDefaultSlots } from '../inspector/sectionSlot.helpers';
-import { DEFAULT_DEMO_PRODUCTS } from '../sections/productCatalog.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from '../sections/catalog/productCatalog.helpers';
 import { DEFAULT_TESTIMONIALS } from '../sections/testimonials/testimonials.helpers';
 import { DEFAULT_FAQS } from '../sections/faq/faq.helpers';
 

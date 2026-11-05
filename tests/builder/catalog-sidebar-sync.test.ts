@@ -7,7 +7,7 @@ import {
   getEffectiveCatalogElementOrder,
   CATALOG_PRESET_SLOTS,
 } from '@/components/builder/sections/catalog/catalogLayout.helpers';
-import { DEFAULT_DEMO_PRODUCTS } from '@/components/builder/sections/productCatalog.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from '@/components/builder/sections/catalog/productCatalog.helpers';
 import { applyDeleteNode, applyAddNode } from '@/components/builder/stores/editorStore.mutations';
 import type { DocumentState } from '@/components/builder/stores/editorStore.types';
 

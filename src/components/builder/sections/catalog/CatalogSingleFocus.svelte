@@ -3,7 +3,7 @@
   import type { ProductItem } from '@/types';
   import { ShoppingBag, CheckCircle, ShieldCheck } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from '../productCatalog.helpers';
+  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];

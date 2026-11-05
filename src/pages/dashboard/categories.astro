@@ -6,7 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { db, stores } from '@/db';
 import { eq, and, isNull } from 'drizzle-orm';
 import { isStoreFullyOnboarded } from '@/services/stores';
-import CategoryManager from '@/components/dashboard/CategoryManager.svelte';
+import CategoryManager from '@/components/tenant/categories/CategoryManager.svelte';
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect("/auth/login");

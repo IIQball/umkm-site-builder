@@ -4,7 +4,7 @@ import {
   getRoleConfig,
   getDashboardHomePath,
   getSettingsHref
-} from '@/components/dashboard/sidebar/sidebar.helpers'
+} from '@/components/shell/sidebar/sidebar.helpers'
 
 export {
   type RoleConfig,
@@ -42,7 +42,6 @@ export const getRoleNavLinks = (role?: string | null): NavSubItem[] => {
   if (r === 'superadmin') {
     return [
       { label: 'Overview Dashboard', href: '/superadmin' },
-      { label: 'Kelola Akses Admin', href: '/superadmin/whitelist' },
       { label: 'Manajemen Pengguna', href: '/superadmin/users' },
       { label: 'Kurasi Template', href: '/superadmin/templates' },
       { label: 'Kategori Template', href: '/superadmin/template-categories' },

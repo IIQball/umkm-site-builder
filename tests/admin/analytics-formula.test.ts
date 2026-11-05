@@ -6,7 +6,7 @@ import {
 import {
   computeBarChartLayout,
   getBudgetUsageStatus,
-} from '@/components/admin/ai/costTrendChart.helpers';
+} from '@/components/superadmin/ai-monitoring/costTrendChart.helpers';
 import type { AiDailyCostPoint } from '@/types/admin/ai-cost-trends.types';
 
 describe('Admin Analytics Formula & Chart Reactivity Tests', () => {

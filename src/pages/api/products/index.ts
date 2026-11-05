@@ -3,7 +3,7 @@ import { db } from '../../../lib/db/client';
 import { products, stores } from '../../../db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
+import { ProductVariantsSchema } from '@/schemas/tenant/product-variant.schema';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
 import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
 import { logActivity } from '@/services/audit.service';

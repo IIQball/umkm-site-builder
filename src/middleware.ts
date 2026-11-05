@@ -103,6 +103,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const user = context.locals.user;
   
+  // Redirect legacy /superadmin/whitelist to unified user management
+  if (pathname === '/superadmin/whitelist' || pathname === '/superadmin/whitelist/') {
+    return context.redirect('/superadmin/users');
+  }
+
   // Redirect privileged or designer users from general entry point /dashboard to their respective role homes
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
     if (user?.role === 'superadmin') return context.redirect('/superadmin');

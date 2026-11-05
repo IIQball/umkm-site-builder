@@ -35,7 +35,7 @@
     getAddedSlotDefaultProps,
   } from './sectionSlot.helpers';
   import type { ProductItem, TestimonialItem, FAQItem } from '@/types';
-  import HeaderSlotControls from './HeaderSlotControls.svelte';
+  import HeaderSlotControls from './header/HeaderSlotControls.svelte';
 
   export let section: TemplateSection;
 

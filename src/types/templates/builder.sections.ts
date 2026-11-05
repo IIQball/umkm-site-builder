@@ -1,5 +1,5 @@
 import type { ColorToken, NodeStyles } from './builder';
-import type { VariantGroup } from '../../schemas/product-variant.schema';
+import type { VariantGroup } from '@/schemas/tenant/product-variant.schema';
 
 export interface HeaderAnnouncementProps {
   showAnnouncement?: boolean;

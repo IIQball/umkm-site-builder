@@ -4,7 +4,7 @@ import {
   getNotificationLink,
   filterNotifications,
   buildNotificationTabs,
-} from '@/components/dashboard/navbar/notification.helpers';
+} from '@/components/shell/navbar/notification.helpers';
 
 describe('Navbar Notifications Helpers & Deep Links', () => {
   describe('getNotificationIcon', () => {

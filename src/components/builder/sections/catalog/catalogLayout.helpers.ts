@@ -5,7 +5,7 @@
  */
 
 import type { ProductItem } from '@/types';
-import { DEFAULT_DEMO_PRODUCTS } from '../productCatalog.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from './productCatalog.helpers';
 
 export const CATALOG_PRESET_SLOTS: Record<string, string[]> = {
   grid_standard: ['badge', 'title', 'subtitle'],

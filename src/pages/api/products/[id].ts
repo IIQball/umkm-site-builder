@@ -3,7 +3,7 @@ import { db } from '../../../lib/db/client';
 import { products, stores } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { ProductVariantsSchema } from '../../../schemas/product-variant.schema';
+import { ProductVariantsSchema } from '@/schemas/tenant/product-variant.schema';
 
 import { deleteFromCloudinary } from '../../../lib/cloudinary';
 import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';

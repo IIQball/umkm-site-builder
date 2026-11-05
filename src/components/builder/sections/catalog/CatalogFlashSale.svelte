@@ -3,7 +3,7 @@
   import type { ProductItem } from '@/types';
   import { Zap, ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { resolveProductNodeStyle } from '../productCatalog.helpers';
+  import { resolveProductNodeStyle } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];

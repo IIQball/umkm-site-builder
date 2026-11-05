@@ -10,6 +10,7 @@
   export let onCopyId: (id: string) => void;
   export let formatDate: (d: Date | string) => string;
   export let onSuspend: ((store: AssistedStoreItem) => void) | undefined = undefined;
+  export let onUnsuspend: ((store: AssistedStoreItem) => void) | undefined = undefined;
 
   const isStoreActive = (status: string | null | undefined) =>
     status === 'published' || status === 'active';
@@ -155,29 +156,63 @@
              <span>Tangguhkan</span>
            </Button>
          {/if}
-      {:else}
-        <!-- Draft: Primary Kelola Toko, Secondary Beli Template -->
-        <Button
-          href={`/onboarding?storeId=${store.id}`}
-          variant="primary"
-          size="sm"
-          className="rounded-xl font-bold text-xs"
-          title="Kelola Data Toko"
-        >
-          <span class="material-symbols-outlined text-xs">tune</span>
-          <span>Kelola Toko</span>
-        </Button>
-        <Button
-          href={`/templates?tenantId=${store.userId}`}
-          variant="secondary"
-          size="sm"
-          className="rounded-xl font-bold text-xs"
-          title="Beli Template untuk Toko Ini"
-        >
-          <span class="material-symbols-outlined text-xs">shopping_bag</span>
-          <span>Beli Template</span>
-        </Button>
-      {/if}
+       {:else if store.status === 'suspended'}
+         <!-- Ditangguhkan: Primary Kelola Toko, Secondary Beli Template, Tertiary Pulihkan -->
+         <Button
+           href={`/onboarding?storeId=${store.id}`}
+           variant="primary"
+           size="sm"
+           className="rounded-xl font-bold text-xs"
+           title="Kelola Data Toko"
+         >
+           <span class="material-symbols-outlined text-xs">tune</span>
+           <span>Kelola Toko</span>
+         </Button>
+         <Button
+           href={`/templates?tenantId=${store.userId}`}
+           variant="secondary"
+           size="sm"
+           className="rounded-xl font-bold text-xs"
+           title="Beli Template untuk Toko Ini"
+         >
+           <span class="material-symbols-outlined text-xs">shopping_bag</span>
+           <span>Beli Template</span>
+         </Button>
+         {#if onUnsuspend}
+           <Button
+             on:click={() => onUnsuspend?.(store)}
+             variant="secondary"
+             size="sm"
+             className="rounded-xl font-bold text-xs text-success hover:text-success"
+             title="Pulihkan Toko"
+           >
+             <span class="material-symbols-outlined text-xs">restore</span>
+             <span>Pulihkan</span>
+           </Button>
+         {/if}
+       {:else}
+         <!-- Draft: Primary Kelola Toko, Secondary Beli Template -->
+         <Button
+           href={`/onboarding?storeId=${store.id}`}
+           variant="primary"
+           size="sm"
+           className="rounded-xl font-bold text-xs"
+           title="Kelola Data Toko"
+         >
+           <span class="material-symbols-outlined text-xs">tune</span>
+           <span>Kelola Toko</span>
+         </Button>
+         <Button
+           href={`/templates?tenantId=${store.userId}`}
+           variant="secondary"
+           size="sm"
+           className="rounded-xl font-bold text-xs"
+           title="Beli Template untuk Toko Ini"
+         >
+           <span class="material-symbols-outlined text-xs">shopping_bag</span>
+           <span>Beli Template</span>
+         </Button>
+       {/if}
     </div>
   </td>
 </tr>

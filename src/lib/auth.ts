@@ -66,12 +66,12 @@ export const auth = betterAuth({
             cleanUrl.searchParams.set('token', token);
             finalUrl = cleanUrl.toString();
           } else if (token) {
-            const cleanUrl = new URL(isActivation ? '/activation' : '/auth/reset-password', parsedUrl.origin);
+            const cleanUrl = new URL(isActivation ? '/auth/activation' : '/auth/reset-password', parsedUrl.origin);
             cleanUrl.searchParams.set('token', token);
             finalUrl = cleanUrl.toString();
           }
         } else if (parsedUrl.pathname === '/reset-password') {
-          parsedUrl.pathname = isActivation ? '/activation' : '/auth/reset-password';
+          parsedUrl.pathname = isActivation ? '/auth/activation' : '/auth/reset-password';
           finalUrl = parsedUrl.toString();
         }
       } catch {

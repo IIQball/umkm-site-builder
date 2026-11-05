@@ -1,18 +1,16 @@
 <script lang="ts">
   import { editorStore, activeNodeId, canvasStore } from '../stores/editorStore';
   import type { FeaturesProps, SectionStyles, FeatureItem } from '@/types';
-  import {
-    FeaturesGrid3Cards,
-    FeaturesHorizontalList,
-    FeaturesBannerInlineBar,
-    FeaturesBentoGrid,
-    FeaturesAlternatingZigzag,
-    FeaturesInteractiveTabs,
-    FeaturesVerticalAccordion,
-    FeaturesStickyScroll,
-    FeaturesDenseMatrix,
-    FeaturesComparison,
-  } from './features';
+  import FeaturesGrid3Cards from './features/FeaturesGrid3Cards.svelte';
+  import FeaturesHorizontalList from './features/FeaturesHorizontalList.svelte';
+  import FeaturesBannerInlineBar from './features/FeaturesBannerInlineBar.svelte';
+  import FeaturesBentoGrid from './features/FeaturesBentoGrid.svelte';
+  import FeaturesAlternatingZigzag from './features/FeaturesAlternatingZigzag.svelte';
+  import FeaturesInteractiveTabs from './features/FeaturesInteractiveTabs.svelte';
+  import FeaturesVerticalAccordion from './features/FeaturesVerticalAccordion.svelte';
+  import FeaturesStickyScroll from './features/FeaturesStickyScroll.svelte';
+  import FeaturesDenseMatrix from './features/FeaturesDenseMatrix.svelte';
+  import FeaturesComparison from './features/FeaturesComparison.svelte';
   import {
     mapRawFeatureItems,
     getDenseFeatureItems,

@@ -8,7 +8,7 @@ import {
 import {
   computeBarChartLayout,
   getBudgetUsageStatus,
-} from '@/components/admin/ai/costTrendChart.helpers';
+} from '@/components/superadmin/ai-monitoring/costTrendChart.helpers';
 
 describe('AI Cost Trends & Quota Formula Tests', () => {
   describe('calculateBudgetUsedPercentage (Zero-Division Safeguards)', () => {

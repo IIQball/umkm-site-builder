@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import CommissionSettingsPanel from '@/components/admin/CommissionSettingsPanel.svelte';
+import CommissionSettingsPanel from '@/components/superadmin/platform-settings/CommissionSettingsPanel.svelte';
 import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { platformSettings } from '@/db/schema';

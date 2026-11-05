@@ -6,7 +6,7 @@ import {
 } from 'lucide-svelte';
 import type { TemplateSection } from '@/schemas';
 import type { LayerNodeItem, ProductItem, TestimonialItem, FAQItem } from '@/types';
-import { DEFAULT_DEMO_PRODUCTS } from '../sections/productCatalog.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from '../sections/catalog/productCatalog.helpers';
 import { getAllSectionDefinitions } from '../registry';
 import { getFooterLayerNodes } from '../sections/footer/footer.helpers';
 import {

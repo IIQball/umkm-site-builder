@@ -16,18 +16,16 @@
     getDynamicLandingNavLinks,
   } from './footer/footer.helpers';
   import { getEffectiveFooterElementOrder } from './footer/footerLayout.helpers';
-  import {
-    FooterMultiColumn,
-    FooterCenteredSimple,
-    FooterCtaFocused,
-    FooterMinimalSingleRow,
-    FooterGiantWordmark,
-    FooterNewsletterCentric,
-    FooterLiveStatusBadge,
-    FooterSplitMap,
-    FooterSocialLinksGrid,
-    FooterBoxedCard,
-  } from './footer';
+  import FooterMultiColumn from './footer/FooterMultiColumn.svelte';
+  import FooterCenteredSimple from './footer/FooterCenteredSimple.svelte';
+  import FooterCtaFocused from './footer/FooterCtaFocused.svelte';
+  import FooterMinimalSingleRow from './footer/FooterMinimalSingleRow.svelte';
+  import FooterGiantWordmark from './footer/FooterGiantWordmark.svelte';
+  import FooterNewsletterCentric from './footer/FooterNewsletterCentric.svelte';
+  import FooterLiveStatusBadge from './footer/FooterLiveStatusBadge.svelte';
+  import FooterSplitMap from './footer/FooterSplitMap.svelte';
+  import FooterSocialLinksGrid from './footer/FooterSocialLinksGrid.svelte';
+  import FooterBoxedCard from './footer/FooterBoxedCard.svelte';
 
   export let props: FooterProps = {};
   export let styles: SectionStyles = {};

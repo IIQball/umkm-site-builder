@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
   import { Card, Button } from "@/components/ui";
   import { addToast } from "@/lib/toast";
-  import CommissionSimulationCard from "./commission/CommissionSimulationCard.svelte";
-  import CommissionSettingsInputs from "./commission/CommissionSettingsInputs.svelte";
-  import CommissionStatsGrid from "./commission/CommissionStatsGrid.svelte";
+  import CommissionSimulationCard from "./CommissionSimulationCard.svelte";
+  import CommissionSettingsInputs from "./CommissionSettingsInputs.svelte";
+  import CommissionStatsGrid from "./CommissionStatsGrid.svelte";
 
   export let initialFeePercentage: number = 30;
   export let initialSettlementDelayDays: number = 7;

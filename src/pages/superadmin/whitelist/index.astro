@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import AdminWhitelistPanel from '@/components/admin/AdminWhitelistPanel.svelte';
+import AdminWhitelistPanel from '@/components/superadmin/whitelist/AdminWhitelistPanel.svelte';
 import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 
 const user = await getAuthenticatedUser(Astro.request);

@@ -5,8 +5,8 @@
   import { toast } from '@/lib/toast';
   import AdminUserSuspendModal from './AdminUserSuspendModal.svelte';
   import AdminUserDetailModal from './AdminUserDetailModal.svelte';
-  import AdminUserQuotaModal from './user/AdminUserQuotaModal.svelte';
-  import AdminUserTable from './user/AdminUserTable.svelte';
+  import AdminUserQuotaModal from './AdminUserQuotaModal.svelte';
+  import AdminUserTable from './AdminUserTable.svelte';
 
   export let initialUsersJson: string = '[]';
   export let currentUser: any = null;

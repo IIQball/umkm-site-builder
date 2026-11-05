@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import UserManagementPanel from '@/components/admin/UserManagementPanel.svelte';
+import UserManagementPanel from '@/components/superadmin/user-management/UserManagementPanel.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const user = await getAuthenticatedUser(Astro.request);

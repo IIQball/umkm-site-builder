@@ -5,8 +5,8 @@ import {
   calculateCostPerPercentUsage,
   buildDailyTrendPoints,
 } from '@/services/ai/cost-trends.service';
-import { computeBarChartLayout } from '@/components/admin/ai/costTrendChart.helpers';
-import { buildDonutChartOptions } from '@/components/admin/ai/featureDistribution.helpers';
+import { computeBarChartLayout } from '@/components/superadmin/ai-monitoring/costTrendChart.helpers';
+import { buildDonutChartOptions } from '@/components/superadmin/ai-monitoring/featureDistribution.helpers';
 import { buildTenantChartOptions } from '@/components/tenant/ai-credits/tenantUsageChart.helpers';
 import { calculateSafePercentage } from '@/services/ai/top-tenants.service';
 import type { AiFeatureDistributionItem } from '@/types/admin/ai-monitoring.types';

@@ -2,7 +2,7 @@
   import PeriodFilter from '@/components/common/PeriodFilter.svelte';
   import { StatCard } from '@/components/ui';
   import TemplateReviewPanel from './TemplateReviewPanel.svelte';
-  import type { AdminTemplateItem } from './review/review.types';
+  import type { AdminTemplateItem } from './review.types';
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
 
   export let allTemplates: AdminTemplateItem[] = [];

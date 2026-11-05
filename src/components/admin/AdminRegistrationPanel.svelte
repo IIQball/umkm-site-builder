@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, Button, Badge, Modal, Table, Pagination, StatCard } from '@/components/ui';
   import { Clock, XCircle, FileText, UserPlus, Trash2 } from 'lucide-svelte';
-  import AdminUserAddModal from './AdminUserAddModal.svelte';
+  import AdminUserAddModal from '@/components/superadmin/user-management/AdminUserAddModal.svelte';
   import { toast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
 

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Plus, Store } from 'lucide-svelte';
+  import { Plus, FolderTree, FolderSearch } from 'lucide-svelte';
   import { Card, Button, Pagination } from '@/components/ui';
   import { addToast } from '@/lib/toast';
-  import CategoryHeader from './category/CategoryHeader.svelte';
-  import CategoryTable from './category/CategoryTable.svelte';
-  import CategoryFormModal from './category/CategoryFormModal.svelte';
-  import CategoryDeleteModal from './category/CategoryDeleteModal.svelte';
   import { slugify } from '@/lib/utils';
-  import { iconOptions } from './category/category.helpers';
+  import CategoryHeader from './CategoryHeader.svelte';
+  import CategoryTable from './CategoryTable.svelte';
+  import CategoryFormModal from './CategoryFormModal.svelte';
+  import CategoryDeleteModal from './CategoryDeleteModal.svelte';
+  import { iconOptions } from './category.helpers';
 
   export let initialCategories: Array<{
     id: string;
@@ -35,7 +35,7 @@
   let formName = '';
   let formSlug = '';
   let formDescription = '';
-  let formIcon = 'storefront';
+  let formIcon = 'folder';
   let formError: string | null = null;
 
   // Delete Confirm Modal State
@@ -66,26 +66,40 @@
   const fetchCategories = async () => {
     loading = true;
     try {
-      const res = await fetch('/api/admin/business-categories');
+      const res = await fetch('/api/admin/template-categories');
       const json = await res.json();
       if (json.ok && Array.isArray(json.data)) {
         categories = json.data;
         pagination = undefined;
       }
     } catch {
-      addToast({ type: 'error', message: 'Gagal mengambil data kategori bisnis' });
+      addToast({
+        type: 'error',
+        message: 'Gagal mengambil data kategori',
+      });
     } finally {
       loading = false;
     }
   };
 
-  const openFormModal = (cat?: (typeof categories)[0]) => {
-    isEditing = Boolean(cat);
-    editingId = cat?.id || '';
-    formName = cat?.name || '';
-    formSlug = cat?.slug || '';
-    formDescription = cat?.description || '';
-    formIcon = cat?.icon || 'storefront';
+  const openCreateModal = () => {
+    isEditing = false;
+    editingId = '';
+    formName = '';
+    formSlug = '';
+    formDescription = '';
+    formIcon = 'folder';
+    formError = null;
+    showFormModal = true;
+  };
+
+  const openEditModal = (cat: (typeof categories)[0]) => {
+    isEditing = true;
+    editingId = cat.id;
+    formName = cat.name;
+    formSlug = cat.slug;
+    formDescription = cat.description || '';
+    formIcon = cat.icon || 'folder';
     formError = null;
     showFormModal = true;
   };
@@ -112,8 +126,8 @@
 
     try {
       const url = isEditing
-        ? `/api/admin/business-categories/${editingId}`
-        : '/api/admin/business-categories';
+        ? `/api/admin/template-categories/${editingId}`
+        : '/api/admin/template-categories';
       const method = isEditing ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -128,11 +142,13 @@
       });
 
       const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error?.message || 'Gagal menyimpan kategori bisnis');
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error?.message || 'Gagal menyimpan kategori');
+      }
 
       addToast({
         type: 'success',
-        message: isEditing ? 'Kategori bisnis berhasil diperbarui' : 'Kategori bisnis berhasil ditambahkan',
+        message: isEditing ? 'Kategori berhasil diperbarui' : 'Kategori berhasil ditambahkan',
       });
 
       showFormModal = false;
@@ -149,37 +165,42 @@
     isDeleting = true;
 
     try {
-      const res = await fetch(`/api/admin/business-categories/${deletingCategory.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/template-categories/${deletingCategory.id}`, {
+        method: 'DELETE',
+      });
       const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error?.message || 'Gagal menghapus kategori bisnis');
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error?.message || 'Gagal menghapus kategori');
+      }
 
       addToast({
         type: 'success',
-        message: `Kategori bisnis "${deletingCategory.name}" berhasil dihapus`,
+        message: `Kategori "${deletingCategory.name}" berhasil dihapus`,
       });
 
       showDeleteModal = false;
       deletingCategory = null;
       await fetchCategories();
     } catch (err) {
-      addToast({ type: 'error', message: err instanceof Error ? err.message : 'Gagal menghapus kategori bisnis' });
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal menghapus kategori',
+      });
     } finally {
       isDeleting = false;
     }
   };
 
   onMount(() => {
-    if (initialCategories.length === 0) fetchCategories();
+    if (initialCategories.length === 0) {
+      fetchCategories();
+    }
 
-    const handleCreateEvent = () => openFormModal();
-    window.addEventListener('open_create_biz_category_modal', handleCreateEvent);
-
-    const topBtn = document.getElementById('btn-add-biz-category-top');
-    if (topBtn) topBtn.addEventListener('click', handleCreateEvent);
+    const handleCreateEvent = () => openCreateModal();
+    window.addEventListener('open_create_category_modal', handleCreateEvent);
 
     return () => {
-      window.removeEventListener('open_create_biz_category_modal', handleCreateEvent);
-      if (topBtn) topBtn.removeEventListener('click', handleCreateEvent);
+      window.removeEventListener('open_create_category_modal', handleCreateEvent);
     };
   });
 </script>
@@ -188,27 +209,31 @@
   <CategoryHeader
     bind:searchQuery
     {loading}
-    title="Master Kategori Bisnis"
-    subtitle="Daftar sektor industri UMKM, slug URL, ikon antarmuka, dan opsi modifikasi data"
     onRefresh={fetchCategories}
   >
-    <Store slot="icon" size={20} />
+    <FolderTree slot="icon" size={20} />
   </CategoryHeader>
 
+  <!-- Categories Table Content -->
   {#if filteredCategories.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-        <Store size={24} />
+        <FolderSearch size={24} />
       </div>
-      <h4 class="font-heading font-bold text-main text-base mb-1">Tidak Ada Kategori Bisnis Ditemukan</h4>
+      <h4 class="font-heading font-bold text-main text-base mb-1">Tidak Ada Kategori Ditemukan</h4>
       <p class="text-xs text-secondary max-w-sm mx-auto leading-relaxed">
-        {searchQuery ? 'Tidak ada kategori bisnis yang cocok dengan pencarian Anda.' : 'Belum ada kategori bisnis terdaftar. Tambahkan kategori baru sekarang.'}
+        {searchQuery ? 'Tidak ada kategori yang cocok dengan pencarian Anda.' : 'Belum ada kategori template terdaftar. Tambahkan kategori baru sekarang.'}
       </p>
       {#if !searchQuery}
         <div class="mt-4">
-          <Button variant="primary" size="sm" className="rounded-2xl font-bold" on:click={() => openFormModal()}>
+          <Button
+            variant="primary"
+            size="sm"
+            className="rounded-2xl font-bold"
+            on:click={openCreateModal}
+          >
             <Plus size={14} />
-            <span>Tambah Kategori Bisnis Pertama</span>
+            <span>Tambah Kategori Pertama</span>
           </Button>
         </div>
       {/if}
@@ -218,11 +243,16 @@
       {paginatedCategories}
       {currentPage}
       {pageSize}
-      categoryLabel="Kategori Bisnis"
-      onEdit={(cat) => openFormModal(cat)}
+      categoryLabel="Kategori Template"
+      onEdit={openEditModal}
       onDelete={openDeleteConfirm}
     />
-    <Pagination bind:currentPage {totalItems} {pageSize} />
+
+    <Pagination
+      bind:currentPage
+      {totalItems}
+      {pageSize}
+    />
   {/if}
 </Card>
 
@@ -237,12 +267,6 @@
   bind:formError
   {isSaving}
   {iconOptions}
-  editTitle="Ubah Kategori Bisnis"
-  createTitle="Tambah Kategori Bisnis Baru"
-  editSubtitle="Perbarui informasi sektor industri bisnis toko"
-  createSubtitle="Buat sektor kategori baru untuk registrasi toko merchant"
-  namePlaceholder="Contoh: Kuliner & Minuman"
-  descPlaceholder="Kategori untuk resto, cafe, kedai kopi, kuliner, dan catering..."
   onSave={handleSave}
   onClose={() => (showFormModal = false)}
 />
@@ -252,7 +276,6 @@
   bind:showModal={showDeleteModal}
   {deletingCategory}
   {isDeleting}
-  warningText="Toko UMKM yang terkait kategori ini mungkin akan kehilangan label industrinya."
   onClose={() => (showDeleteModal = false)}
   onConfirm={handleDelete}
 />

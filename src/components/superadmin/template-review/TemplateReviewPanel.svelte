@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  export type { AdminTemplateItem } from './review/review.types';
+  export type { AdminTemplateItem } from './review.types';
 </script>
 
 <script lang="ts">
@@ -12,9 +12,9 @@
   } from 'lucide-svelte';
   import { Card, Pagination, Button } from '@/components/ui';
   import { addToast } from '@/lib/toast';
-  import type { AdminTemplateItem } from './review/review.types';
-  import TemplateReviewTable from './review/TemplateReviewTable.svelte';
-  import TemplateReviewModals from './review/TemplateReviewModals.svelte';
+  import type { AdminTemplateItem } from './review.types';
+  import TemplateReviewTable from './TemplateReviewTable.svelte';
+  import TemplateReviewModals from './TemplateReviewModals.svelte';
 
   export let initialTemplates: AdminTemplateItem[] | undefined = undefined;
   export let initialTemplatesJson: string = '[]';

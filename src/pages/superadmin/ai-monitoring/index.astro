@@ -1,7 +1,7 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
 import { getAuthenticatedUser, isSuperAdmin } from "@/lib/auth";
-import AiMonitoringDashboard from "@/components/admin/ai/AiMonitoringDashboard.svelte";
+import AiMonitoringDashboard from "@/components/superadmin/ai-monitoring/AiMonitoringDashboard.svelte";
 import { getAiMonitoringDashboardData } from "@/services/ai/monitoring.service";
 
 export const prerender = false;

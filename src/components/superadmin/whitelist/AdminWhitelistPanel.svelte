@@ -2,13 +2,13 @@
   import { onMount } from 'svelte';
   import { ShieldCheck, Plus } from 'lucide-svelte';
   import { toast } from '@/lib/toast';
-  import type { AdminEntry, ConfirmModalState } from './whitelist/whitelist.types';
+  import type { AdminEntry, ConfirmModalState } from './whitelist.types';
   
-  import AdminAddModal from './whitelist/AdminAddModal.svelte';
-  import AdminWhitelistTable from './whitelist/AdminWhitelistTable.svelte';
-  import AdminDetailModal from './whitelist/AdminDetailModal.svelte';
-  import AdminConfirmModal from './whitelist/AdminConfirmModal.svelte';
-  import StatCard from '../ui/StatCard.svelte';
+  import AdminAddModal from './AdminAddModal.svelte';
+  import AdminWhitelistTable from './AdminWhitelistTable.svelte';
+  import AdminDetailModal from './AdminDetailModal.svelte';
+  import AdminConfirmModal from './AdminConfirmModal.svelte';
+  import StatCard from '@/components/ui/StatCard.svelte';
   import { Button } from '@/components/ui';
 
   let admins: AdminEntry[] = [];

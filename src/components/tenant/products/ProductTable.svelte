@@ -3,7 +3,7 @@
   import { toast } from "@/lib/toast";
 
   import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
+  import type { products as productsSchema } from "@/db/schema";
   import ProductFormModal from "./ProductFormModal.svelte";
   import ProductDeleteModal from "./ProductDeleteModal.svelte";
   import ProductTableRow from "./ProductTableRow.svelte";

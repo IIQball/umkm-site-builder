@@ -2,13 +2,13 @@
   import { productImageUrls } from '@/lib/products/image';
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
+  import type { products as productsSchema } from "@/db/schema";
   import type { VariantGroup } from "@/schemas/tenant/product-variant.schema";
   import ImageUpload from "@/components/ui/ImageUpload.svelte";
   import { Button, Input, Modal } from "@/components/ui";
-  import ProductVariantEditor from "./product/ProductVariantEditor.svelte";
-  import ProductBasicFields from "./product/ProductBasicFields.svelte";
-  import { deserializeVariants, validateVariantGroups } from "./product/productForm.helpers";
+  import ProductVariantEditor from "./ProductVariantEditor.svelte";
+  import ProductBasicFields from "./ProductBasicFields.svelte";
+  import { deserializeVariants, validateVariantGroups } from "./productForm.helpers";
 
   type Product = InferSelectModel<typeof productsSchema>;
   type Category = { id: string; name: string };

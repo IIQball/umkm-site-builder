@@ -3,8 +3,8 @@
   import { Button, Card, Table, StatCard, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import { slugify } from '@/lib/utils';
-  import TenantCategoryFormModal from './category/TenantCategoryFormModal.svelte';
-  import TenantCategoryDeleteModal from './category/TenantCategoryDeleteModal.svelte';
+  import TenantCategoryFormModal from './TenantCategoryFormModal.svelte';
+  import TenantCategoryDeleteModal from './TenantCategoryDeleteModal.svelte';
   
   interface Category {
     id: string;

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { CheckCircle2, Clock, XCircle, Palette, Receipt, Search } from 'lucide-svelte';
   import { Card, Table, Pagination, Button } from '@/components/ui';
-  import TenantOrderRow from './orders/TenantOrderRow.svelte';
-  import InvoiceReceiptModal from './orders/InvoiceReceiptModal.svelte';
+  import TenantOrderRow from './TenantOrderRow.svelte';
+  import InvoiceReceiptModal from './InvoiceReceiptModal.svelte';
   import { addToast } from '@/lib/toast';
   import type { OrderTransactionItem } from '@/types/finance';
 

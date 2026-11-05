@@ -2,7 +2,7 @@
   import { firstProductImageUrl } from "@/lib/products/image";
   import { createEventDispatcher } from "svelte";
   import type { InferSelectModel } from "drizzle-orm";
-  import type { products as productsSchema } from "../../db/schema";
+  import type { products as productsSchema } from "@/db/schema";
   import { Button, Badge } from "@/components/ui";
   import { formatIDR } from "@/lib/currency";
 

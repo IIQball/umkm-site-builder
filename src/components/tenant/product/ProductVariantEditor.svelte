@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { VariantGroup } from '../../../schemas/product-variant.schema';
+  import type { VariantGroup } from '@/schemas/tenant/product-variant.schema';
   import { formatPriceAdjustment, parsePriceAdjustment } from './productForm.helpers';
   import Badge from '../../ui/Badge.svelte';
   import Button from '../../ui/Button.svelte';

@@ -1,4 +1,4 @@
-import type { VariantGroup, VariantOption } from "../../../schemas/product-variant.schema";
+import type { VariantGroup, VariantOption } from "@/schemas/tenant/product-variant.schema";
 import { formatCurrencyInput } from "@/lib/currency";
 
 export function deserializeVariants(raw: unknown): VariantGroup[] {

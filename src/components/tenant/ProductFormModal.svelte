@@ -4,7 +4,7 @@
   import type { InferSelectModel } from "drizzle-orm";
   import type { products as productsSchema } from "../../db/schema";
   import type { VariantGroup } from "@/schemas/tenant/product-variant.schema";
-  import ImageUpload from "../shared/ImageUpload.svelte";
+  import ImageUpload from "@/components/ui/ImageUpload.svelte";
   import { Button, Input, Modal } from "@/components/ui";
   import ProductVariantEditor from "./product/ProductVariantEditor.svelte";
   import ProductBasicFields from "./product/ProductBasicFields.svelte";

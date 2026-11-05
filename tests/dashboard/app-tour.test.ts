@@ -5,7 +5,7 @@ import {
   isTourCompleted,
   setTourCompleted,
   isDashboardHomePage,
-} from '@/components/dashboard/tour/tour.helpers';
+} from '@/components/shell/tour/tour.helpers';
 
 describe('Dashboard App Tour Helpers', () => {
   let localStorageMock: Record<string, string> = {};

@@ -7,7 +7,7 @@ import {
   isPathActive,
   getRoleConfig,
   type NavGroup,
-} from '@/components/dashboard/sidebar/sidebar.helpers';
+} from '@/components/shell/sidebar/sidebar.helpers';
 import type { AuthenticatedUser } from '@/lib/auth';
 
 describe('Sidebar Navigation Across All Roles', () => {

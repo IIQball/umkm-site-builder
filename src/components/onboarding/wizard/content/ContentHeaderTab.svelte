@@ -11,7 +11,7 @@
   =============================================================================
 -->
 <script lang="ts">
-  import ImageUpload from '@/components/shared/ImageUpload.svelte';
+  import ImageUpload from '@/components/ui/ImageUpload.svelte';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;

@@ -12,7 +12,7 @@ import {
   BusinessCategoryCreateSchema,
   BusinessCategoryUpdateSchema,
 } from '@/schemas';
-import { getNavGroups } from '@/components/dashboard/sidebar/sidebar.helpers';
+import { getNavGroups } from '@/components/shell/sidebar/sidebar.helpers';
 import { getRoleNavLinks } from '@/components/common/navbar.helpers';
 
 vi.mock('@/lib/auth', () => ({

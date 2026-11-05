@@ -11,7 +11,7 @@
   =============================================================================
 -->
 <script lang="ts">
-  import ImageUpload from '@/components/shared/ImageUpload.svelte';
+  import ImageUpload from '@/components/ui/ImageUpload.svelte';
   import { HERO_IMAGE_PRESETS } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 

@@ -4,7 +4,7 @@ import {
   getRoleConfig,
   getDashboardHomePath,
   getSettingsHref
-} from '@/components/dashboard/sidebar/sidebar.helpers'
+} from '@/components/shell/sidebar/sidebar.helpers'
 
 export {
   type RoleConfig,

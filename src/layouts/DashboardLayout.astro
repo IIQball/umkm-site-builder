@@ -6,11 +6,11 @@
  */
 import '@/styles/global.css';
 import { getAuthenticatedUser } from '@/lib/auth';
-import Sidebar from '@/components/dashboard/Sidebar.svelte';
-import DashboardNavbar from '@/components/dashboard/DashboardNavbar.svelte';
+import Sidebar from '@/components/shell/Sidebar.svelte';
+import DashboardNavbar from '@/components/shell/DashboardNavbar.svelte';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
 import LandingMarquee from '@/components/landing/LandingMarquee.svelte';
-import DashboardAppTour from '@/components/dashboard/tour/DashboardAppTour.svelte';
+import DashboardAppTour from '@/components/shell/tour/DashboardAppTour.svelte';
 
 interface Props {
   title?: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Input, Badge } from '@/components/ui';
-  import ImageUpload from '@/components/shared/ImageUpload.svelte';
+  import ImageUpload from '@/components/ui/ImageUpload.svelte';
 
   export let name: string = '';
   export let loading: boolean = false;

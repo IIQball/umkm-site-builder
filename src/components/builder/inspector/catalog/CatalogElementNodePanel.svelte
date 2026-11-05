@@ -4,7 +4,7 @@
   import type { ProductItem } from '@/types';
   import { Sparkles, Type, FileText, MousePointerClick, Image as ImageIcon, ShoppingBag, Clock, ListFilter } from 'lucide-svelte';
   import NodeStyleControls from '../NodeStyleControls.svelte';
-  import { DEFAULT_DEMO_PRODUCTS } from '../../sections/productCatalog.helpers';
+  import { DEFAULT_DEMO_PRODUCTS } from '../../sections/catalog/productCatalog.helpers';
 
   export let section: TemplateSection;
   export let nodeId: string;

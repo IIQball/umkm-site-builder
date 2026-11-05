@@ -2,20 +2,20 @@
   import { Sparkles } from 'lucide-svelte';
   import type { TemplateSection } from '@/schemas';
   import { getNodeLabel } from './nodeContent.constants';
-  import AnnouncementNodeForm from './node-forms/AnnouncementNodeForm.svelte';
-  import LogoNodeForm from './node-forms/LogoNodeForm.svelte';
-  import NavLinksNodeForm from './node-forms/NavLinksNodeForm.svelte';
-  import HeroNodeForms from './node-forms/HeroNodeForms.svelte';
-  import FeatureHeadingNodeForm from './node-forms/FeatureHeadingNodeForm.svelte';
-  import FeatureItemNodeForm from './node-forms/FeatureItemNodeForm.svelte';
-  import FeatureImageNodeForm from './node-forms/FeatureImageNodeForm.svelte';
-  import FeaturesComparisonContent from '../content/features/FeaturesComparisonContent.svelte';
-  import FeaturesRepeaterContent from '../content/features/FeaturesRepeaterContent.svelte';
-  import CatalogNodeForms from './node-forms/CatalogNodeForms.svelte';
-  import TestimonialsNodeForms from './node-forms/TestimonialsNodeForms.svelte';
-  import FaqNodeForms from './node-forms/FaqNodeForms.svelte';
-  import MapsNodeForms from './node-forms/MapsNodeForms.svelte';
-  import FooterNodeForms from './node-forms/FooterNodeForms.svelte';
+  import AnnouncementNodeForm from './header/AnnouncementNodeForm.svelte';
+  import LogoNodeForm from './header/LogoNodeForm.svelte';
+  import NavLinksNodeForm from './header/NavLinksNodeForm.svelte';
+  import HeroNodeForms from './hero/HeroNodeForms.svelte';
+  import FeatureHeadingNodeForm from './features/FeatureHeadingNodeForm.svelte';
+  import FeatureItemNodeForm from './features/FeatureItemNodeForm.svelte';
+  import FeatureImageNodeForm from './features/FeatureImageNodeForm.svelte';
+  import FeaturesComparisonContent from './features/FeaturesComparisonContent.svelte';
+  import FeaturesRepeaterContent from './features/FeaturesRepeaterContent.svelte';
+  import CatalogNodeForms from './catalog/CatalogNodeForms.svelte';
+  import TestimonialsNodeForms from './testimonials/TestimonialsNodeForms.svelte';
+  import FaqNodeForms from './faq/FaqNodeForms.svelte';
+  import MapsNodeForms from './maps/MapsNodeForms.svelte';
+  import FooterNodeForms from './footer/FooterNodeForms.svelte';
   import {
     IMAGE_SUPPORTED_FEATURE_PRESETS,
     ITEM_IMAGE_FEATURE_PRESETS,

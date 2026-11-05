@@ -3,7 +3,7 @@
   import type { ProductItem } from '@/types';
   import { Gift, Star, Download, FileText, ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from '../productCatalog.helpers';
+  import { buildWhatsAppOrderLink, resolveProductNodeStyle } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];

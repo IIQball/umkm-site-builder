@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { PanelLeft, PanelRight, Sliders } from 'lucide-svelte';
-  import TopBar from './TopBar.svelte';
+  import TopBar from './topbar/TopBar.svelte';
   import LayerPanel from './LayerPanel.svelte';
   import Canvas from './Canvas.svelte';
   import PropertyInspector from './PropertyInspector.svelte';

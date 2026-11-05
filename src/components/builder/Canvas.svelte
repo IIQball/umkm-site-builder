@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { PlusSquare } from 'lucide-svelte';
-  import SectionRenderer from './sections/SectionRenderer.svelte';
-  import LayoutGridOverlay from './LayoutGridOverlay.svelte';
+  import SectionRenderer from './registry/SectionRenderer.svelte';
+  import LayoutGridOverlay from './canvas/LayoutGridOverlay.svelte';
   import CanvasSpacingHandles from './canvas/CanvasSpacingHandles.svelte';
   import type { TemplateSection, TemplateTheme } from '@/schemas';
   import { editorStore, canvasStore } from './stores/editorStore';

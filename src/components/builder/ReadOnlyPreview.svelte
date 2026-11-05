@@ -11,7 +11,7 @@
     Moon,
     ArrowLeft,
   } from 'lucide-svelte';
-  import SectionRenderer from './sections/SectionRenderer.svelte';
+  import SectionRenderer from './registry/SectionRenderer.svelte';
   import { onMount } from 'svelte';
   import { editorStore } from './stores/editorStore';
   import type { EditorTemplate } from './stores/editorStore.types';

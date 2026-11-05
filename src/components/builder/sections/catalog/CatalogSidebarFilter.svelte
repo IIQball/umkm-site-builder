@@ -3,7 +3,7 @@
   import type { ProductItem } from '@/types';
   import { ShoppingBag, ShoppingCart } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { DEFAULT_CATALOG_CATEGORIES, resolveProductNodeStyle, type CatalogCategory } from '../productCatalog.helpers';
+  import { DEFAULT_CATALOG_CATEGORIES, resolveProductNodeStyle, type CatalogCategory } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];

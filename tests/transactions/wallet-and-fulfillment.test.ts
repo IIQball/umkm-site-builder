@@ -14,6 +14,10 @@ vi.mock('@/lib/db/client', () => {
   return { db: mockDb, getDb: () => mockDb };
 });
 
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(async <T>(fn: (tx: typeof db) => Promise<T>): Promise<T> => fn(db)),
+}));
+
 vi.mock('@/lib/finance/xendit', () => ({
   xenditClient: { createInvoice: vi.fn(), getInvoice: vi.fn(), verifyWebhookSignature: vi.fn() },
 }));
@@ -75,7 +79,13 @@ describe('Financial Engine & Ledger Service', () => {
         mockDb.insert.mockReturnValueOnce({
           values: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 'w_123', designerId: 'd1', balance: 0 }]) }),
         });
-        mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+        mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
         mockDb.insert.mockReturnValueOnce({
           values: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ id: 'wmut_1', walletId: 'w_123', type: 'CREDIT', amount: 50000, balanceAfter: 50000 }]),
@@ -92,7 +102,13 @@ describe('Financial Engine & Ledger Service', () => {
         mockDb.select.mockReturnValueOnce({
           from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'w_123', designerId: 'd1', balance: 50000 }]) }) }),
         });
-        mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+        mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
         mockDb.insert.mockReturnValueOnce({
           values: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ id: 'wmut_2', walletId: 'w_123', type: 'CREDIT', amount: 30000, balanceAfter: 80000 }]),
@@ -109,7 +125,13 @@ describe('Financial Engine & Ledger Service', () => {
         mockDb.select.mockReturnValueOnce({
           from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'w_123', designerId: 'd1', balance: 100000 }]) }) }),
         });
-        mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+        mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
         mockDb.insert.mockReturnValueOnce({
           values: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ id: 'wmut_3', walletId: 'w_123', type: 'DEBIT', amount: 40000, balanceAfter: 60000 }]),
@@ -175,7 +197,13 @@ describe('Financial Engine & Ledger Service', () => {
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, status: 'pending' }]) }),
       });
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+      mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
       mockDb.insert.mockReturnValueOnce({ values: vi.fn().mockResolvedValue(undefined) });
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'tpl_1', name: 'Food Template', designerId: 'd_chef' }]) }) }),
@@ -185,7 +213,13 @@ describe('Financial Engine & Ledger Service', () => {
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'w_chef', designerId: 'd_chef', balance: 0 }]) }) }),
       });
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+      mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 'wm_1', walletId: 'w_chef', type: 'CREDIT', amount: 70000, balanceAfter: 70000 }]) }),
       });
@@ -215,7 +249,13 @@ describe('Financial Engine & Ledger Service', () => {
       });
 
       // 2. Update transaction status to success
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+      mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_assisted_1', userId: 'tenant_1', type: 'template_purchase', templateId: 'tpl_1', amount: 55000, adminFee: 5000, assistedBy: 'admin_1', status: 'success' }]),
+          }),
+        }),
+      });
 
       // 3. Insert userTemplates
       mockDb.insert.mockReturnValueOnce({ values: vi.fn().mockResolvedValue(undefined) });
@@ -253,7 +293,13 @@ describe('Financial Engine & Ledger Service', () => {
         }),
       });
       // 7b. Update designer wallet
-      mockDb.update.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
+      mockDb.update.mockReturnValueOnce({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl', userId: 'u1', type: 'template_purchase', templateId: 'tpl_1', amount: 100000, adminFee: 0, status: 'success' }]),
+          }),
+        }),
+      });
       // 7c. Insert designer wallet mutation
       mockDb.insert.mockReturnValueOnce({
         values: vi.fn().mockReturnValue({

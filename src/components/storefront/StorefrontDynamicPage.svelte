@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import type { TemplateConfig, TemplateSection } from '@/schemas';
   import type { ProductItem } from '@/types';
-  import SectionRenderer from '@/components/builder/sections/SectionRenderer.svelte';
+  import SectionRenderer from '@/components/builder/registry/SectionRenderer.svelte';
   import { editorStore, canvasStore } from '@/components/builder/stores/editorStore';
   import StoreStatusBanner from './StoreStatusBanner.svelte';
   import { monitorCLS } from '@/lib/performance/cls.helpers';

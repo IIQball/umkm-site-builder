@@ -4,7 +4,7 @@
   import { ShoppingCart } from 'lucide-svelte';
   import { formatIDR } from '@/lib/currency';
   import { generateWhatsAppLink, getEffectiveWhatsAppNumber, openWhatsAppWithTracking } from '@/lib/whatsapp';
-  import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './productCatalog.helpers';
+  import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './catalog/productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
   import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
   import CatalogCarouselScroll from './catalog/CatalogCarouselScroll.svelte';

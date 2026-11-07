@@ -20,15 +20,6 @@
   let loading: boolean = false;
   let errorMsg: string | null = null;
 
-  const tableHeaders = [
-    { key: 'rank', label: 'Rank', align: 'center' as const, width: '75px' },
-    { key: 'store', label: 'Toko & Pemilik', align: 'left' as const },
-    { key: 'generations', label: 'Total Generate', align: 'right' as const },
-    { key: 'cost', label: 'Biaya API (IDR)', align: 'right' as const },
-    { key: 'tokens', label: 'Konsumsi Token', align: 'right' as const },
-    { key: 'credits', label: 'Kredit Dipakai', align: 'right' as const },
-    { key: 'lastActive', label: 'Terakhir Aktif', align: 'right' as const },
-  ];
 
   $: tenants = data?.tenants || [];
   $: summary = data?.summary || {
@@ -86,9 +77,14 @@
           <Trophy size={20} />
         </div>
         <div>
-          <h2 class="text-heading-md font-bold text-main tracking-tight font-heading">
-            Peringkat Toko Paling Aktif (AI)
-          </h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-heading-md font-bold text-main tracking-tight font-heading">
+              Peringkat Toko Paling Aktif (AI)
+            </h2>
+            <Badge variant="info" size="sm" dot={false} class="hidden sm:inline-flex text-2xs font-bold">
+              {sortBy === 'cost' ? 'Urutan: Biaya Terbesar' : 'Urutan: Generate Terbanyak'}
+            </Badge>
+          </div>
           <p class="text-body-sm text-secondary mt-0.5">
             Analitik toko berdasarkan serapan biaya komputasi API dan frekuensi generate model AI.
           </p>
@@ -181,8 +177,47 @@
       </p>
     </div>
   {:else}
-    <div class="rounded-xl border border-light overflow-hidden">
-      <Table headers={tableHeaders} minWidth="min-w-[850px]">
+    <div class="rounded-xl border border-light overflow-hidden relative transition-opacity duration-200 {loading ? 'opacity-60' : 'opacity-100'}">
+      {#if loading}
+        <div class="absolute inset-0 bg-card/40 backdrop-blur-[1px] flex items-center justify-center z-10 pointer-events-none">
+          <RefreshCw size={22} class="animate-spin text-primary" />
+        </div>
+      {/if}
+      <Table minWidth="min-w-[850px]">
+        <svelte:fragment slot="head">
+          <th class="text-label-caps text-muted px-4 py-3.5 text-center" style="width: 75px">Rank</th>
+          <th class="text-label-caps text-muted px-4 py-3.5 text-left">Toko & Pemilik</th>
+          <th class="text-label-caps px-4 py-3.5 text-right transition-colors {sortBy === 'generations' ? 'text-primary bg-primary/10 font-black' : 'text-muted'}">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 ml-auto cursor-pointer font-bold transition-all hover:text-primary {sortBy === 'generations' ? 'text-primary' : 'text-muted'}"
+              on:click={() => toggleSort('generations')}
+              title="Urutkan berdasarkan jumlah generate terbanyak"
+            >
+              <span>Total Generate</span>
+              {#if sortBy === 'generations'}
+                <span class="text-xs font-black">↓</span>
+              {/if}
+            </button>
+          </th>
+          <th class="text-label-caps px-4 py-3.5 text-right transition-colors {sortBy === 'cost' ? 'text-primary bg-primary/10 font-black' : 'text-muted'}">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 ml-auto cursor-pointer font-bold transition-all hover:text-primary {sortBy === 'cost' ? 'text-primary' : 'text-muted'}"
+              on:click={() => toggleSort('cost')}
+              title="Urutkan berdasarkan biaya API terbesar"
+            >
+              <span>Biaya API (IDR)</span>
+              {#if sortBy === 'cost'}
+                <span class="text-xs font-black">↓</span>
+              {/if}
+            </button>
+          </th>
+          <th class="text-label-caps text-muted px-4 py-3.5 text-right">Konsumsi Token</th>
+          <th class="text-label-caps text-muted px-4 py-3.5 text-right">Kredit Dipakai</th>
+          <th class="text-label-caps text-muted px-4 py-3.5 text-right">Terakhir Aktif</th>
+        </svelte:fragment>
+
         {#each tenants as item (item.tenantId)}
           {@const rankInfo = getRankBadgeInfo(item.rank)}
           <tr>
@@ -206,9 +241,9 @@
             </td>
 
             <!-- Generations & Success Rate -->
-            <td class="py-3.5 px-4 text-right">
+            <td class="py-3.5 px-4 text-right transition-colors {sortBy === 'generations' ? 'bg-primary/5 font-semibold' : ''}">
               <div class="flex flex-col items-end gap-1">
-                <span class="font-bold text-main">{formatNumber(item.totalGenerations)}</span>
+                <span class="font-bold {sortBy === 'generations' ? 'text-primary' : 'text-main'}">{formatNumber(item.totalGenerations)}</span>
                 <Badge variant={getSuccessRateVariant(item.successRate)} size="sm" dot={true}>
                   {item.successRate}% sukses
                 </Badge>
@@ -216,9 +251,9 @@
             </td>
 
             <!-- Cost IDR & USD -->
-            <td class="py-3.5 px-4 text-right">
+            <td class="py-3.5 px-4 text-right transition-colors {sortBy === 'cost' ? 'bg-primary/5 font-semibold' : ''}">
               <div class="flex flex-col items-end">
-                <span class="font-bold text-main">{formatIDR(item.totalCostIdr)}</span>
+                <span class="font-bold {sortBy === 'cost' ? 'text-primary' : 'text-main'}">{formatIDR(item.totalCostIdr)}</span>
                 <span class="text-2xs text-muted font-mono">${item.totalCostUsd.toFixed(2)}</span>
               </div>
             </td>

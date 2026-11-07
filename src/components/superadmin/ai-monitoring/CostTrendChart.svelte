@@ -98,7 +98,7 @@
   <!-- Top Bar: Title & Dynamic Period Label -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center flex-shrink-0 shadow-2xs">
         <BarChart3 size={20} />
       </div>
       <div>
@@ -150,7 +150,7 @@
               <div class="flex items-center gap-2 text-2xs text-canvas/80">
                 <span>{hoveredBar.executionCount} gen ({hoveredBar.successCount} sukses)</span>
               </div>
-              <span class="text-3xs font-mono text-indigo-300">
+              <span class="text-3xs font-mono text-primary-light">
                 {hoveredBar.tokens.toLocaleString('id-ID')} token
               </span>
             </div>
@@ -165,12 +165,12 @@
           >
             <defs>
               <linearGradient id="aiBarGradDefault" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#6366f1" />
-                <stop offset="100%" stop-color="#4f46e5" />
+                <stop offset="0%" stop-color="#36C6FD" />
+                <stop offset="100%" stop-color="#00A3EF" />
               </linearGradient>
               <linearGradient id="aiBarGradHover" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#818cf8" />
-                <stop offset="100%" stop-color="#6366f1" />
+                <stop offset="0%" stop-color="#70D8FE" />
+                <stop offset="100%" stop-color="#36C6FD" />
               </linearGradient>
             </defs>
 
@@ -233,7 +233,7 @@
                   x={bar.x + bar.width / 2}
                   y={chartLayout.baselineY + 18}
                   text-anchor="middle"
-                  class="text-2xs font-sans font-medium transition-colors select-none {hoveredIndex === i ? 'fill-indigo-600 font-bold' : 'fill-secondary'}"
+                  class="text-2xs font-sans font-medium transition-colors select-none {hoveredIndex === i ? 'fill-primary font-bold' : 'fill-secondary'}"
                 >
                   {dailyTrends.length > 14 && i % 2 !== 0 ? '' : bar.label.split(' ')[0]}
                 </text>

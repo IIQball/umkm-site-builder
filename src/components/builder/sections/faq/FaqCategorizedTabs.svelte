@@ -101,7 +101,7 @@
         <button
           type="button"
           on:click|stopPropagation={() => toggle(index)}
-          class="w-full p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
+          class="w-full min-h-[44px] p-4 flex items-center justify-between gap-4 text-left font-heading font-bold text-xs sm:text-sm hover:text-[var(--theme-primary, var(--color-primary))] transition-colors cursor-pointer"
           style="color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading));"
         >
           <span class="flex-1 min-w-0">{item.question}</span>

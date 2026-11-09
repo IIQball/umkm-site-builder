@@ -25,8 +25,9 @@
 
 .cq-title-lg {
   font-family: var(--font-heading, system-ui, sans-serif);
-  font-size: 1.75rem;
-  line-height: 2.125rem;
+  font-size: var(--theme-text-h1, var(--text-h1-size, 1.75rem));
+  font-weight: var(--theme-text-h1-weight, var(--text-h1-weight, 700));
+  line-height: 1.15;
 }
 
 .cq-btn-group {
@@ -56,8 +57,8 @@
     gap: 2rem !important;
   }
   .cq-title-lg {
-    font-size: 2.25rem;
-    line-height: 2.625rem;
+    font-size: var(--theme-text-h1, var(--text-h1-size, 2.25rem));
+    line-height: 1.15;
   }
   .cq-btn-group {
     flex-direction: row;

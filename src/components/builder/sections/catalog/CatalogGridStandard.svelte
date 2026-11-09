@@ -127,7 +127,7 @@
       class={`bg-card border border-light/80 rounded-2xl p-4 flex flex-col justify-between relative transition-all duration-200 text-left cursor-pointer ${
         isCardActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-lg'
-          : 'hover:shadow-md hover:border-light hover:shadow-md'
+          : 'hover:shadow-md hover:border-light'
       }`}
       style="{prodStyle.marginTop ? `margin-top: ${prodStyle.marginTop};` : ''} {prodStyle.marginBottom ? `margin-bottom: ${prodStyle.marginBottom};` : ''}"
     >
@@ -158,21 +158,24 @@
           {/if}
 
           {#if product.categoryName || product.category?.name}
-            <span class="absolute top-2 left-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-slate-700 dark:text-slate-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10">
+            <span
+              class="absolute top-2 left-2 backdrop-blur-xs text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
+              style="background-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 15%, transparent); color: var(--theme-secondary, var(--color-secondary)); border: 1px solid color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 30%, transparent); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
+            >
               {product.categoryName || product.category?.name}
             </span>
           {:else if product.badge}
             <span
               class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
-              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
             >
               {product.badge}
             </span>
           {/if}
 
           {#if activePreset === 'badge_stock_scarcity'}
-            <div class="absolute bottom-2 left-2 bg-amber-500 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs z-10">
-              <Flame size={11} class="text-rose-600" />
+            <div class="absolute bottom-2 left-2 bg-warning text-warning-content font-bold text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs z-10" style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));">
+              <Flame size={11} class="text-error" />
               <span>Sisa {((index + 1) * 3)} slot!</span>
             </div>
           {/if}
@@ -180,13 +183,13 @@
 
         <h3
           class="font-heading font-bold text-xs sm:text-sm text-main line-clamp-2"
-          style={prodStyle.color ? `color: ${prodStyle.color} !important;` : ''}
+          style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600)); {prodStyle.color ? `color: ${prodStyle.color} !important;` : ''}"
         >
           {product.name}
         </h3>
         
         {#if product.description}
-          <p class="text-[11px] text-secondary line-clamp-2 mt-1 leading-relaxed">
+          <p class="text-[11px] text-secondary line-clamp-2 mt-1 leading-relaxed" style="font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400));">
             {product.description}
           </p>
         {/if}
@@ -194,7 +197,7 @@
 
       <div class="mt-3 pt-3 border-t border-light/60">
         <div class="flex items-baseline gap-1.5 flex-wrap mb-2">
-          <p class="font-heading font-black text-xs sm:text-sm text-primary">
+          <p class="font-heading font-black text-xs sm:text-sm text-[var(--theme-primary,var(--color-primary))]" style="font-size: var(--theme-text-h3, var(--text-h3-size, 18px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700));">
             {formatIDR(product.basePrice ?? product.price ?? 0)}
           </p>
           {#if hasDiscount}
@@ -227,7 +230,7 @@
               type="button"
               on:click|stopPropagation={() => handleWaDirectBuy(product, index)}
               class="flex-1 h-8 active:scale-[0.98] text-xs font-heading font-bold transition-all shadow-xs hover:opacity-90 cursor-pointer"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
             >
               Pesan WA
             </button>
@@ -237,17 +240,17 @@
             <button
               type="button"
               on:click|stopPropagation={() => onAddToCart(product, {})}
-              class="flex-1 h-8 border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px));"
+              class="flex-1 h-8 border border-[var(--theme-btn-secondary-border,color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_25%,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_8%,transparent)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
             >
-              <ShoppingCart size={13} />
+              <ShoppingCart size={13} class="text-[var(--theme-secondary,var(--color-secondary))]" />
               <span>{cartButtonText || 'Keranjang'}</span>
             </button>
             <button
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
               class="flex-1 h-8 active:scale-[0.98] text-xs font-heading font-bold flex items-center justify-center transition-all cursor-pointer shadow-xs hover:opacity-90"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
             >
               <span>{buyButtonText || 'Beli'}</span>
             </button>

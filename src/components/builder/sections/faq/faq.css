@@ -5,6 +5,34 @@
   width: 100%;
 }
 
+.cq-title,
+.faq-card h2 {
+  font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
+  font-size: var(--theme-text-h2, var(--text-h2-size, 2rem));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 800));
+  line-height: 1.2;
+}
+
+.faq-card [data-node="badge"],
+.faq-card [data-node="faq_badge"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+.faq-card [data-node="subtitle"],
+.faq-card [data-node="faq_subtitle"],
+.faq-card div[role="region"],
+.faq-card p {
+  font-size: var(--theme-text-body, var(--text-body-size, 1rem));
+  font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400));
+}
+
+.faq-card button[aria-controls] span,
+.faq-card h3 {
+  font-size: var(--theme-text-h3, var(--text-h3-size, 1.125rem));
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));
+}
+
 /* Base Mobile Layouts */
 .cq-faq-split {
   display: flex;

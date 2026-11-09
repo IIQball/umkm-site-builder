@@ -78,19 +78,22 @@
       style={pStyle.marginStyle}
       class={`p-6 sm:p-7 rounded-3xl flex flex-col justify-between relative transition-all duration-200 cursor-pointer ${
         isPopular
-          ? 'bg-blue-50/60 dark:bg-blue-950/40 border-2 border-primary shadow-lg'
+          ? 'bg-primary/10 border-2 border-primary shadow-lg'
           : 'bg-card border border-light/80 shadow-xs hover:shadow-md'
       } ${isCardActive ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100' : ''}`}
     >
       {#if isPopular}
-        <span class="absolute -top-3 right-6 text-2xs font-heading font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
+        <span class="absolute -top-3 right-6 text-2xs font-heading font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main));">
           <Sparkles size={11} />
           <span>POPULER</span>
         </span>
       {/if}
 
       <div>
-        <span class={`text-2xs font-heading font-bold uppercase tracking-wider ${isPopular ? 'text-[var(--theme-secondary,var(--color-secondary))]' : 'text-[var(--color-text-muted)]'}`}>
+        <span
+          class={`text-2xs font-heading font-bold uppercase tracking-wider ${isPopular ? 'text-[var(--theme-secondary,var(--color-secondary))]' : 'text-[var(--color-text-muted)]'}`}
+          style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
+        >
           {tier.badge || `Tier 0${idx + 1}`}
         </span>
         <h3 class="font-heading font-black text-lg text-main mt-1 mb-2" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
@@ -102,15 +105,15 @@
 
         <ul class="space-y-2.5 text-xs text-secondary border-t border-light/60 pt-4 mb-6">
           <li class="flex items-center gap-2">
-            <Check size={14} class="text-primary shrink-0" />
+            <Check size={14} class="text-[var(--theme-secondary,var(--color-secondary))] shrink-0" />
             <span>Komposisi bahan premium pilihan</span>
           </li>
           <li class="flex items-center gap-2">
-            <Check size={14} class="text-primary shrink-0" />
+            <Check size={14} class="text-[var(--theme-secondary,var(--color-secondary))] shrink-0" />
             <span>Kemasan eksklusif kedap udara</span>
           </li>
           <li class="flex items-center gap-2">
-            <Check size={14} class="text-primary shrink-0" />
+            <Check size={14} class="text-[var(--theme-secondary,var(--color-secondary))] shrink-0" />
             <span>Kartu ucapan custom & garansi tiba aman</span>
           </li>
         </ul>
@@ -118,7 +121,7 @@
 
       <div class="pt-4 border-t border-light/60">
         <div class="flex items-baseline gap-2 mb-3">
-          <p class="font-heading font-black text-lg sm:text-xl text-[var(--color-primary)]">
+          <p class="font-heading font-black text-lg sm:text-xl text-[var(--theme-primary,var(--color-primary))]">
             {formatIDR(tier.price)}
           </p>
           {#if hasDiscount}
@@ -132,10 +135,10 @@
           on:click|stopPropagation={() => handleOrder(tier)}
           class={`w-full h-10 font-heading font-bold text-xs transition-all active:scale-[0.98] ${
             isPopular
-              ? 'bg-[var(--color-primary)] hover:opacity-90 text-white shadow-md'
-              : 'border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-main)]'
+              ? 'bg-[var(--theme-primary,var(--color-primary))] hover:opacity-90 text-[var(--theme-btn-primary-text,var(--color-card-base,#ffffff))] shadow-md'
+              : 'border border-[var(--color-border)] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] text-[var(--color-text-main)]'
           }`}
-          style="border-radius: var(--btn-radius, 0.75rem);"
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem));"
         >
           Pilih Paket Bundling
         </button>

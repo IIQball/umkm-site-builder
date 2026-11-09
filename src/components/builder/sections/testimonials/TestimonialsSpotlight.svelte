@@ -73,15 +73,15 @@
     {/if}
 
     <div>
-      <h4
+      <h3
         class="font-heading font-black text-sm"
         style="{authorStyle.color ? `color: ${authorStyle.color};` : 'color: var(--color-text-main);'}"
       >
         {currentItem?.customerName}
-      </h4>
+      </h3>
       <div class="flex items-center justify-center gap-1.5 text-xs text-secondary mt-0.5">
         {#if currentItem?.verified !== false}
-          <span class="text-emerald-600 font-semibold flex items-center gap-0.5">
+          <span class="text-success font-semibold flex items-center gap-0.5">
             <CheckCircle2 size={11} />
             <span>{currentItem?.verifiedText || 'Pelanggan Terverifikasi'}</span>
           </span>

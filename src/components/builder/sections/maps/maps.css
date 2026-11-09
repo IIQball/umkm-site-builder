@@ -5,6 +5,31 @@
   width: 100%;
 }
 
+.maps-card [data-node="badge"],
+.maps-card [data-node="maps_badge"],
+[data-node="badge"],
+[data-node="maps_badge"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+.maps-card h2 {
+  font-size: var(--theme-text-h2, var(--text-h2-size, 26px));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700));
+}
+
+.maps-card h3,
+.maps-card h4 {
+  font-size: var(--theme-text-h3, var(--text-h3-size, 20px));
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));
+}
+
+.maps-card [data-node="maps_info_card"] p,
+.maps-card [data-node="maps_hours_card"] span,
+.maps-card p {
+  font-size: var(--theme-text-body, var(--text-body-size, 16px));
+}
+
 .cq-map-split {
   display: flex;
   flex-direction: column;

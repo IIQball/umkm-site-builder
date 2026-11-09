@@ -59,12 +59,12 @@
           tabindex="0"
           on:click={(e) => handleSelectSlot(e, 'badge')}
           on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSlot(e, 'badge')}
-          class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 transition-all cursor-pointer ${
+          class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3.5 py-1 min-h-[24px] transition-all cursor-pointer ${
             isBadgeActive
               ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2'
               : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/50'
           }`}
-          style="background-color: color-mix(in srgb, {badgeColor || 'var(--theme-primary, var(--color-primary))'} 10%, transparent); border-color: color-mix(in srgb, {badgeColor || 'var(--theme-primary, var(--color-primary))'} 25%, transparent); color: {badgeColor || 'var(--theme-primary, var(--color-primary))'}; margin-top: {badgeMarginTop}; margin-bottom: {badgeMarginBottom}; border-radius: var(--theme-btn-border-radius, 9999px); font-family: var(--theme-heading-font, var(--font-heading));"
+          style="background-color: color-mix(in srgb, {badgeColor || 'var(--theme-secondary, var(--color-secondary))'} 10%, transparent); border-color: color-mix(in srgb, {badgeColor || 'var(--theme-secondary, var(--color-secondary))'} 25%, transparent); color: {badgeColor || 'var(--theme-secondary, var(--color-secondary))'}; font-size: {badgeStyle.fontSize || 'var(--theme-text-caption, var(--text-caption-size, 10px))'}; font-weight: {badgeStyle.fontWeight || 'var(--theme-text-caption-weight, var(--text-caption-weight, 700))'}; margin-top: {badgeMarginTop}; margin-bottom: {badgeMarginBottom}; border-radius: var(--theme-btn-border-radius, 9999px); font-family: var(--theme-heading-font, var(--font-heading));"
         >
           <HelpCircle size={12} class="text-current" />
           <span>{badgeText}</span>
@@ -86,7 +86,7 @@
         >
           <h2
             class="cq-title font-heading font-extrabold tracking-tight"
-            style="color: {titleColor || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading)); font-size: var(--theme-h2-size, 26px); line-height: var(--theme-h2-line-height, 1.25); font-weight: var(--theme-h2-font-weight, 700);"
+            style="color: {titleColor || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading)); font-size: {titleStyle.fontSize || 'var(--theme-text-h2, var(--text-h2-size, 26px))'}; font-weight: {titleStyle.fontWeight || 'var(--theme-text-h2-weight, var(--text-h2-weight, 700))'}; line-height: 1.2;"
           >
             {title}
           </h2>
@@ -108,7 +108,7 @@
         >
           <p
             class="text-body-base max-w-2xl mx-auto leading-relaxed"
-            style="color: {subtitleColor || 'var(--theme-text-muted, var(--color-text-secondary))'}; font-family: var(--theme-body-font, var(--font-body)); font-size: var(--theme-body-size, 16px); line-height: var(--theme-body-line-height, 1.6);"
+            style="color: {subtitleColor || 'var(--theme-text-muted, var(--color-text-secondary))'}; font-family: var(--theme-body-font, var(--font-body)); font-size: {subtitleStyle.fontSize || 'var(--theme-text-body, var(--text-body-size, 16px))'}; font-weight: {subtitleStyle.fontWeight || 'var(--theme-text-body-weight, var(--text-body-weight, 400))'}; line-height: 1.6;"
           >
             {subtitle}
           </p>

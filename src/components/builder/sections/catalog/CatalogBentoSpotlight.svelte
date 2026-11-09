@@ -79,7 +79,7 @@
         </div>
 
         <div class="flex-1 min-w-0">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-heading font-bold uppercase tracking-wider mb-3 shadow-xs" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-heading font-bold uppercase tracking-wider mb-3 shadow-xs" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));">
             <Sparkles size={12} />
             <span>{mainProduct.badge || 'PROMO BUNDLE SPESIAL'}</span>
           </div>
@@ -151,7 +151,7 @@
       class={`cq-bento-secondary bg-card border border-light/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
         isSecActive
           ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-base-100 shadow-lg'
-          : 'hover:shadow-md hover:border-light hover:shadow-md'
+          : 'hover:shadow-md hover:border-light'
       }`}
     >
       <div>
@@ -181,7 +181,7 @@
           {#if product.badge}
             <span
               class="absolute top-2 left-2 text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
-              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
             >
               {product.badge}
             </span>

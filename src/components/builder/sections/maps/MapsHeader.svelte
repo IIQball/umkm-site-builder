@@ -61,14 +61,14 @@
         tabindex="0"
         on:click={(e) => selectNode(e, 'badge')}
         on:keydown={(e) => handleKeydown(e, 'badge')}
-        class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 transition-all cursor-pointer ${
+        class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3.5 py-1 min-h-[24px] transition-all cursor-pointer ${
           align === 'center' ? 'mx-auto' : ''
         } ${
           isBadgeSelected
             ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100'
             : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/50'
         }`}
-        style="{badgeStyle.color ? `color: ${badgeStyle.color} !important; border-color: ${badgeStyle.color} !important;` : 'color: var(--color-primary); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);'} background-color: {badgeStyle.backgroundColor ? `${badgeStyle.backgroundColor} !important;` : 'color-mix(in srgb, var(--color-primary) 10%, transparent);'} margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
+        style="{badgeStyle.color ? `color: ${badgeStyle.color} !important; border-color: ${badgeStyle.color} !important;` : 'color: var(--theme-secondary, var(--color-secondary)); border-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 25%, transparent);'} background-color: {badgeStyle.backgroundColor ? `${badgeStyle.backgroundColor} !important;` : 'color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 10%, transparent);'} font-size: {badgeStyle.fontSize || 'var(--theme-text-caption, var(--text-caption-size, 10px))'}; font-weight: {badgeStyle.fontWeight || 'var(--theme-text-caption-weight, var(--text-caption-weight, 700))'}; margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
       >
         <span
           class="w-1.5 h-1.5 rounded-full"

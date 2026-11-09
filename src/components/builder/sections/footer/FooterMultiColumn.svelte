@@ -14,7 +14,7 @@
   export let copyrightText: string;
   export let attributionText: string = 'Didukung oleh Pinoka';
   export let activeNodeId: string | null = null;
-  export let selectNode: (e: MouseEvent | KeyboardEvent, key: string) => void = () => {};
+  export let selectNode: ((e: MouseEvent | KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['footer_brand', 'footer_contact', 'footer_navigation', 'footer_copyright'];
   export let nodeStyles: Record<string, Record<string, string>> = {};
 
@@ -45,6 +45,17 @@
   $: hasNav = effectiveOrder.includes('footer_navigation') || effectiveOrder.includes('navigation_links');
   $: hasCopyright = effectiveOrder.includes('footer_copyright') || effectiveOrder.includes('copyright');
   $: hasColumns = hasBrand || hasContact || hasNav;
+
+  function editorNode(node: HTMLElement, key: string) {
+    if (!selectNode) return;
+    const onClick = (e: MouseEvent) => selectNode?.(e, key);
+    node.addEventListener('click', onClick);
+    return {
+      destroy() {
+        node.removeEventListener('click', onClick);
+      }
+    };
+  }
 </script>
 
 <div class="flex flex-col w-full">
@@ -54,12 +65,9 @@
         <!-- Kolom 1: Profil Toko -->
         <div
           style="order: {getSlotOrder('footer_brand')}; margin-top: {styleBrand.marginTop}; margin-bottom: {styleBrand.marginBottom};"
-          class="space-y-3 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-      on:click={(e) => selectNode(e, 'footer_brand')}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_brand')}
-      role="button"
-      tabindex="0"
-    >
+          class="space-y-3 rounded-2xl p-2.5 transition-all {selectNode ? 'cursor-pointer' : ''} {activeNodeId === 'footer_brand' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+          use:editorNode={'footer_brand'}
+        >
       <div class="flex items-center gap-2.5">
         {#if logoImageUrl}
           <img src={logoImageUrl} alt={brandName} class="w-8 h-8 rounded-[var(--theme-btn-radius,var(--btn-radius,12px))] object-contain bg-[var(--theme-surface, var(--color-card-base))] border border-[var(--color-border)]" />
@@ -88,11 +96,8 @@
         <!-- Kolom 2: Kontak Layanan -->
         <div
           style="order: {getSlotOrder('footer_contact')}; margin-top: {styleContact.marginTop}; margin-bottom: {styleContact.marginBottom};"
-          class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-          on:click={(e) => selectNode(e, 'footer_contact')}
-          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_contact')}
-          role="button"
-          tabindex="0"
+          class="space-y-2.5 rounded-2xl p-2.5 transition-all {selectNode ? 'cursor-pointer' : ''} {activeNodeId === 'footer_contact' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+          use:editorNode={'footer_contact'}
         >
           <h4
             style="font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--theme-text-primary, var(--color-text-main));"
@@ -135,11 +140,8 @@
         <!-- Kolom 3: Navigasi Cepat -->
         <div
           style="order: {getSlotOrder('footer_navigation')}; margin-top: {styleNav.marginTop}; margin-bottom: {styleNav.marginBottom};"
-          class="space-y-2.5 rounded-2xl p-2.5 transition-all cursor-pointer {activeNodeId === 'footer_navigation' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
-          on:click={(e) => selectNode(e, 'footer_navigation')}
-          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_navigation')}
-          role="button"
-          tabindex="0"
+          class="space-y-2.5 rounded-2xl p-2.5 transition-all {selectNode ? 'cursor-pointer' : ''} {activeNodeId === 'footer_navigation' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+          use:editorNode={'footer_navigation'}
         >
           <h4
             style="font-size: var(--theme-text-caption, var(--text-caption-size, 12px)); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--theme-text-primary, var(--color-text-main));"
@@ -149,11 +151,11 @@
           </h4>
           <ul
             style="font-size: var(--theme-text-body, var(--text-body-size, 14px)); color: {styleNav.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
-            class="space-y-1.5"
+            class="space-y-2"
           >
             {#each menuLinks as link}
               <li>
-                <a href={link.url} class="hover:text-[var(--theme-primary, var(--color-primary))] transition-colors" on:click|stopPropagation>
+                <a href={link.url} class="inline-flex items-center min-h-[28px] py-1 hover:text-[var(--theme-primary, var(--color-primary))] transition-colors" on:click|stopPropagation>
                   {link.label}
                 </a>
               </li>
@@ -167,12 +169,9 @@
   {#if hasCopyright}
     <!-- Bottom Bar -->
     <div
-      class="cq-footer-bottom-bar pt-6 rounded-2xl p-2 transition-all cursor-pointer {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
+      class="cq-footer-bottom-bar pt-6 rounded-2xl p-2 transition-all {selectNode ? 'cursor-pointer' : ''} {activeNodeId === 'footer_copyright' ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2 dark:ring-offset-base-100' : ''}"
       style="order: {copyrightOrder}; margin-top: {styleCopyright.marginTop}; margin-bottom: {styleCopyright.marginBottom}; font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.85); color: {styleCopyright.color || 'var(--theme-text-muted, var(--color-text-muted))'};"
-      on:click={(e) => selectNode(e, 'footer_copyright')}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(e, 'footer_copyright')}
-      role="button"
-      tabindex="0"
+      use:editorNode={'footer_copyright'}
     >
       <p>{copyrightText}</p>
       <p style="font-size: calc(var(--theme-text-body, var(--text-body-size, 14px)) * 0.75);">{attributionText}</p>

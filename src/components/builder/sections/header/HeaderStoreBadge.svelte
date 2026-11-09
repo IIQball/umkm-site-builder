@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menu, MessageCircle } from 'lucide-svelte';
+  import { Menu, MessageCircle, X } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import HeaderNav from './HeaderNav.svelte';
   import TemplateThemeToggle from './TemplateThemeToggle.svelte';
@@ -16,6 +16,7 @@
   export let ctaText: string = 'Konsultasi Gratis';
   export let navbarOrder: string[] = ['logo', 'store_badges', 'nav_links', 'cta'];
   export let onToggleMobileMenu: () => void = () => {};
+  export let isMobileMenuOpen: boolean = false;
 
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isDesktop = viewMode === 'desktop';
@@ -96,12 +97,16 @@
     {#if isSmallScreen}
       <button
         type="button"
-        on:click={onToggleMobileMenu}
+        on:click|stopPropagation={onToggleMobileMenu}
         style="border-radius: var(--theme-btn-radius, var(--btn-radius, 10px)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
         class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs ml-auto"
-        aria-label="Buka menu navigasi"
+        aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
       >
-        <Menu size={20} />
+        {#if isMobileMenuOpen}
+          <X size={20} />
+        {:else}
+          <Menu size={20} />
+        {/if}
       </button>
     {/if}
   </div>

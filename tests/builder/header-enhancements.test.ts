@@ -137,5 +137,42 @@ describe('Header Layout Presets & Design System Helpers', () => {
       'Tombol Pesan WhatsApp (CTA)',
     ]);
   });
+
+  it('should default isSticky to true in default template sections and support toggle', async () => {
+    const { DEFAULT_TEMPLATE_SECTIONS } = await import('@/schemas/templates/template.defaults');
+    const headerSection = DEFAULT_TEMPLATE_SECTIONS.find((s) => s.type === 'header_announcement');
+    expect(headerSection).toBeDefined();
+    expect(headerSection?.props?.isSticky).toBe(true);
+
+    // Sticky class logic test
+    const resolveStickyClass = (isSticky: boolean | undefined) =>
+      (isSticky ?? true) ? 'sticky top-0 z-40 is-sticky overflow-visible' : 'relative z-30 overflow-visible';
+
+    expect(resolveStickyClass(true)).toContain('is-sticky');
+    expect(resolveStickyClass(true)).toContain('sticky top-0 z-40');
+    expect(resolveStickyClass(false)).not.toContain('is-sticky');
+    expect(resolveStickyClass(false)).toContain('relative z-30');
+    expect(resolveStickyClass(undefined)).toContain('is-sticky');
+  });
+
+  it('should verify single theme toggle on navbar and clean mobile drawer without duplicate header', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+
+    // StorefrontLayout should not have duplicate floating theme toggle button
+    const layoutContent = fs.readFileSync(path.resolve('src/layouts/StorefrontLayout.astro'), 'utf-8');
+    expect(layoutContent).not.toContain('storefront-theme-toggle');
+
+    // HeaderMobileDrawer should not render duplicate HeaderLogo or TemplateThemeToggle
+    const drawerContent = fs.readFileSync(
+      path.resolve('src/components/builder/sections/header/HeaderMobileDrawer.svelte'),
+      'utf-8'
+    );
+    expect(drawerContent).not.toContain('<HeaderLogo');
+    expect(drawerContent).not.toContain('<TemplateThemeToggle');
+    expect(drawerContent).not.toContain('bg-slate-950');
+    expect(drawerContent).toContain('top-full');
+  });
 });
+
 

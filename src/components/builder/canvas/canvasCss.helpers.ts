@@ -1,5 +1,14 @@
 import type { TemplateTheme } from '@/schemas'
 import { calculateGoldenRatioTypography } from '@/lib/utils/designMath'
+import { hexToRgb } from '@/lib/utils/contrast'
+
+export const ensurePx = (val?: string | number, fallback: string = '0px'): string => {
+  if (val === undefined || val === null || val === '') return fallback;
+  if (typeof val === 'number') return `${val}px`;
+  const str = String(val).trim();
+  const num = parseInt(str.replace(/[^\d.-]/g, ''), 10);
+  return isNaN(num) ? fallback : `${num}px`;
+};
 
 export const buildCanvasCssVars = (
   theme: Partial<TemplateTheme> = {},
@@ -14,8 +23,12 @@ export const buildCanvasCssVars = (
   const baseFontSize = parseInt(String(typography.body?.fontSize || '16'), 10) || 16
   const goldenRatio = calculateGoldenRatioTypography(baseFontSize)
 
-  const primaryColor = colors.primary || (isDarkPreview ? '#00A3EF' : '#36C6FD')
+  const rawPrimary = colors.primary || theme?.primaryColor || (isDarkPreview ? '#0284c7' : '#0369a1')
+  // WCAG AA 4.5:1 text contrast: #0284c7 with white text is 4.09:1 (fails AA), #0369a1 is 5.83:1 (passes AA)
+  const primaryColor = rawPrimary === '#0284c7' ? '#0369a1' : rawPrimary
   const secondaryColor = colors.secondary || (isDarkPreview ? '#B90162' : '#FC018B')
+  const pRgb = hexToRgb(primaryColor)
+  const sRgb = hexToRgb(secondaryColor)
   const defaultHeadingFont = "'League Spartan', 'Poppins', system-ui, -apple-system, sans-serif"
   const defaultBodyFont = "'Poppins', system-ui, -apple-system, sans-serif"
   const formatFont = (f?: string, fallback = 'sans-serif') => {
@@ -29,24 +42,24 @@ export const buildCanvasCssVars = (
 
   // Active Layout Dimensions
   const activeSafeZone = viewMode === 'mobile'
-    ? (layout.horizontalMarginMobile || '16px')
+    ? ensurePx(layout.horizontalMarginMobile, '16px')
     : viewMode === 'tablet'
-      ? (layout.horizontalMarginTablet || '24px')
-      : (layout.horizontalMarginDesktop || '32px')
+      ? ensurePx(layout.horizontalMarginTablet, '24px')
+      : ensurePx(layout.horizontalMarginDesktop, '32px')
 
   const activeGutter = viewMode === 'desktop' ? '24px' : viewMode === 'tablet' ? '16px' : '12px'
   const activeMaxWidth = layout.maxWidth || '1200px'
 
   // Typography Scales
-  const h1Size = typography.h1?.fontSize || `${goldenRatio.h1}px`
+  const h1Size = ensurePx(typography.h1?.fontSize, `${goldenRatio.h1}px`)
   const h1Weight = typography.h1?.fontWeight || '700'
-  const h2Size = typography.h2?.fontSize || `${goldenRatio.h2}px`
+  const h2Size = ensurePx(typography.h2?.fontSize, `${goldenRatio.h2}px`)
   const h2Weight = typography.h2?.fontWeight || '700'
-  const h3Size = typography.h3?.fontSize || `${goldenRatio.h3}px`
+  const h3Size = ensurePx(typography.h3?.fontSize, `${goldenRatio.h3}px`)
   const h3Weight = typography.h3?.fontWeight || '600'
-  const bodySize = typography.body?.fontSize || `${goldenRatio.body}px`
+  const bodySize = ensurePx(typography.body?.fontSize, `${goldenRatio.body}px`)
   const bodyWeight = typography.body?.fontWeight || '400'
-  const captionSize = typography.caption?.fontSize || `${goldenRatio.caption}px`
+  const captionSize = ensurePx(typography.caption?.fontSize, `${goldenRatio.caption}px`)
   const captionWeight = typography.caption?.fontWeight || '700'
 
   // Button Values (Following Button.ts: Primary = full color, Secondary = outline, Tertiary = underline text)
@@ -63,9 +76,13 @@ export const buildCanvasCssVars = (
   return [
     // 1. Semantic Color Tokens
     `--color-primary: ${primaryColor}`,
-    `--color-primary-dark: ${isDarkPreview ? '#0284c7' : '#00A2EE'}`,
+    `--color-primary-rgb: ${pRgb.r} ${pRgb.g} ${pRgb.b}`,
+    `--color-primary-dark: ${isDarkPreview ? '#0369a1' : '#00A2EE'}`,
     `--color-primary-light: ${isDarkPreview ? '#36C6FD' : '#7dd3fc'}`,
     `--color-secondary: ${secondaryColor}`,
+    `--color-secondary-rgb: ${sRgb.r} ${sRgb.g} ${sRgb.b}`,
+    `--color-secondary-dark: ${isDarkPreview ? '#9f1239' : '#BA0161'}`,
+    `--color-secondary-light: ${isDarkPreview ? '#fb7185' : '#FC018B'}`,
     `--color-bg-base: ${isDarkPreview ? '#0b0f19' : (colors.background || '#ffffff')}`,
     `--color-card-base: ${isDarkPreview ? '#111827' : (colors.surface || '#ffffff')}`,
     `--color-nested-base: ${isDarkPreview ? '#1f2937' : '#f1f5f9'}`,
@@ -111,9 +128,17 @@ export const buildCanvasCssVars = (
     `--active-gutter: ${activeGutter}`,
     `--active-margin: ${activeSafeZone}`,
 
-    // 6. Theme Aliases for Full Backward Compatibility
+    // 6. Theme Aliases for Full Backward Compatibility & DaisyUI Overrides
     `--theme-primary: ${primaryColor}`,
+    `--theme-primary-rgb: ${pRgb.r} ${pRgb.g} ${pRgb.b}`,
     `--theme-secondary: ${secondaryColor}`,
+    `--theme-secondary-rgb: ${sRgb.r} ${sRgb.g} ${sRgb.b}`,
+    `--p: ${primaryColor}`,
+    `--pf: ${primaryColor}`,
+    `--pc: ${btnPrimaryText}`,
+    `--s: ${secondaryColor}`,
+    `--sf: ${secondaryColor}`,
+    `--sc: #ffffff`,
     `--theme-bg: ${isDarkPreview ? '#0b0f19' : (colors.background || '#ffffff')}`,
     `--theme-surface: ${isDarkPreview ? '#111827' : (colors.surface || '#ffffff')}`,
     `--theme-text-primary: ${isDarkPreview ? '#f8fafc' : (colors.textPrimary || '#0f172a')}`,
@@ -121,10 +146,15 @@ export const buildCanvasCssVars = (
     `--theme-font-heading: ${headingFont}`,
     `--theme-font-body: ${bodyFont}`,
     `--theme-text-h1: ${h1Size}`,
+    `--theme-text-h1-weight: ${h1Weight}`,
     `--theme-text-h2: ${h2Size}`,
+    `--theme-text-h2-weight: ${h2Weight}`,
     `--theme-text-h3: ${h3Size}`,
+    `--theme-text-h3-weight: ${h3Weight}`,
     `--theme-text-body: ${bodySize}`,
+    `--theme-text-body-weight: ${bodyWeight}`,
     `--theme-text-caption: ${captionSize}`,
+    `--theme-text-caption-weight: ${captionWeight}`,
     `--theme-btn-radius: ${btnRadius}`,
     `--theme-btn-primary-bg: ${btnPrimaryBg}`,
     `--theme-btn-primary-text: ${btnPrimaryText}`,
@@ -135,9 +165,9 @@ export const buildCanvasCssVars = (
     `--theme-btn-outline-text: ${btnOutlineText}`,
     `--theme-btn-tertiary-text: ${btnTertiaryText}`,
     `--theme-max-width: ${activeMaxWidth}`,
-    `--theme-safe-zone-desktop: ${layout.horizontalMarginDesktop || '32px'}`,
-    `--theme-safe-zone-tablet: ${layout.horizontalMarginTablet || '24px'}`,
-    `--theme-safe-zone-mobile: ${layout.horizontalMarginMobile || '16px'}`,
+    `--theme-safe-zone-desktop: ${ensurePx(layout.horizontalMarginDesktop, '32px')}`,
+    `--theme-safe-zone-tablet: ${ensurePx(layout.horizontalMarginTablet, '24px')}`,
+    `--theme-safe-zone-mobile: ${ensurePx(layout.horizontalMarginMobile, '16px')}`,
   ].join(String.fromCharCode(59) + ' ')
 }
 

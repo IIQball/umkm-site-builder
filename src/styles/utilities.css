@@ -120,18 +120,50 @@ html[data-theme="dark"] .navbar-glass-surface,
 }
 
 #canvas-frame h1,
+.builder-canvas-viewport h1 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h1, var(--text-h1-size, 42px));
+  font-weight: var(--theme-text-h1-weight, var(--text-h1-weight, 700));
+}
+
 #canvas-frame h2,
+.builder-canvas-viewport h2 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h2, var(--text-h2-size, 26px));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700));
+}
+
 #canvas-frame h3,
+.builder-canvas-viewport h3 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h3, var(--text-h3-size, 20px));
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));
+}
+
 #canvas-frame h4,
 #canvas-frame h5,
 #canvas-frame h6,
-.builder-canvas-viewport h1,
-.builder-canvas-viewport h2,
-.builder-canvas-viewport h3,
 .builder-canvas-viewport h4,
 .builder-canvas-viewport h5,
 .builder-canvas-viewport h6 {
   font-family: var(--font-heading, var(--theme-font-heading, inherit));
+}
+
+#canvas-frame [data-node="badge"],
+#canvas-frame [data-node$="_badge"],
+#canvas-frame [data-node*="badge"],
+.builder-canvas-viewport [data-node="badge"],
+.builder-canvas-viewport [data-node$="_badge"],
+.builder-canvas-viewport [data-node*="badge"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+#canvas-frame [data-node="cta"] a,
+#canvas-frame [data-node$="_cta"] a,
+.builder-canvas-viewport [data-node="cta"] a,
+.builder-canvas-viewport [data-node$="_cta"] a {
+  font-size: var(--theme-text-body, var(--text-body-size, 16px));
 }
 
 /* Layout transition neutralizer - enforce composite-only transforms */

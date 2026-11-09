@@ -1,5 +1,6 @@
 <script lang="ts">
   import { canvasStore, editorStore } from '../stores/editorStore';
+  import { ensurePx } from './canvasCss.helpers';
 
   export let viewMode: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   export let showColumnGrid: boolean | undefined = undefined;
@@ -17,11 +18,14 @@
   $: layoutTheme = $editorStore.template?.config.theme?.layout || {};
   $: activeMargin = $canvasStore.activeMargin;
 
-  $: safeZoneMargin = currentViewMode === 'desktop'
-    ? (layoutTheme.horizontalMarginDesktop || activeMargin || '32px')
-    : currentViewMode === 'tablet'
-    ? (layoutTheme.horizontalMarginTablet || activeMargin || '24px')
-    : (layoutTheme.horizontalMarginMobile || activeMargin || '16px');
+  $: safeZoneMargin = ensurePx(
+    currentViewMode === 'desktop'
+      ? (layoutTheme.horizontalMarginDesktop || activeMargin || '32px')
+      : currentViewMode === 'tablet'
+      ? (layoutTheme.horizontalMarginTablet || activeMargin || '24px')
+      : (layoutTheme.horizontalMarginMobile || activeMargin || '16px'),
+    '32px'
+  );
 </script>
 
 {#if activeShowColumnGrid || activeShowPixelGrid}

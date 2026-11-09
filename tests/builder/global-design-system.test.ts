@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { buildCanvasCssVars, buildStorefrontCssTheme } from '@/components/builder/canvas/canvasCss.helpers';
 import { buildUpdatedTheme } from '@/components/builder/stores/documentStore.actions';
 import { extractFontNames, buildGoogleFontsUrl } from '@/components/builder/canvas/fontLoader.helpers';
+import { FONT_FAMILY_OPTIONS } from '@/components/tokens/typography';
 import { DEFAULT_TEMPLATE_THEME } from '@/schemas';
 
 describe('Global Design System & Reactive Canvas CSS Engine', () => {
@@ -53,6 +54,10 @@ describe('Global Design System & Reactive Canvas CSS Engine', () => {
       // Scales
       expect(cssVarsDesktop).toContain('--text-h1-size: 48px');
       expect(cssVarsDesktop).toContain('--text-h1-weight: 800');
+      expect(cssVarsDesktop).toContain('--theme-text-h1: 48px');
+      expect(cssVarsDesktop).toContain('--theme-text-h1-weight: 800');
+      expect(cssVarsDesktop).toContain('--theme-text-caption:');
+      expect(cssVarsDesktop).toContain('--theme-text-caption-weight:');
 
       // Buttons
       expect(cssVarsDesktop).toContain('--btn-radius: 24px');
@@ -73,6 +78,38 @@ describe('Global Design System & Reactive Canvas CSS Engine', () => {
       expect(darkVars).toContain('--color-bg-base: #0b0f19');
       expect(darkVars).toContain('--color-card-base: #111827');
       expect(darkVars).toContain('--color-text-main: #f8fafc');
+    });
+
+    it('normalizes raw number safe zone values to valid px CSS lengths', () => {
+      const themeWithRawNumbers = {
+        ...DEFAULT_TEMPLATE_THEME,
+        layout: {
+          maxWidth: '1200px',
+          horizontalMarginDesktop: '40' as unknown as string,
+          horizontalMarginTablet: '24' as unknown as string,
+          horizontalMarginMobile: '16' as unknown as string,
+        },
+      };
+
+      const vars = buildCanvasCssVars(themeWithRawNumbers, false, 'desktop');
+      expect(vars).toContain('--active-safe-zone: 40px');
+      expect(vars).toContain('--theme-safe-zone-desktop: 40px');
+
+      const mobileVars = buildCanvasCssVars(themeWithRawNumbers, false, 'mobile');
+      expect(mobileVars).toContain('--active-safe-zone: 16px');
+      expect(mobileVars).toContain('--theme-safe-zone-mobile: 16px');
+    });
+  });
+
+  describe('Typography Font Families & Preview Tokens', () => {
+    it('provides curated commercial-free fonts with live style attributes', () => {
+      expect(FONT_FAMILY_OPTIONS.length).toBeGreaterThanOrEqual(25);
+      for (const opt of FONT_FAMILY_OPTIONS) {
+        expect(opt.label).toBeTruthy();
+        expect(opt.value).toBeTruthy();
+        expect(opt.style).toContain('font-family:');
+        expect(opt.sublabel).toBeTruthy();
+      }
     });
   });
 

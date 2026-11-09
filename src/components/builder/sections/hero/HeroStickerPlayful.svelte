@@ -76,7 +76,7 @@
           tabindex="0"
           on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
           on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit);"
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
           class={`badge badge-outline inline-flex items-center gap-1.5 px-3 py-1 text-2xs font-heading font-medium border border-[var(--color-border)] bg-[var(--color-card-base)] text-[var(--color-text-main)] shadow-xs -rotate-2 mb-2 transition-all cursor-pointer ${
             isBadgeActive ? 'ring-2 ring-primary ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
@@ -138,7 +138,7 @@
             href={effectiveCtaLink}
             target={waNumber ? '_blank' : '_self'}
             rel={waNumber ? 'noreferrer' : ''}
-            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor); font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-weight: var(--theme-text-body-weight, var(--text-body-weight, 600));"
             class="btn btn-primary font-heading font-bold shadow-xs px-6"
           >
             {ctaText || 'Borong Sekarang'}

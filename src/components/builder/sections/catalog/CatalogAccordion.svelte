@@ -57,7 +57,7 @@
       <div class="min-w-0 pr-3">
         <div class="flex items-center gap-2">
           {#if product.badge}
-            <span class="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));">
+            <span class="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));">
               {product.badge}
             </span>
           {/if}

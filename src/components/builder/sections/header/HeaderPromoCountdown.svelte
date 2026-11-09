@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { Menu, Ticket } from 'lucide-svelte';
+  import { Menu, Ticket, X } from 'lucide-svelte';
   import HeaderLogo from './HeaderLogo.svelte';
   import HeaderNav from './HeaderNav.svelte';
   import TemplateThemeToggle from './TemplateThemeToggle.svelte';
@@ -20,6 +20,7 @@
   export let navbarContainerOrder: number = 1;
   export let navbarOrder: string[] = ['logo', 'nav_links', 'cta'];
   export let onToggleMobileMenu: () => void = () => {};
+  export let isMobileMenuOpen: boolean = false;
 
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isDesktop = viewMode === 'desktop';
@@ -89,7 +90,7 @@
   <!-- Top Ribbon: Flash Sale Live Countdown -->
   {#if hasAnnouncementRow}
     <div
-      style="order: {announcementBarOrder}; background: linear-gradient(90deg, var(--theme-secondary, var(--color-secondary, #dc2626)), var(--theme-primary, var(--color-primary, #e11d48))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-body, var(--font-family, inherit));"
+      style="order: {announcementBarOrder}; background: linear-gradient(90deg, var(--theme-secondary, var(--color-secondary)), var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-body, var(--font-family, inherit));"
       class="w-full py-1.5 shadow-xs"
     >
       <div
@@ -97,7 +98,7 @@
         style="max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); font-size: var(--theme-text-caption, var(--text-caption-size, 12px));"
       >
         <span class="font-bold flex items-center gap-1.5 tracking-wide">
-          <svelte:component this={resolveFeatureIcon(promoIcon)} size={13} class="fill-current text-yellow-300 animate-bounce flex-shrink-0" />
+          <svelte:component this={resolveFeatureIcon(promoIcon)} size={13} class="fill-current text-warning animate-bounce flex-shrink-0" />
           <span>{promoTitle}</span>
         </span>
 
@@ -158,7 +159,7 @@
           href={waUrl}
           target="_blank"
           rel="noreferrer"
-          style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-secondary, var(--color-secondary, #dc2626)); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
+          style="height: var(--theme-btn-height, 38px); border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-caption, var(--text-caption-size, 13px));"
           class="inline-flex items-center justify-center gap-1.5 px-4 font-bold shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
         >
           <Ticket size={15} />
@@ -170,12 +171,16 @@
       {#if isSmallScreen}
         <button
           type="button"
-          on:click={onToggleMobileMenu}
+          on:click|stopPropagation={onToggleMobileMenu}
           style="border-radius: var(--theme-btn-radius, var(--btn-radius, 10px)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
           class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs ml-auto"
-          aria-label="Buka menu navigasi"
+          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
         >
-          <Menu size={20} />
+          {#if isMobileMenuOpen}
+            <X size={20} />
+          {:else}
+            <Menu size={20} />
+          {/if}
         </button>
       {/if}
     </div>

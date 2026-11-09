@@ -26,15 +26,34 @@
         : 'rounded-2xl';
 
   $: effectiveAspect = isCircle ? 'aspect-square' : aspectRatio;
+  $: mobileImageUrl = (imageUrl && imageUrl.includes('images.unsplash.com'))
+    ? imageUrl.replace('w=1200', 'w=600')
+    : imageUrl;
+  $: srcSet = (imageUrl && imageUrl.includes('images.unsplash.com'))
+    ? `${mobileImageUrl} 600w, ${imageUrl} 1200w`
+    : undefined;
+
+  function editorNode(node: HTMLElement, key: string) {
+    if (!selectNode && !selectNodeKey) return;
+    const onClick = (e: MouseEvent) => selectNode?.(e, key);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') selectNodeKey?.(e, key);
+    };
+    node.addEventListener('click', onClick);
+    node.addEventListener('keydown', onKey);
+    return {
+      destroy() {
+        node.removeEventListener('click', onClick);
+        node.removeEventListener('keydown', onKey);
+      }
+    };
+  }
 </script>
 
 {#if imageUrl}
   <div
     data-node={nodeKey}
-    role="button"
-    tabindex="0"
-    on:click={(e) => selectNode && selectNode(e, nodeKey)}
-    on:keydown={(e) => selectNodeKey && selectNodeKey(e, nodeKey)}
+    use:editorNode={nodeKey}
     style="margin-top: var(--hero-image-mt, 0px); margin-bottom: var(--hero-image-mb, 0px);"
     class={`relative ${maxWidthClass} transition-all cursor-pointer select-none ${
       isActive
@@ -61,13 +80,33 @@
     {#if imageFrame === 'card'}
       <div class={`p-2.5 bg-[var(--color-card-base)] border border-[var(--color-border)] shadow-md overflow-hidden ${shapeClass}`}>
         <div class={`w-full ${effectiveAspect} overflow-hidden ${shapeClass}`}>
-          <img src={imageUrl} alt={altText} class="w-full h-full object-cover" />
+          <img
+            src={imageUrl}
+            srcset={srcSet}
+            sizes="(max-width: 640px) 100vw, 600px"
+            alt={altText}
+            class="w-full h-full object-cover"
+            width="600"
+            height="450"
+            fetchpriority="high"
+            decoding="async"
+          />
         </div>
       </div>
     {:else}
       <!-- Real Foto Murni (Default - Tanpa Card Luar) -->
       <div class={`w-full ${effectiveAspect} overflow-hidden shadow-sm ${shapeClass}`}>
-        <img src={imageUrl} alt={altText} class="w-full h-full object-cover" />
+        <img
+          src={imageUrl}
+          srcset={srcSet}
+          sizes="(max-width: 640px) 100vw, 600px"
+          alt={altText}
+          class="w-full h-full object-cover"
+          width="600"
+          height="450"
+          fetchpriority="high"
+          decoding="async"
+        />
       </div>
     {/if}
 

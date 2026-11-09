@@ -13,7 +13,7 @@
   import HeaderStoreBadge from './header/HeaderStoreBadge.svelte';
   import HeaderPromoCountdown from './header/HeaderPromoCountdown.svelte';
   import TemplateThemeToggle from './header/TemplateThemeToggle.svelte';
-  import { Clock, MapPin, Menu } from 'lucide-svelte';
+  import { Clock, MapPin, Menu, X } from 'lucide-svelte';
   import { canvasStore } from '../stores/editorStore';
   import { generateWhatsAppLink } from '@/lib/whatsapp';
   import {
@@ -70,16 +70,36 @@
   $: navbarOrder = getEffectiveHeaderNavbarOrder(activePreset, props?.navbarOrder);
 
   let isMobileMenuOpen = false;
+  let headerEl: HTMLElement;
 
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = (e?: Event) => {
+    e?.stopPropagation?.();
     isMobileMenuOpen = !isMobileMenuOpen;
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (!isMobileMenuOpen) return;
+    const target = e.target as HTMLElement | null;
+    if (!target || !document.contains(target)) return;
+    if (headerEl && !headerEl.contains(target)) {
+      isMobileMenuOpen = false;
+    }
+  };
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isMobileMenuOpen) {
+      isMobileMenuOpen = false;
+    }
   };
 </script>
 
+<svelte:window on:click={handleClickOutside} on:keydown={handleKeydown} />
+
 <header
+  bind:this={headerEl}
   data-node="header_container"
   style="font-family: var(--theme-font-body, inherit); {hasCustomBg ? '' : 'background-color: var(--theme-surface, var(--color-card-base, white)); color: var(--theme-text-primary, var(--color-text-main)); border-bottom: 1px solid var(--color-border);'}"
-  class={`w-full flex flex-col box-border select-none transition-colors relative z-30 overflow-visible ${
+  class={`w-full flex flex-col box-border select-none transition-colors relative z-40 overflow-visible ${
     activePreset === 'transparent_glass_header'
       ? 'backdrop-blur-md bg-base-100/80 border-b border-[var(--color-border)] text-[var(--theme-text-primary,var(--color-text-main))]'
       : ''
@@ -90,7 +110,7 @@
     {#if hasAnnouncementRow}
       <div
         style="order: {announcementBarOrder}; background-color: var(--color-nested-base); color: var(--theme-text-muted, var(--color-text-secondary)); border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
-        class="w-full py-2"
+        class="w-full py-2 relative z-50"
       >
         <div
           class="w-full mx-auto flex items-center justify-between gap-4 box-border"
@@ -115,67 +135,74 @@
       </div>
     {/if}
   {:else if hasAnnouncementRow && props?.showAnnouncement !== false && !['compact_inline', 'floating_pill_island', 'transparent_glass_header', 'delivery_order_cta', 'store_badge_highlight', 'promo_countdown_banner'].includes(activePreset)}
-    <div data-node="announcement_bar" style="order: {announcementBarOrder};" class="w-full">
+    <div data-node="announcement_bar" style="order: {announcementBarOrder};" class="w-full relative z-50">
       <AnnouncementBar props={safeProps} {sectionId} isActive={isHeaderActive} />
     </div>
   {/if}
 
   <!-- Header Nav Layout Variants -->
   {#if activePreset === 'floating_pill_island'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderPillIsland
         props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'delivery_order_cta'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderDeliveryOrder
         props={safeProps} {sectionId} isActive={isHeaderActive} {hasAnnouncementRow}
         {announcementBarOrder} {navbarContainerOrder} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'store_badge_highlight'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderStoreBadge
         props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'promo_countdown_banner'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderPromoCountdown
         props={safeProps} {sectionId} isActive={isHeaderActive} {hasAnnouncementRow}
         {announcementBarOrder} {navbarContainerOrder} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'split_nav_centered_logo'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderSplitNavCenteredLogo
         props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {navLinks} {waUrl} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'command_search_bar'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderCommandSearch
         props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
   {:else if activePreset === 'mega_menu_dropdown'}
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderMegaMenu
         props={safeProps} {sectionId} isActive={isHeaderActive} {navbarOrder}
         {waNumber} {ctaText} {categories} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
 
@@ -184,7 +211,7 @@
       <!-- Desktop Stacked (Logo vs Nav Links in custom order) -->
       <div
         id={`section-header-nav-${sectionId}`}
-        class="header-nav-container w-full mx-auto flex flex-col items-center justify-center py-4 gap-3 box-border overflow-visible relative"
+        class="header-nav-container w-full mx-auto flex flex-col items-center justify-center py-4 gap-3 box-border overflow-visible relative z-50"
         style="order: {navbarContainerOrder}; max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
       >
         <div class="absolute right-4 top-4">
@@ -205,7 +232,7 @@
     {:else}
       <!-- Tablet & Mobile Single-Row Collapse (Logo Leftmost, Hamburger Rightmost) -->
       <div
-        class="header-nav-container w-full mx-auto flex items-center justify-between gap-4 min-h-[64px] box-border overflow-visible"
+        class="header-nav-container w-full mx-auto flex items-center justify-between gap-4 min-h-[64px] box-border overflow-visible relative z-50"
         style="order: {navbarContainerOrder}; max-width: var(--theme-max-width, var(--active-max-width, 1200px)); padding-left: var(--active-safe-zone, var(--active-margin, 24px)); padding-right: var(--active-safe-zone, var(--active-margin, 24px)); height: 64px; border-bottom: 1px solid var(--color-border); font-family: var(--theme-font-body, inherit);"
       >
         <div data-node="logo" class="flex items-center flex-shrink-0">
@@ -227,12 +254,16 @@
           <!-- 44x44px Hamburger Button -->
           <button
             type="button"
-            on:click={toggleMobileMenu}
+            on:click|stopPropagation={toggleMobileMenu}
             style="border-radius: var(--theme-btn-radius, var(--btn-radius, 10px)); border: 1px solid var(--color-border); color: var(--theme-text-primary, var(--color-text-main)); background: var(--color-card-base, var(--theme-surface, transparent)); font-family: var(--theme-font-body, inherit);"
             class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center hover:opacity-80 transition-colors cursor-pointer shadow-xs ml-auto"
-            aria-label="Buka menu navigasi"
+            aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
           >
-            <Menu size={20} />
+            {#if isMobileMenuOpen}
+              <X size={20} />
+            {:else}
+              <Menu size={20} />
+            {/if}
           </button>
         </div>
       </div>
@@ -240,10 +271,11 @@
 
   {:else}
     <!-- Default Split, Compact Inline, Transparent Glass, Top Contact Bar Main Navbar -->
-    <div style="order: {navbarContainerOrder};" class="w-full">
+    <div style="order: {navbarContainerOrder};" class="w-full relative z-50">
       <HeaderDefaultSplit
         props={safeProps} {sectionId} isActive={isHeaderActive} {activePreset}
         {navbarOrder} {waUrl} {ctaText} onToggleMobileMenu={toggleMobileMenu}
+        {isMobileMenuOpen}
       />
     </div>
   {/if}
@@ -252,7 +284,7 @@
   <HeaderMobileDrawer
     isOpen={isMobileMenuOpen}
     onClose={() => (isMobileMenuOpen = false)}
-    props={safeProps} {sectionId} isActive={isHeaderActive} {activePreset}
+    props={safeProps} {activePreset}
     {waNumber} {ctaText} {storeHours} {address}
     {storeStatus} {categories}
   />

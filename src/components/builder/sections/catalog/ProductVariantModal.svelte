@@ -270,8 +270,8 @@
           <button
             type="button"
             on:click={handleConfirmBuyNow}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-            style="border-radius: var(--btn-radius, 0.75rem);"
+            class="w-full py-3.5 px-4 hover:opacity-90 active:scale-[0.98] text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff));"
           >
             <span>Beli Sekarang</span>
           </button>
@@ -279,8 +279,8 @@
           <button
             type="button"
             on:click={handleConfirmAddToCart}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-            style="border-radius: var(--btn-radius, 0.75rem);"
+            class="w-full py-3.5 px-4 hover:opacity-90 active:scale-[0.98] text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-card-base, #ffffff));"
           >
             <ShoppingCart size={18} />
             <span>+ Keranjang</span>

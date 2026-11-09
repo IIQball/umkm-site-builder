@@ -84,7 +84,7 @@
           {#if product.badge}
             <span
               class="absolute top-1 left-1 text-[9px] font-heading font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
-              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
             >
               {product.badge}
             </span>
@@ -110,7 +110,7 @@
         }`}
       >
         <div class="flex items-baseline gap-1.5 flex-wrap">
-          <span class="font-heading font-black text-xs sm:text-sm text-[var(--color-primary)]">
+          <span class="font-heading font-black text-xs sm:text-sm text-[var(--theme-primary,var(--color-primary))]">
             {formatIDR(product.price)}
           </span>
           {#if hasDiscount}
@@ -123,17 +123,17 @@
           <button
             type="button"
             on:click|stopPropagation={() => onAddToCart(product, {})}
-            class="h-8 px-3 border border-[var(--theme-btn-secondary-border,var(--btn-secondary-border,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[var(--color-nested-base)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            class="h-8 px-3 border border-[var(--theme-btn-secondary-border,color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_25%,var(--color-border)))] bg-[var(--color-card-base)] hover:bg-[color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_8%,transparent)] active:scale-[0.98] text-[var(--color-text-main)] text-xs font-heading font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem));"
           >
-            <ShoppingCart size={13} />
+            <ShoppingCart size={13} class="text-[var(--theme-secondary,var(--color-secondary))]" />
             <span>{cartButtonText || 'Keranjang'}</span>
           </button>
           <button
             type="button"
             on:click|stopPropagation={() => onBuyNow(product, {})}
             class="h-8 px-4 active:scale-[0.98] text-xs font-heading font-bold transition-all cursor-pointer shadow-xs hover:opacity-90 flex items-center justify-center"
-            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
             {buyButtonText || 'Pesan'}
           </button>

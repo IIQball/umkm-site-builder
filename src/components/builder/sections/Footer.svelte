@@ -120,7 +120,7 @@
   $: currentActiveNodeId = (!isActive || isLiveStorefront || $canvasStore?.selectedSectionId !== sectionId) ? null : $activeNodeId;
 
   const handleSelectNode = isLiveStorefront
-    ? (_e: MouseEvent | KeyboardEvent, _key: string) => {}
+    ? undefined
     : (e: MouseEvent | KeyboardEvent, key: string) => {
         if (!isActive) return;
         e.stopPropagation();

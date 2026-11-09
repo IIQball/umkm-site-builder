@@ -73,6 +73,7 @@ export const DEFAULT_TEMPLATE_SECTIONS: TemplateSection[] = [
     type: 'header_announcement',
     layoutPreset: 'default_split',
     props: {
+      isSticky: true,
       showAnnouncement: true,
       announcementText: 'Diskon 20% khusus hari ini',
       announcementAlign: 'center',

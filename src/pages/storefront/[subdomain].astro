@@ -144,6 +144,14 @@ Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=8640
 Astro.response.headers.set("Surrogate-Control", "public, max-age=86400");
 Astro.response.headers.set("Surrogate-Key", `store-${store.id}`);
 
+const userAgent = Astro.request.headers.get("user-agent") || "";
+const secChUaMobile = Astro.request.headers.get("sec-ch-ua-mobile");
+const isMobileDevice = secChUaMobile === "?1" || /Mobile|Android|iPhone|iPad|iPod/i.test(userAgent);
+const initialViewMode: 'mobile' | 'desktop' = isMobileDevice ? "mobile" : "desktop";
+
+const heroSection = finalConfig.sections?.find((s: any) => s.type === 'hero');
+const heroImageUrl = (heroSection?.props as any)?.imageUrl || 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=1200&q=80';
+
 const safeStore = {
   id: store.id,
   name: store.name,
@@ -169,15 +177,45 @@ const safeStore = {
   description={`${store.name} — Toko online resmi di Banyuwangi. ${store.address ? store.address + '.' : ''} Pesan produk lokal terbaik langsung via WhatsApp.`}
   image={storeLogo}
 >
-  {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
+  <link
+    rel="preload"
+    as="image"
+    href={heroImageUrl.includes('images.unsplash.com') ? heroImageUrl.replace('w=1200', 'w=500').replace('q=80', 'q=75') : heroImageUrl}
+    imagesrcset={heroImageUrl.includes('images.unsplash.com') ? `${heroImageUrl.replace('w=1200', 'w=500').replace('q=80', 'q=75')} 500w, ${heroImageUrl} 1200w` : undefined}
+    imagesizes="(max-width: 640px) 100vw, 600px"
+    fetchpriority="high"
+  />
+  {googleFontsUrl && (
+    <link
+      rel="stylesheet"
+      href={googleFontsUrl}
+      media="print"
+      onload="this.media='all'"
+    />
+  )}
   <style is:inline set:html={themeCss} />
 
   <StorefrontDynamicPage
-    client:load
     config={finalConfig}
     store={safeStore}
     products={storeProducts}
     categories={categories}
     isOpen={isOpen}
+    viewModeOverride={initialViewMode}
   />
+
+  {safeStore.id && (
+    <script is:inline define:vars={{ storeId: safeStore.id }}>
+      if (typeof window !== 'undefined' && storeId) {
+        try {
+          fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ storeId: storeId, eventType: 'store_view' }),
+            keepalive: true
+          }).catch(function() {});
+        } catch (e) {}
+      }
+    </script>
+  )}
 </StorefrontLayout>

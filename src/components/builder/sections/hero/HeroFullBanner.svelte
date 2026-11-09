@@ -12,8 +12,8 @@
   export let ctaLink: string = '#products';
   export let waNumber: string = '';
   export let activeNodeId: string | null = null;
-  export let selectNode: (e: MouseEvent, key: string) => void = () => {};
-  export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
+  export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
+  export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta'];
 
   $: effectiveOrder = (
@@ -37,9 +37,9 @@
         data-node="badge"
         role="button"
         tabindex="0"
-        on:click={(e) => selectNode(e, 'hero_badge')}
-        on:keydown={(e) => selectNodeKey(e, 'hero_badge')}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit);"
+        on:click={(e) => selectNode?.(e, 'hero_badge')}
+        on:keydown={(e) => selectNodeKey?.(e, 'hero_badge')}
+        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
         class={`badge badge-outline inline-flex items-center gap-1.5 px-3.5 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-sm ${
           isBadgeActive
             ? 'ring-2 ring-primary ring-offset-2 ring-offset-slate-950 bg-black/60 border-primary text-white'
@@ -59,8 +59,8 @@
         data-node="title"
         role="button"
         tabindex="0"
-        on:click={(e) => selectNode(e, 'hero_title')}
-        on:keydown={(e) => selectNodeKey(e, 'hero_title')}
+        on:click={(e) => selectNode?.(e, 'hero_title')}
+        on:keydown={(e) => selectNodeKey?.(e, 'hero_title')}
         style="font-size: var(--text-h1-size, inherit); font-weight: var(--text-h1-weight, inherit); font-family: var(--font-heading, inherit);"
         class={`text-heading-xl font-heading font-black tracking-tight leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] transition-all cursor-pointer rounded-2xl p-2 ${
           isTitleActive
@@ -75,8 +75,8 @@
         data-node="subtitle"
         role="button"
         tabindex="0"
-        on:click={(e) => selectNode(e, 'hero_subtitle')}
-        on:keydown={(e) => selectNodeKey(e, 'hero_subtitle')}
+        on:click={(e) => selectNode?.(e, 'hero_subtitle')}
+        on:keydown={(e) => selectNodeKey?.(e, 'hero_subtitle')}
         style="font-size: var(--text-body-size, inherit); font-weight: var(--text-body-weight, inherit); font-family: var(--font-body, var(--font-sans, inherit));"
         class={`text-body-base text-white/95 max-w-xl leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-medium transition-all cursor-pointer rounded-xl p-2 bg-black/25 backdrop-blur-[2px] ${
           isSubtitleActive
@@ -91,8 +91,8 @@
         data-node="cta"
         role="button"
         tabindex="0"
-        on:click={(e) => selectNode(e, 'hero_cta')}
-        on:keydown={(e) => selectNodeKey(e, 'hero_cta')}
+        on:click={(e) => selectNode?.(e, 'hero_cta')}
+        on:keydown={(e) => selectNodeKey?.(e, 'hero_cta')}
         class={`mt-2 rounded-2xl p-2 transition-all cursor-pointer ${
           isCtaActive
             ? 'ring-2 ring-primary bg-white/10'
@@ -101,7 +101,7 @@
       >
         <a
           href={effectiveLink}
-          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor);"
+          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-primary, var(--color-primary)); color: var(--theme-btn-primary-text, currentColor); font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-weight: var(--theme-text-body-weight, var(--text-body-weight, 600));"
           class="btn btn-primary font-heading font-semibold text-sm shadow-lg px-8"
         >
           <span>{ctaText}</span>

@@ -137,11 +137,11 @@
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1">
-              <h4 class="font-heading font-bold text-xs text-main truncate">
+              <h3 class="font-heading font-bold text-xs text-main truncate">
                 {item.customerName}
-              </h4>
+              </h3>
               {#if item.verified !== false}
-                <CheckCircle2 size={11} class="text-emerald-500 shrink-0" />
+                <CheckCircle2 size={11} class="text-success shrink-0" />
               {/if}
             </div>
             <p class="text-[10px] text-secondary/70 truncate font-mono">

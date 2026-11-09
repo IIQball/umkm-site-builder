@@ -20,6 +20,7 @@
   export let sectionId: string = '';
   export let isActive: boolean = false;
   export let layoutPreset: string = 'accordion_single_col';
+  export let isLiveStorefront: boolean = false;
 
   $: activePreset = layoutPreset || (props?.layoutPreset as string) || (styles?.layoutPreset as string) || 'accordion_single_col';
 
@@ -125,7 +126,7 @@
       {:else if activePreset === 'grid_2_col_cards'}
         <FaqGridCards {sectionId} faqs={visibleFaqs} {nodeStyles} />
       {:else if activePreset === 'accordion_two_col'}
-        <FaqAccordionTwoCol {sectionId} faqs={visibleFaqs} {nodeStyles} />
+        <FaqAccordionTwoCol {sectionId} faqs={visibleFaqs} {nodeStyles} {isLiveStorefront} />
       {:else if activePreset === 'chat_style_faq'}
         <FaqChatStyle {sectionId} faqs={visibleFaqs} {nodeStyles} />
       {:else if activePreset === 'search_filtered_faq'}
@@ -140,7 +141,7 @@
         <FaqHorizontalCards {sectionId} faqs={visibleFaqs} {nodeStyles} />
       {:else}
         <!-- Default: accordion_single_col -->
-        <FaqAccordionSingle {sectionId} faqs={visibleFaqs} {nodeStyles} />
+        <FaqAccordionSingle {sectionId} faqs={visibleFaqs} {nodeStyles} {isLiveStorefront} />
       {/if}
     </div>
   </div>

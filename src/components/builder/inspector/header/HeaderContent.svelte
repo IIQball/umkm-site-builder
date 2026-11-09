@@ -39,6 +39,25 @@
 </script>
 
 <div class="space-y-6">
+  <!-- 0. Posisi Bilah Navigasi (Sticky vs Relatif) -->
+  <div class="p-3 bg-base-200/40 rounded-xl border border-base-200 flex items-center justify-between gap-3">
+    <div>
+      <span class="font-bold block text-xs text-base-content">Navigasi Menempel (Sticky)</span>
+      <span class="text-[10px] text-base-content/70">Navbar tetap di atas layar saat halaman digulir.</span>
+    </div>
+    <input
+      id="header-sticky-toggle"
+      type="checkbox"
+      checked={(section.props?.isSticky as boolean) ?? (section.props?.stickyNav as boolean) ?? true}
+      on:change={(e) => {
+        handlePropChange('isSticky', e.currentTarget.checked);
+        handlePropChange('stickyNav', e.currentTarget.checked);
+      }}
+      class="toggle toggle-primary toggle-sm cursor-pointer"
+      aria-label="Navigasi Menempel (Sticky)"
+    />
+  </div>
+
   <!-- 1. Konfigurasi Bilah Atas & Lencana Legalitas (Hanya jika didukung layout) -->
   {#if showTopBar}
     <HeaderTopBarContent

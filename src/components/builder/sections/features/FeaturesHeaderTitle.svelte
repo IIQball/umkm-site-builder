@@ -73,16 +73,16 @@
         tabindex="0"
         on:click={handleBadgeClick}
         on:keydown={handleBadgeKeydown}
-        class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium shadow-2xs px-3 py-1 cursor-pointer transition-all ${
+        class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium shadow-2xs px-3.5 py-1 min-h-[24px] cursor-pointer transition-all ${
           isBadgeActive
-            ? 'ring-2 ring-[var(--color-primary)] ring-offset-2'
-            : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--color-primary)]/50'
+            ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/50'
         } ${badgeColorClass}`}
-        style="{!badgeColorClass ? 'background-color: color-mix(in srgb, var(--color-primary) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); color: var(--color-primary);' : ''} {badgeStyle.color ? `color: ${badgeStyle.color};` : ''} margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
+        style="{!badgeColorClass ? 'background-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 10%, transparent); border-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 25%, transparent); color: var(--theme-secondary, var(--color-secondary));' : ''} {badgeStyle.color ? `color: ${badgeStyle.color};` : ''} font-size: {badgeStyle.fontSize || 'var(--theme-text-caption, var(--text-caption-size, 10px))'}; font-weight: {badgeStyle.fontWeight || 'var(--theme-text-caption-weight, var(--text-caption-weight, 700))'}; margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
       >
         <span
           class={`w-1.5 h-1.5 rounded-full ${dotColorClass}`}
-          style={!dotColorClass ? 'background-color: var(--color-primary);' : ''}
+          style={!dotColorClass ? 'background-color: var(--theme-secondary, var(--color-secondary));' : ''}
         ></span>
         <span>{badgeText}</span>
       </div>
@@ -100,7 +100,7 @@
         }`}
         style="margin-top: {titleStyle.marginTop || '0px'}; margin-bottom: {titleStyle.marginBottom || '12px'};"
       >
-        <h2 class="cq-title font-heading font-extrabold tracking-tight" style="color: {titleStyle.color || 'var(--color-text-main)'};">
+        <h2 class="cq-title font-heading font-extrabold tracking-tight" style="color: {titleStyle.color || 'var(--color-text-main)'}; font-size: {titleStyle.fontSize || 'var(--theme-text-h2, var(--text-h2-size, 26px))'}; font-weight: {titleStyle.fontWeight || 'var(--theme-text-h2-weight, var(--text-h2-weight, 700))'};">
           {title}
         </h2>
       </div>
@@ -118,7 +118,7 @@
         }`}
         style="margin-top: {subtitleStyle.marginTop || '0px'}; margin-bottom: {subtitleStyle.marginBottom || '0px'};"
       >
-        <p class="text-body-base leading-relaxed" style="color: {subtitleStyle.color || 'var(--color-text-secondary)'};">
+        <p class="text-body-base leading-relaxed" style="color: {subtitleStyle.color || 'var(--color-text-secondary)'}; font-size: {subtitleStyle.fontSize || 'var(--theme-text-body, var(--text-body-size, 16px))'}; font-weight: {subtitleStyle.fontWeight || 'var(--theme-text-body-weight, var(--text-body-weight, 400))'};">
           {subtitle}
         </p>
       </div>

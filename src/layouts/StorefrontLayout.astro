@@ -1,7 +1,6 @@
 ---
-import '@/styles/global.css';
+import globalCssUrl from '@/styles/global.css?url';
 import criticalCSS from '@/styles/critical.css?raw';
-import LandingMarquee from '@/components/landing/LandingMarquee.svelte';
 
 interface Props {
   title: string;
@@ -53,16 +52,20 @@ const ogImageUrl = new URL(image, siteUrl).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
     
-    {/* Inline critical CSS — blocks render until parsed (by design for LCP optimization) */}
+    {/* Inline critical CSS — immediate render above the fold */}
     <style is:inline set:html={criticalCSS} />
+
+    {/* Non-render-blocking Global CSS via preload + media switch */}
+    <link rel="preload" href={globalCssUrl} as="style" />
+    <link rel="stylesheet" href={globalCssUrl} media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href={globalCssUrl} />
+    </noscript>
     
     {/* Preconnect to external resources */}
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" media="print" onload="this.media='all'" />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    </noscript>
 
     <!-- Anti-flicker theme script - runs before DOM renders -->
     <script is:inline>
@@ -76,56 +79,61 @@ const ogImageUrl = new URL(image, siteUrl).href;
     </script>
   </head>
   <body class="min-h-screen flex flex-col antialiased overflow-x-clip">
-    <LandingMarquee client:load />
     <div id="base-content-container">
       <slot />
     </div>
 
-    <!-- Floating manual theme toggle for storefront visitors -->
-    <button
-      id="storefront-theme-toggle"
-      type="button"
-      class="fixed bottom-5 left-5 z-50 p-2.5 rounded-full bg-card/90 text-main shadow-lg border border-border/80 backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center opacity-80 hover:opacity-100"
-      aria-label="Ganti mode tema"
-      title="Ganti tema terang/gelap"
-    >
-      <!-- Sun icon (shown in dark mode) -->
-      <svg class="w-5 h-5 hidden dark:block text-warning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="4"></circle>
-        <path d="M12 2v2"></path>
-        <path d="M12 20v2"></path>
-        <path d="m4.93 4.93 1.41 1.41"></path>
-        <path d="m17.66 17.66 1.41 1.41"></path>
-        <path d="M2 12h2"></path>
-        <path d="M20 12h2"></path>
-        <path d="m6.34 17.66-1.41 1.41"></path>
-        <path d="m19.07 4.93-1.41 1.41"></path>
-      </svg>
-      <!-- Moon icon (shown in light mode) -->
-      <svg class="w-5 h-5 block dark:hidden text-secondary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-      </svg>
-    </button>
-
+    <!-- Lightweight Zero-Overhead Storefront Interactions -->
     <script is:inline>
-      const toggleBtn = document.getElementById('storefront-theme-toggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-          document.documentElement.setAttribute('data-theme', newTheme);
-          if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
+      document.addEventListener('click', function(e) {
+        // 1. Mobile Menu Drawer Toggle
+        var menuBtn = e.target.closest('button[aria-label*="menu navigasi"]');
+        if (menuBtn) {
+          var drawer = document.getElementById('header-mobile-drawer');
+          if (drawer) {
+            var isHidden = drawer.classList.contains('hidden');
+            if (isHidden) {
+              drawer.classList.remove('hidden');
+              drawer.classList.add('block');
+              menuBtn.setAttribute('aria-label', 'Tutup menu navigasi');
+              menuBtn.setAttribute('aria-expanded', 'true');
+            } else {
+              drawer.classList.add('hidden');
+              drawer.classList.remove('block');
+              menuBtn.setAttribute('aria-label', 'Buka menu navigasi');
+              menuBtn.setAttribute('aria-expanded', 'false');
+            }
           }
-          try {
-            localStorage.setItem('theme', newTheme);
-          } catch (e) {
-            console.error(e);
+          return;
+        }
+
+        // Auto-close drawer on clicking any navigation link inside it
+        var drawerLink = e.target.closest('#header-mobile-drawer a');
+        if (drawerLink) {
+          var drawer = document.getElementById('header-mobile-drawer');
+          if (drawer) {
+            drawer.classList.add('hidden');
+            drawer.classList.remove('block');
+            var btn = document.querySelector('button[aria-label*="menu navigasi"]');
+            if (btn) {
+              btn.setAttribute('aria-label', 'Buka menu navigasi');
+              btn.setAttribute('aria-expanded', 'false');
+            }
           }
-        });
-      }
+          return;
+        }
+
+        // 2. Theme Toggle (Light/Dark mode)
+        var themeBtn = e.target.closest('button[aria-label*="tema"]');
+        if (themeBtn) {
+          var current = document.documentElement.getAttribute('data-theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+          var next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          document.documentElement.classList.toggle('dark', next === 'dark');
+          try { localStorage.setItem('theme', next); } catch (err) {}
+          return;
+        }
+      });
     </script>
   </body>
 </html>

@@ -57,7 +57,7 @@
           tabindex="0"
           on:click={(e) => selectCard(e, idx, product)}
           on:keydown={(e) => { if (e.key === 'Enter') selectCard(e, idx, product); }}
-          class={`hover:bg-nested/40 transition-colors cursor-pointer ${isItemActive ? 'bg-blue-50/60 dark:bg-blue-950/40' : ''}`}
+          class={`hover:bg-nested/40 transition-colors cursor-pointer ${isItemActive ? 'bg-primary/10' : ''}`}
         >
           <td class="p-4 font-heading font-bold text-main" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
             {product.name}
@@ -65,7 +65,7 @@
           <td class="p-4 text-secondary max-w-xs truncate hidden sm:table-cell">
             <div class="flex items-center gap-2">
               {#if product.badge}
-                <span class="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, #0f172a);">
+                <span class="text-[10px] font-heading font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0" style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));">
                   {product.badge}
                 </span>
               {/if}
@@ -73,7 +73,7 @@
             </div>
           </td>
 
-          <td class="p-4 font-heading font-black text-primary">
+          <td class="p-4 font-heading font-black text-[var(--theme-primary,var(--color-primary))]">
             <div class="flex items-baseline gap-1.5 flex-wrap">
               <span>{formatIDR(product.price)}</span>
               {#if hasDiscount}
@@ -88,7 +88,7 @@
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
               class="h-8 px-4 active:scale-[0.98] font-heading font-bold text-xs transition-all shadow-xs hover:opacity-90 cursor-pointer flex items-center justify-center"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
             >
               <span>{buyButtonText || 'Pesan'}</span>
             </button>

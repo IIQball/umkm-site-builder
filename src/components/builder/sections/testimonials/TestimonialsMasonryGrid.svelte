@@ -48,7 +48,7 @@
         </div>
         <p
           class="text-xs sm:text-sm text-secondary leading-relaxed italic"
-          style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
+          style="font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400)); {itemStyle.color ? `color: ${itemStyle.color};` : ''}"
         >
           "{item.comment}"
         </p>
@@ -72,17 +72,17 @@
           />
         </div>
         <div class="min-w-0">
-          <h4 class="font-heading font-bold text-xs text-main truncate">
+          <h3 class="font-heading font-bold text-xs text-main truncate" style="font-size: var(--theme-text-h3, var(--text-h3-size, 18px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));">
             {item.customerName}
-          </h4>
+          </h3>
           {#if item.verified !== false}
-            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+            <span class="text-[10px] text-success font-semibold flex items-center gap-1 mt-0.5" style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 600));">
               <CheckCircle2 size={11} />
               <span>{item.verifiedText || 'Pembeli Terverifikasi'}</span>
             </span>
           {/if}
           {#if item.role}
-            <p class="text-[10px] text-secondary truncate mt-0.5">{item.role}</p>
+            <p class="text-[10px] text-secondary truncate mt-0.5" style="font-size: var(--theme-text-caption, var(--text-caption-size, 10px));">{item.role}</p>
           {/if}
         </div>
       </div>

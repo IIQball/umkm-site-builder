@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import type { SectionStyles } from '@/types';
-  import { getSectionDefinition } from './index';
+  import { getRenderSectionDefinition } from './renderRegistry';
   import { isDarkColor } from '@/lib/utils/designMath';
 
   export let section: TemplateSection;
@@ -55,7 +55,7 @@
     return rules.join('; ');
   };
 
-  $: sectionDef = getSectionDefinition(section?.type);
+  $: sectionDef = getRenderSectionDefinition(section?.type);
   $: isFullBleed = sectionDef?.isFullBleed ?? (section?.type === 'header_announcement' || section?.type === 'hero' || section?.type === 'features' || section?.type === 'product_catalog');
   $: inlineStyle = buildStyle(section?.styles, isFullBleed);
   $: containerWidthMode = section?.styles?.containerWidth || 'boxed';
@@ -67,7 +67,7 @@
     : 'max-width: var(--theme-max-width, 1200px);';
   $: baseSectionProps = section?.props || {};
   $: liveStorefrontOverrides = isLiveStorefront
-    ? { selectNode: () => {}, selectNodeKey: () => {}, activeNodeId: null, isLiveStorefront: true }
+    ? { selectNode: undefined, selectNodeKey: undefined, activeNodeId: null, isLiveStorefront: true }
     : {};
   $: sectionProps = {
     ...baseSectionProps,
@@ -98,6 +98,7 @@
     footer: ['footer', 'contact', 'hubungi-kami'],
   };
   $: anchorId = SECTION_TYPE_TO_ANCHOR[section?.type] || (section?.id ? `section-${section.id}` : undefined);
+  $: isHeaderSticky = section?.type === 'header_announcement' && (((section?.props as Record<string, unknown>)?.isSticky as boolean) ?? ((section?.props as Record<string, unknown>)?.stickyNav as boolean) ?? true);
 </script>
 
 <section
@@ -107,7 +108,7 @@
   style={inlineStyle}
   class={`box-border w-full max-w-full min-w-0 scroll-mt-20 font-sans ${
     section?.type === 'header_announcement'
-      ? `${isLiveStorefront ? 'sticky top-0 z-40' : 'relative z-30'} overflow-visible`
+      ? `${isHeaderSticky ? 'sticky top-0 z-40 is-sticky' : 'relative z-30'} overflow-visible`
       : 'relative overflow-x-hidden'
   }`}
 >

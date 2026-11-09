@@ -101,12 +101,12 @@
             <Star size={11} class="fill-warning text-warning" />
           {/each}
         </div>
-        <h4
+        <h3
           class="font-heading font-bold text-xs sm:text-sm line-clamp-2 text-white"
           style="{itemStyle.color ? `color: ${itemStyle.color};` : ''}"
         >
           "{item.comment || 'Ulasan Pembeli'}"
-        </h4>
+        </h3>
         <div class="flex items-center gap-1.5 text-[11px] text-white/80">
           <span class="font-semibold text-white truncate">{item.customerName}</span>
           {#if item.verified !== false}

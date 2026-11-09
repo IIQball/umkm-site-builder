@@ -16,6 +16,11 @@
   export let viewModeOverride: 'desktop' | 'tablet' | 'mobile' | undefined = undefined;
   export let isPreview: boolean = false;
 
+  if (viewModeOverride) {
+    editorStore.setViewMode(viewModeOverride);
+    canvasStore.setViewMode(viewModeOverride);
+  }
+
   $: sections = (config?.sections || []) as TemplateSection[];
 
   $: if (store && config) {
@@ -44,20 +49,17 @@
       trackAnalyticsEvent(store.id, 'store_view').catch(() => {});
     }
 
-    if (viewModeOverride) {
+    if (isPreview && viewModeOverride) {
       editorStore.setViewMode(viewModeOverride);
+      canvasStore.setViewMode(viewModeOverride);
       return;
     }
 
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 640) {
-        editorStore.setViewMode('mobile');
-      } else if (width < 1024) {
-        editorStore.setViewMode('tablet');
-      } else {
-        editorStore.setViewMode('desktop');
-      }
+      const mode = width < 640 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop';
+      editorStore.setViewMode(mode);
+      canvasStore.setViewMode(mode);
     };
 
     handleResize();
@@ -205,9 +207,14 @@
   }
 
   /* Sticky Header in Subdomain Storefront */
-  :global(.storefront-root [data-section-type="header_announcement"]) {
+  :global(.storefront-root [data-section-type="header_announcement"].is-sticky) {
     position: sticky !important;
     top: 0 !important;
     z-index: 40 !important;
+  }
+  :global(.storefront-root [data-section-type="header_announcement"]:not(.is-sticky)) {
+    position: relative !important;
+    top: auto !important;
+    z-index: 30 !important;
   }
 </style>

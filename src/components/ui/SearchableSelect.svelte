@@ -3,7 +3,7 @@
   import { Search, ChevronDown, Check, X } from 'lucide-svelte';
 
   export let value: string | number = '';
-  export let options: Array<{ value: string | number; label: string; sublabel?: string; disabled?: boolean; }> = [];
+  export let options: Array<{ value: string | number; label: string; sublabel?: string; disabled?: boolean; style?: string; }> = [];
   export let label: string = '', placeholder: string = 'Pilih opsi...', searchPlaceholder: string = 'Cari opsi...';
   export let emptyText: string = 'Tidak ada hasil yang cocok', error: string = '', helper: string = '';
   export let disabled: boolean = false, required: boolean = false, id: string = '', name: string = '';
@@ -42,33 +42,18 @@
     return matchLabel || matchSublabel;
   });
 
-  $: if (isOpen && searchInputRef && searchable) {
-    setTimeout(() => {
-      searchInputRef?.focus();
-    }, 40);
-  }
+  $: if (isOpen && searchInputRef && searchable) setTimeout(() => searchInputRef?.focus(), 40);
 
   let computedAlign: 'left' | 'right' = align === 'right' ? 'right' : 'left';
-
   function updateAlignment() {
-    if (align === 'right') {
-      computedAlign = 'right';
-      return;
-    }
+    if (align === 'right') { computedAlign = 'right'; return; }
     if (typeof window !== 'undefined' && containerRef) {
       const rect = containerRef.getBoundingClientRect();
       const estimatedWidth = popoverWidth ? 160 : 240;
-      if (rect.left + estimatedWidth > window.innerWidth - 16) {
-        computedAlign = 'right';
-      } else {
-        computedAlign = 'left';
-      }
+      computedAlign = rect.left + estimatedWidth > window.innerWidth - 16 ? 'right' : 'left';
     }
   }
-
-  $: if (isOpen) {
-    updateAlignment();
-  }
+  $: if (isOpen) updateAlignment();
 
   const toggleDropdown = () => {
     if (disabled) return;
@@ -182,7 +167,10 @@
     on:click={toggleDropdown}
     on:keydown={handleKeyDown}
   >
-    <span class="truncate min-w-0 flex-1 pr-2 {selectedOption ? 'text-main font-medium' : 'text-muted italic'}">
+    <span
+      class="truncate min-w-0 flex-1 pr-2 {selectedOption ? 'text-main font-medium' : 'text-muted italic'}"
+      style={selectedOption?.style || ''}
+    >
       {selectedOption ? selectedOption.label : placeholder}
     </span>
 
@@ -259,7 +247,10 @@
               aria-selected={isSelected}
             >
               <div class="flex flex-col min-w-0 pr-3">
-                <span class="whitespace-nowrap {isSelected ? 'text-primary font-semibold' : 'text-main font-medium'}">
+                <span
+                  class="whitespace-nowrap {isSelected ? 'text-primary font-semibold' : 'text-main font-medium'}"
+                  style={opt.style || ''}
+                >
                   {opt.label}
                 </span>
                 {#if opt.sublabel}

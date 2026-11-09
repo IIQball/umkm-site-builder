@@ -80,7 +80,7 @@
   $: sectionBgClass = isFullBannerPreset ? 'bg-main text-canvas' : 'text-[var(--color-text-main)]';
 
   const selectNode = isLiveStorefront
-    ? (_e: MouseEvent, _key: string) => {}
+    ? undefined
     : (e: MouseEvent, key: string) => {
         e.stopPropagation();
         editorStore.selectSection(sectionId);
@@ -88,7 +88,7 @@
       };
 
   const selectNodeKey = isLiveStorefront
-    ? (_e: KeyboardEvent, _key: string) => {}
+    ? undefined
     : (e: KeyboardEvent, key: string) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.stopPropagation();

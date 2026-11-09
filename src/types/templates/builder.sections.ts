@@ -35,6 +35,7 @@ export interface HeaderAnnouncementProps {
   bpomText?: string;
   halalIcon?: string;
   halalText?: string;
+  isSticky?: boolean; stickyNav?: boolean;
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }

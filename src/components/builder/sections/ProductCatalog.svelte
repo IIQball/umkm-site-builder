@@ -270,7 +270,8 @@
         <button
           type="button"
           on:click={() => { currentView = 'checkout'; scrollToCatalog(); }}
-          class="btn btn-primary rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-bold text-sm group"
+          class="btn rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-bold text-sm group"
+          style="background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff)); border-radius: 9999px;"
         >
           <div class="relative">
             <ShoppingCart size={18} />

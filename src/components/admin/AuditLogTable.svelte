@@ -2,6 +2,7 @@
   import { Pagination, Badge, Select, Table, Modal, Button, Card, SearchableSelect } from '@/components/ui';
   import { User, Monitor, Info } from 'lucide-svelte';
   import { formatDate } from '@/lib/utils/format';
+  import { formatAuditAction } from '@/lib/utils/audit';
   import { DEFAULT_AUDIT_ACTIONS } from '@/services/audit.constants';
 
   export let initialLogs: Array<{
@@ -53,7 +54,7 @@
     { value: 'all', label: 'Semua Aksi' },
     ...actions.map((action) => ({
       value: action,
-      label: action.replace(/_/g, ' ').toUpperCase(),
+      label: formatAuditAction(action, { mode: 'label' }),
     })),
   ];
 
@@ -171,7 +172,7 @@
           <!-- Column: Aksi -->
           <td class="px-6 py-4">
             <Badge variant={getActionColor(log.action)} class="font-bold tracking-wide uppercase px-2 py-0.5 text-[10px] shadow-xs">
-              {log.action.replace(/_/g, ' ')}
+              {formatAuditAction(log.action, { mode: 'label' })}
             </Badge>
           </td>
 

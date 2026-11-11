@@ -13,6 +13,7 @@
   const dispatch = createEventDispatcher<{
     openDrawer: void;
     closeDrawer: void;
+    openBugReport: void;
     signOut: void;
   }>();
 
@@ -117,20 +118,29 @@
         </div>
       </div>
     {/each}
-    {#if user.role === 'tenant'}
-      <div class="px-3 pt-2">
-        <TenantQuota />
-      </div>
-    {/if}
   </nav>
 
-  <div class="border-t border-light p-3">
+  {#if user.role === 'tenant'}
+    <TenantQuota />
+  {/if}
+
+  <div class="border-t border-light p-3 space-y-1.5 shrink-0">
+    <button
+      type="button"
+      on:click={() => dispatch("openBugReport")}
+      class="flex items-center gap-2.5 w-full min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold text-secondary hover:text-main hover:bg-nested transition-colors cursor-pointer"
+      aria-label="Laporkan masalah atau bug"
+    >
+      <span class="material-symbols-outlined text-base text-primary flex-shrink-0">bug_report</span>
+      <span>Laporkan Bug</span>
+    </button>
+
     <!-- Sign Out Button -->
     <button
       type="button"
       on:click={() => dispatch("signOut")}
       disabled={isLoggingOut}
-      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+      class="flex items-center gap-2.5 w-full min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
       aria-label="Keluar dari akun"
     >
       <span class="material-symbols-outlined text-base flex-shrink-0" class:animate-spin={isLoggingOut}>power_settings_new</span>

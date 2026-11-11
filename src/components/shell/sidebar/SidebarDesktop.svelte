@@ -12,6 +12,7 @@
 
   const dispatch = createEventDispatcher<{
     toggleCollapse: void;
+    openBugReport: void;
     signOut: void;
   }>();
 
@@ -170,12 +171,27 @@
     <TenantQuota {collapsed} />
   {/if}
 
-  <div class="p-3 border-t border-light flex flex-col gap-2 shrink-0 {user.role === 'tenant' ? '' : 'mt-auto'}">
+  <div class="p-3 border-t border-light flex flex-col gap-1.5 shrink-0 {user.role === 'tenant' ? '' : 'mt-auto'}">
+    <button
+      type="button"
+      on:click={() => dispatch("openBugReport")}
+      class="flex items-center gap-2.5 w-full min-h-[38px] px-3 py-2 rounded-xl text-xs font-semibold text-secondary hover:text-main hover:bg-nested transition-colors cursor-pointer {collapsed ? 'justify-center px-0' : ''}"
+      title="Laporkan Masalah / Bug"
+      aria-label="Laporkan masalah atau bug"
+    >
+      <span class="material-symbols-outlined text-base text-primary flex-shrink-0">
+        bug_report
+      </span>
+      {#if !collapsed}
+        <span class="truncate">Laporkan Bug</span>
+      {/if}
+    </button>
+
     <button
       type="button"
       on:click={() => dispatch("signOut")}
       disabled={isLoggingOut}
-      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer {collapsed ? 'justify-center px-0' : ''}"
+      class="flex items-center gap-2.5 w-full min-h-[38px] px-3 py-2 rounded-xl text-xs font-semibold text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer {collapsed ? 'justify-center px-0' : ''}"
       title="Keluar"
       aria-label="Keluar dari akun"
     >

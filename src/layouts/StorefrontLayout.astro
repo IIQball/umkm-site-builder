@@ -1,6 +1,8 @@
 ---
 import globalCssUrl from '@/styles/global.css?url';
 import criticalCSS from '@/styles/critical.css?raw';
+import ToastContainer from '@/components/ui/ToastContainer.svelte';
+import BugReportTrigger from '@/components/common/BugReportTrigger.svelte';
 
 interface Props {
   title: string;
@@ -79,9 +81,11 @@ const ogImageUrl = new URL(image, siteUrl).href;
     </script>
   </head>
   <body class="min-h-screen flex flex-col antialiased overflow-x-clip">
+    <ToastContainer client:idle />
     <div id="base-content-container">
       <slot />
     </div>
+    <BugReportTrigger client:idle sourceApp="site_builder" />
 
     <!-- Lightweight Zero-Overhead Storefront Interactions -->
     <script is:inline>

@@ -141,6 +141,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
         items: [
           { label: 'Monitoring AI', href: '/superadmin/ai-monitoring', icon: 'smart_toy', group: 'Monitoring & Keuangan' },
           { label: 'Riwayat Transaksi', href: '/superadmin/transactions', icon: 'receipt_long', group: 'Monitoring & Keuangan' },
+          { label: 'Laporan Bug', href: '/superadmin/bug-reports', icon: 'bug_report', group: 'Monitoring & Keuangan' },
           { label: 'Audit Logs', href: '/admin/audit-logs', icon: 'history', group: 'Monitoring & Keuangan' },
         ],
       },

@@ -11,5 +11,6 @@ export * from './designer/bank-validate.schema';
 export * from './designer/payout.schema';
 export * from './media.schema';
 export * from './tenant';
+export * from './bug-report.schema';
 
 

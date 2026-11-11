@@ -1,6 +1,8 @@
 <script lang="ts">
   import PeriodFilter from "@/components/common/PeriodFilter.svelte";
   import { Button, Badge } from "@/components/ui";
+  import { apiFetch } from "@/lib/api/parse-response";
+  import { toast } from "@/lib/toast";
   import { Bot, Wallet, Plus, Sparkles, AlertTriangle } from "lucide-svelte";
   import { filterByPeriod, computeAvailableYears } from "@/lib/utils/format";
   import type {
@@ -64,15 +66,13 @@
       const params = new URLSearchParams();
       if (year) params.set('year', String(year));
       if (month && month !== 'all') params.set('month', String(month));
-      const res = await fetch(`/api/admin/ai/summary?${params.toString()}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.ok && json.data) {
-          summary = json.data;
-        }
+      const res = await apiFetch<AiMonitoringSummary>(`/api/admin/ai/summary?${params.toString()}`);
+      if (res.success && res.data) {
+        summary = res.data;
       }
     } catch (err) {
       console.error('[AiMonitoringDashboard] Failed to fetch period summary:', err);
+      toast.error('Gagal memuat ringkasan monitoring AI.');
     }
   }
 
@@ -86,27 +86,26 @@
       if (selectedMonth && selectedMonth !== 'all') params.set('month', String(selectedMonth));
 
       const [summaryRes, depositsRes] = await Promise.all([
-        fetch(`/api/admin/ai/summary?${params.toString()}`),
-        fetch("/api/admin/ai/deposits"),
+        apiFetch<AiMonitoringSummary>(`/api/admin/ai/summary?${params.toString()}`),
+        apiFetch<AiDepositHistoryItem[] | { deposits?: AiDepositHistoryItem[] }>("/api/admin/ai/deposits"),
       ]);
 
-      if (summaryRes.ok) {
-        const json = await summaryRes.json();
-        if (json.ok && json.data) {
-          summary = json.data;
-        }
+      if (summaryRes.success && summaryRes.data) {
+        summary = summaryRes.data;
       }
 
-      if (depositsRes.ok) {
-        const json = await depositsRes.json();
-        if (json.ok && Array.isArray(json.data)) {
-          depositHistory = json.data;
-        } else if (json.deposits) {
-          depositHistory = json.deposits;
-        }
+      if (depositsRes.success && depositsRes.data) {
+        depositHistory = Array.isArray(depositsRes.data)
+          ? depositsRes.data
+          : (depositsRes.data.deposits ?? []);
+      }
+
+      if (!summaryRes.success || !depositsRes.success) {
+        toast.error('Sebagian data monitoring AI gagal diperbarui.');
       }
     } catch (err) {
       console.error("[AiMonitoringDashboard] Failed to refresh data:", err);
+      toast.error("Gagal menyegarkan data monitoring AI.");
     } finally {
       isRefreshing = false;
     }

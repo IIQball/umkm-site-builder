@@ -138,11 +138,11 @@
 
       <!-- Error Message if failed -->
       {#if log.errorMessage}
-        <div class="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl space-y-1">
-          <span class="text-xs font-semibold text-rose-600 dark:text-rose-400 block">
+        <div class="p-3.5 bg-error/10 border border-error/20 rounded-xl space-y-1">
+          <span class="text-xs font-semibold text-error block">
             Pesan Kesalahan (Error)
           </span>
-          <p class="text-xs text-rose-700 dark:text-rose-300 font-mono break-words">
+          <p class="text-xs text-error font-mono break-words">
             {log.errorMessage}
           </p>
         </div>
@@ -158,8 +158,8 @@
             on:click={copyPrompt}
           >
             {#if copied}
-              <Check size={12} class="text-emerald-500" />
-              <span class="text-emerald-500">Tersalin</span>
+              <Check size={12} class="text-success" />
+              <span class="text-success">Tersalin</span>
             {:else}
               <Copy size={12} />
               <span>Salin Prompt</span>

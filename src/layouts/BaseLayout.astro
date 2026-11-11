@@ -5,6 +5,7 @@ import ToastContainer from '@/components/ui/ToastContainer.svelte'
 import RateLimitAlert from '@/components/ui/RateLimitAlert.svelte'
 import SmoothScroll from '@/components/common/SmoothScroll.svelte'
 import LandingMarquee from '@/components/landing/LandingMarquee.svelte'
+import BugReportTrigger from '@/components/common/BugReportTrigger.svelte'
 
 interface Props {
   title?: string
@@ -15,6 +16,8 @@ interface Props {
   hideNavbar?: boolean
   customMarquee?: boolean
   hideToasts?: boolean
+  hideBugReport?: boolean
+  showBugButton?: boolean
 }
 
 const {
@@ -25,8 +28,12 @@ const {
   noindex = false,
   hideNavbar = false,
   customMarquee = false,
-  hideToasts = false
+  hideToasts = false,
+  hideBugReport = false,
+  showBugButton = true
 } = Astro.props
+
+const currentUserEmail = Astro.locals.user?.email ?? ''
 
 const siteUrl = Astro.url.origin
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href
@@ -212,6 +219,14 @@ const ogImageUrl = new URL(image, siteUrl).href
     <div id="base-content-container">
       <slot />
     </div>
+    {!hideBugReport && (
+      <BugReportTrigger
+        client:idle
+        sourceApp="site_builder"
+        userEmail={currentUserEmail}
+        showFloatingTrigger={showBugButton}
+      />
+    )}
   </body>
 </html>
 

@@ -1,19 +1,33 @@
 const IS_DEBUG = process.env.NODE_ENV !== 'production';
 
+function serializeLogArg(arg: unknown): unknown {
+  if (arg instanceof Error) {
+    return {
+      name: arg.name,
+      message: arg.message,
+      stack: arg.stack,
+    };
+  }
+  return arg;
+}
+
 export const debugLog = (tag: string, ...args: unknown[]) => {
   if (!IS_DEBUG) return;
-  // Comment baris di bawah ini untuk menonaktifkan seluruh log secara global:
-  // eslint-disable-next-line no-console
-  console.log(`[DEBUG][${tag}]`, ...args);
+  console.warn(`[DEBUG][${tag}]`, ...args.map(serializeLogArg));
 };
 
 export const errorLog = (tag: string, ...args: unknown[]) => {
-  console.error(`[ERROR][${tag}]`, ...args);
+  const entry = {
+    level: 'error',
+    timestamp: new Date().toISOString(),
+    tag,
+    details: args.map(serializeLogArg),
+  };
+  console.error(`[ERROR][${tag}]`, JSON.stringify(entry));
 };
 
 export const infoLog = (tag: string, ...args: unknown[]) => {
-  // eslint-disable-next-line no-console
-  console.info(`[INFO][${tag}]`, ...args);
+  console.warn(`[INFO][${tag}]`, ...args.map(serializeLogArg));
 };
 
 export const logger = {

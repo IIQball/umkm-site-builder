@@ -38,8 +38,8 @@ describe('POST /api/admin/media/cleanup', () => {
 
     expect(res.status).toBe(403);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('Admin access or valid CRON secret required');
+    expect(body.success).toBe(false);
+    expect(body.message).toContain('Admin access or valid CRON secret required');
   });
 
   it('allows access with x-cron-secret header', async () => {
@@ -62,7 +62,7 @@ describe('POST /api/admin/media/cleanup', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(mockRunMediaCleanup).toHaveBeenCalledWith({
       olderThanHours: 24,
       dryRun: true,
@@ -90,7 +90,7 @@ describe('POST /api/admin/media/cleanup', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(mockRunMediaCleanup).toHaveBeenCalledWith({
       olderThanHours: 48,
       dryRun: false,
@@ -117,6 +117,6 @@ describe('POST /api/admin/media/cleanup', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
   });
 });

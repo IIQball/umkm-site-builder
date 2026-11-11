@@ -42,25 +42,9 @@ export const GET: APIRoute = async ({ url }): Promise<Response> => {
       });
       const redirectLocation = headRes.headers.get('location');
       const canonical = redirectLocation || targetUrl;
-      return Response.json(
-        {
-          ok: true,
-          success: true,
-          data: { canonicalUrl: canonical },
-          canonicalUrl: canonical,
-        },
-        { status: 200 }
-      );
+      return jsonSuccess({ canonicalUrl: canonical }, 200);
     } catch {
-      return Response.json(
-        {
-          ok: true,
-          success: true,
-          data: { canonicalUrl: targetUrl },
-          canonicalUrl: targetUrl,
-        },
-        { status: 200 }
-      );
+      return jsonSuccess({ canonicalUrl: targetUrl }, 200);
     }
   });
 };

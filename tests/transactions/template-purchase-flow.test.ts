@@ -68,8 +68,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('UNAUTHORIZED');
   });
 
   it('should return 403 when user account is suspended', async () => {
@@ -94,8 +94,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(403);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('FORBIDDEN');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('FORBIDDEN');
   });
 
   it('should return 400 when validation fails', async () => {
@@ -120,8 +120,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('VALIDATION_ERROR');
   });
 
   it('should return 404 when template is not found or not approved', async () => {
@@ -147,8 +147,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(404);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('NOT_FOUND');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('NOT_FOUND');
   });
 
   it('should return 400 when template is already owned', async () => {
@@ -184,8 +184,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('TEMPLATE_ALREADY_OWNED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('TEMPLATE_ALREADY_OWNED');
   });
 
   it('should claim free template directly', async () => {
@@ -217,8 +217,8 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.isFree).toBe(true);
+    expect(body.success).toBe(true);
+    expect(body.data.isFree).toBe(true);
     expect(mockInsert).toHaveBeenCalled();
   });
 
@@ -257,7 +257,7 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.invoiceId).toBe('invoice_xendit_123');
     expect(body.data.invoiceUrl).toBe('https://checkout.xendit.co/web/invoice_xendit_123');
     expect(mockCreateInvoice).toHaveBeenCalledWith(
@@ -315,7 +315,7 @@ describe('POST /api/transactions/template-purchase', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
 
     // Total amount should be template.price (50000) + adminServiceFee (5000) = 55000
     expect(mockCreateInvoice).toHaveBeenCalledWith(

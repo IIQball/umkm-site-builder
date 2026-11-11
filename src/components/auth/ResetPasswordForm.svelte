@@ -4,11 +4,16 @@
   import Button from "@/components/ui/Button.svelte";
   import Input from "@/components/ui/Input.svelte";
   import { Eye, EyeOff } from "lucide-svelte";
+  import { apiFetch } from "@/lib/api/parse-response";
   import { toast } from "@/lib/toast";
+
+  export let isActivation = false;
 
   let token = "";
   let password = "";
   let confirmPassword = "";
+  let name = "";
+  let uid = "";
   let loading = false;
   let isTokenValid = true;
   let showPassword = false;
@@ -23,9 +28,15 @@
   };
 
   onMount(() => {
-    // Read the token from URL search params
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get("token");
+
+    if (isActivation) {
+      const nameParam = urlParams.get("name");
+      const uidParam = urlParams.get("uid");
+      if (nameParam) name = nameParam;
+      if (uidParam) uid = uidParam;
+    }
 
     if (!tokenParam) {
       toast.error("Token verifikasi tidak ditemukan di URL. Silakan minta tautan reset password yang baru.");
@@ -35,20 +46,29 @@
     }
   });
 
-  const passwordSchema = z.object({
-    password: z.string().min(8, "Kata sandi minimal 8 karakter"),
-    confirmPassword: z.string(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: "Konfirmasi kata sandi tidak cocok",
-    path: ["confirmPassword"],
-  });
+  const validateForm = () => {
+    const schema = z
+      .object({
+        password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+        confirmPassword: z.string(),
+        ...(isActivation
+          ? { name: z.string().trim().min(3, "Nama minimal 3 karakter") }
+          : {}),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        message: "Konfirmasi kata sandi tidak cocok",
+        path: ["confirmPassword"],
+      });
+
+    return schema.safeParse({ password, confirmPassword, ...(isActivation ? { name } : {}) });
+  };
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
     if (!isTokenValid) return;
 
-    const validationResult = passwordSchema.safeParse({ password, confirmPassword });
+    const validationResult = validateForm();
     if (!validationResult.success) {
       toast.error(validationResult.error.errors[0].message);
       return;
@@ -57,27 +77,27 @@
     loading = true;
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
+      const payload = isActivation
+        ? { token, password, uid, name: name.trim() }
+        : { token, password };
+
+      const result = await apiFetch("/api/auth/reset-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          password
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        fallbackError: "Gagal mengatur ulang kata sandi",
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.error || "Gagal mengatur ulang kata sandi");
+      if (!result.success) {
+        toast.error(result.message);
       } else {
-        toast.success("Akun berhasil diaktifkan! Mengalihkan ke halaman masuk...");
-        window.location.href = '/auth/login?success=activation_complete';
+        toast.success(
+          isActivation
+            ? "Akun berhasil diaktifkan! Mengalihkan ke halaman masuk..."
+            : "Kata sandi berhasil diperbarui! Mengalihkan ke halaman masuk..."
+        );
+        window.location.href = "/auth/login?success=activation_complete";
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
     } finally {
       loading = false;
     }
@@ -86,58 +106,79 @@
 
 <form novalidate on:submit={handleSubmit} class="space-y-5 w-full">
   <div class="space-y-4">
+    {#if isActivation}
       <Input
-        label="Kata Sandi Baru"
-        id="password"
-        type={showPassword ? "text" : "password"}
-        bind:value={password}
-        placeholder="Minimal 8 karakter"
+        label="Nama Lengkap"
+        id="name"
+        type="text"
+        autocomplete="name"
+        bind:value={name}
+        placeholder="Nama Lengkap"
         disabled={loading || !isTokenValid}
         size="md"
-      >
-        <button
-          slot="suffix"
-          type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
-          on:click={togglePasswordVisibility}
-          aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-        >
-          {#if showPassword}
-            <EyeOff size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
-        </button>
-      </Input>
+      />
+    {/if}
 
-      <Input
-        label="Konfirmasi Kata Sandi"
-        id="confirmPassword"
-        type={showConfirmPassword ? "text" : "password"}
-        bind:value={confirmPassword}
-        placeholder="Ulangi kata sandi baru"
-        disabled={loading || !isTokenValid}
-        size="md"
+    <Input
+      label={isActivation ? "Kata Sandi" : "Kata Sandi Baru"}
+      id="password"
+      type={showPassword ? "text" : "password"}
+      autocomplete="new-password"
+      bind:value={password}
+      placeholder="Minimal 8 karakter"
+      disabled={loading || !isTokenValid}
+      size="md"
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        slot="suffix"
+        type="button"
+        class="text-muted hover:text-main"
+        ariaPressed={showPassword}
+        on:click={togglePasswordVisibility}
+        aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
       >
-        <button
-          slot="suffix"
-          type="button"
-          class="flex items-center justify-center p-1 cursor-pointer text-muted hover:text-main transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
-          on:click={toggleConfirmPasswordVisibility}
-          aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-        >
-          {#if showConfirmPassword}
-            <EyeOff size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
-        </button>
-      </Input>
-    </div>
-
-    <div class="pt-2 w-full">
-      <Button type="submit" variant="primary" size="lg" fullWidth disabled={!isTokenValid || loading} {loading}>
-        Simpan Kata Sandi Baru
+        {#if showPassword}
+          <EyeOff size={16} />
+        {:else}
+          <Eye size={16} />
+        {/if}
       </Button>
-    </div>
+    </Input>
+
+    <Input
+      label="Konfirmasi Kata Sandi"
+      id="confirmPassword"
+      type={showConfirmPassword ? "text" : "password"}
+      autocomplete="new-password"
+      bind:value={confirmPassword}
+      placeholder="Ulangi kata sandi baru"
+      disabled={loading || !isTokenValid}
+      size="md"
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        slot="suffix"
+        type="button"
+        class="text-muted hover:text-main"
+        ariaPressed={showConfirmPassword}
+        on:click={toggleConfirmPasswordVisibility}
+        aria-label={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+      >
+        {#if showConfirmPassword}
+          <EyeOff size={16} />
+        {:else}
+          <Eye size={16} />
+        {/if}
+      </Button>
+    </Input>
+  </div>
+
+  <div class="pt-2 w-full">
+    <Button type="submit" variant="primary" size="lg" fullWidth disabled={!isTokenValid || loading} {loading}>
+      {isActivation ? "Aktifkan Akun & Simpan Sandi" : "Simpan Kata Sandi Baru"}
+    </Button>
+  </div>
 </form>

@@ -3,6 +3,7 @@
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { ShoppingCart } from 'lucide-svelte';
   import { formatIDR } from '@/lib/currency';
+  import { toast } from '@/lib/toast';
   import { generateWhatsAppLink, getEffectiveWhatsAppNumber, openWhatsAppWithTracking } from '@/lib/whatsapp';
   import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './catalog/productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
@@ -110,7 +111,7 @@
 
   const addConfiguredItemToCart = (
     product: ProductItem,
-    selections: Record<string, any> = {},
+    selections: Record<string, string | { name: string }> = {},
     qty: number = 1,
     overrideUnitPrice?: number
   ) => {
@@ -126,7 +127,7 @@
           const sel = selections[group.groupName];
           const selName = typeof sel === 'object' && sel ? sel.name : sel;
           if (selName && group.options) {
-            const opt = group.options.find((o: any) => o.name === selName);
+            const opt = group.options.find((o: { name: string; priceAdjustment?: number }) => o.name === selName);
             if (opt && typeof opt.priceAdjustment === 'number') base += opt.priceAdjustment;
           }
         }
@@ -165,11 +166,11 @@
 
   const handleCheckout = () => {
     if (!form.name || !form.phone || !form.address) {
-      alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.');
+      toast.warning('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.', 'Data Belum Lengkap');
       return;
     }
     const itemsSummary = detailedCart.map((item) => {
-      const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as any).name : opt).filter(Boolean).join(", ");
+      const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as { name?: string }).name : opt).filter(Boolean).join(", ");
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
     const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;

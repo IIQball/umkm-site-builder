@@ -1,0 +1,78 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import BugReportsManager from '@/components/superadmin/bug-reports/BugReportsManager.svelte';
+import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
+import { getPaginationParams } from '@/lib/pagination/server';
+import { listBugReports } from '@/services/bug-report.service';
+import type {
+  BugReportListItem,
+  BugReportPagination,
+  BugReportStatusCounts,
+} from '@/components/superadmin/bug-reports/bugReports.helpers';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) {
+  return Astro.redirect('/auth/login');
+}
+
+if (!isAuthorizedSuperAdmin(user)) {
+  return Astro.redirect('/403');
+}
+
+const { page } = getPaginationParams(Astro.url);
+
+let initialItems: BugReportListItem[] = [];
+let initialCounts: BugReportStatusCounts = {
+  all: 0,
+  unresolved: 0,
+  in_progress: 0,
+  resolved: 0,
+};
+let initialPagination: BugReportPagination = {
+  page,
+  limit: 20,
+  total: 0,
+  totalPages: 1,
+};
+let ssrFailed = false;
+
+try {
+  const result = await listBugReports({
+    status: 'all',
+    sourceApp: 'all',
+    page,
+    limit: 20,
+  });
+  initialItems = result.items;
+  initialCounts = result.counts;
+  initialPagination = result.pagination;
+} catch (error) {
+  ssrFailed = true;
+  console.error('[SuperadminBugReports] SSR query error:', error);
+}
+---
+
+<DashboardLayout title="Laporan Bug" breadcrumb="Super Admin / Laporan Bug">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight flex items-center gap-2.5">
+          <span>Laporan &amp; Kendala Sistem</span>
+        </h1>
+        <p class="text-body-base text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau, verifikasi detail konteks halaman, dan kelola status laporan kendala teknis dari Pinoka Site Builder maupun Landing Page.
+        </p>
+      </div>
+    </div>
+
+    <BugReportsManager
+      client:load
+      {initialItems}
+      {initialCounts}
+      {initialPagination}
+      {ssrFailed}
+    />
+  </div>
+</DashboardLayout>

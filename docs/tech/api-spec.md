@@ -10,19 +10,19 @@ this doc is the contract and the review checklist.
 ## 1. Response shape (global)
 
 ```ts
-{ ok: true, data: T }
-{ ok: false, error: { code: string, message: string } }
+{ success: true, data: T, message: string, meta?: Record<string, unknown> }
+{ success: false, data: null, message: string, meta?: { code: string, details?: unknown } }
 ```
 
-`message` is always safe and generic. Detail stays in the server log.
+`message` is always safe and user-friendly. Internal stack traces, SQL queries, paths, and runtime exceptions stay in the server log (`console.error` via `errorLog`).
 
 Example:
 ```ts
 // Success
-{ ok: true, data: { id: 'store_123', name: 'Kopi Budi', subdomain: 'kopi-budi' } }
+{ success: true, data: { id: 'store_123', name: 'Kopi Budi', subdomain: 'kopi-budi' }, message: 'Berhasil' }
 
 // Error
-{ ok: false, error: { code: 'UNAUTHORIZED', message: 'Please log in to continue' } }
+{ success: false, data: null, message: 'Silakan masuk terlebih dahulu untuk melanjutkan.', meta: { code: 'UNAUTHORIZED' } }
 ```
 
 ---
@@ -457,7 +457,16 @@ Adding a code is deliberate. Document it here before using.
 | POST /api/designer/templates/*/save | 100 | 1 hour | Live save during editing |
 | POST /api/admin/tenants/register | 100 | 1 day | Admin work hours |
 | POST /api/admin/stores/setup | 50 | 1 day | Admin work hours |
+| POST /api/public/bug-reports | 5 | 5 min | Spam/flood protection (public + cross-origin CORS) |
 | All others (read-only) | unlimited | — | CDN/caching handles load |
+
+### Bug Reporting Endpoints
+
+- `OPTIONS /api/public/bug-reports` — Preflight CORS for `pinoka.id`, `app.pinoka.id`, and configured landing/site origins.
+- `POST /api/public/bug-reports` — Submit bug report from `site_builder` or `landing_page` (`description`, optional `title`, `stepsToReproduce`, `routeUrl`, `userAgent`, optional `reporterEmail`, optional `attachmentMeta`).
+- `GET /api/superadmin/bug-reports` — List bug reports with `status`, `sourceApp`, `search`, `page`, `limit` (`superadmin` only).
+- `GET /api/superadmin/bug-reports/[id]` — Fetch full bug report detail (`superadmin` only).
+- `PATCH /api/superadmin/bug-reports/[id]` — Update `status` (`unresolved` | `in_progress` | `resolved`) and optional `adminNotes` (`superadmin` only).
 
 ---
 

@@ -712,5 +712,11 @@ Single-use kickoff files and selection procedures have completed their job. The 
 | G3 vp / Vite Plus                              | Plain Vite + Bun scripts (no vp)                     | docs/tech/architecture.md          |
 | G4 git mode (strict / light)                   | Strict (main protected, dev integration, PR-only)    | docs/tech/architecture.md          |
 | G5 auth pools and roles                        | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md    |
-| G6 never-push list                             | .env*, secrets, dumps, uploaded media, credentials   | .gitignore + docs/tech/security.md |
-| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert          | docs/tech/architecture.md          |
+| G6 never-push list | .env*, secrets, dumps, uploaded media, credentials | .gitignore + docs/tech/security.md |
+| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert | docs/tech/architecture.md |
+
+## Pre-Deploy Hardening & Cross-App Bug Reporting Checkpoint
+
+- **End-to-End Bug Reporting:** Added `bug_reports` table + indexed migration (`drizzle/0013_bug_reports.sql`), `src/schemas/bug-report.schema.ts`, `src/services/bug-report.service.ts`, rate-limited CORS-aware ingestion (`POST /api/public/bug-reports`), strict `superadmin` triage APIs (`/api/superadmin/bug-reports`, `/api/superadmin/bug-reports/[id]`), `/superadmin/bug-reports` UI (`BugReportsManager.svelte`, `BugReportDetailModal.svelte`), and client triggers/modals in both `umkm-site-builder` and `pinoka-landing-page`.
+- **API Envelope & Error Sanitization:** Standardized all endpoints to `{ success: boolean, data: T | null, message: string, meta?: object }`; centralized error classification, DB timeout wrapper (`withDbTimeout`), runtime env auditing (`env-validator.ts`), unhandled rejection hooks, and strict separation between structured backend `errorLog` and safe user-facing messages.
+- **UX, Notification & Responsive Modularity:** Eliminated all native `window.alert`/`confirm`/`prompt` and stray `console.log`; centralized `ToastContainer.svelte` top-layer popover; added keyboard-accessible responsive `Table.svelte` scrolling; refactored all `src/` files >300 LOC in both repos (only `src/db/schema.ts` remains exempt).

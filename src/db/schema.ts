@@ -26,6 +26,8 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success',
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'rejected']);
 export const walletMutationTypeEnum = pgEnum('wallet_mutation_type', ['CREDIT', 'DEBIT']);
 export const notificationTypeEnum = pgEnum('notification_type', ['user_registered', 'template_submitted', 'template_reviewed', 'template_purchased', 'store_managed_by_admin', 'quota_upgrade_request']);
+export const bugReportStatusEnum = pgEnum('bug_report_status', ['unresolved', 'in_progress', 'resolved']);
+export const bugReportSourceEnum = pgEnum('bug_report_source', ['site_builder', 'landing_page']);
 
 // ==========================================
 // 2. CORE AUTH TABLES (BETTER-AUTH COMPATIBLE)
@@ -716,4 +718,42 @@ export const storeQuotaPurchasesRelations = relations(storeQuotaPurchases, ({ on
 
 export const aiDepositHistoryRelations = relations(aiDepositHistory, ({ one }) => ({
   creator: one(users, { fields: [aiDepositHistory.createdBy], references: [users.id] }),
+}));
+
+export interface BugReportAttachmentMeta {
+  name?: string;
+  size?: number;
+  mimeType?: string;
+  url?: string;
+}
+
+export const bugReports = pgTable('bug_reports', {
+  id: text('id').primaryKey(),
+  sourceApp: bugReportSourceEnum('source_app').default('site_builder').notNull(),
+  status: bugReportStatusEnum('status').default('unresolved').notNull(),
+  title: text('title'),
+  description: text('description').notNull(),
+  stepsToReproduce: text('steps_to_reproduce'),
+  routeUrl: text('route_url').notNull(),
+  userAgent: text('user_agent').notNull(),
+  reporterEmail: text('reporter_email'),
+  reporterUserId: text('reporter_user_id').references(() => users.id, { onDelete: 'set null' }),
+  reporterRole: text('reporter_role'),
+  attachmentMeta: jsonb('attachment_meta').$type<BugReportAttachmentMeta | null>(),
+  adminNotes: text('admin_notes'),
+  resolvedBy: text('resolved_by').references(() => users.id, { onDelete: 'set null' }),
+  resolvedAt: timestamp('resolved_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  bugReportsStatusIdx: index('bug_reports_status_idx').on(table.status),
+  bugReportsSourceAppIdx: index('bug_reports_source_app_idx').on(table.sourceApp),
+  bugReportsCreatedAtIdx: index('bug_reports_created_at_idx').on(table.createdAt),
+  bugReportsStatusCreatedAtIdx: index('bug_reports_status_created_at_idx').on(table.status, table.createdAt),
+  bugReportsReporterUserIdIdx: index('bug_reports_reporter_user_id_idx').on(table.reporterUserId),
+}));
+
+export const bugReportsRelations = relations(bugReports, ({ one }) => ({
+  reporter: one(users, { fields: [bugReports.reporterUserId], references: [users.id], relationName: 'bugReporter' }),
+  resolver: one(users, { fields: [bugReports.resolvedBy], references: [users.id], relationName: 'bugResolver' }),
 }));

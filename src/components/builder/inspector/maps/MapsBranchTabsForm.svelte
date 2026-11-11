@@ -63,7 +63,7 @@
             variant="ghost"
             size="xs"
             on:click={() => removeBranch(idx)}
-            class="!px-1.5 !py-0.5 !h-auto !min-h-0 text-[10px] text-rose-500 font-semibold hover:underline"
+            class="!px-1.5 !py-0.5 !h-auto !min-h-0 text-[10px] text-error font-semibold hover:underline"
           >
             Hapus
           </Button>

@@ -215,6 +215,14 @@ const packages = getAllCreditPackages();
 
   <script>
     import type { AiCreditPackageConfig } from '@/services/ai/ai-packages.constant';
+    import { toast } from '@/lib/toast';
+    import { apiFetch } from '@/lib/api/parse-response';
+
+    interface CheckoutResponse {
+      paymentUrl?: string;
+      statusUrl?: string;
+      invoiceId?: string;
+    }
 
     let selectedPackage: AiCreditPackageConfig | null = null;
     let isSubmitting = false;
@@ -230,6 +238,7 @@ const packages = getAllCreditPackages();
           window.dispatchEvent(new CustomEvent('open-modal', { detail: pkg }));
         } catch (e) {
           console.error('[CREDITS] parse error:', e);
+          toast.error('Data paket tidak valid. Silakan muat ulang halaman.');
         }
       });
     });
@@ -243,7 +252,7 @@ const packages = getAllCreditPackages();
       const idempotencyKey = 'buy_' + selectedPackage.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 
       try {
-        const response = await fetch('/api/tenant/credits/checkout', {
+        const result = await apiFetch<CheckoutResponse>('/api/tenant/credits/checkout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -255,25 +264,22 @@ const packages = getAllCreditPackages();
             credits: selectedPackage.credits,
             idempotencyKey,
           }),
+          fallbackError: 'Terjadi kendala saat memproses invoice. Silakan coba sesaat lagi.',
         });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.message || 'Checkout gagal');
-        }
-
-        const result = await response.json();
-        if (result.ok && result.data?.paymentUrl) {
-          const statusUrl = result.data.statusUrl || `/dashboard/credits/status?invoiceId=${result.data.invoiceId}&status=pending`;
+        if (result.success && result.data?.paymentUrl) {
+          const statusUrl =
+            result.data.statusUrl ||
+            `/dashboard/credits/status?invoiceId=${result.data.invoiceId ?? ''}&status=pending`;
           sessionStorage.setItem('checkout_status_url', statusUrl);
           window.location.href = result.data.paymentUrl;
         } else {
-          alert('Terjadi kendala saat memproses invoice. Silakan coba sesaat lagi.');
+          toast.error(result.message, 'Gagal Memproses Checkout');
           isSubmitting = false;
         }
       } catch (error) {
         console.error('[CHECKOUT] error:', error);
-        alert(error instanceof Error ? error.message : 'Terjadi kesalahan saat memproses checkout.');
+        toast.error('Terjadi kesalahan saat memproses checkout. Periksa koneksi internet Anda.');
         isSubmitting = false;
       }
     });

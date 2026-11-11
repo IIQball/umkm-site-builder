@@ -1,5 +1,5 @@
 import type ApexCharts from 'apexcharts';
-import { colors } from '@/components/tokens/colors';
+import { getChartThemeTokens } from '@/components/tokens/colors';
 
 export interface DailyPoint {
   date: string;
@@ -29,32 +29,8 @@ export interface UsageResponseData {
   summary: UsageSummary;
 }
 
-export interface ThemeTokens {
-  textMuted: string;
-  textMain: string;
-  primary: string;
-}
-
-export function getTenantThemeTokens(): ThemeTokens {
-  if (typeof window === 'undefined') {
-    return {
-      textMuted: '#64748b',
-      textMain: '#0f172a',
-      primary: colors.primary.DEFAULT,
-    };
-  }
-  const style = getComputedStyle(document.documentElement);
-  const textMuted = style.getPropertyValue('--color-text-muted').trim() || '#64748b';
-  const textMain = style.getPropertyValue('--color-text-main').trim() || '#0f172a';
-  const primary = style.getPropertyValue('--color-primary').trim() || colors.primary.DEFAULT;
-  return { textMuted, textMain, primary };
-}
-
 export function buildTenantChartOptions(points: DailyPoint[]): ApexCharts.ApexOptions {
-  const { textMuted, textMain, primary } = getTenantThemeTokens();
-  const isDark =
-    typeof document !== 'undefined' &&
-    document.documentElement.getAttribute('data-theme') === 'dark';
+  const { text: textMuted, main: textMain, primary, border, isDark } = getChartThemeTokens();
 
   return {
     chart: {
@@ -94,7 +70,7 @@ export function buildTenantChartOptions(points: DailyPoint[]): ApexCharts.ApexOp
       categories: points.map((p) => `${p.dayName} ${p.label.split(' ')[0]}`),
       axisBorder: {
         show: true,
-        color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+        color: border,
       },
       axisTicks: { show: false },
       labels: {
@@ -110,7 +86,7 @@ export function buildTenantChartOptions(points: DailyPoint[]): ApexCharts.ApexOp
       },
     },
     grid: {
-      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+      borderColor: border,
       strokeDashArray: 4,
       yaxis: { lines: { show: true } },
       xaxis: { lines: { show: false } },

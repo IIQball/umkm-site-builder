@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Plus, Trash2, MapPin, Building2, Store } from 'lucide-svelte';
-  import { Button } from '@/components/ui';
+  import { Button, Input, Textarea } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import type { StoreBranchItem } from '../onboarding.types';
 
   export let branchMode: 'single' | 'multi' = 'single';
@@ -13,9 +14,8 @@
 
   onMount(async () => {
     try {
-      const res = await fetch('/api/public/platform-settings');
-      const result = await res.json();
-      if (result.ok && result.data && typeof result.data.maxStoreBranches === 'number') {
+      const result = await apiFetch<{ maxStoreBranches?: number }>('/api/public/platform-settings');
+      if (result.success && result.data && typeof result.data.maxStoreBranches === 'number') {
         maxBranches = result.data.maxStoreBranches;
       }
     } catch {
@@ -63,6 +63,18 @@
   function updateBranch(idx: number, field: keyof StoreBranchItem, value: string) {
     branches = branches.map((b, i) => (i === idx ? { ...b, [field]: value } : b));
   }
+
+  function handleBranchFieldInput(
+    idx: number,
+    field: keyof StoreBranchItem,
+    event: CustomEvent<Event>
+  ) {
+    const el = (event.detail.currentTarget ?? event.detail.target) as
+      | HTMLInputElement
+      | HTMLTextAreaElement
+      | null;
+    if (el) updateBranch(idx, field, el.value);
+  }
 </script>
 
 <div class="space-y-3 pt-2">
@@ -76,27 +88,27 @@
     </div>
 
     <div class="grid grid-cols-2 gap-2">
-      <button
+      <Button
         type="button"
+        variant={branchMode === 'single' ? 'primary' : 'secondary'}
+        size="sm"
         on:click={() => handleModeChange('single')}
-        class="py-2 px-3 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 cursor-pointer {branchMode === 'single'
-          ? 'bg-primary text-primary-content border-primary shadow-2xs font-bold'
-          : 'bg-card text-secondary border-light hover:text-main'}"
+        class="w-full gap-1.5 text-xs"
       >
         <Store size={14} />
         <span>1 Cabang Saja</span>
-      </button>
+      </Button>
 
-      <button
+      <Button
         type="button"
+        variant={branchMode === 'multi' ? 'primary' : 'secondary'}
+        size="sm"
         on:click={() => handleModeChange('multi')}
-        class="py-2 px-3 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 cursor-pointer {branchMode === 'multi'
-          ? 'bg-primary text-primary-content border-primary shadow-2xs font-bold'
-          : 'bg-card text-secondary border-light hover:text-main'}"
+        class="w-full gap-1.5 text-xs"
       >
         <Building2 size={14} />
         <span>Beberapa Cabang (Maks {maxBranches})</span>
-      </button>
+      </Button>
     </div>
   </div>
 
@@ -129,63 +141,50 @@
             </span>
 
             {#if branches.length > 1}
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 on:click={() => removeBranch(idx)}
-                class="p-1 rounded text-secondary hover:text-error transition-colors"
+                class="text-secondary hover:text-error !h-6 !w-6 !min-h-0 !min-w-0 rounded"
                 title="Hapus Cabang Ini"
+                aria-label="Hapus Cabang Ini"
               >
                 <Trash2 size={13} />
-              </button>
+              </Button>
             {/if}
           </div>
 
-          <div>
-            <label for={`branch-name-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
-              Nama Cabang
-            </label>
-            <input
-              id={`branch-name-${idx}`}
-              type="text"
-              value={branch.name}
-              on:input={(e) => updateBranch(idx, 'name', e.currentTarget.value)}
-              placeholder="Contoh: Cabang Rogojampi"
-              class="w-full bg-nested text-main border border-light rounded-lg px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input
+            id={`branch-name-${idx}`}
+            label="Nama Cabang"
+            size="sm"
+            value={branch.name}
+            on:input={(e) => handleBranchFieldInput(idx, 'name', e)}
+            placeholder="Contoh: Cabang Rogojampi"
+          />
 
-          <div>
-            <label for={`branch-addr-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
-              Alamat Lengkap Cabang
-            </label>
-            <textarea
-              id={`branch-addr-${idx}`}
-              rows="2"
-              value={branch.address}
-              on:input={(e) => updateBranch(idx, 'address', e.currentTarget.value)}
-              placeholder="Jl. Raya Rogojampi No. 45, Banyuwangi..."
-              class="w-full bg-nested text-main border border-light rounded-lg p-2.5 text-xs font-sans focus:outline-none focus:border-primary resize-none"
-            ></textarea>
-          </div>
+          <Textarea
+            id={`branch-addr-${idx}`}
+            label="Alamat Lengkap Cabang"
+            rows={2}
+            resizable={false}
+            value={branch.address}
+            on:input={(e) => handleBranchFieldInput(idx, 'address', e)}
+            placeholder="Jl. Raya Rogojampi No. 45, Banyuwangi..."
+            class="text-xs rounded-xl"
+          />
 
-          <div>
-            <label for={`branch-maps-${idx}`} class="block text-xs font-semibold text-secondary mb-1">
-              Link Google Maps Cabang
-            </label>
-            <div class="relative flex items-center">
-              <input
-                id={`branch-maps-${idx}`}
-                type="url"
-                value={branch.googleMapsUrl ?? ''}
-                on:input={(e) => updateBranch(idx, 'googleMapsUrl', e.currentTarget.value)}
-                placeholder="https://maps.app.goo.gl/..."
-                class="w-full bg-nested text-main border border-light rounded-lg pl-7 pr-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-primary"
-              />
-              <div class="absolute left-2 flex items-center pointer-events-none text-muted">
-                <MapPin size={12} />
-              </div>
-            </div>
-          </div>
+          <Input
+            id={`branch-maps-${idx}`}
+            label="Link Google Maps Cabang"
+            size="sm"
+            value={branch.googleMapsUrl ?? ''}
+            on:input={(e) => handleBranchFieldInput(idx, 'googleMapsUrl', e)}
+            placeholder="https://maps.app.goo.gl/..."
+          >
+            <MapPin size={12} slot="prefix" />
+          </Input>
         </div>
       {/each}
     </div>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Modal, Button } from '@/components/ui';
+  import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let showModal = false;
   export let deletingId: string | null = null;
@@ -16,17 +18,20 @@
     if (!deletingId) return;
     deleteLoading = true;
     try {
-      const res = await fetch(`/api/products/${deletingId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.ok) {
+      const result = await apiFetch(`/api/products/${deletingId}`, {
+        method: 'DELETE',
+        fallbackError: 'Gagal menghapus produk.',
+      });
+      if (result.success) {
+        toast.success(result.message || 'Produk berhasil dihapus.');
         closeModal();
         window.dispatchEvent(new CustomEvent('quota-updated'));
         dispatch('success');
       } else {
-        alert('Gagal menghapus: ' + data.error.message);
+        toast.error(result.message, 'Gagal Menghapus Produk');
       }
-    } catch (e: unknown) {
-      alert('Error: ' + (e instanceof Error ? e.message : 'Terjadi kesalahan'));
+    } catch {
+      toast.error('Terjadi kesalahan jaringan saat menghapus produk.');
     } finally {
       deleteLoading = false;
       deletingId = null;
@@ -37,7 +42,7 @@
 <Modal open={showModal} size="sm" on:close={closeModal}>
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-error/15 border border-error/25 text-error flex items-center justify-center flex-shrink-0 shadow-2xs">
         <span class="material-symbols-outlined text-lg">delete</span>
       </div>
       <div>

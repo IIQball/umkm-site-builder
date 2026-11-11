@@ -3,6 +3,7 @@
   import { z } from "zod";
   import Button from "@/components/ui/Button.svelte";
   import Input from "@/components/ui/Input.svelte";
+  import { apiFetch } from "@/lib/api/parse-response";
   import { toast } from "@/lib/toast";
 
   let email = "";
@@ -23,17 +24,15 @@
 
     try {
       // Validasi apakah email ada di database
-      const checkRes = await fetch("/api/auth/check-email", {
+      const checkResult = await apiFetch<{ exists?: boolean }>("/api/auth/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
+        fallbackError: "Email tidak terdaftar di sistem kami.",
       });
-      
-      const checkData = await checkRes.json();
-      
-      if (!checkData.exists) {
-        toast.error("Email tidak terdaftar di sistem kami.");
-        loading = false;
+
+      if (!checkResult.success || !checkResult.data?.exists) {
+        toast.error(!checkResult.success ? checkResult.message : "Email tidak terdaftar di sistem kami.");
         return;
       }
 
@@ -48,8 +47,8 @@
         toast.success("Tautan untuk mengatur ulang kata sandi telah dikirim ke email Anda. Silakan periksa kotak masuk atau folder spam.");
         email = "";
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem");
+    } catch {
+      toast.error("Koneksi ke server terputus. Silakan periksa internet Anda.");
     } finally {
       loading = false;
     }
@@ -59,6 +58,7 @@
 <form novalidate on:submit={handleSubmit} class="space-y-4 w-full">
   <Input
     type="email"
+    autocomplete="email"
     bind:value={email}
     label="Email"
     placeholder="anda@contoh.com"

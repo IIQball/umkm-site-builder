@@ -1,7 +1,8 @@
 <script lang="ts">
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { createEventDispatcher } from 'svelte';
-  import { Button, Modal } from '@/components/ui';
+  import { Button, Input, Modal } from '@/components/ui';
   import { authClient } from '@/lib/auth-client';
 
   export let isOpen = false;
@@ -34,14 +35,14 @@
 
     isSubmitting = true;
     try {
-      const res = await fetch('/api/admin/users/register', {
+      const result = await apiFetch<{ id: string; email?: string }>('/api/admin/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: selectedRole, name: newName, email: newEmail }),
+        fallbackError: 'Gagal mendaftarkan pengguna',
       });
-      const result = await res.json();
 
-      if (res.ok && result.ok) {
+      if (result.success && result.data) {
         const redirectUrl = `/auth/activation?uid=${result.data.id}&name=${encodeURIComponent(newName)}`;
         const { error } = await authClient.requestPasswordReset({
           email: result.data.email || newEmail,
@@ -57,7 +58,7 @@
         resetForm();
         dispatch('success');
       } else {
-        toast.error(result.error?.message || 'Gagal mendaftarkan pengguna');
+        toast.error(result.message);
       }
     } catch {
       toast.error('Terjadi kesalahan jaringan');
@@ -85,36 +86,29 @@
   </svelte:fragment>
 
   <form on:submit|preventDefault={handleAdd} class="space-y-4 pt-1">
-    <div class="space-y-1.5">
-      <label for="inv_name" class="text-xs font-bold text-main block font-heading">
-        Nama Lengkap <span class="text-rose-500">*</span>
-      </label>
-      <input
-        id="inv_name"
-        type="text"
-        bind:value={newName}
-        disabled={isSubmitting}
-        required
-        minlength="3"
-        placeholder="Contoh: Budi Santoso"
-        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all font-sans"
-      />
-    </div>
+    <Input
+      id="inv_name"
+      label="Nama Lengkap"
+      autocomplete="name"
+      bind:value={newName}
+      disabled={isSubmitting}
+      required
+      minlength={3}
+      placeholder="Contoh: Budi Santoso"
+      size="md"
+    />
 
-    <div class="space-y-1.5">
-      <label for="inv_email" class="text-xs font-bold text-main block font-heading">
-        Alamat Email <span class="text-rose-500">*</span>
-      </label>
-      <input
-        id="inv_email"
-        type="email"
-        bind:value={newEmail}
-        disabled={isSubmitting}
-        required
-        placeholder="budi@email.com"
-        class="w-full bg-nested/80 border border-light rounded-xl px-3.5 py-2 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-card transition-all font-sans"
-      />
-    </div>
+    <Input
+      id="inv_email"
+      type="email"
+      label="Alamat Email"
+      autocomplete="email"
+      bind:value={newEmail}
+      disabled={isSubmitting}
+      required
+      placeholder="budi@email.com"
+      size="md"
+    />
 
     <!-- Info notice — warna hitam / text-main jelas, bukan biru -->
     <div class="bg-nested border border-light rounded-xl p-3.5 text-xs text-main leading-relaxed font-sans">

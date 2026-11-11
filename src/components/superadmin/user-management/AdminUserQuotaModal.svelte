@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Modal, Input, Button } from '@/components/ui';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import type { AdminUserItem } from '@/types';
 
   export let isOpen = false;
@@ -23,18 +24,20 @@
   async function fetchCurrentQuota(userId: string) {
     isFetching = true;
     try {
-      const res = await fetch(`/api/admin/users/${userId}/quota`);
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        currentMaxProducts = data.data.maxProducts;
-        currentMaxCategories = data.data.maxCategories;
+      const res = await apiFetch<{ maxProducts: number; maxCategories: number }>(
+        `/api/admin/users/${userId}/quota`,
+        { fallbackError: 'Gagal memuat kuota saat ini' }
+      );
+      if (res.success && res.data) {
+        currentMaxProducts = res.data.maxProducts;
+        currentMaxCategories = res.data.maxCategories;
         maxProducts = currentMaxProducts + (suggestedAddProducts || 0);
         maxCategories = currentMaxCategories + (suggestedAddCategories || 0);
       } else {
-        toast.error(data.error?.message || 'Gagal memuat kuota saat ini');
+        toast.error(res.message);
         onClose();
       }
-    } catch (e) {
+    } catch {
       toast.error('Terjadi kesalahan jaringan');
     } finally {
       isFetching = false;
@@ -45,38 +48,25 @@
     if (!selectedUser) return;
     isLoading = true;
     try {
-      const res = await fetch(`/api/admin/users/${selectedUser.id}/quota`, {
+      const res = await apiFetch<{ message?: string }>(`/api/admin/users/${selectedUser.id}/quota`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ maxProducts, maxCategories })
+        body: JSON.stringify({ maxProducts, maxCategories }),
+        fallbackError: 'Gagal memperbarui kuota',
       });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        toast.success(data.data.message || 'Kuota berhasil diperbarui');
+      if (res.success) {
+        toast.success(res.message || res.data?.message || 'Kuota berhasil diperbarui');
         onClose();
       } else {
-        toast.error(data.error?.message || 'Gagal memperbarui kuota');
+        toast.error(res.message);
       }
-    } catch (e) {
+    } catch {
       toast.error('Terjadi kesalahan sistem');
     } finally {
       isLoading = false;
     }
   }
 </script>
-
-<style>
-  :global(.no-spinners::-webkit-inner-spin-button),
-  :global(.no-spinners::-webkit-outer-spin-button) {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
-  }
-  :global(input[type="number"].no-spinners) {
-    -moz-appearance: textfield;
-    appearance: textfield;
-  }
-</style>
 
 <Modal bind:open={isOpen} size="sm" title="Kelola Kuota Merchant" on:close={onClose}>
   <div class="flex flex-col gap-4 -mt-2 pb-2">

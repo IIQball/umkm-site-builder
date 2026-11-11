@@ -6,8 +6,9 @@
     Info,
     RefreshCw,
   } from 'lucide-svelte';
-  import { Modal, Button } from '@/components/ui';
+  import { Modal, Button, Textarea } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let isOpen: boolean = false;
   export let templateId: string = '';
@@ -43,22 +44,23 @@
   const fetchCommissionSettings = async () => {
     try {
       isLoadingFee = true;
-      const res = await fetch(`/api/public/commission?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store',
-          'Pragma': 'no-cache',
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.ok && data.data) {
-          if (typeof data.data.platformFeePercentage === 'number') {
-            platformFeePercentage = data.data.platformFeePercentage;
-          }
-          if (typeof data.data.maxTemplateRevisions === 'number') {
-            maxRevisions = data.data.maxTemplateRevisions;
-          }
+      const result = await apiFetch<{ platformFeePercentage?: number; maxTemplateRevisions?: number }>(
+        `/api/public/commission?t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store',
+            'Pragma': 'no-cache',
+          },
+          fallbackError: 'Gagal memuat konfigurasi komisi.',
+        }
+      );
+      if (result.success && result.data) {
+        if (typeof result.data.platformFeePercentage === 'number') {
+          platformFeePercentage = result.data.platformFeePercentage;
+        }
+        if (typeof result.data.maxTemplateRevisions === 'number') {
+          maxRevisions = result.data.maxTemplateRevisions;
         }
       }
     } catch {
@@ -141,13 +143,13 @@
 
     <!-- Previous Rejection Alert -->
     {#if isRejected && rejectionReason}
-      <div class="rounded-xl bg-rose-500/10 border border-rose-500/25 p-3.5 space-y-1.5">
-        <div class="flex items-center justify-between gap-1.5 font-bold text-rose-600 dark:text-rose-400">
+      <div class="rounded-xl bg-error/10 border border-error/25 p-3.5 space-y-1.5">
+        <div class="flex items-center justify-between gap-1.5 font-bold text-error">
           <div class="flex items-center gap-1.5">
             <AlertCircle size={14} class="shrink-0" />
             <span>Alasan Penolakan Kurator</span>
           </div>
-          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-rose-500/15">
+          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-error/15">
             Revisi ke-{revisionCount + 1}/{maxRevisions}
           </span>
         </div>
@@ -159,23 +161,20 @@
 
     <!-- Revision Notes Form Input -->
     {#if isRejected}
-      <div class="rounded-xl border border-light bg-card p-3.5 space-y-2">
-        <label for="revision-notes-input" class="block font-semibold text-main text-xs">
-          Penjelasan Perbaikan Desain <span class="text-rose-500">*</span>
-        </label>
-        <textarea
+      <div class="rounded-xl border border-light bg-card p-3.5">
+        <Textarea
           id="revision-notes-input"
+          label="Penjelasan Perbaikan Desain"
+          required
           bind:value={revisionNotes}
           disabled={isSubmitting || isLimitReached}
-          rows="3"
-          class="w-full bg-nested border border-light rounded-xl p-3 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition-all resize-none"
+          rows={3}
+          maxlength={500}
+          resizable={false}
+          helper="Wajib diisi minimal 5 karakter"
           placeholder="Jelaskan perbaikan apa saja yang telah Anda buat berdasarkan catatan kurator di atas..."
-          maxlength="500"
-        ></textarea>
-        <div class="flex justify-between items-center text-xs text-muted">
-          <span>Wajib diisi minimal 5 karakter</span>
-          <span class="font-mono">{revisionNotes.length}/500</span>
-        </div>
+          class="text-xs"
+        />
       </div>
     {/if}
 

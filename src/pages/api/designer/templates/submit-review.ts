@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
-import { handleApiRoute, validate, AppError } from '@/lib/utils';
+import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import { submitTemplateForReview } from '@/services/templates';
 import { db, notifications, users } from '@/db';
 import { eq } from 'drizzle-orm';
@@ -69,12 +69,14 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       },
     });
 
-    return Response.json({
-      success: true,
-      ok: true,
-      data: updated,
-      status: 'pending',
-      redirectUrl: `/builder/preview/${templateId}`,
-    });
+    return jsonSuccess(
+      {
+        ...updated,
+        status: 'pending',
+        redirectUrl: `/builder/preview/${templateId}`,
+      },
+      200,
+      'Template berhasil diajukan untuk kurasi'
+    );
   });
 };

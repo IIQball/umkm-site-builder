@@ -23,22 +23,22 @@ export const getStatusBadge = (status: string): AuditBadgeStyle => {
     case 'success':
       return {
         label: 'Sukses',
-        cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        cls: 'bg-success/10 text-success border-success/20',
       };
     case 'failed':
       return {
         label: 'Gagal',
-        cls: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+        cls: 'bg-error/10 text-error border-error/20',
       };
     case 'processing':
       return {
         label: 'Diproses',
-        cls: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+        cls: 'bg-info/10 text-info border-info/20',
       };
     case 'pending':
       return {
         label: 'Menunggu',
-        cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+        cls: 'bg-warning/10 text-warning border-warning/20',
       };
     default:
       return {
@@ -53,13 +53,13 @@ export const getQualityBadge = (qualityTier?: string | null): AuditBadgeStyle =>
   if (tier === 'hd' || tier === 'high') {
     return {
       label: 'HD / Tinggi',
-      cls: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+      cls: 'bg-accent/10 text-accent border-accent/20',
     };
   }
   if (tier === 'standard' || tier === 'medium') {
     return {
       label: 'Standar',
-      cls: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+      cls: 'bg-info/10 text-info border-info/20',
     };
   }
   return {

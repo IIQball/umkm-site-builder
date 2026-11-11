@@ -1,10 +1,10 @@
 /**
  * AI Asset Generator Client API
  * Menghubungkan antarmuka merchant langsung ke endpoint POST /api/ai/generate
- * dengan penanganan error Bahasa Indonesia terstandarisasi.
  */
 
 import { formatAiErrorMessage } from '@/lib/errors/ai-error';
+import { apiFetch } from '@/lib/api/parse-response';
 import type { AiFeatureType, AiSizeRatio, AiQualityTier } from '@/types/ai';
 
 export interface GenerateAiAssetRequest {
@@ -78,42 +78,32 @@ export async function generateAiAssetClient(
     },
   };
 
-  try {
-    const res = await fetch('/api/ai/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+  const parsed = await apiFetch<Record<string, unknown>>('/api/ai/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+    timeoutMs: 0,
+  });
 
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok || (!json.ok && !json.success)) {
-      const rawErrMsg = json.error?.message || json.error || json.message || res.status;
-      const formattedMessage = formatAiErrorMessage(rawErrMsg);
-      throw new Error(formattedMessage);
-    }
-
-    const data = json.data || json;
-
-    return {
-      success: true,
-      imageUrl: data.imageUrl || '',
-      logId: data.logId || '',
-      modelUsed: data.modelUsed || '',
-      remainingCredits: data.remainingCredits ?? 0,
-      creditsDeducted: data.creditsDeducted ?? 1,
-      costUsd: data.costUsd,
-      costIdr: data.costIdr,
-      inputTokens: data.inputTokens,
-      outputTokens: data.outputTokens,
-      isTesting: data.isTesting,
-    };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(formatAiErrorMessage(error));
+  if (!parsed.success) {
+    throw new Error(formatAiErrorMessage({ status: parsed.status, message: parsed.message }));
   }
+
+  const data = (parsed.data || {}) as Partial<GenerateAiAssetResponse>;
+
+  return {
+    success: true,
+    imageUrl: data.imageUrl || '',
+    logId: data.logId || '',
+    modelUsed: data.modelUsed || '',
+    remainingCredits: data.remainingCredits ?? 0,
+    creditsDeducted: data.creditsDeducted ?? 1,
+    costUsd: data.costUsd,
+    costIdr: data.costIdr,
+    inputTokens: data.inputTokens,
+    outputTokens: data.outputTokens,
+    isTesting: data.isTesting,
+  };
 }

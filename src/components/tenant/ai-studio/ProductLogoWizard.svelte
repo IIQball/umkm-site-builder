@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
+  import { Check } from 'lucide-svelte';
   import { Button, Input, Card, Badge, SearchableSelect } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import {
     LOGO_CONCEPT_OPTIONS,
     BUSINESS_CATEGORY_OPTIONS,
@@ -53,19 +55,17 @@
   async function loadBusinessCategories() {
     isLoadingCategories = true;
     try {
-      const res = await fetch('/api/public/business-categories');
-      if (res.ok) {
-        const json = await res.json();
-        const items = json.data || json;
-        if (Array.isArray(items) && items.length > 0) {
-          categoryOptions = items.map((cat: { name: string; description?: string | null }) => ({
-            value: cat.name,
-            label: cat.name,
-            sublabel: cat.description || undefined,
-          }));
-          if (!categoryOptions.some((opt) => opt.value === selectedCategory)) {
-            selectedCategory = categoryOptions[0].value;
-          }
+      const res = await apiFetch<Array<{ name: string; description?: string | null }>>(
+        '/api/public/business-categories'
+      );
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        categoryOptions = res.data.map((cat) => ({
+          value: cat.name,
+          label: cat.name,
+          sublabel: cat.description || undefined,
+        }));
+        if (!categoryOptions.some((opt) => opt.value === selectedCategory)) {
+          selectedCategory = categoryOptions[0].value;
         }
       }
     } catch {
@@ -187,7 +187,7 @@
                 <LogoConceptVisual concept={opt.id} selected={isSelected} />
                 {#if isSelected}
                   <div class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary text-primary-content flex items-center justify-center shadow-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <Check size={10} strokeWidth={3} />
                   </div>
                 {/if}
               </div>

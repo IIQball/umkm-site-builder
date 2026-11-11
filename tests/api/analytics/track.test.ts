@@ -27,7 +27,7 @@ describe('Analytics Track API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(400);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 400 if eventType missing', async () => {
@@ -35,7 +35,7 @@ describe('Analytics Track API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(400);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 400 if eventType is invalid', async () => {
@@ -43,7 +43,7 @@ describe('Analytics Track API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(400);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('successfully tracks store_view event', async () => {
@@ -59,7 +59,7 @@ describe('Analytics Track API', () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.eventType).toBe('store_view');
     expect(data.data.totalViews).toBe(1);
   });
@@ -77,7 +77,7 @@ describe('Analytics Track API', () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.eventType).toBe('wa_click');
     expect(data.data.totalWaClicks).toBe(1);
   });
@@ -93,6 +93,6 @@ describe('Analytics Track API', () => {
     const data = await res.json();
 
     expect(res.status).toBe(404);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 });

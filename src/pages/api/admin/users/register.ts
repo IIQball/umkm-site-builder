@@ -113,8 +113,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     } catch (e: unknown) {
       if (e instanceof AppError) throw e;
-      const errorMessage = e instanceof Error ? e.message : 'Error during user registration';
-      throw new AppError(errorMessage, 500);
+      throw e;
     }
 
     return jsonSuccess({ id: newUserId, email: validated.email });

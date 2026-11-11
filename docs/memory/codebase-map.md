@@ -44,7 +44,11 @@ is stale it is worse than empty, because it gets trusted.
 
 | Primitive | Location | Does |
 |---|---|---|
-| response shape | src/pages/api/*.ts | `{ ok: true, data: T }` or `{ ok: false, error: { code, message } }` |
+| response shape | src/lib/utils/api-handler.ts | `{ success: boolean, data: T \| null, message: string, meta?: object }` via `jsonSuccess`/`jsonError`/`handleApiRoute` |
+| error sanitizer | src/lib/utils/error-sanitizer.ts | `classifyServerError()`, `sanitizeClientErrorMessage()`, `registerGlobalRejectionHandler()` |
+| env & db timeout | src/lib/config/env-validator.ts, src/lib/db/timeout.ts | `validateRuntimeEnv()`, `readRuntimeEnv()`, `withDbTimeout()`, `DatabaseTimeoutError` |
+| bug reports | src/services/bug-report.service.ts, src/pages/api/public/bug-reports.ts, src/pages/api/superadmin/bug-reports/ | End-to-end bug report ingestion & superadmin triage |
+| FE api client | src/lib/api/parse-response.ts | `apiFetch()`, `parseApiResponse()` expecting standardized envelope |
 | Xendit client | src/lib/xendit.ts | Invoice creation, signature verification, API calls |
 | Cloudinary lib | src/lib/cloudinary.ts | generateSignedUploadParams(), uploadToCloudinary(), deleteFromCloudinary() |
 | analytics service | src/services/analytics.service.ts | trackEvent(storeId, eventType) — increments totalWaClicks or totalViews on stores table |
@@ -85,4 +89,4 @@ is stale it is worse than empty, because it gets trusted.
 
 Things that surprised a previous session. Each entry saves the next one an hour.
 
-- **API Response Drift:** The documented response shape `{ ok, data } / { ok, error: { code, message } }` (used in `src/types/common/api.ts`) is currently the minority pattern (4 routes). 29 routes use `jsonSuccess()`/`jsonError()` from `src/lib/utils/api-handler.ts` which emits `{ success, ok, message, data }`. Another 13 routes hand-roll `new Response(...)`, often omitting `error.code` (drift is heaviest in product, store, and category routes). Consequence: client code must tolerate all three variants.
+- **Standardized API Envelope & Error Sanitization:** All API routes use `handleApiRoute` / `jsonSuccess` / `jsonError` emitting `{ success, data, message, meta? }`. Errors `>= 500` are automatically sanitized before reaching clients, while full stack traces go only to structured `errorLog` (`console.error`). Frontend callers should use `apiFetch()` or `parseApiResponse()` from `src/lib/api/parse-response.ts`.

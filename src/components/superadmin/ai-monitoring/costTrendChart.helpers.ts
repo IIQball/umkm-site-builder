@@ -116,22 +116,22 @@ export function getBudgetUsageStatus(percentage: number): {
     return {
       variant: 'success',
       text: 'Aman',
-      bgClass: 'bg-emerald-500/10',
-      textClass: 'text-emerald-700 dark:text-emerald-400',
+      bgClass: 'bg-success/10',
+      textClass: 'text-success',
     };
   }
   if (percentage <= 90) {
     return {
       variant: 'warning',
       text: 'Mendekati Batas',
-      bgClass: 'bg-amber-500/10',
-      textClass: 'text-amber-700 dark:text-amber-400',
+      bgClass: 'bg-warning/10',
+      textClass: 'text-warning',
     };
   }
   return {
     variant: 'error',
     text: 'Kritis / Habis',
-    bgClass: 'bg-rose-500/10',
-    textClass: 'text-rose-700 dark:text-rose-400',
+    bgClass: 'bg-error/10',
+    textClass: 'text-error',
   };
 }

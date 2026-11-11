@@ -4,6 +4,8 @@
   import { cubicOut, backOut } from "svelte/easing";
   import Button from "@/components/ui/Button.svelte";
   import { formatDate } from "@/lib/utils/format";
+  import { apiFetch } from "@/lib/api/parse-response";
+  import { toast } from "@/lib/toast";
   import type { AuthenticatedUser } from "@/lib/auth";
   import {
     getNotificationIcon,
@@ -59,10 +61,9 @@
   const fetchNotifications = async () => {
     isLoading = true;
     try {
-      const res = await fetch("/api/notifications");
-      if (res.ok) {
-        const json = await res.json();
-        notifications = json.data || [];
+      const res = await apiFetch<AppNotificationItem[]>("/api/notifications");
+      if (res.success && Array.isArray(res.data)) {
+        notifications = res.data;
         unreadCount = notifications.filter((n) => !n.isRead).length;
       }
     } catch (e) {
@@ -75,11 +76,16 @@
   const markAsRead = async (id?: string, isRead?: boolean) => {
     if (!id || isRead) return;
     try {
-      await fetch(`/api/notifications/${id}/read`, { method: "POST" });
-      notifications = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-      unreadCount = notifications.filter((n) => !n.isRead).length;
+      const res = await apiFetch(`/api/notifications/${id}/read`, { method: "POST" });
+      if (res.success) {
+        notifications = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+        unreadCount = notifications.filter((n) => !n.isRead).length;
+      } else {
+        toast.error(res.message);
+      }
     } catch (e) {
       console.error("Failed to mark notification as read", e);
+      toast.error("Gagal menandai notifikasi telah dibaca.");
     }
   };
 
@@ -87,22 +93,34 @@
     modalClosedAt = Date.now();
     notificationToDelete = null;
     try {
-      await fetch(`/api/notifications/${id}`, { method: "DELETE" });
-      notifications = notifications.filter((n) => n.id !== id);
-      unreadCount = notifications.filter((n) => !n.isRead).length;
+      const res = await apiFetch(`/api/notifications/${id}`, { method: "DELETE" });
+      if (res.success) {
+        notifications = notifications.filter((n) => n.id !== id);
+        unreadCount = notifications.filter((n) => !n.isRead).length;
+        toast.success("Notifikasi dihapus.");
+      } else {
+        toast.error(res.message);
+      }
     } catch (e) {
       console.error("Failed to delete notification", e);
+      toast.error("Gagal menghapus notifikasi.");
     }
   };
 
   const markAllAsRead = async () => {
     if (unreadCount === 0) return;
     try {
-      await fetch(`/api/notifications/read-all`, { method: "POST" });
-      notifications = notifications.map((n) => ({ ...n, isRead: true }));
-      unreadCount = 0;
+      const res = await apiFetch(`/api/notifications/read-all`, { method: "POST" });
+      if (res.success) {
+        notifications = notifications.map((n) => ({ ...n, isRead: true }));
+        unreadCount = 0;
+        toast.success("Semua notifikasi ditandai terbaca.");
+      } else {
+        toast.error(res.message);
+      }
     } catch (e) {
       console.error("Failed to mark all notifications as read", e);
+      toast.error("Gagal menandai semua notifikasi.");
     }
   };
 
@@ -240,13 +258,7 @@
                     {formatDate(notif.createdAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg hover:bg-error/10 text-muted hover:text-error shrink-0"
-                  on:click={(e) => { e.detail?.preventDefault?.(); e.detail?.stopPropagation?.(); notificationToDelete = notif.id ?? null; }}
-                  title="Hapus notifikasi"
-                >
+                <Button variant="ghost" size="icon" class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 min-w-[28px] min-h-[28px] rounded-lg hover:bg-error/10 text-muted hover:text-error shrink-0" on:click={(e) => { e.detail?.preventDefault?.(); e.detail?.stopPropagation?.(); notificationToDelete = notif.id ?? null; }} title="Hapus notifikasi">
                   <span class="material-symbols-outlined text-[15px]">delete</span>
                 </Button>
               </a>
@@ -260,12 +272,7 @@
         <span class="text-2xs text-muted font-sans">
           {notifications.length} notifikasi
         </span>
-        <Button
-          variant="tertiary"
-          on:click={markAllAsRead}
-          disabled={unreadCount === 0}
-          class="text-xs font-bold text-primary hover:text-primary-focus cursor-pointer"
-        >
+        <Button variant="tertiary" on:click={markAllAsRead} disabled={unreadCount === 0} class="text-xs font-bold text-primary hover:text-primary-focus cursor-pointer">
           Tandai semua dibaca
         </Button>
       </div>

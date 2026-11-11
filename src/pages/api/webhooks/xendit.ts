@@ -4,7 +4,7 @@ import { transactionService, payoutService } from '@/services';
 import { db } from '@/lib/db/client';
 import { payoutRequests } from '@/db/schema';
 import { eq, or } from 'drizzle-orm';
-import { handleApiRoute, validate, AppError } from '@/lib/utils';
+import { handleApiRoute, jsonSuccess, validate, AppError, parseJsonBody, timingSafeEqualString } from '@/lib/utils';
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -26,22 +26,21 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       throw new AppError('Missing callback token', 403);
     }
 
-    // Verify callback token
-    if (callbackToken.trim() !== expectedToken) {
+    // Verify callback token using constant-time comparison
+    if (!timingSafeEqualString(callbackToken.trim(), expectedToken)) {
       throw new AppError('Invalid callback token', 403);
     }
 
-    // Read body as raw JSON
-    const rawBody = await context.request.json();
-    const externalId = rawBody.external_id;
+    // Read body as validated JSON object
+    const rawBody = await parseJsonBody<Record<string, unknown>>(context.request);
+    const externalId = typeof rawBody.external_id === 'string' ? rawBody.external_id : '';
 
     if (!externalId) {
       throw new AppError('Missing external_id', 400);
     }
 
-    // Detect if payload is a Xendit Disbursement callback
     const isDisbursement =
-      rawBody.status &&
+      Boolean(rawBody.status) &&
       ['COMPLETED', 'FAILED'].includes(String(rawBody.status).toUpperCase()) &&
       !rawBody.event;
 
@@ -53,7 +52,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           or(
             eq(payoutRequests.id, externalId),
             eq(payoutRequests.gatewayReference, externalId),
-            eq(payoutRequests.xenditPayoutId, rawBody.id)
+            eq(payoutRequests.xenditPayoutId, String(rawBody.id || ''))
           )
         );
 
@@ -66,31 +65,21 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         const status = String(rawBody.status).toUpperCase();
 
         await payoutService.processDisbursementWebhook({
-          id: rawBody.id,
+          id: typeof rawBody.id === 'string' ? rawBody.id : undefined,
           external_id: payout.id,
           payoutRequestId: payout.id,
           status,
-          failure_code: rawBody.failure_code,
-          failureCode: rawBody.failure_code,
+          failure_code: typeof rawBody.failure_code === 'string' ? rawBody.failure_code : undefined,
+          failureCode: typeof rawBody.failure_code === 'string' ? rawBody.failure_code : undefined,
         });
       }
 
-      return Response.json({
-        received: true,
-      }, { status: 200 });
+      return jsonSuccess({ received: true }, 200, 'Disbursement webhook processed');
     }
 
-    // Parse and validate payload for invoice
     const payload = validate(XenditWebhookPayloadSchema, rawBody);
-
-    // Process webhook with business logic & fulfillment
-    // Handles: template_purchase, ai_credit_purchase, store_quota_purchase
     const result = await transactionService.processWebhook(payload);
 
-    return Response.json({
-      success: true,
-      ok: true,
-      message: result.message,
-    }, { status: 200 });
+    return jsonSuccess({ processed: true }, 200, result.message);
   });
 };

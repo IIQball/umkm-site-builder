@@ -10,7 +10,7 @@ import Sidebar from '@/components/shell/Sidebar.svelte';
 import DashboardNavbar from '@/components/shell/DashboardNavbar.svelte';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
 import LandingMarquee from '@/components/landing/LandingMarquee.svelte';
-import DashboardAppTour from '@/components/shell/tour/DashboardAppTour.svelte';
+import BugReportTrigger from '@/components/common/BugReportTrigger.svelte';
 
 interface Props {
   title?: string;
@@ -60,7 +60,12 @@ const userJson = JSON.stringify(user);
   <body class="bg-base-200 h-screen overflow-hidden flex flex-col">
     <ToastContainer client:load />
     <LandingMarquee client:load />
-    {!hideSidebar && user?.role !== 'superadmin' && <DashboardAppTour client:load role={user.role} currentPath={Astro.url.pathname} />}
+    <BugReportTrigger
+      client:idle
+      sourceApp="site_builder"
+      userEmail={user?.email ?? ''}
+      showFloatingTrigger={hideSidebar}
+    />
     <div class="flex flex-1 min-h-0 overflow-hidden">
       <!-- Sidebar: desktop collapsible + mobile FAB+drawer -->
       {!hideSidebar && <Sidebar client:load userJson={userJson} currentPath={Astro.url.pathname} />}

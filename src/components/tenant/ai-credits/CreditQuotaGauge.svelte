@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { AlertCircle, Zap } from 'lucide-svelte';
   import { Card, Button, Badge } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import CreditRadialMeter from './CreditRadialMeter.svelte';
   import CreditMutationTable from './CreditMutationTable.svelte';
   import type {
@@ -35,15 +37,15 @@
   async function loadData() {
     errorMessage = '';
     try {
-      const res = await fetch('/api/tenant/ai/credit-history');
-      if (!res.ok) {
-        throw new Error('Gagal memuat rincian kuota kredit');
+      const res = await apiFetch<{ quota: CreditQuotaData; mutations?: CreditMutationItem[] }>(
+        '/api/tenant/ai/credit-history',
+        { fallbackError: 'Gagal memuat rincian kuota kredit' }
+      );
+      if (!res.success || !res.data) {
+        throw new Error(res.message);
       }
-      const json = await res.json();
-      if (json.ok && json.data) {
-        quota = json.data.quota;
-        mutations = json.data.mutations || [];
-      }
+      quota = res.data.quota;
+      mutations = res.data.mutations || [];
     } catch (err: unknown) {
       errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
     } finally {
@@ -133,7 +135,7 @@
       <!-- Sisi Kanan: Call to Action -->
       <div class="flex-shrink-0 flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto lg:w-48">
         <Button variant="primary" size="md" href="/dashboard/credits/buy" class="w-full justify-center shadow-xs">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <Zap size={16} class="mr-1.5" />
           <span>Beli Kredit</span>
         </Button>
         <Button variant="outline" size="md" href="/dashboard/ai" class="w-full justify-center">
@@ -150,7 +152,7 @@
   {#if errorMessage}
     <div class="p-4 bg-error/10 border border-error/20 rounded-2xl text-error text-xs flex items-center justify-between gap-3">
       <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <AlertCircle size={16} />
         <span>{errorMessage}</span>
       </div>
       <Button variant="ghost" size="xs" on:click={loadData}>Coba Lagi</Button>

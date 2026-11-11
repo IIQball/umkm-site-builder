@@ -77,7 +77,7 @@
             variant="ghost"
             size="icon"
             on:click={() => handleRemove(index)}
-            class="!p-1 !h-6 !w-6 !min-h-0 !min-w-0 text-base-content/40 hover:text-rose-500 rounded transition-colors"
+            class="!p-1 !h-6 !w-6 !min-h-0 !min-w-0 text-base-content/40 hover:text-error rounded transition-colors"
             title="Hapus Kategori"
           >
             <Trash2 size={12} />

@@ -22,7 +22,7 @@
 
 <div class="space-y-1.5 mb-4">
   <label for="prod_name" class="text-xs font-bold text-main block font-heading">
-    Nama Produk <span class="text-rose-500">*</span>
+    Nama Produk <span class="text-error">*</span>
   </label>
   <Input
     id="prod_name"
@@ -34,7 +34,7 @@
 
 <div class="space-y-1.5 mb-4">
   <label for="prod_category" class="text-xs font-bold text-main block font-heading">
-    Kategori <span class="text-rose-500">*</span>
+    Kategori <span class="text-error">*</span>
   </label>
   <Select
     id="prod_category"
@@ -46,7 +46,7 @@
 
 <div class="space-y-1.5 mb-4">
   <label for="prod_price" class="text-xs font-bold text-main block font-heading">
-    Harga Dasar <span class="text-rose-500">*</span>
+    Harga Dasar <span class="text-error">*</span>
   </label>
   <Input
     id="prod_price"

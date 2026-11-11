@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { db } from '@/db';
 import { stores, transactions, aiGenerationLogs, tenantAiCredits } from '@/db/schema';
 import { eq, and, desc, isNull, or } from 'drizzle-orm';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler';
 import { formatIDR } from '@/lib/currency';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { getOrInitializeAiCredit } from '@/services/ai-credit.service';
@@ -49,10 +49,10 @@ function resolveQuotaStatus(balance: number, percentage: number): 'plenty' | 'lo
 }
 
 export const GET: APIRoute = async ({ request }) => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      return jsonError('Silakan login terlebih dahulu', 401);
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
 
     // Ambil data toko tenant
@@ -232,8 +232,5 @@ export const GET: APIRoute = async ({ request }) => {
         bonusCredits: initialBonus,
       },
     });
-  } catch (error: unknown) {
-    console.error('[CREDIT_HISTORY] fetch error:', error);
-    return jsonError('Gagal mengambil rincian kuota dan riwayat mutasi kredit', 500);
-  }
+  });
 };

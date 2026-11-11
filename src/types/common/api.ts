@@ -1,20 +1,27 @@
 /**
  * Unified API response shape
- * All API responses follow this structure
+ * All API responses follow `{ success: boolean, data: T | null, message: string, meta?: object }`.
  */
 
-export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;
-
-export interface SuccessResponse<T> {
-  ok: true;
-  data: T;
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data: T | null;
+  message: string;
+  meta?: Record<string, unknown>;
 }
 
-export interface ErrorResponse {
-  ok: false;
-  error: {
+export interface SuccessResponse<T = unknown> extends ApiResponse<T> {
+  success: true;
+  data: T | null;
+}
+
+export interface ErrorResponse extends ApiResponse<null> {
+  success: false;
+  data: null;
+  meta?: {
     code: string;
-    message: string;
+    details?: unknown;
+    [key: string]: unknown;
   };
 }
 
@@ -26,44 +33,10 @@ export const ErrorCode = {
   DUPLICATE_KEY: 'DUPLICATE_KEY',
   INVALID_STATE: 'INVALID_STATE',
   PAYMENT_FAILED: 'PAYMENT_FAILED',
-  INTERNAL: 'INTERNAL',
+  RATE_LIMITED: 'RATE_LIMITED',
+  GATEWAY_TIMEOUT: 'GATEWAY_TIMEOUT',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  INTERNAL: 'INTERNAL_ERROR',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
-
-export function okResponse<T>(data: T): SuccessResponse<T> {
-  return { ok: true, data };
-}
-
-export function errorResponse(code: ErrorCode, message: string): ErrorResponse {
-  return {
-    ok: false,
-    error: { code, message },
-  };
-}
-
-export const unauthorized = (msg = 'Please log in to continue') =>
-  errorResponse('UNAUTHORIZED', msg);
-
-export const forbidden = (msg = 'Access denied') =>
-  errorResponse('FORBIDDEN', msg);
-
-export const notFound = (msg = 'Not found') =>
-  errorResponse('NOT_FOUND', msg);
-
-export const validationError = (msg = 'Validation failed') =>
-  errorResponse('VALIDATION_ERROR', msg);
-
-export const duplicateKeyError = (msg = 'Resource already exists') =>
-  errorResponse('DUPLICATE_KEY', msg);
-
-export const invalidState = (msg = 'Invalid state') =>
-  errorResponse('INVALID_STATE', msg);
-
-export const invalidStateError = invalidState;
-
-export const paymentFailed = (msg = 'Payment failed') =>
-  errorResponse('PAYMENT_FAILED', msg);
-
-export const internalError = (msg = 'Internal server error') =>
-  errorResponse('INTERNAL', msg);

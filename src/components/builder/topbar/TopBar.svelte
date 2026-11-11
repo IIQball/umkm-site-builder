@@ -4,9 +4,11 @@
     Send,
     CheckCircle2,
     ArrowLeft,
+    Bug,
     Sun,
     Moon,
   } from 'lucide-svelte';
+  import { openBugReportModal } from '@/components/common/bugReport.helpers';
   import { editorStore, canvasStore } from '../stores/editorStore';
   import SubmitReviewModal from './SubmitReviewModal.svelte';
   import TopBarViewportControls from './TopBarViewportControls.svelte';
@@ -51,7 +53,7 @@
       case 'approved':
         return { label: 'Disetujui', variant: 'emerald' as const };
       case 'rejected':
-        return { label: 'Ditolak', variant: 'rose' as const };
+        return { label: 'Ditolak', variant: 'error' as const };
       default:
         return { label: s, variant: 'slate' as const };
     }
@@ -63,14 +65,15 @@
 <header class="h-14 bg-card border-b border-light px-4 flex items-center justify-between flex-shrink-0 select-none text-main transition-colors z-30">
   <!-- Left info & Editable Title -->
   <div class="flex items-center gap-2.5 min-w-0">
-    <a
+    <Button
       href={templateId ? `/builder/new?id=${templateId}` : '/designer/templates'}
-      class="text-xs font-semibold text-secondary hover:text-main transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-nested hover:bg-nested/80 border border-light"
+      variant="secondary"
+      size="xs"
       title="Kembali ke Studio Inisialisasi Template"
     >
       <ArrowLeft size={13} />
       <span class="hidden sm:inline">Kembali</span>
-    </a>
+    </Button>
 
     <div class="h-4 w-px bg-nested border-r border-light"></div>
 
@@ -109,6 +112,18 @@
 
   <!-- Right actions -->
   <div class="flex items-center gap-2">
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      on:click={openBugReportModal}
+      class="!p-2 !h-auto !min-h-0 rounded-lg text-secondary hover:text-main hover:bg-nested border border-light transition-colors"
+      aria-label="Laporkan masalah atau bug"
+      title="Laporkan Masalah / Bug"
+    >
+      <Bug size={14} class="text-primary" />
+    </Button>
+
     <!-- Theme Toggle -->
     <Button
       type="button"

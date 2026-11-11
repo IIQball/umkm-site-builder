@@ -72,7 +72,7 @@ describe('Variants API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(data.data.productId).toBe('prod-1');
       expect(data.data.variants).toHaveLength(1);
       expect(data.data.variants[0].groupName).toBe('Ukuran');
@@ -199,8 +199,8 @@ describe('Variants API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.ok).toBe(false);
-      expect(data.error.code).toBe('VALIDATION_ERROR');
+      expect(data.success).toBe(false);
+      expect(data.meta.code).toBe('VALIDATION_ERROR');
     });
 
     it('updates variants successfully', async () => {
@@ -269,7 +269,7 @@ describe('Variants API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(data.data.variants[0].groupName).toBe('Warna');
     });
 

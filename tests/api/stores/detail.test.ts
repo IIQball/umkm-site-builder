@@ -27,7 +27,7 @@ describe('GET /api/stores/detail', () => {
     const res = await GET(ctx);
     expect(res.status).toBe(400);
     const data = await res.json();
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 404 if store is not found by subdomain', async () => {
@@ -57,7 +57,7 @@ describe('GET /api/stores/detail', () => {
     const res = await GET(ctx);
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.name).toBe('Batik Indah');
     expect(data.data.managedByAdmin).toEqual({ name: 'Admin Pendamping Siti' });
     // Safety check: sensitive admin fields must not exist
@@ -85,7 +85,7 @@ describe('GET /api/stores/detail', () => {
     const res = await GET(ctx);
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.managedByAdmin).toBeNull();
   });
 });

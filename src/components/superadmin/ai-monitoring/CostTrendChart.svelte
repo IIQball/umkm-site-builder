@@ -3,6 +3,9 @@
   import { BarChart3, Calendar } from 'lucide-svelte';
   import { Card } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { INDONESIAN_MONTHS } from '@/lib/utils/format';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
   import type { AiCostTrendsData } from '@/types/admin/ai-cost-trends.types';
   import {
     computeBarChartLayout,
@@ -20,18 +23,13 @@
   let hoveredBar: BarChartPoint | null = null;
   let hoveredIndex: number | null = null;
 
-  const MONTH_NAMES = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ];
-
   $: rangeTitle = (() => {
     const yr = selectedYear || new Date().getFullYear();
     if (!selectedMonth || selectedMonth === 'all') {
       return `Tahun ${yr}`;
     }
     const mIndex = Number(selectedMonth) - 1;
-    return `${MONTH_NAMES[mIndex] || ''} ${yr}`.trim();
+    return `${INDONESIAN_MONTHS[mIndex] || ''} ${yr}`.trim();
   })();
 
   $: summary = data?.summary || {
@@ -73,15 +71,15 @@
       if (month && month !== 'all') params.set('month', String(month));
       else if (month === 'all') params.set('month', 'all');
 
-      const res = await fetch(`/api/admin/ai/cost-trends?${params.toString()}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.ok && json.data) {
-          data = json.data;
-        }
+      const res = await apiFetch<AiCostTrendsData>(`/api/admin/ai/cost-trends?${params.toString()}`);
+      if (res.success && res.data) {
+        data = res.data;
+      } else if (!res.success) {
+        toast.error(res.message);
       }
     } catch (err) {
       console.error('[CostTrendChart] Failed to load trends:', err);
+      toast.error('Gagal memuat tren biaya AI.');
     } finally {
       isLoading = false;
     }
@@ -105,7 +103,7 @@
         <h2 class="text-heading-sm sm:text-heading-md text-main font-bold font-heading leading-tight">
           Tren Pengeluaran Harian & Kuota AI
         </h2>
-        <p class="text-body-xs text-secondary mt-0.5 font-sans">
+        <p class="text-xs text-secondary mt-0.5 font-sans">
           Monitoring fluktuasi biaya harian, rasio limit deposit, dan harga unit per 1% kuota.
         </p>
       </div>

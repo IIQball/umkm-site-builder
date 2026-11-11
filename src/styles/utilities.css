@@ -182,6 +182,16 @@ details summary:after,
     display: none;
   }
 
+  .no-spinners::-webkit-inner-spin-button,
+  .no-spinners::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"].no-spinners {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
   /* Dark mode border & line softening rules */
   html[data-theme="dark"] .border-light,
   html[data-theme="dark"] [class*="border-light"],

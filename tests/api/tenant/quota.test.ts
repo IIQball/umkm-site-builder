@@ -56,14 +56,12 @@ describe('Tenant Quota API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toEqual({
-      ok: true,
-      data: {
-        products: 6,
-        categories: 2,
-        maxProducts: 15,
-        maxCategories: 5
-      }
+    expect(data.success).toBe(true);
+    expect(data.data).toEqual({
+      products: 6,
+      categories: 2,
+      maxProducts: 15,
+      maxCategories: 5
     });
   });
 
@@ -89,14 +87,12 @@ describe('Tenant Quota API', () => {
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data).toEqual({
-      ok: true,
-      data: {
-        products: 0,
-        categories: 0,
-        maxProducts: 15,
-        maxCategories: 5
-      }
+    expect(data.success).toBe(true)
+    expect(data.data).toEqual({
+      products: 0,
+      categories: 0,
+      maxProducts: 15,
+      maxCategories: 5
     })
   })
 })

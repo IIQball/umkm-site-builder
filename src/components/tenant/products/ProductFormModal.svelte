@@ -6,6 +6,8 @@
   import type { VariantGroup } from "@/schemas/tenant/product-variant.schema";
   import ImageUpload from "@/components/ui/ImageUpload.svelte";
   import { Button, Input, Modal } from "@/components/ui";
+  import { apiFetch } from "@/lib/api/parse-response";
+  import { toast } from "@/lib/toast";
   import ProductVariantEditor from "./ProductVariantEditor.svelte";
   import ProductBasicFields from "./ProductBasicFields.svelte";
   import { deserializeVariants, validateVariantGroups } from "./productForm.helpers";
@@ -65,7 +67,6 @@
       isAvailable = true;
       sortOrder = 0;
       variantGroups = [];
-      variantGroups = [];
       imageUrls = [];
     }
   } else if (!showModal && wasOpen) {
@@ -124,28 +125,31 @@
         : `/api/stores/${storeId}/products`;
       const method = editingProduct ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const result = await apiFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        fallbackError: "Gagal menyimpan produk",
       });
-      const data = await res.json();
 
-      if (data.ok) {
+      if (result.success) {
+        toast.success(editingProduct ? "Produk berhasil diperbarui." : "Produk berhasil ditambahkan.");
         closeModal();
         window.dispatchEvent(new CustomEvent('quota-updated'));
         dispatch("success");
       } else {
-        let errorMsg = data.error.message;
+        let errorMsg = result.message;
         if (errorMsg === "Validation failed" || errorMsg === "Validasi gagal") {
           errorMsg = "Pastikan semua form wajib sudah terisi dengan benar.";
         }
         errorMessage = "Gagal menyimpan: " + errorMsg;
+        toast.error(errorMsg);
       }
     } catch (e: unknown) {
       errorMessage =
         "Error: " +
         (e instanceof Error ? e.message : "Terjadi kesalahan tidak dikenal");
+      toast.error(errorMessage);
     } finally {
       formLoading = false;
     }
@@ -202,7 +206,7 @@
 
   <div class="space-y-1.5 mb-4">
     <div class="text-xs font-bold text-main block font-heading">
-      Gambar Produk <span class="text-rose-500">*</span>
+      Gambar Produk <span class="text-error">*</span>
     </div>
     <div
       class="border rounded-2xl p-2 bg-nested"

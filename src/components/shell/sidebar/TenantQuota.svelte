@@ -4,6 +4,7 @@
   import Input from '../../ui/Input.svelte';
   import Button from '../../ui/Button.svelte';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   
   export let collapsed = false;
 
@@ -30,15 +31,19 @@
 
   async function fetchQuota() {
     try {
-      const res = await fetch('/api/tenant/quota');
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        products = data.data.products;
-        categories = data.data.categories;
-        maxProducts = data.data.maxProducts ?? 15;
-        maxCategories = data.data.maxCategories ?? 5;
+      const res = await apiFetch<{
+        products: number;
+        categories: number;
+        maxProducts?: number;
+        maxCategories?: number;
+      }>('/api/tenant/quota');
+      if (res.success && res.data) {
+        products = res.data.products;
+        categories = res.data.categories;
+        maxProducts = res.data.maxProducts ?? 15;
+        maxCategories = res.data.maxCategories ?? 5;
       }
-    } catch (e) {
+    } catch {
       // silent fail
     }
   }
@@ -48,28 +53,28 @@
       toast.error('Silakan isi jumlah slot tambahan yang dibutuhkan');
       return;
     }
-    
+
     isSubmitting = true;
     try {
-      const res = await fetch('/api/tenant/quota/request-upgrade', {
+      const result = await apiFetch('/api/tenant/quota/request-upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           categorySlots: Number(requestCategories),
           productSlots: Number(requestProducts)
-        })
+        }),
+        fallbackError: 'Gagal mengirim permintaan',
       });
-      
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        toast.success(data.message || 'Permintaan berhasil dikirim');
+
+      if (result.success) {
+        toast.success(result.message || 'Permintaan berhasil dikirim');
         showUpgradeModal = false;
         requestProducts = 0;
         requestCategories = 0;
       } else {
-        toast.error(data.error?.message || 'Gagal mengirim permintaan');
+        toast.error(result.message);
       }
-    } catch (e) {
+    } catch {
       toast.error('Terjadi kesalahan sistem');
     } finally {
       isSubmitting = false;
@@ -81,59 +86,83 @@
     window.addEventListener('quota-updated', fetchQuota);
     return () => window.removeEventListener('quota-updated', fetchQuota);
   });
+  $: nearLimit = (maxProducts > 0 && products >= maxProducts) || (maxCategories > 0 && categories >= maxCategories);
 </script>
 
-<div class="py-4 mt-auto border-t border-light flex flex-col gap-3 w-full shrink-0 {collapsed ? 'px-2 items-center' : 'px-4'}">
+<div
+  class="border-t border-light shrink-0 w-full {collapsed
+    ? 'px-2 py-2.5 flex justify-center'
+    : 'px-3.5 py-2.5 space-y-2'}"
+>
   {#if collapsed}
-    <div 
-      class="w-10 h-10 rounded-xl flex items-center justify-center text-primary hover:bg-nested transition-colors cursor-pointer" 
-      title="Produk: {products}/{maxProducts} | Kategori: {categories}/{maxCategories}"
+    <button
+      type="button"
+      on:click={() => (showUpgradeModal = true)}
+      class="relative w-10 h-10 rounded-xl flex items-center justify-center transition-colors cursor-pointer {nearLimit
+        ? 'text-error hover:bg-error/10'
+        : 'text-primary hover:bg-nested'}"
+      title="Produk: {products}/{maxProducts} • Kategori: {categories}/{maxCategories} (Klik untuk tingkatkan)"
+      aria-label="Status kuota toko, klik untuk tingkatkan kuota"
     >
-      <span class="material-symbols-outlined text-xl icon-filled">cloud</span>
-    </div>
+      <span class="material-symbols-outlined text-lg icon-filled">cloud</span>
+      {#if nearLimit}
+        <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-error"></span>
+      {/if}
+    </button>
   {:else}
-    <div class="flex items-center gap-2.5 text-main">
-      <span class="material-symbols-outlined text-xl text-primary icon-filled">cloud</span>
-      <span class="text-xs font-bold font-heading leading-tight">Status Kuota</span>
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span class="material-symbols-outlined text-base text-primary icon-filled shrink-0">
+          cloud
+        </span>
+        <span class="text-xs font-bold font-heading text-main truncate">
+          Kuota Toko
+        </span>
+      </div>
+
+      <button
+        type="button"
+        on:click={() => (showUpgradeModal = true)}
+        class="inline-flex items-center gap-1 min-h-[28px] md:min-h-[24px] px-2.5 py-0.5 rounded-full text-2xs font-bold font-heading transition-colors cursor-pointer shrink-0 {nearLimit
+          ? 'bg-error/10 text-error hover:bg-error hover:text-white'
+          : 'bg-primary/15 text-primary hover:bg-primary hover:text-slate-950'}"
+        aria-label="Ajukan penambahan kuota toko"
+      >
+        <span class="material-symbols-outlined text-xs">rocket_launch</span>
+        <span>Tingkatkan</span>
+      </button>
     </div>
 
-    <div class="space-y-1.5 mt-0.5">
-      <div class="space-y-3">
-        <!-- Products Progress -->
-        <div>
-          <div class="flex justify-between items-end text-[10px] font-bold mb-1">
-            <span class="text-main">{products} / {maxProducts} <span class="text-muted font-normal ml-0.5">Produk</span></span>
-            <span class="text-primary">{Math.round((products / maxProducts) * 100)}%</span>
-          </div>
-          <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
-            <div 
-              class="h-1.5 rounded-full {products >= maxProducts ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
-              style="width: {progressProducts}%"
-            ></div>
-          </div>
+    <div class="grid grid-cols-2 gap-2.5">
+      <div class="min-w-0 space-y-1">
+        <div class="flex items-baseline justify-between gap-1 text-2xs leading-none">
+          <span class="text-secondary font-medium truncate">Produk</span>
+          <span class="font-mono font-bold tabular-nums shrink-0 {products >= maxProducts ? 'text-error' : 'text-main'}">
+            {products}/{maxProducts}
+          </span>
         </div>
-
-        <!-- Categories Progress -->
-        <div>
-          <div class="flex justify-between items-end text-[10px] font-bold mb-1">
-            <span class="text-main">{categories} / {maxCategories} <span class="text-muted font-normal ml-0.5">Kategori</span></span>
-            <span class="text-primary">{Math.round((categories / maxCategories) * 100)}%</span>
-          </div>
-          <div class="w-full bg-base-300 dark:bg-base-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/5">
-            <div 
-              class="h-1.5 rounded-full {categories >= maxCategories ? 'bg-rose-500' : 'bg-primary'} transition-all duration-300" 
-              style="width: {progressCategories}%"
-            ></div>
-          </div>
+        <div class="w-full bg-nested border border-light/60 rounded-full h-1.5 overflow-hidden">
+          <div
+            class="h-full rounded-full transition-all duration-300 {products >= maxProducts ? 'bg-error' : 'bg-primary'}"
+            style="width: {progressProducts}%"
+          ></div>
         </div>
       </div>
-      <button 
-        on:click={() => showUpgradeModal = true}
-        class="w-full mt-3 py-1.5 bg-primary/10 hover:bg-primary hover:text-white text-primary rounded-lg text-[11px] font-bold font-heading transition-all duration-200 active:scale-95 flex items-center justify-center gap-1 group"
-      >
-        <span class="material-symbols-outlined text-[14px] transition-transform group-hover:-translate-y-0.5">rocket_launch</span>
-        Tingkatkan
-      </button>
+
+      <div class="min-w-0 space-y-1">
+        <div class="flex items-baseline justify-between gap-1 text-2xs leading-none">
+          <span class="text-secondary font-medium truncate">Kategori</span>
+          <span class="font-mono font-bold tabular-nums shrink-0 {categories >= maxCategories ? 'text-error' : 'text-main'}">
+            {categories}/{maxCategories}
+          </span>
+        </div>
+        <div class="w-full bg-nested border border-light/60 rounded-full h-1.5 overflow-hidden">
+          <div
+            class="h-full rounded-full transition-all duration-300 {categories >= maxCategories ? 'bg-error' : 'bg-primary'}"
+            style="width: {progressCategories}%"
+          ></div>
+        </div>
+      </div>
     </div>
   {/if}
 </div>

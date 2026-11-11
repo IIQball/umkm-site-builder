@@ -10,7 +10,8 @@
     XCircle,
     Search,
   } from 'lucide-svelte';
-  import { Card, Pagination, Button } from '@/components/ui';
+  import { Card, Pagination, Button, Input } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { addToast } from '@/lib/toast';
   import type { AdminTemplateItem } from './review.types';
   import TemplateReviewTable from './TemplateReviewTable.svelte';
@@ -47,13 +48,14 @@
   const fetchTemplates = async () => {
     isLoading = true;
     try {
-      const res = await fetch('/api/admin/templates');
-      const result = await res.json();
-      if (result.ok && Array.isArray(result.data)) {
-        allTemplates = result.data.filter((t: AdminTemplateItem) => t.status !== 'draft');
+      const result = await apiFetch<AdminTemplateItem[]>('/api/admin/templates', {
+        fallbackError: 'Gagal memuat daftar template',
+      });
+      if (result.success && Array.isArray(result.data)) {
+        allTemplates = result.data.filter((t) => t.status !== 'draft');
+      } else if (!result.success) {
+        addToast({ type: 'error', message: result.message });
       }
-    } catch {
-      addToast({ type: 'error', message: 'Gagal memuat daftar template' });
     } finally {
       isLoading = false;
     }
@@ -96,16 +98,16 @@
     }
     actionLoading = true;
     try {
-      const res = await fetch(`/api/admin/templates/${selectedTemplate.id}/review`, {
+      const result = await apiFetch(`/api/admin/templates/${selectedTemplate.id}/review`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action,
           rejectionReason: action === 'reject' ? rejectionReason.trim() : undefined,
         }),
+        fallbackError: 'Gagal memproses review template',
       });
-      const result = await res.json();
-      if (res.ok && result.ok) {
+      if (result.success) {
         addToast({
           type: 'success',
           message: action === 'approve'
@@ -115,10 +117,8 @@
         closeModal();
         await fetchTemplates();
       } else {
-        addToast({ type: 'error', message: result.error?.message || 'Gagal memproses review template' });
+        addToast({ type: 'error', message: result.message });
       }
-    } catch {
-      addToast({ type: 'error', message: 'Terjadi kesalahan jaringan saat memproses review' });
     } finally {
       actionLoading = false;
     }
@@ -168,15 +168,16 @@
     <!-- Actions & Filter Pills -->
     <div class="flex flex-wrap items-center gap-2.5">
       <!-- Search Input Capsule -->
-      <div class="relative">
-        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="Cari nama template / desainer..."
-          class="bg-nested/80 border border-light rounded-full pl-8 pr-3 py-1.5 text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary focus:bg-card transition-all w-52 sm:w-60"
-        />
-      </div>
+      <Input
+        type="search"
+        size="sm"
+        bind:value={searchQuery}
+        placeholder="Cari nama template / desainer..."
+        fullWidth={false}
+        class="w-52 sm:w-60 !rounded-full !bg-nested/80"
+      >
+        <Search size={14} slot="prefix" />
+      </Input>
 
       <!-- Segmented Status Filter (Exact matching style from OrderHistoryTable) -->
       <div class="flex items-center gap-1 bg-nested/80 border border-light rounded-full p-1">

@@ -7,29 +7,30 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
 import { hasExistingStore, isSubdomainTaken } from '@/services/stores';
 import { ZodError } from 'zod';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonSuccess, jsonError, parseJsonBody } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
 import { logActivity } from '@/services/audit.service';
 import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
 export const POST: APIRoute = async ({ request }) => {
-  const user = await getAuthenticatedUser(request);
-  if (!user) {
-    return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
-  }
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
+    }
 
-  if (user.status !== 'active') {
-    return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
-  }
+    if (user.status !== 'active') {
+      return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
+    }
 
-  const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
-  if (user.role !== 'tenant' && !isAdminOrSuper) {
-    return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
-  }
+    const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
+    if (user.role !== 'tenant' && !isAdminOrSuper) {
+      return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
+    }
 
-  try {
-    const body = await request.json();
-    const parsedData = OnboardStoreInput.parse(body);
+    try {
+      const body = await parseJsonBody(request);
+      const parsedData = OnboardStoreInput.parse(body);
     const { subdomain, name, categoryId, waNumber, googleMapsUrl, address, regionData, templateId, tenantId } = parsedData;
 
     const maxBranches = await getMaxStoreBranches();
@@ -109,13 +110,12 @@ export const POST: APIRoute = async ({ request }) => {
       },
     });
 
-    return jsonSuccess({ storeId, subdomain, name }, 201);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      return jsonError(err.errors[0]?.message || 'Validation failed', 400, err.errors);
+    return jsonSuccess({ storeId, subdomain, name }, 201, 'Toko berhasil dibuat');
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return jsonError(err.errors[0]?.message || 'Validasi gagal', 400, err.errors, 'VALIDATION_ERROR');
+      }
+      throw err;
     }
-
-    console.error('[STORE] onboard failed:', err);
-    return jsonError('Internal server error', 500, undefined, 'INTERNAL');
-  }
+  });
 };

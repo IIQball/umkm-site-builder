@@ -30,8 +30,8 @@ describe('POST /api/builder/save', () => {
 
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('UNAUTHORIZED');
   });
 
   it('should return 401 for body with Zod issues when unauthenticated', async () => {
@@ -53,7 +53,7 @@ describe('POST /api/builder/save', () => {
     // Auth guard fires before validation
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('UNAUTHORIZED');
   });
 });

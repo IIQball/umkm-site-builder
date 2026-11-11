@@ -62,7 +62,9 @@ function blobToBase64(blob: Blob): Promise<string> {
  */
 export async function compressImageClient(
   file: File,
-  maxSizeBytes = DEFAULT_MAX_SIZE_BYTES
+  maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
+  maxWidth = MAX_DIMENSION,
+  maxHeight = MAX_DIMENSION
 ): Promise<CompressedImageResult> {
   if (!file) {
     throw new Error('Berkas gambar wajib disertakan');
@@ -106,8 +108,8 @@ export async function compressImageClient(
   let width = img.naturalWidth || img.width;
   let height = img.naturalHeight || img.height;
 
-  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-    const scaleRatio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+  if (width > maxWidth || height > maxHeight) {
+    const scaleRatio = Math.min(maxWidth / width, maxHeight / height);
     width = Math.max(1, Math.round(width * scaleRatio));
     height = Math.max(1, Math.round(height * scaleRatio));
   }

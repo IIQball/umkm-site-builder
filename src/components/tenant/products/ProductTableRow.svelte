@@ -111,7 +111,7 @@
       <Button
         variant="destructive"
         size="icon"
-        className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+        className="!bg-nested hover:!bg-error/10 !border-light hover:!border-error/20 !text-secondary hover:!text-error shadow-2xs"
         on:click={() => dispatch("delete", product.id)}
         title="Hapus"
       >

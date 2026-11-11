@@ -8,6 +8,9 @@
   import { Button } from '@/components/ui';
   import { editorStore, canvasStore, activeSection, maxStoreBranchesStore } from './stores/editorStore';
   import { applyTheme } from '@/lib/utils/theme';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
+  import type { TemplateRecord } from '@/types';
 
   export let templateId: string;
   export let platformFeePercentage: number = 30;
@@ -28,25 +31,22 @@
     loading = true;
     fetchError = null;
     try {
-      const response = await fetch(`/api/designer/templates/draft?templateId=${encodeURIComponent(templateId)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const result = await apiFetch<TemplateRecord>(
+        `/api/designer/templates/draft?templateId=${encodeURIComponent(templateId)}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          fallbackError: 'Gagal memuat template dari server.',
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      if (!result.ok || !result.data) {
-        throw new Error(result.error?.message || 'Invalid response from server');
+      if (!result.success || !result.data) {
+        throw new Error(result.message);
       }
 
       editorStore.init(result.data);
     } catch (err) {
-      fetchError = err instanceof Error ? err.message : 'Unknown error occurred';
+      fetchError = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat template.';
+      toast.error(fetchError);
       console.error('[Builder] Error loading template:', err);
     } finally {
       loading = false;
@@ -57,9 +57,8 @@
     canvasStore.initEditorTheme();
     maxStoreBranchesStore.set(maxStoreBranches);
     try {
-      const res = await fetch('/api/public/platform-settings');
-      const result = await res.json();
-      if (result.ok && result.data && typeof result.data.maxStoreBranches === 'number') {
+      const result = await apiFetch<{ maxStoreBranches?: number }>('/api/public/platform-settings');
+      if (result.success && result.data && typeof result.data.maxStoreBranches === 'number') {
         maxStoreBranches = result.data.maxStoreBranches;
         maxStoreBranchesStore.set(result.data.maxStoreBranches);
       }

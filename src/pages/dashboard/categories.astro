@@ -59,7 +59,8 @@ if (!isStoreFullyOnboarded(userStore)) {
       <CategoryManager 
         client:load 
         storeId={userStore?.id || ''} 
-        storeName={userStore?.name || 'Toko Anda'} 
+        storeName={userStore?.name || 'Toko Anda'}
+        maxCategories={userStore?.maxCategories ?? 5}
       />
     </div>
   </div>

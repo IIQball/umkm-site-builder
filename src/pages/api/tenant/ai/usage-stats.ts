@@ -2,7 +2,8 @@ import type { APIRoute } from 'astro';
 import { db } from '@/db';
 import { stores, aiGenerationLogs, tenantAiCredits } from '@/db/schema';
 import { eq, and, gte, isNull } from 'drizzle-orm';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { INDONESIAN_MONTHS_SHORT } from '@/lib/utils/format';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export const prerender = false;
@@ -10,10 +11,6 @@ export const prerender = false;
 const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 const ID_DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const ID_DAYS_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-const ID_MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-];
 
 /** Format tanggal (YYYY-MM-DD) berdasarkan zona waktu WIB (UTC+7) */
 export function toWibDateKey(date: Date): string {
@@ -51,10 +48,10 @@ export interface UsageStatsSummary {
 }
 
 export const GET: APIRoute = async ({ request }) => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(request);
     if (!user) {
-      return jsonError('Silakan login terlebih dahulu', 401);
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
 
     // Ambil data toko milik tenant - Isolasi data multi-tenant ketat
@@ -76,9 +73,9 @@ export const GET: APIRoute = async ({ request }) => {
       const dayIdx = utcDate.getUTCDay();
       return {
         date: key,
-        label: `${d} ${ID_MONTHS[m - 1]}`,
+        label: `${d} ${INDONESIAN_MONTHS_SHORT[m - 1]}`,
         dayName: ID_DAYS[dayIdx],
-        fullLabel: `${ID_DAYS_FULL[dayIdx]}, ${d} ${ID_MONTHS[m - 1]} ${y}`,
+        fullLabel: `${ID_DAYS_FULL[dayIdx]}, ${d} ${INDONESIAN_MONTHS_SHORT[m - 1]} ${y}`,
         creditsUsed: 0,
         generationsCount: 0,
       };
@@ -178,8 +175,5 @@ export const GET: APIRoute = async ({ request }) => {
     };
 
     return jsonSuccess({ points, summary }, 200);
-  } catch (error: unknown) {
-    console.error('[AI_USAGE_STATS] fetch error:', error);
-    return jsonError('Gagal mengambil statistik penggunaan kredit AI', 500);
-  }
+  });
 };

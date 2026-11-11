@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Card, Table, Pagination, Button } from '@/components/ui';
+  import { Card, Table, Pagination, Button, Input, Select } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
   import type {
     AiAuditLogItem,
     AiLogsPaginationMeta,
@@ -57,16 +59,19 @@
       params.set('page', String(page));
       params.set('limit', String(pagination.limit || 10));
 
-      const res = await fetch(`/api/admin/ai/logs?${params.toString()}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.ok && json.data) {
-          logs = json.data.logs || [];
-          pagination = json.data.pagination || { total: logs.length, page, limit: 10, totalPages: 1 };
-        }
+      const res = await apiFetch<{ logs?: AiAuditLogItem[]; pagination?: AiLogsPaginationMeta }>(
+        `/api/admin/ai/logs?${params.toString()}`,
+        { fallbackError: 'Gagal memuat data log audit.' }
+      );
+      if (res.success && res.data) {
+        logs = res.data.logs || [];
+        pagination = res.data.pagination || { total: logs.length, page, limit: 10, totalPages: 1 };
+      } else {
+        toast.error(res.message);
       }
     } catch (err) {
       console.error('[AiTestAuditTable] Gagal memuat data log audit:', err);
+      toast.error('Koneksi bermasalah saat memuat data log audit.');
     } finally {
       isLoading = false;
     }
@@ -84,6 +89,20 @@
     selectedLog = log;
     isDetailModalOpen = true;
   }
+
+  const STATUS_FILTER_OPTIONS = [
+    { value: 'all', label: 'Semua Status' },
+    { value: 'success', label: 'Sukses' },
+    { value: 'failed', label: 'Gagal' },
+    { value: 'pending', label: 'Menunggu / Proses' },
+  ];
+
+  const handleStatusSelect = (event: CustomEvent<Event>) => {
+    const el = (event.detail.currentTarget ?? event.detail.target) as HTMLSelectElement | null;
+    if (!el) return;
+    statusFilter = el.value as typeof statusFilter;
+    handleFilterChange();
+  };
 
   onMount(() => {
     if (initialLogs.length === 0) fetchAuditLogs(1);
@@ -117,51 +136,56 @@
 
   <!-- Filter Toolbar: isTesting segmented tabs, status select, and search -->
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-    <div class="flex items-center gap-1.5 p-1 bg-nested/80 border border-light rounded-xl self-start">
-      <button
+    <div class="flex items-center gap-1 p-1 bg-nested/80 border border-light rounded-xl self-start">
+      <Button
         type="button"
-        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all {isTestingFilter === 'true' ? 'bg-canvas text-main shadow-xs border border-light' : 'text-muted hover:text-main'}"
+        size="xs"
+        variant={isTestingFilter === 'true' ? 'dark' : 'ghost'}
+        class="!rounded-lg font-semibold {isTestingFilter === 'true' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
         on:click={() => { isTestingFilter = 'true'; handleFilterChange(); }}
       >
         Hanya Pengujian (Test)
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
-        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all {isTestingFilter === 'false' ? 'bg-canvas text-main shadow-xs border border-light' : 'text-muted hover:text-main'}"
+        size="xs"
+        variant={isTestingFilter === 'false' ? 'dark' : 'ghost'}
+        class="!rounded-lg font-semibold {isTestingFilter === 'false' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
         on:click={() => { isTestingFilter = 'false'; handleFilterChange(); }}
       >
         Produksi Saja
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
-        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all {isTestingFilter === 'all' ? 'bg-canvas text-main shadow-xs border border-light' : 'text-muted hover:text-main'}"
+        size="xs"
+        variant={isTestingFilter === 'all' ? 'dark' : 'ghost'}
+        class="!rounded-lg font-semibold {isTestingFilter === 'all' ? 'shadow-2xs' : 'text-muted hover:text-main'}"
         on:click={() => { isTestingFilter = 'all'; handleFilterChange(); }}
       >
         Semua Log
-      </button>
+      </Button>
     </div>
 
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-      <select
-        bind:value={statusFilter}
-        on:change={handleFilterChange}
-        class="px-3 py-2 text-xs bg-canvas border border-light rounded-xl text-main focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        <option value="all">Semua Status</option>
-        <option value="success">Sukses</option>
-        <option value="failed">Gagal</option>
-        <option value="pending">Menunggu / Proses</option>
-      </select>
+      <Select
+        aria-label="Filter status log AI"
+        size="sm"
+        fullWidth={false}
+        options={STATUS_FILTER_OPTIONS}
+        value={statusFilter}
+        on:change={handleStatusSelect}
+      />
 
-      <div class="relative flex-1 sm:w-64">
-        <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-        <input
-          type="text"
+      <div class="flex-1 sm:w-64">
+        <Input
+          type="search"
+          size="sm"
           placeholder="Cari model, ID, prompt..."
           bind:value={searchQuery}
-          on:keydown={(e) => e.key === 'Enter' && handleFilterChange()}
-          class="w-full pl-9 pr-3 py-2 text-xs bg-canvas border border-light rounded-xl text-main placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+          on:keydown={(e) => e.detail.key === 'Enter' && handleFilterChange()}
+        >
+          <Search size={14} slot="prefix" />
+        </Input>
       </div>
     </div>
   </div>
@@ -188,7 +212,7 @@
             <div class="text-2xs text-muted mt-0.5 flex items-center gap-1">
               <span>{getFeatureLabel(log.featureType)}</span>
               {#if log.isTesting}
-                <span class="px-1.5 py-0.2 text-3xs font-semibold rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">TEST</span>
+                <span class="px-1.5 py-0.2 text-3xs font-semibold rounded bg-warning/10 text-warning border border-warning/20">TEST</span>
               {/if}
             </div>
           </td>

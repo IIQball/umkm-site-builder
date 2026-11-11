@@ -142,7 +142,6 @@ umkm-site-builder/
 │   │   │   ├── AdminRegistrationPanel.svelte # [⚠️ >300 baris - 391 baris] Pembuat & pengelola link undangan merchant
 │   │   │   └── AuditLogTable.svelte         # [231 baris] Komponen UI Svelte modular
 │   │   ├── auth/ # Komponen form otentikasi & login pengguna
-│   │   │   ├── ActivationForm.svelte        # [168 baris] Komponen UI Svelte modular
 │   │   │   ├── ForgotPasswordForm.svelte    # [83 baris] Form permintaan reset password pengguna
 │   │   │   ├── GoogleAuthButton.svelte      # [59 baris] Tombol login Google SSO BetterAuth
 │   │   │   ├── LoginForm.svelte             # [159 baris] Form login tenant, designer, dan admin
@@ -458,7 +457,6 @@ umkm-site-builder/
 │   │   │   ├── PaymentModal.svelte          # [53 baris] Modal pembayaran invoice Xendit
 │   │   │   └── TransactionStatus.svelte     # [96 baris] Status tagihan invoice (polling & status badge)
 │   │   ├── common/ # Komponen dialog feedback & status global
-│   │   │   ├── GlobalZoomControl.svelte     # [89 baris] Kontrol interaktif floating pill zoom-in & zoom-out (25%-200%)
 │   │   │   ├── Navbar.astro                 # [23 baris] Navigasi utama header base layout
 │   │   │   ├── navbar.helpers.ts            # [111 baris] Fungsi pembantu & helper
 │   │   │   ├── NavbarDropdown.svelte        # [80 baris] Komponen UI Svelte modular
@@ -582,16 +580,6 @@ umkm-site-builder/
 │   │   │   │   ├── SidebarDesktop.svelte        # [191 baris] Sidebar dashboard versi layar desktop
 │   │   │   │   ├── SidebarMobile.svelte         # [141 baris] Drawer sidebar dashboard versi mobile
 │   │   │   │   └── TenantQuota.svelte           # [182 baris] Mini indicator kuota di sidebar
-│   │   │   ├── tour/ # Modul pendukung
-│   │   │   │   ├── routes/ # Modul pendukung
-│   │   │   │   │   ├── adminTour.ts                 # [226 baris] Konfigurasi tour peran admin
-│   │   │   │   │   ├── designerTour.ts              # [151 baris] Konfigurasi tour peran desainer
-│   │   │   │   │   ├── shellTour.helpers.ts         # [136 baris] Helper navigasi umum shell tour
-│   │   │   │   │   ├── superadminTour.ts            # [177 baris] Konfigurasi tour peran superadmin
-│   │   │   │   │   └── tenantTour.ts                # [190 baris] Konfigurasi tour peran tenant
-│   │   │   │   ├── DashboardAppTour.svelte      # [176 baris] Komponen onboarding tour terpadu
-│   │   │   │   ├── routeTours.data.ts           # [19 baris] Data rute dan mapping langkah tour
-│   │   │   │   └── tour.helpers.ts              # [105 baris] Helper tour driver & step filter
 │   │   │   ├── DashboardNavbar.svelte       # [216 baris] Navigasi panel dashboard tenant & profil aksi
 │   │   │   └── Sidebar.svelte               # [60 baris] Menu navigasi sidebar panel tenant & admin
 │   │   ├── storefront/ # Komponen rendering toko storefront tenant
@@ -659,7 +647,6 @@ umkm-site-builder/
 │   │   │   │   ├── CreditMutationTable.svelte   # [228 baris] Tabel mutasi pemakaian kredit AI toko
 │   │   │   │   ├── CreditQuotaGauge.svelte      # [168 baris] Gauge visual sisa kuota kredit AI toko
 │   │   │   │   ├── CreditRadialMeter.svelte     # [118 baris] Meteran radial pemakaian AI generator
-│   │   │   │   ├── InsufficientCreditsModal.svelte # [148 baris] Modal peringatan saldo kredit AI habis
 │   │   │   │   ├── tenantUsageChart.helpers.ts  # [141 baris] Helper kalkulasi grafik pemakaian AI tenant
 │   │   │   │   └── TenantUsageChart.svelte      # [207 baris] Grafik riwayat pemakaian kredit AI toko
 │   │   │   ├── ai-studio/ # Generator studio konten kreatif AI tenant
@@ -1287,7 +1274,6 @@ umkm-site-builder/
 │   ├── components/ # Uji fungsional komponen UI Svelte
 │   │   └── compressor.test.ts           # [43 baris] Uji pengujian unit / integrasi Vitest
 │   ├── dashboard/ # Komponen dashboard manajemen tenant
-│   │   ├── app-tour.test.ts             # [139 baris] Uji pengujian unit / integrasi Vitest
 │   │   ├── navbar-notifications.test.ts # [110 baris] Uji pengujian unit / integrasi Vitest
 │   │   └── sidebar-navigation.test.ts   # [206 baris] Uji pengujian unit / integrasi Vitest
 │   ├── e2e/ # Modul pendukung

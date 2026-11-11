@@ -3,6 +3,8 @@
   import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
   import TemplateCardPreview from './TemplateCardPreview.svelte';
   import TemplatePricingSimulator from './TemplatePricingSimulator.svelte';
   import TemplateBasicDetails from './TemplateBasicDetails.svelte';
@@ -15,12 +17,13 @@
     description?: string | null;
     icon?: string | null;
   }> = [];
-  export let initialTemplate: {
+  type TemplateDraftData = {
     id: string; name: string; price: number; status: string;
     description?: string | null; categoryId?: string | null;
     thumbnailUrl?: string | null; rejectionReason?: string | null;
     revisionCount?: number; revisionNotes?: string | null;
-  } | null = null;
+  };
+  export let initialTemplate: TemplateDraftData | null = null;
 
   let name = initialTemplate?.name || '';
   let description = initialTemplate?.description || '';
@@ -44,15 +47,16 @@
       const queryId = urlParams.get('id') || urlParams.get('templateId');
       if (queryId) {
         try {
-          const res = await fetch(`/api/designer/templates/draft?templateId=${encodeURIComponent(queryId)}`);
-          const json = await res.json();
-          if (json.ok && json.data) {
-            initialTemplate = json.data;
-            name = json.data.name || '';
-            description = json.data.description || '';
-            selectedCategoryId = json.data.categoryId || '';
-            thumbnailUrl = json.data.thumbnailUrl || '';
-            numericPriceState = json.data.price ?? 0;
+          const result = await apiFetch<TemplateDraftData>(
+            `/api/designer/templates/draft?templateId=${encodeURIComponent(queryId)}`
+          );
+          if (result.success && result.data) {
+            initialTemplate = result.data;
+            name = result.data.name || '';
+            description = result.data.description || '';
+            selectedCategoryId = result.data.categoryId || '';
+            thumbnailUrl = result.data.thumbnailUrl || '';
+            numericPriceState = result.data.price ?? 0;
             priceDisplay = numericPriceState === 0 ? '0' : numericPriceState.toLocaleString('id-ID');
             isEditMode = true;
           }
@@ -65,10 +69,9 @@
     if (categories.length === 0) {
       loadingCategories = true;
       try {
-        const res = await fetch('/api/public/template-categories');
-        const json = await res.json();
-        if (json.ok && Array.isArray(json.data)) {
-          categories = json.data;
+        const result = await apiFetch<typeof categories>('/api/public/template-categories');
+        if (result.success && Array.isArray(result.data)) {
+          categories = result.data;
         }
       } catch {
         categories = [];
@@ -81,11 +84,12 @@
     }
 
     try {
-      const commRes = await fetch('/api/public/commission');
-      const commJson = await commRes.json();
-      if (commJson.ok && commJson.data) {
-        platformFeePercentage = commJson.data.platformFeePercentage;
-        designerPercentage = commJson.data.designerPercentage;
+      const commResult = await apiFetch<{ platformFeePercentage: number; designerPercentage: number }>(
+        '/api/public/commission'
+      );
+      if (commResult.success && commResult.data) {
+        platformFeePercentage = commResult.data.platformFeePercentage;
+        designerPercentage = commResult.data.designerPercentage;
       }
     } catch (err) {
       console.error('Gagal mengambil informasi split komisi:', err);
@@ -105,6 +109,7 @@
     e.preventDefault();
     if (!name.trim()) {
       error = 'Nama template wajib diisi';
+      toast.warning(error);
       return;
     }
 
@@ -117,7 +122,7 @@
       const endpoint = isUpdating && currentTemplateId
         ? `/api/designer/templates/draft?templateId=${encodeURIComponent(currentTemplateId)}`
         : '/api/designer/templates/draft';
-      const response = await fetch(endpoint, {
+      const result = await apiFetch<{ id?: string }>(endpoint, {
         method: isUpdating ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -127,18 +132,21 @@
           thumbnailUrl: thumbnailUrl.trim() || undefined,
           price: numericPriceState,
         }),
+        fallbackError: 'Gagal memproses template. Silakan coba lagi.',
       });
 
-      const result = await response.json();
       const targetId = isUpdating ? currentTemplateId : result.data?.id;
 
-      if (response.ok && result.ok && targetId) {
+      if (result.success && targetId) {
+        toast.success(isUpdating ? 'Draf template diperbarui.' : 'Draf template dibuat.');
         window.location.href = `/builder/${targetId}`;
       } else {
-        error = result.error?.message || 'Gagal memproses template. Silakan coba lagi.';
+        error = result.message;
+        toast.error(error);
       }
     } catch {
       error = 'Terjadi kesalahan sistem saat memproses template.';
+      toast.error(error);
     } finally {
       loading = false;
     }
@@ -164,7 +172,7 @@
             </h1>
             {#if isEditMode}
               {#if initialTemplate?.status === 'rejected'}
-                <Badge variant="rose" size="sm">Perbaikan Desain</Badge>
+                <Badge variant="error" size="sm">Perbaikan Desain</Badge>
               {:else}
                 <Badge variant="primary" size="sm">Edit Draf</Badge>
               {/if}
@@ -180,13 +188,15 @@
         </div>
       </div>
 
-      <a
+      <Button
         href={backHref}
-        class="inline-flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-main bg-nested hover:bg-nested/80 border border-light px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-2xs self-start sm:self-auto"
+        variant="secondary"
+        size="sm"
+        class="self-start sm:self-auto"
       >
         <ArrowLeft size={14} />
         <span>Kembali ke Katalog</span>
-      </a>
+      </Button>
     </div>
 
     <!-- Main Grid: Left Form (60%) + Right Live Preview (40%) -->
@@ -201,7 +211,7 @@
       >
         {#if error}
           <div
-            class="flex items-start gap-2.5 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs animate-fade-in-up"
+            class="flex items-start gap-2.5 p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-xs animate-fade-in-up"
           >
             <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5">error</span>
             <p class="leading-relaxed font-sans">{error}</p>
@@ -209,17 +219,17 @@
         {/if}
 
         {#if isEditMode && initialTemplate?.status === 'rejected' && initialTemplate.rejectionReason}
-          <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs space-y-2 animate-fade-in-up">
+          <div class="p-4 rounded-2xl bg-error/10 border border-error/20 text-xs space-y-2 animate-fade-in-up">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold">
+              <div class="flex items-center gap-2 text-error font-bold">
                 <span class="material-symbols-outlined text-base">assignment_late</span>
                 <span>Catatan Penolakan dari Kurator</span>
               </div>
               {#if initialTemplate.revisionCount !== undefined}
-                <Badge variant="rose" size="sm">Revisi #{initialTemplate.revisionCount}</Badge>
+                <Badge variant="error" size="sm">Revisi #{initialTemplate.revisionCount}</Badge>
               {/if}
             </div>
-            <div class="p-3 bg-card/80 border border-rose-500/20 rounded-xl text-secondary leading-relaxed font-sans">
+            <div class="p-3 bg-card/80 border border-error/20 rounded-xl text-secondary leading-relaxed font-sans">
               {initialTemplate.rejectionReason}
             </div>
             <p class="text-2xs text-muted">

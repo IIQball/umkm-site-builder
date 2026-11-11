@@ -5,6 +5,7 @@
   import Button from '@/components/ui/Button.svelte';
   import Badge from '@/components/ui/Badge.svelte';
   import StatCard from '@/components/ui/StatCard.svelte';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { Zap, Sparkles, RefreshCw, ArrowUpRight, AlertCircle } from 'lucide-svelte';
   import {
     type DailyPoint,
@@ -53,22 +54,18 @@
     errorMessage = '';
 
     try {
-      const res = await fetch('/api/tenant/ai/usage-stats', {
+      const result = await apiFetch<UsageResponseData>('/api/tenant/ai/usage-stats', {
         signal: abortCtrl.signal,
         credentials: 'same-origin',
+        fallbackError: 'Gagal memuat riwayat penggunaan kredit',
       });
 
-      if (!res.ok) {
-        throw new Error(`Gagal memuat data statistik (HTTP ${res.status})`);
+      if (!result.success || !result.data) {
+        throw new Error(result.message);
       }
 
-      const json = await res.json();
-      if (!json.ok || !json.data) {
-        throw new Error(json?.error?.message || 'Gagal memuat riwayat penggunaan kredit');
-      }
-
-      points = json.data.points;
-      summary = json.data.summary;
+      points = result.data.points;
+      summary = result.data.summary;
       await renderChart();
     } catch (err: unknown) {
       if ((err as Error).name === 'AbortError') return;

@@ -105,7 +105,7 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       expect(res.status).toBe(201);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(insertedValues).toBeDefined();
       expect(insertedValues.price).toBe(50000);
       expect(insertedValues.price).not.toBe(5000000);
@@ -203,7 +203,7 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
 
       // Verify Xendit invoice amount
       expect(xenditClient.createInvoice).toHaveBeenCalledWith(

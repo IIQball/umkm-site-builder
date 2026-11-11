@@ -37,8 +37,8 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('VALIDATION_ERROR');
   });
 
   it('should reject invalid latitude/longitude', async () => {
@@ -49,8 +49,8 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('VALIDATION_ERROR');
   });
 
   it('should return successfully when valid parameters are provided', async () => {
@@ -61,7 +61,7 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data).toEqual([]);
     expect(body.meta.total).toBe(1);
   });
@@ -74,7 +74,7 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
   });
 
   it('should support categoryId and keyword filter', async () => {
@@ -85,7 +85,7 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
   });
 
   it('should support geolocation coordinates and radius filter', async () => {
@@ -96,7 +96,7 @@ describe('Directory Search API', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data).toBeInstanceOf(Array);
   });
 });

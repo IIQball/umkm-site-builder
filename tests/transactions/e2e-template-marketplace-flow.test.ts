@@ -102,8 +102,8 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(reviewRes.status).toBe(200);
     const reviewData = await reviewRes.json();
-    expect(reviewData.ok).toBe(true);
-    expect(reviewData.template.status).toBe('approved');
+    expect(reviewData.success).toBe(true);
+    expect(reviewData.data.status).toBe('approved');
 
     // Step 2: Admin sets dynamic platform fee percentage to 20%
     mockGetAuthUser.mockResolvedValueOnce(adminUser);
@@ -121,7 +121,7 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(settingRes.status).toBe(200);
     const settingData = await settingRes.json();
-    expect(settingData.ok).toBe(true);
+    expect(settingData.success).toBe(true);
     expect(settingData.data.platformFeePercentage).toBe(20);
 
     // Step 3: Tenant purchases the approved template
@@ -149,7 +149,7 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(purchaseRes.status).toBe(200);
     const purchaseData = await purchaseRes.json();
-    expect(purchaseData.ok).toBe(true);
+    expect(purchaseData.success).toBe(true);
     expect(purchaseData.data.invoiceId).toBe('inv_xendit_e2e_123');
 
     // Step 4: Simulate Xendit webhook callback for paid invoice
@@ -185,7 +185,7 @@ describe('E2E Template Marketplace Flow', () => {
     } as unknown as Parameters<typeof xenditWebhookApi>[0])) as Response;
 
     expect(webhookRes.status).toBe(200);
-    expect((await webhookRes.json()).ok).toBe(true);
+    expect((await webhookRes.json()).success).toBe(true);
 
     // Verification step: Verify calculations & record assertions
     expect(recordedCommissionPayload.totalAmount).toBe(200000);

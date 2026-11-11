@@ -235,7 +235,7 @@ describe('Payment Idempotency System', () => {
       } as unknown as Parameters<typeof purchaseTemplatePost>[0]);
       expect(res1.status).toBe(200);
       const data1 = await res1.json();
-      expect(data1.ok).toBe(true);
+      expect(data1.success).toBe(true);
       expect(data1.data?.externalId).toBe('INV-route_key_1');
 
       const res2 = await purchaseTemplatePost({
@@ -244,7 +244,7 @@ describe('Payment Idempotency System', () => {
       } as unknown as Parameters<typeof purchaseTemplatePost>[0]);
       expect(res2.status).toBe(200);
       const data2 = await res2.json();
-      expect(data2.ok).toBe(true);
+      expect(data2.success).toBe(true);
       expect(data2.data.externalId).toBe('INV-route_key_1');
 
       expect(mockCreateInvoice).toHaveBeenCalledTimes(1);

@@ -81,7 +81,7 @@ describe('Template Categories API & Schemas', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(Array.isArray(body.data)).toBe(true);
     });
   });

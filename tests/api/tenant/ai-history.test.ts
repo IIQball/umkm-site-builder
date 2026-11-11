@@ -55,8 +55,8 @@ describe('Tenant AI History API - GET /api/tenant/ai/history', () => {
     const body = await response.json();
 
     expect(response.status).toBe(401);
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('login');
+    expect(body.success).toBe(false);
+    expect(body.message).toContain('login');
   });
 
   it('returns empty items array when tenant has not created a store yet', async () => {
@@ -78,7 +78,7 @@ describe('Tenant AI History API - GET /api/tenant/ai/history', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data).toEqual({ items: [], total: 0 });
   });
 
@@ -109,7 +109,7 @@ describe('Tenant AI History API - GET /api/tenant/ai/history', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.total).toBe(2);
     expect(body.data.items).toHaveLength(2);
     expect(body.data.items[0].id).toBe('log_01');
@@ -144,7 +144,7 @@ describe('Tenant AI History API - GET /api/tenant/ai/history', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.total).toBe(1);
     expect(body.data.items[0].featureType).toBe('logo');
   });
@@ -168,7 +168,8 @@ describe('Tenant AI History API - GET /api/tenant/ai/history', () => {
     const body = await response.json();
 
     expect(response.status).toBe(500);
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('Gagal mengambil riwayat');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('INTERNAL_ERROR');
+    expect(body.message).not.toContain('Database connection failed');
   });
 });

@@ -32,8 +32,8 @@ describe('Admin AI Cost Trends API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(body.success).toBe(false);
+      expect(body.meta.code).toBe('UNAUTHORIZED');
     });
 
     it('returns 403 when user is not an authorized admin', async () => {
@@ -45,7 +45,7 @@ describe('Admin AI Cost Trends API Endpoint', () => {
 
       expect(res.status).toBe(403);
       const body = await res.json();
-      expect(body.error.message).toBe('Admin access required');
+      expect(body.message).toBe('Admin access required');
     });
 
     it('returns 200 with cost trends data for authorized admin', async () => {
@@ -95,7 +95,7 @@ describe('Admin AI Cost Trends API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data).toEqual(mockData);
       expect(mockGetTrends).toHaveBeenCalledWith({
         days: 14,

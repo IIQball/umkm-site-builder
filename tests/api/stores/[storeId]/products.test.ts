@@ -22,8 +22,8 @@ describe('Store Products API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.ok).toBe(false);
-    expect(data.error.message).toBe('storeId is required');
+    expect(data.success).toBe(false);
+    expect(data.message).toBe('storeId wajib diisi');
   });
 
   it('returns paginated products for a store', async () => {
@@ -73,15 +73,15 @@ describe('Store Products API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data[0].id).toBe('1');
     expect(data.data[0].price).toBe(10000);
     expect(data.data[0].imageUrl).toBe('test.jpg');
     
-    expect(data.pagination).toBeDefined();
-    expect(data.pagination.total).toBe(1);
-    expect(data.pagination.page).toBe(1);
-    expect(data.pagination.limit).toBe(10);
+    expect(data.meta?.pagination).toBeDefined();
+    expect(data.meta.pagination.total).toBe(1);
+    expect(data.meta.pagination.page).toBe(1);
+    expect(data.meta.pagination.limit).toBe(10);
   });
 
   it('applies categoryId filter correctly', async () => {
@@ -132,6 +132,6 @@ describe('Store Products API', () => {
     
     // We can't easily assert the exact where clause args here without complex mock inspection, 
     // but we can assert the response structure is correct
-    expect(data.pagination.total).toBe(1);
+    expect(data.meta.pagination.total).toBe(1);
   });
 });

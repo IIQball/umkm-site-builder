@@ -51,8 +51,8 @@ describe('Tenant AI Usage Stats API - GET /api/tenant/ai/usage-stats', () => {
     const body = await response.json();
 
     expect(response.status).toBe(401);
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('login');
+    expect(body.success).toBe(false);
+    expect(body.message).toContain('login');
   });
 
   it('returns 7 empty days with zero summary when tenant has no store yet', async () => {
@@ -74,7 +74,7 @@ describe('Tenant AI Usage Stats API - GET /api/tenant/ai/usage-stats', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.points).toHaveLength(7);
     expect(body.data.summary.totalCreditsUsed7d).toBe(0);
     expect(body.data.summary.currentBalance).toBe(0);
@@ -132,7 +132,7 @@ describe('Tenant AI Usage Stats API - GET /api/tenant/ai/usage-stats', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.points).toHaveLength(7);
     expect(body.data.summary.totalCreditsUsed7d).toBe(6);
     expect(body.data.summary.totalGenerations7d).toBe(3);

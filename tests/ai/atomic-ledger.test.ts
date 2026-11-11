@@ -366,7 +366,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleDepositPost({ request, params: {} } as unknown as DepositContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.exchangeRate).toBe(16254);
       expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -403,7 +403,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(400);
       const json = await res.json();
-      expect(json.error.message).toContain('Prompt wajib diisi');
+      expect(json.message).toContain('Prompt wajib diisi');
     });
 
     it('returns 400 when mockup feature is requested without product image', async () => {
@@ -420,7 +420,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(400);
       const json = await res.json();
-      expect(json.error.message).toContain('Gambar produk wajib disertakan untuk fitur mockup');
+      expect(json.message).toContain('Gambar produk wajib disertakan untuk fitur mockup');
     });
 
     it('returns 400 when image buffer strictly exceeds 4 MB payload limit', async () => {
@@ -439,7 +439,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(400);
       const json = await res.json();
-      expect(json.error.message).toContain('Ukuran gambar referensi melebihi batas 4 MB');
+      expect(json.message).toContain('Ukuran gambar referensi melebihi batas 4 MB');
     });
 
     it('returns 404 when merchant store is not found in database', async () => {
@@ -457,7 +457,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(404);
       const json = await res.json();
-      expect(json.error.message).toContain('Toko merchant tidak ditemukan');
+      expect(json.message).toContain('Toko merchant tidak ditemukan');
     });
 
     it('returns 402 when credit balance is insufficient before AI call', async () => {
@@ -473,8 +473,8 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(402);
       const json = await res.json();
-      expect(json.ok).toBe(false);
-      expect(json.error.message).toContain('Kredit AI tidak mencukupi');
+      expect(json.success).toBe(false);
+      expect(json.message).toContain('Kredit AI tidak mencukupi');
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockTransaction).not.toHaveBeenCalled();
     });
@@ -492,8 +492,8 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(402);
       const json = await res.json();
-      expect(json.ok).toBe(false);
-      expect(json.error.message).toContain('Kredit AI tidak mencukupi');
+      expect(json.success).toBe(false);
+      expect(json.message).toContain('Kredit AI tidak mencukupi');
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockTransaction).not.toHaveBeenCalled();
     });
@@ -524,7 +524,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(402);
       const json = await res.json();
-      expect(json.error.message).toContain('Kredit AI tidak mencukupi saat pemotongan');
+      expect(json.message).toContain('Kredit AI tidak mencukupi saat pemotongan');
       expect(mockGenerate).not.toHaveBeenCalled();
     });
 
@@ -572,7 +572,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.remainingCredits).toBe(1);
       expect(json.data.creditsDeducted).toBe(1);
       expect(json.data.modelUsed).toBe('gpt-image-2.5-flare');
@@ -624,7 +624,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.remainingCredits).toBe(3);
       expect(json.data.creditsDeducted).toBe(2);
       expect(json.data.modelUsed).toBe('gpt-image-2.5-sunburst');
@@ -681,7 +681,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.imageUrl).toContain('mockup_1.webp');
       expect(insertedLog.featureType).toBe('packaging_mockup');
       expect(mockEdit).toHaveBeenCalled();
@@ -732,7 +732,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
     });
 
     it('parses multipart/form-data with image file for packaging_mockup generation', async () => {
@@ -781,7 +781,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.imageUrl).toContain('mockup_form.webp');
       expect(mockEdit).toHaveBeenCalled();
     });
@@ -830,7 +830,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.imageUrl).toContain('poster_food.webp');
       expect(mockGenerate).toHaveBeenCalled();
       expect(mockEdit).not.toHaveBeenCalled();
@@ -879,7 +879,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(json.data.isTesting).toBe(true);
       expect(json.data.creditsDeducted).toBe(0);
       expect(mockTx.update).not.toHaveBeenCalled();
@@ -981,7 +981,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(201);
       const json = await res.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
 
       expect(json.data.isTesting).toBe(false);
       expect(json.data.creditsDeducted).toBe(2);
@@ -1051,7 +1051,10 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       const res = (await handleGeneratePost({ request, params: {} } as unknown as GenerateContext)) as Response;
       expect(res.status).toBe(500);
       const json = await res.json();
-      expect(json.error.message).toContain('Gagal memproses generasi AI: Database transaction lock conflict');
+      expect(json.success).toBe(false);
+      expect(json.meta.code).toBe('INTERNAL_ERROR');
+      expect(json.message).toBe('Terjadi kesalahan internal pada server. Silakan coba beberapa saat lagi.');
+      expect(json.message).not.toContain('Database transaction lock conflict');
     });
 
     it('executes product_poster text-to-image calling images.generate when no image is provided', async () => {

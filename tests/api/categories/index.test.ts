@@ -54,7 +54,8 @@ describe('Categories API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toEqual({ ok: true, data: mockCategories });
+    expect(data.success).toBe(true);
+    expect(data.data).toEqual(mockCategories);
   });
 
   it('POST creates a category', async () => {
@@ -117,7 +118,7 @@ describe('Categories API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(402);
-    expect(data.error.message).toContain('Maksimal 2 kategori');
+    expect(data.message).toContain('Maksimal 2 kategori');
   });
 
   it('PATCH updates a category', async () => {

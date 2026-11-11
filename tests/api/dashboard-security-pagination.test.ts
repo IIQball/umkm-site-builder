@@ -176,7 +176,7 @@ describe('Dashboard Security & Server-Side Pagination Test Suite', () => {
 
       expect(response.status).toBe(200);
       const json = await response.json();
-      expect(json.ok).toBe(true);
+      expect(json.success).toBe(true);
       expect(Array.isArray(json.data)).toBe(true);
       const record = json.data[0] as Record<string, unknown>;
       for (const forbiddenKey of SENSITIVE_FORBIDDEN_KEYS) {

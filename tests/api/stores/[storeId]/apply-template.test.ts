@@ -38,7 +38,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(401);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 403 if user is not tenant', async () => {
@@ -47,7 +47,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(403);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 400 if templateId missing', async () => {
@@ -56,7 +56,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(400);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 404 if store not found', async () => {
@@ -69,7 +69,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(404);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 403 if store belongs to different user', async () => {
@@ -82,7 +82,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(403);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 404 if template not found or not approved', async () => {
@@ -95,7 +95,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(404);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('returns 403 if paid template not owned', async () => {
@@ -110,7 +110,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(403);
-    expect(data.ok).toBe(false);
+    expect(data.success).toBe(false);
   });
 
   it('successfully applies a free template', async () => {
@@ -126,7 +126,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.templateId).toBe('tpl-free');
     expect(data.data.templateName).toBe('Basic');
   });
@@ -144,7 +144,7 @@ describe('Apply Template API', () => {
     const res = (await POST(ctx)) as Response;
     const data = await res.json();
     expect(res.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.templateName).toBe('Premium');
   });
 });

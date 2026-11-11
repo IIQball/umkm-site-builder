@@ -65,8 +65,8 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(body.success).toBe(false);
+      expect(body.meta.code).toBe('UNAUTHORIZED');
     });
 
     it('returns 401 when user is not an authorized designer', async () => {
@@ -106,7 +106,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.payouts[0].id).toBe('po_1');
       expect(body.data.payouts[0].amount).toBe(50000);
       expect(body.data.payouts[0].status).toBe('processing');
@@ -141,7 +141,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error.message).toBe('Rekening bank tidak ditemukan');
+      expect(body.message).toBe('Rekening bank tidak ditemukan');
     });
 
     it('returns 400 when amount is less than payoutMinimumBalance', async () => {
@@ -164,7 +164,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error.message).toContain('Nominal penarikan minimal');
+      expect(body.message).toContain('Nominal penarikan minimal');
     });
 
     it('returns 400 when amount exceeds eligible balance', async () => {
@@ -190,7 +190,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.error.message).toBe('Saldo tersedia tidak mencukupi untuk melakukan penarikan');
+      expect(body.message).toBe('Saldo tersedia tidak mencukupi untuk melakukan penarikan');
     });
 
     it('returns 200 and performs atomic database transaction when amount is valid', async () => {
@@ -244,7 +244,7 @@ describe('Designer Payout Request API Endpoints', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data).toEqual(mockResult);
     });
   });

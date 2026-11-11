@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import ActivationForm from "@/components/auth/ActivationForm.svelte";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm.svelte";
 import Card from "@/components/ui/Card.svelte";
 import { db } from "@/lib/db/client";
 import { verifications, users, tenantInvitations } from "@/db/schema";
@@ -63,7 +63,7 @@ if (uid) {
   }
 }
 
-// Uses ActivationForm which handles name, password, and confirmation
+// Uses ResetPasswordForm (activation mode) which handles name, password, and confirmation
 ---
 
 <BaseLayout title={`${title} - Pinoka`} description={description} hideNavbar={true}>
@@ -85,7 +85,7 @@ if (uid) {
           <p class="text-body-base text-secondary mt-2">{description}</p>
         </div>
 
-        <ActivationForm client:load />
+        <ResetPasswordForm client:load isActivation={true} />
       </Card>
     </div>
   </main>

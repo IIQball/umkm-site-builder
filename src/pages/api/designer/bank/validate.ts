@@ -3,7 +3,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { bankValidateSchema } from '@/schemas/designer/bank-validate.schema';
 import { xenditClient } from '@/lib/finance/xendit';
 import { InMemoryRateLimiter } from '@/lib/utils/rate-limiter';
-import { logger } from '@/lib/utils/logger';
+import { handleApiRoute, jsonError, jsonSuccess, parseJsonBody } from '@/lib/utils/api-handler';
 
 // Rate Limiter: Maximum 5 attempts per designer within 1 hour
 export const bankValidateLimiter = new InMemoryRateLimiter(5, 60 * 60 * 1000);
@@ -39,33 +39,28 @@ export function isAccountNameMatching(profileName?: string | null, accountHolder
 }
 
 export const POST: APIRoute = async (context): Promise<Response> => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(context.request);
     if (!user || !isAuthorizedDesigner(user)) {
-      return Response.json(
-        {
-          success: false,
-          isValid: false,
-          message: 'Akses desainer diperlukan untuk memvalidasi rekening.',
-        },
-        { status: 401 }
+      return jsonError(
+        'Akses desainer diperlukan untuk memvalidasi rekening.',
+        401,
+        { isValid: false },
+        'UNAUTHORIZED'
       );
     }
 
-    // Rate Limiter per designer: max 5 requests per hour
     const rateLimitKey = `bank-val:${user.id}`;
     if (!bankValidateLimiter.check(rateLimitKey)) {
-      return Response.json(
-        {
-          success: false,
-          isValid: false,
-          message: 'Batas percobaan tercapai. Silakan coba lagi 1 jam ke depan atau hubungi admin.',
-        },
-        { status: 429 }
+      return jsonError(
+        'Batas percobaan tercapai. Silakan coba lagi 1 jam ke depan atau hubungi admin.',
+        429,
+        { isValid: false },
+        'RATE_LIMITED'
       );
     }
 
-    const rawBody = await context.request.json().catch(() => ({}));
+    const rawBody = await parseJsonBody<Record<string, unknown>>(context.request).catch(() => ({} as Record<string, unknown>));
     const sanitizedBody = {
       ...rawBody,
       accountNumber:
@@ -76,13 +71,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const parseResult = bankValidateSchema.safeParse(sanitizedBody);
 
     if (!parseResult.success) {
-      return Response.json(
-        {
-          success: false,
-          isValid: false,
-          message: 'Format nomor rekening tidak sesuai',
-        },
-        { status: 400 }
+      return jsonError(
+        'Format nomor rekening tidak sesuai',
+        400,
+        { isValid: false },
+        'VALIDATION_ERROR'
       );
     }
 
@@ -93,7 +86,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     });
 
     if (!res.isValid) {
-      // Map HTTP status from Xendit to clean Indonesian messages
       let message = res.message;
       if (!message) {
         if (res.httpStatus === 404) {
@@ -110,23 +102,14 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
 
       const clientStatus = res.httpStatus === 500 ? 500 : 400;
-      return Response.json(
-        {
-          success: false,
-          isValid: false,
-          message,
-        },
-        { status: clientStatus }
-      );
+      return jsonError(message, clientStatus, { isValid: false });
     }
 
-    // Name match verification between designer profile and bank account holder
     const isMatching = isAccountNameMatching(user.name, res.accountHolderName);
     const nameMismatch = !isMatching;
 
-    return Response.json(
+    return jsonSuccess(
       {
-        success: true,
         isValid: true,
         accountHolderName: res.accountHolderName || '',
         nameMismatch,
@@ -134,17 +117,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           ? 'Nama pemilik rekening berbeda dengan nama profil Anda. Pastikan Anda menggunakan rekening pribadi untuk pencairan komisi.'
           : undefined,
       },
-      { status: 200 }
+      200,
+      'Rekening valid'
     );
-  } catch (error) {
-    logger.error('bank-validate', error);
-    return Response.json(
-      {
-        success: false,
-        isValid: false,
-        message: 'Gagal memverifikasi rekening. Silakan periksa kembali nomor Anda.',
-      },
-      { status: 500 }
-    );
-  }
+  });
 };

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { handleApiRoute, validate, AppError } from '@/lib/utils';
+import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { transactionService } from '@/services';
 import { extractIdempotencyKey } from '@/lib/finance/idempotency';
 import { getCreditPackageById, getPlatformAiCapacity, notifySuperadminsAiDepleted } from '@/services/ai';
@@ -84,9 +84,8 @@ export const POST: APIRoute = async (context): Promise<Response> =>
     // URL status transaksi untuk arahan setelah pembayaran selesai
     const statusUrl = `${baseUrl}/dashboard/credits/status?invoiceId=${result.invoiceId}&status=pending`;
 
-    return Response.json({
-      ok: true,
-      data: {
+    return jsonSuccess(
+      {
         invoiceId: result.invoiceId,
         paymentUrl: result.paymentUrl,
         statusUrl,
@@ -95,5 +94,7 @@ export const POST: APIRoute = async (context): Promise<Response> =>
         credits: canonicalPkg.credits,
         amount: canonicalPkg.price,
       },
-    });
+      200,
+      'Invoice pembelian kredit AI berhasil dibuat'
+    );
   });

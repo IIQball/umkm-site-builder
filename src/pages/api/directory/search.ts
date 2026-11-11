@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { handleApiRoute, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonError, jsonSuccess } from '@/lib/utils/api-handler';
 import { db } from '@/db';
 import { stores, businessCategories, products } from '@/db/schema';
 import { eq, ilike, or, and, desc, asc, isNull, sql, inArray } from 'drizzle-orm';
@@ -84,13 +84,7 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
         and(
           sql`${stores.latitude} IS NOT NULL`,
           sql`${stores.longitude} IS NOT NULL`,
-          sql`6371 * acos(
-            least(1.0, greatest(-1.0,
-              cos(radians(${lat})) * cos(radians(${stores.latitude})) *
-              cos(radians(${stores.longitude}) - radians(${lng})) +
-              sin(radians(${lat})) * sin(radians(${stores.latitude}))
-            ))
-          ) <= ${radius}`
+          sql`${distanceSql} <= ${radius}`
         )!
       );
     }
@@ -229,18 +223,12 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
       };
     });
 
-    return Response.json({
-      success: true,
-      ok: true,
-      message: 'Data direktori berhasil dimuat',
-      data: storesData,
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasMore: page < totalPages
-      }
-    }, { status: 200 });
+    return jsonSuccess(storesData, 200, 'Data direktori berhasil dimuat', {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasMore: page < totalPages,
+    });
   });
 };

@@ -3,7 +3,7 @@ import { db } from '@/lib/db/client';
 import { products, stores } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonSuccess, jsonError, parseJsonBody } from '@/lib/utils/api-handler';
 import { canManageStore, type AuthenticatedUser } from '@/lib/auth';
 import { logActivity } from '@/services/audit.service';
 
@@ -16,14 +16,14 @@ const attachAiImageInput = z.object({
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  try {
+  return handleApiRoute(async () => {
     // 1. Authenticate
     if (!locals.user) {
       return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
 
     // 2. Parse & validate input
-    const body = await request.json();
+    const body = await parseJsonBody(request);
     const result = attachAiImageInput.safeParse(body);
 
     if (!result.success) {
@@ -102,12 +102,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       {
         productId: updatedProduct.id,
         imageUrls: updatedProduct.imageUrls,
-        message: `Gambar ${attachmentType} berhasil dipasang ke produk`,
       },
-      200
+      200,
+      `Gambar ${attachmentType} berhasil dipasang ke produk`
     );
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return jsonError(message, 500, undefined, 'INTERNAL');
-  }
+  });
 };

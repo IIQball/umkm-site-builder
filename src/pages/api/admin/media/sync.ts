@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
-import crypto from 'node:crypto';
 import { getAuthenticatedUser, isAuthorizedAdmin } from '@/lib/auth';
-import { handleApiRoute, AppError, validate } from '@/lib/utils';
+import { handleApiRoute, AppError, validate, jsonSuccess, timingSafeEqualString } from '@/lib/utils';
 import { runMediaSync } from '@/services/media/sync.service';
 import { MediaSyncOptionsSchema } from '@/schemas/media.schema';
 
@@ -12,16 +11,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const authHeader = context.request.headers.get('Authorization') || '';
     const cronHeader = context.request.headers.get('x-cron-secret') || '';
 
-    const checkSecret = (input: string, secret: string) => {
-      if (!input || !secret) return false;
-      const inputBuf = Buffer.from(input);
-      const secretBuf = Buffer.from(secret);
-      return inputBuf.length === secretBuf.length && crypto.timingSafeEqual(inputBuf, secretBuf);
-    };
-
     const isCronAuthorized =
       Boolean(cronSecret) &&
-      (checkSecret(cronHeader, cronSecret as string) || checkSecret(authHeader, `Bearer ${cronSecret}`));
+      (timingSafeEqualString(cronHeader, cronSecret as string) ||
+        timingSafeEqualString(authHeader, `Bearer ${cronSecret}`));
 
     if (!isCronAuthorized) {
       const user = await getAuthenticatedUser(context.request);
@@ -39,11 +32,10 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       dryRun: validated.dryRun,
     });
 
-    return Response.json({
-      success: true,
-      ok: true,
-      message: validated.dryRun ? 'Media sync dry run completed' : 'Media sync executed successfully',
-      data: report,
-    }, { status: 200 });
+    return jsonSuccess(
+      report,
+      200,
+      validated.dryRun ? 'Media sync dry run completed' : 'Media sync executed successfully'
+    );
   });
 };

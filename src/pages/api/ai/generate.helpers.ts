@@ -1,4 +1,5 @@
 import { AppError } from '@/lib/utils';
+import { errorLog, infoLog } from '@/lib/utils/logger';
 import { db } from '@/db';
 import { tenantAiCredits } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
@@ -225,12 +226,10 @@ export async function rollbackAiCredits(tenantId: string, credits: number, userI
           updatedAt: new Date(),
         })
         .where(eq(tenantAiCredits.tenantId, tenantId));
-      // eslint-disable-next-line no-console
-      console.info(`[AI_CREDIT_COMPENSATION] Restored ${credits} credits for store ${tenantId}`);
+      infoLog('AI_CREDIT_COMPENSATION', `Restored ${credits} credits for store ${tenantId}`);
     }
   } catch (rollbackError: unknown) {
-    // eslint-disable-next-line no-console
-    console.error(`[AI_CREDIT_COMPENSATION_FAILED] Failed to restore credits:`, rollbackError);
+    errorLog('AI_CREDIT_COMPENSATION_FAILED', rollbackError);
   }
 }
 
@@ -251,8 +250,7 @@ export function handleGenerateError(error: unknown, currentPhase: AiPhase): neve
         ? errObj.statusCode
         : respStatus || (error instanceof AppError ? error.status : isTimeout ? 504 : 500);
 
-  // eslint-disable-next-line no-console
-  console.error(`[AI_GENERATE_ERROR][Phase: ${currentPhase}]`, {
+  errorLog(`AI_GENERATE_ERROR:${currentPhase}`, {
     phase: currentPhase,
     message: rawMessage,
     status,
@@ -263,7 +261,7 @@ export function handleGenerateError(error: unknown, currentPhase: AiPhase): neve
   throw new AppError(
     isTimeout
       ? 'Gagal memproses generasi AI: Batas waktu pembuatan visual terlampaui. Saldo kredit toko telah dikembalikan.'
-      : `Gagal memproses generasi AI: ${rawMessage}`,
+      : 'Gagal memproses generasi AI. Saldo kredit toko telah dikembalikan secara otomatis bila berlaku.',
     status >= 400 && status < 600 ? status : 500
   );
 }

@@ -1,29 +1,53 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../db';
-import { stores } from '../../../db/schema';
-import { eq } from 'drizzle-orm';
-import { getAuthenticatedUser, canManageStore } from '../../../lib/auth';
+import { z } from 'zod';
+import { db } from '@/db';
+import { stores } from '@/db/schema';
+import { and, eq, isNull } from 'drizzle-orm';
+import { getAuthenticatedUser, canManageStore } from '@/lib/auth';
 import { logActivity } from '@/services/audit.service';
+import { handleApiRoute, jsonError, jsonSuccess, parseJsonBody } from '@/lib/utils/api-handler';
+
+const whatsAppTemplateSchema = z.object({
+  storeId: z.string().trim().min(1).optional(),
+  template: z.string().max(4000, 'Template pesan maksimal 4000 karakter').optional(),
+});
 
 export const PUT: APIRoute = async ({ request, url }) => {
-  try {
+  return handleApiRoute(async () => {
     const user = await getAuthenticatedUser(request);
-    if (!user) return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 });
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
+    }
 
-    const body = await request.json();
-    const id = url.searchParams.get('storeId') || body.storeId;
+    const rawBody = await parseJsonBody(request);
+    const parsed = whatsAppTemplateSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return jsonError(
+        parsed.error.issues[0]?.message || 'Input template tidak valid',
+        400,
+        parsed.error.issues,
+        'VALIDATION_ERROR'
+      );
+    }
 
-    const [store] = id 
-      ? await db.select().from(stores).where(eq(stores.id, id)).limit(1)
-      : await db.select().from(stores).where(eq(stores.userId, user.id)).limit(1);
+    const id = url.searchParams.get('storeId') || parsed.data.storeId;
 
-    if (!store) return new Response(JSON.stringify({ success: false, error: 'Not found' }), { status: 404 });
-    if (!canManageStore(user, store)) return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), { status: 403 });
+    const [store] = id
+      ? await db.select().from(stores).where(and(eq(stores.id, id), isNull(stores.deletedAt))).limit(1)
+      : await db.select().from(stores).where(and(eq(stores.userId, user.id), isNull(stores.deletedAt))).limit(1);
+
+    if (!store) {
+      return jsonError('Toko tidak ditemukan', 404, undefined, 'NOT_FOUND');
+    }
+    if (!canManageStore(user, store)) {
+      return jsonError('Anda tidak memiliki izin mengelola toko ini', 403, undefined, 'FORBIDDEN');
+    }
 
     const customization = (store.customization as Record<string, unknown>) || {};
-    customization.waCheckoutTemplate = body.template;
+    customization.waCheckoutTemplate = parsed.data.template;
 
-    await db.update(stores)
+    await db
+      .update(stores)
       .set({ customization, updatedAt: new Date(), lastEditedBy: user.id })
       .where(eq(stores.id, store.id));
 
@@ -34,8 +58,6 @@ export const PUT: APIRoute = async ({ request, url }) => {
       details: { storeId: store.id },
     });
 
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch {
-    return new Response(JSON.stringify({ success: false, error: 'Server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-  }
+    return jsonSuccess({ updated: true }, 200, 'Template WhatsApp berhasil diperbarui');
+  });
 };

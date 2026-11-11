@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { handleApiRoute, validate, AppError } from '@/lib/utils';
+import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { transactionService } from '@/services';
 import { TemplatePurchaseInputSchema } from '@/schemas';
 import { extractIdempotencyKey } from '@/lib/finance/idempotency';
@@ -45,18 +45,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     );
 
     if (result.isFree) {
-      return Response.json({
-        success: true,
-        ok: true,
-        isFree: true,
-        message: result.message,
-      });
+      return jsonSuccess({ isFree: true }, 200, result.message);
     }
 
-    return Response.json({
-      success: true,
-      ok: true,
-      data: result.data,
-    });
+    return jsonSuccess(result.data, 200, 'Invoice pembelian template berhasil dibuat');
   });
 };

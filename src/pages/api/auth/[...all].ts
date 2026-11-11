@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import type { APIRoute } from "astro";
 import { logger } from '@/lib/utils/logger';
+import { jsonError } from '@/lib/utils/api-handler';
 
 export const ALL: APIRoute = async (ctx) => {
   try {
@@ -17,7 +18,7 @@ export const ALL: APIRoute = async (ctx) => {
     if (ctx.url.pathname.includes("/callback")) {
       return ctx.redirect("/auth/login?error=unauthorized_email");
     }
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
+    return jsonError('Terjadi kesalahan layanan autentikasi.', 500, undefined, 'INTERNAL_ERROR');
   }
 };
 

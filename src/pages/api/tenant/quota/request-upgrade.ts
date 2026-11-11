@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { handleApiRoute, AppError } from '@/lib/utils';
+import { handleApiRoute, AppError, jsonSuccess } from '@/lib/utils';
 import { db, notifications, users } from '@/db';
 import { and, eq, gte, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -61,10 +61,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       );
     }
 
-    return Response.json({
-      success: true,
-      ok: true,
-      message: 'Permintaan berhasil dikirim ke Admin',
-    });
+    return jsonSuccess(null, 200, 'Permintaan berhasil dikirim ke Admin');
   });
 };

@@ -84,8 +84,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         throw new AppError('Failed to create admin account', 500);
       }
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : 'Error during admin registration';
-      throw new AppError(errorMessage, 500);
+      if (e instanceof AppError) throw e;
+      throw e;
     }
 
     await db.insert(adminWhitelist).values({

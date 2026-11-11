@@ -1,11 +1,11 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../lib/db/client';
-import { products, stores } from '../../../db/schema';
+import { db } from '@/lib/db/client';
+import { products, stores } from '@/db/schema';
 import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '@/schemas/tenant/product-variant.schema';
-import { jsonSuccess, jsonError } from '../../../lib/utils/api-handler';
-import { canManageStore, type AuthenticatedUser } from '../../../lib/auth';
+import { handleApiRoute, jsonSuccess, jsonError, parseJsonBody } from '@/lib/utils/api-handler';
+import { canManageStore, type AuthenticatedUser } from '@/lib/auth';
 import { logActivity } from '@/services/audit.service';
 
 const productInput = z.object({
@@ -22,43 +22,42 @@ const productInput = z.object({
 });
 
 export const GET: APIRoute = async ({ request }) => {
-  try {
+  return handleApiRoute(async () => {
     const url = new URL(request.url);
     const storeId = url.searchParams.get('storeId');
 
     if (!storeId) {
-      return jsonError('storeId is required', 400);
+      return jsonError('storeId wajib diisi', 400, undefined, 'VALIDATION_ERROR');
     }
 
-    const query = db.select().from(products).where(
-      and(eq(products.storeId, storeId), isNull(products.deletedAt))
-    ).orderBy(desc(products.createdAt));
-    const allProducts = await query;
+    const allProducts = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.storeId, storeId), isNull(products.deletedAt)))
+      .orderBy(desc(products.createdAt));
 
     return jsonSuccess(allProducts, 200);
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return jsonError(message, 500);
-  }
+  });
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  try {
-    // 1. Authenticate
+  return handleApiRoute(async () => {
     if (!locals.user) {
-      return jsonError('Silakan login terlebih dahulu', 401, undefined);
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
     }
 
-    // 2. Parse input — accept JSON body with pre-uploaded imageUrls
-    const body = await request.json();
+    const body = await parseJsonBody(request);
     const result = productInput.safeParse(body);
 
     if (!result.success) {
       return jsonError('Validasi gagal', 400, result.error.issues, 'VALIDATION_ERROR');
     }
 
-    // 3. Authorize — check store access via canManageStore
-    const [store] = await db.select().from(stores).where(eq(stores.id, result.data.storeId)).limit(1);
+    const [store] = await db
+      .select()
+      .from(stores)
+      .where(and(eq(stores.id, result.data.storeId), isNull(stores.deletedAt)))
+      .limit(1);
     if (!store) {
       return jsonError('Toko tidak ditemukan', 404, undefined, 'NOT_FOUND');
     }
@@ -67,15 +66,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return jsonError('Anda tidak memiliki izin mengelola produk toko ini', 403, undefined, 'FORBIDDEN');
     }
 
-    const [productCount] = await db.select({ count: sql`count(*)` })
+    const [productCount] = await db
+      .select({ count: sql`count(*)` })
       .from(products)
       .where(and(eq(products.storeId, result.data.storeId), isNull(products.deletedAt)));
 
     if (Number(productCount.count) >= store.maxProducts) {
-      return jsonError(`Maksimal ${store.maxProducts} produk. Anda telah mencapai batas kuota Anda. Silakan ajukan peningkatan kuota.`, 402, undefined, 'PAYMENT_REQUIRED');
+      return jsonError(
+        `Maksimal ${store.maxProducts} produk. Anda telah mencapai batas kuota Anda. Silakan ajukan peningkatan kuota.`,
+        402,
+        undefined,
+        'PAYMENT_REQUIRED'
+      );
     }
 
-    // 4. Insert product with pre-uploaded image URLs
     const newProductData = {
       ...result.data,
       id: crypto.randomUUID(),
@@ -83,7 +87,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const inserted = await db.insert(products).values(newProductData).returning();
 
-    await db.update(stores)
+    await db
+      .update(stores)
       .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
       .where(eq(stores.id, store.id));
 
@@ -98,12 +103,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
     });
 
-    return jsonSuccess(inserted[0], 201);
-  } catch (error: unknown) {
-    // eslint-disable-next-line no-console
-    console.error('[PRODUCT] create error:', error instanceof Error ? error.message : error);
-    const message = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return jsonError(message, 500, undefined);
-  }
+    return jsonSuccess(inserted[0], 201, 'Produk berhasil dibuat');
+  });
 };
-

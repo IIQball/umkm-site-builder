@@ -13,4 +13,5 @@ export * from './business-categories';
 export * from './ai';
 export * from './audit.service';
 export * from './audit.constants';
+export * from './bug-report.service';
 

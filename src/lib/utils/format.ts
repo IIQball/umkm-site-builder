@@ -8,9 +8,7 @@ export const formatIDR = curFormatIDR;
 export const formatSmartIDR = curFormatSmartIDR;
 export const formatNumber = curFormatNumber;
 
-export function formatCurrency(amount: number): string {
-  return formatIDR(amount);
-}
+export const formatCurrency = curFormatIDR;
 
 export function formatPriceInput(value: number | string | null | undefined): string {
   if (value === null || value === undefined) return '';
@@ -70,6 +68,8 @@ export const INDONESIAN_MONTHS = [
   'November',
   'Desember',
 ] as const;
+
+export const INDONESIAN_MONTHS_SHORT = INDONESIAN_MONTHS.map((month) => month.slice(0, 3));
 
 export function getPeriodBounds(
   year: number,

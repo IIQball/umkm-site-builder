@@ -24,7 +24,8 @@ export type Resource =
   | 'bank_accounts' 
   | 'payout_requests' 
   | 'activity_logs' 
-  | 'platform_settings';
+  | 'platform_settings'
+  | 'bug_reports';
 
 export type Action = 
   | 'create' 

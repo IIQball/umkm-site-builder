@@ -2,17 +2,14 @@ import { db } from '@/lib/db/client';
 import { aiGenerationLogs, aiDepositHistory } from '@/db/schema';
 import { sql, gte, lte, and, count } from 'drizzle-orm';
 import { getActiveExchangeRate } from './cost-calculator.service';
-import { getPeriodBounds } from '@/lib/utils/format';
+import { getPeriodBounds, INDONESIAN_MONTHS_SHORT } from '@/lib/utils/format';
 import type {
   AiCostTrendsData,
   AiDailyCostPoint,
   AiCostTrendsSummary,
 } from '@/types/admin/ai-cost-trends.types';
 
-export const INDONESIAN_MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-];
+export const INDONESIAN_MONTHS = INDONESIAN_MONTHS_SHORT;
 
 /**
  * Calculates budget used percentage against monthly deposit limit.

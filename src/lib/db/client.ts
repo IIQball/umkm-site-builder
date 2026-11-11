@@ -1,6 +1,7 @@
 import { drizzle, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { config } from '@/lib/config/app';
+import { EnvironmentConfigError } from '@/lib/config/env-validator';
 import * as schema from '@/db/schema';
 
 // Neon HTTP driver: stateless, one request per query, no socket held open.
@@ -22,7 +23,7 @@ export function getDb(): Database {
   const dbUrl = config.database.url || (process.env.NODE_ENV === 'test' ? 'postgresql://mock:mock@localhost:5432/mock' : '');
 
   if (!dbUrl) {
-    throw new Error('DATABASE_URL environment variable is not set');
+    throw new EnvironmentConfigError(['DATABASE_URL']);
   }
 
   dbInstance = drizzle(neon(dbUrl), { schema });

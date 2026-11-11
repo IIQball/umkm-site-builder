@@ -183,37 +183,21 @@ export class TransactionService {
         successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
         failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
         metadata: {
-          userId,
-          type: 'template_purchase',
-          templateId: template.id,
-          assistedBy: assistedBy || null,
-          adminFee,
-          idempotencyKey: cleanKey || null,
+          userId, type: 'template_purchase', templateId: template.id,
+          assistedBy: assistedBy || null, adminFee, idempotencyKey: cleanKey || null,
         },
       });
 
       await db.insert(transactions).values({
         id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        userId,
-        type: 'template_purchase',
-        amount: totalAmount,
-        adminFee,
-        assistedBy: assistedBy || null,
-        status: 'pending',
-        templateId: template.id,
-        externalId: invoiceNum,
-        paymentGatewayRef: xenditInvoice.id,
-        paymentChannel: null,
-        createdAt: new Date(),
+        userId, type: 'template_purchase', amount: totalAmount, adminFee,
+        assistedBy: assistedBy || null, status: 'pending', templateId: template.id,
+        externalId: invoiceNum, paymentGatewayRef: xenditInvoice.id, paymentChannel: null, createdAt: new Date(),
       });
 
       return {
         isFree: false,
-        data: {
-          invoiceUrl: xenditInvoice.invoiceUrl || '',
-          invoiceId: xenditInvoice.id,
-          externalId: invoiceNum,
-        },
+        data: { invoiceUrl: xenditInvoice.invoiceUrl || '', invoiceId: xenditInvoice.id, externalId: invoiceNum },
       };
     };
 
@@ -252,34 +236,28 @@ export class TransactionService {
       return { status: 'ignored', message: 'Already processed' };
     }
 
-    let newStatus: PaymentStatus = 'pending';
-    if (isPaid) newStatus = 'success';
-    else if (status === 'FAILED') newStatus = 'failed';
-    else if (status === 'EXPIRED') newStatus = 'expired';
-    else if (status === 'CANCELED') newStatus = 'canceled';
+    const statusMap: Record<string, PaymentStatus> = {
+      FAILED: 'failed',
+      EXPIRED: 'expired',
+      CANCELED: 'canceled',
+    };
+    const newStatus: PaymentStatus = isPaid ? 'success' : (statusMap[status] ?? 'pending');
 
     const processed = await withTransaction(async (tx) => {
       const [claimedTransaction] = await tx.update(transactions).set({
         status: newStatus,
         paymentGatewayRef: payload.id,
         paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
-      })
-        .where(and(
-          eq(transactions.id, transaction.id),
-          ne(transactions.status, 'success')
-        ))
-        .returning();
+      }).where(and(eq(transactions.id, transaction.id), ne(transactions.status, 'success'))).returning();
 
       if (!claimedTransaction) return false;
       if (isPaid) await fulfillPaidTransaction(claimedTransaction, tx);
       return true;
     });
 
-    if (!processed) {
-      return { status: 'ignored', message: 'Already processed' };
-    }
-
-    return { status: 'success', message: 'Webhook processed successfully' };
+    return processed
+      ? { status: 'success', message: 'Webhook processed successfully' }
+      : { status: 'ignored', message: 'Already processed' };
   }
 
   async getTransactionDetails(externalId: string): Promise<TransactionRecord | null> {
@@ -287,15 +265,15 @@ export class TransactionService {
     return tx ? mapTransactionToRecord(tx) : null;
   }
 
-  async getInvoiceUrl(externalId: string): Promise<string | null> {
+  getInvoiceUrl(externalId: string): Promise<string | null> {
     return fetchInvoiceUrl(externalId);
   }
 
-  async getTenantOrders(userId: string) {
+  getTenantOrders(userId: string) {
     return queryTenantOrders(userId);
   }
 
-  async getDesignerIncomingOrders(designerId: string) {
+  getDesignerIncomingOrders(designerId: string) {
     return queryDesignerIncomingOrders(designerId);
   }
 

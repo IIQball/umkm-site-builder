@@ -3,6 +3,7 @@
   import { Plus, FolderTree, FolderSearch } from 'lucide-svelte';
   import { Card, Button, Pagination } from '@/components/ui';
   import { addToast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { slugify } from '@/lib/utils';
   import CategoryHeader from './CategoryHeader.svelte';
   import CategoryTable from './CategoryTable.svelte';
@@ -66,11 +67,12 @@
   const fetchCategories = async () => {
     loading = true;
     try {
-      const res = await fetch('/api/admin/template-categories');
-      const json = await res.json();
-      if (json.ok && Array.isArray(json.data)) {
+      const json = await apiFetch<typeof categories>('/api/admin/template-categories');
+      if (json.success && Array.isArray(json.data)) {
         categories = json.data;
         pagination = undefined;
+      } else if (!json.success) {
+        addToast({ type: 'error', message: json.message });
       }
     } catch {
       addToast({
@@ -130,7 +132,7 @@
         : '/api/admin/template-categories';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const result = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -139,11 +141,11 @@
           description: formDescription.trim() || undefined,
           icon: formIcon.trim() || undefined,
         }),
+        fallbackError: 'Gagal menyimpan kategori',
       });
 
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        throw new Error(json.error?.message || 'Gagal menyimpan kategori');
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
       addToast({
@@ -165,12 +167,12 @@
     isDeleting = true;
 
     try {
-      const res = await fetch(`/api/admin/template-categories/${deletingCategory.id}`, {
+      const result = await apiFetch(`/api/admin/template-categories/${deletingCategory.id}`, {
         method: 'DELETE',
+        fallbackError: 'Gagal menghapus kategori',
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        throw new Error(json.error?.message || 'Gagal menghapus kategori');
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
       addToast({

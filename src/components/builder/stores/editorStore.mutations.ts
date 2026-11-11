@@ -1,4 +1,5 @@
 import type { TemplateConfig } from '@/schemas';
+import { apiFetch } from '@/lib/api/parse-response';
 import type { DocumentState, EditorTemplate } from './editorStore.types';
 import { getDefaultFeaturesSlots } from '../sections/features/featuresLayout.helpers';
 import { getAddedSlotDefaultProps, getSectionDefaultSlots } from '../inspector/sectionSlot.helpers';
@@ -31,22 +32,19 @@ export async function applySave(
 ): Promise<void> {
   if (!state.template || state.isSaving) return;
   update((s) => ({ ...s, isSaving: true, error: null, saveSuccess: false }));
-  try {
-    const { template } = state;
-    const response = await fetch(`/api/builder/save?templateId=${encodeURIComponent(template.id)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: template.name, description: template.description, price: template.price, thumbnailUrl: template.thumbnailUrl, config: template.config }),
-    });
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || 'Gagal menyimpan template');
-    }
-    update((s) => ({ ...s, isSaving: false, isDirty: false, saveSuccess: true }));
-    setTimeout(() => update((s) => ({ ...s, saveSuccess: false })), 3000);
-  } catch (err) {
-    update((s) => ({ ...s, isSaving: false, error: err instanceof Error ? err.message : 'Gagal menyimpan template' }));
+  const { template } = state;
+  const res = await apiFetch(`/api/builder/save?templateId=${encodeURIComponent(template.id)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: template.name, description: template.description, price: template.price, thumbnailUrl: template.thumbnailUrl, config: template.config }),
+    fallbackError: 'Gagal menyimpan template',
+  });
+  if (!res.success) {
+    update((s) => ({ ...s, isSaving: false, error: res.message }));
+    return;
   }
+  update((s) => ({ ...s, isSaving: false, isDirty: false, saveSuccess: true }));
+  setTimeout(() => update((s) => ({ ...s, saveSuccess: false })), 3000);
 }
 
 export async function applySubmitReview(
@@ -58,20 +56,24 @@ export async function applySubmitReview(
   update((s) => ({ ...s, isSaving: true, error: null }));
   try {
     const { template } = state;
-    await fetch(`/api/builder/save?templateId=${encodeURIComponent(template.id)}`, {
+    const saveRes = await apiFetch(`/api/builder/save?templateId=${encodeURIComponent(template.id)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: template.name, description: template.description, price: template.price, thumbnailUrl: template.thumbnailUrl, config: template.config }),
+      fallbackError: 'Gagal menyimpan perubahan sebelum mengajukan review',
     });
-    const response = await fetch('/api/designer/templates/submit-review', {
+    if (!saveRes.success) throw new Error(saveRes.message);
+
+    const res = await apiFetch<{ redirectUrl?: string }>('/api/designer/templates/submit-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ templateId: template.id, revisionNotes: revisionNotes?.trim() || undefined }),
+      fallbackError: 'Gagal mengajukan review template',
     });
-    const resData = await response.json().catch(() => ({}));
-    if (!response.ok || !resData.ok) throw new Error(resData.error?.message || 'Gagal mengajukan review template');
+    if (!res.success) throw new Error(res.message);
+
     update((s) => ({ ...s, isSaving: false, isDirty: false, saveSuccess: true, template: s.template ? { ...s.template, status: 'pending' as EditorTemplate['status'] } : null }));
-    window.location.href = resData.redirectUrl || `/builder/preview/${template.id}`;
+    window.location.href = res.data?.redirectUrl || `/builder/preview/${template.id}`;
     return true;
   } catch (err) {
     update((s) => ({ ...s, isSaving: false, error: err instanceof Error ? err.message : 'Gagal mengajukan review' }));

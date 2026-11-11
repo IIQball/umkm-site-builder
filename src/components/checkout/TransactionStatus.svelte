@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let invoiceId: string;
   export let onStatusUpdate: (status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded') => void = () => {};
@@ -10,39 +11,44 @@
   let pollCount = 0;
   const maxPolls = 120; // 10 menit (interval 5 detik)
 
+  interface TransactionStatusPayload {
+    status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded';
+    type?: string;
+    credits?: number;
+  }
+
   const fetchTransactionStatus = async () => {
     try {
-      const response = await fetch(`/api/public/transactions/status/${invoiceId}`);
+      const result = await apiFetch<TransactionStatusPayload>(
+        `/api/public/transactions/status/${invoiceId}`,
+        { fallbackError: 'Gagal memeriksa status transaksi' }
+      );
 
-      if (!response.ok) {
-        throw new Error('Gagal memeriksa status transaksi');
+      if (!result.success || !result.data) {
+        error = result.message;
+        return;
       }
 
-      const result = await response.json();
+      const newStatus = result.data.status;
+      if (newStatus !== status) {
+        const previousStatus = status;
+        status = newStatus;
 
-      if (result.ok && result.data) {
-        const newStatus = result.data.status;
-        if (newStatus !== status) {
-          const previousStatus = status;
-          status = newStatus;
-          
-          // Show toast notification for AI credit purchase success
-          if (status === 'success' && previousStatus === 'pending') {
-            const transactionType = result.data?.type;
-            if (transactionType === 'ai_credit_purchase') {
-              const credits = result.data?.credits;
-              const creditsText = credits ? ` ${credits} kredit AI` : 'Kredit AI';
-              toast.success(`${creditsText} berhasil ditambahkan ke saldo toko Anda!`, undefined, 5000);
-            } else {
-              toast.success('Pembayaran berhasil! Terima kasih atas transaksi Anda.', undefined, 5000);
-            }
+        if (status === 'success' && previousStatus === 'pending') {
+          const transactionType = result.data?.type;
+          if (transactionType === 'ai_credit_purchase') {
+            const credits = result.data?.credits;
+            const creditsText = credits ? ` ${credits} kredit AI` : 'Kredit AI';
+            toast.success(`${creditsText} berhasil ditambahkan ke saldo toko Anda!`, undefined, 5000);
+          } else {
+            toast.success('Pembayaran berhasil! Terima kasih atas transaksi Anda.', undefined, 5000);
           }
-          
-          onStatusUpdate(status);
         }
+
+        onStatusUpdate(status);
       }
     } catch (err) {
-       error = err instanceof Error ? err.message : 'Error memeriksa status';
+      error = err instanceof Error ? err.message : 'Error memeriksa status';
     }
   };
 

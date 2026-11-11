@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { Modal, Button, Input, Badge } from '@/components/ui';
   import { DollarSign, Landmark, Info, ArrowRight, Loader2 } from 'lucide-svelte';
   import { formatCurrencyInput, parseCurrencyInput } from '@/lib/currency';
@@ -46,7 +47,7 @@
     isSubmitting = true;
 
     try {
-      const response = await fetch('/api/admin/ai/deposits', {
+      const result = await apiFetch('/api/admin/ai/deposits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,11 +57,10 @@
           amountIdr: numIdr,
           description: description.trim() || undefined,
         }),
+        fallbackError: 'Gagal mencatat deposit AI',
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.ok) {
+      if (result.success) {
         toast.success('Deposit AI berhasil dicatat dengan kurs riil!');
         amountUsd = '';
         displayAmountIdr = '';
@@ -69,8 +69,7 @@
         dispatch('success');
         dispatch('close');
       } else {
-        const errorMsg = result?.error?.message || result?.message || 'Gagal mencatat deposit AI';
-        toast.error(errorMsg);
+        toast.error(result.message);
       }
     } catch {
       toast.error('Terjadi kesalahan koneksi saat mencatat deposit');

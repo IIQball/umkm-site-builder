@@ -94,7 +94,7 @@
             variant="ghost"
             size="icon"
             on:click={() => removeBeforeItem(idx)}
-            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-rose-500"
+            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-error"
             title="Hapus Poin"
           >
             <Trash2 size={13} />
@@ -140,7 +140,7 @@
             variant="ghost"
             size="icon"
             on:click={() => removeAfterItem(idx)}
-            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-rose-500"
+            class="!w-6 !h-6 !min-h-0 !p-0 text-base-content/50 hover:text-error"
             title="Hapus Poin"
           >
             <Trash2 size={13} />

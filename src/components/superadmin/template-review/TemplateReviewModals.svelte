@@ -76,7 +76,7 @@
 >
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-error/15 border border-error/25 text-error flex items-center justify-center flex-shrink-0 shadow-2xs">
         <XCircle size={20} />
       </div>
       <div>
@@ -164,11 +164,11 @@
 
       <!-- Alasan Penolakan Superadmin / Kurator -->
       <div class="space-y-1.5">
-        <div class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 font-heading">
+        <div class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-error font-heading">
           <span class="material-symbols-outlined text-sm">cancel</span>
           <span>Alasan Penolakan Kurator Sebelumnya</span>
         </div>
-        <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-main leading-relaxed font-sans whitespace-pre-wrap">
+        <div class="p-3.5 rounded-2xl bg-error/10 border border-error/20 text-xs text-main leading-relaxed font-sans whitespace-pre-wrap">
           {selectedTemplate.rejectionReason || 'Tidak ada alasan penolakan awal yang tercantum.'}
         </div>
       </div>

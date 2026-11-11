@@ -3,6 +3,7 @@
   import { Trophy, RefreshCw, Store, Sparkles, Coins, Zap } from 'lucide-svelte';
   import { Card, Table, Badge, Button } from '@/components/ui';
   import { formatIDR, formatDate, formatNumber } from '@/lib/utils/format';
+  import { apiFetch } from '@/lib/api/parse-response';
   import type { TopTenantsAiResponse } from '@/types/admin/ai-top-tenants.types';
   import {
     getRankBadgeInfo,
@@ -48,12 +49,12 @@
       if (selectedYear) params.set('year', String(selectedYear));
       if (selectedMonth && selectedMonth !== 'all') params.set('month', String(selectedMonth));
 
-      const res = await fetch(`/api/admin/ai/top-tenants?${params.toString()}`);
-      if (!res.ok) throw new Error('Gagal memuat data peringkat toko');
-      const json = await res.json();
-      if (json.ok && json.data) {
-        data = json.data;
-      }
+      const res = await apiFetch<TopTenantsAiResponse>(
+        `/api/admin/ai/top-tenants?${params.toString()}`,
+        { fallbackError: 'Gagal memuat data peringkat toko' }
+      );
+      if (!res.success || !res.data) throw new Error(res.message);
+      data = res.data;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
     } finally {

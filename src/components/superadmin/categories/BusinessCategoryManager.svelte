@@ -3,6 +3,7 @@
   import { Plus, Store } from 'lucide-svelte';
   import { Card, Button, Pagination } from '@/components/ui';
   import { addToast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import CategoryHeader from './CategoryHeader.svelte';
   import CategoryTable from './CategoryTable.svelte';
   import CategoryFormModal from './CategoryFormModal.svelte';
@@ -66,11 +67,12 @@
   const fetchCategories = async () => {
     loading = true;
     try {
-      const res = await fetch('/api/admin/business-categories');
-      const json = await res.json();
-      if (json.ok && Array.isArray(json.data)) {
+      const json = await apiFetch<typeof categories>('/api/admin/business-categories');
+      if (json.success && Array.isArray(json.data)) {
         categories = json.data;
         pagination = undefined;
+      } else if (!json.success) {
+        addToast({ type: 'error', message: json.message });
       }
     } catch {
       addToast({ type: 'error', message: 'Gagal mengambil data kategori bisnis' });
@@ -116,7 +118,7 @@
         : '/api/admin/business-categories';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const result = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -125,10 +127,10 @@
           description: formDescription.trim() || undefined,
           icon: formIcon.trim() || undefined,
         }),
+        fallbackError: 'Gagal menyimpan kategori bisnis',
       });
 
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error?.message || 'Gagal menyimpan kategori bisnis');
+      if (!result.success) throw new Error(result.message);
 
       addToast({
         type: 'success',
@@ -149,9 +151,11 @@
     isDeleting = true;
 
     try {
-      const res = await fetch(`/api/admin/business-categories/${deletingCategory.id}`, { method: 'DELETE' });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error?.message || 'Gagal menghapus kategori bisnis');
+      const result = await apiFetch(`/api/admin/business-categories/${deletingCategory.id}`, {
+        method: 'DELETE',
+        fallbackError: 'Gagal menghapus kategori bisnis',
+      });
+      if (!result.success) throw new Error(result.message);
 
       addToast({
         type: 'success',

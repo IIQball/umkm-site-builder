@@ -28,7 +28,7 @@
 
   <div class="space-y-4 pt-1">
     {#if error}
-      <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
+      <div class="p-3 bg-error/10 text-error rounded-lg border border-error/20 flex gap-2 text-sm animate-fade-in-up">
         <span class="material-symbols-outlined text-base">error</span>
         <p class="font-medium">{error}</p>
       </div>
@@ -36,7 +36,7 @@
 
     <div class="space-y-1.5">
       <label for="cat_name" class="text-xs font-bold text-main block font-heading">
-        Nama Kategori <span class="text-rose-500">*</span>
+        Nama Kategori <span class="text-error">*</span>
       </label>
       <Input 
         id="cat_name"

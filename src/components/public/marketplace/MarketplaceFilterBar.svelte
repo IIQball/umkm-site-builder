@@ -90,7 +90,7 @@
         <button
           type="button"
           on:click={onReset}
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer active:scale-95"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-error/10 hover:bg-error/20 text-error text-xs font-bold transition-colors cursor-pointer active:scale-95"
           title="Reset Semua Filter"
         >
           <RotateCcw size={13} />

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Modal, Button, Textarea } from '@/components/ui';
   import { addToast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import type { AssistedStoreItem } from '@/types/admin';
 
   export let open: boolean = false;
@@ -21,18 +22,17 @@
 
     loading = true;
     try {
-      const response = await fetch(`/api/admin/stores/${store.id}/suspend`, {
+      const result = await apiFetch(`/api/admin/stores/${store.id}/suspend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reason.trim() }),
+        fallbackError: 'Gagal menangguhkan toko',
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
+      if (!result.success) {
         addToast({
           type: 'error',
-          message: result.error?.message || 'Gagal menangguhkan toko',
+          message: result.message,
         });
         return;
       }
@@ -60,16 +60,15 @@
 
     loading = true;
     try {
-      const response = await fetch(`/api/admin/stores/${store.id}/unsuspend`, {
+      const result = await apiFetch(`/api/admin/stores/${store.id}/unsuspend`, {
         method: 'POST',
+        fallbackError: 'Gagal memulihkan toko',
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
+      if (!result.success) {
         addToast({
           type: 'error',
-          message: result.error?.message || 'Gagal memulihkan toko',
+          message: result.message,
         });
         return;
       }

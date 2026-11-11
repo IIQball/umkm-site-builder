@@ -4,6 +4,7 @@
   import DesignerTemplateRow from './templates/DesignerTemplateRow.svelte';
   import DesignerRejectionModal from './templates/DesignerRejectionModal.svelte';
   import DesignerDeleteDraftModal from './templates/DesignerDeleteDraftModal.svelte';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { addToast } from '@/lib/toast';
   import { formatDate } from '@/lib/utils/format';
   export let templates: Array<{
@@ -117,7 +118,7 @@
     selectedDraftIds = [];
   };
 
-  const openDeleteModalForSingle = (tpl: any) => {
+  const openDeleteModalForSingle = (tpl: { id: string; name: string }) => {
     targetsToDelete = [{ id: tpl.id, name: tpl.name }];
     deleteModalOpen = true;
   };
@@ -137,14 +138,14 @@
       isDeletingDraft = true;
       const ids: string[] = targetsToDelete.map((t: { id: string }) => t.id);
 
-      const res = await fetch('/api/designer/templates/draft', {
+      const result = await apiFetch('/api/designer/templates/draft', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateIds: ids }),
+        fallbackError: 'Gagal menghapus draf template',
       });
-      const result = await res.json();
 
-      if (res.ok) {
+      if (result.success) {
         const deletedSet = new Set(ids);
         templates = templates.filter(t => !deletedSet.has(t.id));
         selectedDraftIds = selectedDraftIds.filter((id: string) => !deletedSet.has(id));
@@ -155,10 +156,8 @@
           message: ids.length > 1 ? `${ids.length} draf template berhasil dihapus permanen!` : 'Draf template berhasil dihapus permanen!',
         });
       } else {
-        addToast({ type: 'error', message: result.error?.message || 'Gagal menghapus draf template' });
+        addToast({ type: 'error', message: result.message });
       }
-    } catch {
-      addToast({ type: 'error', message: 'Terjadi kesalahan koneksi saat menghapus draf' });
     } finally {
       isDeletingDraft = false;
     }
@@ -170,6 +169,8 @@
         return { label: 'Disetujui', variant: 'emerald' as const, dot: true, pulse: false };
       case 'pending':
         return { label: 'Menunggu Review', variant: 'orange' as const, dot: true, pulse: true };
+      case 'rejected':
+        return { label: 'Ditolak', variant: 'error' as const, dot: true, pulse: false };
       default:
         return { label: 'Draft', variant: 'slate' as const, dot: true, pulse: false };
     }

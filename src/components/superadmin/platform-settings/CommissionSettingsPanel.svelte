@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { Card, Button } from "@/components/ui";
   import { addToast } from "@/lib/toast";
+  import { apiFetch } from "@/lib/api/parse-response";
   import CommissionSimulationCard from "./CommissionSimulationCard.svelte";
   import CommissionSettingsInputs from "./CommissionSettingsInputs.svelte";
   import CommissionStatsGrid from "./CommissionStatsGrid.svelte";
@@ -21,9 +22,14 @@
 
   onMount(async () => {
     try {
-      const res = await fetch("/api/admin/settings/commission");
-      const result = await res.json();
-      if (result.ok && result.data) {
+      const result = await apiFetch<{
+        platformFeePercentage?: number;
+        settlementDelayDays?: number;
+        adminServiceFee?: number;
+        maxStoreBranches?: number;
+        maxTemplateRevisions?: number;
+      }>("/api/admin/settings/commission");
+      if (result.success && result.data) {
         if (result.data.platformFeePercentage !== undefined) {
           platformFeePercentage = Number(result.data.platformFeePercentage);
         }
@@ -85,7 +91,7 @@
     isLoading = true;
 
     try {
-      const res = await fetch("/api/admin/settings/commission", {
+      const result = await apiFetch("/api/admin/settings/commission", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -95,10 +101,10 @@
           maxStoreBranches: Number(maxStoreBranches),
           maxTemplateRevisions: Number(maxTemplateRevisions),
         }),
+        fallbackError: "Gagal menyimpan pengaturan platform",
       });
-      const result = await res.json();
 
-      if (res.ok && result.ok) {
+      if (result.success) {
         addToast({
           type: "success",
           message:
@@ -107,7 +113,7 @@
       } else {
         addToast({
           type: "error",
-          message: result.error?.message || "Gagal menyimpan pengaturan platform",
+          message: result.message,
         });
       }
     } catch {

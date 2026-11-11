@@ -41,6 +41,7 @@
   import { DEFAULT_TEMPLATE_CONFIG } from '@/schemas/templates/template.defaults';
   import { buildCanvasCssVars } from '@/components/builder/canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from '@/components/builder/canvas/fontLoader.helpers';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { getMainDomain } from '@/lib/domain';
 
   export let templates: TemplateItem[] = [];
@@ -88,15 +89,14 @@
   $: {
     const rawMaps = googleMapsUrl || customization?.maps?.branches?.[0]?.googleMapsUrl || '';
     if (rawMaps && (rawMaps.includes('goo.gl') || rawMaps.includes('maps.app.goo.gl'))) {
-      fetch(`/api/public/resolve-maps?url=${encodeURIComponent(rawMaps)}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data?.canonicalUrl) {
-            canonicalMapsUrl = data.canonicalUrl;
+      apiFetch<{ canonicalUrl?: string }>(`/api/public/resolve-maps?url=${encodeURIComponent(rawMaps)}`)
+        .then((result) => {
+          const resolved = result.data?.canonicalUrl;
+          if (result.success && resolved) {
+            canonicalMapsUrl = resolved;
+          } else if (!result.success) {
+            canonicalMapsUrl = rawMaps;
           }
-        })
-        .catch(() => {
-          canonicalMapsUrl = rawMaps;
         });
     } else {
       canonicalMapsUrl = rawMaps;

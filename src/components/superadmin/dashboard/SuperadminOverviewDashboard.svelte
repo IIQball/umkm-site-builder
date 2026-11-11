@@ -101,7 +101,7 @@
 
   <!-- Baris 2: Map & Direktori Quick Card -->
   <div
-    class="bg-card-base border border-light/60 rounded-3xl p-5 shadow-xs flex flex-col lg:flex-row gap-6"
+    class="bg-card border border-light/60 rounded-3xl p-5 shadow-xs flex flex-col lg:flex-row gap-6"
   >
     <div
       class="w-full lg:w-2/3 rounded-2xl overflow-hidden relative shadow-inner group"

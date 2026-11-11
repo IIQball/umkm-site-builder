@@ -19,7 +19,7 @@
 >
   <div class="flex flex-col items-center text-center p-2">
     <!-- Destructive Icon Badge -->
-    <div class="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center mb-4 ring-8 ring-rose-500/5">
+    <div class="w-14 h-14 rounded-2xl bg-error/10 text-error flex items-center justify-center mb-4 ring-8 ring-error/5">
       <span class="material-symbols-outlined text-3xl">delete_forever</span>
     </div>
 
@@ -36,9 +36,9 @@
     </p>
 
     <!-- Warning Box -->
-    <div class="w-full p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/60 text-left mb-5 flex items-start gap-3 text-xs">
-      <span class="material-symbols-outlined text-rose-500 text-base mt-0.5 flex-shrink-0">warning</span>
-      <div class="text-rose-800 dark:text-rose-300 leading-relaxed font-sans">
+    <div class="w-full p-3.5 rounded-2xl bg-error/10 border border-error/20 text-left mb-5 flex items-start gap-3 text-xs">
+      <span class="material-symbols-outlined text-error text-base mt-0.5 flex-shrink-0">warning</span>
+      <div class="text-error leading-relaxed font-sans">
         <strong class="font-bold block mb-0.5">Peringatan Hard Delete:</strong>
         Tindakan ini tidak dapat dibatalkan. Seluruh data konfigurasi, token visual, dan konten draf akan hilang selamanya.
       </div>

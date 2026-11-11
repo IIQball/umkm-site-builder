@@ -155,3 +155,57 @@ export type BadgeVariant =
   | 'amber'
   | 'rose'
   | 'orange'
+
+export interface ChartThemeTokens {
+  text: string
+  main: string
+  card: string
+  border: string
+  primary: string
+  success: string
+  warning: string
+  error: string
+  info: string
+  accent: string
+  isDark: boolean
+}
+
+export function getChartThemeTokens(): ChartThemeTokens {
+  const isDark =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-theme') === 'dark'
+  const fallback = isDark ? colors.neutrals.dark : colors.neutrals.light
+
+  if (typeof window === 'undefined') {
+    return {
+      text: fallback.textMuted,
+      main: fallback.textMain,
+      card: fallback.cardBase,
+      border: fallback.border,
+      primary: colors.primary.DEFAULT,
+      success: colors.semantic.success.DEFAULT,
+      warning: colors.semantic.warning.DEFAULT,
+      error: colors.semantic.error.DEFAULT,
+      info: colors.semantic.info.DEFAULT,
+      accent: colors.semantic.accent.DEFAULT,
+      isDark
+    }
+  }
+
+  const style = getComputedStyle(document.documentElement)
+  const readVar = (name: string, fb: string) => style.getPropertyValue(name).trim() || fb
+
+  return {
+    text: readVar('--color-text-muted', fallback.textMuted),
+    main: readVar('--color-text-main', fallback.textMain),
+    card: readVar('--color-card-base', fallback.cardBase),
+    border: readVar('--color-border', fallback.border),
+    primary: readVar('--color-primary', colors.primary.DEFAULT),
+    success: readVar('--color-success', colors.semantic.success.DEFAULT),
+    warning: readVar('--color-warning', colors.semantic.warning.DEFAULT),
+    error: readVar('--color-error', colors.semantic.error.DEFAULT),
+    info: readVar('--color-info', colors.semantic.info.DEFAULT),
+    accent: readVar('--color-accent', colors.semantic.accent.DEFAULT),
+    isDark
+  }
+}

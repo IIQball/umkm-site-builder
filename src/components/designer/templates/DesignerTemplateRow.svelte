@@ -1,18 +1,32 @@
 <script lang="ts">
   import { Badge, Button } from '@/components/ui';
+  import type { BadgeVariant } from '@/components/tokens/colors';
   import { formatCurrency } from '@/lib/utils/format';
   import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
 
+  interface DesignerTemplateRowItem {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number;
+    thumbnailUrl: string | null;
+    status: string;
+    rejectionReason: string | null;
+    createdAt: Date | string;
+    totalSold: number;
+    revisionCount?: number;
+  }
+
   export let rowNumber: number = 1;
-  export let tpl: any;
+  export let tpl: DesignerTemplateRowItem;
   export let copiedId: string | null = null;
-  export let badge: { label: string; variant: any; dot: boolean; pulse: boolean };
+  export let badge: { label: string; variant: BadgeVariant; dot: boolean; pulse: boolean };
   export let formatDate: (d: Date | string) => string;
   export let onCopyId: (id: string) => void;
-  export let onShowRejection: (tpl: any) => void;
+  export let onShowRejection: (tpl: DesignerTemplateRowItem) => void;
   export let isSelected: boolean = false;
   export let onToggleSelect: ((id: string) => void) | undefined = undefined;
-  export let onDeleteDraft: ((tpl: any) => void) | undefined = undefined;
+  export let onDeleteDraft: ((tpl: DesignerTemplateRowItem) => void) | undefined = undefined;
 </script>
 
 <tr class={`transition-colors group ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-nested/40'}`}>
@@ -141,7 +155,7 @@
           className="rounded-xl font-bold"
           on:click={() => onShowRejection(tpl)}
         >
-          <span class="material-symbols-outlined text-xs text-rose-500">info</span>
+          <span class="material-symbols-outlined text-xs text-error">info</span>
           <span>Alasan</span>
         </Button>
         <Button

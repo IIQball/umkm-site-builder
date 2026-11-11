@@ -2,6 +2,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import type ApexCharts from 'apexcharts';
   import { formatIDR, formatNumber } from '@/lib/utils/format';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { Sparkles, AlertCircle } from 'lucide-svelte';
   import type { AiFeatureDistributionData } from '@/types/admin/ai-monitoring.types';
   import {
@@ -73,12 +74,12 @@
       if (year) params.set('year', String(year));
       if (month && month !== 'all') params.set('month', String(month));
 
-      const res = await fetch(`/api/admin/ai/feature-distribution?${params.toString()}`);
-      if (!res.ok) throw new Error('Gagal memuat data distribusi fitur');
-      const json = await res.json();
-      if (json.ok && json.data) {
-        data = json.data;
-      }
+      const res = await apiFetch<AiFeatureDistributionData>(
+        `/api/admin/ai/feature-distribution?${params.toString()}`,
+        { fallbackError: 'Gagal memuat data distribusi fitur' }
+      );
+      if (!res.success || !res.data) throw new Error(res.message);
+      data = res.data;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
     } finally {
@@ -202,7 +203,7 @@
       <span class="text-xs font-semibold">Memuat distribusi fitur...</span>
     </div>
   {:else if errorMsg}
-    <div class="p-4 rounded-2xl bg-danger/10 text-danger border border-danger/20 flex items-center gap-3 text-sm">
+    <div class="p-4 rounded-2xl bg-error/10 text-error border border-error/20 flex items-center gap-3 text-sm">
       <AlertCircle size={18} />
       <span>{errorMsg}</span>
     </div>

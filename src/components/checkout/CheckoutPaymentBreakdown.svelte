@@ -27,7 +27,7 @@
     <h2 class="text-heading-sm font-bold text-main font-heading">
       {checkoutTitle}
     </h2>
-    <p class="text-body-xs text-secondary mt-0.5">
+    <p class="text-xs text-secondary mt-0.5">
       {checkoutDescription}
     </p>
   </div>

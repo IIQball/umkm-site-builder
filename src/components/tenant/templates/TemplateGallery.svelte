@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Loader2, Palette, Sparkles, ShoppingBag, Store, Check, ChevronLeft, ChevronRight } from 'lucide-svelte';
+  import { Loader2, Palette, Sparkles, ShoppingBag, Store, Check } from 'lucide-svelte';
   import ConfirmTemplateModal from './ConfirmTemplateModal.svelte';
-  import { Badge, Button } from '@/components/ui';
+  import { Badge, Button, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let storeId = '';
   export let currentTemplateId = '';
@@ -31,7 +32,6 @@
   let pendingTemplateName = '';
 
   $: currentTemplateName = templates.find((t) => t.id === currentTemplateId)?.name || '';
-  $: totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
   $: paginatedTemplates = templates.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -41,12 +41,14 @@
     loading = true;
     error = '';
     try {
-      const res = await fetch('/api/tenant/templates');
-      if (!res.ok) {
-        throw new Error('Gagal memuat template milik Anda');
+      const res = await apiFetch<TemplateItem[] | { templates?: TemplateItem[] }>(
+        '/api/tenant/templates',
+        { fallbackError: 'Gagal memuat template milik Anda' }
+      );
+      if (!res.success) {
+        throw new Error(res.message);
       }
-      const result = await res.json();
-      templates = result.data?.templates || result.templates || [];
+      templates = Array.isArray(res.data) ? res.data : (res.data?.templates || []);
       currentPage = 1;
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'Terjadi kesalahan saat memuat template';
@@ -68,16 +70,15 @@
     modalOpen = false;
 
     try {
-      const res = await fetch(`/api/stores/${storeId}/apply-template`, {
+      const result = await apiFetch(`/api/stores/${storeId}/apply-template`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateId: pendingTemplateId }),
+        fallbackError: 'Gagal menerapkan template',
       });
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.error?.message || 'Gagal menerapkan template');
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
       currentTemplateId = pendingTemplateId;
@@ -96,14 +97,6 @@
     modalOpen = false;
     pendingTemplateId = '';
     pendingTemplateName = '';
-  }
-
-  function prevPage() {
-    if (currentPage > 1) currentPage--;
-  }
-
-  function nextPage() {
-    if (currentPage < totalPages) currentPage++;
   }
 
   fetchTemplates();
@@ -242,43 +235,14 @@
       </div>
 
       <!-- Pagination -->
-      {#if totalPages > 1}
-        <div class="flex items-center justify-center gap-4 pt-4">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={currentPage === 1}
-            on:click={prevPage}
-            className="font-bold"
-          >
-            <ChevronLeft size={16} />
-            <span>Sebelumnya</span>
-          </Button>
-
-          <div class="flex items-center gap-2">
-            {#each Array.from({ length: totalPages }, (_, i) => i + 1) as page}
-              <button
-                on:click={() => (currentPage = page)}
-                class="w-8 h-8 rounded-lg font-bold transition-all {currentPage === page
-                  ? 'bg-primary text-white'
-                  : 'bg-nested text-main hover:bg-light'}"
-              >
-                {page}
-              </button>
-            {/each}
-          </div>
-
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={currentPage === totalPages}
-            on:click={nextPage}
-            className="font-bold"
-          >
-            <span>Selanjutnya</span>
-            <ChevronRight size={16} />
-          </Button>
-        </div>
+      {#if templates.length > ITEMS_PER_PAGE}
+        <Pagination
+          bind:currentPage
+          totalItems={templates.length}
+          pageSize={ITEMS_PER_PAGE}
+          autoUpdateUrl={false}
+          class="border-t-0 pt-2"
+        />
       {/if}
     </div>
   {/if}

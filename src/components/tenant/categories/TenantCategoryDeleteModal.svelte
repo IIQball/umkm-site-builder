@@ -11,7 +11,7 @@
   <div class="space-y-4">
     <p class="text-secondary text-sm">Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.</p>
     {#if error}
-      <div class="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg border border-rose-500/20 flex gap-2 text-sm animate-fade-in-up">
+      <div class="p-3 bg-error/10 text-error rounded-lg border border-error/20 flex gap-2 text-sm animate-fade-in-up">
         <span class="material-symbols-outlined text-base">error</span>
         <p class="font-medium">{error}</p>
       </div>

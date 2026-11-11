@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button, Card, Table, StatCard, Pagination } from '@/components/ui';
+  import { Button, Card, Table, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { slugify } from '@/lib/utils';
   import TenantCategoryFormModal from './TenantCategoryFormModal.svelte';
   import TenantCategoryDeleteModal from './TenantCategoryDeleteModal.svelte';
+  import CategoryStatsRow from './CategoryStatsRow.svelte';
   
   interface Category {
     id: string;
@@ -16,6 +18,7 @@
 
   export let storeId: string = '';
   export let storeName: string = 'Toko Anda';
+  export let maxCategories = 5;
 
   let categories: Category[] = [];
   let isLoading = true;
@@ -46,15 +49,18 @@
     isLoading = true;
     error = null;
     try {
-      const res = await fetch(`/api/categories?storeId=${storeId}`);
-      const data = await res.json();
-      if (res.ok) {
-        categories = data.data || [];
+      const result = await apiFetch<Category[]>(`/api/categories?storeId=${storeId}`, {
+        fallbackError: 'Gagal memuat kategori',
+      });
+      if (result.success && Array.isArray(result.data)) {
+        categories = result.data;
       } else {
-        error = data?.error?.message || data?.error || 'Gagal memuat kategori';
+        error = result.message;
+        toast.error(error);
       }
     } catch {
       error = 'Gagal memuat kategori';
+      toast.error(error);
     } finally {
       isLoading = false;
     }
@@ -72,8 +78,8 @@
   });
 
   const openAddModal = () => {
-    if (categories.length >= 5) {
-      toast.error("Batas maksimum 5 kategori tercapai. Fitur berbayar.");
+    if (categories.length >= maxCategories) {
+      toast.error(`Batas maksimum ${maxCategories} kategori tercapai. Silakan ajukan peningkatan kuota.`);
       return;
     }
     editingCategory = null;
@@ -100,25 +106,25 @@
         ? { id: editingCategory.id, name: formName, slug: formSlug } 
         : { storeId, name: formName, slug: formSlug };
         
-      const res = await fetch('/api/categories', {
+      const result = await apiFetch('/api/categories', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
+        fallbackError: 'Gagal menyimpan kategori',
       });
-      
-      const data = await res.json();
-      if (res.ok) {
+
+      if (result.success) {
         await fetchCategories();
         isModalOpen = false;
         window.dispatchEvent(new CustomEvent('quota-updated'));
         toast.success(editingCategory ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.');
       } else {
-        error = data?.error?.message || data?.error || 'Gagal menyimpan kategori';
-        toast.error(error as string);
+        error = result.message;
+        toast.error(error);
       }
     } catch {
       error = 'Gagal menyimpan kategori';
-      toast.error(error as string);
+      toast.error(error);
     } finally {
       isSaving = false;
     }
@@ -140,16 +146,18 @@
     isDeleting = true;
     error = null;
     try {
-      const res = await fetch(`/api/categories?id=${deleteId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) {
+      const result = await apiFetch(`/api/categories?id=${deleteId}`, {
+        method: 'DELETE',
+        fallbackError: 'Gagal menghapus kategori',
+      });
+      if (result.success) {
         categories = categories.filter(c => c.id !== deleteId);
         window.dispatchEvent(new CustomEvent('quota-updated'));
         toast.success('Kategori berhasil dihapus.');
         isDeleteModalOpen = false;
       } else {
-        error = data?.error?.message || data?.error || 'Gagal menghapus kategori';
-        toast.error(error as string);
+        error = result.message;
+        toast.error(error);
       }
     } catch {
       error = 'Gagal menghapus kategori';
@@ -163,54 +171,8 @@
   $: inactiveCategories = totalCategories - activeCategories;
 </script>
 
-<div class="space-y-8">
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    {#key totalCategories}
-      <StatCard 
-        label="Total Kategori" 
-        value={totalCategories} 
-        rawValue={totalCategories}
-        icon="layers" 
-        cardTheme="dark"
-        badge="Organisasi"
-        footerText="Total kategori dibuat"
-        delayClass="delay-100"
-      />
-    {/key}
-    {#key activeCategories}
-      <StatCard 
-        label="Kategori Aktif" 
-        value={activeCategories} 
-        rawValue={activeCategories}
-        icon="check_circle" 
-        cardTheme="default"
-        badge="Aktif"
-        footerText="Kategori yang aktif"
-        delayClass="delay-150"
-      />
-    {/key}
-    {#key inactiveCategories}
-      <StatCard 
-        label="Tidak Aktif" 
-        value={inactiveCategories} 
-        rawValue={inactiveCategories}
-        icon="visibility_off" 
-        cardTheme="orange"
-        badge="Tersembunyi"
-        footerText="Kategori tidak ditampilkan"
-        delayClass="delay-200"
-      />
-    {/key}
-    <StatCard 
-      label="Status Organisir" 
-      value="—" 
-      icon="done_all" 
-      cardTheme="blue"
-      badge="Siap"
-      footerText="Kategori terorganisir"
-      delayClass="delay-250"
-    />
-  </div>
+<div class="space-y-8 min-w-0">
+  <CategoryStatsRow {totalCategories} {activeCategories} {inactiveCategories} />
   <!-- Content -->
   <Card variant="bordered" padding="none" radius="2xl" className="shadow-xs overflow-hidden animate-fade-in-up delay-300">
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -266,7 +228,7 @@
               <p class="text-xs font-bold text-main font-sans">{category.name}</p>
             </td>
             <td class="px-6 py-4 align-top hidden sm:table-cell">
-              <p class="text-xs font-medium text-secondary font-sans">{storeName || 'Unknown Store'}</p>
+              <p class="text-xs font-medium text-secondary font-sans">{storeName || 'Toko Tidak Diketahui'}</p>
             </td>
             <td class="px-6 py-4 align-top text-right">
               <div class="flex items-center justify-end gap-1">
@@ -281,7 +243,7 @@
                 <Button 
                   variant="destructive"
                   size="icon"
-                  className="!bg-nested hover:!bg-rose-500/10 !border-light hover:!border-rose-500/20 !text-secondary hover:!text-rose-600 shadow-2xs"
+                  className="!bg-nested hover:!bg-error/10 !border-light hover:!border-error/20 !text-secondary hover:!text-error shadow-2xs"
                   on:click={() => confirmDelete(category.id)}
                   title="Hapus"
                 >

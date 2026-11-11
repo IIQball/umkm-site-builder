@@ -392,6 +392,7 @@ Tables, relationships, and key constraints. Drizzle schema in `src/db/schema.ts`
 - `commissions.designerId` — fast lookup of designer's earnings
 - `wallet_mutations.walletId` — fast ledger query
 - `images.deleted_at` — identify orphan files for cleanup
+- `bug_reports_status_idx`, `bug_reports_source_app_idx`, `bug_reports_created_at_idx`, `bug_reports_status_created_at_idx`, `bug_reports_reporter_user_id_idx` — indexed triage filtering and reporter lookup (`drizzle/0013_bug_reports.sql`, with nullable `ON DELETE SET NULL` FKs on `reporter_user_id` and `resolved_by`)
 
 ---
 

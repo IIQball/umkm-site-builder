@@ -1,4 +1,4 @@
-export type Range = '7d' | '30d' | '12m';
+import { INDONESIAN_MONTHS } from '@/lib/utils/format';
 
 export interface TrafficPoint {
   key: string;
@@ -18,10 +18,10 @@ export interface MerchantGrowthPoint {
   y: number;
 }
 
-export interface MerchantGrowthSummary {
+export interface MerchantTrafficSummary {
   totalCount: number;
-  recentCount: number;
-  prevCount: number;
+  thisMonthCount: number;
+  lastMonthCount: number;
   growthPercentage: number;
   isPositiveGrowth: boolean;
   points: MerchantGrowthPoint[];
@@ -36,20 +36,141 @@ export interface MerchantGrowthSummary {
   usableWidth: number;
   usableHeight: number;
   periodLabel: string;
-  range: Range;
+  filterMode: 'month' | 'day';
+  periodViews: number;
+  periodClicks: number;
+  periodConversion: string;
+  periodEngagementScore: number;
 }
 
-export const CHART_RANGES: Array<{ value: Range; label: string }> = [
-  { value: '7d', label: '7 Hari' },
-  { value: '30d', label: '30 Hari' },
-  { value: '12m', label: '12 Bulan' },
-];
+export function computeTrafficAvailableYears(
+  allPoints: TrafficPoint[],
+  fallbackYear?: number
+): number[] {
+  const currentYear = new Date().getFullYear();
+  const years = new Set<number>([currentYear]);
+  if (fallbackYear && !isNaN(fallbackYear)) {
+    years.add(fallbackYear);
+  }
 
-export function calculateMerchantGrowth(
-  rawPoints: TrafficPoint[],
-  range: Range
-): MerchantGrowthSummary {
+  for (const pt of allPoints) {
+    if (pt.key) {
+      const year = parseInt(pt.key.split('-')[0], 10);
+      if (!isNaN(year) && year > 2000 && year < 2100) {
+        years.add(year);
+      }
+    }
+  }
+
+  return Array.from(years).sort((a, b) => b - a);
+}
+
+export function pieSlicePath(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number
+): string {
+  const x1 = cx + r * Math.cos(startAngle);
+  const y1 = cy + r * Math.sin(startAngle);
+  const x2 = cx + r * Math.cos(endAngle);
+  const y2 = cy + r * Math.sin(endAngle);
+  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+  return `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+}
+
+export function calculateTrafficGrowth(
+  allPoints: TrafficPoint[],
+  filter: { year: number; month: number | 'all' }
+): MerchantTrafficSummary {
+  const targetYear = filter.year || new Date().getFullYear();
+  const targetMonth = filter.month ?? 'all';
+
+  const totalCount = allPoints.reduce((sum, p) => sum + (p.views || 0), 0);
   const points: MerchantGrowthPoint[] = [];
+  const filterMode: 'month' | 'day' = targetMonth === 'all' ? 'month' : 'day';
+
+  let periodLabel = `Tahun ${targetYear}`;
+  let activeIdx = 0;
+
+  if (targetMonth === 'all') {
+    for (let month = 0; month < 12; month++) {
+      const monthPrefix = `${targetYear}-${String(month + 1).padStart(2, '0')}`;
+      const countInMonth = allPoints
+        .filter((p) => p.key.startsWith(monthPrefix))
+        .reduce((sum, p) => sum + (p.views || 0), 0);
+
+      const label = INDONESIAN_MONTHS[month];
+      const fullLabel = `${INDONESIAN_MONTHS[month]} ${targetYear}`;
+
+      points.push({
+        key: monthPrefix,
+        label,
+        fullLabel,
+        count: countInMonth,
+        cumulative: countInMonth, // Non-kumulatif: data periode itu sendiri
+        x: 0,
+        y: 0,
+      });
+    }
+
+    const currentYear = new Date().getFullYear();
+    activeIdx = targetYear === currentYear ? new Date().getMonth() : 11;
+  } else {
+    const monthIndex = targetMonth - 1;
+    const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+    const monthPrefix = `${targetYear}-${String(targetMonth).padStart(2, '0')}`;
+
+    periodLabel = `${INDONESIAN_MONTHS[monthIndex]} ${targetYear}`;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayKey = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+      const countInDay = allPoints
+        .filter((p) => p.key === dayKey)
+        .reduce((sum, p) => sum + (p.views || 0), 0);
+
+      const label = String(day);
+      const fullLabel = `${day} ${INDONESIAN_MONTHS[monthIndex]} ${targetYear}`;
+
+      points.push({
+        key: dayKey,
+        label,
+        fullLabel,
+        count: countInDay,
+        cumulative: countInDay, // Non-kumulatif: data tanggal itu sendiri
+        x: 0,
+        y: 0,
+      });
+    }
+
+    const currentYear = new Date().getFullYear();
+    const currentMonthIndex = new Date().getMonth();
+    if (targetYear === currentYear && monthIndex === currentMonthIndex) {
+      activeIdx = Math.min(new Date().getDate() - 1, daysInMonth - 1);
+    } else {
+      activeIdx = daysInMonth - 1;
+    }
+  }
+
+  // Hitung metrik periode untuk pie chart & rasio
+  const periodFiltered = allPoints.filter((p) => {
+    if (targetMonth === 'all') {
+      return p.key.startsWith(`${targetYear}-`);
+    }
+    return p.key.startsWith(`${targetYear}-${String(targetMonth).padStart(2, '0')}-`);
+  });
+
+  const periodViews = periodFiltered.reduce((sum, p) => sum + (p.views || 0), 0);
+  const periodClicks = periodFiltered.reduce((sum, p) => sum + (p.waClicks || 0), 0);
+  const periodConversion =
+    periodViews > 0 ? ((periodClicks / periodViews) * 100).toFixed(1) : '0.0';
+  const periodEngagementScore = Math.min(
+    Math.round((parseFloat(periodConversion) / 100) * 100),
+    100
+  );
+
+  // Kalkulasi koordinat SVG Line & Area (Non-kumulatif)
   const svgWidth = 850;
   const svgHeight = 280;
   const padLeft = 48;
@@ -60,34 +181,15 @@ export function calculateMerchantGrowth(
   const usableHeight = svgHeight - padTop - padBottom;
   const baselineY = padTop + usableHeight;
 
-  let totalCount = 0;
-  let runningCumulative = 0;
-
-  for (let i = 0; i < rawPoints.length; i++) {
-    const p = rawPoints[i];
-    const count = p.views;
-    runningCumulative += count;
-    totalCount += count;
-
-    points.push({
-      key: p.key,
-      label: p.label,
-      fullLabel: p.label,
-      count,
-      cumulative: runningCumulative,
-      x: 0,
-      y: 0,
-    });
-  }
-
-  const maxVal = Math.max(...points.map((p) => p.cumulative), 4);
+  // Nilai maksimum berdasarkan count masing-masing titik (bukan kumulatif)
+  const maxVal = Math.max(...points.map((p) => p.count), 4);
   const n = points.length;
 
   for (let i = 0; i < n; i++) {
-    const pt = points[i];
-    pt.x = Math.round(padLeft + (i / Math.max(1, n - 1)) * usableWidth);
-    const ratio = maxVal > 0 ? pt.cumulative / maxVal : 0;
-    pt.y = Math.round(baselineY - ratio * usableHeight);
+    const p = points[i];
+    p.x = Math.round(padLeft + (i / Math.max(1, n - 1)) * usableWidth);
+    const ratio = maxVal > 0 ? p.count / maxVal : 0;
+    p.y = Math.round(baselineY - ratio * usableHeight);
   }
 
   let svgLinePath = '';
@@ -111,24 +213,22 @@ export function calculateMerchantGrowth(
     svgAreaPath = `${svgLinePath} L ${last.x},${baselineY} L ${first.x},${baselineY} Z`;
   }
 
-  const activeIdx = Math.max(0, points.length - 1);
-  const recentCount = points[activeIdx]?.count ?? 0;
-  const prevCount = activeIdx > 0 ? (points[activeIdx - 1]?.count ?? 0) : 0;
+  const thisMonthCount = points[activeIdx]?.count ?? 0;
+  const lastMonthCount = activeIdx > 0 ? (points[activeIdx - 1]?.count ?? 0) : 0;
 
   let growthPercentage = 0;
-  if (prevCount > 0) {
-    growthPercentage = Math.round(((recentCount - prevCount) / prevCount) * 100);
-  } else if (recentCount > 0) {
+  if (lastMonthCount > 0) {
+    growthPercentage = Math.round(((thisMonthCount - lastMonthCount) / lastMonthCount) * 100);
+  } else if (thisMonthCount > 0) {
     growthPercentage = 100;
   }
 
-  const isPositiveGrowth = recentCount >= prevCount;
-  const periodLabel = range === '7d' ? '7 Hari Terakhir' : range === '30d' ? '30 Hari Terakhir' : '12 Bulan Terakhir';
+  const isPositiveGrowth = thisMonthCount >= lastMonthCount;
 
   return {
     totalCount,
-    recentCount,
-    prevCount,
+    thisMonthCount,
+    lastMonthCount,
     growthPercentage,
     isPositiveGrowth,
     points,
@@ -143,6 +243,10 @@ export function calculateMerchantGrowth(
     usableWidth,
     usableHeight,
     periodLabel,
-    range,
+    filterMode,
+    periodViews,
+    periodClicks,
+    periodConversion,
+    periodEngagementScore,
   };
 }

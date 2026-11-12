@@ -13,6 +13,7 @@
     filterByPeriod,
     formatDate,
   } from "@/lib/utils/format";
+  import { formatAuditAction } from "@/lib/utils/audit";
   import { Card } from "@/components/ui";
 
   export let allUsers: Array<{ id: string; name: string | null; email: string; role: string; createdAt: string | Date }> = [];
@@ -76,8 +77,7 @@
   );
 
   function formatActionText(action: string) {
-    const text = action.replace(/_/g, " ").toLowerCase();
-    return text.charAt(0).toUpperCase() + text.slice(1);
+    return formatAuditAction(action, { mode: "feed" });
   }
 </script>
 
@@ -179,7 +179,7 @@
           href="/admin/audit-logs"
           class="text-xs font-bold text-primary hover:underline"
         >
-          Lihat Audit Log &rarr;
+          Lihat Log Aktivitas &rarr;
         </a>
       </div>
 

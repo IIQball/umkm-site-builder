@@ -1,13 +1,12 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import StatCard from '@/components/ui/StatCard.svelte';
-import ChartWidget from '@/components/tenant/dashboard/ChartWidget.svelte';
+import MerchantOverviewDashboard from '@/components/tenant/dashboard/MerchantOverviewDashboard.svelte';
 import TenantUsageChart from '@/components/tenant/ai-credits/TenantUsageChart.svelte';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { stores } from '@/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
-import { getStoreTrafficSeries, type TrafficPoint } from '@/services/analytics.service';
+import { getAllStoreTrafficHistory, type TrafficPoint } from '@/services/analytics.service';
 import { isStoreFullyOnboarded } from '@/services/stores';
 
 const user = await getAuthenticatedUser(Astro.request);
@@ -29,18 +28,19 @@ if (!isStoreFullyOnboarded(store)) {
   return Astro.redirect('/onboarding');
 }
 
-// Data awal grafik (12 bulan) dirender dari server supaya grafik langsung muncul.
-// Jika tabel statistik belum dibuat / query gagal, dashboard tetap tampil tanpa grafik error.
-let initialPoints: TrafficPoint[] = [];
+// Seluruh riwayat data statistik trafik dirender dari server untuk filter periode dinamis (sama seperti dashboard designer).
+let allHistory: TrafficPoint[] = [];
 let initialPointsFailed = false;
 if (store?.id) {
   try {
-    initialPoints = await getStoreTrafficSeries(store.id, '12m');
+    allHistory = await getAllStoreTrafficHistory(store.id);
   } catch (error) {
     initialPointsFailed = true;
     console.error('[DASHBOARD] gagal memuat data grafik:', error);
   }
 }
+
+const userCreatedYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
 const managedByAdmin = store?.registeredBy && store.registrar ? { name: store.registrar.name } : null;
 
@@ -52,15 +52,6 @@ const storeData = store || {
 };
 
 const isOnboarded = store ? true : false;
-
-const conversionRate = storeData.totalViews > 0
-  ? ((storeData.totalWaClicks / storeData.totalViews) * 100).toFixed(1)
-  : '0.0';
-
-const engagementScore = Math.min(
-  Math.round((parseInt(conversionRate) / 100) * 100),
-  100
-);
 
 const currentHour = new Date().getHours();
 let greeting = 'Selamat Datang';
@@ -97,64 +88,15 @@ if (currentHour >= 4 && currentHour < 11) {
       </div>
     </div>
 
-    <!-- Analytics Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard 
-        client:load
-        label="Total Views" 
-        value={storeData.totalViews} 
-        rawValue={storeData.totalViews}
-        icon="visibility" 
-        cardTheme="dark"
-        badge="Pengunjung"
-        footerText="Total kunjungan toko"
-        delayClass="delay-100"
-      />
-      <StatCard 
-        client:load
-        label="WhatsApp Clicks" 
-        value={storeData.totalWaClicks} 
-        rawValue={storeData.totalWaClicks}
-        icon="message" 
-        cardTheme="default"
-        badge="Kontak"
-        footerText="Klik hubungi via WhatsApp"
-        delayClass="delay-150"
-      />
-      <StatCard 
-        client:load
-        label="Conversion Rate" 
-        value={`${conversionRate}%`} 
-        rawValue={parseFloat(conversionRate)}
-        icon="trending_up" 
-        cardTheme="blue"
-        badge="Metrik"
-        footerText="Persentase konversi pengunjung"
-        delayClass="delay-200"
-      />
-      <StatCard 
-        client:load
-        label="Engagement Score" 
-        value={engagementScore} 
-        rawValue={engagementScore}
-        icon="poll" 
-        cardTheme="orange"
-        badge="Skor"
-        valueSuffix="/ 100"
-        footerText="Skor engagement toko"
-        delayClass="delay-250"
-      />
-    </div>
-
-    <!-- Chart Widget -->
-    <div class="animate-fade-in-up delay-300">
-      <ChartWidget 
+    <!-- Master Overview Dashboard (Filter Periode -> StatCard -> Charts) -->
+    <div class="animate-fade-in-up delay-200">
+      <MerchantOverviewDashboard 
         client:load 
         totalViews={storeData.totalViews}
         totalClicks={storeData.totalWaClicks}
         isOnboarded={isOnboarded}
-        initialPoints={initialPoints}
-        initialFailed={initialPointsFailed}
+        allHistory={allHistory}
+        userCreatedYear={userCreatedYear}
       />
     </div>
 

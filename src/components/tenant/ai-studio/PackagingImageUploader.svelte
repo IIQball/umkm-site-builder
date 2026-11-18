@@ -11,35 +11,24 @@
   export let originalFileSize: number = 0;
   export let compressedFileSize: number = 0;
   export let error: string = '';
+  export let allowGalleryPicker: boolean = false;
 
   const dispatch = createEventDispatcher<{
     processed: { base64: string; compressedSize: number; originalFile: File };
     remove: void;
     error: string;
+    pickGallery: void;
   }>();
 
   let isCompressing = false;
   let isDragging = false;
   let fileInputRef: HTMLInputElement;
 
-  function formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  }
-
-  $: savingsPercent =
-    originalFileSize > 0 && compressedFileSize > 0
-      ? Math.max(0, Math.round(((originalFileSize - compressedFileSize) / originalFileSize) * 100))
-      : 0;
-
   async function processSelectedFile(file: File) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      const err = 'Berkas harus berupa gambar (JPG, PNG, atau WebP)';
+      const err = 'Pilih berkas gambar (JPG atau PNG) yang sesuai';
       dispatch('error', err);
       return;
     }
@@ -90,6 +79,19 @@
     }
     dispatch('remove');
   }
+
+  function handleContainerClick(e: MouseEvent) {
+    if ((e.target as HTMLElement)?.closest('button')) return;
+    fileInputRef.click();
+  }
+
+  function handleContainerKeydown(e: KeyboardEvent) {
+    if ((e.target as HTMLElement)?.closest('button')) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInputRef.click();
+    }
+  }
 </script>
 
 <div>
@@ -117,8 +119,8 @@
       on:dragover={handleDragOver}
       on:dragleave={handleDragLeave}
       on:drop={handleDrop}
-      on:click={() => fileInputRef.click()}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && fileInputRef.click()}
+      on:click={handleContainerClick}
+      on:keydown={handleContainerKeydown}
     >
       <div class="w-12 h-12 rounded-full bg-card border border-light flex items-center justify-center mx-auto mb-3 text-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -137,9 +139,24 @@
           Klik untuk memilih foto produk atau seret ke sini
         </p>
         <p class="text-2xs text-secondary mb-2">
-          Format JPEG, PNG, atau WebP. Foto otomatis dioptimasi sebelum dikirim.
+          Format JPG atau PNG. Foto otomatis disesuaikan agar pas dan jernih.
         </p>
-        <Badge variant="secondary" size="sm" dot={false}>Maksimal 4 MB asli</Badge>
+        <div class="flex items-center justify-center gap-2">
+          <Badge variant="secondary" size="sm" dot={false}>Maksimal 4 MB asli</Badge>
+          {#if allowGalleryPicker}
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              on:click={(e) => {
+                e.stopPropagation();
+                dispatch('pickGallery');
+              }}
+            >
+              Pilih dari Galeri Mockup
+            </Button>
+          {/if}
+        </div>
       {/if}
     </div>
   {:else}
@@ -152,24 +169,11 @@
         />
       </div>
       <div class="flex-1 min-w-0 space-y-1 text-center sm:text-left">
-        <p class="text-xs font-semibold text-main truncate">
+        <p class="text-xs font-semibold text-main truncate" title={originalFileSize > 0 || compressedFileSize > 0 ? (originalFileName || 'Foto Produk') : undefined}>
           {originalFileName || 'Foto Produk Terunggah'}
         </p>
-        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-0.5">
-          <span class="text-2xs text-muted line-through font-mono">
-            {formatBytes(originalFileSize)}
-          </span>
-          <span class="text-xs font-mono font-bold text-success">
-            {formatBytes(compressedFileSize)}
-          </span>
-          {#if savingsPercent > 0}
-            <Badge variant="success" size="sm" dot={false}>
-              -{savingsPercent}% Hemat
-            </Badge>
-          {/if}
-        </div>
         <p class="text-2xs text-secondary pt-0.5">
-          Siap diproses untuk rendering mockup 3D AI.
+          Foto siap digunakan untuk proses render AI.
         </p>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">

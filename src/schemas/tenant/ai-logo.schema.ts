@@ -33,6 +33,12 @@ export const LOGO_FONT_FAMILIES = [
   'Fraunces',
   'Outfit',
   'Playfair Display',
+  'Montserrat',
+  'Inter',
+  'Merriweather',
+  'Cormorant Garamond',
+  'DM Serif Display',
+  'Sora',
 ] as const;
 
 export type LogoFontFamily = (typeof LOGO_FONT_FAMILIES)[number];
@@ -123,6 +129,8 @@ export const aiLogoSchema = z.object({
     })
     .min(1, 'Pilih minimal 1 warna palet')
     .max(3, 'Maksimal 3 warna dalam palet logo sesuai aturan minimalisme visual'),
+  hasBackground: z.boolean().optional().default(true),
+  backgroundColor: hexColorSchema.optional().default('#FFFFFF'),
   qualityTier: z.enum(AI_QUALITY_TIERS).optional(),
   isTesting: z.boolean().optional(),
 });

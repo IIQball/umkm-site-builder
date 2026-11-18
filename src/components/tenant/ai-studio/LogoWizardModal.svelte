@@ -82,6 +82,8 @@
         fontFamily: payload.fontFamily,
         colorPalette: payload.colorPalette.join(', '),
         focalSubject: cleanFocal,
+        hasBackground: payload.hasBackground,
+        backgroundColor: payload.backgroundColor,
         qualityTier: payload.qualityTier || 'high',
       });
 

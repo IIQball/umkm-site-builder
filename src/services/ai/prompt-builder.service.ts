@@ -8,6 +8,7 @@ import {
   getCategoryRedFlags,
   resolveMarkTypeGuide,
 } from './rules/logo-design-rules';
+import { resolveFontDirective } from './ai-font-directives';
 import type { GenerateLogoPromptInput } from '@/types/ai';
 
 export { type GenerateLogoPromptInput } from '@/types/ai';
@@ -61,6 +62,8 @@ export const generateLogoPromptSchema = z.object({
   lockupType: z.enum(['icon_only', 'vertical', 'horizontal']).optional(),
   fontFamily: z.string().trim().optional().default('Plus Jakarta Sans'),
   focalSubject: z.string().trim().max(30).optional().transform((val) => (val ? sanitizeText(val) : undefined)),
+  hasBackground: z.boolean().optional().default(true),
+  backgroundColor: z.string().trim().optional().default('#FFFFFF'),
 });
 
 /**
@@ -118,7 +121,7 @@ export function cleanGeneratedPrompt(raw: string, storeName?: string, logoText?:
 /**
  * Enforces mandatory technical specifications without duplicating them or appending raw brand names.
  */
-export function ensureMandatoryKeywords(prompt: string, hasLogoText = false): string {
+export function ensureMandatoryKeywords(prompt: string, hasLogoText = false, bgDirective?: string): string {
   let result = prompt;
   const lower = result.toLowerCase();
 
@@ -129,7 +132,11 @@ export function ensureMandatoryKeywords(prompt: string, hasLogoText = false): st
   if (!lower.includes('negative space')) {
     missingSpecs.push('negative space');
   }
-  if (!lower.includes('pure white background')) {
+  if (bgDirective) {
+    if (!lower.includes('background')) {
+      missingSpecs.push(bgDirective);
+    }
+  } else if (!lower.includes('background') && !lower.includes('pure white background')) {
     missingSpecs.push('pure white background');
   }
   if (!hasLogoText && !lower.includes('no text')) {
@@ -167,15 +174,22 @@ export async function buildLogoPrompt(input: GenerateLogoPromptInput): Promise<s
     : (validated.lockupType || 'vertical');
   const isIconOnly = effectiveLockupType === 'icon_only';
   const effectiveFont = validated.fontFamily || 'Plus Jakarta Sans';
+  const fontDirectiveDesc = resolveFontDirective(effectiveFont);
+  const isCustomBg = Boolean(validated.backgroundColor && validated.backgroundColor.toUpperCase() !== '#FFFFFF');
+  const bgDirective = validated.hasBackground === false
+    ? 'pure transparent background, zero background elements, cutout isolated vector mark'
+    : (isCustomBg
+        ? `solid single-color flat background with exact solid hex color ${validated.backgroundColor}, plain solid background with zero gradient and zero pattern`
+        : 'pure white background');
 
   let lockupDirective = '';
   if (effectiveLockupType === 'icon_only') {
     lockupDirective =
       'LOCKUP PROPORTIONS (Icon Only): Isolated central symbol occupying 50%-55% of canvas area with at least 22.5% clean empty whitespace on all borders. Strictly 0 text, NO letters, NO words.';
   } else if (effectiveLockupType === 'vertical') {
-    lockupDirective = `LOCKUP PROPORTIONS (Vertical Stacked): Central symbol height 40% of canvas, wordmark cap-height 10% of canvas (exact 4:1 golden ratio), vertical gap between symbol and wordmark 20% of symbol height, minimum 45% total clean whitespace. Wordmark typography: clean bold typesetting in '${effectiveFont}' font: "${validated.logoText?.trim()}".`;
+    lockupDirective = `LOCKUP PROPORTIONS (Vertical Stacked): Central symbol height 40% of canvas, wordmark cap-height 10% of canvas (exact 4:1 golden ratio), vertical gap between symbol and wordmark 20% of symbol height, minimum 45% total clean whitespace. Wordmark typography: clean bold typesetting in '${effectiveFont}' (${fontDirectiveDesc}): "${validated.logoText?.trim()}".`;
   } else {
-    lockupDirective = `LOCKUP PROPORTIONS (Horizontal Side-by-Side): Symbol height 26% of canvas, wordmark cap-height 13% of canvas (exact 2:1 ratio), horizontal gap 35% of symbol width, total lockup width maximum 70% of canvas with 15% left/right margins. Wordmark typography: clean bold typesetting in '${effectiveFont}' font: "${validated.logoText?.trim()}".`;
+    lockupDirective = `LOCKUP PROPORTIONS (Horizontal Side-by-Side): Symbol height 26% of canvas, wordmark cap-height 13% of canvas (exact 2:1 ratio), horizontal gap 35% of symbol width, total lockup width maximum 70% of canvas with 15% left/right margins. Wordmark typography: clean bold typesetting in '${effectiveFont}' (${fontDirectiveDesc}): "${validated.logoText?.trim()}".`;
   }
 
   let systemPrompt = KAAN_KIZILTUG_SYSTEM_PROMPT;
@@ -216,7 +230,7 @@ export async function buildLogoPrompt(input: GenerateLogoPromptInput): Promise<s
         ]),
     '- DO NOT include raw store name in quotes or say for "Brand".',
     '- STRICTLY FORBIDDEN to use literal cartoon trigger words: princess, queen, king, girl, woman, crown, food, dish, plate, bowl, mascot, face.',
-    '- 100% canvas focus on central high-contrast flat vector glyph on pure white background (#FFFFFF).',
+    `- 100% canvas focus on central high-contrast flat vector glyph with ${bgDirective}.`,
     !isIconOnly
       ? `- Include clean bold wordmark lockup typeset in '${effectiveFont}' according to specified lockup proportions.`
       : '- Mandate strictly NO text, NO letters, NO words.',
@@ -242,7 +256,16 @@ export async function buildLogoPrompt(input: GenerateLogoPromptInput): Promise<s
     }
 
     const cleaned = cleanGeneratedPrompt(rawPrompt, validated.storeName, validated.logoText);
-    return ensureMandatoryKeywords(cleaned, hasLogoText);
+    let finalPrompt = ensureMandatoryKeywords(cleaned, hasLogoText, bgDirective);
+    if (!isIconOnly && validated.logoText) {
+      if (!finalPrompt.toLowerCase().includes(effectiveFont.toLowerCase())) {
+        finalPrompt = `${finalPrompt}, wordmark "${validated.logoText.trim()}" in ${fontDirectiveDesc}`;
+      }
+    }
+    if (validated.colorPalette && !finalPrompt.toLowerCase().includes('color palette:')) {
+      finalPrompt = `${finalPrompt}, strict color palette: ${validated.colorPalette}`;
+    }
+    return finalPrompt;
   } catch (error: unknown) {
     if (error instanceof ValidationError) {
       throw error;

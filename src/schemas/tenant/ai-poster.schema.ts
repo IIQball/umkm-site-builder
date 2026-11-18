@@ -30,6 +30,7 @@ export type PosterSizeRatio = (typeof POSTER_SIZE_RATIOS)[number];
 
 const BASE64_IMAGE_DATA_URI_PATTERN = /^data:image\/(?:png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/;
 const RAW_BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
+const URL_IMAGE_PATTERN = /^https?:\/\/.+/i;
 const MAX_BASE64_LENGTH = 6 * 1024 * 1024;
 
 export const aiPosterSchema = z.object({
@@ -76,14 +77,15 @@ export const aiPosterSchema = z.object({
     .trim()
     .max(MAX_BASE64_LENGTH, 'Ukuran foto produk melebihi batas 4 MB')
     .refine(
-      (val) => !val || BASE64_IMAGE_DATA_URI_PATTERN.test(val) || RAW_BASE64_PATTERN.test(val),
+      (val) => !val || BASE64_IMAGE_DATA_URI_PATTERN.test(val) || RAW_BASE64_PATTERN.test(val) || URL_IMAGE_PATTERN.test(val),
       {
-        message: 'Format foto produk harus berupa data gambar base64 yang valid',
+        message: 'Format foto produk harus berupa data gambar base64 atau tautan gambar yang valid',
       }
     )
     .optional()
     .or(z.literal('')),
   qualityTier: z.enum(AI_QUALITY_TIERS).optional(),
+  fontFamily: z.string().optional(),
   isTesting: z.boolean().optional(),
 });
 

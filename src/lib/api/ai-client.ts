@@ -33,6 +33,8 @@ export interface GenerateAiAssetRequest {
   visualStyle?: string;
   colorPalette?: string | string[];
   focalSubject?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
   options?: {
     quality?: 'medium' | 'high';
     qualityTier?: 'standard' | 'high';

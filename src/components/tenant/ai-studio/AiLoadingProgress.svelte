@@ -36,8 +36,8 @@
     },
     {
       id: 3,
-      title: 'Optimasi Format WebP',
-      description: 'Kompresi lossless & penyiapan CDN Cloudinary',
+      title: 'Menyempurnakan Gambar',
+      description: 'Menjernihkan detail dan menyiapkan hasil berkualitas tinggi',
       minProgress: 80,
       maxProgress: 100,
     },

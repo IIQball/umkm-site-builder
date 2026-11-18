@@ -26,5 +26,7 @@ export interface AiStudioGeneratePayload {
   subText?: string;
   colorPalette?: string;
   focalSubject?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
   qualityTier?: 'standard' | 'high';
 }

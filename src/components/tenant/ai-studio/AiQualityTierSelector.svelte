@@ -32,10 +32,10 @@
 <div>
   <div class="flex items-center justify-between mb-2">
     <span class="block text-label-caps text-muted">
-      Tingkat Kualitas & Model AI <span class="text-error">*</span>
+      Tingkat Kualitas Gambar <span class="text-error">*</span>
     </span>
     <Badge variant={value === 'high' ? 'primary' : 'slate'} size="sm" dot={false}>
-      {value === 'high' ? 'Model HD (2 Kredit)' : 'Model Standar (1 Kredit)'}
+      {value === 'high' ? 'Kualitas HD (2 Kredit)' : 'Kualitas Standar (1 Kredit)'}
     </Badge>
   </div>
 
@@ -74,9 +74,9 @@
           <p class="text-xs text-secondary leading-relaxed mb-2.5">
             {opt.description}
           </p>
-          <div class="text-2xs text-muted font-mono flex items-center gap-1.5 pt-2 border-t border-light/60">
+          <div class="text-2xs text-muted flex items-center gap-1.5 pt-2 border-t border-light/60">
             <span class="w-1.5 h-1.5 rounded-full {isSelected ? 'bg-primary' : 'bg-muted'}"></span>
-            <span>Mesin: {opt.model}</span>
+            <span>{opt.id === 'high' ? 'Resolusi Tinggi & Tajam' : 'Resolusi Standar & Cepat'}</span>
           </div>
         </Card>
       </div>

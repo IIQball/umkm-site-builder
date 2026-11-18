@@ -162,6 +162,9 @@
       templateId={$editorStore.template.id}
       templateName={$editorStore.template.name}
       templatePrice={$editorStore.template.price}
+      templateDescription={$editorStore.template.description}
+      templateThumbnailUrl={$editorStore.template.thumbnailUrl}
+      templateCategoryName={$editorStore.template.categoryName}
       {platformFeePercentage}
       status={$editorStore.template.status}
       rejectionReason={$editorStore.template.rejectionReason}

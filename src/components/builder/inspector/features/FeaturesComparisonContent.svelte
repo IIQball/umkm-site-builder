@@ -77,7 +77,7 @@
       type="text"
       value={beforeTitle}
       on:input={(e) => handlePropChange('beforeTitle', e.currentTarget.value)}
-      class="input input-bordered input-xs w-full"
+      class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each beforeItems as item, idx}
@@ -86,7 +86,7 @@
             type="text"
             value={item}
             on:input={(e) => updateBeforeItem(idx, e.currentTarget.value)}
-            class="input input-bordered input-xs flex-1"
+            class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl flex-1"
             placeholder="Poin kekurangan"
           />
           <Button
@@ -123,7 +123,7 @@
       type="text"
       value={afterTitle}
       on:input={(e) => handlePropChange('afterTitle', e.currentTarget.value)}
-      class="input input-bordered input-xs w-full"
+      class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
     />
     <div class="space-y-1.5 pt-1">
       {#each afterItems as item, idx}
@@ -132,7 +132,7 @@
             type="text"
             value={item}
             on:input={(e) => updateAfterItem(idx, e.currentTarget.value)}
-            class="input input-bordered input-xs flex-1"
+            class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl flex-1"
             placeholder="Poin keunggulan"
           />
           <Button

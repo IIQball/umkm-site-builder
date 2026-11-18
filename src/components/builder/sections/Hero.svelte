@@ -135,7 +135,7 @@
         alt="Hero Background"
         class="w-full h-full object-cover select-none"
       />
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-[1px]"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/65 via-black/75 to-black/90 backdrop-blur-[1px]"></div>
     </div>
   {:else if activePreset === 'video_background_loop'}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
@@ -150,7 +150,7 @@
       >
         <track kind="captions" />
       </video>
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px]"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/65 via-black/75 to-black/90 backdrop-blur-[1px]"></div>
     </div>
   {:else if activePreset === 'gradient_mesh_glow'}
     <div class="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">

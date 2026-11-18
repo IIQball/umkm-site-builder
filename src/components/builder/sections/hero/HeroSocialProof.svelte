@@ -48,13 +48,13 @@
           : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
       }`}
     >
-      <div class="avatar-group -space-x-3 rtl:space-x-reverse">
+      <div class="flex items-center -space-x-2.5 rtl:space-x-reverse overflow-hidden">
         {#each activeAvatars as avatarUrl, i}
-          <div class="avatar">
-            <div class="w-8 h-8">
-              <img src={avatarUrl} alt="Avatar {i + 1}" />
-            </div>
-          </div>
+          <img
+            src={avatarUrl}
+            alt="Avatar {i + 1}"
+            class="inline-block w-8 h-8 rounded-full ring-2 ring-[var(--color-bg-base,#ffffff)] object-cover shadow-sm shrink-0"
+          />
         {/each}
       </div>
       <div class="text-left text-xs">

@@ -106,7 +106,7 @@
     {id}
     value={selectedPreset}
     on:change={handleSelectChange}
-    class="select select-bordered select-xs w-full"
+    class="select select-bordered select-sm w-full min-h-[40px] h-10 text-xs px-3 rounded-xl"
   >
     {#each SECTION_LINK_OPTIONS as opt}
       <option value={opt.value}>{opt.label}</option>
@@ -120,7 +120,7 @@
         value={value}
         on:input={handleCustomInput}
         placeholder="https://wa.me/... atau https://..."
-        class="input input-bordered input-xs w-full font-mono"
+        class="input input-bordered input-sm w-full min-h-[40px] h-10 text-xs font-mono px-3 rounded-xl"
       />
       <span class="block text-[10px] text-base-content/50 mt-0.5">
         Ketik tautan eksternal lengkap (misal: https://...)

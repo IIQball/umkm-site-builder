@@ -30,7 +30,7 @@
         type="text"
         value={section.props?.storeHours ?? 'Buka: 08.00 - 21.00 WIB'}
         on:input={(e) => handlePropChange('storeHours', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm w-full h-9 text-xs"
         placeholder="Buka: 08.00 - 21.00 WIB"
       />
     </div>
@@ -44,7 +44,7 @@
         type="text"
         value={section.props?.address ?? 'Jakarta, Indonesia'}
         on:input={(e) => handlePropChange('address', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm w-full h-9 text-xs"
         placeholder="Jakarta, Indonesia"
       />
     </div>
@@ -55,7 +55,7 @@
         type="text"
         value={section.props?.storeStatus ?? 'Toko Buka'}
         on:input={(e) => handlePropChange('storeStatus', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm w-full h-9 text-xs"
         placeholder="Toko Buka"
       />
     </div>
@@ -75,7 +75,7 @@
           type="text"
           value={stripEmoji(section.props?.promoTitle ?? 'FLASH SALE')}
           on:input={(e) => handlePropChange('promoTitle', stripEmoji(e.currentTarget.value))}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm w-full h-9 text-xs"
           placeholder="FLASH SALE"
         />
       </div>
@@ -88,7 +88,7 @@
           max="72"
           value={section.props?.promoDurationHours ?? 4}
           on:input={(e) => handlePropChange('promoDurationHours', Number(e.currentTarget.value) || 4)}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm w-full h-9 text-xs"
           placeholder="4"
         />
       </div>
@@ -114,7 +114,7 @@
         type="text"
         value={stripEmoji(section.props?.deliveryText ?? 'Siap Kirim Instan: Estimasi 30 Menit')}
         on:input={(e) => handlePropChange('deliveryText', stripEmoji(e.currentTarget.value))}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm w-full h-9 text-xs"
         placeholder="Siap Kirim Instan: Estimasi 30 Menit"
       />
     </div>
@@ -125,7 +125,7 @@
         type="text"
         value={stripEmoji(section.props?.deliveryPartners ?? 'Tersedia GrabFood & GoFood')}
         on:input={(e) => handlePropChange('deliveryPartners', stripEmoji(e.currentTarget.value))}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm w-full h-9 text-xs"
         placeholder="Tersedia GrabFood & GoFood"
       />
     </div>
@@ -163,7 +163,7 @@
             type="text"
             value={stripEmoji(section.props?.announcementText ?? '')}
             on:input={(e) => handlePropChange('announcementText', stripEmoji(e.currentTarget.value))}
-            class="input input-bordered input-xs w-full"
+            class="input input-bordered input-sm w-full h-9 text-xs"
             placeholder="Diskon 20% khusus pesanan hari ini..."
           />
         </div>
@@ -177,7 +177,7 @@
             type="text"
             value={stripEmoji(section.props?.freeShippingText ?? '')}
             on:input={(e) => handlePropChange('freeShippingText', stripEmoji(e.currentTarget.value))}
-            class="input input-bordered input-xs w-full"
+            class="input input-bordered input-sm w-full h-9 text-xs"
             placeholder="Gratis ongkir min. belanja Rp 250rb"
           />
         </div>
@@ -201,7 +201,7 @@
           type="text"
           value={stripEmoji(section.props?.bpomText ?? 'BPOM Terdaftar')}
           on:input={(e) => handlePropChange('bpomText', stripEmoji(e.currentTarget.value))}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm w-full h-9 text-xs"
           placeholder="BPOM Terdaftar"
         />
       </div>
@@ -212,7 +212,7 @@
           type="text"
           value={stripEmoji(section.props?.halalText ?? 'Halal MUI')}
           on:input={(e) => handlePropChange('halalText', stripEmoji(e.currentTarget.value))}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm w-full h-9 text-xs"
           placeholder="Halal MUI"
         />
       </div>

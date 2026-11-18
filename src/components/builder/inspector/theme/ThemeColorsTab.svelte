@@ -3,6 +3,7 @@
   import { DEFAULT_THEME_COLOR_FIELDS } from '@/components/tokens/colors';
   import { evaluateContrast, recommendAccessibleColor } from '@/lib/utils/contrast';
   import { ShieldCheck, AlertTriangle, Wand2, Check } from 'lucide-svelte';
+  import { Button } from '@/components/ui';
 
   export let theme: TemplateTheme;
   export let onColorChange: (key: string, value: string) => void = () => {};
@@ -78,17 +79,17 @@
   </div>
 
   <!-- WCAG Contrast Guardrail Summary Banner -->
-  <div class="p-2.5 rounded-lg border text-xs flex items-center justify-between gap-2 {primaryButtonContrast.passesAA && textPrimaryContrast.passesAA ? 'bg-success/10 border-success/30 text-success' : 'bg-warning/10 border-warning/30 text-warning'}">
-    <div class="flex items-center gap-1.5 font-semibold">
+  <div class="p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 {primaryButtonContrast.passesAA && textPrimaryContrast.passesAA ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300' : 'bg-amber-500/15 border-amber-500/40 text-amber-900 dark:text-amber-200'}">
+    <div class="flex items-center gap-1.5 font-bold">
       {#if primaryButtonContrast.passesAA && textPrimaryContrast.passesAA}
-        <ShieldCheck size={14} class="shrink-0" />
+        <ShieldCheck size={14} class="shrink-0 text-emerald-600 dark:text-emerald-400" />
         <span>WCAG 2.1 AA Guardrail: Lolos</span>
       {:else}
-        <AlertTriangle size={14} class="shrink-0" />
+        <AlertTriangle size={14} class="shrink-0 text-amber-600 dark:text-amber-400" />
         <span>WCAG 2.1 AA: Perlu Penyesuaian Kontras</span>
       {/if}
     </div>
-    <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-base-100/60 border border-current">
+    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border {primaryButtonContrast.passesAA && textPrimaryContrast.passesAA ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-amber-400 dark:border-amber-700'}">
       Btn {primaryButtonContrast.ratio}:1
     </span>
   </div>
@@ -126,26 +127,28 @@
 
         <!-- Reactive WCAG Contrast Indicator Badge & Quick Fix -->
         {#if contrastInfo}
-          <div class="flex items-center justify-between gap-1.5 text-[10px] px-1">
-            <span class="flex items-center gap-1 font-mono {contrastInfo.eval.passesAA ? 'text-success font-semibold' : 'text-warning font-bold'}">
+          <div class="flex items-center justify-between gap-1.5 text-[11px] px-1">
+            <span class="flex items-center gap-1 font-mono {contrastInfo.eval.passesAA ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-amber-800 dark:text-amber-300 font-bold'}">
               {#if contrastInfo.eval.passesAA}
-                <Check size={12} class="shrink-0" />
+                <Check size={12} class="shrink-0 text-emerald-600" />
                 <span>AA ({contrastInfo.eval.ratio}:1)</span>
               {:else}
-                <AlertTriangle size={12} class="shrink-0" />
+                <AlertTriangle size={12} class="shrink-0 text-amber-600" />
                 <span>{contrastInfo.eval.ratio}:1 (&lt; 4.5)</span>
               {/if}
             </span>
             {#if !contrastInfo.eval.passesAA}
-              <button
+              <Button
                 type="button"
+                size="xs"
+                variant="outline"
                 on:click={contrastInfo.fix}
-                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-warning/20 text-warning hover:bg-warning/30 transition-colors cursor-pointer"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-950 dark:text-amber-100 hover:bg-amber-500/30 border border-amber-500/40 shadow-2xs transition-colors"
                 title="Sesuaikan hex otomatis agar memenuhi rasio kontras WCAG 4.5:1"
               >
-                <Wand2 size={10} />
+                <Wand2 size={11} class="text-amber-700 dark:text-amber-300" />
                 <span>Auto-Fix 4.5:1</span>
-              </button>
+              </Button>
             {/if}
           </div>
         {/if}

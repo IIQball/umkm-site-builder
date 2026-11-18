@@ -29,7 +29,7 @@
       type="text"
       value={announcementText}
       on:input={(e) => onPropChange('announcementText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
+      class="w-full px-3 py-2 min-h-[38px] bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:border-primary text-xs"
       placeholder="Gratis Ongkir se-Indonesia!"
     />
   </div>

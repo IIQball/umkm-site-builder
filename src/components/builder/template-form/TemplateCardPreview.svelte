@@ -10,7 +10,7 @@
   export let status: string = 'draft';
 </script>
 
-<div class="lg:col-span-5 p-6 md:p-8 bg-nested/30 flex flex-col justify-between space-y-6">
+<div class="lg:col-span-5 p-6 md:p-8 bg-nested/30 flex flex-col space-y-6 sticky top-6 lg:sticky lg:top-6 self-start z-10 rounded-b-3xl lg:rounded-b-none lg:rounded-r-3xl">
   <div>
     <div class="flex items-center gap-2 mb-4">
       <span class="material-symbols-outlined text-primary text-base">visibility</span>

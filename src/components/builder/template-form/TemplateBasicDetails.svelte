@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Input, Badge } from '@/components/ui';
+  import { Input, Badge, SearchableSelect } from '@/components/ui';
   import ImageUpload from '@/components/ui/ImageUpload.svelte';
 
   export let name: string = '';
@@ -8,6 +8,11 @@
   export let selectedCategoryId: string = '';
   export let loadingCategories: boolean = false;
   export let thumbnailUrl: string = '';
+
+  $: categoryOptions = categories.map((cat) => ({
+    value: cat.id,
+    label: cat.name,
+  }));
 </script>
 
 <!-- Template Name Input -->
@@ -32,32 +37,35 @@
   </Input>
 </div>
 
-<!-- Category Pills strictly from DB -->
-<div class="space-y-2">
-  <span class="text-label-caps text-muted font-bold block">Kategori & Ceruk Usaha</span>
+<!-- Category Searchable Dropdown strictly from DB -->
+<div class="space-y-1.5">
+  <div class="flex items-center justify-between">
+    <label for="tmpl-category" class="text-label-caps text-muted font-bold">
+      Kategori & Ceruk Usaha <span class="text-error">*</span>
+    </label>
+    {#if categories.length > 0}
+      <span class="text-2xs text-muted font-mono">{categories.length} Kategori Tersedia</span>
+    {/if}
+  </div>
+
   {#if loadingCategories}
-    <div class="flex items-center gap-2 text-xs text-muted py-2">
+    <div class="flex items-center gap-2 text-xs text-muted py-2.5 px-3 bg-nested/40 rounded-xl border border-light">
       <span class="material-symbols-outlined text-sm animate-spin">refresh</span>
-      <span>Memuat kategori...</span>
+      <span>Memuat daftar kategori...</span>
     </div>
   {:else if categories.length === 0}
     <p class="text-xs text-muted italic py-1">Belum ada kategori template di database.</p>
   {:else}
-    <div class="flex flex-wrap gap-2">
-      {#each categories as cat}
-        <button
-          type="button"
-          on:click={() => (selectedCategoryId = cat.id)}
-          class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border {selectedCategoryId ===
-          cat.id
-            ? 'bg-primary text-white border-primary shadow-2xs'
-            : 'bg-nested/80 border-light text-secondary hover:text-main'}"
-        >
-          <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>
-          <span>{cat.name}</span>
-        </button>
-      {/each}
-    </div>
+    <SearchableSelect
+      id="tmpl-category"
+      bind:value={selectedCategoryId}
+      options={categoryOptions}
+      placeholder="Pilih kategori atau ceruk bisnis..."
+      searchPlaceholder="Ketik untuk mencari kategori..."
+      clearable={false}
+      disabled={loading}
+      size="md"
+    />
   {/if}
 </div>
 

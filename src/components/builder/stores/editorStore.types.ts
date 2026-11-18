@@ -13,6 +13,8 @@ export interface EditorTemplate {
   rejectionReason?: string | null;
   revisionCount?: number;
   revisionNotes?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   config: TemplateConfig;
 }
 

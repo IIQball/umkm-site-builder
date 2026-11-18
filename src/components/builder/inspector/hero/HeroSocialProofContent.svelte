@@ -63,7 +63,7 @@
         type="text"
         value={socialProofText}
         on:input={(e) => onPropChange('socialProofText', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Dipercaya oleh 2.500+ Pembeli"
       />
     </div>

@@ -36,7 +36,7 @@
         type="text"
         value={bentoPromoTitle}
         on:input={(e) => onPropChange('bentoPromoTitle', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Diskon Pembeli Pertama"
       />
     </div>
@@ -50,7 +50,7 @@
         type="text"
         value={bentoPromoHighlight}
         on:input={(e) => onPropChange('bentoPromoHighlight', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-bold"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-bold"
         placeholder="Potongan 25%"
       />
     </div>
@@ -64,7 +64,7 @@
         type="text"
         value={bentoPromoSubtitle}
         on:input={(e) => onPropChange('bentoPromoSubtitle', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Klaim voucher di WhatsApp sekarang"
       />
     </div>
@@ -80,9 +80,9 @@
         class="select select-bordered select-xs w-full"
       >
         <option value="auto">Otomatis (Kontras Tema)</option>
-        <option value="#ffffff">Putih Bersih (#FFFFFF)</option>
-        <option value="#0f172a">Gelap Pekat (#0F172A)</option>
-        <option value="#fef08a">Kuning Terang (#FEF08A)</option>
+        <option value="var(--theme-text-primary, #0f172a)">Teks Utama (Tema)</option>
+        <option value="var(--theme-text-muted, #64748b)">Teks Redup (Tema)</option>
+        <option value="var(--theme-bg, #ffffff)">Latar Terang (Tema)</option>
       </select>
     </div>
   </div>
@@ -136,7 +136,7 @@
         type="text"
         value={bentoReviewAuthor}
         on:input={(e) => onPropChange('bentoReviewAuthor', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="- Pelanggan Terverifikasi"
       />
     </div>
@@ -162,7 +162,7 @@
         type="text"
         value={bentoFeatureTitle}
         on:input={(e) => onPropChange('bentoFeatureTitle', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-semibold"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-semibold"
         placeholder="Kirim Seluruh Indonesia"
       />
     </div>
@@ -176,7 +176,7 @@
         type="text"
         value={bentoFeatureSubtitle}
         on:input={(e) => onPropChange('bentoFeatureSubtitle', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Packing aman bubble wrap tebal"
       />
     </div>

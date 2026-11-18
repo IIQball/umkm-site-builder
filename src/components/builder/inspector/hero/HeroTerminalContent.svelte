@@ -23,7 +23,7 @@
         type="text"
         value={terminalFile}
         on:input={(e) => onPropChange('terminalFile', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-mono"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-mono"
         placeholder="store-system.sh"
       />
     </div>
@@ -37,7 +37,7 @@
         type="text"
         value={terminalCmd1}
         on:input={(e) => onPropChange('terminalCmd1', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-mono"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-mono"
         placeholder="$ check --stock ready"
       />
     </div>
@@ -51,7 +51,7 @@
         type="text"
         value={terminalRes1}
         on:input={(e) => onPropChange('terminalRes1', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Seluruh produk terverifikasi & siap kirim"
       />
     </div>
@@ -65,7 +65,7 @@
         type="text"
         value={terminalCmd2}
         on:input={(e) => onPropChange('terminalCmd2', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-mono"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-mono"
         placeholder="$ order --instant-whatsapp"
       />
     </div>
@@ -79,7 +79,7 @@
         type="text"
         value={terminalRes2}
         on:input={(e) => onPropChange('terminalRes2', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Integrasi otomatis pesan WA tanpa ribet"
       />
     </div>
@@ -93,7 +93,7 @@
         type="text"
         value={terminalStatus}
         on:input={(e) => onPropChange('terminalStatus', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-mono"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-mono"
         placeholder="_ Siap melayani pelanggan..."
       />
     </div>

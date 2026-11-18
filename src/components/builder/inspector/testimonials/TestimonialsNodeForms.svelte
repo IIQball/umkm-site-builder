@@ -3,6 +3,7 @@
   import type { TestimonialItem } from '@/types';
   import { Star, CheckCircle2 } from 'lucide-svelte';
   import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
+  import VideoUploadDropzone from '../VideoUploadDropzone.svelte';
   import {
     DEFAULT_TESTIMONIALS,
     DEFAULT_CLIENT_LOGOS,
@@ -51,73 +52,31 @@
   <div class="space-y-3 text-left">
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-header-badge">Teks Lencana (Badge)</label>
-      <input
-        id="testi-header-badge"
-        type="text"
-        value={badgeText}
-        on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Ulasan Pembeli"
-      />
+      <input id="testi-header-badge" type="text" value={badgeText} on:input={(e) => onPropChange('badgeText', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" placeholder="Ulasan Pembeli" />
     </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-header-title">Judul Section Testimoni (H2)</label>
-      <input
-        id="testi-header-title"
-        type="text"
-        value={title}
-        on:input={(e) => onPropChange('title', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
-        placeholder="Kata Mereka yang Sudah Mencoba"
-      />
+      <input id="testi-header-title" type="text" value={title} on:input={(e) => onPropChange('title', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold" placeholder="Kata Mereka yang Sudah Mencoba" />
     </div>
     <div class="space-y-1">
       <label class="font-semibold text-xs text-base-content" for="testi-header-sub">Deskripsi Subjudul</label>
-      <textarea
-        id="testi-header-sub"
-        rows="2"
-        value={subtitle}
-        on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-        placeholder="Ulasan kepuasan pelanggan..."
-      ></textarea>
+      <textarea id="testi-header-sub" rows="2" value={subtitle} on:input={(e) => onPropChange('subtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" placeholder="Ulasan kepuasan pelanggan..."></textarea>
     </div>
   </div>
 {:else if nodeId === 'title'}
   <div class="space-y-1 text-left">
     <label class="font-semibold text-xs text-base-content" for="testi-title-node">Judul Utama Testimoni (H2)</label>
-    <input
-      id="testi-title-node"
-      type="text"
-      value={title}
-      on:input={(e) => onPropChange('title', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold"
-      placeholder="Kata Mereka yang Sudah Mencoba"
-    />
+    <input id="testi-title-node" type="text" value={title} on:input={(e) => onPropChange('title', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs font-bold" placeholder="Kata Mereka yang Sudah Mencoba" />
   </div>
 {:else if nodeId === 'subtitle'}
   <div class="space-y-1 text-left">
     <label class="font-semibold text-xs text-base-content" for="testi-subtitle-node">Deskripsi Subjudul</label>
-    <textarea
-      id="testi-subtitle-node"
-      rows="3"
-      value={subtitle}
-      on:input={(e) => onPropChange('subtitle', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-      placeholder="Ulasan kepuasan pelanggan..."
-    ></textarea>
+    <textarea id="testi-subtitle-node" rows="3" value={subtitle} on:input={(e) => onPropChange('subtitle', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" placeholder="Ulasan kepuasan pelanggan..."></textarea>
   </div>
 {:else if nodeId === 'badge'}
   <div class="space-y-1 text-left">
     <label class="font-semibold text-xs text-base-content" for="testi-badge-node">Teks Lencana (Badge)</label>
-    <input
-      id="testi-badge-node"
-      type="text"
-      value={badgeText}
-      on:input={(e) => onPropChange('badgeText', e.currentTarget.value)}
-      class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs"
-      placeholder="Ulasan Pembeli"
-    />
+    <input id="testi-badge-node" type="text" value={badgeText} on:input={(e) => onPropChange('badgeText', e.currentTarget.value)} class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs" placeholder="Ulasan Pembeli" />
   </div>
 {:else if nodeId.startsWith('testi_avatar_')}
   <div class="space-y-3 text-left">
@@ -129,6 +88,15 @@
       maxHeight={400}
       folder="testimonials"
     />
+    {#if section.props?.layout === 'video_cards' || currentTesti?.videoUrl}
+      <VideoUploadDropzone
+        videoUrl={currentTesti?.videoUrl || ''}
+        onVideoChange={(url) => updateTestiField('videoUrl', url)}
+        label="Video Ulasan Pengulas"
+        placeholderTitle="Unggah Video Ulasan"
+        folder="testimonials"
+      />
+    {/if}
   </div>
 {:else if nodeId.startsWith('testi_item_') || nodeId.startsWith('item_') || testimonials.some(t => t.id === nodeId)}
   <div class="space-y-3 text-left">
@@ -212,8 +180,8 @@
       {/if}
     </div>
 
-    <!-- Foto Avatar -->
-    <div class="space-y-1 pt-1">
+    <!-- Foto Avatar & Video -->
+    <div class="space-y-2 pt-1">
       <span class="block font-semibold text-xs text-base-content">Foto Avatar Pengulas</span>
       <ImageUploadDropzone
         imageUrl={currentTesti?.avatar || ''}
@@ -222,6 +190,15 @@
         folder="testimonials"
         compact={true}
       />
+      {#if section.props?.layout === 'video_cards' || currentTesti?.videoUrl}
+        <VideoUploadDropzone
+          videoUrl={currentTesti?.videoUrl || ''}
+          onVideoChange={(url) => updateTestiField('videoUrl', url)}
+          label="Video Ulasan Pengulas"
+          placeholderTitle="Unggah Video Ulasan"
+          folder="testimonials"
+        />
+      {/if}
     </div>
   </div>
 {:else if nodeId === 'testi_spotlight_quote'}

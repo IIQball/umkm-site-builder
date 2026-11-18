@@ -38,7 +38,7 @@
         type="text"
         value={stickerText}
         on:input={(e) => onPropChange('stickerText', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-bold"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-bold"
         placeholder="PROMO TERBATAS!"
       />
     </div>
@@ -123,7 +123,7 @@
         type="text"
         value={contrastBadgeText}
         on:input={(e) => onPropChange('contrastBadgeText', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Pendaftaran Terbatas"
       />
     </div>
@@ -137,7 +137,7 @@
         type="text"
         value={contrastTitleText}
         on:input={(e) => onPropChange('contrastTitleText', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-bold"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-bold"
         placeholder="Kuota Tersisa 4 Peserta"
       />
     </div>
@@ -151,7 +151,7 @@
         rows="2"
         value={contrastDescText}
         on:input={(e) => onPropChange('contrastDescText', e.currentTarget.value)}
-        class="textarea textarea-bordered textarea-xs w-full"
+        class="textarea textarea-bordered textarea-sm text-xs rounded-xl w-full"
         placeholder="Mendapatkan modul lengkap..."
       ></textarea>
     </div>
@@ -171,7 +171,7 @@
         type="text"
         value={founderRole}
         on:input={(e) => onPropChange('founderRole', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full font-bold"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-bold"
         placeholder="Pendiri & Artisan"
       />
     </div>
@@ -185,7 +185,7 @@
         type="text"
         value={founderTitle}
         on:input={(e) => onPropChange('founderTitle', e.currentTarget.value)}
-        class="input input-bordered input-xs w-full"
+        class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
         placeholder="Pengrajin Resep Asli"
       />
     </div>
@@ -206,7 +206,7 @@
               type="text"
               value={stat.value}
               on:input={(e) => updateStat(i, 'value', e.currentTarget.value)}
-              class="input input-bordered input-xs w-full font-bold"
+              class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-bold"
               placeholder="25.000+"
             />
           </div>
@@ -217,7 +217,7 @@
               type="text"
               value={stat.label}
               on:input={(e) => updateStat(i, 'label', e.currentTarget.value)}
-              class="input input-bordered input-xs w-full"
+              class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
               placeholder="Porsi Terkirim"
             />
           </div>

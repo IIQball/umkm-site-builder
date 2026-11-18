@@ -91,6 +91,12 @@
             props: {
               ...(section.props || {}),
               logoText: section.props?.logoText || store?.name || 'Toko UMKM',
+              logoImageUrl: store?.logoUrl || section.props?.logoImageUrl,
+              logoType: section.props?.logoType === 'image_only'
+                ? 'image_only'
+                : (store?.logoUrl || section.props?.logoImageUrl)
+                  ? 'image_text'
+                  : (section.props?.logoType || 'text_only'),
               storeName: store?.name || section.props?.storeName,
               address: store?.address || section.props?.address,
               categories: categories.length > 0 ? categories : (section.props?.categories || []),

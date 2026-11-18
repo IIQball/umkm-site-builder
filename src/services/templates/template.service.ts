@@ -22,6 +22,9 @@ export { getPublicTemplates } from './template.public.service';
 export async function getTemplateById(templateId: string, userId: string, userRole: string) {
   const template = await db.query.templates.findFirst({
     where: eq(templates.id, templateId),
+    with: {
+      category: true,
+    },
   });
 
   if (!template) {

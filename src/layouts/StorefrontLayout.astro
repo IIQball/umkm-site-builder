@@ -3,22 +3,37 @@ import globalCssUrl from '@/styles/global.css?url';
 import criticalCSS from '@/styles/critical.css?raw';
 import ToastContainer from '@/components/ui/ToastContainer.svelte';
 import BugReportTrigger from '@/components/common/BugReportTrigger.svelte';
+import { colors } from '@/components/tokens/colors';
 
 interface Props {
   title: string;
   description?: string;
   image?: string;
+  favicon?: string;
 }
 
 const {
   title,
   description = 'Toko Online Resmi UMKM — Didukung oleh Pinoka',
   image = '/og-image.png',
+  favicon,
 } = Astro.props;
 
 const siteUrl = Astro.url.origin;
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const ogImageUrl = new URL(image, siteUrl).href;
+
+const resolvedFavicon = favicon || '/favicon.svg';
+const isCustomFavicon = Boolean(favicon && favicon !== '/favicon.svg');
+const faviconType = resolvedFavicon.includes('.svg')
+  ? 'image/svg+xml'
+  : resolvedFavicon.includes('.png')
+  ? 'image/png'
+  : resolvedFavicon.includes('.jpg') || resolvedFavicon.includes('.jpeg')
+  ? 'image/jpeg'
+  : resolvedFavicon.includes('.webp')
+  ? 'image/webp'
+  : 'image/x-icon';
 ---
 
 <!DOCTYPE html>
@@ -33,11 +48,20 @@ const ogImageUrl = new URL(image, siteUrl).href;
     <link rel="canonical" href={canonicalUrl} />
 
     <!-- Favicons & App Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/svg+xml" href="/icon-512x512.svg" sizes="512x512" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.svg" sizes="180x180" />
+    {isCustomFavicon ? (
+      <>
+        <link rel="icon" type={faviconType} href={resolvedFavicon} />
+        <link rel="apple-touch-icon" href={resolvedFavicon} />
+      </>
+    ) : (
+      <>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/svg+xml" href="/icon-512x512.svg" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.svg" sizes="180x180" />
+      </>
+    )}
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#36C6FD" />
+    <meta name="theme-color" content={colors.primary.DEFAULT} />
 
     <!-- Open Graph / WhatsApp Social Share -->
     <meta property="og:site_name" content="Pinoka Storefront" />

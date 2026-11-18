@@ -30,12 +30,10 @@
 
     if (s.marginTop) rules.push(`margin-top: ${s.marginTop}`);
     if (s.marginBottom) rules.push(`margin-bottom: ${s.marginBottom}`);
-    if (!fullBleed) {
-      if (s.paddingTop) rules.push(`padding-top: ${s.paddingTop}`);
-      if (s.paddingBottom) rules.push(`padding-bottom: ${s.paddingBottom}`);
-      if (s.paddingLeft) rules.push(`padding-left: ${s.paddingLeft}`);
-      if (s.paddingRight) rules.push(`padding-right: ${s.paddingRight}`);
-    }
+    if (s.paddingTop) rules.push(`padding-top: ${s.paddingTop}`);
+    if (s.paddingBottom) rules.push(`padding-bottom: ${s.paddingBottom}`);
+    if (s.paddingLeft && s.paddingLeft !== '0px') rules.push(`padding-left: ${s.paddingLeft}`);
+    if (s.paddingRight && s.paddingRight !== '0px') rules.push(`padding-right: ${s.paddingRight}`);
     if (s.fontSize) rules.push(`font-size: ${s.fontSize}`);
     if (s.fontWeight) rules.push(`font-weight: ${s.fontWeight}`);
     if (s.display) rules.push(`display: ${s.display}`);
@@ -131,7 +129,7 @@
         {isLiveStorefront}
       />
     {:else}
-      <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: var(--active-safe-zone, 32px); padding-right: var(--active-safe-zone, 32px); {containerStyle}">
+      <div class={`${containerClass} section-safe-container min-w-0 box-border`} style="padding-left: calc(var(--active-safe-zone, 32px) + {section?.styles?.paddingLeft || '0px'}); padding-right: calc(var(--active-safe-zone, 32px) + {section?.styles?.paddingRight || '0px'}); {containerStyle}">
         <svelte:component
           this={sectionDef.renderComponent}
           props={sectionProps}

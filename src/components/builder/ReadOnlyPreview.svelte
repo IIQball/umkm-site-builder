@@ -58,6 +58,7 @@
   onMount(() => {
     if (template) {
       editorStore.init(template);
+      editorStore.selectSection(null);
       if (!baseTemplateConfig && template.config) {
         baseTemplateConfig = clone(template.config);
       }
@@ -252,7 +253,7 @@
         bind:clientHeight={canvasHeight}
         data-theme={isDark ? 'dark' : 'light'}
         style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
-        class={`transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
+        class={`storefront-root transition-transform duration-300 ease-out shadow-2xl my-0 flex flex-col box-border overflow-x-hidden ${
           isDark ? 'theme-dark dark bg-canvas text-main' : 'theme-light bg-card text-main'
         } ${
           viewMode === 'desktop'
@@ -269,7 +270,7 @@
         {:else}
           <div class="flex flex-col w-full min-w-0 transition-all">
             {#each sections as section (section.id)}
-              <SectionRenderer {section} isActive={false} {storeId} />
+              <SectionRenderer {section} isActive={false} {storeId} isLiveStorefront={true} />
             {/each}
           </div>
         {/if}

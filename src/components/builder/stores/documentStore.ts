@@ -42,6 +42,8 @@ export function createDocumentStore() {
     init(rawTemplate: Partial<EditorTemplate> & { id: string; config?: unknown }) {
       if (!rawTemplate) return;
       const validConfig = ensureValidConfig(rawTemplate.config);
+      const rawWithCategory = rawTemplate as Record<string, unknown>;
+      const categoryObj = rawWithCategory.category as { id?: string; name?: string } | undefined;
       const template: EditorTemplate = {
         id: rawTemplate.id,
         name: rawTemplate.name || 'Untitled Template',
@@ -52,6 +54,8 @@ export function createDocumentStore() {
         rejectionReason: rawTemplate.rejectionReason || null,
         revisionCount: typeof rawTemplate.revisionCount === 'number' ? rawTemplate.revisionCount : 0,
         revisionNotes: rawTemplate.revisionNotes || null,
+        categoryId: (rawTemplate.categoryId || categoryObj?.id || null) as string | null,
+        categoryName: (rawTemplate.categoryName || categoryObj?.name || 'Umum') as string,
         config: validConfig,
       };
       set({ ...initialDocumentState, template });

@@ -185,7 +185,7 @@
     on:error={handleImageError}
   />
 
-  <!-- 4. Pilihan Kualitas & Model AI -->
+  <!-- 4. Pilihan Kualitas Gambar -->
   <AiQualityTierSelector bind:value={qualityTier} disabled={loading} />
 
   <!-- Aksi Form -->

@@ -15,6 +15,7 @@ export interface StoreProfileData {
   longitude?: number | null;
   branchMode?: 'single' | 'multi';
   branches?: unknown[];
+  logoUrl?: string | null;
 }
 
 /**
@@ -147,6 +148,11 @@ export function mergeStoreCustomization(
           }
           if (address) {
             section.props.address = address;
+          }
+          const effectiveLogo = (cust.logoUrl as string) || ((cust.header as Record<string, unknown>)?.logoImageUrl as string) || storeData?.logoUrl;
+          if (effectiveLogo) {
+            section.props.logoImageUrl = effectiveLogo;
+            section.props.logoType = section.props.logoType === 'image_only' ? 'image_only' : 'image_text';
           }
           break;
         }

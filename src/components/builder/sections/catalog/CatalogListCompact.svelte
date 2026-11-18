@@ -81,14 +81,6 @@
               <ShoppingBag size={18} />
             </div>
           {/if}
-          {#if product.badge}
-            <span
-              class="absolute top-1 left-1 text-[9px] font-heading font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
-              style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
-            >
-              {product.badge}
-            </span>
-          {/if}
         </div>
         <div class="min-w-0">
           <h3 class="font-heading font-bold text-xs sm:text-sm text-main truncate" style={pStyle.color ? `color: ${pStyle.color};` : ''}>
@@ -133,7 +125,7 @@
             type="button"
             on:click|stopPropagation={() => onBuyNow(product, {})}
             class="h-8 px-4 active:scale-[0.98] text-xs font-heading font-bold transition-all cursor-pointer shadow-xs hover:opacity-90 flex items-center justify-center"
-            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, var(--color-card-base, #ffffff))); font-family: var(--theme-font-heading, var(--font-heading, inherit));"
           >
             {buyButtonText || 'Pesan'}
           </button>

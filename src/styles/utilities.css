@@ -173,6 +173,46 @@ details summary:after,
   transition-property: transform !important;
 }
 
+/* Storefront & Template Preview Strict Isolation: Suppress builder outline rings and selection borders */
+.storefront-root [class*="hover:outline"]:hover,
+.storefront-root [class*="hover:outline-dashed"]:hover,
+.storefront-root [class*="outline-dashed"],
+.storefront-root [class*="outline-dashed"]:hover,
+.storefront-root [data-node],
+.storefront-root [data-node-key],
+.storefront-root [data-node]:hover,
+.storefront-root [data-node-key]:hover {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
+.storefront-root [class*="ring-2"]:not(input):not(textarea):not(select):not(button):not(a):not(.keep-ring),
+.storefront-root [data-node].ring-2:not(input):not(textarea):not(select),
+.storefront-root [data-node-key].ring-2:not(input):not(textarea):not(select),
+.storefront-root [role="button"][data-node].ring-2,
+.storefront-root .footer-card [role="button"].ring-2,
+.storefront-root .header-nav-container [role="button"].ring-2 {
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  background-color: transparent !important;
+}
+
+.storefront-root [data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root [data-node-key]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root [role="button"][data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root .footer-card [role="button"]:not(a):not(button):not(.cursor-pointer),
+.storefront-root .cq-footer-bottom-bar > div:not(a):not(button):not(.cursor-pointer) {
+  cursor: default !important;
+}
+
+.storefront-root a,
+.storefront-root button,
+.storefront-root .builder-header-nav-link,
+.storefront-root [role="tab"] {
+  cursor: pointer !important;
+}
+
 @layer utilities {
   .no-scrollbar {
     scrollbar-width: none;

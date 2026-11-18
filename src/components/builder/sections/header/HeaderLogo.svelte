@@ -11,7 +11,8 @@
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isMobile = viewMode === 'mobile';
 
-  $: logoType = props.logoType || 'image_text';
+  $: rawLogoType = props.logoType || 'image_text';
+  $: logoType = rawLogoType === 'image' ? 'image_text' : rawLogoType;
   $: logoText = props.logoText || 'Toko UMKM';
   $: logoImageUrl = props.logoImageUrl || '';
   $: logoHeight = Number(props.logoImageHeight) || 40;

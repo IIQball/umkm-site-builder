@@ -8,7 +8,6 @@ export { type GenerateLogoImageOptions, type GeneratedLogoResult } from '@/types
 const DEFAULT_MODEL = 'gpt-image-2.5-sunburst';
 const DEFAULT_SIZE = '1024x1024';
 const DEFAULT_QUALITY = 'high';
-const DEFAULT_BACKGROUND = 'transparent';
 const DEFAULT_OUTPUT_FORMAT = 'png';
 
 /**
@@ -33,6 +32,7 @@ export async function generateLogoImage(
   const client = getOpenAIClient();
   const quality = options?.quality ?? DEFAULT_QUALITY;
   const model = options?.model ?? DEFAULT_MODEL;
+  const background = options?.hasBackground === true ? 'opaque' : 'transparent';
 
   try {
     const response = await withOpenAiRetry(
@@ -43,7 +43,7 @@ export async function generateLogoImage(
             prompt: sanitizedPrompt,
             size: DEFAULT_SIZE,
             quality,
-            background: DEFAULT_BACKGROUND,
+            background,
             output_format: DEFAULT_OUTPUT_FORMAT,
           },
           OPENAI_IMAGE_REQUEST_OPTIONS

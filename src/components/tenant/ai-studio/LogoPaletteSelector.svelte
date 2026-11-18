@@ -1,33 +1,39 @@
 <script lang="ts">
-  import { Badge, Button } from '@/components/ui';
+  import { Badge } from '@/components/ui';
   import { PRESET_COLOR_PALETTES } from './logo-wizard.constants';
   import { HEX_COLOR_REGEX } from '@/lib/validators/ai-logo';
 
   export let selectedColors: string[] = ['#C85A32', '#F7F4EE', '#2A2A2A'];
   export let error: string = '';
 
-  let customColorInput: string = '#10B981';
+  type PaletteMode = 'preset' | 'custom';
+  let mode: PaletteMode = 'preset';
 
   function applyPreset(colors: string[]) {
     selectedColors = [...colors].slice(0, 3);
     error = '';
   }
 
-  function addCustomColor() {
-    const trimmed = customColorInput.trim();
+  function handleColorChange(index: number, newColor: string) {
+    const trimmed = newColor.trim().toUpperCase();
     if (!HEX_COLOR_REGEX.test(trimmed)) {
-      error = 'Format warna tidak valid';
+      error = 'Format warna tidak valid (gunakan format hex seperti #C85A32)';
       return;
     }
+    const updated = [...selectedColors];
+    updated[index] = trimmed;
+    selectedColors = updated;
+    error = '';
+  }
+
+  function addColorSlot() {
     if (selectedColors.length >= 3) {
       error = 'Maksimal 3 warna agar logo tetap simpel dan elegan';
       return;
     }
-    if (selectedColors.includes(trimmed.toUpperCase())) {
-      error = 'Warna ini sudah ada di dalam pilihan';
-      return;
-    }
-    selectedColors = [...selectedColors, trimmed.toUpperCase()];
+    const fallbackPalette = ['#2563EB', '#F59E0B', '#10B981', '#EC4899', '#8B5CF6'];
+    const nextColor = fallbackPalette.find((c) => !selectedColors.includes(c)) || '#3B82F6';
+    selectedColors = [...selectedColors, nextColor];
     error = '';
   }
 
@@ -41,8 +47,8 @@
   }
 </script>
 
-<div>
-  <div class="flex items-center justify-between mb-2">
+<div class="space-y-3">
+  <div class="flex items-center justify-between">
     <span class="block text-label-caps text-muted">
       Pilihan Warna Logo <span class="text-error">*</span>
     </span>
@@ -51,9 +57,30 @@
     </Badge>
   </div>
 
-  <!-- Pilihan Kombinasi Warna Cepat -->
-  <div class="mb-3">
-    <span class="text-2xs text-muted block mb-1.5 font-medium">Kombinasi Warna Siap Pakai:</span>
+  <!-- Pilihan Mode: Rekomendasi vs Pilih Sendiri -->
+  <div class="flex items-center p-1 bg-nested rounded-xl border border-light w-fit gap-1">
+    <button
+      type="button"
+      class="px-3 py-1 text-xs font-heading font-semibold rounded-lg transition-all cursor-pointer {mode === 'preset'
+        ? 'bg-card text-main shadow-2xs border border-light'
+        : 'text-secondary hover:text-main'}"
+      on:click={() => (mode = 'preset')}
+    >
+      Kombinasi Rekomendasi
+    </button>
+    <button
+      type="button"
+      class="px-3 py-1 text-xs font-heading font-semibold rounded-lg transition-all cursor-pointer {mode === 'custom'
+        ? 'bg-card text-main shadow-2xs border border-light'
+        : 'text-secondary hover:text-main'}"
+      on:click={() => (mode = 'custom')}
+    >
+      Pilih Warna Sendiri
+    </button>
+  </div>
+
+  {#if mode === 'preset'}
+    <!-- Pilihan Kombinasi Warna Cepat -->
     <div class="flex flex-wrap gap-2">
       {#each PRESET_COLOR_PALETTES as preset}
         {@const isActive = preset.colors.slice(0, 3).join(',') === selectedColors.join(',')}
@@ -78,53 +105,65 @@
         </button>
       {/each}
     </div>
-  </div>
+  {/if}
 
-  <!-- Warna yang Sedang Dipilih -->
+  <!-- Slot Warna Terpilih / Pengatur Warna Kustom -->
   <div class="p-3 bg-nested rounded-2xl border border-light space-y-3">
-    <div class="flex flex-wrap items-center gap-2">
-      {#each selectedColors as color, index}
-        <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-card rounded-xl border-2 border-primary/30 shadow-2xs">
-          <span
-            class="w-4 h-4 rounded-full border border-light/60 shadow-inner flex-shrink-0"
-            style="background-color: {color};"
-          ></span>
-          <span class="text-xs font-mono font-bold text-main">{color}</span>
-          <button
-            type="button"
-            class="ml-1 text-muted hover:text-error transition-colors p-0.5 rounded cursor-pointer"
-            on:click={() => removeColor(index)}
-            aria-label="Hapus warna {color}"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      {/each}
+    <div class="flex items-center justify-between text-2xs text-secondary font-medium">
+      <span>Warna Logo Aktif (Bisa Diatur Langsung):</span>
+      <span>Maksimal 3 warna</span>
     </div>
 
-    {#if selectedColors.length < 3}
-      <div class="flex items-center gap-2 pt-2 border-t border-light/60">
-        <input
-          type="color"
-          bind:value={customColorInput}
-          class="w-8 h-8 rounded-lg cursor-pointer border border-light p-0.5 bg-card"
-          title="Pilih warna"
-        />
-        <input
-          type="text"
-          bind:value={customColorInput}
-          placeholder="#HEX"
-          maxlength="7"
-          class="w-24 px-2 py-1 text-xs font-mono rounded-lg border border-light bg-card text-main uppercase"
-        />
-        <Button size="xs" variant="secondary" on:click={addCustomColor}>
-          + Tambah Warna
-        </Button>
-      </div>
-    {/if}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      {#each selectedColors as color, index}
+        <div class="flex items-center justify-between gap-2 p-2 bg-card rounded-xl border border-light shadow-2xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <input
+              type="color"
+              value={color}
+              on:input={(e) => handleColorChange(index, e.currentTarget.value)}
+              class="w-7 h-7 rounded-lg cursor-pointer border border-light p-0.5 bg-card flex-shrink-0"
+              title="Klik untuk memilih warna"
+            />
+            <input
+              type="text"
+              value={color}
+              on:change={(e) => handleColorChange(index, e.currentTarget.value)}
+              maxlength="7"
+              class="w-20 px-1.5 py-1 text-2xs font-mono font-bold rounded-lg border border-light bg-nested text-main uppercase"
+            />
+          </div>
+          {#if selectedColors.length > 1}
+            <button
+              type="button"
+              class="text-muted hover:text-error transition-colors p-1 rounded cursor-pointer"
+              on:click={() => removeColor(index)}
+              title="Hapus warna"
+              aria-label="Hapus warna ke-{index + 1}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          {/if}
+        </div>
+      {/each}
+
+      {#if selectedColors.length < 3}
+        <button
+          type="button"
+          class="flex items-center justify-center gap-1.5 p-2 border-2 border-dashed border-light hover:border-primary/50 hover:bg-card text-secondary hover:text-primary rounded-xl text-xs font-medium transition-all cursor-pointer h-full min-h-[42px]"
+          on:click={addColorSlot}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Tambah Warna</span>
+        </button>
+      {/if}
+    </div>
   </div>
 
   {#if error}

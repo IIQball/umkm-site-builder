@@ -11,7 +11,7 @@
   =============================================================================
 -->
 <script lang="ts">
-  import { CheckCircle2, MessageCircle, Sparkles } from 'lucide-svelte';
+  import { MessageCircle, Sparkles } from 'lucide-svelte';
   import { COLOR_PALETTES } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
@@ -64,7 +64,7 @@
           type="text"
           bind:value={customization.theme.primaryColor}
           on:input={() => onUpdate?.()}
-          placeholder="#0ea5e9"
+          placeholder="#2563eb"
           maxlength="7"
           class="w-full bg-nested text-main border border-light rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold uppercase"
         />
@@ -82,22 +82,14 @@
       Warna ini otomatis diselaraskan ke berbagai elemen visual landing page:
     </p>
 
-    <!-- Simulated UI Chips -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+    <!-- Simulated Primary Button -->
+    <div class="pt-1">
       <div
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-white text-xs font-bold font-sans shadow-2xs transition-all"
+        class="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-white text-xs font-bold font-sans shadow-2xs transition-all w-full sm:w-auto"
         style="background-color: {customization.theme.primaryColor};"
       >
-        <MessageCircle size={13} />
+        <MessageCircle size={14} />
         <span>Tombol WhatsApp</span>
-      </div>
-
-      <div
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold font-sans transition-all border"
-        style="background-color: color-mix(in srgb, {customization.theme.primaryColor} 12%, transparent); color: {customization.theme.primaryColor}; border-color: color-mix(in srgb, {customization.theme.primaryColor} 30%, transparent);"
-      >
-        <CheckCircle2 size={13} />
-        <span>Lencana Promo 2026</span>
       </div>
     </div>
   </div>

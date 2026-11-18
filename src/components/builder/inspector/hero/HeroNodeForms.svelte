@@ -64,7 +64,7 @@
             type="text"
             value={stripEmoji(badgeText)}
             on:input={(e) => onPropChange('badgeText', stripEmoji(e.currentTarget.value))}
-            class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-primary font-medium"
+            class="w-full px-3.5 py-2 min-h-[40px] h-10 bg-base-200/50 border border-base-300 rounded-xl text-xs focus:outline-none focus:border-primary font-medium"
             placeholder="Promo Spesial UMKM"
           />
         </div>
@@ -103,7 +103,7 @@
           id="hero-node-title-tag"
           value={titleTag}
           on:change={(e) => onPropChange('titleTag', e.currentTarget.value)}
-          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-primary"
+          class="w-full px-3.5 py-2 min-h-[40px] h-10 bg-base-200/50 border border-base-300 rounded-xl text-xs focus:outline-none focus:border-primary"
         >
           <option value="h1">Heading 1 (&lt;h1&gt;) — Utama Halaman</option>
           <option value="h2">Heading 2 (&lt;h2&gt;) — Seksi</option>
@@ -120,7 +120,7 @@
         value={stripEmoji(subtitle)}
         on:input={(e) => onPropChange('subtitle', stripEmoji(e.currentTarget.value))}
         rows="3"
-        class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-primary resize-y"
+        class="w-full px-3.5 py-2.5 bg-base-200/50 border border-base-300 rounded-xl text-xs focus:outline-none focus:border-primary resize-y"
         placeholder="Deskripsi singkat mengenai penawaran dan produk unggulan toko Anda."
       ></textarea>
     </div>
@@ -136,7 +136,7 @@
             type="text"
             value={stripEmoji(ctaText)}
             on:input={(e) => onPropChange('ctaText', stripEmoji(e.currentTarget.value))}
-            class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-primary font-bold"
+            class="w-full px-3.5 py-2 min-h-[40px] h-10 bg-base-200/50 border border-base-300 rounded-xl text-xs focus:outline-none focus:border-primary font-bold"
             placeholder="Pesan Sekarang"
           />
         </div>
@@ -161,7 +161,7 @@
           type="text"
           value={stripEmoji(secondaryCtaText)}
           on:input={(e) => onPropChange('secondaryCtaText', stripEmoji(e.currentTarget.value))}
-          class="w-full px-3 py-1.5 bg-base-200/50 border border-base-300 rounded-lg text-xs focus:outline-none focus:border-primary"
+          class="w-full px-3.5 py-2 min-h-[40px] h-10 bg-base-200/50 border border-base-300 rounded-xl text-xs focus:outline-none focus:border-primary"
           placeholder="Pelajari Lebih Lanjut"
         />
       </div>

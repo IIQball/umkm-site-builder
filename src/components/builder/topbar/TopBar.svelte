@@ -17,6 +17,9 @@
   export let templateId: string = '';
   export let templateName: string = 'Template';
   export let templatePrice: number = 0;
+  export let templateDescription: string | null | undefined = '';
+  export let templateThumbnailUrl: string | null | undefined = '';
+  export let templateCategoryName: string | null | undefined = 'Umum';
   export let platformFeePercentage: number = 30;
   export let status: string = 'draft';
   export let rejectionReason: string | null | undefined = undefined;
@@ -184,6 +187,9 @@
   {templateId}
   {templateName}
   {templatePrice}
+  {templateDescription}
+  {templateThumbnailUrl}
+  {templateCategoryName}
   {status}
   {rejectionReason}
   {revisionCount}

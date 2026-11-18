@@ -109,7 +109,7 @@
               type="text"
               value={msg.time || '11:15'}
               on:input={(e) => updateMessage(i, 'time', e.currentTarget.value)}
-              class="input input-bordered input-xs w-full font-mono text-center"
+              class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full font-mono text-center"
               placeholder="11:15"
             />
           </div>
@@ -122,7 +122,7 @@
             rows="2"
             value={msg.text}
             on:input={(e) => updateMessage(i, 'text', e.currentTarget.value)}
-            class="textarea textarea-bordered textarea-xs w-full resize-none"
+            class="textarea textarea-bordered textarea-sm text-xs rounded-xl w-full resize-none"
             placeholder="Ketik isi pesan WhatsApp..."
           ></textarea>
         </div>

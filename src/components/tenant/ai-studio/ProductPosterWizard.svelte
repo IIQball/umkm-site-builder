@@ -6,6 +6,8 @@
   import PosterStyleSelector from './PosterStyleSelector.svelte';
   import PackagingImageUploader from './PackagingImageUploader.svelte';
   import AiQualityTierSelector from './AiQualityTierSelector.svelte';
+  import AiFontFamilySelector from './AiFontFamilySelector.svelte';
+  import ProductDesignPickerModal from '@/components/tenant/products/ProductDesignPickerModal.svelte';
   import {
     validateAiPoster,
     type PosterStyle,
@@ -30,12 +32,14 @@
   let subText: string = initialSubText;
   let posterStyle: PosterStyle = initialPosterStyle;
   let sizeRatio: PosterSizeRatio = initialSizeRatio;
+  let fontFamily: string = 'Plus Jakarta Sans';
   let referenceImageBase64: string = '';
   let originalFileName: string = '';
   let originalFileSize: number = 0;
   let compressedFileSize: number = 0;
   let qualityTier: 'standard' | 'high' = 'high';
   let errors: Record<string, string> = {};
+  let isGalleryPickerOpen: boolean = false;
 
   function handleSelectRatio(ratio: PosterSizeRatio) {
     sizeRatio = ratio;
@@ -43,6 +47,13 @@
       delete errors.sizeRatio;
       errors = { ...errors };
     }
+  }
+
+  function handleGallerySelect(event: CustomEvent<string>) {
+    referenceImageBase64 = event.detail;
+    originalFileName = 'Mockup Galeri Desain';
+    originalFileSize = 1024 * 500;
+    compressedFileSize = 1024 * 200;
   }
 
   function handleImageProcessed(
@@ -85,6 +96,7 @@
       sizeRatio,
       referenceImageBase64: referenceImageBase64 || undefined,
       qualityTier,
+      fontFamily,
     };
 
     const validation = validateAiPoster(payload);
@@ -200,11 +212,20 @@
     error={errors.posterStyle}
   />
 
-  <!-- 4. Upload Foto Produk Asli (Di Urutan Terakhir Sebelum Kualitas & Render) -->
+  <!-- 4. Pilihan Tipografi Font Poster -->
+  <AiFontFamilySelector
+    bind:selectedFont={fontFamily}
+    disabled={loading}
+    label="Pilihan Huruf Headline Poster"
+    helper="Pilih gaya tipografi teks promosi yang serasi dengan gaya poster."
+  />
+
+  <!-- 5. Foto Produk Asli (Upload Manual atau Pilih dari Galeri Mockup) -->
   <PackagingImageUploader
     disabled={loading}
     label="Foto Produk Makanan (Opsional)"
     required={false}
+    allowGalleryPicker={true}
     {referenceImageBase64}
     {originalFileName}
     {originalFileSize}
@@ -213,9 +234,16 @@
     on:processed={handleImageProcessed}
     on:remove={handleImageRemoved}
     on:error={handleImageError}
+    on:pickGallery={() => (isGalleryPickerOpen = true)}
   />
 
-  <!-- 5. Pilihan Kualitas & Model AI -->
+  <ProductDesignPickerModal
+    bind:open={isGalleryPickerOpen}
+    filterType="packaging_mockup"
+    on:select={handleGallerySelect}
+  />
+
+  <!-- 6. Pilihan Kualitas Gambar -->
   <AiQualityTierSelector bind:value={qualityTier} disabled={loading} />
 
   <!-- 6. Aksi Formulir -->

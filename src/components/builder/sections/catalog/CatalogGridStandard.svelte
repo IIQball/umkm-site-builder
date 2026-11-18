@@ -12,6 +12,7 @@
   export let buyButtonText: string = 'Beli';
   export let cartButtonText: string = 'Keranjang';
   export let nodeStyles: Record<string, Record<string, string>> = {};
+  export let isLiveStorefront: boolean = false;
   export let onAddToCart: (product: ProductItem, selections: Record<string, string>) => void = () => {};
   export let onBuyNow: (product: ProductItem, selections: Record<string, string>) => void = () => {};
 
@@ -45,13 +46,21 @@
 
   function selectCard(e: Event, idx: number, prod: ProductItem) {
     e.stopPropagation();
+    if (isLiveStorefront) {
+      onAddToCart(prod, {});
+      return;
+    }
     if (sectionId) {
       canvasStore.selectNode(sectionId, prod.id || `product_item_${idx}`);
     }
   }
 
-  function selectImage(e: Event, idx: number) {
+  function selectImage(e: Event, idx: number, prod?: ProductItem) {
     e.stopPropagation();
+    if (isLiveStorefront && prod) {
+      onAddToCart(prod, {});
+      return;
+    }
     if (sectionId) {
       canvasStore.selectNode(sectionId, `product_image_${idx}`);
     }
@@ -98,7 +107,7 @@
           activeTab === cat ? 'shadow-xs' : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-nested-base)]'
         }`}
         style={activeTab === cat
-          ? 'background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white));'
+          ? 'background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white));'
           : 'background-color: var(--color-card-base);'}
       >
         {cat === 'all' ? 'Semua Produk' : cat}
@@ -138,8 +147,8 @@
           data-node-id={`product_image_${index}`}
           role="button"
           tabindex="0"
-          on:click={(e) => selectImage(e, index)}
-          on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index); }}
+          on:click={(e) => selectImage(e, index, product)}
+          on:keydown={(e) => { if (e.key === 'Enter') selectImage(e, index, product); }}
           class={`aspect-square rounded-xl overflow-hidden bg-nested mb-3 relative group/img cursor-pointer ${
             isImgActive ? 'ring-2 ring-primary' : ''
           }`}
@@ -197,7 +206,7 @@
 
       <div class="mt-3 pt-3 border-t border-light/60">
         <div class="flex items-baseline gap-1.5 flex-wrap mb-2">
-          <p class="font-heading font-black text-xs sm:text-sm text-[var(--theme-primary,var(--color-primary))]" style="font-size: var(--theme-text-h3, var(--text-h3-size, 18px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700));">
+          <p class="font-heading font-black text-xs sm:text-sm text-[var(--theme-primary,#2563eb)]" style="font-size: var(--theme-text-h3, var(--text-h3-size, 18px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700));">
             {formatIDR(product.basePrice ?? product.price ?? 0)}
           </p>
           {#if hasDiscount}
@@ -230,7 +239,7 @@
               type="button"
               on:click|stopPropagation={() => handleWaDirectBuy(product, index)}
               class="flex-1 h-8 active:scale-[0.98] text-xs font-heading font-bold transition-all shadow-xs hover:opacity-90 cursor-pointer"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
             >
               Pesan WA
             </button>
@@ -250,7 +259,7 @@
               type="button"
               on:click|stopPropagation={() => onBuyNow(product, {})}
               class="flex-1 h-8 active:scale-[0.98] text-xs font-heading font-bold flex items-center justify-center transition-all cursor-pointer shadow-xs hover:opacity-90"
-              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, var(--color-primary)))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
+              style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); background-color: var(--theme-btn-primary-bg, var(--btn-primary-bg, var(--theme-primary, #2563eb))); color: var(--theme-btn-primary-text, var(--btn-primary-text, white)); font-family: var(--theme-font-heading, var(--font-heading, inherit)); font-size: var(--theme-text-body, var(--text-body-size, 14px));"
             >
               <span>{buyButtonText || 'Beli'}</span>
             </button>

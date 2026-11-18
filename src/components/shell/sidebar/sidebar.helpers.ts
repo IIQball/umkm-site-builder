@@ -59,6 +59,7 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
           { label: 'Studio AI', href: '/dashboard/ai', icon: 'auto_awesome', group: 'Manajemen Toko' },
           { label: 'Riwayat Kuota AI', href: '/dashboard/credits/history', icon: 'history', group: 'Manajemen Toko' },
           { label: 'Kategori Produk', href: '/dashboard/categories', icon: 'category', group: 'Manajemen Toko' },
+          { label: 'Pengaturan Toko', href: '/onboarding', icon: 'store', group: 'Manajemen Toko' },
         ],
       },
       {
@@ -78,7 +79,6 @@ export const getNavGroups = (role: AuthenticatedUser['role']): NavGroup[] => {
       {
         title: 'Pengaturan',
         items: [
-          { label: 'Pengaturan Toko', href: '/onboarding', icon: 'store', group: 'Pengaturan' },
           { label: 'Pengaturan Akun', href: '/settings/account', icon: 'manage_accounts', group: 'Pengaturan' },
         ],
       },

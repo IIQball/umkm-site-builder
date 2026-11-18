@@ -117,7 +117,7 @@
           type="text"
           value={section.props?.ctaText ?? 'Chat WA'}
           on:input={(e) => handlePropChange('ctaText', e.currentTarget.value)}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
           placeholder="Chat WA"
         />
       </div>

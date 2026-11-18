@@ -122,7 +122,7 @@ describe('AI Visual Discipline & Anti-Slop (bun:test)', () => {
       expect(userContent).toContain("'Space Grotesk'");
     });
 
-    it('supports all 6 OFL commercial font families', async () => {
+    it('supports all OFL commercial font families', async () => {
       for (const font of LOGO_FONT_FAMILIES) {
         mockCreate.mockResolvedValueOnce({
           choices: [{ message: { content: 'Flat vector logo' } }],

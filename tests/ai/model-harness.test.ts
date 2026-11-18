@@ -81,7 +81,7 @@ describe('AI Image Model Validation Harness Runner (bun:test)', () => {
       // 3. Webp format upload validation
       const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
       expect(uploadSpy).toHaveBeenCalled();
-      const uploadArgs = uploadSpy.mock.calls[0];
+      const uploadArgs = uploadSpy.mock.calls[uploadSpy.mock.calls.length - 1];
       expect(uploadArgs[1]).toBeDefined();
       expect(uploadArgs[1]?.format).toBe('webp');
       expect(uploadResult.secureUrl).toContain('.webp');

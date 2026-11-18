@@ -96,7 +96,7 @@ if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl
   try {
     const headRes = await fetch(canonicalMapsUrl, {
       redirect: 'manual',
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(800),
     });
     const redirectLocation = headRes.headers.get('location');
     if (redirectLocation) {
@@ -110,6 +110,8 @@ if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl
 const storeCustomization = (store.customization as Record<string, unknown>) || {};
 const branchMode = (storeCustomization.maps as any)?.branchMode || (storeCustomization as any).branchMode || 'single';
 const branches = (storeCustomization.maps as any)?.branches || (storeCustomization as any).branches || [];
+const templateLogoUrl = normalizedConfig.sections?.find((s: any) => s.type === 'header_announcement')?.props?.logoImageUrl as string | undefined;
+const activeLogoUrl = (storeCustomization.logoUrl as string) || ((storeCustomization.header as any)?.logoImageUrl as string) || templateLogoUrl || null;
 
 const finalConfig = mergeStoreCustomization(normalizedConfig, store.customization, {
   id: store.id,
@@ -124,6 +126,7 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
   longitude: store.longitude,
   branchMode,
   branches,
+  logoUrl: activeLogoUrl,
 });
 
 // 5. Dynamic Theme Tokens & Google Fonts Injection
@@ -137,11 +140,11 @@ const googleFontsUrl = buildGoogleFontsUrl(fontNames);
 
 const customization = storeCustomization;
 const isOpen = customization.isOpen !== false;
-const storeLogo = (customization.logoUrl as string) || storeProducts[0]?.image || '/og-image.png';
+const storeLogo = activeLogoUrl || storeProducts[0]?.image || '/og-image.png';
 
-// Set cache headers
-Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
-Astro.response.headers.set("Surrogate-Control", "public, max-age=86400");
+// Set cache headers - allow immediate fresh content
+Astro.response.headers.set("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=60");
+Astro.response.headers.set("Surrogate-Control", "public, max-age=60");
 Astro.response.headers.set("Surrogate-Key", `store-${store.id}`);
 
 const userAgent = Astro.request.headers.get("user-agent") || "";
@@ -167,6 +170,7 @@ const safeStore = {
   status: store.status,
   branchMode,
   branches,
+  logoUrl: activeLogoUrl,
   category: store.category ? { id: store.category.id, name: store.category.name, slug: store.category.slug } : null,
   managedByAdmin: store.registeredBy && store.registrar?.name ? { name: store.registrar.name } : null,
 };
@@ -176,6 +180,7 @@ const safeStore = {
   title={`${store.name} — ${store.category?.name || "Toko Online"}`}
   description={`${store.name} — Toko online resmi di Banyuwangi. ${store.address ? store.address + '.' : ''} Pesan produk lokal terbaik langsung via WhatsApp.`}
   image={storeLogo}
+  favicon={activeLogoUrl || undefined}
 >
   <link
     rel="preload"
@@ -196,6 +201,7 @@ const safeStore = {
   <style is:inline set:html={themeCss} />
 
   <StorefrontDynamicPage
+    client:load
     config={finalConfig}
     store={safeStore}
     products={storeProducts}

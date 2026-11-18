@@ -12,6 +12,9 @@
   export let assets: AiAssetItem[] = [];
   export let products: Array<{ id: string; name: string }> = [];
   export let loading: boolean = false;
+  export let storeId: string = '';
+
+  $: void products;
 
   const dispatch = createEventDispatcher<{
     create: void;
@@ -23,7 +26,6 @@
   let selectedAsset: AiAssetItem | null = null;
   let isDetailOpen = false;
   let isAttachOpen = false;
-  let isAttaching = false;
 
   $: filteredAssets = assets.filter((asset) => {
     if (activeCategory === 'all') return true;
@@ -33,16 +35,6 @@
   function handleOpenDetail(asset: AiAssetItem) {
     selectedAsset = asset;
     isDetailOpen = true;
-  }
-
-  async function handleAttach(event: CustomEvent<{ productId: string; cloudinaryUrl: string; attachmentType: string }>) {
-    isAttaching = true;
-    try {
-      dispatch('attach', event.detail);
-    } finally {
-      isAttaching = false;
-      isAttachOpen = false;
-    }
   }
 </script>
 
@@ -122,7 +114,12 @@
       {#each filteredAssets as asset (asset.id)}
         <AiGalleryCard
           {asset}
+          {storeId}
           on:openDetail={(e) => handleOpenDetail(e.detail)}
+          on:attach={(e) => {
+            selectedAsset = e.detail;
+            isAttachOpen = true;
+          }}
         />
       {/each}
     </div>
@@ -132,6 +129,7 @@
   <AiAssetDetailModal
     open={isDetailOpen}
     asset={selectedAsset}
+    {storeId}
     on:close={() => (isDetailOpen = false)}
   />
 
@@ -139,9 +137,7 @@
   <AiAssetAttachModal
     open={isAttachOpen}
     asset={selectedAsset}
-    {products}
-    loading={isAttaching}
+    {storeId}
     on:close={() => (isAttachOpen = false)}
-    on:attach={handleAttach}
   />
 </div>

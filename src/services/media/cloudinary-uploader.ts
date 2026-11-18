@@ -23,7 +23,8 @@ function sanitizeErrorMessage(message: string): string {
  */
 export async function uploadBase64Image(
   b64Data: string,
-  folder: string
+  folder: string,
+  options?: { format?: string }
 ): Promise<CloudinaryUploadResult> {
   const sanitizedBase64 = typeof b64Data === 'string' ? b64Data.trim() : '';
   if (!sanitizedBase64) {
@@ -47,7 +48,7 @@ export async function uploadBase64Image(
     const result = await cloudinary.uploader.upload(uploadPayload, {
       folder: sanitizedFolder,
       resource_type: 'image',
-      format: 'webp',
+      format: options?.format || 'webp',
     });
 
     return {

@@ -204,14 +204,14 @@
 <Modal
   open={commentModalOpen}
   title={commentModalItem ? `Komentar — ${commentModalItem.customerName}` : ''}
-  size="sm"
+  size="md"
   on:close={closeComments}
 >
   {#if commentModalItem && commentModalIndex !== null}
     {@const comments = getCommentsForItem(commentModalIndex, commentModalItem)}
     <div class="space-y-4">
       <!-- Original review snippet -->
-      <div class="p-3 rounded-2xl bg-nested border border-light/60 text-xs leading-relaxed text-main italic">
+      <div class="p-3 rounded-2xl bg-nested border border-light/60 text-xs leading-relaxed text-main italic break-words">
         "{commentModalItem.comment}"
       </div>
 
@@ -224,10 +224,10 @@
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-baseline gap-2">
-                <span class="font-heading font-bold text-xs text-main">{c.author}</span>
+                <span class="text-xs font-semibold text-main font-sans">{c.author}</span>
                 <span class="text-[10px] text-secondary">{c.time}</span>
               </div>
-              <p class="text-xs text-main/80 mt-0.5 leading-relaxed">{c.text}</p>
+              <p class="text-xs text-main/80 mt-0.5 leading-relaxed break-words">{c.text}</p>
             </div>
           </div>
         {/each}

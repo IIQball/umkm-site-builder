@@ -10,6 +10,7 @@
   import { toast } from "@/lib/toast";
   import ProductVariantEditor from "./ProductVariantEditor.svelte";
   import ProductBasicFields from "./ProductBasicFields.svelte";
+  import ProductDesignPickerModal from "./ProductDesignPickerModal.svelte";
   import { deserializeVariants, validateVariantGroups } from "./productForm.helpers";
 
   type Product = InferSelectModel<typeof productsSchema>;
@@ -35,6 +36,38 @@
   let imageUrls: string[] = [];
   let variantGroups: VariantGroup[] = [];
   let fieldErrors: Record<string, string> = {};
+  let isGalleryPickerOpen = false;
+  let targetReplaceIndex: number | null = null;
+
+  function handleOpenGalleryPicker(indexToReplace: number | null = null) {
+    targetReplaceIndex = indexToReplace;
+    isGalleryPickerOpen = true;
+  }
+
+  function handleGalleryImageSelect(event: CustomEvent<string>) {
+    const selectedUrl = event.detail;
+    if (!selectedUrl) return;
+    if (imageUrls.includes(selectedUrl)) {
+      toast.info("Gambar ini sudah ada di daftar produk.");
+      return;
+    }
+    if (targetReplaceIndex !== null && targetReplaceIndex >= 0 && targetReplaceIndex < imageUrls.length) {
+      const updated = [...imageUrls];
+      updated[targetReplaceIndex] = selectedUrl;
+      imageUrls = updated;
+      targetReplaceIndex = null;
+      fieldErrors.imageUrls = "";
+      toast.success("Gambar berhasil diganti dari Galeri Desain AI!");
+      return;
+    }
+    if (imageUrls.length >= 5) {
+      toast.warning("Maksimal 5 gambar per produk.");
+      return;
+    }
+    imageUrls = [...imageUrls, selectedUrl];
+    fieldErrors.imageUrls = "";
+    toast.success("Gambar berhasil ditambahkan dari Galeri Desain AI!");
+  }
 
   function handleSortOrderInput(e: CustomEvent | Event) {
     const customEvent = e as CustomEvent;
@@ -69,12 +102,14 @@
       variantGroups = [];
       imageUrls = [];
     }
+    targetReplaceIndex = null;
   } else if (!showModal && wasOpen) {
     wasOpen = false;
   }
 
   const closeModal = () => {
     showModal = false;
+    targetReplaceIndex = null;
     errorMessage = "";
     dispatch("close");
   };
@@ -177,20 +212,7 @@
     </div>
   </svelte:fragment>
   {#if errorMessage}
-    <div class="alert alert-error mb-4 shadow-xs">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="stroke-current shrink-0 h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
+    <div class="alert alert-error mb-4 shadow-xs text-xs flex items-center gap-2">
       <span>{errorMessage}</span>
     </div>
   {/if}
@@ -205,17 +227,19 @@
   />
 
   <div class="space-y-1.5 mb-4">
-    <div class="text-xs font-bold text-main block font-heading">
+    <span class="text-xs font-bold text-main block font-heading">
       Gambar Produk <span class="text-error">*</span>
-    </div>
+    </span>
     <div
-      class="border rounded-2xl p-2 bg-nested"
+      class="border rounded-2xl p-2.5 bg-nested"
       class:border-error={fieldErrors.imageUrls}
     >
       <ImageUpload
         folder="products"
-        maxFiles={1}
+        maxFiles={5}
         existingUrls={imageUrls}
+        allowGalleryPicker={true}
+        onPickGallery={(idx) => handleOpenGalleryPicker(idx ?? null)}
         onUpload={(urls) => {
           imageUrls = urls;
           fieldErrors.imageUrls = "";
@@ -227,6 +251,11 @@
     {/if}
   </div>
 
+  <ProductDesignPickerModal
+    bind:open={isGalleryPickerOpen}
+    on:select={handleGalleryImageSelect}
+  />
+
   <!-- Variant Groups Editor -->
   <ProductVariantEditor
     bind:variantGroups
@@ -235,35 +264,14 @@
 
   <div class="space-y-1.5 mb-4">
     <label for="prod_sort" class="text-xs font-bold text-main block font-heading">Urutan Tampil</label>
-    <Input
-      id="prod_sort"
-      type="text"
-      inputmode="numeric"
-      value={sortOrder}
-      on:input={handleSortOrderInput}
-    />
+    <Input id="prod_sort" type="text" inputmode="numeric" value={sortOrder} on:input={handleSortOrderInput} />
   </div>
 
-
-
   <svelte:fragment slot="footer">
-    <Button
-      variant="secondary"
-      size="sm"
-      className="rounded-xl font-bold"
-      disabled={formLoading}
-      on:click={closeModal}
-    >
+    <Button variant="secondary" size="sm" className="rounded-xl font-bold" disabled={formLoading} on:click={closeModal}>
       Batal
     </Button>
-    <Button
-      variant="primary"
-      size="sm"
-      className="rounded-xl font-bold"
-      on:click={handleSaveProduct}
-      disabled={formLoading}
-      loading={formLoading}
-    >
+    <Button variant="primary" size="sm" className="rounded-xl font-bold" on:click={handleSaveProduct} disabled={formLoading} loading={formLoading}>
       {formLoading ? 'Menyimpan...' : editingProduct ? 'Simpan Perubahan' : 'Tambah Produk'}
     </Button>
   </svelte:fragment>

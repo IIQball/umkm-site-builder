@@ -64,7 +64,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       attachedAt: new Date().toISOString(),
     };
     
-    const updatedImageUrls = [...currentImageUrls, aiImageEntry];
+    const filteredExisting = currentImageUrls.filter(
+      (entry) => (typeof entry === 'string' ? entry : entry?.url) !== cloudinaryUrl
+    );
+    const updatedImageUrls = [aiImageEntry, ...filteredExisting];
 
     // 6. Update product with new imageUrls
     const [updatedProduct] = await db

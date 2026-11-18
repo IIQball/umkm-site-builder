@@ -1,3 +1,5 @@
+import type { LogoFontFamily } from '@/schemas/tenant/ai-logo.schema';
+
 /**
  * AI Generation & Quota Domain Types
  * Shared Contract for Virda AI Studio & Store Quota Management
@@ -107,13 +109,17 @@ export interface GenerateLogoPromptInput {
   logoText?: string;
   colorPalette?: string;
   lockupType?: 'icon_only' | 'vertical' | 'horizontal';
-  fontFamily?: 'Poppins' | 'Plus Jakarta Sans' | 'Space Grotesk' | 'Fraunces' | 'Outfit' | 'Playfair Display';
+  fontFamily?: LogoFontFamily | string;
   focalSubject?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
 }
 
 export interface GenerateLogoImageOptions {
   quality?: 'medium' | 'high';
   model?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
 }
 
 export interface GeneratedLogoResult {
@@ -247,40 +253,22 @@ export const MOCK_AI_GENERATION_LOGS: AiGenerationLog[] = [
 
 export const MOCK_STORE_QUOTA_PACKAGES: StoreQuotaPackage[] = [
   {
-    id: 'pkg_quota_basic',
-    name: 'Paket Tambah 20 Produk',
-    slug: 'paket-tambah-20-produk',
+    id: 'pkg_quota_basic', name: 'Paket Tambah 20 Produk', slug: 'paket-tambah-20-produk',
     description: 'Menambah kuota 20 produk dan 5 kategori baru pada katalog toko',
-    price: 25000,
-    additionalProducts: 20,
-    additionalCategories: 5,
-    isActive: true,
-    createdAt: '2026-10-17T00:00:00.000Z',
-    updatedAt: '2026-10-17T00:00:00.000Z',
+    price: 25000, additionalProducts: 20, additionalCategories: 5, isActive: true,
+    createdAt: '2026-10-17T00:00:00.000Z', updatedAt: '2026-10-17T00:00:00.000Z',
   },
   {
-    id: 'pkg_quota_pro',
-    name: 'Paket Tambah 50 Produk',
-    slug: 'paket-tambah-50-produk',
+    id: 'pkg_quota_pro', name: 'Paket Tambah 50 Produk', slug: 'paket-tambah-50-produk',
     description: 'Menambah kuota 50 produk dan 15 kategori baru untuk katalog lengkap',
-    price: 50000,
-    additionalProducts: 50,
-    additionalCategories: 15,
-    isActive: true,
-    createdAt: '2026-10-17T00:00:00.000Z',
-    updatedAt: '2026-10-17T00:00:00.000Z',
+    price: 50000, additionalProducts: 50, additionalCategories: 15, isActive: true,
+    createdAt: '2026-10-17T00:00:00.000Z', updatedAt: '2026-10-17T00:00:00.000Z',
   },
   {
-    id: 'pkg_quota_unlimited',
-    name: 'Paket Sultan 200 Produk',
-    slug: 'paket-sultan-200-produk',
+    id: 'pkg_quota_unlimited', name: 'Paket Sultan 200 Produk', slug: 'paket-sultan-200-produk',
     description: 'Menambah kuota 200 produk dan 50 kategori untuk merchant skala besar',
-    price: 150000,
-    additionalProducts: 200,
-    additionalCategories: 50,
-    isActive: true,
-    createdAt: '2026-10-17T00:00:00.000Z',
-    updatedAt: '2026-10-17T00:00:00.000Z',
+    price: 150000, additionalProducts: 200, additionalCategories: 50, isActive: true,
+    createdAt: '2026-10-17T00:00:00.000Z', updatedAt: '2026-10-17T00:00:00.000Z',
   },
 ];
 

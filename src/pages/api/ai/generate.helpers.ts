@@ -31,6 +31,8 @@ export interface GenerateRequestBody {
   visualStyle?: string;
   colorPalette?: string | string[];
   focalSubject?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
   qualityTier?: 'standard' | 'high';
   options?: {
     quality?: 'medium' | 'high';
@@ -72,6 +74,8 @@ export interface ParsedGeneratePayload {
   visualStyleInput?: string;
   colorPaletteInput?: string;
   focalSubjectInput?: string;
+  hasBackground?: boolean;
+  backgroundColor?: string;
 }
 
 export async function parseGeneratePayload(request: Request): Promise<ParsedGeneratePayload> {
@@ -99,6 +103,8 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
   let visualStyleInput: string | undefined;
   let colorPaletteInput: string | undefined;
   let focalSubjectInput: string | undefined;
+  let hasBackgroundInput: boolean | undefined;
+  let backgroundColorInput: string | undefined;
 
   const contentType = request.headers.get('content-type') || '';
 
@@ -136,6 +142,11 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
     visualStyleInput = (formData.get('visualStyle') as string) || undefined;
     colorPaletteInput = (formData.get('colorPalette') as string) || undefined;
     focalSubjectInput = (formData.get('focalSubject') as string) || undefined;
+    const rawHasBg = formData.get('hasBackground');
+    if (rawHasBg !== null) {
+      hasBackgroundInput = rawHasBg === 'true' || rawHasBg === '1';
+    }
+    backgroundColorInput = (formData.get('backgroundColor') as string) || undefined;
 
     const file = formData.get('image');
     if (file && typeof file === 'object' && 'arrayBuffer' in file) {
@@ -153,8 +164,20 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
     }
     if (body.options?.size) sizeRatio = body.options.size;
     if (body.image) {
-      const cleanB64 = body.image.replace(/^data:image\/\w+;base64,/, '');
-      imageBuffer = Buffer.from(cleanB64, 'base64');
+      if (body.image.startsWith('http://') || body.image.startsWith('https://')) {
+        try {
+          const resp = await fetch(body.image);
+          if (resp.ok) {
+            const ab = await resp.arrayBuffer();
+            imageBuffer = Buffer.from(ab);
+          }
+        } catch {
+          // ignore error, imageBuffer will stay null
+        }
+      } else {
+        const cleanB64 = body.image.replace(/^data:image\/\w+;base64,/, '');
+        imageBuffer = Buffer.from(cleanB64, 'base64');
+      }
     }
     isTesting = Boolean(body.isTesting);
     explicitStoreId = body.storeId;
@@ -175,6 +198,10 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
     visualStyleInput = body.visualStyle;
     colorPaletteInput = Array.isArray(body.colorPalette) ? body.colorPalette.join(', ') : body.colorPalette;
     focalSubjectInput = body.focalSubject;
+    if (body.hasBackground !== undefined) {
+      hasBackgroundInput = Boolean(body.hasBackground);
+    }
+    backgroundColorInput = body.backgroundColor;
   }
 
   return {
@@ -202,6 +229,8 @@ export async function parseGeneratePayload(request: Request): Promise<ParsedGene
     visualStyleInput,
     colorPaletteInput,
     focalSubjectInput,
+    hasBackground: hasBackgroundInput !== undefined ? hasBackgroundInput : true,
+    backgroundColor: backgroundColorInput || '#FFFFFF',
   };
 }
 

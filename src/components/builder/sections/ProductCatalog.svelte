@@ -39,15 +39,11 @@
     ? nodeStyles
     : ((props?.nodeStyles || styles?.nodeStyles || {}) as Record<string, Record<string, string>>);
 
-  let dynamicProducts: ProductItem[] = [];
-  let categories: { id: string; name: string; slug: string }[] = [];
-  let activeCategoryId: string = "all";
-
-  let currentView: "catalog" | "checkout" = "catalog";
-  let storeWaNumber: string = "";
-  let cart: CartItem[] = [];
-  let isMounted = false;
+  let dynamicProducts: ProductItem[] = [], categories: { id: string; name: string; slug: string }[] = [], activeCategoryId: string = "all";
+  let currentView: "catalog" | "checkout" = "catalog", storeWaNumber: string = "", cart: CartItem[] = [], isMounted = false;
   let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
+  let buyButtonText = '', cartButtonText = 'Keranjang';
+  let marginTop = '0px', marginBottom = '0px', paddingTop = '48px', paddingBottom = '48px', paddingLeft = '', paddingRight = '';
 
   $: effectiveStoreId = storeId || (props?.storeId as string) || '';
   $: storageKey = `cart_${effectiveStoreId || 'default'}`;
@@ -67,17 +63,10 @@
   });
 
   $: if (isMounted && typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(cart));
-    } catch {
-      void 0;
-    }
+    try { localStorage.setItem(storageKey, JSON.stringify(cart)); } catch { void 0; }
   }
 
-  // State for variant modal
-  let selectedVariantProduct: ProductItem | null = null;
-  let isVariantModalOpen = false;
-  let variantModalMode: 'cart' | 'buy' = 'cart';
+  let selectedVariantProduct: ProductItem | null = null, isVariantModalOpen = false, variantModalMode: 'cart' | 'buy' = 'cart';
 
   // In live storefront: use only real products (empty state if none). In builder: fallback to demo.
   $: products = isLiveStorefront
@@ -134,9 +123,14 @@
       }
       cart = [...cart, { product, variantId: variantKey, selections, qty, price: base, subtotal: base * qty }];
     }
+    toast.success(`${product.name} dimasukkan ke keranjang`);
   };
 
   const handleAddToCart = (product: ProductItem) => {
+    if (!product.variants || product.variants.length === 0) {
+      addConfiguredItemToCart(product);
+      return;
+    }
     selectedVariantProduct = product;
     variantModalMode = 'cart';
     isVariantModalOpen = true;
@@ -150,6 +144,12 @@
   };
 
   const handleBuyNow = (product: ProductItem) => {
+    if (!product.variants || product.variants.length === 0) {
+      addConfiguredItemToCart(product);
+      currentView = 'checkout';
+      scrollToCatalog();
+      return;
+    }
     selectedVariantProduct = product;
     variantModalMode = 'buy';
     isVariantModalOpen = true;
@@ -159,10 +159,7 @@
     cart[idx].qty += delta;
     cart = cart[idx].qty <= 0 ? cart.filter((_, i) => i !== idx) : [...cart];
   };
-
-  const removeFromCart = (idx: number) => {
-    cart = cart.filter((_, i) => i !== idx);
-  };
+  const removeFromCart = (idx: number) => { cart = cart.filter((_, i) => i !== idx); };
 
   const handleCheckout = () => {
     if (!form.name || !form.phone || !form.address) {
@@ -173,7 +170,8 @@
       const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as { name?: string }).name : opt).filter(Boolean).join(", ");
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
-    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    const deliveryMethod = form.delivery || 'Kurir Toko / Pengantaran Langsung';
+    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nMetode Pengiriman: ${deliveryMethod}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     const waLink = generateWhatsAppLink(effectiveWaNumber, message);
     
     openWhatsAppWithTracking(waLink, effectiveStoreId);
@@ -181,9 +179,10 @@
 </script>
 
 <div
+  id={sectionId || 'produk'}
   data-node="product_catalog_container"
-  class="product-card w-full box-border relative overflow-hidden"
-  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom}; container-type: inline-size; container-name: productcard;"
+  class="w-full box-border relative"
+  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom};"
 >
   {#if currentView === 'checkout'}
     <div
@@ -223,7 +222,7 @@
         />
       </div>
 
-      <div style="order: {isGridFirst ? 1 : 2};">
+      <div class="product-card" style="order: {isGridFirst ? 1 : 2};">
         <!-- Empty State: shown in live storefront when store has no products yet -->
         {#if isLiveStorefront && products.length === 0}
           <div class="flex flex-col items-center justify-center gap-4 py-20 text-center text-muted">
@@ -259,27 +258,28 @@
             <CatalogAccordion {sectionId} {products} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
           {:else}
             <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
-            <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <CatalogGridStandard {sectionId} {products} {activePreset} {isLiveStorefront} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {/if}
         {/if}
       </div>
     </div>
 
-    <!-- Floating Sticky Cart Pill -->
+    <!-- Floating Sticky Cart Pill (posisi rapih di atas Laporkan Bug) -->
     {#if totalCartItems > 0}
-      <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
+      <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-20 right-4 sm:right-6 z-40">
         <button
           type="button"
           on:click={() => { currentView = 'checkout'; scrollToCatalog(); }}
-          class="btn rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-bold text-sm group"
-          style="background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff)); border-radius: 9999px;"
+          class="flex items-center gap-2.5 py-2.5 px-4 rounded-full shadow-2xl border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-semibold text-xs sm:text-sm select-none whitespace-nowrap"
+          style="background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff));"
         >
-          <div class="relative">
-            <ShoppingCart size={18} />
-            <span class="badge badge-error badge-xs absolute -top-2 -right-2 text-white font-mono font-bold p-1">{totalCartItems}</span>
+          <div class="flex items-center gap-1.5 bg-black/15 dark:bg-white/20 px-2 py-0.5 rounded-full font-mono font-bold text-xs">
+            <ShoppingCart size={14} />
+            <span>{totalCartItems}</span>
           </div>
           <span>Keranjang</span>
-          <span class="badge badge-ghost font-mono text-xs">{formatIDR(cartTotal)}</span>
+          <span class="opacity-40">•</span>
+          <span class="font-bold font-mono">{formatIDR(cartTotal)}</span>
         </button>
       </div>
     {/if}

@@ -81,6 +81,42 @@ export const LOGO_FONT_OPTIONS: LogoFontOption[] = [
     category: 'Mewah & Anggun',
     description: 'Tampilan anggun dan berkelas, memberi kesan produk premium bermutu tinggi.',
   },
+  {
+    id: 'Montserrat',
+    name: 'Montserrat',
+    category: 'Tegas & Berani',
+    description: 'Proporsional kuat untuk judul promosi mencolok.',
+  },
+  {
+    id: 'Inter',
+    name: 'Inter',
+    category: 'Netral & Presisi',
+    description: 'Keterbacaan sangat tinggi di semua resolusi layar.',
+  },
+  {
+    id: 'Merriweather',
+    name: 'Merriweather',
+    category: 'Editorial Nyaman',
+    description: 'Serif berbobot seimbang dan nyaman dibaca.',
+  },
+  {
+    id: 'Cormorant Garamond',
+    name: 'Cormorant Garamond',
+    category: 'Eksklusif Mewah',
+    description: 'Sentuhan kaligrafi megah untuk merek berkelas.',
+  },
+  {
+    id: 'DM Serif Display',
+    name: 'DM Serif Display',
+    category: 'Tajam & Berkelas',
+    description: 'Gaya serif kontras tinggi memikat perhatian.',
+  },
+  {
+    id: 'Sora',
+    name: 'Sora',
+    category: 'Futuristik Bersih',
+    description: 'Sentuhan geometris modern yang segar.',
+  },
 ];
 
 export interface LogoConceptOption {

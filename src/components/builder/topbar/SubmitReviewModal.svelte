@@ -9,11 +9,15 @@
   import { Modal, Button, Textarea } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
   import { apiFetch } from '@/lib/api/parse-response';
+  import SubmitReviewCardPreview from './SubmitReviewCardPreview.svelte';
 
   export let isOpen: boolean = false;
   export let templateId: string = '';
   export let templateName: string = 'Template';
   export let templatePrice: number = 0;
+  export let templateDescription: string | null | undefined = '';
+  export let templateThumbnailUrl: string | null | undefined = '';
+  export let templateCategoryName: string | null | undefined = 'Umum';
   export let status: string = 'draft';
   export let rejectionReason: string | null | undefined = undefined;
   export let revisionCount: number = 0;
@@ -129,121 +133,138 @@
   bind:open={isOpen}
   title={isRejected ? 'Ajukan Ulang Revisi Template' : 'Ajukan Template untuk Kurasi'}
   description={templateId ? `${templateName} (ID: ${templateId})` : templateName}
-  size="md"
+  size="xl"
   on:close={handleClose}
 >
-  <div class="space-y-4 text-xs font-sans">
-    <!-- Error Alert if any -->
-    {#if errorMessage}
-      <div class="alert alert-error text-xs rounded-xl shadow-xs py-2.5 px-3 flex items-start gap-2">
-        <AlertCircle size={16} class="shrink-0 mt-0.5" />
-        <span class="leading-relaxed">{errorMessage}</span>
-      </div>
-    {/if}
-
-    <!-- Previous Rejection Alert -->
-    {#if isRejected && rejectionReason}
-      <div class="rounded-xl bg-error/10 border border-error/25 p-3.5 space-y-1.5">
-        <div class="flex items-center justify-between gap-1.5 font-bold text-error">
-          <div class="flex items-center gap-1.5">
-            <AlertCircle size={14} class="shrink-0" />
-            <span>Alasan Penolakan Kurator</span>
-          </div>
-          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-error/15">
-            Revisi ke-{revisionCount + 1}/{maxRevisions}
-          </span>
-        </div>
-        <p class="text-secondary leading-relaxed pl-5 whitespace-pre-wrap">
-          {rejectionReason}
-        </p>
-      </div>
-    {/if}
-
-    <!-- Revision Notes Form Input -->
-    {#if isRejected}
-      <div class="rounded-xl border border-light bg-card p-3.5">
-        <Textarea
-          id="revision-notes-input"
-          label="Penjelasan Perbaikan Desain"
-          required
-          bind:value={revisionNotes}
-          disabled={isSubmitting || isLimitReached}
-          rows={3}
-          maxlength={500}
-          resizable={false}
-          helper="Wajib diisi minimal 5 karakter"
-          placeholder="Jelaskan perbaikan apa saja yang telah Anda buat berdasarkan catatan kurator di atas..."
-          class="text-xs"
-        />
-      </div>
-    {/if}
-
-    <!-- Curation Flow Note -->
-    <div class="rounded-xl bg-nested/50 border border-light p-3.5 space-y-1.5">
-      <div class="flex items-center gap-1.5 font-semibold text-main">
-        <Info size={14} class="text-primary shrink-0" />
-        <span>Ketentuan Peninjauan Desain</span>
-      </div>
-      <p class="text-secondary leading-relaxed pl-5">
-        Template akan ditinjau tim kurator sebelum terbit ke katalog publik. Konfigurasi template akan dikunci sementara selama peninjauan berlangsung.
-      </p>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 text-xs font-sans">
+    <!-- Left Column (5 cols): Marketplace Card Preview & Completeness Checklist -->
+    <div class="lg:col-span-5">
+      <SubmitReviewCardPreview
+        {templateId}
+        {templateName}
+        {templatePrice}
+        {templateDescription}
+        {templateThumbnailUrl}
+        {templateCategoryName}
+        {status}
+      />
     </div>
 
-    <!-- Clean Commission Breakdown Card -->
-    <div class="rounded-xl border border-light bg-card p-4 space-y-3">
-      <div class="flex items-center justify-between pb-1">
-        <span class="font-semibold text-main text-xs">
-          Rincian Pembagian Hasil
-        </span>
-        <button
-          type="button"
-          class="text-xs text-muted hover:text-primary transition-colors flex items-center gap-1.5 p-1 -mr-1 rounded hover:bg-nested disabled:opacity-50 cursor-pointer"
-          disabled={isLoadingFee}
-          on:click={fetchCommissionSettings}
-          title="Sinkronkan data komisi terbaru"
-        >
-          <RefreshCw size={12} class={isLoadingFee ? 'animate-spin text-primary' : ''} />
-          <span>{isLoadingFee ? 'Memperbarui...' : 'Sinkronkan'}</span>
-        </button>
-      </div>
-
-      <!-- Ratio Indicator -->
-      <div class="grid grid-cols-2 gap-2 text-center">
-        <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
-          <span class="text-xs-dense text-muted block">Fee Platform</span>
-          <span class="text-sm font-bold text-main font-mono">{platformFeePercentage}%</span>
+    <!-- Right Column (7 cols): Curation Details, Notes, and Commission Breakdown -->
+    <div class="lg:col-span-7 space-y-4">
+      <!-- Error Alert if any -->
+      {#if errorMessage}
+        <div class="alert alert-error text-xs rounded-xl shadow-xs py-2.5 px-3 flex items-start gap-2">
+          <AlertCircle size={16} class="shrink-0 mt-0.5" />
+          <span class="leading-relaxed">{errorMessage}</span>
         </div>
-        <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
-          <span class="text-xs-dense text-muted block">Hak Desainer</span>
-          <span class="text-sm font-bold text-success font-mono">{designerPercentage}%</span>
-        </div>
-      </div>
+      {/if}
 
-      <!-- Line items -->
-      <div class="pt-1 border-t border-light/80 space-y-1.5">
-        <div class="flex justify-between items-center text-secondary">
-          <span>Harga Jual Template</span>
-          <span class="font-semibold text-main font-mono">
-            {templatePrice > 0 ? formatIDR(templatePrice) : 'Gratis (Rp 0)'}
-          </span>
-        </div>
-
-        {#if templatePrice > 0}
-          <div class="flex justify-between items-center text-muted">
-            <span>Potongan Fee ({platformFeePercentage}%)</span>
-            <span class="font-mono">-{formatIDR(platformFeeAmount)}</span>
-          </div>
-          <div class="border-t border-light/80 pt-2 flex justify-between items-center">
-            <span class="font-medium text-main">Estimasi Diterima Desainer</span>
-            <span class="font-bold text-success font-mono text-sm">
-              {formatIDR(designerAmount)}
+      <!-- Previous Rejection Alert -->
+      {#if isRejected && rejectionReason}
+        <div class="rounded-xl bg-error/10 border border-error/25 p-3.5 space-y-1.5">
+          <div class="flex items-center justify-between gap-1.5 font-bold text-error">
+            <div class="flex items-center gap-1.5">
+              <AlertCircle size={14} class="shrink-0" />
+              <span>Alasan Penolakan Kurator</span>
+            </div>
+            <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-error/15">
+              Revisi ke-{revisionCount + 1}/{maxRevisions}
             </span>
           </div>
-        {:else}
-          <p class="text-muted italic pt-0.5 text-xs-dense">
-            *Template gratis tidak dikenakan potongan fee platform.
+          <p class="text-secondary leading-relaxed pl-5 whitespace-pre-wrap">
+            {rejectionReason}
           </p>
-        {/if}
+        </div>
+      {/if}
+
+      <!-- Revision Notes Form Input -->
+      {#if isRejected}
+        <div class="rounded-xl border border-light bg-card p-3.5">
+          <Textarea
+            id="revision-notes-input"
+            label="Penjelasan Perbaikan Desain"
+            required
+            bind:value={revisionNotes}
+            disabled={isSubmitting || isLimitReached}
+            rows={3}
+            maxlength={500}
+            resizable={false}
+            helper="Wajib diisi minimal 5 karakter"
+            placeholder="Jelaskan perbaikan apa saja yang telah Anda buat berdasarkan catatan kurator di atas..."
+            class="text-xs"
+          />
+        </div>
+      {/if}
+
+      <!-- Curation Flow Note -->
+      <div class="rounded-xl bg-nested/50 border border-light p-3.5 space-y-1.5">
+        <div class="flex items-center gap-1.5 font-semibold text-main">
+          <Info size={14} class="text-primary shrink-0" />
+          <span>Ketentuan Peninjauan Desain</span>
+        </div>
+        <p class="text-secondary leading-relaxed pl-5">
+          Template akan ditinjau tim kurator sebelum terbit ke katalog publik. Konfigurasi template akan dikunci sementara selama peninjauan berlangsung.
+        </p>
+      </div>
+
+      <!-- Clean Commission Breakdown Card -->
+      <div class="rounded-xl border border-light bg-card p-4 space-y-3">
+        <div class="flex items-center justify-between pb-1">
+          <span class="font-semibold text-main text-xs">
+            Rincian Pembagian Hasil
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            disabled={isLoadingFee}
+            on:click={fetchCommissionSettings}
+            title="Sinkronkan data komisi terbaru"
+            class="text-xs text-muted hover:text-primary gap-1.5 h-auto py-1 px-1.5 -mr-1"
+          >
+            <RefreshCw size={12} class={isLoadingFee ? 'animate-spin text-primary' : ''} />
+            <span>{isLoadingFee ? 'Memperbarui...' : 'Sinkronkan'}</span>
+          </Button>
+        </div>
+
+        <!-- Ratio Indicator -->
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
+            <span class="text-xs-dense text-muted block">Fee Platform</span>
+            <span class="text-sm font-bold text-main font-mono">{platformFeePercentage}%</span>
+          </div>
+          <div class="bg-nested/60 rounded-lg py-2 px-3 border border-light/60">
+            <span class="text-sm font-bold text-success font-mono">{designerPercentage}%</span>
+          </div>
+        </div>
+
+        <!-- Line items -->
+        <div class="pt-1 border-t border-light/80 space-y-1.5">
+          <div class="flex justify-between items-center text-secondary">
+            <span>Harga Jual Template</span>
+            <span class="font-semibold text-main font-mono">
+              {templatePrice > 0 ? formatIDR(templatePrice) : 'Gratis (Rp 0)'}
+            </span>
+          </div>
+
+          {#if templatePrice > 0}
+            <div class="flex justify-between items-center text-muted">
+              <span>Potongan Fee ({platformFeePercentage}%)</span>
+              <span class="font-mono">-{formatIDR(platformFeeAmount)}</span>
+            </div>
+            <div class="border-t border-light/80 pt-2 flex justify-between items-center">
+              <span class="font-medium text-main">Estimasi Diterima Desainer</span>
+              <span class="font-bold text-success font-mono text-sm">
+                {formatIDR(designerAmount)}
+              </span>
+            </div>
+          {:else}
+            <p class="text-muted italic pt-0.5 text-xs-dense">
+              *Template gratis tidak dikenakan potongan fee platform.
+            </p>
+          {/if}
+        </div>
       </div>
     </div>
   </div>

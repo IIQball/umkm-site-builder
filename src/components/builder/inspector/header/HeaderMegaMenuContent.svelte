@@ -91,7 +91,7 @@
               type="text"
               value={cat.name}
               on:input={(e) => handleUpdate(idx, 'name', e.currentTarget.value)}
-              class="input input-bordered input-xs w-full"
+              class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
               placeholder="cth. Makanan"
             />
           </div>
@@ -102,7 +102,7 @@
               type="text"
               value={cat.description ?? ''}
               on:input={(e) => handleUpdate(idx, 'description', e.currentTarget.value)}
-              class="input input-bordered input-xs w-full"
+              class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
               placeholder="cth. Snack & Kuliner"
             />
           </div>

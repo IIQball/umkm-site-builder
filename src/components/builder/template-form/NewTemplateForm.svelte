@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
-  import { formatIDR } from '@/lib/currency';
+  import { formatIDR, formatCurrencyInput } from '@/lib/currency';
   import { apiFetch } from '@/lib/api/parse-response';
   import { toast } from '@/lib/toast';
   import TemplateCardPreview from './TemplateCardPreview.svelte';
@@ -10,13 +10,7 @@
   import TemplateBasicDetails from './TemplateBasicDetails.svelte';
 
   export let backHref = '/designer/templates';
-  export let categories: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    description?: string | null;
-    icon?: string | null;
-  }> = [];
+  export let categories: Array<{ id: string; name: string; slug: string; description?: string | null; icon?: string | null }> = [];
   type TemplateDraftData = {
     id: string; name: string; price: number; status: string;
     description?: string | null; categoryId?: string | null;
@@ -30,7 +24,7 @@
   let selectedCategoryId = initialTemplate?.categoryId || '';
   let thumbnailUrl = initialTemplate?.thumbnailUrl || '';
   let numericPriceState = initialTemplate?.price ?? 50000;
-  let priceDisplay = initialTemplate ? (initialTemplate.price === 0 ? '0' : initialTemplate.price.toLocaleString('id-ID')) : '50.000';
+  let priceDisplay = initialTemplate ? (initialTemplate.price === 0 ? '0' : formatCurrencyInput(initialTemplate.price)) : '50.000';
   let isEditMode = Boolean(initialTemplate);
   let loading = false;
   let loadingCategories = false;
@@ -57,7 +51,7 @@
             selectedCategoryId = result.data.categoryId || '';
             thumbnailUrl = result.data.thumbnailUrl || '';
             numericPriceState = result.data.price ?? 0;
-            priceDisplay = numericPriceState === 0 ? '0' : numericPriceState.toLocaleString('id-ID');
+            priceDisplay = numericPriceState === 0 ? '0' : formatCurrencyInput(numericPriceState);
             isEditMode = true;
           }
         } catch (fetchErr) {
@@ -153,11 +147,11 @@
   };
 </script>
 
-<div class="max-w-5xl mx-auto space-y-6 animate-fade-in">
-  <Card variant="bordered" padding="none" radius="3xl" className="shadow-sm overflow-hidden">
+<div class="max-w-5xl mx-auto space-y-6 w-full">
+  <Card variant="bordered" padding="none" radius="3xl" overflow="visible" className="shadow-sm overflow-visible">
     <!-- Card Header Banner -->
     <div
-      class="p-6 md:p-8 bg-nested/50 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      class="p-6 md:p-8 bg-nested/50 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-3xl"
     >
       <div class="flex items-center gap-3">
         <div
@@ -201,7 +195,7 @@
 
     <!-- Main Grid: Left Form (60%) + Right Live Preview (40%) -->
     <div
-      class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--color-border-light)]"
+      class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--color-border-light)] items-start"
     >
       <!-- Left Column: Interactive Form -->
       <form

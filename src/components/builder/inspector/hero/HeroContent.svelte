@@ -64,7 +64,7 @@
           type="text"
           value={stripEmoji(section.props?.badgeText ?? '')}
           on:input={(e) => handlePropChange('badgeText', stripEmoji(e.currentTarget.value))}
-          class="input input-bordered input-sm w-full"
+          class="input input-bordered input-sm w-full min-h-[40px] h-10 text-xs px-3 rounded-xl"
           placeholder="Promo Spesial UMKM"
         />
       </div>
@@ -88,7 +88,7 @@
         type="text"
         value={stripEmoji(section.props?.title ?? '')}
         on:input={(e) => handlePropChange('title', stripEmoji(e.currentTarget.value))}
-        class="input input-bordered input-sm w-full"
+        class="input input-bordered input-sm w-full min-h-[40px] h-10 text-xs px-3 rounded-xl"
         placeholder="Selamat datang di toko kami"
       />
     </div>
@@ -105,7 +105,7 @@
         value={stripEmoji(subtitle)}
         on:input={(e) => handlePropChange('subtitle', stripEmoji(e.currentTarget.value))}
         rows="2"
-        class="textarea textarea-bordered textarea-sm w-full resize-y"
+        class="textarea textarea-bordered textarea-sm w-full resize-y rounded-xl p-3 text-xs min-h-[64px]"
         placeholder="Produk berkualitas dengan harga terjangkau dan pelayanan terpercaya."
       ></textarea>
     </div>
@@ -143,7 +143,7 @@
           type="text"
           value={stripEmoji(section.props?.ctaText ?? '')}
           on:input={(e) => handlePropChange('ctaText', stripEmoji(e.currentTarget.value))}
-          class="input input-bordered input-sm w-full"
+          class="input input-bordered input-sm w-full min-h-[40px] h-10 text-xs px-3 rounded-xl"
           placeholder="Lihat Katalog"
         />
       </div>

@@ -4,6 +4,7 @@ import { withOpenAiRetry } from '@/lib/resilience/openai-retry';
 import { isModelOrParameterRejection } from './model-adapter';
 import { uploadBase64Image } from '@/services/media/cloudinary-uploader';
 import type { PosterStyle } from '@/lib/validators/ai-poster';
+import { resolveFontDirective } from './ai-font-directives';
 
 export interface GenerateProductPosterOptions {
   size?: '1024x1024' | '1024x1536';
@@ -74,6 +75,7 @@ export interface BuildProductPosterPromptParams {
   titleText: string;
   subText?: string;
   posterStyle?: PosterStyle;
+  fontFamily?: string;
 }
 
 export function buildProductPosterPrompt(params: BuildProductPosterPromptParams): string {
@@ -82,11 +84,13 @@ export function buildProductPosterPrompt(params: BuildProductPosterPromptParams)
   const productLabel = params.productName?.trim() ? `Product: "${params.productName.trim()}". ` : '';
   const headline = params.titleText.trim();
   const tagline = params.subText?.trim() ? ` Tagline: "${params.subText.trim()}".` : '';
+  const fontSpec = resolveFontDirective(params.fontFamily);
+  const fontDirective = ` Headline typography: bold clear display typesetting in '${params.fontFamily || 'clean'}' font (${fontSpec}).`;
 
   return [
     `Commercial promotional product poster. ${productLabel}Headline text: "${headline}".${tagline}`,
     `Style & Lighting: ${styleConfig.scene}.`,
-    `Typography & Layout: ${styleConfig.typography}.`,
+    `Typography & Layout: ${styleConfig.typography}.${fontDirective}`,
     POSTER_HIERARCHY_DIRECTIVE,
     STRICT_POSTER_NEGATIVE_DIRECTIVE,
   ].join(' ');

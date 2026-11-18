@@ -68,6 +68,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         visualStyleInput,
         colorPaletteInput,
         focalSubjectInput,
+        hasBackground,
+        backgroundColor,
       } = await parseGeneratePayload(context.request);
 
       const sanitizedPrompt = typeof prompt === 'string' ? prompt.trim() : '';
@@ -173,6 +175,8 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           visualStyle: effectiveVisualStyle,
           colorPalette: effectiveColorPalette,
           focalSubject: focalSubjectInput,
+          hasBackground,
+          backgroundColor,
         });
         promptFinal = compiledLogoPrompt;
 
@@ -180,12 +184,14 @@ export const POST: APIRoute = async (context): Promise<Response> => {
         const logoResult = await generateLogoImage(compiledLogoPrompt, {
           quality: effectiveQualityTier === 'standard' ? 'medium' : 'high',
           model: selectedModel,
+          hasBackground,
+          backgroundColor,
         });
         inputTokens = logoResult.inputTokens;
         outputTokens = logoResult.outputTokens;
 
         currentPhase = 'CLOUDINARY_UPLOADER';
-        const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos');
+        const uploadResult = await uploadBase64Image(logoResult.base64, 'pinoka/logos', { format: 'png' });
         imageUrl = uploadResult.secureUrl;
       } else if (featureType === 'product_poster') {
         currentPhase = 'IMAGE_GENERATOR';
@@ -195,6 +201,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           titleText: effectiveHeadline,
           subText: subTextInput,
           posterStyle: posterStyleInput,
+          fontFamily: fontFamilyInput,
         });
         promptFinal = compiledPosterPrompt;
 

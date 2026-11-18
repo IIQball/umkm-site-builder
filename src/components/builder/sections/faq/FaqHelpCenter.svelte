@@ -41,7 +41,7 @@
       </div>
 
       <h3
-        class="font-heading font-bold text-xs sm:text-sm line-clamp-1"
+        class="font-heading font-bold text-xs sm:text-sm line-clamp-2 leading-snug min-h-[2.5rem] flex items-center"
         style="color: {itemStyle.color || 'var(--theme-text-primary, var(--color-text-main))'}; font-family: var(--theme-heading-font, var(--font-heading));"
       >
         {item.question}

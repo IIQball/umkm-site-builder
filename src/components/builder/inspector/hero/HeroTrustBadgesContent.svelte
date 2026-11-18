@@ -76,7 +76,7 @@
           type="text"
           value={badge.text}
           on:input={(e) => updateItem(i, 'text', e.currentTarget.value)}
-          class="input input-bordered input-xs w-full"
+          class="input input-bordered input-sm min-h-[38px] h-9.5 text-xs rounded-xl w-full"
           placeholder="Nama Lencana (cth: Halal MUI)"
         />
 

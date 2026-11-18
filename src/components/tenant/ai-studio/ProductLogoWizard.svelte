@@ -9,6 +9,7 @@
   } from './logo-wizard.constants';
   import LogoConceptVisual from './LogoConceptVisual.svelte';
   import LogoPaletteSelector from './LogoPaletteSelector.svelte';
+  import LogoBackgroundSelector from './LogoBackgroundSelector.svelte';
   import LogoLockupSelector from './LogoLockupSelector.svelte';
   import AiQualityTierSelector from './AiQualityTierSelector.svelte';
   import {
@@ -48,6 +49,8 @@
   let fontFamily: LogoFontFamily = 'Plus Jakarta Sans';
   let logoText: string = '';
   let selectedColors: string[] = ['#C85A32', '#F7F4EE', '#2A2A2A'];
+  let hasBackground: boolean = true;
+  let backgroundColor: string = '#FFFFFF';
   let qualityTier: 'standard' | 'high' = 'high';
   let focalSubject: string = '';
   let errors: Record<string, string> = {};
@@ -108,6 +111,8 @@
       fontFamily,
       logoText: logoText.trim(),
       colorPalette: selectedColors,
+      hasBackground,
+      backgroundColor,
       qualityTier,
       focalSubject: focalSubject.trim() || undefined,
     };
@@ -247,7 +252,10 @@
   <!-- 5. Palet Warna Logo (Maksimal 3 Warna) -->
   <LogoPaletteSelector bind:selectedColors bind:error={errors.colorPalette} />
 
-  <!-- 6. Kualitas & Model AI -->
+  <!-- 6. Latar Belakang Logo -->
+  <LogoBackgroundSelector bind:hasBackground bind:backgroundColor />
+
+  <!-- 7. Pilihan Kualitas Gambar -->
   <AiQualityTierSelector bind:value={qualityTier} disabled={loading} />
 
   <!-- Aksi Formulir -->

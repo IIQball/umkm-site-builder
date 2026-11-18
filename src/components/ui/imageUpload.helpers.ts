@@ -97,6 +97,24 @@ export function uploadWebpToCloudinary(
   return uploadFormDataWithProgress(params.uploadUrl, blob, 'image.webp', params, onProgress);
 }
 
+export async function uploadSingleFileWorkflow(
+  file: File,
+  folder: 'products' | 'templates' | 'stores',
+  maxSizeMB: number,
+  onProgress?: (percent: number) => void
+): Promise<{ url?: string; error?: string }> {
+  const validationError = validateImageUploadFile(file, maxSizeMB);
+  if (validationError) return { error: validationError };
+  try {
+    const webpBlob = await convertImageFileToWebP(file);
+    const params = await requestSignedUploadParams(folder);
+    const url = await uploadWebpToCloudinary(webpBlob, params, (p) => onProgress?.(p));
+    return { url };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Upload gagal' };
+  }
+}
+
 export async function deleteCloudinaryUploadAsset(urlToDelete: string): Promise<void> {
   if (!urlToDelete || !urlToDelete.includes('cloudinary.com')) return;
   try {

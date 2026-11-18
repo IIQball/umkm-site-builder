@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { AlertCircle, CheckCircle2, LayoutTemplate, Package, Tag, X } from 'lucide-svelte';
-  import { Card } from '@/components/ui';
+  import { AlertCircle, CheckCircle2, LayoutTemplate, Package, Tag, X, ArrowLeft } from 'lucide-svelte';
+  import { Card, Button } from '@/components/ui';
   import ProductLogoWizard from './ProductLogoWizard.svelte';
   import ProductPackagingWizard from './ProductPackagingWizard.svelte';
   import ProductPosterWizard from './ProductPosterWizard.svelte';
   import AiLoadingProgress from './AiLoadingProgress.svelte';
+  import AiResultPreview from './AiResultPreview.svelte';
   import AiAssetGallery from './AiAssetGallery.svelte';
   import AiDeveloperTestBar from './AiDeveloperTestBar.svelte';
   import AiCreditTopupBanner from './AiCreditTopupBanner.svelte';
@@ -13,25 +14,41 @@
   import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
   import { generateAiAssetClient } from '@/lib/api/ai-client';
   import { formatAiErrorMessage } from '@/lib/errors/ai-error';
-  import { apiFetch } from '@/lib/api/parse-response';
   import { toast } from '@/lib/toast';
   import type { AiAssetItem } from './gallery.constants';
-  import type { AiLogoInput } from '@/lib/validators/ai-logo';
-  import type { AiPackagingInput } from '@/lib/validators/ai-packaging';
-  import type { AiPosterInput } from '@/lib/validators/ai-poster';
   import type { AiStudioMainTab, AiStudioSubTab, AiStudioGeneratePayload } from './studio.types';
+  import {
+    getCreditStatusStyle,
+    fetchCreditBalanceApi,
+    fetchAssetHistoryApi,
+    buildLogoPayload,
+    buildPackagingPayload,
+    buildPosterPayload,
+  } from './studio.helpers';
 
   export let storeId: string = '';
   export let storeName: string = '';
 
+  const SUB_TABS = [
+    { id: 'packaging' as const, label: 'Mockup Kemasan Produk', icon: Package },
+    { id: 'poster' as const, label: 'Poster Promosi Makanan', icon: LayoutTemplate },
+    { id: 'logo' as const, label: 'Logo Toko Minimalis', icon: Tag },
+  ];
+
   let mainTab: AiStudioMainTab = 'studio';
   let designSubTab: AiStudioSubTab = 'packaging';
-
   let isGenerating = false;
   let generationProgress = 10;
   let generationTitle = 'Sedang Merancang Visual AI...';
   let generalError = '';
   let successNotice = '';
+
+  let generatedAsset: {
+    imageUrl: string;
+    featureType: 'logo' | 'packaging_mockup' | 'product_poster';
+    logId: string;
+    qualityTier: 'standard' | 'high';
+  } | null = null;
 
   let assets: AiAssetItem[] = [];
   let isAssetsLoading = false;
@@ -45,53 +62,29 @@
   let isCreditLoading = false;
   let creditPurchaseInvoiceId = '';
 
-  $: creditStatusStyle = creditBalance <= 0
-    ? { badge: 'bg-error/10 text-error border-error/25 hover:bg-error/20', subtext: 'text-error/80' }
-    : creditBalance <= 2
-    ? { badge: 'bg-warning/10 text-warning border-warning/25 hover:bg-warning/20', subtext: 'text-warning/80' }
-    : { badge: 'bg-success/10 text-success border-success/25 hover:bg-success/20', subtext: 'text-success/80' };
+  $: creditStatusStyle = getCreditStatusStyle(creditBalance);
 
-  async function fetchCreditBalance() {
-    if (!storeId) return;
+  async function loadBalance() {
     isCreditLoading = true;
-    try {
-      const res = await apiFetch<{
-        balance?: number;
-        totalPurchased?: number;
-        tier?: string;
-        packageName?: string;
-      }>(`/api/tenant/ai-credit/${storeId}`);
-      if (res.success && res.data) {
-        const data = res.data;
-        creditBalance = typeof data.balance === 'number' ? data.balance : 0;
-        creditTotalPurchased = typeof data.totalPurchased === 'number' ? data.totalPurchased : 0;
-        activeTier = data.tier || 'trial';
-        activePackageName = data.packageName || (creditTotalPurchased > 0 ? 'Paket Aktif' : 'Belum Ada Paket Aktif');
-      }
-    } catch {
-      // Offline fallback
-    } finally {
-      isCreditLoading = false;
+    const res = await fetchCreditBalanceApi(storeId);
+    if (res) {
+      creditBalance = res.balance;
+      creditTotalPurchased = res.totalPurchased;
+      activeTier = res.tier;
+      activePackageName = res.packageName;
     }
+    isCreditLoading = false;
   }
 
-  async function fetchAssetHistory() {
+  async function loadHistory() {
     isAssetsLoading = true;
-    try {
-      const res = await apiFetch<AiAssetItem[] | { items?: AiAssetItem[] }>('/api/tenant/ai/history');
-      if (res.success && res.data) {
-        assets = Array.isArray(res.data) ? res.data : (res.data.items || []);
-      }
-    } catch {
-      // Offline fallback
-    } finally {
-      isAssetsLoading = false;
-    }
+    assets = await fetchAssetHistoryApi();
+    isAssetsLoading = false;
   }
 
   onMount(() => {
-    fetchAssetHistory();
-    fetchCreditBalance();
+    loadHistory();
+    loadBalance();
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       isTestMode = urlParams.get('testMode') === 'true';
@@ -99,10 +92,9 @@
     }
   });
 
-  function handleCreditPurchaseStatus(status: 'pending' | 'success' | 'failed' | 'expired' | 'canceled' | 'refunded') {
+  function handleCreditPurchaseStatus(status: string) {
     if (status !== 'success') return;
-
-    void fetchCreditBalance();
+    void loadBalance();
     creditPurchaseInvoiceId = '';
     const url = new URL(window.location.href);
     url.searchParams.delete('creditPurchase');
@@ -126,7 +118,7 @@
     successNotice = '';
 
     try {
-      await generateAiAssetClient({
+      const res = await generateAiAssetClient({
         ...payload,
         storeId,
         qualityTier: payload.qualityTier || 'high',
@@ -137,8 +129,14 @@
       generationProgress = 100;
       successNotice = 'Desain visual AI berhasil dibuat dan disimpan ke galeri!';
       toast.success(successNotice);
-      await Promise.all([fetchAssetHistory(), fetchCreditBalance()]);
-      mainTab = 'gallery';
+      await Promise.all([loadHistory(), loadBalance()]);
+
+      generatedAsset = {
+        imageUrl: res.imageUrl,
+        featureType: payload.featureType,
+        logId: res.logId,
+        qualityTier: (payload.qualityTier as 'standard' | 'high') || 'high',
+      };
     } catch (err: unknown) {
       generalError = formatAiErrorMessage(err);
       toast.error(generalError);
@@ -146,62 +144,12 @@
       isGenerating = false;
     }
   }
-
-  function handleLogoSubmit(event: CustomEvent<AiLogoInput>) {
-    const d = event.detail;
-    executeGeneration({
-      featureType: 'logo',
-      prompt: `Logo for ${d.storeName}, category: ${d.businessCategory || 'general'}, concept: ${d.conceptType || d.visualStyle || 'pictorial_symbol'}.`,
-      storeName: d.storeName,
-      visualStyle: d.visualStyle,
-      conceptType: d.conceptType,
-      businessCategory: d.businessCategory,
-      logoText: d.logoText,
-      lockupType: d.lockupType,
-      fontFamily: d.fontFamily,
-      colorPalette: d.colorPalette.join(', '),
-      qualityTier: d.qualityTier,
-      focalSubject: d.focalSubject,
-    });
-  }
-
-  function handlePackagingSubmit(event: CustomEvent<AiPackagingInput>) {
-    const d = event.detail;
-    executeGeneration({
-      featureType: 'packaging_mockup',
-      prompt: `Commercial 3D mockup of ${d.packagingType.replace('_', ' ')} with label "${d.productLabel}".`,
-      packagingType: d.packagingType,
-      productLabel: d.productLabel,
-      presentationStyle: d.presentationStyle,
-      image: d.referenceImageBase64,
-      qualityTier: d.qualityTier,
-    });
-  }
-
-  function handlePosterSubmit(event: CustomEvent<AiPosterInput>) {
-    const d = event.detail;
-    const style = d.posterStyle || d.backgroundMood || 'vietnam_editorial';
-    executeGeneration({
-      featureType: 'product_poster',
-      prompt: `Appetizing poster for "${d.productName || 'Product'}" with headline "${d.titleText}"${d.subText ? `, tagline: "${d.subText}"` : ''}, style: ${style.replace('_', ' ')}.`,
-      productName: d.productName,
-      titleText: d.titleText,
-      subText: d.subText,
-      posterStyle: style,
-      image: d.referenceImageBase64,
-      size: d.sizeRatio === '2:3' ? '1024x1536' : '1024x1024',
-      qualityTier: d.qualityTier,
-    });
-  }
 </script>
 
 <div class="space-y-6">
   {#if creditPurchaseInvoiceId}
     <div class="rounded-2xl border border-light bg-card px-4 py-2">
-      <TransactionStatus
-        invoiceId={creditPurchaseInvoiceId}
-        onStatusUpdate={handleCreditPurchaseStatus}
-      />
+      <TransactionStatus invoiceId={creditPurchaseInvoiceId} onStatusUpdate={handleCreditPurchaseStatus} />
     </div>
   {/if}
 
@@ -209,10 +157,8 @@
     <AiDeveloperTestBar bind:isTesting />
   {/if}
 
-  <!-- Navigasi Tab Utama (Studio Desain vs Galeri Desain) -->
   <AiStudioHeaderBar bind:mainTab assetsCount={assets.length} {storeName} {creditBalance} {creditStatusStyle} />
 
-  <!-- Peringatan Halus & Nudge Upgrade Kredit AI -->
   <AiCreditTopupBanner
     balance={creditBalance}
     totalPurchased={creditTotalPurchased}
@@ -221,7 +167,6 @@
     loading={isCreditLoading}
   />
 
-  <!-- Notifikasi Error / Sukses -->
   {#if generalError}
     <div class="p-3.5 bg-error/10 border border-error/20 rounded-2xl text-error text-xs flex items-center justify-between gap-3">
       <div class="flex items-center gap-2">
@@ -246,54 +191,79 @@
     </div>
   {/if}
 
-  <!-- Visualizer Loading Progres -->
   {#if isGenerating}
     <AiLoadingProgress active={isGenerating} progress={generationProgress} title={generationTitle} />
   {/if}
 
-  <!-- Konten Tab 1: Studio Desain -->
+  <!-- Tab 1: Studio Desain -->
   {#if mainTab === 'studio' && !isGenerating}
     <div class="space-y-6">
-      <!-- Sub-Tab Wizard Fitur -->
-      <div class="flex flex-wrap items-center gap-2 border-b border-light pb-3">
-        <button type="button" class="px-3.5 py-1.5 text-xs font-heading font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 {designSubTab === 'packaging' ? 'bg-primary text-primary-content font-bold shadow-xs' : 'bg-nested hover:bg-card text-secondary border border-light'}" on:click={() => (designSubTab = 'packaging')}>
-          <Package size={14} />
-          <span>Mockup Kemasan Produk</span>
-        </button>
-        <button type="button" class="px-3.5 py-1.5 text-xs font-heading font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 {designSubTab === 'poster' ? 'bg-primary text-primary-content font-bold shadow-xs' : 'bg-nested hover:bg-card text-secondary border border-light'}" on:click={() => (designSubTab = 'poster')}>
-          <LayoutTemplate size={14} />
-          <span>Poster Promosi Makanan</span>
-        </button>
-        <button type="button" class="px-3.5 py-1.5 text-xs font-heading font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 {designSubTab === 'logo' ? 'bg-primary text-primary-content font-bold shadow-xs' : 'bg-nested hover:bg-card text-secondary border border-light'}" on:click={() => (designSubTab = 'logo')}>
-          <Tag size={14} />
-          <span>Logo Toko Minimalis</span>
-        </button>
-      </div>
+      {#if generatedAsset}
+        <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-light">
+              <h3 class="font-heading font-bold text-base text-main">
+                Pratinjau Hasil Desain Baru
+              </h3>
+              <Button
+                variant="ghost"
+                size="xs"
+                class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+                on:click={() => (generatedAsset = null)}
+              >
+                <ArrowLeft size={13} />
+                <span>Buat Desain Lainnya</span>
+              </Button>
+            </div>
+            <AiResultPreview
+              imageUrl={generatedAsset.imageUrl}
+              featureType={generatedAsset.featureType}
+              qualityTier={generatedAsset.qualityTier}
+              logId={generatedAsset.logId}
+              {storeId}
+              on:regenerate={() => (generatedAsset = null)}
+            />
+          </div>
+        </Card>
+      {:else}
+        <div class="flex flex-wrap items-center gap-2 border-b border-light pb-3">
+          {#each SUB_TABS as tab}
+            <button
+              type="button"
+              class="px-3.5 py-1.5 text-xs font-heading font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 {designSubTab === tab.id ? 'bg-primary text-primary-content font-bold shadow-xs' : 'bg-nested hover:bg-card text-secondary border border-light'}"
+              on:click={() => (designSubTab = tab.id)}
+            >
+              <svelte:component this={tab.icon} size={14} />
+              <span>{tab.label}</span>
+            </button>
+          {/each}
+        </div>
 
-      <!-- Panel Wizard Terpilih (Inline Tanpa Modal) -->
-      {#if designSubTab === 'packaging'}
-        <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
-          <ProductPackagingWizard loading={isGenerating} on:submit={handlePackagingSubmit} on:cancel={() => (mainTab = 'gallery')} />
-        </Card>
-      {:else if designSubTab === 'poster'}
-        <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
-          <ProductPosterWizard loading={isGenerating} on:submit={handlePosterSubmit} on:cancel={() => (mainTab = 'gallery')} />
-        </Card>
-      {:else if designSubTab === 'logo'}
-        <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
-          <ProductLogoWizard loading={isGenerating} initialStoreName={storeName} on:submit={handleLogoSubmit} on:cancel={() => (mainTab = 'gallery')} />
-        </Card>
+        {#if designSubTab === 'packaging'}
+          <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
+            <ProductPackagingWizard loading={isGenerating} on:submit={(e) => executeGeneration(buildPackagingPayload(e.detail))} on:cancel={() => (mainTab = 'gallery')} />
+          </Card>
+        {:else if designSubTab === 'poster'}
+          <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
+            <ProductPosterWizard loading={isGenerating} on:submit={(e) => executeGeneration(buildPosterPayload(e.detail))} on:cancel={() => (mainTab = 'gallery')} />
+          </Card>
+        {:else if designSubTab === 'logo'}
+          <Card variant="bordered" padding="lg" radius="2xl" class="bg-card">
+            <ProductLogoWizard loading={isGenerating} initialStoreName={storeName} on:submit={(e) => executeGeneration(buildLogoPayload(e.detail))} on:cancel={() => (mainTab = 'gallery')} />
+          </Card>
+        {/if}
       {/if}
     </div>
   {/if}
 
-  <!-- Konten Tab 2: Galeri Desain -->
+  <!-- Tab 2: Galeri Desain -->
   {#if mainTab === 'gallery' && !isGenerating}
     <AiAssetGallery
       {assets}
+      {storeId}
       loading={isAssetsLoading}
       on:create={() => (mainTab = 'studio')}
-      on:refresh={fetchAssetHistory}
+      on:refresh={loadHistory}
     />
   {/if}
 </div>

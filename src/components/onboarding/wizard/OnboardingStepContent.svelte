@@ -15,7 +15,6 @@
   import {
     ArrowLeft,
     CheckCircle,
-    Loader2,
     Palette,
     Layout,
     Sparkles,
@@ -231,8 +230,7 @@
             on:click={onSubmit}
           >
             {#if submitStatus === 'submitting'}
-              <Loader2 size={16} class="animate-spin" />
-              Menyimpan...
+              <span>Menyimpan...</span>
             {:else}
               {isEdit ? 'Simpan Perubahan Toko' : 'Selesai & Buat Toko'}
               <CheckCircle size={16} />

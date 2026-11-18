@@ -5,6 +5,7 @@
   export let padding: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
   export let radius: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full' = '2xl';
   export let hoverable: boolean = false;
+  export let overflow: 'hidden' | 'visible' | 'auto' | undefined = undefined;
   export let id: string = '';
   export let role: string | undefined = undefined;
   let className: string = '';
@@ -44,8 +45,13 @@
     full: 'rounded-full',
   };
 
+  $: resolvedOverflow = overflow
+    ? (overflow === 'visible' ? 'overflow-visible' : overflow === 'auto' ? 'overflow-auto' : 'overflow-hidden')
+    : (className.includes('overflow-') ? '' : 'overflow-hidden');
+
   $: cardClasses = [
-    'relative overflow-hidden transition-all duration-150 text-main',
+    'relative transition-all duration-150 text-main',
+    resolvedOverflow,
     variantStyles[variant] || variantStyles.bordered,
     paddingStyles[padding] || paddingStyles.md,
     radiusStyles[radius] || radiusStyles['2xl'],

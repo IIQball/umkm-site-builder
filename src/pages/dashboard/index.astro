@@ -30,12 +30,10 @@ if (!isStoreFullyOnboarded(store)) {
 
 // Seluruh riwayat data statistik trafik dirender dari server untuk filter periode dinamis (sama seperti dashboard designer).
 let allHistory: TrafficPoint[] = [];
-let initialPointsFailed = false;
 if (store?.id) {
   try {
     allHistory = await getAllStoreTrafficHistory(store.id);
   } catch (error) {
-    initialPointsFailed = true;
     console.error('[DASHBOARD] gagal memuat data grafik:', error);
   }
 }

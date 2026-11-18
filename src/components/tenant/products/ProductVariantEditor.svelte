@@ -12,7 +12,7 @@
     if (variantGroups.length >= 5) return;
     variantGroups = [
       ...variantGroups,
-      { groupName: "", options: [{ name: "", priceAdjustment: 0, isAvailable: true }] },
+      { groupName: "", options: [{ name: "Reguler / Standar", priceAdjustment: 0, isAvailable: true }] },
     ];
   }
 

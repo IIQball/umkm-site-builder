@@ -3,11 +3,9 @@
   import { Card } from '@/components/ui';
   import OnboardingStepSubdomain from './wizard/OnboardingStepSubdomain.svelte';
   import OnboardingStepStoreInfo from './wizard/OnboardingStepStoreInfo.svelte';
-  // Catatan: Pemilihan template dinonaktifkan di onboarding baru; toko otomatis memakai template bawaan.
-  // import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
+  import OnboardingStepTemplate from './wizard/OnboardingStepTemplate.svelte';
   import OnboardingStepSettings from './wizard/OnboardingStepSettings.svelte';
-  // Catatan TA: OnboardingStepContent disembunyikan sementara untuk fokus topik TA Template Builder.
-  // import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
+  import OnboardingStepContent from './wizard/OnboardingStepContent.svelte';
   import OnboardingStepper from './wizard/OnboardingStepper.svelte';
   import OnboardingSuccessStep from './wizard/OnboardingSuccessStep.svelte';
   import type {
@@ -35,7 +33,6 @@
 
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
-  // Wizard Form State
   let currentStep: OnboardingStep = 1;
   let subdomain = '', subdomainStatus: ValidationStatus = 'idle', subdomainMessage = '';
   let debounceTimer: ReturnType<typeof setTimeout>;
@@ -72,13 +69,7 @@
 
     const state = loadSavedOnboardingState();
     if (state) {
-      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 2) {
-        currentStep = state.currentStep;
-      } else if (!isEdit && state.currentStep && state.currentStep >= 3) {
-        currentStep = 2;
-      } else if (isEdit && state.currentStep && state.currentStep <= 3) {
-        currentStep = state.currentStep;
-      }
+      if (state.currentStep && state.currentStep >= 1 && state.currentStep <= 4) currentStep = state.currentStep;
       subdomain = state.subdomain || '';
       storeName = state.storeName || '';
       categoryId = state.categoryId || '';
@@ -87,14 +78,14 @@
       address = state.address || '';
       if (state.branchMode) branchMode = state.branchMode;
       if (Array.isArray(state.branches)) branches = state.branches;
-      selectedTemplateId = DEFAULT_TEMPLATE_ID;
+      selectedTemplateId = state.selectedTemplateId || DEFAULT_TEMPLATE_ID;
       if (state.regionData) regionData = state.regionData;
       subdomainStatus = state.subdomainStatus || 'idle';
       subdomainMessage = state.subdomainMessage || '';
       if (state.contentCustomization) contentCustomization = state.contentCustomization;
       if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
     }
-    selectedTemplateId = DEFAULT_TEMPLATE_ID;
+    if (!selectedTemplateId) selectedTemplateId = DEFAULT_TEMPLATE_ID;
   });
 
   function saveState() {
@@ -116,31 +107,12 @@
     if (!input) return;
     subdomain = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     clearTimeout(debounceTimer);
-    if (checkAbortCtrl) {
-      checkAbortCtrl.abort();
-      checkAbortCtrl = null;
-    }
-    if (!subdomain) {
-      subdomainStatus = 'idle';
-      subdomainMessage = '';
-      return;
-    }
-    if (subdomain.length < 3) {
-      subdomainStatus = 'typing';
-      subdomainMessage = 'Ketik minimal 3 karakter...';
-      return;
-    }
-    if (subdomain.endsWith('-')) {
-      subdomainStatus = 'typing';
-      subdomainMessage = 'Lanjutkan mengetik setelah tanda hubung (-)...';
-      return;
-    }
+    if (checkAbortCtrl) { checkAbortCtrl.abort(); checkAbortCtrl = null; }
+    if (!subdomain) { subdomainStatus = 'idle'; subdomainMessage = ''; return; }
+    if (subdomain.length < 3) { subdomainStatus = 'typing'; subdomainMessage = 'Ketik minimal 3 karakter...'; return; }
+    if (subdomain.endsWith('-')) { subdomainStatus = 'typing'; subdomainMessage = 'Lanjutkan mengetik setelah tanda hubung (-)...'; return; }
     const localErr = validateSubdomainLocally(subdomain);
-    if (localErr) {
-      subdomainStatus = 'invalid';
-      subdomainMessage = localErr;
-      return;
-    }
+    if (localErr) { subdomainStatus = 'invalid'; subdomainMessage = localErr; return; }
     subdomainStatus = 'typing';
     subdomainMessage = 'Mengetik...';
 
@@ -181,16 +153,15 @@
         }
         if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
         contentCustomization.maps = { branchMode, branches };
-        selectedTemplateId = DEFAULT_TEMPLATE_ID;
-        if (isEdit) {
-          currentStep = 3;
-          saveState();
-        } else {
-          handleOnboardSubmit();
-        }
+        currentStep = 3;
+        saveState();
       }
-    } else if (currentStep === 3 && isEdit) {
-      handleEditSubmit();
+    } else if (currentStep === 3) {
+      currentStep = 4;
+      saveState();
+    } else if (currentStep === 4) {
+      if (isEdit) handleEditSubmit();
+      else handleOnboardSubmit();
     }
   }
 
@@ -209,7 +180,7 @@
     const res = await submitOnboardStore({
       subdomain, name: storeName.trim(), categoryId, waNumber: waNumber.trim(),
       googleMapsUrl: googleMapsUrl.trim(), address, regionData,
-      templateId: DEFAULT_TEMPLATE_ID, tenantId, customization: custPayload,
+      templateId: selectedTemplateId || DEFAULT_TEMPLATE_ID, tenantId, customization: custPayload,
     });
 
     if (!res.ok) {
@@ -225,7 +196,7 @@
     }
 
     submitStatus = 'success';
-    currentStep = isEdit ? 4 : 3;
+    currentStep = 5;
     clearOnboardingState();
   }
 
@@ -249,7 +220,7 @@
     }
 
     submitStatus = 'success';
-    currentStep = 4;
+    currentStep = 5;
   }
 </script>
 
@@ -274,15 +245,29 @@
         {formErrors} {submitStatus} {submitError}
         onPrev={prevStep} onNext={nextStep}
       />
-    {:else if isEdit && currentStep === 3}
-      <OnboardingStepSettings
-        {templates} {subdomain} bind:selectedTemplateId
-        bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
-        {categories} {storeName} {waNumber} {address} {googleMapsUrl}
-        {branchMode} {branches} customization={contentCustomization}
-        onPrev={prevStep} onSave={handleEditSubmit}
+    {:else if currentStep === 3}
+      {#if isEdit}
+        <OnboardingStepSettings
+          {templates} {subdomain} bind:selectedTemplateId
+          bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
+          {categories} {storeName} {waNumber} {address} {googleMapsUrl}
+          {branchMode} {branches} customization={contentCustomization}
+          onPrev={prevStep} onNext={nextStep} onSave={handleEditSubmit}
+        />
+      {:else}
+        <OnboardingStepTemplate
+          {templates} bind:selectedTemplateId {storeName} {subdomain}
+          {submitStatus} {submitError} onPrev={prevStep} onNext={nextStep}
+        />
+      {/if}
+    {:else if currentStep === 4}
+      <OnboardingStepContent
+        {templates} {categories} {selectedTemplateId} {subdomain} {storeName}
+        {waNumber} {address} {googleMapsUrl} {branchMode} {branches} {isEdit}
+        bind:customization={contentCustomization} {submitStatus} {submitError}
+        onPrev={prevStep} onSubmit={isEdit ? handleEditSubmit : handleOnboardSubmit}
       />
-    {:else if (!isEdit && currentStep === 3) || currentStep === 4}
+    {:else if currentStep === 5}
       <OnboardingSuccessStep
         {isEdit} {subdomain} {storeName} {address} onResetStep={() => { currentStep = 1; }}
       />

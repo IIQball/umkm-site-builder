@@ -63,8 +63,8 @@
   </div>
 
   {#if variantGroups.length === 0}
-    <div class="border border-dashed border-base-300 rounded-xl p-4 text-center">
-      <p class="text-sm text-base-content/50">
+    <div class="border border-dashed border-light rounded-xl p-4 text-center">
+      <p class="text-sm text-muted">
         Belum ada varian. Klik "Tambah Grup" untuk menambahkan varian seperti Ukuran, Warna, dll.
       </p>
     </div>
@@ -75,20 +75,20 @@
       <div class="flex items-center gap-2 mb-3">
         <input
           type="text"
-          class="input input-bordered input-sm flex-1 rounded-xl bg-nested text-main font-sans text-xs focus:border-primary focus:outline-none"
-          class:input-error={fieldErrors[`variantGroup_${gi}`]}
+          class="flex-1 h-8 px-3 text-xs rounded-xl border border-light bg-nested text-main font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+          class:border-error={fieldErrors[`variantGroup_${gi}`]}
           bind:value={group.groupName}
           placeholder="Nama grup (contoh: Ukuran, Warna)"
         />
         <Button
           type="button"
           variant="ghost"
-          size="xs"
-          class="hover:bg-error/10 hover:text-error text-error/70 p-1.5 h-auto min-h-0"
+          size="icon"
+          class="hover:bg-error/10 hover:text-error text-error/70 shrink-0"
           on:click={() => removeVariantGroup(gi)}
           ariaLabel="Hapus grup"
         >
-          <Trash2 size={16} />
+          <Trash2 size={15} />
         </Button>
       </div>
       {#if fieldErrors[`variantGroup_${gi}`]}
@@ -101,39 +101,37 @@
           <div class="flex items-center gap-2">
             <input
               type="text"
-              class="input input-bordered input-xs flex-1 rounded-lg bg-nested text-main font-sans focus:border-primary focus:outline-none h-8 px-3"
-              class:input-error={fieldErrors[`variantOption_${gi}_${oi}`]}
+              class="flex-1 h-8 px-3 text-xs rounded-xl border border-light bg-nested text-main font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+              class:border-error={fieldErrors[`variantOption_${gi}_${oi}`]}
               bind:value={option.name}
               placeholder="Nama opsi (contoh: S, M, L)"
             />
-            <div class="relative">
-              <input
-                type="text"
-                class="input input-bordered input-xs w-28 rounded-lg bg-nested text-main font-sans focus:border-primary focus:outline-none h-8 px-3 text-right"
-                value={formatPriceAdjustment(option.priceAdjustment)}
-                on:input={(e) => {
-                  option.priceAdjustment = parsePriceAdjustment(e.currentTarget.value);
-                  variantGroups = [...variantGroups];
-                }}
-                placeholder="Selisih harga"
-                title="Selisih harga dari harga dasar (contoh: +5000 atau -2000)"
-              />
-            </div>
+            <input
+              type="text"
+              class="w-32 sm:w-36 h-8 px-3 text-xs rounded-xl border border-light bg-nested text-main font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors text-right shrink-0"
+              value={formatPriceAdjustment(option.priceAdjustment)}
+              on:input={(e) => {
+                option.priceAdjustment = parsePriceAdjustment(e.currentTarget.value);
+                variantGroups = [...variantGroups];
+              }}
+              placeholder="Selisih harga"
+              title="Selisih harga dari harga dasar (contoh: +5000 atau -2000)"
+            />
             <input
               type="checkbox"
-              class="toggle toggle-xs toggle-success"
+              class="w-4 h-4 rounded text-primary focus:ring-primary/30 accent-primary cursor-pointer shrink-0"
               bind:checked={option.isAvailable}
               title={option.isAvailable ? "Tersedia" : "Tidak tersedia"}
             />
             <Button
               type="button"
               variant="ghost"
-              size="xs"
-              class="text-base-content/40 hover:text-error p-1.5 h-auto min-h-0"
+              size="icon"
+              class="text-muted hover:text-error hover:bg-error/10 shrink-0"
               on:click={() => removeVariantOption(gi, oi)}
               ariaLabel="Hapus opsi"
             >
-              <X size={14} />
+              <X size={15} />
             </Button>
           </div>
           {#if fieldErrors[`variantOption_${gi}_${oi}`]}
@@ -153,7 +151,7 @@
           + Tambah Opsi
         </Button>
       {/if}
-      <div class="text-xs text-base-content/40 mt-1">
+      <div class="text-xs text-muted mt-1">
         {group.options.length}/20 opsi
       </div>
     </div>

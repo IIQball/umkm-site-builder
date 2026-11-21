@@ -6,6 +6,10 @@ import * as bugReportService from '@/services/bug-report.service';
 
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
+  isAuthorizedSuperAdmin: (user: { role?: string } | null | undefined) => user?.role === 'superadmin',
+  isAuthorizedAdmin: (user: { role?: string } | null | undefined) => user?.role === 'admin' || user?.role === 'superadmin',
+  isAuthorizedDesigner: (user: { role?: string } | null | undefined) => user?.role === 'designer',
+  isAuthorizedTenant: (user: { role?: string } | null | undefined) => user?.role === 'tenant',
   auth: {
     api: {
       getSession: vi.fn().mockResolvedValue(null),

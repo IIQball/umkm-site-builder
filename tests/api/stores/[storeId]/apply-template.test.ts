@@ -50,6 +50,15 @@ describe('Apply Template API', () => {
     expect(data.success).toBe(false);
   });
 
+  it('returns 403 if user is superadmin', async () => {
+    (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u_super', role: 'superadmin', status: 'active' });
+    const ctx = makeContext('store-1', { templateId: 'tpl-1' });
+    const res = (await POST(ctx)) as Response;
+    const data = await res.json();
+    expect(res.status).toBe(403);
+    expect(data.success).toBe(false);
+  });
+
   it('returns 400 if templateId missing', async () => {
     (getAuthenticatedUser as Mock).mockResolvedValue({ id: 'u1', role: 'tenant', status: 'active' });
     const ctx = makeContext('store-1', {});

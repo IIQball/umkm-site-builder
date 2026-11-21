@@ -66,6 +66,7 @@ export interface StoreContentCustomization {
     ctaText: string;
     badgeText: string;
     imageUrl: string;
+    [key: string]: unknown;
   };
   features: {
     heading: string;

@@ -16,9 +16,11 @@
   import type { StoreContentCustomization, StoreTestimonialItem } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'masonry_grid';
   export let onUpdate: (() => void) | undefined = undefined;
 
-  const MAX_TESTIMONIALS = 6;
+  $: maxTestimonials = layoutPreset === 'single_spotlight' ? 3 : 6;
+  $: canAdd = items.length < maxTestimonials;
 
   $: if (!customization.testimonials) {
     customization.testimonials = {
@@ -39,7 +41,7 @@
   }
 
   function handleAdd() {
-    if (!customization.testimonials || items.length >= MAX_TESTIMONIALS) return;
+    if (!customization.testimonials || !canAdd) return;
     const newItem: StoreTestimonialItem = {
       id: `testi_${Date.now()}`,
       customerName: `Pelanggan Baru #${items.length + 1}`,
@@ -117,15 +119,15 @@
   <!-- Testimonials Repeater Header -->
   <div class="flex items-center justify-between">
     <span class="text-xs font-bold text-main font-heading">
-      Daftar Ulasan Pelanggan ({items.length}/{MAX_TESTIMONIALS})
+      Daftar Ulasan Pelanggan ({items.length}/{maxTestimonials})
     </span>
     <Button
       type="button"
       size="sm"
       variant="ghost"
-      disabled={items.length >= MAX_TESTIMONIALS}
+      disabled={!canAdd}
       on:click={handleAdd}
-      class="text-primary font-bold text-xs !px-2.5 !py-1 !h-auto gap-1"
+      class="text-primary font-bold text-xs !px-2.5 !py-1 !h-auto gap-1 disabled:opacity-40"
     >
       <Plus size={14} />
       <span>Tambah Ulasan</span>

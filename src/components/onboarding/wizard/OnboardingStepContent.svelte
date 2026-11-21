@@ -68,7 +68,7 @@
   let canonicalMapsUrl: string = '';
 
   const TABS: Array<{ id: ContentTab; label: string; icon: typeof Palette }> = [
-    { id: 'design', label: 'Warna', icon: Palette },
+    { id: 'design', label: 'Warna Brand', icon: Palette },
     { id: 'header', label: 'Header', icon: Compass },
     { id: 'hero', label: 'Hero', icon: Layout },
     { id: 'features', label: 'Keunggulan', icon: Sparkles },
@@ -108,6 +108,19 @@
     : DEFAULT_TEMPLATE_CONFIG;
 
   $: headerSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'header_announcement');
+  $: heroSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'hero');
+  $: featuresSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'features');
+  $: testimonialsSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'testimonials');
+  $: faqSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'faq');
+  $: footerSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'footer');
+
+  $: headerPreset = (headerSectionInTemplate?.layoutPreset as string) || (headerSectionInTemplate?.props?.layoutPreset as string) || 'default_split';
+  $: heroPreset = (heroSectionInTemplate?.layoutPreset as string) || (heroSectionInTemplate?.props?.layoutPreset as string) || 'split_left_text';
+  $: featuresPreset = (featuresSectionInTemplate?.layoutPreset as string) || (featuresSectionInTemplate?.props?.layoutPreset as string) || 'grid_3_cards';
+  $: testimonialsPreset = (testimonialsSectionInTemplate?.layoutPreset as string) || (testimonialsSectionInTemplate?.props?.layoutPreset as string) || 'masonry_grid';
+  $: faqPreset = (faqSectionInTemplate?.layoutPreset as string) || (faqSectionInTemplate?.props?.layoutPreset as string) || 'accordion_single_col';
+  $: footerPreset = (footerSectionInTemplate?.layoutPreset as string) || (footerSectionInTemplate?.props?.layoutPreset as string) || 'multi_column';
+
   $: templateHasHeaderLogo = Boolean(
     headerSectionInTemplate &&
     (headerSectionInTemplate.props?.logoType !== 'text_only' || Boolean(headerSectionInTemplate.props?.logoImageUrl))
@@ -185,17 +198,17 @@
           {#if activeTab === 'design'}
             <ContentDesignTab bind:customization onUpdate={triggerSync} />
           {:else if activeTab === 'header'}
-            <ContentHeaderTab bind:customization hasLogo={templateHasHeaderLogo} onUpdate={triggerSync} />
+            <ContentHeaderTab bind:customization hasLogo={templateHasHeaderLogo} layoutPreset={headerPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'hero'}
-            <ContentHeroTab bind:customization onUpdate={triggerSync} />
+            <ContentHeroTab bind:customization layoutPreset={heroPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'features'}
-            <ContentFeaturesTab bind:customization onUpdate={triggerSync} />
+            <ContentFeaturesTab bind:customization layoutPreset={featuresPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'testimonials'}
-            <ContentTestimonialsTab bind:customization onUpdate={triggerSync} />
+            <ContentTestimonialsTab bind:customization layoutPreset={testimonialsPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'faq'}
-            <ContentFaqTab bind:customization onUpdate={triggerSync} />
+            <ContentFaqTab bind:customization layoutPreset={faqPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'footer'}
-            <ContentFooterTab bind:customization onUpdate={triggerSync} />
+            <ContentFooterTab bind:customization layoutPreset={footerPreset} onUpdate={triggerSync} />
           {/if}
         </div>
       </div>

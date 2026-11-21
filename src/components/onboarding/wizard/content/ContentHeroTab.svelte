@@ -12,11 +12,22 @@
 -->
 <script lang="ts">
   import ImageUpload from '@/components/ui/ImageUpload.svelte';
+  import {
+    supportsHeroBadge,
+    supportsHeroCta,
+    supportsHeroImage,
+  } from '@/components/builder/sections/hero/heroLayout.helpers';
   import { HERO_IMAGE_PRESETS } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'split_left_text';
   export let onUpdate: (() => void) | undefined = undefined;
+
+  $: isVideo = layoutPreset === 'video_background_loop';
+  $: hasBadge = supportsHeroBadge(layoutPreset);
+  $: hasCta = supportsHeroCta(layoutPreset);
+  $: hasImage = supportsHeroImage(layoutPreset) && !isVideo;
 
   function handleHeroUpload(urls: string[]) {
     customization.hero.imageUrl = urls[0] || '';
@@ -26,21 +37,23 @@
 
 <div class="space-y-4 text-left">
   <!-- Badge Teks -->
-  <div>
-    <label for="hero-badge-input" class="block text-xs font-bold text-main font-heading mb-1.5">
-      Teks Badge Promosi
-    </label>
-    <input
-      id="hero-badge-input"
-      type="text"
-      bind:value={customization.hero.badgeText}
-      on:input={() => onUpdate?.()}
-      placeholder="Contoh: Koleksi Resmi 2026 / Promo Terbatas"
-      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
-    />
-  </div>
+  {#if hasBadge}
+    <div>
+      <label for="hero-badge-input" class="block text-xs font-bold text-main font-heading mb-1.5">
+        Teks Badge Promosi
+      </label>
+      <input
+        id="hero-badge-input"
+        type="text"
+        bind:value={customization.hero.badgeText}
+        on:input={() => onUpdate?.()}
+        placeholder="Contoh: Koleksi Resmi 2026 / Promo Terbatas"
+        class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
+      />
+    </div>
+  {/if}
 
-  <!-- Judul Hero -->
+  <!-- Judul Hero (Selalu Ada) -->
   <div>
     <label for="hero-title-input" class="block text-xs font-bold text-main font-heading mb-1.5">
       Judul Utama Banner Hero
@@ -55,7 +68,7 @@
     />
   </div>
 
-  <!-- Subjudul / Deskripsi Hero -->
+  <!-- Subjudul / Deskripsi Hero (Selalu Ada) -->
   <div>
     <label for="hero-subtitle-input" class="block text-xs font-bold text-main font-heading mb-1.5">
       Deskripsi & Penjelasan Singkat
@@ -71,68 +84,92 @@
   </div>
 
   <!-- Teks Tombol CTA -->
-  <div>
-    <label for="hero-cta-input" class="block text-xs font-bold text-main font-heading mb-1.5">
-      Teks Tombol Aksi (CTA)
-    </label>
-    <input
-      id="hero-cta-input"
-      type="text"
-      bind:value={customization.hero.ctaText}
-      on:input={() => onUpdate?.()}
-      placeholder="Contoh: Pesan Sekarang / Hubungi Penjual"
-      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-    />
-  </div>
-
-  <!-- Gambar Banner Hero -->
-  <div class="space-y-2 pt-2 border-t border-light">
-    <div class="flex items-center justify-between">
-      <span class="block text-xs font-bold text-main font-heading">
-        Gambar Banner Hero
-      </span>
-      {#if customization.hero.imageUrl}
-        <span class="text-xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
-          Gambar Terpasang
-        </span>
-      {/if}
-    </div>
-
-    <!-- Presets -->
-    <div class="grid grid-cols-2 gap-2 mb-2">
-      {#each HERO_IMAGE_PRESETS as preset}
-        <button
-          type="button"
-          on:click={() => {
-            customization.hero.imageUrl = preset.url;
-            onUpdate?.();
-          }}
-          class="flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all cursor-pointer {customization.hero.imageUrl === preset.url
-            ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-            : 'border-light bg-card hover:bg-nested/40'}"
-        >
-          <img
-            src={preset.url}
-            alt={preset.name}
-            class="w-9 h-7 rounded object-cover shrink-0"
-          />
-          <span class="text-xs font-semibold text-main truncate font-sans">{preset.name}</span>
-        </button>
-      {/each}
-    </div>
-
-    <!-- Direct Component Upload -->
-    <div class="pt-1">
-      <p class="text-xs text-secondary mb-1.5 font-sans">
-        Atau unggah foto banner sendiri (PNG, JPG, atau WebP):
-      </p>
-      <ImageUpload
-        folder="stores"
-        maxFiles={1}
-        maxSizeMB={5}
-        existingUrls={customization.hero.imageUrl ? [customization.hero.imageUrl] : []}
-        onUpload={handleHeroUpload}
+  {#if hasCta}
+    <div>
+      <label for="hero-cta-input" class="block text-xs font-bold text-main font-heading mb-1.5">
+        Teks Tombol Aksi (CTA)
+      </label>
+      <input
+        id="hero-cta-input"
+        type="text"
+        bind:value={customization.hero.ctaText}
+        on:input={() => onUpdate?.()}
+        placeholder="Contoh: Pesan Sekarang / Hubungi Penjual"
+        class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
       />
     </div>
-  </div>
+  {/if}
+
+  <!-- Video Background (Jika Layout Video) -->
+  {#if isVideo}
+    <div class="space-y-2 pt-2 border-t border-light">
+      <label for="hero-video-input" class="block text-xs font-bold text-main font-heading mb-1.5">
+        URL Video Latar Belakang (Loop)
+      </label>
+      <input
+        id="hero-video-input"
+        type="text"
+        bind:value={customization.hero.imageUrl}
+        on:input={() => onUpdate?.()}
+        placeholder="https://cdn.example.com/video-loop.mp4"
+        class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+      />
+      <p class="text-xs text-secondary font-sans leading-relaxed">
+        Maksimal 1 video latar belakang loop ringan untuk menjaga performa loading toko.
+      </p>
+    </div>
+  {/if}
+
+  <!-- Gambar Banner Hero -->
+  {#if hasImage}
+    <div class="space-y-2 pt-2 border-t border-light">
+      <div class="flex items-center justify-between">
+        <span class="block text-xs font-bold text-main font-heading">
+          Gambar Banner Hero (Maks. 1 Gambar)
+        </span>
+        {#if customization.hero.imageUrl}
+          <span class="text-xs font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+            Gambar Terpasang
+          </span>
+        {/if}
+      </div>
+
+      <!-- Presets -->
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        {#each HERO_IMAGE_PRESETS as preset}
+          <button
+            type="button"
+            on:click={() => {
+              customization.hero.imageUrl = preset.url;
+              onUpdate?.();
+            }}
+            class="flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all cursor-pointer {customization.hero.imageUrl === preset.url
+              ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+              : 'border-light bg-card hover:bg-nested/40'}"
+          >
+            <img
+              src={preset.url}
+              alt={preset.name}
+              class="w-9 h-7 rounded object-cover shrink-0"
+            />
+            <span class="text-xs font-semibold text-main truncate font-sans">{preset.name}</span>
+          </button>
+        {/each}
+      </div>
+
+      <!-- Direct Component Upload -->
+      <div class="pt-1">
+        <p class="text-xs text-secondary mb-1.5 font-sans">
+          Atau unggah foto banner sendiri (PNG, JPG, atau WebP, maks. 5MB):
+        </p>
+        <ImageUpload
+          folder="stores"
+          maxFiles={1}
+          maxSizeMB={5}
+          existingUrls={customization.hero.imageUrl ? [customization.hero.imageUrl] : []}
+          onUpload={handleHeroUpload}
+        />
+      </div>
+    </div>
+  {/if}
 </div>

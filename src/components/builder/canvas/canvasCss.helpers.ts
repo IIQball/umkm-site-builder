@@ -37,8 +37,10 @@ export const buildCanvasCssVars = (
     if (clean.includes(',')) return clean;
     return `'${clean.replace(/^['"]+|['"]+$/g, '')}', ${fallback}`;
   };
-  const headingFont = formatFont(typography.headingFont, defaultHeadingFont)
-  const bodyFont = formatFont(typography.bodyFont, defaultBodyFont)
+  const rawHeading = typography.headingFont || ((theme as Record<string, unknown>)?.fontHeading as string | undefined)
+  const rawBody = typography.bodyFont || ((theme as Record<string, unknown>)?.fontFamily as string | undefined)
+  const headingFont = formatFont(rawHeading, defaultHeadingFont)
+  const bodyFont = formatFont(rawBody, defaultBodyFont)
 
   // Active Layout Dimensions
   const activeSafeZone = viewMode === 'mobile'

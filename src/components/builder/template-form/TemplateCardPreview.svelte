@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Store, Info, Check } from 'lucide-svelte';
+  import { Store, Info, Check, Eye } from 'lucide-svelte';
   import { Badge } from '@/components/ui';
 
   export let name: string = '';
@@ -13,7 +13,7 @@
 <div class="lg:col-span-5 p-6 md:p-8 bg-nested/30 flex flex-col space-y-6 sticky top-6 lg:sticky lg:top-6 self-start z-10 rounded-b-3xl lg:rounded-b-none lg:rounded-r-3xl">
   <div>
     <div class="flex items-center gap-2 mb-4">
-      <span class="material-symbols-outlined text-primary text-base">visibility</span>
+      <Eye size={16} class="text-primary" />
       <h3 class="text-xs font-bold text-main uppercase tracking-wider font-heading">
         Pratinjau Kartu Marketplace
       </h3>
@@ -53,7 +53,7 @@
 
         <div class="absolute bottom-3 left-3">
           <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-card/90 backdrop-blur-md text-main border border-light shadow-2xs">
-            {selectedCategoryName}
+            {selectedCategoryName || 'Umum'}
           </span>
         </div>
       </div>
@@ -90,19 +90,19 @@
     </div>
     <ul class="text-2xs text-secondary space-y-1.5 font-sans">
       <li class="flex items-center gap-2">
-        <span class="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+        <span class="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center flex-shrink-0">
           <Check size={10} />
         </span>
         <span>Editor Visual drag-and-drop no-code</span>
       </li>
       <li class="flex items-center gap-2">
-        <span class="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+        <span class="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center flex-shrink-0">
           <Check size={10} />
         </span>
-        <span>Overlay Panduan Kolom Grid Figma & Pixel Grid 8px</span>
+        <span>Overlay Panduan Kolom Grid & Pixel Grid</span>
       </li>
       <li class="flex items-center gap-2">
-        <span class="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+        <span class="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center flex-shrink-0">
           <Check size={10} />
         </span>
         <span>Pengajuan Review langsung ke Kurator Admin</span>

@@ -7,7 +7,9 @@
   import type { AiAssetItem } from '@/components/tenant/ai-studio/gallery.constants';
 
   export let open: boolean = false;
-  export let filterType: 'packaging_mockup' | 'all' = 'all';
+  export let filterType: 'packaging_mockup' | 'logo' | 'product_poster' | 'all' = 'all';
+  export let title: string = 'Pilih dari Galeri Desain AI';
+  export let description: string = 'Klik salah satu gambar untuk langsung memasangnya ke produk (format WebP)';
 
   const dispatch = createEventDispatcher<{
     select: string;
@@ -17,8 +19,8 @@
   let assets: AiAssetItem[] = [];
   let loading = false;
 
-  $: displayedAssets = filterType === 'packaging_mockup'
-    ? assets.filter((a) => a.featureType === 'packaging_mockup')
+  $: displayedAssets = filterType !== 'all'
+    ? assets.filter((a) => a.featureType === filterType)
     : assets;
 
   async function loadGallery() {
@@ -69,10 +71,10 @@
       <div class="flex items-center justify-between pb-3 border-b border-light">
         <div>
           <h3 class="font-heading font-bold text-base text-main">
-            Pilih dari Galeri Desain AI
+            {title}
           </h3>
           <p class="text-2xs text-secondary">
-            Klik salah satu gambar untuk langsung memasangnya ke produk (format WebP)
+            {description}
           </p>
         </div>
         <Button
@@ -87,7 +89,7 @@
         </Button>
       </div>
 
-      <!-- Grid Kartu Gambar Tanpa Header/Footer Clutter -->
+      <!-- Grid Kartu Gambar -->
       <div class="flex-1 overflow-y-auto pr-1">
         {#if loading}
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -100,7 +102,11 @@
             <div class="w-12 h-12 rounded-full bg-nested flex items-center justify-center mx-auto text-muted">
               <Image size={22} />
             </div>
-            <p class="text-xs">Belum ada aset visual yang cocok di Galeri Desain AI toko Anda.</p>
+            <p class="text-xs">
+              {filterType === 'logo'
+                ? 'Belum ada aset Logo di Galeri AI Studio toko Anda. Buat logo terlebih dahulu di menu AI Studio.'
+                : 'Belum ada aset visual yang cocok di Galeri Desain AI toko Anda.'}
+            </p>
           </div>
         {:else}
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -113,18 +119,14 @@
                 on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelect(asset)}
                 title="Pilih gambar ini"
               >
-                <!-- Full Gambar Bebas Clutter Atas/Bawah -->
                 <img
                   src={asset.cloudinaryUrl}
                   alt="Desain AI"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
                 />
-
-                <!-- Overlay Hover Halus -->
-                <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                  <span class="px-2.5 py-1 text-2xs font-bold font-heading bg-primary text-primary-content rounded-full shadow-md scale-95 group-hover:scale-100 transition-transform">
-                    Gunakan Gambar
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span class="text-xs font-semibold text-white bg-primary px-3 py-1.5 rounded-full shadow-md">
+                    Gunakan
                   </span>
                 </div>
               </div>

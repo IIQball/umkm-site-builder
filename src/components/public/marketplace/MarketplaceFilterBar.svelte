@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { RotateCcw } from 'lucide-svelte';
+  import { RotateCcw, Search, ChevronDown, ArrowUpDown } from 'lucide-svelte';
+  import { SearchableSelect } from '@/components/ui';
   import type { CategoryItem, PublicTemplate } from '../marketplace.types';
 
   export let searchQuery: string = '';
@@ -9,6 +10,15 @@
   export let categories: CategoryItem[] = [];
   export let templates: PublicTemplate[] = [];
   export let onReset: () => void;
+
+  $: categoryOptions = [
+    { value: 'all', label: 'Semua Kategori', sublabel: `${templates.length} template` },
+    ...categories.map((cat) => ({
+      value: cat.slug,
+      label: cat.name,
+      sublabel: `${templates.filter((t) => t.categorySlug === cat.slug).length} template`,
+    })),
+  ];
 </script>
 
 <div class="bg-card rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
@@ -22,13 +32,11 @@
         placeholder="Cari tema toko, kuliner, fashion, nama desainer..."
         class="w-full bg-nested/80 rounded-full pl-11 pr-4 py-3 text-sm text-main placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card transition-all shadow-2xs font-sans border-0"
       />
-      <label
-        for="marketplace-search-input"
-        class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-lg cursor-text z-10 select-none"
+      <Search
+        size={18}
+        class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none z-10 select-none"
         aria-hidden="true"
-      >
-        search
-      </label>
+      />
       {#if searchQuery}
         <button
           type="button"
@@ -40,10 +48,27 @@
       {/if}
     </div>
 
-    <!-- Price & Sort Dropdown Filters -->
+    <!-- Category, Price & Sort Dropdown Filters -->
     <div class="flex flex-wrap items-center gap-3">
+      <!-- Category Searchable Dropdown -->
+      <div class="w-full sm:w-56">
+        <SearchableSelect
+          id="marketplace-category-select"
+          value={selectedCategorySlug}
+          options={categoryOptions}
+          placeholder="Pilih Kategori..."
+          searchPlaceholder="Cari kategori..."
+          size="md"
+          clearable={false}
+          fullWidth={true}
+          on:change={(e) => {
+            selectedCategorySlug = String(e.detail.value || 'all');
+          }}
+        />
+      </div>
+
       <!-- Price Filter Dropdown -->
-      <div class="relative min-w-[140px]">
+      <div class="relative min-w-[130px] flex-1 sm:flex-initial">
         <select
           id="marketplace-price-filter"
           bind:value={selectedPriceFilter}
@@ -56,17 +81,15 @@
           <option value="50to100">Rp 50.000 - Rp 100.000</option>
           <option value="above100">&gt; Rp 100.000</option>
         </select>
-        <label
-          for="marketplace-price-filter"
-          class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm cursor-pointer z-10 select-none"
+        <ChevronDown
+          size={14}
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none z-10 select-none"
           aria-hidden="true"
-        >
-          expand_more
-        </label>
+        />
       </div>
 
       <!-- Sorting Dropdown -->
-      <div class="relative min-w-[150px]">
+      <div class="relative min-w-[130px] flex-1 sm:flex-initial">
         <select
           id="marketplace-sort-filter"
           bind:value={selectedSort}
@@ -77,13 +100,11 @@
           <option value="price_desc">Harga: Tertinggi</option>
           <option value="name_asc">Nama (A - Z)</option>
         </select>
-        <label
-          for="marketplace-sort-filter"
-          class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-sm cursor-pointer z-10 select-none"
+        <ArrowUpDown
+          size={14}
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none z-10 select-none"
           aria-hidden="true"
-        >
-          sort
-        </label>
+        />
       </div>
 
       {#if searchQuery || selectedCategorySlug !== 'all' || selectedPriceFilter !== 'all' || selectedSort !== 'newest'}
@@ -98,41 +119,5 @@
         </button>
       {/if}
     </div>
-  </div>
-
-  <!-- Category Pills Rail -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2 border-t border-border/40 dark:border-white/10">
-    <button
-      type="button"
-      on:click={() => (selectedCategorySlug = 'all')}
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === 'all'
-        ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
-        : 'bg-nested/80 hover:bg-card text-secondary hover:text-main'}"
-    >
-      <span class="material-symbols-outlined text-sm">grid_view</span>
-      <span>Semua Kategori</span>
-      <span class="text-[11px] opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
-        {templates.length}
-      </span>
-    </button>
-
-    {#each categories as cat (cat.id)}
-      {@const count = templates.filter((t) => t.categorySlug === cat.slug).length}
-      <button
-        type="button"
-        on:click={() => (selectedCategorySlug = cat.slug)}
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer {selectedCategorySlug === cat.slug
-          ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-2xs'
-          : 'bg-nested/80 hover:bg-card text-secondary hover:text-main'}"
-      >
-        <span class="material-symbols-outlined text-sm">{cat.icon || 'folder'}</span>
-        <span>{cat.name}</span>
-        {#if count > 0}
-          <span class="text-[11px] opacity-80 bg-white/20 dark:bg-black/20 px-1.5 py-0.5 rounded-full font-mono">
-            {count}
-          </span>
-        {/if}
-      </button>
-    {/each}
   </div>
 </div>

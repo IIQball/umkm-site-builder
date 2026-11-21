@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Users, Sliders, Save } from "lucide-svelte";
   import { Card, Button } from "@/components/ui";
   import { addToast } from "@/lib/toast";
   import { apiFetch } from "@/lib/api/parse-response";
@@ -12,12 +13,16 @@
   export let initialAdminServiceFee: number = 5000;
   export let initialMaxStoreBranches: number = 5;
   export let initialMaxTemplateRevisions: number = 3;
+  export let initialContactPhone: string = '085736653639';
+  export let initialContactEmail: string = 'support@pinoka.id';
 
   let platformFeePercentage: number = initialFeePercentage;
   let settlementDelayDays: number = initialSettlementDelayDays;
   let adminServiceFee: number = initialAdminServiceFee;
   let maxStoreBranches: number = initialMaxStoreBranches;
   let maxTemplateRevisions: number = initialMaxTemplateRevisions;
+  let contactPhone: string = initialContactPhone;
+  let contactEmail: string = initialContactEmail;
   let isLoading = false;
 
   onMount(async () => {
@@ -28,6 +33,8 @@
         adminServiceFee?: number;
         maxStoreBranches?: number;
         maxTemplateRevisions?: number;
+        contactPhone?: string;
+        contactEmail?: string;
       }>("/api/admin/settings/commission");
       if (result.success && result.data) {
         if (result.data.platformFeePercentage !== undefined) {
@@ -44,6 +51,12 @@
         }
         if (result.data.maxTemplateRevisions !== undefined) {
           maxTemplateRevisions = Number(result.data.maxTemplateRevisions);
+        }
+        if (result.data.contactPhone !== undefined) {
+          contactPhone = result.data.contactPhone;
+        }
+        if (result.data.contactEmail !== undefined) {
+          contactEmail = result.data.contactEmail;
         }
       }
     } catch {
@@ -87,6 +100,20 @@
       });
       return;
     }
+    if (contactPhone && !/^[0-9+() -]{8,20}$/.test(contactPhone.trim())) {
+      addToast({
+        type: "error",
+        message: "Format nomor telepon narahubung tidak valid (minimal 8 digit)",
+      });
+      return;
+    }
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+      addToast({
+        type: "error",
+        message: "Format email narahubung tidak valid",
+      });
+      return;
+    }
 
     isLoading = true;
 
@@ -100,6 +127,8 @@
           adminServiceFee: Number(adminServiceFee),
           maxStoreBranches: Number(maxStoreBranches),
           maxTemplateRevisions: Number(maxTemplateRevisions),
+          contactPhone: contactPhone.trim(),
+          contactEmail: contactEmail.trim().toLowerCase(),
         }),
         fallbackError: "Gagal menyimpan pengaturan platform",
       });
@@ -108,7 +137,7 @@
         addToast({
           type: "success",
           message:
-            "Pengaturan komisi, fee admin, settlement & batas cabang/revisi berhasil disimpan!",
+            "Pengaturan komisi, fee admin, kontak narahubung & batas cabang/revisi berhasil disimpan!",
         });
       } else {
         addToast({
@@ -158,9 +187,7 @@
         size="md"
         className="font-bold"
       >
-        <span class="material-symbols-outlined text-primary text-base"
-          >group</span
-        >
+        <Users size={16} class="text-primary mr-1.5" />
         <span>Manajemen Pengguna</span>
       </Button>
     </div>
@@ -193,7 +220,7 @@
           <div
             class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs"
           >
-            <span class="material-symbols-outlined text-lg">tune</span>
+            <Sliders size={18} />
           </div>
           <div>
             <h3
@@ -227,6 +254,8 @@
             bind:settlementDelayDays
             bind:maxStoreBranches
             bind:maxTemplateRevisions
+            bind:contactPhone
+            bind:contactEmail
             {isLoading}
           />
 
@@ -241,10 +270,7 @@
               disabled={isLoading}
               className="min-w-[180px] shadow-xs active:scale-95 font-bold rounded-2xl"
             >
-              <span
-                class="material-symbols-outlined text-[18px] mr-1.5 icon-filled"
-                >save</span
-              >
+              <Save size={18} class="mr-1.5" />
               <span>Simpan Parameter</span>
             </Button>
           </div>

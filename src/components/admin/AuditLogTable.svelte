@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Pagination, Badge, Select, Table, Modal, Button, Card, SearchableSelect } from '@/components/ui';
-  import { User, Monitor, Info } from 'lucide-svelte';
+  import type { BadgeVariant } from '@/components/tokens/colors';
+  import { User, Monitor, Info, History } from 'lucide-svelte';
   import { formatDate } from '@/lib/utils/format';
   import { formatAuditAction } from '@/lib/utils/audit';
   import { DEFAULT_AUDIT_ACTIONS } from '@/services/audit.constants';
@@ -8,7 +9,7 @@
   export let initialLogs: Array<{
     id: string;
     action: string;
-    details: any;
+    details: Record<string, unknown> | null;
     createdAt: string;
     user?: {
       id: string;
@@ -31,8 +32,8 @@
   let actionFilter = initialActionFilter;
   let roleFilter = initialRoleFilter;
 
-  let selectedLog: any = null;
-  const openDetailModal = (log: any) => { selectedLog = log; };
+  let selectedLog: (typeof initialLogs)[0] | null = null;
+  const openDetailModal = (log: (typeof initialLogs)[0]) => { selectedLog = log; };
   const closeDetailModal = () => { selectedLog = null; };
 
   const handleFilterChange = () => {
@@ -66,7 +67,7 @@
     { value: 'superadmin', label: 'Super Admin' }
   ];
 
-  const getActionColor = (action: string) => {
+  const getActionBadgeVariant = (action: string): BadgeVariant => {
     const act = action.toLowerCase();
     if (act.includes('create') || act.includes('add') || act.includes('activated') || act.includes('approve') || act.includes('apply')) return 'success';
     if (act.includes('delete') || act.includes('remove') || act.includes('fail') || act.includes('suspended') || act.includes('reject')) return 'error';
@@ -82,7 +83,7 @@
   <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested dark:text-main flex items-center justify-center flex-shrink-0 shadow-2xs">
-        <span class="material-symbols-outlined text-lg">history</span>
+        <History size={18} />
       </div>
       <div>
         <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
@@ -121,7 +122,7 @@
   {#if logs.length === 0}
     <div class="py-16 px-8 flex flex-col items-center text-center">
       <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-        <span class="material-symbols-outlined text-2xl">history</span>
+        <History size={24} />
       </div>
       <h4 class="font-bold text-main text-base font-heading mb-1">Tidak Ada Aktivitas</h4>
       <p class="text-xs text-secondary max-w-sm mx-auto font-sans leading-relaxed">
@@ -171,7 +172,7 @@
 
           <!-- Column: Aksi -->
           <td class="px-6 py-4">
-            <Badge variant={getActionColor(log.action)} class="font-bold tracking-wide uppercase px-2 py-0.5 text-[10px] shadow-xs">
+            <Badge variant={getActionBadgeVariant(log.action)} size="sm">
               {formatAuditAction(log.action, { mode: 'label' })}
             </Badge>
           </td>

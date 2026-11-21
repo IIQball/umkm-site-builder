@@ -20,7 +20,7 @@
       on:click={() => { role = 'tenant'; }}
     >
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
+        <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'tenant' ? 'bg-primary text-primary-content' : 'bg-nested text-muted group-hover:text-main'}">
           <Store size={18} strokeWidth={2.5} />
         </div>
         <div class="pr-6">
@@ -41,7 +41,7 @@
       on:click={() => { role = 'designer'; }}
     >
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-slate-950' : 'bg-nested text-muted group-hover:text-main'}">
+        <div class="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-colors {role === 'designer' ? 'bg-primary text-primary-content' : 'bg-nested text-muted group-hover:text-main'}">
           <PenTool size={18} strokeWidth={2.5} />
         </div>
         <div class="pr-6">
@@ -64,7 +64,7 @@
   </div>
 
   <p class="text-xs text-center text-secondary pt-6 leading-relaxed">
-    Dengan membuat akun, Anda menyetujui <a href="/syarat-layanan" class="text-primary hover:underline font-medium">Syarat Layanan</a> dan <a href="/kebijakan-privasi" class="text-primary hover:underline font-medium">Kebijakan Privasi</a>.
+    Dengan membuat akun, Anda menyetujui <a href="/terms" class="text-primary hover:underline font-medium">Syarat Layanan</a> dan <a href="/privacy" class="text-primary hover:underline font-medium">Kebijakan Privasi</a>.
   </p>
 </div>
 

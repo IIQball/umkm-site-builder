@@ -8,19 +8,20 @@
     variant: 'success' | 'warning' | 'error' | 'slate';
     text: string;
   };
+  export let isMonthlyView: boolean = false;
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <!-- Card 1: Harga per 1% Usage -->
+  <!-- Card 1: Nilai Biaya per 1% Kuota Deposit -->
   <StatCard
-    label="HARGA PER 1% USAGE"
+    label="BIAYA PER 1% KUOTA"
     value={formatSmartIDR(summary.costPerPercentUsageIdr)}
     rawValue={summary.costPerPercentUsageIdr}
     valueSuffix="/ 1%"
     icon="payments"
     cardTheme="default"
-    badge="Unit Biaya"
-    footerText={`Batas Deposit: ${formatIDR(summary.monthlyDepositLimitIdr)}`}
+    badge="Unit Kuota"
+    footerText={`Limit Deposit: ${formatIDR(summary.monthlyDepositLimitIdr)}`}
     delayClass="delay-75"
   />
 
@@ -41,15 +42,15 @@
     delayClass="delay-100"
   />
 
-  <!-- Card 3: Rata-rata Harian -->
+  <!-- Card 3: Rata-rata Harian / Bulanan (Bukan Fluktuasi) -->
   <StatCard
-    label="RATA-RATA HARIAN"
+    label={isMonthlyView ? "RATA-RATA BULANAN" : "RATA-RATA HARIAN"}
     value={formatSmartIDR(summary.averageDailyCostIdr)}
     rawValue={summary.averageDailyCostIdr}
-    valueSuffix="/ hari"
+    valueSuffix={isMonthlyView ? "/ bulan" : "/ hari"}
     icon="trending_up"
     cardTheme="default"
-    badge="Fluktuasi"
+    badge="Rata-rata"
     footerText={`Biaya Tertinggi: ${formatIDR(summary.peakDailyCostIdr)}`}
     delayClass="delay-150"
   />

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Percent, Headphones, Clock, Store, FileEdit, Phone, Mail } from 'lucide-svelte';
   import { Input, Button } from '@/components/ui';
   import { formatCurrencyInput, parseCurrencyInput } from '@/lib/currency';
 
@@ -7,6 +8,8 @@
   export let settlementDelayDays: number = 7;
   export let maxStoreBranches: number = 5;
   export let maxTemplateRevisions: number = 3;
+  export let contactPhone: string = '085736653639';
+  export let contactEmail: string = 'support@pinoka.id';
   export let isLoading: boolean = false;
 
   let displayFee: string = formatCurrencyInput(adminServiceFee) || '0';
@@ -42,7 +45,7 @@
   <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-        <span class="material-symbols-outlined text-sm">percent</span>
+        <Percent size={14} />
       </div>
       <span class="text-xs font-bold text-main font-heading">Potongan Fee Platform</span>
     </div>
@@ -76,7 +79,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-lg bg-info/15 text-info flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm">support_agent</span>
+          <Headphones size={14} />
         </div>
         <span class="text-xs font-bold text-main font-heading">Fee Pendampingan Admin</span>
       </div>
@@ -127,7 +130,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-lg bg-orange/15 text-orange flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm">hourglass_top</span>
+          <Clock size={14} />
         </div>
         <span class="text-xs font-bold text-main font-heading">Penahanan Settlement</span>
       </div>
@@ -178,7 +181,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm">store</span>
+          <Store size={14} />
         </div>
         <span class="text-xs font-bold text-main font-heading">Maksimal Cabang Toko</span>
       </div>
@@ -230,7 +233,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-lg bg-warning/15 text-warning flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm">history_edu</span>
+          <FileEdit size={14} />
         </div>
         <span class="text-xs font-bold text-main font-heading">Batas Pengajuan Revisi Template</span>
       </div>
@@ -275,5 +278,47 @@
     >
       <span slot="suffix" class="font-bold text-xs text-muted select-none">Kali</span>
     </Input>
+  </div>
+
+  <!-- Contact Phone Input -->
+  <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-success/10 text-success flex items-center justify-center">
+        <Phone size={14} />
+      </div>
+      <span class="text-xs font-bold text-main font-heading">Nomor Telepon Narahubung</span>
+    </div>
+    <Input
+      id="contactPhone"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      placeholder="085736653639"
+      bind:value={contactPhone}
+      disabled={isLoading}
+      className="font-bold text-sm font-mono"
+      helper="Nomor WhatsApp/telepon resmi di halaman bantuan & kontak publik."
+    />
+  </div>
+
+  <!-- Contact Email Input -->
+  <div class="p-5 rounded-3xl bg-card border border-light space-y-3 shadow-2xs">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+        <Mail size={14} />
+      </div>
+      <span class="text-xs font-bold text-main font-heading">Email Narahubung</span>
+    </div>
+    <Input
+      id="contactEmail"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="support@pinoka.id"
+      bind:value={contactEmail}
+      disabled={isLoading}
+      className="font-bold text-sm font-mono"
+      helper="Alamat email resmi untuk pengaduan & bantuan pengguna."
+    />
   </div>
 </div>

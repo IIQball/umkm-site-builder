@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-svelte';
+  import { Sparkles, ArrowLeft, ArrowRight, AlertCircle, AlertTriangle } from 'lucide-svelte';
   import { Card, Textarea, Button, Badge } from '@/components/ui';
   import { formatIDR, formatCurrencyInput } from '@/lib/currency';
   import { apiFetch } from '@/lib/api/parse-response';
@@ -32,8 +32,8 @@
   let platformFeePercentage = 30;
   let designerPercentage = 70;
 
-  $: selectedCategoryObj = categories.find((c) => c.id === selectedCategoryId) || categories[0];
-  $: selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : 'Umum';
+  $: selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  $: selectedCategoryName = selectedCategory?.name || 'Umum';
 
   onMount(async () => {
     if (!initialTemplate && typeof window !== 'undefined') {
@@ -64,9 +64,7 @@
       loadingCategories = true;
       try {
         const result = await apiFetch<typeof categories>('/api/public/template-categories');
-        if (result.success && Array.isArray(result.data)) {
-          categories = result.data;
-        }
+        if (result.success && Array.isArray(result.data)) categories = result.data;
       } catch {
         categories = [];
       } finally {
@@ -78,9 +76,7 @@
     }
 
     try {
-      const commResult = await apiFetch<{ platformFeePercentage: number; designerPercentage: number }>(
-        '/api/public/commission'
-      );
+      const commResult = await apiFetch<{ platformFeePercentage: number; designerPercentage: number }>('/api/public/commission');
       if (commResult.success && commResult.data) {
         platformFeePercentage = commResult.data.platformFeePercentage;
         designerPercentage = commResult.data.designerPercentage;
@@ -94,15 +90,17 @@
     selectedCategoryId = categories[0].id;
   }
 
-  $: pricePreview =
-    numericPriceState > 0
-      ? formatIDR(numericPriceState)
-      : 'Gratis';
+  $: pricePreview = numericPriceState > 0 ? formatIDR(numericPriceState) : 'Gratis';
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     if (!name.trim()) {
       error = 'Nama template wajib diisi';
+      toast.warning(error);
+      return;
+    }
+    if (!selectedCategoryId) {
+      error = 'Pilih kategori rekomendasi template';
       toast.warning(error);
       return;
     }
@@ -122,7 +120,7 @@
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || undefined,
-          categoryId: selectedCategoryId || undefined,
+          categoryId: selectedCategoryId,
           thumbnailUrl: thumbnailUrl.trim() || undefined,
           price: numericPriceState,
         }),
@@ -130,7 +128,6 @@
       });
 
       const targetId = isUpdating ? currentTemplateId : result.data?.id;
-
       if (result.success && targetId) {
         toast.success(isUpdating ? 'Draf template diperbarui.' : 'Draf template dibuat.');
         window.location.href = `/builder/${targetId}`;
@@ -150,26 +147,18 @@
 <div class="max-w-5xl mx-auto space-y-6 w-full">
   <Card variant="bordered" padding="none" radius="3xl" overflow="visible" className="shadow-sm overflow-visible">
     <!-- Card Header Banner -->
-    <div
-      class="p-6 md:p-8 bg-nested/50 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-3xl"
-    >
+    <div class="p-6 md:p-8 bg-nested/50 border-b border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-3xl">
       <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center flex-shrink-0 shadow-2xs"
-        >
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center flex-shrink-0 shadow-2xs">
           <Sparkles size={16} />
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-heading-md text-main font-bold">
-              Studio Inisialisasi Template
-            </h1>
+            <h1 class="text-heading-md text-main font-bold">Studio Inisialisasi Template</h1>
             {#if isEditMode}
-              {#if initialTemplate?.status === 'rejected'}
-                <Badge variant="error" size="sm">Perbaikan Desain</Badge>
-              {:else}
-                <Badge variant="primary" size="sm">Edit Draf</Badge>
-              {/if}
+              <Badge variant={initialTemplate?.status === 'rejected' ? 'error' : 'primary'} size="sm">
+                {initialTemplate?.status === 'rejected' ? 'Perbaikan Desain' : 'Edit Draf'}
+              </Badge>
             {:else}
               <Badge variant="secondary" size="sm">Draf Baru</Badge>
             {/if}
@@ -182,32 +171,19 @@
         </div>
       </div>
 
-      <Button
-        href={backHref}
-        variant="secondary"
-        size="sm"
-        class="self-start sm:self-auto"
-      >
+      <Button href={backHref} variant="secondary" size="sm" class="self-start sm:self-auto">
         <ArrowLeft size={14} />
         <span>Kembali ke Katalog</span>
       </Button>
     </div>
 
     <!-- Main Grid: Left Form (60%) + Right Live Preview (40%) -->
-    <div
-      class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--color-border-light)] items-start"
-    >
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--color-border-light)] items-start">
       <!-- Left Column: Interactive Form -->
-      <form
-        on:submit={handleSubmit}
-        class="lg:col-span-7 p-6 md:p-8 space-y-6"
-        novalidate
-      >
+      <form on:submit={handleSubmit} class="lg:col-span-7 p-6 md:p-8 space-y-6" novalidate>
         {#if error}
-          <div
-            class="flex items-start gap-2.5 p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-xs animate-fade-in-up"
-          >
-            <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5">error</span>
+          <div class="flex items-start gap-2.5 p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-xs animate-fade-in-up">
+            <AlertCircle size={16} class="flex-shrink-0 mt-0.5" />
             <p class="leading-relaxed font-sans">{error}</p>
           </div>
         {/if}
@@ -216,7 +192,7 @@
           <div class="p-4 rounded-2xl bg-error/10 border border-error/20 text-xs space-y-2 animate-fade-in-up">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 text-error font-bold">
-                <span class="material-symbols-outlined text-base">assignment_late</span>
+                <AlertTriangle size={16} />
                 <span>Catatan Penolakan dari Kurator</span>
               </div>
               {#if initialTemplate.revisionCount !== undefined}
@@ -226,13 +202,10 @@
             <div class="p-3 bg-card/80 border border-error/20 rounded-xl text-secondary leading-relaxed font-sans">
               {initialTemplate.rejectionReason}
             </div>
-            <p class="text-2xs text-muted">
-              Perbaiki metadata dasar di bawah ini, lalu klik tombol simpan untuk menyelaraskan desain kanvas.
-            </p>
           </div>
         {/if}
 
-        <!-- Basic Details: Name, Category, Thumbnail -->
+        <!-- Basic Details: Name, Category (Single recommended), Thumbnail -->
         <TemplateBasicDetails
           bind:name
           {loading}
@@ -242,7 +215,7 @@
           bind:thumbnailUrl
         />
 
-        <!-- Pricing & Income Simulator Sub-Component -->
+        <!-- Pricing & Income Simulator -->
         <TemplatePricingSimulator
           bind:numericPriceState
           bind:priceDisplay
@@ -252,15 +225,26 @@
           {designerPercentage}
         />
 
-        <!-- Description / Tagline Input -->
-        <Textarea
-          id="tmpl-desc"
-          label="Deskripsi Ringkas & Keunggulan (Opsional)"
-          placeholder="Jelaskan karakteristik visual, target UMKM, dan fitur unik template ini..."
-          bind:value={description}
-          rows={3}
-          disabled={loading}
-        />
+        <!-- Description / Tagline Input (Singkat & Padat) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="tmpl-desc" class="text-label-caps text-muted font-bold">
+              Deskripsi Ringkas & Keunggulan (Opsional)
+            </label>
+            <span class="text-xs text-muted font-mono">{description.length}/120 karakter</span>
+          </div>
+          <Textarea
+            id="tmpl-desc"
+            placeholder="Jelaskan karakteristik visual dan fitur unik template ini secara singkat..."
+            bind:value={description}
+            rows={2}
+            maxlength={120}
+            disabled={loading}
+          />
+          <p class="text-2xs text-secondary">
+            Ringkasan keunggulan desain template (maksimal 120 karakter).
+          </p>
+        </div>
 
         <!-- Action Submit Buttons -->
         <div class="pt-4 flex items-center justify-between gap-3 border-t border-light">
@@ -278,7 +262,7 @@
         </div>
       </form>
 
-      <!-- Right Column: Real-Time Live Card Mockup & Studio Info Sub-Component -->
+      <!-- Right Column: Real-Time Live Card Mockup -->
       <TemplateCardPreview
         {name}
         {description}
@@ -290,4 +274,3 @@
     </div>
   </Card>
 </div>
-

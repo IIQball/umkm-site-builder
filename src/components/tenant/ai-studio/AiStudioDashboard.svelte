@@ -8,7 +8,6 @@
   import AiLoadingProgress from './AiLoadingProgress.svelte';
   import AiResultPreview from './AiResultPreview.svelte';
   import AiAssetGallery from './AiAssetGallery.svelte';
-  import AiDeveloperTestBar from './AiDeveloperTestBar.svelte';
   import AiCreditTopupBanner from './AiCreditTopupBanner.svelte';
   import AiStudioHeaderBar from './AiStudioHeaderBar.svelte';
   import TransactionStatus from '@/components/checkout/TransactionStatus.svelte';
@@ -52,8 +51,6 @@
 
   let assets: AiAssetItem[] = [];
   let isAssetsLoading = false;
-  let isTestMode = false;
-  let isTesting = false;
 
   let creditBalance = 0;
   let creditTotalPurchased = 0;
@@ -87,7 +84,6 @@
     loadBalance();
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      isTestMode = urlParams.get('testMode') === 'true';
       creditPurchaseInvoiceId = urlParams.get('creditPurchase') || '';
     }
   });
@@ -103,7 +99,7 @@
 
   async function executeGeneration(payload: AiStudioGeneratePayload) {
     const reqCredits = payload.qualityTier === 'high' ? 2 : 1;
-    if (creditBalance < reqCredits && !(isTestMode && isTesting)) {
+    if (creditBalance < reqCredits) {
       generalError = creditBalance <= 0
         ? 'Kredit AI toko Anda telah habis. Silakan lakukan isi ulang kredit terlebih dahulu.'
         : `Kredit tidak mencukupi untuk desain ini (butuh ${reqCredits} kredit, tersisa ${creditBalance} kredit).`;
@@ -122,7 +118,6 @@
         ...payload,
         storeId,
         qualityTier: payload.qualityTier || 'high',
-        isTesting: isTestMode && isTesting,
         size: payload.size || '1024x1024',
       });
 
@@ -151,10 +146,6 @@
     <div class="rounded-2xl border border-light bg-card px-4 py-2">
       <TransactionStatus invoiceId={creditPurchaseInvoiceId} onStatusUpdate={handleCreditPurchaseStatus} />
     </div>
-  {/if}
-
-  {#if isTestMode}
-    <AiDeveloperTestBar bind:isTesting />
   {/if}
 
   <AiStudioHeaderBar bind:mainTab assetsCount={assets.length} {storeName} {creditBalance} {creditStatusStyle} />

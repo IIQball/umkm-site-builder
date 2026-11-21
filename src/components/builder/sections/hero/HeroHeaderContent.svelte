@@ -58,17 +58,17 @@
       <div
         data-node="badge"
         use:editorNode={'hero_badge'}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700)); color: var(--hero-badge-color, inherit); margin-top: var(--hero-badge-mt, 0px); margin-bottom: var(--hero-badge-mb, 0px);"
-        class={`inline-flex items-center gap-1.5 px-3.5 py-1 mb-3 min-h-[24px] text-2xs font-heading font-medium border transition-all shadow-2xs ${selectNode ? 'cursor-pointer' : ''} ${
+        style="font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700)); color: var(--hero-badge-color, var(--theme-secondary, var(--color-secondary))); border-color: color-mix(in srgb, var(--hero-badge-color, var(--theme-secondary, var(--color-secondary))) 25%, transparent); background-color: color-mix(in srgb, var(--hero-badge-color, var(--theme-secondary, var(--color-secondary))) 10%, transparent); margin-top: var(--hero-badge-mt, 0px); margin-bottom: var(--hero-badge-mb, 12px);"
+        class={`inline-flex items-center rounded-full gap-1.5 px-3.5 py-1 mb-3 min-h-[24px] text-2xs font-heading font-medium border transition-all shadow-2xs ${selectNode ? 'cursor-pointer' : ''} ${
           isBadgeActive
             ? 'ring-2 ring-[var(--theme-primary,var(--color-primary))] ring-offset-2 dark:ring-offset-base-100 bg-[var(--theme-primary,var(--color-primary))]/15'
-            : 'bg-[color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_10%,transparent)] border-[color-mix(in_srgb,var(--theme-secondary,var(--color-secondary))_25%,transparent)] text-[var(--theme-secondary,var(--color-secondary))] hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/50'
+            : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary,var(--color-primary))]/50'
         }`}
       >
         {#if badgeIcon}
-          <svelte:component this={resolveFeatureIcon(badgeIcon)} size={12} class="text-[var(--theme-secondary,var(--color-secondary))] shrink-0" />
+          <svelte:component this={resolveFeatureIcon(badgeIcon)} size={12} class="shrink-0" style="color: currentColor;" />
         {:else}
-          <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--theme-secondary, var(--color-secondary));"></span>
+          <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: currentColor;"></span>
         {/if}
         <span>{stripEmoji(badgeText)}</span>
       </div>

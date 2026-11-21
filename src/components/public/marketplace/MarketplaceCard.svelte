@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eye, ShoppingCart, CheckCircle2 } from 'lucide-svelte';
+  import { Eye, ShoppingCart, CheckCircle2, Palette, Tag } from 'lucide-svelte';
   import { Button, Badge } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
   import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
@@ -17,7 +17,8 @@
 
   let imageLoadError = false;
 
-  $: isAdmin = userRole === 'admin' || userRole === 'superadmin';
+  $: isAdmin = userRole === 'admin';
+  $: isRestrictedRole = userRole === 'designer' || userRole === 'superadmin';
   $: displayPrice = (isAdmin && hasSelectedTenant && tpl.price > 0)
     ? tpl.price + adminServiceFee
     : tpl.price;
@@ -44,7 +45,7 @@
         <div
           class="w-10 h-10 rounded-xl bg-card flex items-center justify-center text-muted shadow-2xs"
         >
-          <span class="material-symbols-outlined text-xl">palette</span>
+          <Palette size={20} />
         </div>
         <span class="text-xs font-medium text-muted">Tanpa Pratinjau</span>
       </div>
@@ -58,7 +59,7 @@
         <span
           class="inline-flex items-center gap-1.5 bg-card/90 backdrop-blur-md text-main px-2.5 py-1 rounded-full text-xs font-semibold shadow-xs"
         >
-          <span class="material-symbols-outlined text-xs text-primary">{tpl.categoryIcon || 'category'}</span>
+          <Tag size={12} class="text-primary" />
           <span>{tpl.categoryName}</span>
         </span>
       {:else}
@@ -70,18 +71,12 @@
       {/if}
 
       {#if tpl.price === 0}
-        <span
-          class="inline-flex items-center gap-1 bg-success text-success-content px-2.5 py-0.5 rounded-full text-xs font-bold shadow-xs"
-        >
-          Gratis
-        </span>
+        <Badge variant="success" size="sm">Gratis</Badge>
       {:else if !isAdmin && isOwned}
-        <span
-          class="inline-flex items-center gap-1 bg-card/90 backdrop-blur-md text-success px-2.5 py-0.5 rounded-full text-xs font-bold shadow-xs"
-        >
+        <Badge variant="primary" size="sm" class="gap-1">
           <CheckCircle2 size={12} />
-          Dimiliki
-        </span>
+          <span>Dimiliki</span>
+        </Badge>
       {/if}
     </div>
   </div>
@@ -193,6 +188,17 @@
               : (tpl.price === 0 ? 'Gunakan' : 'Beli')}
           </span>
         </Button>
+      {:else if isRestrictedRole}
+        <div class="flex-1 flex justify-end">
+          <Badge
+            variant="secondary"
+            size="lg"
+            dot={false}
+            class="gap-1.5 w-full justify-center py-1.5 text-xs text-secondary font-medium"
+          >
+            {userRole === 'designer' ? 'Mode Desainer' : 'Mode Superadmin'}
+          </Badge>
+        </div>
       {/if}
     </div>
   </div>

@@ -18,11 +18,8 @@
     close: void;
   }>();
 
-  let isOpen = false;
-  let searchQuery = '';
-  let containerRef: HTMLDivElement | null = null;
-  let searchInputRef: HTMLInputElement | null = null;
-  let highlightedIndex = -1;
+  let isOpen = false, searchQuery = '', highlightedIndex = -1;
+  let containerRef: HTMLDivElement | null = null, searchInputRef: HTMLInputElement | null = null;
 
   const sizeStyles = {
     sm: 'py-2 px-3 text-xs rounded-xl min-h-[36px]',
@@ -31,15 +28,13 @@
   };
 
   $: componentId = id || (label ? `searchable-${label.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : 'searchable-select');
-
   $: selectedOption = options.find((opt) => String(opt.value) === String(value));
+  $: displayLabel = selectedOption ? selectedOption.label : placeholder;
 
   $: filteredOptions = options.filter((opt) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
-    const matchLabel = opt.label.toLowerCase().includes(q);
-    const matchSublabel = opt.sublabel ? opt.sublabel.toLowerCase().includes(q) : false;
-    return matchLabel || matchSublabel;
+    return opt.label.toLowerCase().includes(q) || (opt.sublabel ? opt.sublabel.toLowerCase().includes(q) : false);
   });
 
   $: if (isOpen && searchInputRef && searchable) setTimeout(() => searchInputRef?.focus(), 40);
@@ -84,7 +79,6 @@
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (disabled) return;
-
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
@@ -92,21 +86,16 @@
       }
       return;
     }
-
     if (e.key === 'Escape') {
       e.preventDefault();
       isOpen = false;
       dispatch('close');
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if (filteredOptions.length > 0) {
-        highlightedIndex = (highlightedIndex + 1) % filteredOptions.length;
-      }
+      if (filteredOptions.length > 0) highlightedIndex = (highlightedIndex + 1) % filteredOptions.length;
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (filteredOptions.length > 0) {
-        highlightedIndex = (highlightedIndex - 1 + filteredOptions.length) % filteredOptions.length;
-      }
+      if (filteredOptions.length > 0) highlightedIndex = (highlightedIndex - 1 + filteredOptions.length) % filteredOptions.length;
     } else if (e.key === 'Enter' && highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
       e.preventDefault();
       selectOption(filteredOptions[highlightedIndex]);
@@ -121,28 +110,19 @@
     }
   };
 
-  onMount(() => {
-    document.addEventListener('click', handleDocumentClick, true);
-  });
-
-  onDestroy(() => {
-    if (typeof document !== 'undefined') {
-      document.removeEventListener('click', handleDocumentClick, true);
-    }
-  });
+  onMount(() => document.addEventListener('click', handleDocumentClick, true));
+  onDestroy(() => { if (typeof document !== 'undefined') document.removeEventListener('click', handleDocumentClick, true); });
 </script>
 
 <div
   bind:this={containerRef}
-  class="relative {isOpen ? 'z-40' : ''} {fullWidth ? 'w-full' : 'inline-block'} font-sans {className}"
-  role="none"
+  class="relative flex flex-col font-sans {fullWidth ? 'w-full' : 'w-auto inline-block'} {className}"
 >
-  {#if name}
-    <input type="hidden" {name} {value} />
-  {/if}
-
   {#if label}
-    <label for={componentId} class="block text-label-caps text-muted mb-1.5 font-medium">
+    <label
+      for={componentId}
+      class="text-xs font-bold text-main mb-1.5 block font-heading"
+    >
       {label}
       {#if required}
         <span class="text-error ml-0.5">*</span>
@@ -150,20 +130,28 @@
     </label>
   {/if}
 
-  <!-- Trigger Container -->
-  <div
+  <!-- Hidden native input for forms -->
+  <input
+    type="hidden"
     id={componentId}
+    {name}
+    {value}
+    {required}
+    {disabled}
+  />
+
+  <!-- Trigger Button -->
+  <div
     role="combobox"
-    aria-haspopup="listbox"
-    aria-expanded={isOpen}
-    aria-controls="{componentId}-listbox"
     tabindex={disabled ? -1 : 0}
-    class="w-full flex items-center justify-between text-left bg-nested text-main border transition-all duration-150 cursor-pointer select-none
-      focus:outline-none focus:bg-card
-      {error ? 'border-error focus:border-error focus:ring-2 focus:ring-error/20' : 'border-light focus:border-primary focus:ring-2 focus:ring-primary/20'}
-      {disabled ? 'opacity-50 cursor-not-allowed bg-nested/50 pointer-events-none' : 'hover:border-primary/40'}
-      {isOpen ? 'ring-2 ring-primary/20 border-primary bg-card' : ''}
-      {sizeStyles[size] || sizeStyles.md}"
+    aria-expanded={isOpen}
+    aria-haspopup="listbox"
+    aria-controls="{componentId}-listbox"
+    aria-disabled={disabled}
+    class="flex items-center justify-between {sizeStyles[size]} bg-card border rounded-xl transition-all cursor-pointer select-none
+      {isOpen ? 'border-primary ring-2 ring-primary/20 shadow-xs' : 'border-light hover:border-border'}
+      {error ? '!border-error focus:!ring-error/20' : ''}
+      {disabled ? 'opacity-50 cursor-not-allowed bg-nested/50 pointer-events-none' : ''}"
     on:click={toggleDropdown}
     on:keydown={handleKeyDown}
   >
@@ -171,7 +159,7 @@
       class="truncate min-w-0 flex-1 pr-2 {selectedOption ? 'text-main font-medium' : 'text-muted italic'}"
       style={selectedOption?.style || ''}
     >
-      {selectedOption ? selectedOption.label : placeholder}
+      {displayLabel}
     </span>
 
     <div class="flex items-center gap-1 shrink-0 text-muted ml-2">
@@ -196,11 +184,11 @@
   <!-- Dropdown Popover -->
   {#if isOpen}
     <div
+      id="{componentId}-listbox"
       class="absolute {computedAlign === 'right' ? 'right-0' : 'left-0'} top-full mt-1.5 z-50 {popoverWidth || 'min-w-full w-full sm:min-w-[220px] max-w-[calc(100vw-2rem)] sm:max-w-md'} bg-card border border-light rounded-2xl shadow-xl overflow-hidden animate-fade-in-up"
       role="listbox"
       aria-label={label || placeholder}
     >
-      <!-- Search Input Header -->
       {#if searchable}
         <div class="p-2 border-b border-light bg-nested/40">
           <div class="relative flex items-center">
@@ -246,20 +234,14 @@
               role="option"
               aria-selected={isSelected}
             >
-              <div class="flex flex-col min-w-0 pr-3">
-                <span
-                  class="whitespace-nowrap {isSelected ? 'text-primary font-semibold' : 'text-main font-medium'}"
-                  style={opt.style || ''}
-                >
+              <div class="flex flex-col min-w-0 pr-2">
+                <span class="whitespace-nowrap {isSelected ? 'text-primary font-semibold' : 'text-main font-medium'}" style={opt.style || ''}>
                   {opt.label}
                 </span>
                 {#if opt.sublabel}
-                  <span class="text-xs-dense text-muted whitespace-nowrap mt-0.5">
-                    {opt.sublabel}
-                  </span>
+                  <span class="text-xs-dense text-muted whitespace-nowrap mt-0.5">{opt.sublabel}</span>
                 {/if}
               </div>
-
               {#if isSelected}
                 <Check size={14} class="text-primary shrink-0 ml-2" />
               {/if}
@@ -268,7 +250,6 @@
         {/if}
       </div>
 
-      <!-- Footer count if many options -->
       {#if options.length > 5}
         <div class="px-3 py-1.5 border-t border-light/60 bg-nested/30 text-2xs text-muted flex justify-between items-center font-mono">
           <span>{filteredOptions.length} opsi tersedia</span>

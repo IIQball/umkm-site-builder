@@ -9,6 +9,7 @@
     Map as MapIcon,
     Radar,
   } from 'lucide-svelte';
+  import { SearchableSelect } from '@/components/ui';
   import type { BusinessCategory } from './directory.types';
 
   export let searchQuery = '';
@@ -26,11 +27,19 @@
     disableLocation: void;
     changeViewMode: 'list' | 'map';
   }>();
+
+  $: categoryOptions = [
+    { value: '', label: 'Semua Kategori' },
+    ...categories.map((c) => ({
+      value: c.slug,
+      label: c.name,
+    })),
+  ];
 </script>
 
 <div class="space-y-4">
-  <!-- Top Search & View Switcher Bar -->
-  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+  <!-- Top Search, Category Dropdown, & View Switcher Bar -->
+  <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3">
     <!-- Search Input -->
     <div class="relative flex-1">
       <input
@@ -61,7 +70,7 @@
               type="button"
               on:click={() => dispatch('disableLocation')}
               title="Hapus filter lokasi"
-              class="p-1 rounded-lg hover:bg-orange/20 text-orange hover:text-red-500 transition-colors flex items-center cursor-pointer"
+              class="p-1 rounded-lg hover:bg-orange/20 text-orange hover:text-error transition-colors flex items-center cursor-pointer"
             >
               <X size={13} />
             </button>
@@ -79,8 +88,23 @@
       </div>
     </div>
 
+    <!-- Category Searchable Dropdown -->
+    <div class="w-full md:w-64">
+      <SearchableSelect
+        id="directory-category-select"
+        value={selectedCategory}
+        options={categoryOptions}
+        placeholder="Semua Kategori"
+        searchPlaceholder="Cari kategori UMKM..."
+        size="md"
+        clearable={true}
+        fullWidth={true}
+        on:change={(e) => dispatch('selectCategory', String(e.detail.value || ''))}
+      />
+    </div>
+
     <!-- View Mode Switcher -->
-    <div class="inline-flex rounded-2xl bg-nested p-1 border border-border self-center sm:self-auto shrink-0 shadow-2xs">
+    <div class="inline-flex rounded-2xl bg-nested p-1 border border-border self-center md:self-auto shrink-0 shadow-2xs">
       <button
         type="button"
         on:click={() => dispatch('changeViewMode', 'list')}
@@ -114,31 +138,6 @@
           class="px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer {radius === r ? 'bg-orange text-white border border-orange shadow-xs' : 'bg-card hover:bg-nested border border-border text-secondary hover:text-main'}"
         >
           {r} km
-        </button>
-      {/each}
-    </div>
-  {/if}
-
-  <!-- Category Pills -->
-  {#if categories.length > 0}
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-      <button
-        type="button"
-        on:click={() => dispatch('selectCategory', '')}
-        class="px-4 py-2 rounded-full text-xs shrink-0 transition-all cursor-pointer {selectedCategory === '' ? 'bg-main text-canvas font-bold shadow-xs' : 'bg-card hover:bg-nested text-secondary hover:text-main border border-border font-medium'}"
-      >
-        Semua
-      </button>
-      {#each categories as category (category.id)}
-        <button
-          type="button"
-          on:click={() => dispatch('selectCategory', category.slug)}
-          class="px-4 py-2 rounded-full text-xs shrink-0 flex items-center gap-1.5 transition-all cursor-pointer {selectedCategory === category.slug ? 'bg-main text-canvas font-bold shadow-xs' : 'bg-card hover:bg-nested text-secondary hover:text-main border border-border font-medium'}"
-        >
-          {#if category.icon}
-            <span class="material-symbols-outlined text-[14px]">{category.icon}</span>
-          {/if}
-          <span>{category.name}</span>
         </button>
       {/each}
     </div>

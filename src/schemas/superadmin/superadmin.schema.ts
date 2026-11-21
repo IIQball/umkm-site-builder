@@ -27,6 +27,20 @@ export const commissionSettingsSchema = z.object({
   settlementDelayDays: z.number().int().min(0).optional(),
   maxStoreBranches: z.number().int().min(1).max(50).optional(),
   maxTemplateRevisions: z.number().int().min(1).max(20).optional(),
+  contactPhone: z
+    .string()
+    .trim()
+    .refine((val) => !val || /^[0-9+() -]{8,20}$/.test(val), {
+      message: 'Format nomor telepon tidak valid (minimal 8 digit)',
+    })
+    .optional(),
+  contactEmail: z
+    .string()
+    .trim()
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: 'Format email tidak valid',
+    })
+    .optional(),
 });
 
 export type CommissionSettingsInput = z.infer<typeof commissionSettingsSchema>;

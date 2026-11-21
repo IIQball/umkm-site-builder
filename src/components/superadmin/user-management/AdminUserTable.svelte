@@ -18,7 +18,7 @@
     { label: 'Email', width: 'w-48' },
     { label: 'Tanggal Daftar', width: 'w-40' },
     { label: 'Status', align: 'center' as const, width: 'w-32' },
-    { label: 'Aksi', align: 'right' as const, width: 'w-32' }
+    { label: 'Aksi', align: 'right' as const, width: 'w-56' }
   ];
 </script>
 
@@ -33,7 +33,7 @@
     </p>
   </div>
 {:else}
-  <Table headers={tableHeaders} minWidth="min-w-[700px]">
+  <Table headers={tableHeaders} minWidth="min-w-[850px]">
     {#each users as item, i (item.id)}
       <tr class="hover:bg-nested/40 transition-colors group">
         <!-- Sequence Number (#) -->
@@ -98,41 +98,48 @@
             {#if item.status === 'active'}
               <Button
                 variant="destructive"
-                size="icon"
-                className="!bg-nested hover:!bg-error/10 !border-light hover:!border-error/20 !text-secondary hover:!text-error shadow-2xs"
+                size="xs"
+                className="!bg-nested hover:!bg-error/10 !border-light hover:!border-error/20 !text-secondary hover:!text-error shadow-2xs gap-1 font-semibold"
                 on:click={() => onSuspend(item)}
                 title="Tangguhkan Pengguna"
               >
                 <UserMinus size={13} />
+                <span>Tangguhkan</span>
               </Button>
               {#if item.role === 'tenant' && item.hasStore}
                 <Button
                   variant="secondary"
-                  size="icon"
+                  size="xs"
+                  class="gap-1 font-semibold"
                   title="Kelola Kuota"
                   on:click={() => onManageQuota(item)}
                 >
                   <Cloud size={13} />
+                  <span>Kuota</span>
                 </Button>
               {/if}
             {:else if item.status === 'suspended'}
               {#if item.suspendReason}
                 <Button
                   variant="secondary"
-                  size="icon"
+                  size="xs"
+                  class="gap-1 font-semibold"
                   title="Lihat Alasan"
                   on:click={() => onShowDetail(item)}
                 >
                   <FileText size={13} />
+                  <span>Alasan</span>
                 </Button>
               {/if}
               <Button
                 variant="primary"
-                size="icon"
+                size="xs"
+                class="gap-1 font-semibold"
                 on:click={() => onUnsuspend(item)}
                 title="Aktifkan Pengguna"
               >
                 <CheckCircle2 size={13} />
+                <span>Aktifkan</span>
               </Button>
             {/if}
           </div>

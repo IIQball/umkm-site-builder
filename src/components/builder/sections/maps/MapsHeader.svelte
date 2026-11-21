@@ -70,10 +70,6 @@
         }`}
         style="{badgeStyle.color ? `color: ${badgeStyle.color} !important; border-color: ${badgeStyle.color} !important;` : 'color: var(--theme-secondary, var(--color-secondary)); border-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 25%, transparent);'} background-color: {badgeStyle.backgroundColor ? `${badgeStyle.backgroundColor} !important;` : 'color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 10%, transparent);'} font-size: {badgeStyle.fontSize || 'var(--theme-text-caption, var(--text-caption-size, 10px))'}; font-weight: {badgeStyle.fontWeight || 'var(--theme-text-caption-weight, var(--text-caption-weight, 700))'}; margin-top: {badgeStyle.marginTop || '0px'}; margin-bottom: {badgeStyle.marginBottom || '12px'};"
       >
-        <span
-          class="w-1.5 h-1.5 rounded-full"
-          style="background-color: currentColor;"
-        ></span>
         {#if ResolvedBadgeIcon}
           <svelte:component this={ResolvedBadgeIcon} size={12} class="shrink-0" />
         {/if}

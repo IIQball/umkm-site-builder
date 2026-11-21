@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ params, request }) => {
       return jsonError('Silakan login terlebih dahulu', 401);
     }
 
-    if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin') {
+    if (user.role !== 'tenant' && user.role !== 'admin') {
       return jsonError('Hanya tenant atau admin pendamping yang dapat menerapkan template', 403);
     }
 

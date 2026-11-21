@@ -9,6 +9,7 @@
   import ProductTableRow from "./ProductTableRow.svelte";
   import ProductStatsRow from "./ProductStatsRow.svelte";
   import ProductCategoryFilter from "./ProductCategoryFilter.svelte";
+  import { Package, AlertCircle, Plus } from "lucide-svelte";
   import { Card, Table, Button, Pagination } from "@/components/ui";
 
   type Product = InferSelectModel<typeof productsSchema>;
@@ -21,7 +22,7 @@
   let products: Product[] = [];
   let searchCategoryName = "";
   let currentPage = 1;
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   let loading = true;
   let error = "";
 
@@ -117,7 +118,7 @@
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
-          <span class="material-symbols-outlined text-lg">inventory_2</span>
+          <Package size={18} />
         </div>
         <div class="min-w-0">
           <h3 class="text-heading-md text-main font-bold font-heading leading-tight">Daftar Produk</h3>
@@ -131,7 +132,7 @@
 
     {#if error}
       <div class="m-4 p-4 bg-error/10 text-error rounded-xl border border-error/20 flex gap-3 items-center animate-fade-in">
-        <span class="material-symbols-outlined text-lg">error</span>
+        <AlertCircle size={18} />
         <span class="text-sm font-medium">{error}</span>
       </div>
     {/if}
@@ -143,13 +144,13 @@
     {:else if products.length === 0}
       <div class="py-16 px-8 flex flex-col items-center text-center">
         <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-          <span class="material-symbols-outlined text-2xl">inventory_2</span>
+          <Package size={24} />
         </div>
         <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Belum Ada Produk</h4>
         <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">Silakan tambahkan produk pertama Anda.</p>
         <div class="mt-2">
           <Button variant="primary" size="sm" on:click={handleOpenAdd}>
-            <span class="material-symbols-outlined text-base">add</span>
+            <Plus size={16} />
             <span>Tambah Produk</span>
           </Button>
         </div>
@@ -175,7 +176,13 @@
 
       {#if totalPages > 1}
         <div class="px-6 py-4 border-t border-light flex justify-center">
-          <Pagination {currentPage} totalItems={filteredProducts.length} pageSize={itemsPerPage} on:pageChange={(e) => (currentPage = e.detail)} />
+          <Pagination
+            {currentPage}
+            totalItems={filteredProducts.length}
+            pageSize={itemsPerPage}
+            autoUpdateUrl={false}
+            on:pageChange={(e) => (currentPage = e.detail)}
+          />
         </div>
       {/if}
     {/if}

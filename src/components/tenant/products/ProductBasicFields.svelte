@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Input, Select, Textarea } from "@/components/ui";
+  import { Input, SearchableSelect, Textarea } from "@/components/ui";
   import { formatCurrencyInput, parseCurrencyInput } from "@/lib/currency";
 
   type Category = { id: string; name: string };
@@ -10,6 +10,11 @@
   export let description: string = "";
   export let categories: Category[] = [];
   export let fieldErrors: Record<string, string> = {};
+
+  $: categoryOptions = categories.map((cat) => ({
+    value: cat.id,
+    label: cat.name,
+  }));
 
   const handlePriceInput = (event: Event | CustomEvent) => {
     const customEvent = event as CustomEvent;
@@ -36,12 +41,20 @@
   <label for="prod_category" class="text-xs font-bold text-main block font-heading">
     Kategori <span class="text-error">*</span>
   </label>
-  <Select
-    id="prod_category"
-    bind:value={categoryId}
-    error={fieldErrors.categoryId}
-    options={categories.length === 0 ? [{value: "", label: "Belum ada kategori", disabled: true}] : categories.map(cat => ({ value: cat.id, label: cat.name }))}
-  />
+  {#if categories.length === 0}
+    <p class="text-xs text-muted italic py-1">Belum ada kategori produk. Silakan buat kategori terlebih dahulu.</p>
+  {:else}
+    <SearchableSelect
+      id="prod_category"
+      bind:value={categoryId}
+      options={categoryOptions}
+      placeholder="Pilih kategori produk..."
+      searchPlaceholder="Cari kategori..."
+      clearable={false}
+      size="md"
+      error={fieldErrors.categoryId}
+    />
+  {/if}
 </div>
 
 <div class="space-y-1.5 mb-4">

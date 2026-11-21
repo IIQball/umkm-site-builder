@@ -21,7 +21,7 @@
   export let adminServiceFee: number = 5000;
   export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
-  $: isAdmin = userRole === 'admin' || userRole === 'superadmin';
+  $: isAdmin = userRole === 'admin';
   $: isTenantOrGuest = !isLoggedIn || userRole === 'tenant';
 
   let templates = [...initialTemplates];
@@ -73,6 +73,16 @@
   const handlePurchase = (template: PublicTemplate) => {
     if (!isLoggedIn) {
       window.location.href = `/auth/login?redirect=/templates`;
+      return;
+    }
+
+    if (userRole === 'designer' || userRole === 'superadmin') {
+      addToast({
+        type: 'error',
+        message: userRole === 'designer'
+          ? 'Akun desainer tidak dapat membeli template'
+          : 'Akun superadmin tidak dapat membeli template',
+      });
       return;
     }
 

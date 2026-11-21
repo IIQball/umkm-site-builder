@@ -76,15 +76,15 @@
           tabindex="0"
           on:click={(e) => selectNode && selectNode(e, 'hero_badge')}
           on:keydown={(e) => selectNodeKey && selectNodeKey(e, 'hero_badge')}
-          style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
-          class={`badge badge-outline inline-flex items-center gap-1.5 px-3 py-1 text-2xs font-heading font-medium border border-[var(--color-border)] bg-[var(--color-card-base)] text-[var(--color-text-main)] shadow-xs -rotate-2 mb-2 transition-all cursor-pointer ${
+          style="font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700)); color: var(--theme-secondary, var(--color-secondary)); border-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 25%, transparent); background-color: color-mix(in srgb, var(--theme-secondary, var(--color-secondary)) 10%, transparent);"
+          class={`inline-flex items-center rounded-full gap-1.5 px-3.5 py-1 text-2xs font-heading font-medium border shadow-xs -rotate-2 mb-2 transition-all cursor-pointer ${
             isBadgeActive ? 'ring-2 ring-primary ring-offset-2' : 'hover:outline-dashed hover:outline-1 hover:outline-primary/50'
           }`}
         >
           {#if IconComponent}
-            <svelte:component this={IconComponent} size={12} class="text-[var(--color-primary)] shrink-0" />
+            <svelte:component this={IconComponent} size={12} class="shrink-0" style="color: currentColor;" />
           {:else}
-            <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-primary);"></span>
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: currentColor;"></span>
           {/if}
           <span>{stripEmoji(badgeText)}</span>
         </div>

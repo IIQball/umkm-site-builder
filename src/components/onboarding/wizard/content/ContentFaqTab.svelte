@@ -16,6 +16,7 @@
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'accordion_single_col';
   export let onUpdate: (() => void) | undefined = undefined;
 
   function addFaq() {
@@ -38,6 +39,12 @@
 </script>
 
 <div class="space-y-4 text-left">
+  {#if layoutPreset === 'search_filtered_faq'}
+    <div class="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary font-sans font-semibold">
+      Layout FAQ Pencarian: Dilengkapi kotak pencarian instan bagi calon pembeli.
+    </div>
+  {/if}
+
   <!-- Section Heading & Subheading -->
   <div class="space-y-3 pb-3 border-b border-light">
     <div>

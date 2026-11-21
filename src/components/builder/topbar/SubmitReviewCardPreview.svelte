@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Store, Image as ImageIcon, AlertTriangle, Check, ExternalLink } from 'lucide-svelte';
+  import { Store, Image as ImageIcon, AlertTriangle, Check, ExternalLink, Lightbulb, Eye, Type, CreditCard, FileText } from 'lucide-svelte';
   import { Badge } from '@/components/ui';
   import { formatIDR } from '@/lib/currency';
 
@@ -24,7 +24,7 @@
   <!-- Section Title -->
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-primary text-base">visibility</span>
+      <Eye size={16} class="text-primary" />
       <span class="font-bold text-main text-xs uppercase tracking-wider font-heading">
         Pratinjau Kartu Marketplace
       </span>
@@ -60,7 +60,7 @@
           <span class="text-3xs font-mono font-bold text-muted uppercase tracking-widest block">
             PRATINJAU VISUAL KANVAS
           </span>
-          <span class="inline-flex items-center gap-1 text-3xs font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+          <span class="inline-flex items-center gap-1 text-3xs font-bold text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/20">
             <AlertTriangle size={10} />
             <span>Thumbnail Belum Diunggah</span>
           </span>
@@ -125,31 +125,31 @@
     <ul class="text-2xs space-y-1.5 text-secondary font-sans">
       <li class="flex items-center justify-between">
         <span class="flex items-center gap-1.5">
-          <ImageIcon size={12} class={hasThumbnail ? 'text-success' : 'text-amber-500'} />
+          <ImageIcon size={12} class={hasThumbnail ? 'text-success' : 'text-warning'} />
           <span>Gambar Thumbnail</span>
         </span>
         {#if hasThumbnail}
           <span class="font-bold text-success flex items-center gap-0.5"><Check size={11} /> Terpasang</span>
         {:else}
-          <span class="font-bold text-amber-500 flex items-center gap-0.5"><AlertTriangle size={11} /> Belum Ada</span>
+          <span class="font-bold text-warning flex items-center gap-0.5"><AlertTriangle size={11} /> Belum Ada</span>
         {/if}
       </li>
 
       <li class="flex items-center justify-between">
         <span class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-xs {hasCustomName ? 'text-success' : 'text-amber-500'}">title</span>
+          <Type size={12} class={hasCustomName ? 'text-success' : 'text-warning'} />
           <span>Nama Template</span>
         </span>
         {#if hasCustomName}
           <span class="font-bold text-success truncate max-w-[140px] text-right">{displayName}</span>
         {:else}
-          <span class="font-bold text-amber-500">Nama Default</span>
+          <span class="font-bold text-warning">Nama Default</span>
         {/if}
       </li>
 
       <li class="flex items-center justify-between">
         <span class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-xs {templatePrice >= 0 ? 'text-success' : 'text-amber-500'}">payments</span>
+          <CreditCard size={12} class={templatePrice >= 0 ? 'text-success' : 'text-warning'} />
           <span>Harga Penjualan</span>
         </span>
         <span class="font-mono font-bold text-main">{priceLabel}</span>
@@ -157,21 +157,22 @@
 
       <li class="flex items-center justify-between">
         <span class="flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-xs {hasDescription ? 'text-success' : 'text-amber-500'}">description</span>
+          <FileText size={12} class={hasDescription ? 'text-success' : 'text-warning'} />
           <span>Deskripsi Template</span>
         </span>
         {#if hasDescription}
           <span class="font-bold text-success flex items-center gap-0.5"><Check size={11} /> Terisi</span>
         {:else}
-          <span class="font-bold text-amber-500 flex items-center gap-0.5"><AlertTriangle size={11} /> Belum Diisi</span>
+          <span class="font-bold text-warning flex items-center gap-0.5"><AlertTriangle size={11} /> Belum Diisi</span>
         {/if}
       </li>
     </ul>
 
     {#if !hasThumbnail}
       <div class="pt-1.5 border-t border-light/60">
-        <p class="text-3xs text-amber-600 dark:text-amber-400 leading-relaxed font-sans">
-          💡 <strong>Tips:</strong> Template dengan gambar thumbnail yang memikat memiliki rasio penjualan 5x lebih tinggi di katalog.
+        <p class="text-3xs text-warning leading-relaxed font-sans flex items-center gap-1">
+          <Lightbulb size={12} class="text-warning shrink-0" />
+          <span><strong>Tips:</strong> Template dengan gambar thumbnail yang memikat memiliki rasio penjualan 5x lebih tinggi di katalog.</span>
         </p>
       </div>
     {/if}

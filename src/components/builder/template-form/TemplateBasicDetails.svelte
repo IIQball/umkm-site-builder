@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Palette, Loader2 } from 'lucide-svelte';
   import { Input, Badge, SearchableSelect } from '@/components/ui';
   import ImageUpload from '@/components/ui/ImageUpload.svelte';
 
@@ -21,27 +22,26 @@
     <label for="tmpl-name" class="text-label-caps text-muted font-bold">
       Nama Template Desain <span class="text-error">*</span>
     </label>
-    <span class="text-xs text-muted font-mono">{name.length}/60 karakter</span>
+    <span class="text-xs text-muted font-mono">{name.length}/40 karakter</span>
   </div>
   <Input
     id="tmpl-name"
-    placeholder="Contoh: Template Resto & Kuliner Nusantara"
+    placeholder="Contoh: Kuliner Nusantara"
     bind:value={name}
     disabled={loading}
-    maxLength={60}
+    maxLength={40}
     className="font-semibold"
   >
-    <span slot="prefix" class="material-symbols-outlined text-base text-muted select-none">
-      palette
-    </span>
+    <Palette slot="prefix" size={16} class="text-muted select-none" />
   </Input>
+  <p class="text-2xs text-muted">Beri nama singkat dan menarik (maksimal 40 karakter).</p>
 </div>
 
-<!-- Category Searchable Dropdown strictly from DB -->
+<!-- Recommended Category Single-Select Dropdown with cross-category compatibility note -->
 <div class="space-y-1.5">
   <div class="flex items-center justify-between">
     <label for="tmpl-category" class="text-label-caps text-muted font-bold">
-      Kategori & Ceruk Usaha <span class="text-error">*</span>
+      Kategori Rekomendasi Desain <span class="text-error">*</span>
     </label>
     {#if categories.length > 0}
       <span class="text-2xs text-muted font-mono">{categories.length} Kategori Tersedia</span>
@@ -50,7 +50,7 @@
 
   {#if loadingCategories}
     <div class="flex items-center gap-2 text-xs text-muted py-2.5 px-3 bg-nested/40 rounded-xl border border-light">
-      <span class="material-symbols-outlined text-sm animate-spin">refresh</span>
+      <Loader2 size={14} class="animate-spin text-muted" />
       <span>Memuat daftar kategori...</span>
     </div>
   {:else if categories.length === 0}
@@ -60,13 +60,16 @@
       id="tmpl-category"
       bind:value={selectedCategoryId}
       options={categoryOptions}
-      placeholder="Pilih kategori atau ceruk bisnis..."
-      searchPlaceholder="Ketik untuk mencari kategori..."
+      placeholder="Pilih kategori rekomendasi..."
+      searchPlaceholder="Cari kategori ceruk usaha..."
       clearable={false}
       disabled={loading}
       size="md"
     />
   {/if}
+  <p class="text-2xs text-secondary">
+    Pilih kategori usaha yang paling direkomendasikan untuk tema desain ini (template tetap dapat digunakan oleh jenis usaha UMKM lainnya).
+  </p>
 </div>
 
 <!-- Thumbnail Upload Section -->

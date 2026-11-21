@@ -74,10 +74,10 @@ let assistedTenants: Array<{
   ownedTemplateIds: string[];
 }> = [];
 
-if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+if (currentUser && currentUser.role === 'admin') {
   const adminStores = await db.query.stores.findMany({
     where: and(
-      currentUser.role === 'admin' ? eq(stores.registeredBy, currentUser.id) : undefined,
+      eq(stores.registeredBy, currentUser.id),
       isNull(stores.deletedAt)
     ),
     with: {

@@ -23,7 +23,7 @@ Keep it short and current. This is a checkpoint, not a changelog.
   - **Load Testing Script**: `scripts/load-test.ts` simulates 50 concurrent store domains with 5 requests each (250 total). Validates SSR response time SLA: p95 < 1000ms, success rate ≥ 95%. Run via `bun run load-test`.
   - **CLS Optimization Helpers**: `src/lib/performance/cls.helpers.ts` provides utilities to prevent layout shifts: `getImageContainerStyle()` (reserve space for images), `getProductCardStyle()` (fix product card heights), `getHeroSectionStyle()` (reserve space for hero), `monitorCLS()` (real-time CLS monitoring via PerformanceObserver).
   - **StorefrontDynamicPage Integration**: Added `monitorCLS(0.05)` on mount to monitor layout shifts > 5% in browser console.
-  - **Feature Spec & Manual Testing Guide**: `docs/prd/features/h14-stress-test.md` and `docs/H14_MANUAL_TESTING_GUIDE.md` provide complete specifications and step-by-step manual testing instructions (load test, CLS monitoring, Lighthouse audit, regression check).
+  - **Feature Spec**: `docs/prd/features/h14-stress-test.md` provides complete specifications for load test, CLS monitoring, Lighthouse audit, and regression check.
   - **Status**: Ready for manual testing. Pending user walkthrough before PR creation to `dev`.
   - 0 typecheck errors (`bun run type-check`), 0 lint warnings (`bun run lint`). Load test framework ready; CLS monitoring active in browser.
 

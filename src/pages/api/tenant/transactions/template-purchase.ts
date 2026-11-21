@@ -14,6 +14,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     if (user.status !== 'active') {
       throw new AppError('Account is suspended', 403);
     }
+    if (user.role !== 'tenant' && user.role !== 'admin') {
+      throw new AppError('Hanya akun merchant (tenant) dan admin pendamping yang dapat membeli template', 403, undefined, 'FORBIDDEN_ROLE');
+    }
 
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(TemplatePurchaseInputSchema, body);
@@ -27,13 +30,12 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let targetUserId = user.id;
     let actingAssistedBy: string | null = null;
 
-    if (user.role === 'admin' || user.role === 'superadmin') {
-      if (tenantId) {
-        targetUserId = tenantId;
-        actingAssistedBy = assistedBy || user.id;
-      } else if (assistedBy) {
-        actingAssistedBy = assistedBy;
+    if (user.role === 'admin') {
+      if (!tenantId) {
+        throw new AppError('Admin wajib memilih merchant binaan untuk pembelian template', 400, undefined, 'TENANT_REQUIRED');
       }
+      targetUserId = tenantId;
+      actingAssistedBy = assistedBy || user.id;
     }
 
     const result = await transactionService.purchaseTemplate(

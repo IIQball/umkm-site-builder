@@ -4,9 +4,16 @@ import PublicNavbar from "@/components/common/PublicNavbar.svelte"
 import LandingMarquee from "@/components/landing/LandingMarquee.svelte"
 import PublicContactSection from "@/components/landing/PublicContactSection.svelte"
 import LandingFooter from "@/components/landing/LandingFooter.svelte"
+import { getPlatformSettings } from "@/services/finance"
+
+export const prerender = false
 
 const user = Astro.locals.user
 const currentPath = Astro.url.pathname
+
+const settings = await getPlatformSettings()
+const contactPhone = settings.contactPhone || ''
+const contactEmail = settings.contactEmail || ''
 ---
 
 <BaseLayout
@@ -36,7 +43,7 @@ const currentPath = Astro.url.pathname
 
     <!-- Main Content -->
     <main class="flex-1 w-full pt-20 sm:pt-24 md:pt-28 flex flex-col">
-      <PublicContactSection client:visible />
+      <PublicContactSection client:visible {contactPhone} {contactEmail} />
     </main>
 
     <!-- Footer -->

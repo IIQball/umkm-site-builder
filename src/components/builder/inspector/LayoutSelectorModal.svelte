@@ -14,14 +14,52 @@
   export let onSelectPreset: (presetId: string) => void;
   export let onClose: () => void = () => {};
 
+  const RECENT_PRESETS_KEY = 'pinoka_recent_layout_presets';
+
+  function getRecentPreset(type: string): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(RECENT_PRESETS_KEY);
+      if (!raw) return null;
+      const map = JSON.parse(raw);
+      return map[type] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveRecentPreset(type: string, id: string) {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(RECENT_PRESETS_KEY);
+      const map = raw ? JSON.parse(raw) : {};
+      map[type] = id;
+      localStorage.setItem(RECENT_PRESETS_KEY, JSON.stringify(map));
+    } catch {
+      // safe fallback
+    }
+  }
+
   let searchQuery = '';
   let scrollContainerEl: HTMLElement | null = null;
   let prevOpen = false;
+  let recentPresetId: string | null = null;
+
+  $: if (open && sectionType) {
+    recentPresetId = getRecentPreset(sectionType);
+  }
 
   $: allPresets = PRESETS_BY_SECTION_TYPE[sectionType] || [];
   $: sectionLabel = SECTION_TYPE_LABELS[sectionType] || 'Section Layout';
 
-  $: filteredPresets = allPresets.filter((preset) => {
+  $: orderedPresets = (() => {
+    if (!recentPresetId) return allPresets;
+    const recent = allPresets.find((p) => p.id === recentPresetId);
+    if (!recent) return allPresets;
+    return [recent, ...allPresets.filter((p) => p.id !== recentPresetId)];
+  })();
+
+  $: filteredPresets = orderedPresets.filter((preset) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -57,6 +95,8 @@
 
   const handleSelect = (presetId: string) => {
     activePresetId = presetId;
+    saveRecentPreset(sectionType, presetId);
+    recentPresetId = presetId;
     onSelectPreset(presetId);
     scrollToActivePreset(true);
   };
@@ -131,11 +171,15 @@
             }`}
           >
             <!-- Visual Wireframe Shot (Dribbble View) -->
-            <div class="relative w-full aspect-[16/9] bg-slate-950 p-3 overflow-hidden border-b border-light flex items-center justify-center">
+            <div class="relative w-full aspect-[16/9] bg-neutral text-neutral-content p-3 overflow-hidden border-b border-light flex items-center justify-center">
               {@html getPresetSchematicSvg(sectionType, preset.id)}
 
               <!-- Tag Pill -->
-              {#if preset.tag}
+              {#if preset.id === recentPresetId}
+                <span class="badge badge-warning text-black badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 shadow-md">
+                  Terbaru Dipilih
+                </span>
+              {:else if preset.tag}
                 <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-light backdrop-blur-xs">
                   {preset.tag}
                 </span>
@@ -191,15 +235,4 @@
     {/if}
   </div>
 
-  <!-- Modal Footer -->
-  <svelte:fragment slot="footer">
-    <div class="flex items-center justify-between w-full">
-      <span class="text-2xs text-muted font-sans hidden sm:inline">
-        💡 Tips: Klik kartu preview untuk melihat perubahan tata letak secara instan di layar kanvas.
-      </span>
-      <Button variant="outline" size="sm" on:click={onClose}>
-        <span>Tutup Galeri</span>
-      </Button>
-    </div>
-  </svelte:fragment>
 </Modal>

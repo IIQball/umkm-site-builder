@@ -13,11 +13,13 @@ const settlementDays = settings.settlementDelayDays;
 const minPayoutFormatted = formatIDR(settings.payoutMinimumBalance);
 const maxBranches = settings.maxStoreBranches;
 const maxRevisions = settings.maxTemplateRevisions;
+const contactPhone = settings.contactPhone || '085736653639';
+const contactEmail = settings.contactEmail || 'support@pinoka.id';
 ---
 
 <BaseLayout
   title="Syarat dan Ketentuan Layanan | Pinoka"
-  description="Syarat dan Ketentuan resmi penggunaan platform digitalisasi toko online UMKM Pinoka."
+  description="Syarat dan Ketentuan resmi penggunaan platform digitalisasi toko online UMKM Pinoka dan generator kecerdasan buatan (AI)."
   hideNavbar={true}
 >
   <main class="min-h-screen bg-canvas py-8 sm:py-12 md:py-16 px-4 sm:px-6">
@@ -27,13 +29,13 @@ const maxRevisions = settings.maxTemplateRevisions;
           Syarat dan Ketentuan Penggunaan Pinoka
         </h1>
         <p class="text-xs sm:text-sm font-medium text-secondary font-sans">
-          Terakhir diperbarui: 14 Oktober 2026
+          Terakhir diperbarui: 21 November 2026
         </p>
       </header>
 
       <div class="space-y-8 text-sm sm:text-base leading-relaxed text-secondary font-sans text-justify [hyphens:auto] [-webkit-hyphens:auto] [&_*]:[hyphens:auto] [&_*]:[-webkit-hyphens:auto] legal-article-content">
         <p>
-          Selamat datang di Pinoka. Dengan mendaftar, mengakses, atau menggunakan layanan platform situs UMKM kami, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan layanan di bawah ini. Jika Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan penggunaan layanan kami.
+          Selamat datang di Pinoka. Dengan mendaftar, mengakses, atau menggunakan layanan platform situs UMKM kami (termasuk fitur pembuatan etalase mandiri, pasar kurasi template, dan generator kecerdasan buatan / AI Studio), Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan layanan di bawah ini. Jika Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan penggunaan layanan kami.
         </p>
 
         <section class="space-y-3">
@@ -43,23 +45,31 @@ const maxRevisions = settings.maxTemplateRevisions;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.1</span>
-              <span><strong>Pinoka</strong> adalah sistem SaaS terpadu yang memfasilitasi pembuatan situs etalase mandiri bagi pelaku UMKM serta pasar kurasi template karya desainer lokal.</span>
+              <span><strong>Pinoka</strong> adalah sistem SaaS terpadu yang memfasilitasi pembuatan situs etalase mandiri bagi pelaku UMKM, pasar kurasi template desainer lokal, dan generator aset visual berbasis kecerdasan buatan.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.2</span>
-              <span><strong>Merchant</strong> adalah pelaku usaha mikro, kecil, dan menengah yang mendaftarkan toko untuk mempublikasikan katalog produk dan menerima pemesanan daring.</span>
+              <span><strong>Merchant</strong> adalah pelaku usaha mikro, kecil, dan menengah yang mendaftarkan toko untuk mempublikasikan katalog produk, menerima pemesanan daring, dan memanfaatkan fitur generator AI.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.3</span>
-              <span><strong>Desainer</strong> adalah kreator terverifikasi yang membuat dan menyediakan rancangan tema visual storefront di template marketplace.</span>
+              <span><strong>Desainer</strong> adalah kreator terverifikasi yang membuat dan menyediakan rancangan tema visual storefront di template marketplace Pinoka.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.4</span>
-              <span><strong>Superadmin</strong> adalah pengelola otoritas tertinggi platform yang berwenang menetapkan kebijakan sistem, mengkurasi dan menyetujui template desainer, menyetujui permohonan peningkatan kuota toko, serta mengawasi keamanan seluruh ekosistem Pinoka.</span>
+              <span><strong>Superadmin</strong> adalah pengelola otoritas tertinggi platform yang berwenang menetapkan parameter kebijakan sistem, mengkurasi template desainer, menyetujui permohonan peningkatan kuota toko, dan mengawasi integritas seluruh ekosistem Pinoka.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.5</span>
-              <span><strong>Admin Pendamping</strong> adalah fasilitator operasional yang memiliki kewenangan terbatas untuk mendampingi UMKM, yakni: membantu mendaftarkan akun merchant, mendaftarkan toko baru, mengelola pengaturan toko, dan membelikan template desain toko yang didampingi.</span>
+              <span><strong>Admin Pendamping</strong> adalah fasilitator operasional yang memiliki kewenangan mendampingi UMKM dalam mendaftarkan akun merchant, mendaftarkan toko baru, mengelola konfigurasi toko, dan membelikan template desain atas mandat Merchant.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.6</span>
+              <span><strong>AI Studio & Generator AI</strong> adalah modul sintesis visual berbasis kecerdasan buatan pada platform Pinoka, mencakup generator logo (AI Logo), mockup kemasan (AI Packaging Mockup), dan poster promosi produk (AI Product Poster).</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">1.7</span>
+              <span><strong>Kredit AI (AI Credits)</strong> adalah satuan token internal pada akun Merchant yang digunakan untuk mengeksekusi generasi visual AI dengan alokasi bobot sesuai tier engine komputasi yang dipilih.</span>
             </li>
           </ul>
         </section>
@@ -75,19 +85,19 @@ const maxRevisions = settings.maxTemplateRevisions;
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.2</span>
-              <span><strong>Akun Berbantuan (Assisted Management):</strong> Akun Merchant dapat didaftarkan langsung oleh Admin Pendamping. Untuk akun yang didaftarkan atau didampingi Admin, wewenang Admin terbatas pada: mendaftarkan akun, mendaftarkan toko, mengelola dan memperbarui data toko, serta membelikan template desain atas persetujuan Merchant.</span>
+              <span><strong>Akun Berbantuan (Assisted Management):</strong> Akun Merchant dapat didaftarkan langsung oleh Admin Pendamping. Untuk akun berbantuan, wewenang Admin terbatas pada mendaftarkan akun, mendaftarkan toko, mengelola profil toko, dan membelikan template desain atas persetujuan Merchant.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.3</span>
-              <span><strong>Transparansi Notifikasi Real-time:</strong> Setiap kali Admin Pendamping melakukan pembaruan profil toko, perubahan cabang gerai, atau membelikan template, sistem Pinoka otomatis mengirimkan notifikasi internal langsung ke akun Merchant demi akuntabilitas.</span>
+              <span><strong>Transparansi Notifikasi Real-time:</strong> Setiap kali Admin Pendamping melakukan perubahan profil toko, penambahan cabang gerai, atau transaksi template, sistem Pinoka otomatis mengirimkan notifikasi internal langsung ke akun Merchant demi akuntabilitas.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.4</span>
-              <span><strong>Kuota Standar Toko dan Cabang:</strong> Setiap toko awal diberikan kuota default maksimal 10 produk aktif, maksimal 5 kategori barang, dan pengelolaan hingga maksimal {maxBranches} cabang toko fisik lengkap dengan titik lokasi Google Maps.</span>
+              <span><strong>Kuota Standar Toko dan Cabang:</strong> Setiap toko awal diberikan kuota default maksimal 10 produk aktif, 5 kategori barang, dan pengelolaan hingga maksimal {maxBranches} cabang toko fisik lengkap dengan titik lokasi peta Google Maps.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">2.5</span>
-              <span><strong>Alur Pengajuan Penambahan Kuota:</strong> Merchant yang membutuhkan penambahan kuota produk atau kategori dapat mengajukan permohonan melalui dasbor toko dengan frekuensi maksimal 1 kali dalam 7 hari. Permohonan peningkatan kuota akan ditinjau dan ditetapkan secara eksklusif oleh Superadmin.</span>
+              <span><strong>Alur Pengajuan Penambahan Kuota:</strong> Merchant yang membutuhkan penambahan kuota produk atau kategori dapat mengajukan permohonan melalui dasbor toko dengan frekuensi maksimal 1 kali dalam 7 hari kalender untuk ditinjau secara langsung oleh Superadmin.</span>
             </li>
           </ul>
         </section>
@@ -99,15 +109,15 @@ const maxRevisions = settings.maxTemplateRevisions;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.1</span>
-              <span>Merchant memiliki kendali penuh atas foto produk, deskripsi, varian harga, serta ketersediaan stok pada etalase toko masing-masing.</span>
+              <span>Merchant memiliki kendali dan tanggung jawab penuh atas foto produk, deskripsi, harga, serta ketersediaan stok pada etalase toko masing-masing.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.2</span>
-              <span>Sistem pemesanan diarahkan langsung ke WhatsApp resmi Merchant melalui deep-link checkout otomatis tanpa potongan komisi penjualan produk apa pun dari pihak Pinoka.</span>
+              <span>Sistem pemesanan diarahkan langsung ke WhatsApp resmi Merchant melalui format deep-link checkout otomatis tanpa potongan komisi penjualan produk apa pun (0% komisi transaksi barang UMKM) dari pihak Pinoka.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">3.3</span>
-              <span>Dilarang mempublikasikan produk yang melanggar hukum Republik Indonesia, termasuk obat-obatan terlarang, barang tiruan ilegal, senjata, atau materi yang melanggar norma sosial.</span>
+              <span>Dilarang mempublikasikan produk yang melanggar hukum Republik Indonesia, termasuk obat terlarang, barang tiruan ilegal, senjata, atau materi yang melanggar norma sosial dan kesusilaan.</span>
             </li>
           </ul>
         </section>
@@ -119,15 +129,15 @@ const maxRevisions = settings.maxTemplateRevisions;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.1</span>
-              <span><strong>Alur Pengajuan Kurasi Awal:</strong> Desainer membuat rancangan tema di Builder (status draf) lalu mengajukan kurasi ke Superadmin (status peninjauan). Tim Superadmin menguji orisinalitas, estetika visual, responsivitas antarmuka perangkat, dan integritas konfigurasi sebelum disetujui terbit di katalog marketplace publik.</span>
+              <span><strong>Alur Kurasi Awal:</strong> Desainer membuat rancangan tema di Template Builder lalu mengajukan kurasi ke Superadmin. Tim Superadmin memvalidasi estetika visual, tata letak responsif lintas layar, serta integritas konfigurasi token sebelum disetujui terbit di marketplace.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.2</span>
-              <span><strong>Alur dan Batas Pengajuan Revisi:</strong> Jika template ditolak oleh Superadmin, Desainer menerima catatan evaluasi resmi dan dapat mengajukan perbaikan ulang. Pengajuan revisi dibatasi maksimal {maxRevisions} kali. Apabila mencapai {maxRevisions} kali penolakan berturut-turut, template terkunci permanen dan tidak dapat diajukan kurasi ulang lagi.</span>
+              <span><strong>Batas Pengajuan Revisi Desain:</strong> Apabila template ditolak oleh Superadmin, Desainer dapat mengajukan perbaikan berdasarkan catatan evaluasi resmi hingga maksimal {maxRevisions} kali pengajuan. Jika mencapai {maxRevisions} kali penolakan berturut-turut, template terkunci permanen.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.3</span>
-              <span>Desainer menjamin bahwa rancangan template merupakan ciptaan orisinal dan tidak melanggar hak kekayaan intelektual pihak ketiga mana pun.</span>
+              <span>Desainer menjamin bahwa rancangan template merupakan ciptaan orisinal dan tidak melanggar hak kekayaan intelektual (HAKI) pihak ketiga.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">4.4</span>
@@ -143,11 +153,11 @@ const maxRevisions = settings.maxTemplateRevisions;
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.1</span>
-              <span>Transaksi template diproses melalui saluran gateway pembayaran resmi dalam mata uang Rupiah (IDR).</span>
+              <span>Transaksi pembelian template dan paket kredit AI diproses melalui saluran gateway pembayaran resmi dalam mata uang Rupiah (IDR).</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.2</span>
-              <span><strong>Pembagian Fee Penjualan Template:</strong> Dari setiap penjualan 1 template berbayar, sistem memotong fee layanan platform sebesar {platformFee}% untuk operasional sistem, serta menyalurkan {designerFee}% secara utuh sebagai royalti bersih ke saldo dompet digital Desainer.</span>
+              <span><strong>Pembagian Komisi Template:</strong> Dari setiap penjualan 1 template berbayar, sistem memotong fee layanan platform sebesar {platformFee}% untuk pemeliharaan sistem, serta menyalurkan {designerFee}% sebagai royalti bersih ke saldo dompet digital Desainer.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.3</span>
@@ -155,38 +165,71 @@ const maxRevisions = settings.maxTemplateRevisions;
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.4</span>
-              <span><strong>Penahanan Settlement (Settlement Delay):</strong> Komisi penjualan template yang diperoleh Desainer akan ditahan selama {settlementDays} hari kalender (masa hold) sebelum dialihkan ke saldo siap tarik demi keamanan transaksi.</span>
+              <span><strong>Penahanan Settlement (Settlement Hold):</strong> Komisi penjualan template yang diperoleh Desainer akan ditahan selama {settlementDays} hari kalender sebelum dialihkan ke saldo siap tarik demi kepastian keamanan transaksi.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">5.5</span>
-              <span><strong>Batas Penarikan Dana (Payout):</strong> Desainer dapat mencairkan saldo komisi ke rekening bank domestik terverifikasi setelah memenuhi batas saldo siap tarik minimal {minPayoutFormatted}.</span>
+              <span><strong>Ambang Penarikan Dana (Payout):</strong> Desainer dapat mencairkan saldo komisi ke rekening bank domestik terverifikasi setelah memenuhi batas saldo siap tarik minimal {minPayoutFormatted}.</span>
             </li>
           </ul>
         </section>
 
         <section class="space-y-3">
           <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
-            6. Penangguhan dan Penghentian Layanan
+            6. Ketentuan Generator AI, Alokasi Kuota Kredit, dan Hak Cipta
           </h2>
           <ul class="space-y-2.5 list-none pl-0">
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.1</span>
-              <span>Superadmin berhak membekukan sementara (suspend) atau mencabut akses akun yang terbukti melakukan manipulasi data, pelanggaran hak cipta, atau tindak pidana siber.</span>
+              <span><strong>Lisensi dan Kepemilikan Aset AI:</strong> Seluruh materi visual (logo, mockup kemasan, dan poster promosi) yang berhasil digenerasikan oleh Merchant melalui AI Studio Pinoka menjadi hak milik penuh Merchant untuk keperluan komersial etalase toko, media sosial, kemasan fisik, maupun materi promosi bisnis UMKM.</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.2</span>
-              <span>Merchant dan Desainer berhak mengajukan penutupan akun mandiri melalui menu pengaturan profil setelah menyelesaikan seluruh kewajiban yang masih berjalan.</span>
+              <span><strong>Pemotongan Atomik Saldo Kredit AI:</strong> Sistem memotong saldo kredit AI merchant secara atomik pada saat inisiasi permintaan sintesis sesuai tier kualitas (1 kredit untuk tier reguler/flare, 2 kredit untuk tier HD/sunburst). Apabila terjadi kendala koneksi atau kegagalan generasi dari penyedia AI/CDN pihak ketiga, sistem secara otomatis melakukan pembatalan dan pengembalian kredit utuh (atomic rollback).</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.3</span>
+              <span><strong>Karakteristik Model Generatif:</strong> Hasil sintesis visual dihasilkan secara algoritmik berbasis model AI generatif probabilistik. Merchant memahami bahwa Pinoka tidak dapat menjamin ketiadaan kemiripan bentuk atau elemen grafis secara kebetulan dengan karya publik lainnya, dan Merchant disarankan melakukan verifikasi sebelum mendaftarkan merek dagang formal.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.4</span>
+              <span><strong>Larangan Penggunaan Prompt AI:</strong> Merchant dilarang keras mengunggah referensi atau memasukkan prompt bernuansa pornografi, diskriminasi SARA, penipuan merek pihak ketiga, barang terlarang hukum, maupun teknik prompt injection yang membahayakan sistem. Pelanggaran berat berakibat pada pembekuan permanen akun tanpa kompensasi kredit.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">6.5</span>
+              <span><strong>Kebijakan Saldo Kredit AI:</strong> Kredit AI yang telah berhasil digunakan untuk proses generasi visual yang sukses bersifat final dan tidak dapat diuangkan (non-refundable).</span>
             </li>
           </ul>
         </section>
 
         <section class="space-y-3">
           <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
-            7. Perubahan Ketentuan Layanan
+            7. Penangguhan dan Penghentian Layanan
+          </h2>
+          <ul class="space-y-2.5 list-none pl-0">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">7.1</span>
+              <span>Superadmin berhak membekukan sementara (suspend) atau mencabut akses akun yang terbukti memanipulasi data transaksi, melanggar hak cipta, atau menyalahgunakan infrastruktur digital Pinoka.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-xs sm:text-sm font-bold text-primary shrink-0 mt-0.5 text-left">7.2</span>
+              <span>Pengguna berhak mengajukan penutupan akun mandiri melalui tim dukungan setelah menyelesaikan seluruh kewajiban transaksi yang sedang berlangsung.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-base sm:text-lg font-bold text-main font-heading text-left">
+            8. Saluran Narahubung dan Pembaruan Ketentuan
           </h2>
           <p>
-            Pinoka berhak mengubah, menambah, atau memperbarui Syarat dan Ketentuan ini sewaktu-waktu demi penyelarasan hukum dan peningkatan keandalan platform. Perubahan akan dicantumkan dengan tanggal pembaruan terbaru di bagian atas dokumen ini. Penggunaan berkelanjutan atas platform menandakan persetujuan Anda terhadap versi ketentuan yang berlaku.
+            Pinoka berhak mengubah, menambah, atau memperbarui Syarat dan Ketentuan ini sewaktu-waktu demi kepatuhan hukum dan peningkatan keandalan layanan platform. Pembaruan akan dicantumkan dengan tanggal pembaruan terbaru di bagian atas dokumen ini.
           </p>
+          <div class="p-4 rounded-2xl bg-nested border border-border space-y-1.5 text-xs sm:text-sm mt-3">
+            <p class="font-bold text-main">Saluran Komunikasi & Narahubung Resmi Pinoka:</p>
+            <p>WhatsApp / Telepon: <span class="font-mono font-medium text-main">{contactPhone}</span></p>
+            <p>Email Bantuan: <span class="font-mono font-medium text-main">{contactEmail}</span></p>
+          </div>
         </section>
       </div>
     </article>
@@ -203,4 +246,3 @@ const maxRevisions = settings.maxTemplateRevisions;
     text-align: left;
   }
 </style>
-

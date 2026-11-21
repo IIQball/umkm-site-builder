@@ -55,6 +55,7 @@ export function buildTemplateCustomizationPayload(
     {
       type: 'hero',
       props: {
+        ...custom.hero,
         title: custom.hero.title,
         subtitle: custom.hero.subtitle,
         ctaText: custom.hero.ctaText,
@@ -119,6 +120,7 @@ export function buildTemplateCustomizationPayload(
     theme: {
       primaryColor: custom.theme.primaryColor,
       fontFamily: custom.theme.typography?.bodyFont || custom.theme.fontFamily,
+      fontHeading: custom.theme.typography?.headingFont,
       typography: {
         headingFont: custom.theme.typography.headingFont,
         bodyFont: custom.theme.typography.bodyFont,

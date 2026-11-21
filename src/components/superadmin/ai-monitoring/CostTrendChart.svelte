@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { BarChart3, Calendar } from 'lucide-svelte';
   import { Card } from '@/components/ui';
-  import { formatIDR } from '@/lib/currency';
+  import { formatIDR, formatNumber } from '@/lib/currency';
   import { INDONESIAN_MONTHS } from '@/lib/utils/format';
   import { apiFetch } from '@/lib/api/parse-response';
   import { toast } from '@/lib/toast';
@@ -110,8 +110,8 @@
     </div>
   </div>
 
-  <!-- Metric Cards: Modular Component -->
-  <CostTrendMetricCards {summary} {budgetStatus} />
+  <!-- Metric Cards: Modular Component with Dynamic Monthly/Daily Suffix -->
+  <CostTrendMetricCards {summary} {budgetStatus} isMonthlyView={!selectedMonth || selectedMonth === 'all'} />
 
   <!-- Main Bar Chart Container -->
   <Card variant="bordered" padding="none" radius="2xl" class="shadow-xs overflow-hidden">
@@ -119,14 +119,14 @@
       <div class="flex items-center gap-2">
         <Calendar size={16} class="text-secondary" />
         <h3 class="text-body-sm font-bold text-main">
-          Fluktuasi Biaya ({rangeTitle})
+          Tren Pengeluaran AI ({rangeTitle})
         </h3>
         {#if isLoading}
           <span class="loading loading-spinner loading-xs text-primary"></span>
         {/if}
       </div>
       <span class="text-2xs text-muted font-mono font-medium">
-        Total {summary.totalExecutions} generasi ({summary.totalTokens.toLocaleString('id-ID')} token)
+        Total {summary.totalExecutions} generasi ({formatNumber(summary.totalTokens)} token)
       </span>
     </div>
 
@@ -149,7 +149,7 @@
                 <span>{hoveredBar.executionCount} gen ({hoveredBar.successCount} sukses)</span>
               </div>
               <span class="text-3xs font-mono text-primary-light">
-                {hoveredBar.tokens.toLocaleString('id-ID')} token
+                {formatNumber(hoveredBar.tokens)} token
               </span>
             </div>
           {/if}

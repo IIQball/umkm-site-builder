@@ -84,6 +84,13 @@ export function mergeStoreCustomization(
         config.theme.typography.bodyFont = custTheme.fontFamily;
       }
     }
+
+    if (typeof custTheme.fontHeading === 'string' && custTheme.fontHeading.trim()) {
+      config.theme.fontHeading = custTheme.fontHeading;
+      if (config.theme.typography) {
+        config.theme.typography.headingFont = custTheme.fontHeading;
+      }
+    }
   }
 
   // 2. Merge Section Overrides

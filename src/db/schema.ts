@@ -420,6 +420,8 @@ export const platformSettings = pgTable('platform_settings', {
   settlementDelayDays: integer('settlement_delay_days').default(7).notNull(),
   maxStoreBranches: integer('max_store_branches').default(5).notNull(),
   maxTemplateRevisions: integer('max_template_revisions').default(3).notNull(),
+  contactPhone: text('contact_phone').default('085736653639').notNull(),
+  contactEmail: text('contact_email').default('support@pinoka.id').notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.id),
 });

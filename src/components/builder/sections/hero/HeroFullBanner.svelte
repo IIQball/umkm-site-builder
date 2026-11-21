@@ -39,8 +39,8 @@
         tabindex="0"
         on:click={(e) => selectNode?.(e, 'hero_badge')}
         on:keydown={(e) => selectNodeKey?.(e, 'hero_badge')}
-        style="border-radius: var(--theme-btn-radius, var(--btn-radius, 9999px)); font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
-        class={`badge badge-outline inline-flex items-center gap-1.5 px-3.5 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-sm ${
+        style="font-family: var(--font-heading, inherit); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
+        class={`inline-flex items-center rounded-full gap-1.5 px-3.5 py-1 text-2xs font-heading font-medium border transition-all cursor-pointer shadow-sm ${
           isBadgeActive
             ? 'ring-2 ring-primary ring-offset-2 ring-offset-slate-950 bg-black/60 border-primary text-white'
             : 'bg-black/50 border-white/25 text-white backdrop-blur-md hover:outline-dashed hover:outline-1 hover:outline-white/70'

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { FolderTree, Plus, Pencil, Trash2 } from 'lucide-svelte';
   import { Button, Card, Table, Pagination } from '@/components/ui';
   import { toast } from '@/lib/toast';
   import { apiFetch } from '@/lib/api/parse-response';
@@ -26,7 +27,7 @@
   let error: string | null = null;
 
   let currentPage = 1;
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   $: totalPages = Math.ceil(categories.length / itemsPerPage) || 1;
   $: paginatedCategories = categories.slice(
@@ -178,7 +179,7 @@
     <div class="p-5 sm:p-6 border-b border-light flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
-          <span class="material-symbols-outlined text-lg">category</span>
+          <FolderTree size={18} />
         </div>
         <div>
           <h3 class="text-heading-md text-main font-bold font-heading leading-tight">
@@ -197,7 +198,7 @@
     {:else if categories.length === 0}
       <div class="py-16 px-8 flex flex-col items-center text-center">
         <div class="w-14 h-14 rounded-2xl bg-nested border border-light flex items-center justify-center text-muted mx-auto mb-3 shadow-2xs">
-          <span class="material-symbols-outlined text-2xl">category</span>
+          <FolderTree size={24} />
         </div>
         <h4 class="text-heading-md font-bold text-main mb-1.5 font-heading">Belum Ada Kategori</h4>
         <p class="text-body-sm text-secondary max-w-xs leading-relaxed mb-4 font-sans">
@@ -209,7 +210,7 @@
             size="sm"
             on:click={openAddModal}
           >
-            <span class="material-symbols-outlined text-base">add</span>
+            <Plus size={16} />
             <span>Buat Kategori</span>
           </Button>
         </div>
@@ -238,7 +239,7 @@
                   on:click={() => openEditModal(category)}
                   title="Edit"
                 >
-                  <span class="material-symbols-outlined text-base">edit</span>
+                  <Pencil size={15} />
                 </Button>
                 <Button 
                   variant="destructive"
@@ -247,7 +248,7 @@
                   on:click={() => confirmDelete(category.id)}
                   title="Hapus"
                 >
-                  <span class="material-symbols-outlined text-base">delete</span>
+                  <Trash2 size={15} />
                 </Button>
               </div>
             </td>
@@ -261,6 +262,7 @@
             {currentPage}
             totalItems={categories.length}
             pageSize={itemsPerPage}
+            autoUpdateUrl={false}
             on:pageChange={(e) => (currentPage = e.detail)}
           />
         </div>

@@ -334,4 +334,82 @@ describe('POST /api/transactions/template-purchase', () => {
     expect(insertedTransaction.assistedBy).toBe('admin_1');
     expect(insertedTransaction.userId).toBe('tenant_1');
   });
+
+  it('should return 403 when user role is designer', async () => {
+    mockGetAuthUser.mockResolvedValue({
+      id: 'designer_1',
+      name: 'Designer 1',
+      email: 'designer@example.com',
+      role: 'designer',
+      status: 'active',
+    });
+
+    const request = new Request('http://localhost:4321/api/transactions/template-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ templateId: 'tpl_123' }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('FORBIDDEN_ROLE');
+  });
+
+  it('should return 403 when user role is superadmin', async () => {
+    mockGetAuthUser.mockResolvedValue({
+      id: 'superadmin_1',
+      name: 'Super Admin',
+      email: 'superadmin@example.com',
+      role: 'superadmin',
+      status: 'active',
+    });
+
+    const request = new Request('http://localhost:4321/api/transactions/template-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ templateId: 'tpl_123' }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('FORBIDDEN_ROLE');
+  });
+
+  it('should return 400 when admin does not provide tenantId', async () => {
+    mockGetAuthUser.mockResolvedValue({
+      id: 'admin_1',
+      name: 'Admin Pendamping',
+      email: 'admin@example.com',
+      role: 'admin',
+      status: 'active',
+    });
+
+    const request = new Request('http://localhost:4321/api/transactions/template-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ templateId: 'tpl_123' }),
+    });
+
+    const res = (await POST({
+      request,
+      params: {},
+    } as unknown as Parameters<typeof POST>[0])) as Response;
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('TENANT_REQUIRED');
+  });
 });

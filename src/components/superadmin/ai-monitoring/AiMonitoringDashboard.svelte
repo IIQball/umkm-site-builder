@@ -3,7 +3,7 @@
   import { Button, Badge } from "@/components/ui";
   import { apiFetch } from "@/lib/api/parse-response";
   import { toast } from "@/lib/toast";
-  import { Bot, Wallet, Plus, Sparkles, AlertTriangle } from "lucide-svelte";
+  import { Bot, Wallet, Plus, AlertTriangle } from "lucide-svelte";
   import { filterByPeriod, computeAvailableYears } from "@/lib/utils/format";
   import type {
     AiMonitoringDashboardData,
@@ -13,7 +13,6 @@
   import AiKeyMetrics from "./AiKeyMetrics.svelte";
   import CostTrendChart from "./CostTrendChart.svelte";
   import AiRecentLogsTable from "./AiRecentLogsTable.svelte";
-  import AiTestAuditTable from "./AiTestAuditTable.svelte";
   import AiDepositHistoryTable from "./AiDepositHistoryTable.svelte";
   import AiDepositModal from "./AiDepositModal.svelte";
   import FeatureDistributionChart from "./FeatureDistributionChart.svelte";
@@ -22,7 +21,7 @@
   export let initialData: AiMonitoringDashboardData;
   export let isSuperAdmin: boolean = false;
 
-  let activeTab: "logs" | "audit" | "deposits" = "logs";
+  let activeTab: "logs" | "deposits" = "logs";
   let summary: AiMonitoringSummary = initialData.summary;
   let recentLogs = initialData.recentLogs || [];
   let depositHistory: AiDepositHistoryItem[] = initialData.depositHistory || [];
@@ -220,16 +219,6 @@
       </Button>
 
       <Button
-        variant={activeTab === 'audit' ? 'dark' : 'ghost'}
-        size="sm"
-        class="!rounded-xl gap-2 font-bold cursor-pointer shrink-0"
-        on:click={() => (activeTab = 'audit')}
-      >
-        <Sparkles size={16} />
-        <span>Audit Pengujian (Testing)</span>
-      </Button>
-
-      <Button
         variant={activeTab === 'deposits' ? 'dark' : 'ghost'}
         size="sm"
         class="!rounded-xl gap-2 font-bold cursor-pointer shrink-0"
@@ -268,8 +257,6 @@
         {isRefreshing}
         on:refresh={handleRefresh}
       />
-    {:else if activeTab === "audit"}
-      <AiTestAuditTable defaultIsTesting="true" />
     {:else}
       <AiDepositHistoryTable
         deposits={filteredDeposits}

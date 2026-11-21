@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client';
 import { transactions, templates, userTemplates, notifications } from '@/db/schema';
-import { eq, and, desc, inArray } from 'drizzle-orm';
+import { eq, and, desc, inArray, lte } from 'drizzle-orm';
 import { xenditClient } from '@/lib/finance/xendit';
 import { logActivity } from '@/services/audit.service';
 
@@ -181,4 +181,32 @@ export async function fetchInvoiceUrl(externalId: string): Promise<string | null
   } catch {
     return null;
   }
+}
+
+/**
+ * Expire pending transactions older than maxHours (default: 24h).
+ */
+export async function expireStalePendingTransactions(maxHours: number = 24): Promise<{
+  expiredCount: number;
+  expiredIds: string[];
+  cutoffDate: string;
+}> {
+  const cutoff = new Date(Date.now() - maxHours * 60 * 60 * 1000);
+  const stale = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(and(eq(transactions.status, 'pending'), lte(transactions.createdAt, cutoff)));
+
+  if (stale.length === 0) {
+    return { expiredCount: 0, expiredIds: [], cutoffDate: cutoff.toISOString() };
+  }
+
+  const ids = stale.map((t) => t.id);
+  await db.update(transactions).set({ status: 'expired' }).where(inArray(transactions.id, ids));
+
+  return {
+    expiredCount: ids.length,
+    expiredIds: ids,
+    cutoffDate: cutoff.toISOString(),
+  };
 }

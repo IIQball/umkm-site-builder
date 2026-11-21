@@ -1,0 +1,2 @@
+ALTER TABLE "platform_settings" ADD COLUMN "contact_phone" text DEFAULT '085736653639' NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_settings" ADD COLUMN "contact_email" text DEFAULT 'support@pinoka.id' NOT NULL;

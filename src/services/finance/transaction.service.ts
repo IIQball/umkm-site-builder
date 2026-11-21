@@ -21,6 +21,7 @@ import {
   formatInvoiceNum,
   grantFreeTemplate,
   getTransactionByExternalId,
+  expireStalePendingTransactions,
 } from './transaction.helpers';
 import { getAdminServiceFee } from './commission.service';
 
@@ -279,6 +280,10 @@ export class TransactionService {
 
   formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  expireStalePendingTransactions(maxHours: number = 24) {
+    return expireStalePendingTransactions(maxHours);
   }
 }
 

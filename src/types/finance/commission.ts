@@ -16,6 +16,8 @@ export interface PlatformSettings {
   settlementDelayDays: number;
   maxStoreBranches: number;
   maxTemplateRevisions?: number;
+  contactPhone?: string;
+  contactEmail?: string;
   updatedAt: Date;
   updatedBy: string | null;
 }

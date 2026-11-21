@@ -24,6 +24,8 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       settlementDelayDays: settings.settlementDelayDays,
       maxStoreBranches: settings.maxStoreBranches ?? 5,
       maxTemplateRevisions: settings.maxTemplateRevisions ?? 3,
+      contactPhone: settings.contactPhone ?? '085736653639',
+      contactEmail: settings.contactEmail ?? 'support@pinoka.id',
     });
   });
 };
@@ -51,6 +53,8 @@ export const saveSettings: APIRoute = async (context): Promise<Response> => {
         adminServiceFee: validated.adminServiceFee,
         payoutMinimumBalance: validated.payoutMinimumBalance,
         settlementDelayDays: validated.settlementDelayDays,
+        contactPhone: validated.contactPhone,
+        contactEmail: validated.contactEmail,
       },
     });
 

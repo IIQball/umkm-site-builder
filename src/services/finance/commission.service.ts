@@ -10,6 +10,8 @@ export const DEFAULT_PLATFORM_FEE_PERCENTAGE = 30;
 export const DEFAULT_ADMIN_SERVICE_FEE = 5000;
 export const DEFAULT_MAX_STORE_BRANCHES = 5;
 export const DEFAULT_MAX_TEMPLATE_REVISIONS = 3;
+export const DEFAULT_CONTACT_PHONE = '085736653639';
+export const DEFAULT_CONTACT_EMAIL = 'support@pinoka.id';
 export const DEFAULT_SETTINGS = {
   platformFeePercentage: 30,
   adminServiceFee: 5000,
@@ -17,6 +19,8 @@ export const DEFAULT_SETTINGS = {
   settlementDelayDays: 7,
   maxStoreBranches: 5,
   maxTemplateRevisions: 3,
+  contactPhone: '085736653639',
+  contactEmail: 'support@pinoka.id',
 };
 
 /**
@@ -40,6 +44,8 @@ export async function getPlatformSettings(
       ...current,
       maxStoreBranches: current.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
       maxTemplateRevisions: current.maxTemplateRevisions ?? DEFAULT_SETTINGS.maxTemplateRevisions,
+      contactPhone: current.contactPhone ?? DEFAULT_SETTINGS.contactPhone,
+      contactEmail: current.contactEmail ?? DEFAULT_SETTINGS.contactEmail,
     };
   } catch {
     return {
@@ -62,6 +68,8 @@ export async function updatePlatformSettings(
     settlementDelayDays?: number;
     maxStoreBranches?: number;
     maxTemplateRevisions?: number;
+    contactPhone?: string;
+    contactEmail?: string;
   },
   userId: string,
   dbClient: typeof db = db
@@ -95,6 +103,8 @@ export async function updatePlatformSettings(
         settlementDelayDays: data.settlementDelayDays ?? DEFAULT_SETTINGS.settlementDelayDays,
         maxStoreBranches: data.maxStoreBranches ?? DEFAULT_SETTINGS.maxStoreBranches,
         maxTemplateRevisions: data.maxTemplateRevisions ?? DEFAULT_SETTINGS.maxTemplateRevisions,
+        contactPhone: data.contactPhone ? data.contactPhone.trim() : DEFAULT_SETTINGS.contactPhone,
+        contactEmail: data.contactEmail ? data.contactEmail.trim().toLowerCase() : DEFAULT_SETTINGS.contactEmail,
         updatedBy: userId,
         updatedAt: new Date(),
       })
@@ -110,6 +120,8 @@ export async function updatePlatformSettings(
         settlementDelayDays: data.settlementDelayDays !== undefined ? data.settlementDelayDays : existingList[0].settlementDelayDays,
         maxStoreBranches: data.maxStoreBranches !== undefined ? data.maxStoreBranches : existingList[0].maxStoreBranches,
         maxTemplateRevisions: data.maxTemplateRevisions !== undefined ? data.maxTemplateRevisions : existingList[0].maxTemplateRevisions,
+        contactPhone: data.contactPhone !== undefined ? data.contactPhone.trim() : existingList[0].contactPhone,
+        contactEmail: data.contactEmail !== undefined ? data.contactEmail.trim().toLowerCase() : existingList[0].contactEmail,
         updatedBy: userId,
         updatedAt: new Date(),
       })

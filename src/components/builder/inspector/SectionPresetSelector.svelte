@@ -22,9 +22,9 @@
 
 {#if currentPresets.length > 0}
   <div class="space-y-3">
-    <div class="flex items-center justify-between border-b border-base-200 pb-1.5">
-      <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-base-content/70">
-        <LayoutGrid size={13} class="text-[var(--theme-primary, var(--color-primary))]" />
+    <div class="flex items-center justify-between border-b border-light pb-1.5">
+      <div class="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-secondary">
+        <LayoutGrid size={13} class="text-primary" />
         <span>Tata Letak ({currentPresets.length} Variasi)</span>
       </div>
       <Button
@@ -40,34 +40,32 @@
     </div>
 
     <!-- Active Preset Hero Card (Click to open Dribbble-style Modal) -->
-    <div
-      role="button"
-      tabindex="0"
+    <button
+      type="button"
       on:click={() => (isModalOpen = true)}
-      on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (isModalOpen = true)}
-      class="p-3.5 rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-left relative group hover:border-primary transition-all cursor-pointer shadow-xs hover:shadow-md"
-      title="Buka Galeri Tata Letak ala Dribbble"
+      class="w-full p-3.5 rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-left relative group hover:border-primary transition-all cursor-pointer shadow-xs hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40"
+      title="Buka Galeri Tata Letak"
     >
       <div class="flex items-center justify-between gap-2 mb-1.5">
         <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span class="font-bold text-xs text-base-content font-heading">
+          <span class="font-bold text-xs text-main font-heading">
             {activePresetObj?.label || 'Default Layout'}
           </span>
         </div>
-        <span class="badge badge-primary badge-xs gap-1 font-bold font-mono shadow-2xs">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-mono font-bold bg-primary text-slate-950 shadow-2xs">
           <Check size={9} strokeWidth={3} />
           <span>Aktif</span>
         </span>
       </div>
 
-      <p class="text-[11px] text-base-content/70 line-clamp-2 leading-relaxed">
+      <p class="text-2xs text-secondary line-clamp-2 leading-relaxed">
         {activePresetObj?.desc || 'Tata letak default komponen.'}
       </p>
 
       <!-- Trigger Button -->
-      <div class="mt-3 pt-2.5 border-t border-primary/20 flex items-center justify-between">
-        <span class="text-xs font-mono text-base-content/50 uppercase tracking-wider">
+      <div class="mt-3 pt-2.5 border-t border-light flex items-center justify-between">
+        <span class="text-2xs font-mono text-muted uppercase tracking-wider">
           {section.type}
         </span>
         <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-0.5 transition-transform">
@@ -76,7 +74,7 @@
           <ChevronRight size={12} />
         </span>
       </div>
-    </div>
+    </button>
   </div>
 
   <!-- Dribbble-style Near-Fullscreen Layout Selector Modal -->

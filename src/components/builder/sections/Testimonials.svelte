@@ -54,8 +54,7 @@
     getSlotOrder('testimonials_grid'),
     getSlotOrder('testi_item_0'),
     getSlotOrder('testi_stats'),
-    getSlotOrder('testi_slider_track'),
-    getSlotOrder('testi_logo_cloud')
+    getSlotOrder('testi_slider_track')
   );
 </script>
 
@@ -86,7 +85,7 @@
       <TestimonialsMarquee {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'social_post_cards'}
       <TestimonialsSocialCards {sectionId} {testimonials} {nodeStyles} />
-    {:else if activePreset === 'side_by_side_3_cards' || activePreset === 'video_review_cards' || activePreset === 'logo_client_cloud'}
+    {:else if activePreset === 'side_by_side_3_cards'}
       <TestimonialsSideBySide {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'split_rating_stats'}
       <TestimonialsSplitStats {sectionId} {testimonials} {nodeStyles} />

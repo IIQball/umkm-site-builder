@@ -146,8 +146,7 @@ describe('Token-Based Presets & Mathematical Design System Schema', () => {
 
     const testimonialsPresets = [
       'masonry_grid', 'single_spotlight', 'chat_bubble_flow', 'infinite_marquee_scroll',
-      'video_review_cards', 'social_post_cards', 'side_by_side_3_cards',
-      'logo_client_cloud', 'split_rating_stats', 'carousel_slider'
+      'social_post_cards', 'side_by_side_3_cards', 'split_rating_stats', 'carousel_slider'
     ];
     for (const p of testimonialsPresets) {
       expect(TestimonialsPresetSchema.safeParse(p).success).toBe(true);

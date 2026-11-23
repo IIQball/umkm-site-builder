@@ -16,10 +16,6 @@
   import CatalogPriceTable from './catalog/CatalogPriceTable.svelte';
   import CatalogLookbook from './catalog/CatalogLookbook.svelte';
   import CatalogFlashSale from './catalog/CatalogFlashSale.svelte';
-  import CatalogBundleTiers from './catalog/CatalogBundleTiers.svelte';
-  import CatalogSingleFocus from './catalog/CatalogSingleFocus.svelte';
-  import CatalogSpecialCards from './catalog/CatalogSpecialCards.svelte';
-  import CatalogAccordion from './catalog/CatalogAccordion.svelte';
   import CatalogCheckoutModal from './catalog/CatalogCheckoutModal.svelte';
   import ProductVariantModal from './catalog/ProductVariantModal.svelte';
   import { fly } from 'svelte/transition';
@@ -248,17 +244,9 @@
             <CatalogLookbook {sectionId} {products} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'flash_sale_countdown'}
             <CatalogFlashSale {sectionId} {products} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'bundle_package_tiers'}
-            <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'single_product_deep_focus'}
-            <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
-            <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'minimal_accordion_catalog'}
-            <CatalogAccordion {sectionId} {products} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
           {:else}
-            <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
-            <CatalogGridStandard {sectionId} {products} {activePreset} {isLiveStorefront} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <!-- Standard, compact_mini_cards -->
+            <CatalogGridStandard {sectionId} {products} {activePreset} {isLiveStorefront} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {/if}
         {/if}
       </div>

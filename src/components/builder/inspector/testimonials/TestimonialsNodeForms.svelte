@@ -3,11 +3,8 @@
   import type { TestimonialItem } from '@/types';
   import { Star, CheckCircle2 } from 'lucide-svelte';
   import ImageUploadDropzone from '../ImageUploadDropzone.svelte';
-  import VideoUploadDropzone from '../VideoUploadDropzone.svelte';
   import {
     DEFAULT_TESTIMONIALS,
-    DEFAULT_CLIENT_LOGOS,
-    type ClientLogoItem,
   } from '../../sections/testimonials/testimonials.helpers';
 
   export let section: TemplateSection;
@@ -18,10 +15,6 @@
     ? (section.props.testimonials as TestimonialItem[])
     : DEFAULT_TESTIMONIALS) as TestimonialItem[];
 
-  $: logos = (Array.isArray(section.props?.logos) && section.props.logos.length > 0
-    ? (section.props.logos as ClientLogoItem[])
-    : DEFAULT_CLIENT_LOGOS) as ClientLogoItem[];
-
   $: title = (section.props?.title as string) || (section.props?.heading as string) || '';
   $: subtitle = (section.props?.subtitle as string) || '';
   $: badgeText = (section.props?.badgeText as string) || '';
@@ -29,7 +22,6 @@
   $: itemIndex = (() => {
     if (nodeId.startsWith('testi_item_')) return parseInt(nodeId.replace('testi_item_', ''), 10);
     if (nodeId.startsWith('testi_avatar_')) return parseInt(nodeId.replace('testi_avatar_', ''), 10);
-    if (nodeId.startsWith('testi_logo_')) return parseInt(nodeId.replace('testi_logo_', ''), 10);
     if (nodeId.startsWith('item_')) return parseInt(nodeId.replace('item_', ''), 10);
     const foundIdx = testimonials.findIndex((t) => t.id === nodeId);
     if (foundIdx !== -1) return foundIdx;
@@ -37,7 +29,6 @@
   })();
 
   $: currentTesti = testimonials[itemIndex] || testimonials[0];
-  $: currentLogo = logos[itemIndex] || logos[0];
 
   function updateTestiField(field: keyof TestimonialItem, value: any) {
     const updated = [...testimonials];
@@ -88,15 +79,6 @@
       maxHeight={400}
       folder="testimonials"
     />
-    {#if section.props?.layout === 'video_cards' || currentTesti?.videoUrl}
-      <VideoUploadDropzone
-        videoUrl={currentTesti?.videoUrl || ''}
-        onVideoChange={(url) => updateTestiField('videoUrl', url)}
-        label="Video Ulasan Pengulas"
-        placeholderTitle="Unggah Video Ulasan"
-        folder="testimonials"
-      />
-    {/if}
   </div>
 {:else if nodeId.startsWith('testi_item_') || nodeId.startsWith('item_') || testimonials.some(t => t.id === nodeId)}
   <div class="space-y-3 text-left">
@@ -190,15 +172,6 @@
         folder="testimonials"
         compact={true}
       />
-      {#if section.props?.layout === 'video_cards' || currentTesti?.videoUrl}
-        <VideoUploadDropzone
-          videoUrl={currentTesti?.videoUrl || ''}
-          onVideoChange={(url) => updateTestiField('videoUrl', url)}
-          label="Video Ulasan Pengulas"
-          placeholderTitle="Unggah Video Ulasan"
-          folder="testimonials"
-        />
-      {/if}
     </div>
   </div>
 {:else if nodeId === 'testi_spotlight_quote'}
@@ -247,13 +220,6 @@
     <p class="font-semibold text-xs text-blue-700 dark:text-blue-300">Track Slider Ulasan</p>
     <p class="text-[11px] text-base-content/70">
       Menampilkan ulasan pelanggan secara dinamis dengan interaksi navigasi sentuh atau rotasi otomatis loop.
-    </p>
-  </div>
-{:else if nodeId === 'testi_logo_cloud' || nodeId.startsWith('testi_logo_')}
-  <div class="space-y-2 text-left">
-    <p class="font-semibold text-xs text-base-content">Logo Kemitraan: {currentLogo?.name || 'Mitra'}</p>
-    <p class="text-[11px] text-base-content/60">
-      Menampilkan logo instansi, komunitas, atau mitra korporat yang telah mempercayai UMKM Anda.
     </p>
   </div>
 {/if}

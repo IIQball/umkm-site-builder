@@ -10,9 +10,6 @@ import { DEFAULT_DEMO_PRODUCTS } from './productCatalog.helpers';
 export const CATALOG_PRESET_SLOTS: Record<string, string[]> = {
   grid_standard: ['badge', 'title', 'subtitle'],
   compact_mini_cards: ['badge', 'title', 'subtitle'],
-  quick_buy_whatsapp_direct: ['badge', 'title', 'subtitle'],
-  badge_stock_scarcity: ['badge', 'title', 'subtitle'],
-  interactive_filter_tabs: ['badge', 'title', 'subtitle', 'catalog_categories'],
   carousel_scroll: ['badge', 'title', 'subtitle'],
   list_compact: ['badge', 'title', 'subtitle'],
   masonry_catalog: ['badge', 'title', 'subtitle'],
@@ -21,13 +18,6 @@ export const CATALOG_PRESET_SLOTS: Record<string, string[]> = {
   price_table_view: ['badge', 'title', 'subtitle', 'catalog_price_rows'],
   lookbook_gallery: ['badge', 'title', 'subtitle'],
   flash_sale_countdown: ['badge', 'title', 'subtitle', 'catalog_timer'],
-  bundle_package_tiers: ['badge', 'title', 'subtitle', 'catalog_bundle_tier', 'catalog_cta'],
-  single_product_deep_focus: ['badge', 'title', 'subtitle', 'product_image_0', 'product_desc', 'catalog_cta'],
-  seasonal_hampers_gift: ['badge', 'title', 'subtitle'],
-  before_after_product_effect: ['badge', 'title', 'subtitle'],
-  digital_download_catalog: ['badge', 'title', 'subtitle'],
-  customer_review_paired_card: ['badge', 'title', 'subtitle'],
-  minimal_accordion_catalog: ['badge', 'title', 'subtitle', 'catalog_price_rows'],
 };
 
 /**
@@ -39,14 +29,9 @@ export function getDefaultCatalogSlots(preset: string, products?: ProductItem[])
   const baseSlots = CATALOG_PRESET_SLOTS[preset] || ['badge', 'title', 'subtitle'];
   const slots: string[] = [...baseSlots];
 
-  // Tiap produk adalah elemen mandiri (single product focus hanya memuat 1 item)
-  if (preset === 'single_product_deep_focus') {
-    slots.push('product_item_0');
-  } else {
-    prods.forEach((_, idx) => {
-      slots.push(`product_item_${idx}`);
-    });
-  }
+  prods.forEach((_, idx) => {
+    slots.push(`product_item_${idx}`);
+  });
 
   return slots;
 }
@@ -60,13 +45,9 @@ export function getAllowedCatalogSlots(preset: string, products?: ProductItem[])
   const baseSlots = CATALOG_PRESET_SLOTS[preset] || ['badge', 'title', 'subtitle'];
   const allowed = new Set<string>(['badge', 'title', 'subtitle', ...baseSlots]);
 
-  if (preset === 'single_product_deep_focus') {
-    allowed.add('product_item_0');
-  } else {
-    prods.forEach((_, idx) => {
-      allowed.add(`product_item_${idx}`);
-    });
-  }
+  prods.forEach((_, idx) => {
+    allowed.add(`product_item_${idx}`);
+  });
 
   return Array.from(allowed);
 }
@@ -89,14 +70,8 @@ export function getCatalogSlotLabel(slot: string, _preset?: string, products?: P
       return 'Tab Filter Kategori';
     case 'catalog_timer':
       return 'Hitung Mundur Flash Sale';
-    case 'catalog_bundle_tier':
-      return 'Pilihan Paket Bundling';
     case 'catalog_cta':
       return 'Tombol Pesan WhatsApp';
-    case 'product_image_0':
-      return 'Foto Produk Utama';
-    case 'product_desc':
-      return 'Deskripsi Manfaat Produk Unggulan';
     case 'catalog_price_rows':
       return 'Daftar / Tabel Harga';
     case 'catalog_grid':

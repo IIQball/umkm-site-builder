@@ -61,44 +61,6 @@ export const getTestimonialsSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
-  // 4. Video Review Cards (3 kartu dengan tombol play video)
-  if (id === 'video_review_cards') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="16" y="20" width="62" height="96" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-      <rect x="20" y="24" width="54" height="60" rx="4" fill="#0f172a"/>
-      <circle cx="47" cy="54" r="9" fill="#ef4444"/>
-      <polygon points="45,50 51,54 45,58" fill="#ffffff"/>
-      <rect x="22" y="90" width="44" height="5" rx="1.5" fill="#f8fafc"/>
-      <rect x="89" y="20" width="62" height="96" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
-      <rect x="93" y="24" width="54" height="60" rx="4" fill="#0f172a"/>
-      <circle cx="120" cy="54" r="9" fill="#ef4444"/>
-      <polygon points="118,50 124,54 118,58" fill="#ffffff"/>
-      <rect x="95" y="90" width="44" height="5" rx="1.5" fill="#f8fafc"/>
-      <rect x="162" y="20" width="62" height="96" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-      <rect x="166" y="24" width="54" height="60" rx="4" fill="#0f172a"/>
-      <circle cx="193" cy="54" r="9" fill="#ef4444"/>
-      <polygon points="191,50 197,54 191,58" fill="#ffffff"/>
-      <rect x="168" y="90" width="44" height="5" rx="1.5" fill="#f8fafc"/>
-    </svg>`;
-  }
-
-  // 5. Logo Client Cloud (Deretan logo mitra)
-  if (id === 'logo_client_cloud') {
-    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="240" height="135" rx="8" fill="#090d16"/>
-      <rect x="74" y="16" width="92" height="8" rx="2" fill="#f8fafc"/>
-      <rect x="88" y="28" width="64" height="5" rx="1.5" fill="#64748b"/>
-      <rect x="18" y="48" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="72" y="48" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="126" y="48" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="180" y="48" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="45" y="82" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="99" y="82" width="46" height="26" rx="4" fill="#1e293b"/>
-      <rect x="153" y="82" width="46" height="26" rx="4" fill="#1e293b"/>
-    </svg>`;
-  }
-
   // Default Masonry Grid (3 Kolom kartu ulasan berbobot)
   return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="240" height="135" rx="8" fill="#090d16"/>

@@ -12,15 +12,6 @@ export const IMAGE_SUPPORTED_CATALOG_PRESETS = [
   'compact_mini_cards',
   'lookbook_gallery',
   'flash_sale_countdown',
-  'interactive_filter_tabs',
-  'quick_buy_whatsapp_direct',
-  'bundle_package_tiers',
-  'single_product_deep_focus',
-  'badge_stock_scarcity',
-  'seasonal_hampers_gift',
-  'before_after_product_effect',
-  'digital_download_catalog',
-  'customer_review_paired_card',
 ] as const;
 
 export function isCatalogImageSupported(preset: string): boolean {
@@ -28,15 +19,15 @@ export function isCatalogImageSupported(preset: string): boolean {
 }
 
 export function isCatalogCategorySupported(preset: string): boolean {
-  return preset === 'interactive_filter_tabs' || preset === 'split_category_sidebar';
+  return preset === 'split_category_sidebar';
 }
 
 export function isCatalogCartSupported(preset: string): boolean {
-  return !['price_table_view', 'lookbook_gallery', 'bundle_package_tiers', 'single_product_deep_focus', 'minimal_accordion_catalog'].includes(preset);
+  return !['price_table_view', 'lookbook_gallery'].includes(preset);
 }
 
 export function isCatalogSingleProduct(preset: string): boolean {
-  return preset === 'single_product_deep_focus';
+  return Boolean(preset && false);
 }
 
 export function resolveProductNodeStyle(

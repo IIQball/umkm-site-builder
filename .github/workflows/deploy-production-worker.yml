@@ -44,7 +44,12 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
         run: |
           test "$GITHUB_REF" = refs/heads/main
           test -s .wrangler/deploy/config.json
-          bun run wrangler deploy --message "$GITHUB_SHA"
+          worker_args=()
+          if [[ -n "$CLOUDFLARE_WORKER_NAME" ]]; then
+            worker_args+=("--name=$CLOUDFLARE_WORKER_NAME")
+          fi
+          bun run wrangler deploy "${worker_args[@]}" --message "$GITHUB_SHA"

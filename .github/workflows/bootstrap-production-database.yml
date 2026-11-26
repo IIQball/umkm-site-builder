@@ -1,0 +1,42 @@
+name: Bootstrap production database
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production-bootstrap
+    concurrency:
+      group: production-database-bootstrap
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.13.1'
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: '1.4.4'
+
+      - name: Install dependencies
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Apply migrations and seed initial data
+        env:
+          BOOTSTRAP_DATABASE_URL: ${{ secrets.BOOTSTRAP_DATABASE_URL }}
+          BOOTSTRAP_SUPERADMIN_NAME: ${{ secrets.BOOTSTRAP_SUPERADMIN_NAME }}
+          BOOTSTRAP_SUPERADMIN_EMAIL: ${{ secrets.BOOTSTRAP_SUPERADMIN_EMAIL }}
+          BOOTSTRAP_SUPERADMIN_PASSWORD: ${{ secrets.BOOTSTRAP_SUPERADMIN_PASSWORD }}
+        run: bun --no-env-file run db:bootstrap

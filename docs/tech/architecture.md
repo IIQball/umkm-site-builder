@@ -57,13 +57,13 @@ Stack is locked in `../../AGENTS.md` §3. This file records how it is wired **in
 **Migrations:**
 - Generated: `bun run drizzle-kit generate` (schema → SQL)
 - Applied locally: `bun run drizzle-kit push` (direct to Neon branch)
-- Applied to production: Manual review required; run via GitHub Actions on merge to main (not auto-applied)
+- Applied to production: Review and apply before deploying the matching release. For a blank database, follow the [first production release guide](../production-bootstrap.md).
 - Schema version tracked in Drizzle metadata; rollback via git history + manual SQL
 
 **Local development:**
 - Each developer uses own Neon branch (Neon branching feature for free)
 - Branch is auto-deleted after 7 days if no activity (acceptable; recreate by pushing schema again)
-- Seed data via `bun run seed` (calls Drizzle + custom scripts)
+- Seed data via `bun run seed` after applying the local schema
 - Backup: Use `pg_dump` via Neon's psql CLI or export from Neon dashboard
 
 ### G7 detail — media storage
@@ -272,7 +272,7 @@ Rules that govern this: `../../AGENTS.md` §4.
 - **Migrations:**
   - Generated: `bun run drizzle-kit generate` (compares schema.ts to remote DB)
   - Applied locally: `bun run drizzle-kit push` (Neon branch)
-  - Applied to production: Manual trigger via GitHub Actions; requires review + approval
+  - Applied to production: Review and apply migrations before deploying the matching release
 
 ---
 

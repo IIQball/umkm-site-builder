@@ -55,8 +55,9 @@ export function extractSubdomain(rawHost: string | null | undefined): string | n
 
   // Pola 3: Domain kustom (misal: sub.domain.com atau sub.domain.co.id)
   const parts = host.split('.');
-  // Tangani TLD 2-tingkat umum seperti .co.id, .sch.id, .web.id, .org.uk
-  const isTwoLevelTld = parts.length >= 3 && ['co', 'web', 'or', 'ac', 'sch', 'go'].includes(parts[parts.length - 2]);
+  // Tangani sufiks publik dua tingkat seperti .co.id, .my.id, dan .org.uk
+  const isTwoLevelTld = host.endsWith('.my.id') ||
+    (parts.length >= 3 && ['co', 'web', 'or', 'ac', 'sch', 'go'].includes(parts[parts.length - 2]));
   const minPartsForSubdomain = isTwoLevelTld ? 4 : 3;
 
   if (parts.length >= minPartsForSubdomain) {

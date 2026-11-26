@@ -1,9 +1,22 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding untuk keperluan
+  fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pada skenario ini, kustomisasi konten & gaya (warna, tipografi, teks seksi) diserahkan
+  sepenuhnya kepada modul Template Builder & Designer Studio, bukan di onboarding.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai modul kustomisasi konten
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { Plus, Trash2 } from 'lucide-svelte';
   import { Button } from '@/components/ui';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'accordion_single_col';
   export let onUpdate: (() => void) | undefined = undefined;
 
   function addFaq() {
@@ -26,6 +39,12 @@
 </script>
 
 <div class="space-y-4 text-left">
+  {#if layoutPreset === 'search_filtered_faq'}
+    <div class="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary font-sans font-semibold">
+      Layout FAQ Pencarian: Dilengkapi kotak pencarian instan bagi calon pembeli.
+    </div>
+  {/if}
+
   <!-- Section Heading & Subheading -->
   <div class="space-y-3 pb-3 border-b border-light">
     <div>

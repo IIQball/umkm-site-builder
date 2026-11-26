@@ -1,5 +1,11 @@
+<!--
+  =============================================================================
+  Kustomisasi Warna Brand Toko Tenant
+  Menyediakan opsi palet warna utama toko dan input warna heksadesimal / native picker.
+  =============================================================================
+-->
 <script lang="ts">
-  import { CheckCircle2, MessageCircle, Sparkles } from 'lucide-svelte';
+  import { Sparkles } from 'lucide-svelte';
   import { COLOR_PALETTES } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
@@ -52,7 +58,7 @@
           type="text"
           bind:value={customization.theme.primaryColor}
           on:input={() => onUpdate?.()}
-          placeholder="#0ea5e9"
+          placeholder="#2563eb"
           maxlength="7"
           class="w-full bg-nested text-main border border-light rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold uppercase"
         />
@@ -64,28 +70,32 @@
   <div class="p-3.5 bg-card rounded-xl border border-light space-y-2.5 shadow-2xs">
     <div class="flex items-center gap-1.5 text-xs font-bold text-main font-heading">
       <Sparkles size={13} class="text-primary" />
-      <span>Simulasi Tampilan Warna di Halaman</span>
+      <span>Simulasi Tampilan Warna Brand</span>
     </div>
     <p class="text-xs text-secondary font-sans leading-relaxed">
-      Warna ini otomatis diselaraskan ke berbagai elemen visual landing page:
+      Warna brand ini otomatis diterapkan ke seluruh tombol, badge, dan aksen visual toko Anda:
     </p>
 
-    <!-- Simulated UI Chips -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-      <div
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-white text-xs font-bold font-sans shadow-2xs transition-all"
-        style="background-color: {customization.theme.primaryColor};"
-      >
-        <MessageCircle size={13} />
-        <span>Tombol WhatsApp</span>
-      </div>
-
-      <div
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold font-sans transition-all border"
-        style="background-color: color-mix(in srgb, {customization.theme.primaryColor} 12%, transparent); color: {customization.theme.primaryColor}; border-color: color-mix(in srgb, {customization.theme.primaryColor} 30%, transparent);"
-      >
-        <CheckCircle2 size={13} />
-        <span>Lencana Promo 2026</span>
+    <!-- Simulated Elements -->
+    <div class="pt-1 space-y-2">
+      <div class="p-2.5 bg-nested rounded-lg border border-light/80 space-y-1">
+        <span class="text-2xs text-secondary font-sans font-medium">Contoh Tombol Aksi:</span>
+        <div class="flex items-center gap-2 pt-1">
+          <button
+            type="button"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white shadow-2xs transition-all pointer-events-none"
+            style="background-color: {customization.theme.primaryColor};"
+          >
+            Beli Sekarang
+          </button>
+          <button
+            type="button"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-card border border-light shadow-2xs transition-all pointer-events-none"
+            style="color: {customization.theme.primaryColor}; border-color: {customization.theme.primaryColor}40;"
+          >
+            Lihat Detail
+          </button>
+        </div>
       </div>
     </div>
   </div>

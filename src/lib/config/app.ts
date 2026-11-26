@@ -3,20 +3,10 @@
  * All external service URLs and keys configured here
  */
 
-// `import.meta.env.FOO` is inlined by Vite as a string literal at build time, so a value
-// supplied only at runtime (a Cloudflare Worker secret) never reaches it. Reading a bare
-// `import.meta.env` gives the whole build-time object, which we fall back to for `astro dev`
-// and for tests, where .env files are loaded into it and `process.env` is empty.
-//
-// `process.env` is checked first because it is the only source that can change without a
-// rebuild: on Workers it is populated from vars and secrets by `nodejs_compat`. Same order
-// as lib/auth.ts and lib/cloudinary.ts.
-const buildTimeEnv = import.meta.env as unknown as Record<string, string | undefined>;
+// The Astro adapter supplies runtime environment values without embedding the env object.
+import { readRuntimeEnv, validateRuntimeEnv } from './env-validator';
 
-function env(key: string): string {
-  const runtime = typeof process !== 'undefined' ? process.env?.[key] : undefined;
-  return runtime || buildTimeEnv?.[key] || '';
-}
+const env = readRuntimeEnv;
 
 export const config = {
   app: {
@@ -50,9 +40,13 @@ export const config = {
   },
 
   media: {
-    cloudinaryName: env('CLOUDINARY_NAME'),
+    cloudinaryName: env('CLOUDINARY_NAME') || env('CLOUDINARY_CLOUD_NAME'),
     cloudinaryApiKey: env('CLOUDINARY_API_KEY'),
-    cloudinarySecret: env('CLOUDINARY_SECRET'),
+    cloudinarySecret: env('CLOUDINARY_SECRET') || env('CLOUDINARY_API_SECRET'),
+  },
+
+  ai: {
+    openaiApiKey: env('OPENAI_API_KEY'),
   },
 
   // Feature flags
@@ -63,22 +57,10 @@ export const config = {
   },
 };
 
-// Surface missing secrets in production as one log line. Deliberately does not throw:
-// this module is imported at the top of the request path, so throwing here takes the whole
-// Worker down with an empty 500 instead of failing the one route that needed the value.
+// Surface missing secrets in production as one structured log entry. Deliberately does not
+// throw at module evaluation so unrelated routes stay healthy while DB/API boundaries fail safely.
 if (config.app.isProd) {
-  const missing = [
-    ['DATABASE_URL', config.database.url],
-    ['BETTER_AUTH_SECRET', config.auth.secret],
-    ['XENDIT_API_KEY', config.payments.xenditApiKey],
-    ['CLOUDINARY_NAME', config.media.cloudinaryName],
-  ]
-    .filter(([, value]) => !value)
-    .map(([key]) => key);
-
-  if (missing.length > 0) {
-    console.error(`[config] missing required environment variables: ${missing.join(', ')}`);
-  }
+  validateRuntimeEnv({ strict: false, isProd: true });
 }
 
 export default config;

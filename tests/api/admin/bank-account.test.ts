@@ -38,7 +38,7 @@ describe('Admin Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.ok).toBe(false);
+      expect(body.success).toBe(false);
     });
 
     it('returns bank accounts for authorized admin', async () => {
@@ -71,7 +71,7 @@ describe('Admin Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.accounts).toHaveLength(1);
       expect(body.data.primaryAccount.accountHolder).toBe('Admin Official');
     });
@@ -131,7 +131,7 @@ describe('Admin Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.accountNumber).toBe('5566778899');
     });
   });
@@ -162,7 +162,7 @@ describe('Admin Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.success).toBe(true);
     });
   });

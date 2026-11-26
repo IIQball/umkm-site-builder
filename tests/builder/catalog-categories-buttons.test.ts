@@ -3,7 +3,7 @@ import {
   DEFAULT_CATALOG_CATEGORIES,
   DEFAULT_DEMO_PRODUCTS,
   type CatalogCategory,
-} from '@/components/builder/sections/productCatalog.helpers';
+} from '@/components/builder/sections/catalog/productCatalog.helpers';
 
 describe('Product Catalog Categories & Button Text Configuration', () => {
   it('DEFAULT_CATALOG_CATEGORIES has predefined categories with valid id, name, and slug', () => {

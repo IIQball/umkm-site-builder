@@ -3,6 +3,7 @@ import { getAuthenticatedUser, isAuthorizedDesigner } from '@/lib/auth';
 import { TemplateDraftUpdateSchema } from '@/schemas';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
 import { updateTemplateDraft } from '@/services/templates';
+import { logActivity } from '@/services/audit.service';
 
 export const POST: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -22,6 +23,15 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const input = validate(TemplateDraftUpdateSchema, body);
 
     const updated = await updateTemplateDraft(templateId, input, user.id, user.role);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Save Template Builder',
+      details: {
+        templateId,
+        name: updated.name,
+      },
+    });
 
     return jsonSuccess(updated);
   });

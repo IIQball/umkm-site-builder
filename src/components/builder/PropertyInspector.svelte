@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Sliders, Type, LayoutGrid, ChevronRight, PanelRightClose } from 'lucide-svelte';
   import { Button } from '@/components/ui';
-  import ContentTab from './ContentTab.svelte';
-  import LayoutTab from './LayoutTab.svelte';
-  import StylesTab from './StylesTab.svelte';
-  import NodeStylesTab from './NodeStylesTab.svelte';
+  import ContentTab from './inspector/ContentTab.svelte';
+  import LayoutTab from './inspector/LayoutTab.svelte';
+  import StylesTab from './inspector/StylesTab.svelte';
+  import NodeStylesTab from './inspector/NodeStylesTab.svelte';
   import NodeContentForm from './inspector/NodeContentForm.svelte';
   import GlobalThemeInspector from './inspector/GlobalThemeInspector.svelte';
   import HeaderAnnouncementPanel from './inspector/header/HeaderAnnouncementPanel.svelte';

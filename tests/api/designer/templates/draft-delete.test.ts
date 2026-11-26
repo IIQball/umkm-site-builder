@@ -76,7 +76,7 @@ describe('DELETE /api/designer/templates/draft', () => {
     const res = (await DELETE({ request, params: {} } as unknown as DeleteContext)) as Response;
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(mockDelete).toHaveBeenCalled();
   });
 
@@ -97,7 +97,7 @@ describe('DELETE /api/designer/templates/draft', () => {
     const res = (await DELETE({ request, params: {} } as unknown as DeleteContext)) as Response;
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.deletedCount).toBe(2);
     expect(mockDelete).toHaveBeenCalled();
   });

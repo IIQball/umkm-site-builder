@@ -8,7 +8,7 @@ import { z } from 'zod';
 const TrackEventSchema = z.object({
   storeId: z.string().min(1, 'storeId wajib diisi'),
   eventType: z.enum(['wa_click', 'store_view'], {
-    errorMap: () => ({ message: 'eventType harus wa_click atau store_view' }),
+    error: 'eventType harus wa_click atau store_view',
   }),
 });
 

@@ -32,7 +32,7 @@
         <h3 class="text-heading-sm sm:text-heading-md text-main font-bold font-heading leading-tight">
           Pendapatan Fee Pendampingan
         </h3>
-        <p class="text-body-xs text-secondary mt-0.5 font-sans">
+        <p class="text-xs text-secondary mt-0.5 font-sans">
           {revenueData.periodLabel ? `Tren komisi fee (${revenueData.periodLabel})` : 'Tren komisi fee pendaftaran & transaksi'}
         </p>
       </div>

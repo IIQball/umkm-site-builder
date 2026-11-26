@@ -7,6 +7,8 @@
   import DirectoryMapView from '@/components/directory/DirectoryMapView.svelte';
   import DirectoryHeaderControls from '@/components/directory/DirectoryHeaderControls.svelte';
   import DirectoryStoreSkeleton from '@/components/directory/DirectoryStoreSkeleton.svelte';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
   import type { DirectoryStore, BusinessCategory, DirectoryMeta } from '@/components/directory/directory.types';
 
   let stores: DirectoryStore[] = [];
@@ -30,10 +32,9 @@
 
   async function fetchCategories() {
     try {
-      const res = await fetch('/api/public/business-categories');
-      const data = await res.json();
-      if (data.ok && Array.isArray(data.data)) {
-        categories = data.data;
+      const res = await apiFetch<BusinessCategory[]>('/api/public/business-categories');
+      if (res.success && Array.isArray(res.data)) {
+        categories = res.data;
       }
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -67,21 +68,23 @@
         url.searchParams.set('radius', radius.toString());
       }
 
-      const res = await fetch(url.toString());
-      const data = await res.json();
+      const result = await apiFetch<DirectoryStore[]>(url.toString(), {
+        fallbackError: 'Gagal memuat data direktori',
+      });
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Gagal memuat data direktori');
+      if (!result.success || !Array.isArray(result.data)) {
+        throw new Error(result.message);
       }
 
       if (reset) {
-        stores = data.data;
+        stores = result.data;
       } else {
-        stores = [...stores, ...data.data];
+        stores = [...stores, ...result.data];
       }
-      meta = data.meta;
+      meta = (result.meta as DirectoryMeta | undefined) ?? null;
     } catch (err: unknown) {
       error = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat data.';
+      toast.error(error);
     } finally {
       loading = false;
     }

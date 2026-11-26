@@ -4,18 +4,10 @@ import { GET as getNotifications } from '@/pages/api/notifications/index';
 import { POST as postReadAll } from '@/pages/api/notifications/read-all';
 import { POST as postReadSingle } from '@/pages/api/notifications/[id]/read';
 import { DELETE as deleteNotification } from '@/pages/api/notifications/[id]/index';
-import { auth } from '@/lib/auth';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 // Mock the auth module
-vi.mock('@/lib/auth', () => {
-  return {
-    auth: {
-      api: {
-        getSession: vi.fn(),
-      }
-    }
-  };
-});
+vi.mock('@/lib/auth', () => ({ getAuthenticatedUser: vi.fn() }));
 
 vi.mock('@/db', () => ({
   db: {
@@ -34,7 +26,7 @@ describe('Notifications API', () => {
   describe('GET /api/notifications', () => {
     it('rejects unauthenticated requests', async () => {
       // Mock no session
-      (auth.api.getSession as any).mockResolvedValue(null);
+      (getAuthenticatedUser as any).mockResolvedValue(null);
 
       const res = (await getNotifications({
         request: new Request('http://localhost:4321/api/notifications'),
@@ -46,9 +38,8 @@ describe('Notifications API', () => {
 
     it('returns notifications for authenticated user', async () => {
       // Mock authenticated session
-      (auth.api.getSession as any).mockResolvedValue({
-        user: { id: 'test-user-id', role: 'designer', name: 'Test User' },
-        session: { id: 'test-session', userId: 'test-user-id', expiresAt: new Date() }
+      (getAuthenticatedUser as any).mockResolvedValue({
+        id: 'test-user-id', role: 'designer', name: 'Test User'
       } as any);
 
       const res = (await getNotifications({
@@ -64,7 +55,7 @@ describe('Notifications API', () => {
 
   describe('POST /api/notifications/read-all', () => {
     it('rejects unauthenticated requests', async () => {
-      (auth.api.getSession as any).mockResolvedValue(null);
+      (getAuthenticatedUser as any).mockResolvedValue(null);
 
       const res = (await postReadAll({
         request: new Request('http://localhost:4321/api/notifications/read-all', {
@@ -77,9 +68,8 @@ describe('Notifications API', () => {
     });
 
     it('returns 200 for authenticated user', async () => {
-      (auth.api.getSession as any).mockResolvedValue({
-        user: { id: 'test-user-id', role: 'designer', name: 'Test User' },
-        session: { id: 'test-session', userId: 'test-user-id', expiresAt: new Date() }
+      (getAuthenticatedUser as any).mockResolvedValue({
+        id: 'test-user-id', role: 'designer', name: 'Test User'
       } as any);
 
       const res = (await postReadAll({
@@ -97,7 +87,7 @@ describe('Notifications API', () => {
 
   describe('POST /api/notifications/[id]/read', () => {
     it('rejects unauthenticated requests', async () => {
-      (auth.api.getSession as any).mockResolvedValue(null);
+      (getAuthenticatedUser as any).mockResolvedValue(null);
 
       const res = (await postReadSingle({
         request: new Request('http://localhost:4321/api/notifications/notif-1/read', {
@@ -110,9 +100,8 @@ describe('Notifications API', () => {
     });
 
     it('returns 200 for authenticated user', async () => {
-      (auth.api.getSession as any).mockResolvedValue({
-        user: { id: 'test-user-id', role: 'designer', name: 'Test User' },
-        session: { id: 'test-session', userId: 'test-user-id', expiresAt: new Date() }
+      (getAuthenticatedUser as any).mockResolvedValue({
+        id: 'test-user-id', role: 'designer', name: 'Test User'
       } as any);
 
       const res = (await postReadSingle({
@@ -132,7 +121,7 @@ describe('Notifications API', () => {
 
   describe('DELETE /api/notifications/[id]', () => {
     it('rejects unauthenticated requests', async () => {
-      (auth.api.getSession as any).mockResolvedValue(null);
+      (getAuthenticatedUser as any).mockResolvedValue(null);
 
       const res = (await deleteNotification({
         request: new Request('http://localhost:4321/api/notifications/notif-1', {
@@ -145,9 +134,8 @@ describe('Notifications API', () => {
     });
 
     it('returns 200 for authenticated user', async () => {
-      (auth.api.getSession as any).mockResolvedValue({
-        user: { id: 'test-user-id', role: 'designer', name: 'Test User' },
-        session: { id: 'test-session', userId: 'test-user-id', expiresAt: new Date() }
+      (getAuthenticatedUser as any).mockResolvedValue({
+        id: 'test-user-id', role: 'designer', name: 'Test User'
       } as any);
 
       const res = (await deleteNotification({

@@ -3,7 +3,7 @@ import {
   VariantOptionSchema,
   VariantGroupSchema,
   ProductVariantsSchema,
-} from '../../src/schemas/product-variant.schema';
+} from '@/schemas/tenant/product-variant.schema';
 
 describe('VariantOptionSchema', () => {
   it('accepts valid option', () => {

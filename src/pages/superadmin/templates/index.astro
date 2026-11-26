@@ -1,13 +1,13 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import TemplateReviewDashboard from "@/components/admin/TemplateReviewDashboard.svelte";
+import TemplateReviewDashboard from "@/components/superadmin/template-review/TemplateReviewDashboard.svelte";
 import Button from "@/components/ui/Button.svelte";
 import { getAuthenticatedUser, isAuthorizedSuperAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { templates, designers, users } from "@/db/schema";
 import { eq, ne, isNull, desc, and, count } from "drizzle-orm";
 import { getPaginationParams, paginate } from "@/lib/pagination/server";
-import type { AdminTemplateItem } from "@/components/admin/review/review.types";
+import type { AdminTemplateItem } from "@/components/superadmin/template-review/review.types";
 import type { PaginatedResult } from "@/types/common";
 
 export const prerender = false;

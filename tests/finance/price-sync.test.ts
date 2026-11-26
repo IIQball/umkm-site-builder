@@ -24,6 +24,10 @@ vi.mock('@/lib/db/client', () => {
   return { db: mockDb, getDb: () => mockDb };
 });
 
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(async <T>(fn: (tx: typeof db) => Promise<T>): Promise<T> => fn(db)),
+}));
+
 // Mock Xendit
 vi.mock('@/lib/finance/xendit', () => ({
   xenditClient: {
@@ -101,7 +105,7 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       expect(res.status).toBe(201);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(insertedValues).toBeDefined();
       expect(insertedValues.price).toBe(50000);
       expect(insertedValues.price).not.toBe(5000000);
@@ -155,10 +159,18 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
   describe('2. Template Purchase Transaction Initiation', () => {
     it('should create Xendit invoice and transaction record with exact IDR 50000', async () => {
+      (authLib.getAuthenticatedUser as unknown as Mock).mockResolvedValueOnce({
+        id: 'usr_tenant_1',
+        name: 'Tenant One',
+        email: 'tenant@example.com',
+        role: 'tenant',
+        status: 'active',
+      });
+
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 'usr_designer_1', email: 'designer@example.com' }]),
+            limit: vi.fn().mockResolvedValue([{ id: 'usr_tenant_1', email: 'tenant@example.com' }]),
           }),
         }),
       });
@@ -174,7 +186,7 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       (xenditClient.createInvoice as Mock).mockResolvedValueOnce({
         id: 'xend_inv_123',
-        invoiceNum: 'INV-usr_designer_1-999',
+        invoiceNum: 'INV-usr_tenant_1-999',
         invoiceUrl: 'https://checkout.xendit.co/web/123',
       });
 
@@ -199,7 +211,7 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
 
       // Verify Xendit invoice amount
       expect(xenditClient.createInvoice).toHaveBeenCalledWith(
@@ -238,7 +250,11 @@ describe('Finance Price Sync & Purchase Flow (Zero 100x Multiplier)', () => {
 
       // Update tx status to success
       mockDb.update.mockReturnValueOnce({
-        set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'txn_tpl_50k', type: 'template_purchase', status: 'success', templateId: 'tpl_123', userId: 'buyer_1', amount: 50000, adminFee: 0 }]),
+          }),
+        }),
       });
 
       // Insert userTemplate

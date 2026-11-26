@@ -6,6 +6,7 @@ import {
   updateTemplateCategory,
   deleteTemplateCategory,
 } from '@/services/template-categories';
+import { logActivity } from '@/services/audit.service';
 
 export const PUT: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -23,6 +24,16 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
     const input = validate(TemplateCategoryUpdateSchema, body);
 
     const updated = await updateTemplateCategory(id, input);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Update Template Category',
+      details: {
+        categoryId: id,
+        name: updated.name,
+      },
+    });
+
     return jsonSuccess(updated);
   });
 };
@@ -40,6 +51,15 @@ export const DELETE: APIRoute = async (context): Promise<Response> => {
     }
 
     const result = await deleteTemplateCategory(id);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Delete Template Category',
+      details: {
+        categoryId: id,
+      },
+    });
+
     return jsonSuccess(result);
   });
 };

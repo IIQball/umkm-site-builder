@@ -45,7 +45,7 @@
         {#each activeBadges as badge}
           {@const IconComp = resolveFeatureIcon(badge.icon || 'CheckCircle2') || CheckCircle2}
           <span class="flex items-center gap-1.5">
-            <svelte:component this={IconComp} size={14} class="text-primary" />
+            <svelte:component this={IconComp} size={14} class="text-[var(--theme-secondary,var(--color-secondary))]" />
             <span>{stripEmoji(badge.text)}</span>
           </span>
         {/each}

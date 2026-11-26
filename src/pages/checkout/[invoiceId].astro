@@ -116,12 +116,15 @@ try {
   error = 'Gagal memuat data tagihan';
 }
 
-const isTemplatePurchase = true;
-const checkoutTitle = 'Pembayaran Template';
-const checkoutMetaTitle = `Pembelian Template - ${templateName || 'Pinoka'}`;
-const checkoutDescription = 'Selesaikan pembayaran untuk menerapkan template desain toko UMKM Anda';
-const lineItemTitle = `Pembelian Template "${templateName || 'Desain UMKM'}"`;
-const lineItemSubtitle = 'Desain Template Website UMKM Siap Pakai';
+const isAiCredit = pageData?.status && !pageData?.templateDescription && !templateName;
+const isTemplatePurchase = !isAiCredit;
+const checkoutTitle = isAiCredit ? 'Top Up Kuota Token AI' : 'Pembayaran Template';
+const checkoutMetaTitle = isAiCredit ? 'Top Up Kuota Kredit AI Toko - Pinoka' : `Pembelian Template - ${templateName || 'Pinoka'}`;
+const checkoutDescription = isAiCredit
+  ? 'Selesaikan pembayaran untuk mengisi saldo kredit Studio Visual AI toko Anda'
+  : 'Selesaikan pembayaran untuk menerapkan template desain toko UMKM Anda';
+const lineItemTitle = isAiCredit ? 'Top Up Saldo Kredit AI Toko UMKM' : `Pembelian Template "${templateName || 'Desain UMKM'}"`;
+const lineItemSubtitle = isAiCredit ? 'Kredit Kuota Studio Visual AI (Tanpa Kedaluwarsa)' : 'Desain Template Website UMKM Siap Pakai';
 ---
 
 <BaseLayout title={checkoutMetaTitle} description={checkoutDescription}>

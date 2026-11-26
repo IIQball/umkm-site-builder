@@ -119,15 +119,15 @@
               <svelte:component this={resolveFeatureIcon(item.icon || item.iconName)} size={22} />
             </div>
             {#if item.badge}
-              <span class="inline-block px-2.5 py-0.5 rounded-full text-2xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary);">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-2xs font-heading font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));">
                 {item.badge}
               </span>
             {/if}
           </div>
-          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]" style={itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}>
+          <h3 data-node="feature_title" class="feature-item-title font-heading text-[var(--color-text-main)]" style="font-size: var(--theme-text-h3, var(--text-h3-size, 20px)); font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700)); {itemStyle.color ? `color: ${itemStyle.color} !important;` : ''}">
             {item.title}
           </h3>
-          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans">
+          <p data-node="feature_desc" class="text-body-sm text-[var(--color-text-secondary)] leading-relaxed font-sans" style="font-size: var(--theme-text-body, var(--text-body-size, 16px)); font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400));">
             {item.description}
           </p>
           {#if item.statLabel || item.linkUrl}

@@ -1,11 +1,24 @@
 import { db } from '@/lib/db/client';
-import { transactions, templates, userTemplates, commissions, notifications, users } from '@/db/schema';
+import { transactions, templates, userTemplates, commissions, notifications, users, tenantAiCredits, stores } from '@/db/schema';
 import { calculateCommission } from '@/services/finance/commission.service';
 import { creditWallet } from '@/services/finance/wallet.service';
-import { eq, and, desc, inArray } from 'drizzle-orm';
-import { xenditClient } from '@/lib/finance/xendit';
+import { eq, sql } from 'drizzle-orm';
 import type { TransactionRecord } from '@/types';
+import type { DbExecutor } from '@/types/common/db';
 import { formatIDR } from '@/lib/currency';
+import { logActivity } from '@/services/audit.service';
+import { getCreditPackageByAmount } from '@/services/ai';
+
+export {
+  queryTenantOrders,
+  queryDesignerIncomingOrders,
+  getTransactionByExternalId,
+  formatInvoiceNum,
+  grantFreeTemplate,
+  invoiceUrlCache,
+  fetchInvoiceUrl,
+  expireStalePendingTransactions,
+} from './transactionOrders.helpers';
 
 export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): TransactionRecord {
   return {
@@ -25,11 +38,14 @@ export function mapTransactionToRecord(tx: typeof transactions.$inferSelect): Tr
   };
 }
 
-export async function fulfillPaidTransaction(transaction: typeof transactions.$inferSelect): Promise<void> {
+export async function fulfillPaidTransaction(
+  transaction: typeof transactions.$inferSelect,
+  client: DbExecutor = db
+): Promise<void> {
   if (transaction.type === 'template_purchase' && transaction.templateId) {
     const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     try {
-      await db.insert(userTemplates).values({
+      await client.insert(userTemplates).values({
         id: userTemplateId,
         userId: transaction.userId,
         templateId: transaction.templateId,
@@ -39,7 +55,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       // Ignore duplicate record
     }
 
-    const templateList = await db.select().from(templates).where(eq(templates.id, transaction.templateId)).limit(1);
+    const templateList = await client.select().from(templates).where(eq(templates.id, transaction.templateId)).limit(1);
     if (templateList.length > 0) {
       const template = templateList[0];
       const adminAmount = Number(transaction.adminFee || 0);
@@ -47,7 +63,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
       const { platformFee, designerAmount } = await calculateCommission(baseAmount);
 
       const commissionId = `comm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      await db.insert(commissions).values({
+      await client.insert(commissions).values({
         id: commissionId,
         designerId: template.designerId,
         adminId: transaction.assistedBy || null,
@@ -65,6 +81,7 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         amount: designerAmount,
         description: `Komisi Penjualan Template: ${template.name}`,
         referenceId: transaction.id,
+        tx: client,
       });
 
       if (adminAmount > 0 && transaction.assistedBy) {
@@ -73,19 +90,20 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
           amount: adminAmount,
           description: 'Fee Pendampingan Pembelian Template',
           referenceId: transaction.id,
+          tx: client,
         });
       }
       
       // Send notification to designer
       try {
-        const buyer = await db
+        const buyer = await client
           .select({ name: users.name })
           .from(users)
           .where(eq(users.id, transaction.userId))
           .limit(1);
         const buyerName = buyer.length > 0 && buyer[0].name ? buyer[0].name : 'Seseorang';
         
-        await db.insert(notifications).values({
+        await client.insert(notifications).values({
           id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           userId: template.designerId,
           type: 'template_purchased',
@@ -95,185 +113,100 @@ export async function fulfillPaidTransaction(transaction: typeof transactions.$i
         });
 
         if (transaction.assistedBy) {
-          await db.insert(notifications).values({
+          await client.insert(notifications).values({
             id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
             userId: transaction.userId,
             type: 'template_purchased',
-            title: 'Template Berhasil Dibeli',
-            message: `Admin telah membantu membelikan template "${template.name}" untuk toko Anda.`,
+            title: 'Pembelian Template Berhasil',
+            message: `Admin telah membantu pembelian template "${template.name}" untuk toko Anda. Template kini sudah aktif di dashboard.`,
             metadata: { templateId: template.id, transactionId: transaction.id }
           });
         }
       } catch {
         // Non-blocking notification dispatch
       }
+
+      await logActivity({
+        userId: transaction.userId,
+        action: 'Purchase Template',
+        details: {
+          templateId: template.id,
+          templateName: template.name,
+          amount: transaction.amount,
+          adminFee: adminAmount,
+          assistedBy: transaction.assistedBy || null,
+        },
+      });
     }
-  }
-}
+  } else if (transaction.type === 'ai_credit_purchase' && transaction.userId) {
+    // Handle AI credit purchase fulfillment
+    try {
+      // 1. Resolve exact credits from canonical package by amount
+      const canonicalPkg = getCreditPackageByAmount(Number(transaction.amount));
+      const credits = canonicalPkg ? canonicalPkg.credits : Math.max(1, Math.floor(Number(transaction.amount) / 2500));
+      const packageName = canonicalPkg?.name || 'Paket Kredit AI';
 
-export async function queryTenantOrders(userId: string, limit: number = 10, offset: number = 0) {
-  return db.query.transactions.findMany({
-    where: and(
-      eq(transactions.userId, userId),
-      eq(transactions.type, 'template_purchase')
-    ),
-    columns: {
-      id: true,
-      userId: true,
-      type: true,
-      amount: true,
-      adminFee: true,
-      status: true,
-      storeId: true,
-      templateId: true,
-      assistedBy: true,
-      externalId: true,
-      paymentGatewayRef: true,
-      paymentChannel: true,
-      createdAt: true,
-    },
-    with: {
-      template: {
-        columns: {
-          id: true,
-          name: true,
-          thumbnailUrl: true,
-          price: true,
+      // 2. Resolve storeId
+      let targetStoreId = transaction.storeId;
+      if (!targetStoreId) {
+        const [foundStore] = await client
+          .select({ id: stores.id })
+          .from(stores)
+          .where(eq(stores.userId, transaction.userId))
+          .limit(1);
+        targetStoreId = foundStore?.id || transaction.userId;
+      }
+
+      // 3. Get or update tenant AI credits record
+      const now = new Date();
+      const creditRecordId = `cred_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      await client.insert(tenantAiCredits).values({
+        id: creditRecordId,
+        userId: transaction.userId,
+        tenantId: targetStoreId,
+        balance: credits,
+        totalPurchased: credits,
+        totalUsed: 0,
+        createdAt: now,
+        updatedAt: now,
+      }).onConflictDoUpdate({
+        target: tenantAiCredits.tenantId,
+        set: {
+          userId: transaction.userId,
+          balance: sql`${tenantAiCredits.balance} + ${credits}`,
+          totalPurchased: sql`${tenantAiCredits.totalPurchased} + ${credits}`,
+          updatedAt: now,
         },
-      },
-      assistant: {
-        columns: { id: true, name: true, email: true },
-      },
-    },
-    orderBy: [desc(transactions.createdAt)],
-    limit,
-    offset,
-  });
-}
+      });
 
-export async function queryDesignerIncomingOrders(designerId: string, limit: number = 10, offset: number = 0) {
-  const designerTemplates = await db.query.templates.findMany({
-    where: eq(templates.designerId, designerId),
-    columns: { id: true },
-  });
+      // 4. Send notification & audit log
+      try {
+        await client.insert(notifications).values({
+          id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          userId: transaction.userId,
+          type: 'quota_upgrade_request',
+          title: 'Kredit AI Berhasil Ditambahkan',
+          message: `Pembelian ${packageName} berhasil! Saldo ${credits} kredit AI telah ditambahkan dan siap digunakan.`,
+          metadata: { credits, packageName, transactionId: transaction.id, amount: transaction.amount }
+        });
+      } catch {
+        // Non-blocking notification dispatch
+      }
 
-  if (!designerTemplates.length) return [];
-
-  const templateIds = designerTemplates.map((t: { id: string }) => t.id);
-
-  return db.query.transactions.findMany({
-    where: and(
-      inArray(transactions.templateId, templateIds),
-      eq(transactions.type, 'template_purchase')
-    ),
-    columns: {
-      id: true,
-      userId: true,
-      type: true,
-      amount: true,
-      adminFee: true,
-      status: true,
-      storeId: true,
-      templateId: true,
-      assistedBy: true,
-      externalId: true,
-      paymentGatewayRef: true,
-      paymentChannel: true,
-      createdAt: true,
-    },
-    with: {
-      template: {
-        columns: {
-          id: true,
-          name: true,
-          thumbnailUrl: true,
-          price: true,
+      await logActivity({
+        userId: transaction.userId,
+        storeId: transaction.storeId || null,
+        action: 'Purchase AI Credit',
+        details: {
+          transactionId: transaction.id,
+          amount: transaction.amount,
+          credits,
+          paymentChannel: transaction.paymentChannel || null,
         },
-      },
-      user: {
-        columns: { id: true, name: true, email: true, image: true },
-      },
-      commission: {
-        columns: {
-          id: true,
-          designerAmount: true,
-          platformFee: true,
-          totalAmount: true,
-        },
-      },
-    },
-    orderBy: [desc(transactions.createdAt)],
-    limit,
-    offset,
-  });
-}
-export async function getTransactionByExternalId(externalId: string) {
-  const query = db.select().from(transactions).where(eq(transactions.externalId, externalId));
-  const hasLimit = 'limit' in query && typeof (query as { limit?: (n: number) => Promise<unknown> }).limit === 'function';
-  const rawResults = hasLimit ? await (query as { limit: (n: number) => Promise<unknown[]> }).limit(1) : await query;
-  const results = Array.isArray(rawResults) ? rawResults : [];
-  return (results[0] as typeof transactions.$inferSelect) || null;
-}
-
-export function formatInvoiceNum(userId: string, idempotencyKey?: string | null): { cleanKey: string | null; invoiceNum: string } {
-  const cleanKey = idempotencyKey?.trim() || null;
-  const invoiceNum = cleanKey
-    ? (cleanKey.startsWith('INV-') ? cleanKey : `INV-${cleanKey}`)
-    : `INV-${userId}-${Date.now()}`;
-  return { cleanKey, invoiceNum };
-}
-
-export async function grantFreeTemplate(
-  userId: string,
-  buyerName: string,
-  template: { id: string; designerId: string; name: string },
-  assistedBy?: string | null
-): Promise<{ isFree: true; message: string }> {
-  const userTemplateId = `utpl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-  await db.insert(userTemplates).values({
-    id: userTemplateId,
-    userId,
-    templateId: template.id,
-    acquiredAt: new Date(),
-  });
-
-  await db.insert(notifications).values({
-    id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    userId: template.designerId,
-    type: 'template_purchased',
-    title: 'Template Diunduh',
-    message: `${buyerName} telah mengunduh template gratis Anda "${template.name}".`,
-    metadata: { templateId: template.id },
-  });
-
-  if (assistedBy) {
-    await db.insert(notifications).values({
-      id: `notif_${Date.now()}_tenant_${Math.random().toString(36).slice(2, 7)}`,
-      userId,
-      type: 'template_purchased',
-      title: 'Template Berhasil Diunduh',
-      message: `Admin telah membantu mengunduh template gratis "${template.name}" untuk toko Anda.`,
-      metadata: { templateId: template.id },
-    });
-  }
-
-  return { isFree: true, message: 'Free template added to your account successfully' };
-}
-
-export const invoiceUrlCache = new Map<string, string>();
-
-export async function fetchInvoiceUrl(externalId: string): Promise<string | null> {
-  try {
-    if (invoiceUrlCache.has(externalId)) return invoiceUrlCache.get(externalId) || null;
-
-    const tx = await getTransactionByExternalId(externalId);
-    if (!tx?.paymentGatewayRef) return null;
-
-    const xenditInvoice = await xenditClient.getInvoice(tx.paymentGatewayRef);
-    const invoiceUrl = xenditInvoice.invoiceUrl || null;
-    if (invoiceUrl) invoiceUrlCache.set(externalId, invoiceUrl);
-    return invoiceUrl;
-  } catch {
-    return null;
+      });
+    } catch (error) {
+      console.error('[FULFILL_CREDIT_PURCHASE] error:', error);
+      throw error;
+    }
   }
 }

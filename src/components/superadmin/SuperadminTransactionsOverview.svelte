@@ -1,7 +1,7 @@
 <script lang="ts">
   import PeriodFilter from '@/components/common/PeriodFilter.svelte';
   import { StatCard } from '@/components/ui';
-  import OrderHistoryTable from '@/components/dashboard/OrderHistoryTable.svelte';
+  import OrderHistoryTable from '@/components/tenant/orders/OrderHistoryTable.svelte';
   import { filterByPeriod, computeAvailableYears } from '@/lib/utils/format';
   import { formatSmartIDR } from '@/lib/currency';
   import type { OrderTransactionItem } from '@/types/finance';

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { handleApiRoute, validate, AppError } from '@/lib/utils';
+import { handleApiRoute, validate, AppError, jsonSuccess } from '@/lib/utils';
 import { transactionService } from '@/services';
 import { TemplatePurchaseInputSchema } from '@/schemas';
 import { extractIdempotencyKey } from '@/lib/finance/idempotency';
@@ -13,6 +13,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     }
     if (user.status !== 'active') {
       throw new AppError('Account is suspended', 403);
+    }
+    if (user.role !== 'tenant' && user.role !== 'admin') {
+      throw new AppError('Hanya akun merchant (tenant) dan admin pendamping yang dapat membeli template', 403, undefined, 'FORBIDDEN_ROLE');
     }
 
     const body = await context.request.json().catch(() => ({}));
@@ -27,13 +30,12 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     let targetUserId = user.id;
     let actingAssistedBy: string | null = null;
 
-    if (user.role === 'admin' || user.role === 'superadmin') {
-      if (tenantId) {
-        targetUserId = tenantId;
-        actingAssistedBy = assistedBy || user.id;
-      } else if (assistedBy) {
-        actingAssistedBy = assistedBy;
+    if (user.role === 'admin') {
+      if (!tenantId) {
+        throw new AppError('Admin wajib memilih merchant binaan untuk pembelian template', 400, undefined, 'TENANT_REQUIRED');
       }
+      targetUserId = tenantId;
+      actingAssistedBy = assistedBy || user.id;
     }
 
     const result = await transactionService.purchaseTemplate(
@@ -45,18 +47,9 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     );
 
     if (result.isFree) {
-      return Response.json({
-        success: true,
-        ok: true,
-        isFree: true,
-        message: result.message,
-      });
+      return jsonSuccess({ isFree: true }, 200, result.message);
     }
 
-    return Response.json({
-      success: true,
-      ok: true,
-      data: result.data,
-    });
+    return jsonSuccess(result.data, 200, 'Invoice pembelian template berhasil dibuat');
   });
 };

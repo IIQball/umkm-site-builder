@@ -75,7 +75,12 @@ const matrix: PermissionMatrix = {
   platform_settings: {
     read: ['superadmin', 'admin'],
     update: ['superadmin'],
-  }
+  },
+  bug_reports: {
+    create: ['superadmin', 'admin', 'designer', 'tenant', 'public'],
+    read: ['superadmin'],
+    update: ['superadmin'],
+  },
 };
 
 /**

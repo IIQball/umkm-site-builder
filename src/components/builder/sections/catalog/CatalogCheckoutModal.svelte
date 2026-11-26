@@ -24,6 +24,7 @@
     name: '',
     phone: '',
     address: '',
+    delivery: 'Kurir Toko / Pengantaran Langsung',
     notes: '',
   };
   export let onBackToCatalog: () => void;
@@ -56,12 +57,12 @@
     <Button
       variant="ghost"
       size="icon"
-      class="rounded-full hover:scale-105 active:scale-95 transition-all text-slate-600"
+      class="rounded-full hover:scale-105 active:scale-95 transition-all text-base-content/70"
       on:click={onBackToCatalog}
     >
       <ArrowLeft size={20} />
     </Button>
-    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+    <h2 class="text-xl sm:text-2xl font-bold text-base-content tracking-tight">
       Selesaikan Pesanan Anda
     </h2>
   </div>
@@ -156,7 +157,7 @@
           <div class="mt-8 pt-6 border-t border-base-200 flex justify-between items-end">
             <span class="font-bold text-base-content">Total Harga</span>
             <div class="text-right">
-              <p class="text-2xl font-black font-mono text-[var(--theme-primary, var(--color-primary))] tracking-tight">
+              <p class="text-2xl font-black font-mono text-[var(--theme-primary,#2563eb)] tracking-tight">
                 {formatIDR(cartTotal)}
               </p>
               <p class="text-[10px] text-base-content/50 mt-1">
@@ -199,6 +200,22 @@
           </div>
 
           <div>
+            <label for="form-delivery" class="text-xs font-bold text-base-content block mb-1.5 font-heading">
+              Pilihan Pengiriman <span class="text-error">*</span>
+            </label>
+            <select
+              id="form-delivery"
+              bind:value={form.delivery}
+              class="w-full px-3.5 py-2.5 rounded-xl border border-base-300 bg-base-100 text-base-content text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+            >
+              <option value="Kurir Toko / Pengantaran Langsung">Kurir Toko / Pengantaran Langsung</option>
+              <option value="Ambil Sendiri di Toko (Self Pick-up)">Ambil Sendiri di Toko (Self Pick-up)</option>
+              <option value="Ekspedisi Reguler (JNE, J&T, SiCepat)">Ekspedisi Reguler (JNE, J&T, SiCepat)</option>
+              <option value="Ojek Online / Instan (GoSend, GrabExpress)">Ojek Online / Instan (GoSend, GrabExpress)</option>
+            </select>
+          </div>
+
+          <div>
             <Textarea
               id="form-address"
               label="Alamat Lengkap"
@@ -227,7 +244,7 @@
             on:click={onCheckout}
           >
             <WhatsAppIcon size={18} />
-            <span class="sm:hidden text-[13px] whitespace-nowrap">Pesan via WA</span>
+            <span class="sm:hidden text-xs whitespace-nowrap">Pesan via WA</span>
             <span class="hidden sm:inline">Kirim Pesanan via WhatsApp</span>
           </Button>
         </div>

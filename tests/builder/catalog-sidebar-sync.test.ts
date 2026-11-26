@@ -7,14 +7,14 @@ import {
   getEffectiveCatalogElementOrder,
   CATALOG_PRESET_SLOTS,
 } from '@/components/builder/sections/catalog/catalogLayout.helpers';
-import { DEFAULT_DEMO_PRODUCTS } from '@/components/builder/sections/productCatalog.helpers';
+import { DEFAULT_DEMO_PRODUCTS } from '@/components/builder/sections/catalog/productCatalog.helpers';
 import { applyDeleteNode, applyAddNode } from '@/components/builder/stores/editorStore.mutations';
 import type { DocumentState } from '@/components/builder/stores/editorStore.types';
 
 describe('Catalog Sidebar Sync (Left LAPISAN vs Right Tata Letak Inspector)', () => {
   const presets = Object.keys(CATALOG_PRESET_SLOTS);
 
-  it('all 20 catalog presets have matching slot counts and 1:1 Bahasa Indonesia labels in left and right sidebars', () => {
+  it('all 10 catalog presets have matching slot counts and 1:1 Bahasa Indonesia labels in left and right sidebars', () => {
     for (const preset of presets) {
       const defaultSlots = getDefaultCatalogSlots(preset, DEFAULT_DEMO_PRODUCTS);
       const section: TemplateSection = {
@@ -87,14 +87,14 @@ describe('Catalog Sidebar Sync (Left LAPISAN vs Right Tata Letak Inspector)', ()
     expect(leftNames).toContain('Deskripsi Subjudul');
   });
 
-  it('single_product_deep_focus includes deep description and CTA in both sidebars', () => {
-    const defaultSlots = getDefaultCatalogSlots('single_product_deep_focus', DEFAULT_DEMO_PRODUCTS);
+  it('split_category_sidebar includes category filter in both sidebars', () => {
+    const defaultSlots = getDefaultCatalogSlots('split_category_sidebar', DEFAULT_DEMO_PRODUCTS);
     const section: TemplateSection = {
-      id: 'cat-single',
+      id: 'cat-sidebar',
       type: 'product_catalog',
-      layoutPreset: 'single_product_deep_focus',
+      layoutPreset: 'split_category_sidebar',
       props: {
-        layoutPreset: 'single_product_deep_focus',
+        layoutPreset: 'split_category_sidebar',
         products: DEFAULT_DEMO_PRODUCTS,
         elementOrder: [...defaultSlots],
       },
@@ -103,8 +103,8 @@ describe('Catalog Sidebar Sync (Left LAPISAN vs Right Tata Letak Inspector)', ()
     const leftNodes = getSectionNodes(section);
     const leftNames = leftNodes.map((n) => n.name);
 
-    expect(leftNames).toContain('Deskripsi Manfaat Produk Unggulan');
-    expect(leftNames).toContain('Tombol Pesan WhatsApp');
+    expect(leftNames).toContain('Bilah Filter Kategori');
+    expect(leftNames).toContain('Judul Utama (H2)');
   });
 
   it('deleting a product item removes it from products list and elementOrder', () => {

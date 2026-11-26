@@ -16,6 +16,7 @@ import type {
   ExistingStoreData,
   RegionData,
 } from "@/components/onboarding/onboarding.types";
+import { DEFAULT_TEMPLATE_ID } from "@/schemas";
 
 const user = await getAuthenticatedUser(Astro.request);
 if (!user) return Astro.redirect("/auth/login");
@@ -190,6 +191,32 @@ if (availableTemplates.length === 0) {
     .limit(3);
 
   availableTemplates = anyTemplates;
+}
+
+// Ensure default universal template is always present at top for new store setups
+if (!store?.templateId) {
+  const [defaultTpl] = await db
+    .select({ ...templateSelectShape, isOwned: sql<boolean>`true` })
+    .from(templates)
+    .leftJoin(
+      templateCategories,
+      eq(templates.categoryId, templateCategories.id),
+    )
+    .where(
+      and(
+        eq(templates.id, DEFAULT_TEMPLATE_ID),
+        eq(templates.status, "approved"),
+        isNull(templates.deletedAt),
+      ),
+    )
+    .limit(1);
+
+  if (defaultTpl) {
+    availableTemplates = [
+      defaultTpl,
+      ...availableTemplates.filter((t) => t.id !== defaultTpl.id),
+    ];
+  }
 }
 
 const pageTitle = isEdit

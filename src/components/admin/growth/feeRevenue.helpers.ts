@@ -11,10 +11,12 @@ export function calculateFeeRevenueGrowth(
   filterOrMonthsOrRef: GrowthFilter | number | Date = 12,
   refDateArg: Date = new Date()
 ): FeeRevenueSummary {
+  let refDate = refDateArg;
   let targetYear = refDateArg.getFullYear();
   let targetMonth: number | 'all' = 'all';
 
   if (filterOrMonthsOrRef instanceof Date) {
+    refDate = filterOrMonthsOrRef;
     targetYear = filterOrMonthsOrRef.getFullYear();
     targetMonth = 'all';
   } else if (typeof filterOrMonthsOrRef === 'number') {
@@ -68,8 +70,8 @@ export function calculateFeeRevenueGrowth(
       });
     }
 
-    const currentYear = new Date().getFullYear();
-    activeIdx = targetYear === currentYear ? new Date().getMonth() : 11;
+    const currentYear = refDate.getFullYear();
+    activeIdx = targetYear === currentYear ? refDate.getMonth() : 11;
   } else {
     const monthIndex = targetMonth - 1;
     const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
@@ -105,10 +107,10 @@ export function calculateFeeRevenueGrowth(
       });
     }
 
-    const currentYear = new Date().getFullYear();
-    const currentMonthIndex = new Date().getMonth();
+    const currentYear = refDate.getFullYear();
+    const currentMonthIndex = refDate.getMonth();
     if (targetYear === currentYear && monthIndex === currentMonthIndex) {
-      activeIdx = Math.min(new Date().getDate() - 1, daysInMonth - 1);
+      activeIdx = Math.min(refDate.getDate() - 1, daysInMonth - 1);
     } else {
       activeIdx = daysInMonth - 1;
     }

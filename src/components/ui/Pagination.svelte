@@ -55,11 +55,21 @@
     return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
   })();
 
-  const btnSizeClass = size === 'xs' ? 'btn-xs text-2xs min-h-[28px] h-7' : size === 'md' ? 'btn-md text-sm min-h-[40px] h-10' : 'btn-sm text-xs min-h-[32px] h-8';
+  const btnSizeClass = size === 'xs'
+    ? 'min-w-[28px] h-7 text-2xs px-1.5'
+    : size === 'md'
+    ? 'min-w-[40px] h-10 text-sm px-3'
+    : 'min-w-[34px] h-8.5 text-xs px-2.5';
+
+  const navBtnSizeClass = size === 'xs'
+    ? 'w-7 h-7 text-xs'
+    : size === 'md'
+    ? 'w-10 h-10 text-base'
+    : 'w-8.5 h-8.5 text-sm';
 </script>
 
 {#if totalItems > 0}
-  <div class="px-6 py-4 border-t border-light flex flex-col sm:flex-row items-center justify-between gap-3 {className}">
+  <div class="px-6 py-4 border-t border-light flex flex-col sm:flex-row items-center justify-between gap-4 {className}">
     <!-- Info Text -->
     {#if showInfo}
       <p class="text-xs text-secondary font-medium">
@@ -69,13 +79,13 @@
       <div></div>
     {/if}
 
-    <!-- DaisyUI Pagination Join Group -->
+    <!-- Pagination Controls (Clean Flex layout, no squishing) -->
     {#if totalPages > 1}
-      <div class="join border border-light rounded-xl overflow-hidden shadow-2xs">
+      <div class="inline-flex items-center gap-1.5 p-1 rounded-2xl bg-nested/60 border border-light shadow-2xs">
         <!-- Prev Button -->
         <button
           type="button"
-          class="join-item btn {btnSizeClass} bg-nested hover:bg-nested/80 border-0 text-main font-bold disabled:opacity-35 disabled:bg-nested/50 cursor-pointer"
+          class="{navBtnSizeClass} rounded-xl flex items-center justify-center font-bold text-secondary hover:text-main hover:bg-card border border-transparent hover:border-light transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shrink-0"
           disabled={currentPage <= 1}
           on:click={() => goToPage(currentPage - 1)}
           aria-label="Halaman Sebelumnya"
@@ -86,16 +96,17 @@
         <!-- Page Numbers -->
         {#each pages as p}
           {#if p === '...'}
-            <button
-              type="button"
-              class="join-item btn {btnSizeClass} btn-disabled bg-nested/60 border-0 text-muted cursor-default select-none font-mono"
+            <span
+              class="{navBtnSizeClass} flex items-center justify-center text-muted font-mono font-bold select-none shrink-0"
             >
               ...
-            </button>
+            </span>
           {:else}
             <button
               type="button"
-              class="join-item btn {btnSizeClass} border-0 font-mono font-bold cursor-pointer transition-all {currentPage === p ? 'bg-main text-canvas dark:bg-primary dark:text-white shadow-inner' : 'bg-nested hover:bg-nested/80 text-main'}"
+              class="{btnSizeClass} rounded-xl font-mono font-bold transition-all shrink-0 cursor-pointer flex items-center justify-center {currentPage === p
+                ? 'bg-primary text-white shadow-xs border border-primary'
+                : 'text-secondary hover:text-main hover:bg-card border border-transparent hover:border-light'}"
               on:click={() => goToPage(Number(p))}
               aria-current={currentPage === p ? 'page' : undefined}
             >
@@ -107,7 +118,7 @@
         <!-- Next Button -->
         <button
           type="button"
-          class="join-item btn {btnSizeClass} bg-nested hover:bg-nested/80 border-0 text-main font-bold disabled:opacity-35 disabled:bg-nested/50 cursor-pointer"
+          class="{navBtnSizeClass} rounded-xl flex items-center justify-center font-bold text-secondary hover:text-main hover:bg-card border border-transparent hover:border-light transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shrink-0"
           disabled={currentPage >= totalPages}
           on:click={() => goToPage(currentPage + 1)}
           aria-label="Halaman Selanjutnya"

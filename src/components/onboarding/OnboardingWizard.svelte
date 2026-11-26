@@ -22,6 +22,7 @@
     createDefaultContentCustomization, extractContentCustomizationFromStore,
     buildTemplateCustomizationPayload,
   } from './wizard/content/contentCustomization.helpers';
+  import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
   export let categories: Array<{ id: string; name: string }> = [];
   export let templates: TemplateItem[] = [];
@@ -32,7 +33,6 @@
 
   type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
-  // Wizard Form State
   let currentStep: OnboardingStep = 1;
   let subdomain = '', subdomainStatus: ValidationStatus = 'idle', subdomainMessage = '';
   let debounceTimer: ReturnType<typeof setTimeout>;
@@ -55,7 +55,7 @@
       googleMapsUrl = existingStore.googleMapsUrl || '';
       address = existingStore.address || '';
       if (existingStore.regionData) regionData = { ...DEFAULT_REGION, ...existingStore.regionData };
-      selectedTemplateId = existingStore.templateId || (templates[0]?.id ?? '');
+      selectedTemplateId = existingStore.templateId || (templates.find((t) => t.id === DEFAULT_TEMPLATE_ID)?.id ?? templates[0]?.id ?? DEFAULT_TEMPLATE_ID);
       isOpen = existingStore.isOpen !== false;
       waCheckoutTemplate = existingStore.waCheckoutTemplate || DEFAULT_WA_CHECKOUT_TEMPLATE;
       const mapsCust = (existingStore.customization?.maps as any) || (existingStore.customization as any) || {};
@@ -78,14 +78,14 @@
       address = state.address || '';
       if (state.branchMode) branchMode = state.branchMode;
       if (Array.isArray(state.branches)) branches = state.branches;
-      selectedTemplateId = state.selectedTemplateId || '';
+      selectedTemplateId = state.selectedTemplateId || DEFAULT_TEMPLATE_ID;
       if (state.regionData) regionData = state.regionData;
       subdomainStatus = state.subdomainStatus || 'idle';
       subdomainMessage = state.subdomainMessage || '';
       if (state.contentCustomization) contentCustomization = state.contentCustomization;
       if (address && contentCustomization?.footer) contentCustomization.footer.address = address;
     }
-    if (!selectedTemplateId && templates.length > 0) selectedTemplateId = templates[0].id;
+    if (!selectedTemplateId) selectedTemplateId = DEFAULT_TEMPLATE_ID;
   });
 
   function saveState() {
@@ -107,31 +107,12 @@
     if (!input) return;
     subdomain = input.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     clearTimeout(debounceTimer);
-    if (checkAbortCtrl) {
-      checkAbortCtrl.abort();
-      checkAbortCtrl = null;
-    }
-    if (!subdomain) {
-      subdomainStatus = 'idle';
-      subdomainMessage = '';
-      return;
-    }
-    if (subdomain.length < 3) {
-      subdomainStatus = 'typing';
-      subdomainMessage = 'Ketik minimal 3 karakter...';
-      return;
-    }
-    if (subdomain.endsWith('-')) {
-      subdomainStatus = 'typing';
-      subdomainMessage = 'Lanjutkan mengetik setelah tanda hubung (-)...';
-      return;
-    }
+    if (checkAbortCtrl) { checkAbortCtrl.abort(); checkAbortCtrl = null; }
+    if (!subdomain) { subdomainStatus = 'idle'; subdomainMessage = ''; return; }
+    if (subdomain.length < 3) { subdomainStatus = 'typing'; subdomainMessage = 'Ketik minimal 3 karakter...'; return; }
+    if (subdomain.endsWith('-')) { subdomainStatus = 'typing'; subdomainMessage = 'Lanjutkan mengetik setelah tanda hubung (-)...'; return; }
     const localErr = validateSubdomainLocally(subdomain);
-    if (localErr) {
-      subdomainStatus = 'invalid';
-      subdomainMessage = localErr;
-      return;
-    }
+    if (localErr) { subdomainStatus = 'invalid'; subdomainMessage = localErr; return; }
     subdomainStatus = 'typing';
     subdomainMessage = 'Mengetik...';
 
@@ -178,6 +159,9 @@
     } else if (currentStep === 3) {
       currentStep = 4;
       saveState();
+    } else if (currentStep === 4) {
+      if (isEdit) handleEditSubmit();
+      else handleOnboardSubmit();
     }
   }
 
@@ -196,7 +180,7 @@
     const res = await submitOnboardStore({
       subdomain, name: storeName.trim(), categoryId, waNumber: waNumber.trim(),
       googleMapsUrl: googleMapsUrl.trim(), address, regionData,
-      templateId: selectedTemplateId, tenantId, customization: custPayload,
+      templateId: selectedTemplateId || DEFAULT_TEMPLATE_ID, tenantId, customization: custPayload,
     });
 
     if (!res.ok) {
@@ -268,7 +252,7 @@
           bind:isOpen bind:waCheckoutTemplate {submitStatus} {submitError}
           {categories} {storeName} {waNumber} {address} {googleMapsUrl}
           {branchMode} {branches} customization={contentCustomization}
-          onPrev={prevStep} onSave={handleEditSubmit} onNext={nextStep}
+          onPrev={prevStep} onNext={nextStep} onSave={handleEditSubmit}
         />
       {:else}
         <OnboardingStepTemplate

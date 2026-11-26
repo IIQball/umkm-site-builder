@@ -1,16 +1,14 @@
 <script lang="ts">
   import type { TestimonialsProps, SectionStyles, TestimonialItem } from '@/types';
   import './testimonials/testimonials.css';
-  import { DEFAULT_TESTIMONIALS, DEFAULT_CLIENT_LOGOS } from './testimonials/testimonials.helpers';
+  import { DEFAULT_TESTIMONIALS } from './testimonials/testimonials.helpers';
   import TestimonialsHeader from './testimonials/TestimonialsHeader.svelte';
   import TestimonialsMasonryGrid from './testimonials/TestimonialsMasonryGrid.svelte';
   import TestimonialsSpotlight from './testimonials/TestimonialsSpotlight.svelte';
   import TestimonialsChatBubble from './testimonials/TestimonialsChatBubble.svelte';
   import TestimonialsMarquee from './testimonials/TestimonialsMarquee.svelte';
-  import TestimonialsVideoCards from './testimonials/TestimonialsVideoCards.svelte';
   import TestimonialsSocialCards from './testimonials/TestimonialsSocialCards.svelte';
   import TestimonialsSideBySide from './testimonials/TestimonialsSideBySide.svelte';
-  import TestimonialsLogoCloud from './testimonials/TestimonialsLogoCloud.svelte';
   import TestimonialsSplitStats from './testimonials/TestimonialsSplitStats.svelte';
   import TestimonialsCarouselSlider from './testimonials/TestimonialsCarouselSlider.svelte';
 
@@ -34,7 +32,6 @@
   $: title = (props?.title as string) || (props?.heading as string) || 'Kata Mereka yang Sudah Mencoba';
   $: subtitle = (props?.subtitle as string) || 'Kepuasan rasa dan kualitas produk adalah prioritas utama kami.';
   $: badgeText = (props?.badgeText as string) || 'Ulasan Pembeli';
-  $: logos = ((props?.logos as any) || DEFAULT_CLIENT_LOGOS);
   $: nodeStyles = (props?.nodeStyles || {}) as Record<string, Record<string, string>>;
   $: effectiveOrder = getEffectiveTestimonialsElementOrder(
     activePreset,
@@ -57,8 +54,7 @@
     getSlotOrder('testimonials_grid'),
     getSlotOrder('testi_item_0'),
     getSlotOrder('testi_stats'),
-    getSlotOrder('testi_slider_track'),
-    getSlotOrder('testi_logo_cloud')
+    getSlotOrder('testi_slider_track')
   );
 </script>
 
@@ -87,14 +83,10 @@
       <TestimonialsChatBubble {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'infinite_marquee_scroll'}
       <TestimonialsMarquee {sectionId} {testimonials} {nodeStyles} />
-    {:else if activePreset === 'video_review_cards'}
-      <TestimonialsVideoCards {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'social_post_cards'}
       <TestimonialsSocialCards {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'side_by_side_3_cards'}
       <TestimonialsSideBySide {sectionId} {testimonials} {nodeStyles} />
-    {:else if activePreset === 'logo_client_cloud'}
-      <TestimonialsLogoCloud {sectionId} {logos} {nodeStyles} />
     {:else if activePreset === 'split_rating_stats'}
       <TestimonialsSplitStats {sectionId} {testimonials} {nodeStyles} />
     {:else if activePreset === 'carousel_slider'}

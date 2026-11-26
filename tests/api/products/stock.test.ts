@@ -65,7 +65,7 @@ describe('PATCH /api/products/[id]/stock', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data.success).toBe(true);
     expect(data.data.isAvailable).toBe(false);
   });
 

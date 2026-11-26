@@ -63,7 +63,7 @@
   >
     <div
       class="flex items-center gap-2.5 font-heading"
-      style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
+      style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
     >
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
       <span class="font-bold text-emerald-600 dark:text-emerald-400 tracking-wide">{storeHoursStatus}</span>
@@ -79,7 +79,7 @@
         target="_blank"
         rel="noreferrer"
         class="inline-flex items-center gap-1.5 text-[var(--theme-primary,var(--color-primary))] hover:underline font-semibold transition-colors font-heading"
-        style="font-size: var(--theme-text-body, var(--text-body-size, 14px));"
+        style="font-size: var(--theme-text-body, var(--text-body-size, 16px));"
       >
         <MessageCircle size={13} />
         <span>Tanya Antrian via WhatsApp →</span>

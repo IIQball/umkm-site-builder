@@ -31,7 +31,7 @@
         <h3 class="text-heading-sm sm:text-heading-md text-main font-bold font-heading leading-tight">
           Pertumbuhan Merchant
         </h3>
-        <p class="text-body-xs text-secondary mt-0.5 font-sans">
+        <p class="text-xs text-secondary mt-0.5 font-sans">
           {growthData.periodLabel ? `Tren pendaftaran merchant (${growthData.periodLabel})` : 'Tren pendaftaran merchant baru'}
         </p>
       </div>

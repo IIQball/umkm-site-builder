@@ -16,8 +16,8 @@
   export let imageFrame: 'none' | 'card' | 'grid' = 'none';
   export let imageShape: 'rounded' | 'square' | 'circle' | 'squircle' = 'rounded';
   export let activeNodeId: string | null = null;
-  export let selectNode: (e: MouseEvent, key: string) => void = () => {};
-  export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
+  export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
+  export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta', 'image'];
 
   $: isImageActive =

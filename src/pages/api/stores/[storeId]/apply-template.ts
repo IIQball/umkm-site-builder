@@ -4,6 +4,7 @@ import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler'
 import { validate } from '@/lib/utils/validation';
 import { validateTemplateOwnership, applyTemplateToStore } from '@/services/store-template.service';
 import { migrateTemplateConfig } from '@/lib/templates';
+import { logActivity } from '@/services/audit.service';
 import { z } from 'zod';
 
 const ApplyTemplateSchema = z.object({
@@ -17,7 +18,7 @@ export const POST: APIRoute = async ({ params, request }) => {
       return jsonError('Silakan login terlebih dahulu', 401);
     }
 
-    if (user.role !== 'tenant' && user.role !== 'admin' && user.role !== 'superadmin') {
+    if (user.role !== 'tenant' && user.role !== 'admin') {
       return jsonError('Hanya tenant atau admin pendamping yang dapat menerapkan template', 403);
     }
 
@@ -41,6 +42,16 @@ export const POST: APIRoute = async ({ params, request }) => {
     // Terapkan template ke store menggunakan service layer dengan config yang termigrasi
     const migratedConfig = migrateTemplateConfig(result.template.config);
     await applyTemplateToStore(storeId, templateId, migratedConfig, user.id);
+
+    await logActivity({
+      userId: user.id,
+      storeId,
+      action: 'Apply Template',
+      details: {
+        templateId,
+        templateName: result.template.name,
+      },
+    });
 
     return jsonSuccess({
       storeId,

@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import CommissionSettingsPanel from '@/components/admin/CommissionSettingsPanel.svelte';
+import CommissionSettingsPanel from '@/components/superadmin/platform-settings/CommissionSettingsPanel.svelte';
 import { getAuthenticatedUser, isAuthorizedSuperAdmin } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { platformSettings } from '@/db/schema';
@@ -21,6 +21,8 @@ let initialSettlementDelayDays = 7;
 let initialAdminServiceFee = 5000;
 let initialMaxStoreBranches = 5;
 let initialMaxTemplateRevisions = 3;
+let initialContactPhone = '085736653639';
+let initialContactEmail = 'support@pinoka.id';
 
 try {
   const records = await db
@@ -30,6 +32,8 @@ try {
       adminServiceFee: platformSettings.adminServiceFee,
       maxStoreBranches: platformSettings.maxStoreBranches,
       maxTemplateRevisions: platformSettings.maxTemplateRevisions,
+      contactPhone: platformSettings.contactPhone,
+      contactEmail: platformSettings.contactEmail,
     })
     .from(platformSettings)
     .limit(1);
@@ -49,6 +53,12 @@ try {
     if (typeof records[0].maxTemplateRevisions === 'number') {
       initialMaxTemplateRevisions = records[0].maxTemplateRevisions;
     }
+    if (typeof records[0].contactPhone === 'string' && records[0].contactPhone) {
+      initialContactPhone = records[0].contactPhone;
+    }
+    if (typeof records[0].contactEmail === 'string' && records[0].contactEmail) {
+      initialContactEmail = records[0].contactEmail;
+    }
   }
 } catch {
   initialFeePercentage = 30;
@@ -56,6 +66,8 @@ try {
   initialAdminServiceFee = 5000;
   initialMaxStoreBranches = 5;
   initialMaxTemplateRevisions = 3;
+  initialContactPhone = '085736653639';
+  initialContactEmail = 'support@pinoka.id';
 }
 ---
 
@@ -68,6 +80,8 @@ try {
       {initialAdminServiceFee}
       {initialMaxStoreBranches}
       {initialMaxTemplateRevisions}
+      {initialContactPhone}
+      {initialContactEmail}
     />
   </div>
 </DashboardLayout>

@@ -20,8 +20,8 @@ describe('Admin Merchant Template Purchase & Checkout Flow', () => {
 
       expect(res.status).toBe(400);
       const data = await res.json();
-      expect(data.ok).toBe(false);
-      expect(data.error.message).toContain('Missing invoice ID');
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('Missing invoice ID');
     });
 
     it('returns 404 when transaction is not found', async () => {
@@ -34,8 +34,8 @@ describe('Admin Merchant Template Purchase & Checkout Flow', () => {
 
       expect(res.status).toBe(404);
       const data = await res.json();
-      expect(data.ok).toBe(false);
-      expect(data.error.message).toContain('Transaction not found');
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('Transaction not found');
     });
 
     it('returns transaction details including adminFee and baseAmount for assisted purchases', async () => {
@@ -60,7 +60,7 @@ describe('Admin Merchant Template Purchase & Checkout Flow', () => {
 
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(data.data.invoiceId).toBe('INV-tenant_1-12345');
       expect(data.data.amount).toBe(55000);
       expect(data.data.adminFee).toBe(5000);
@@ -88,7 +88,7 @@ describe('Admin Merchant Template Purchase & Checkout Flow', () => {
 
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(data.data.amount).toBe(75000);
       expect(data.data.adminFee).toBe(0);
       expect(data.data.baseAmount).toBe(75000);

@@ -254,3 +254,32 @@ export async function getStoreTrafficSeries(
     };
   });
 }
+
+export async function getAllStoreTrafficHistory(
+  storeId: string,
+): Promise<TrafficPoint[]> {
+  const rows = await db
+    .select({
+      date: storeDailyStats.date,
+      views: storeDailyStats.views,
+      waClicks: storeDailyStats.waClicks,
+    })
+    .from(storeDailyStats)
+    .where(eq(storeDailyStats.storeId, storeId));
+
+  return rows
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((r) => {
+      const parts = r.date.split("-").map(Number);
+      const m = parts[1];
+      const d = parts[2];
+      return {
+        key: r.date,
+        label: `${d} ${ID_MONTHS[m - 1]}`,
+        views: r.views,
+        waClicks: r.waClicks,
+        conversion: toConversion(r.views, r.waClicks),
+      };
+    });
+}
+

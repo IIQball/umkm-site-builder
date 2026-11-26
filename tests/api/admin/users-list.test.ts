@@ -86,7 +86,7 @@ describe('GET /api/admin/users', () => {
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.ok).toBe(true);
+    expect(json.success).toBe(true);
     expect(json.data).toHaveLength(1);
     expect(json.data[0].status).toBe('active');
   });

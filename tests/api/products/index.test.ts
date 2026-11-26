@@ -35,7 +35,7 @@ describe('Products API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
       expect(data.data).toEqual(mockProducts);
     });
 
@@ -46,7 +46,7 @@ describe('Products API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.ok).toBe(false);
+      expect(data.success).toBe(false);
     });
   });
 
@@ -103,7 +103,7 @@ describe('Products API', () => {
 
       expect(response.status).toBe(201);
       const data = await response.json();
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
     });
 
     it('rejects if product quota exceeded', async () => {
@@ -145,7 +145,7 @@ describe('Products API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(402);
-      expect(data.error.message).toContain('Maksimal 10 produk');
+      expect(data.message).toContain('Maksimal 10 produk');
     });
   });
 
@@ -189,7 +189,7 @@ describe('Products API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
     });
   });
 
@@ -231,7 +231,7 @@ describe('Products API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.ok).toBe(true);
+      expect(data.success).toBe(true);
     });
   });
 });

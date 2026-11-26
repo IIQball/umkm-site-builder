@@ -20,6 +20,7 @@
   export let ctaText: string = 'Chat WA';
   export let navbarOrder: string[] = ['logo', 'search_bar', 'cta'];
   export let onToggleMobileMenu: () => void = () => {};
+  export let isMobileMenuOpen: boolean = false;
 
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isDesktop = viewMode === 'desktop';
@@ -273,12 +274,16 @@
       {#if isSmallScreen}
         <button
           type="button"
-          on:click={onToggleMobileMenu}
+          on:click|stopPropagation={onToggleMobileMenu}
           style="border-radius: var(--theme-btn-radius, var(--btn-radius, 8px)); border: 1px solid var(--color-border); background-color: var(--theme-surface, var(--color-card-base, transparent)); color: var(--theme-text-primary, var(--color-text-main));"
           class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer shadow-xs ml-auto hover:bg-[var(--color-nested-base)]"
-          aria-label="Buka menu navigasi"
+          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
         >
-          <Menu size={20} />
+          {#if isMobileMenuOpen}
+            <X size={20} />
+          {:else}
+            <Menu size={20} />
+          {/if}
         </button>
       {/if}
     </div>

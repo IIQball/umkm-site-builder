@@ -90,3 +90,19 @@ export class InMemoryRateLimiter {
     }
   }
 }
+
+export function extractClientIp(request: Request, clientAddress?: string): string {
+  const cfIp = request.headers.get('cf-connecting-ip')?.trim();
+  if (cfIp) return cfIp;
+
+  const trustedSocketIp = clientAddress?.trim();
+  if (trustedSocketIp) return trustedSocketIp;
+
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0]?.trim();
+    if (first) return first;
+  }
+
+  return 'unknown';
+}

@@ -2,105 +2,79 @@ import { auth } from '@/lib/auth';
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { db, users, sessions, tenantInvitations, verifications } from '@/db/index';
-import { eq, or } from 'drizzle-orm';
+import { logActivity } from '@/services/audit.service';
+import { and, eq, gt } from 'drizzle-orm';
+import { AppError, handleApiRoute, jsonError, jsonSuccess, parseJsonBody } from '@/lib/utils/api-handler';
+import { errorLog } from '@/lib/utils/logger';
 
 const resetPasswordSchema = z.object({
-  token: z.string().min(1, "Token verifikasi tidak valid atau kedaluwarsa"),
-  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+  token: z.string().min(1, 'Token verifikasi tidak valid atau kedaluwarsa'),
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
   uid: z.string().optional(),
   name: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request }) => {
-  try {
-    const body = await request.json();
+  return handleApiRoute(async () => {
+    const body = await parseJsonBody(request);
     const result = resetPasswordSchema.safeParse(body);
 
     if (!result.success) {
-      return new Response(JSON.stringify({ error: result.error.errors[0].message }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonError(result.error.issues[0].message, 400, result.error.flatten().fieldErrors, 'VALIDATION_ERROR');
     }
 
-    const { token, password, uid, name } = result.data;
+    const { token, password, name } = result.data;
+    const verRecord = await db.query.verifications.findFirst({
+      where: and(eq(verifications.identifier, `reset-password:${token}`), gt(verifications.expiresAt, new Date())),
+    });
+    const targetUser = verRecord?.value ? await db.query.users.findFirst({
+      where: eq(users.id, verRecord.value),
+    }) : null;
+    if (!targetUser) {
+      throw new AppError('Token reset kata sandi tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_TOKEN');
+    }
 
-    let targetUid = uid;
-    if (!targetUid && token) {
-      const verRecord = await db.query.verifications.findFirst({
-        where: eq(verifications.identifier, `reset-password:${token}`),
+    let invitation: typeof tenantInvitations.$inferSelect | undefined;
+    if (targetUser.status === 'pending') {
+      invitation = await db.query.tenantInvitations.findFirst({
+        where: and(eq(tenantInvitations.email, targetUser.email), gt(tenantInvitations.expiresAt, new Date())),
       });
-      if (verRecord?.value) {
-        const matched = await db.query.users.findFirst({
-          where: or(eq(users.email, verRecord.value), eq(users.id, verRecord.value)),
-        });
-        if (matched) {
-          targetUid = matched.id;
-        }
+      if (!invitation || !targetUser.registeredBy || invitation.invitedBy !== targetUser.registeredBy || invitation.acceptedAt) {
+        throw new AppError('Undangan tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_INVITATION');
       }
     }
 
-    // Call BetterAuth internal API securely
-    await auth.api.resetPassword({
-      body: { newPassword: password, token },
-      headers: request.headers
-    });
-
-    let userEmail = "";
-    let userRole = "";
-
-    // If targetUid is identified, securely update user and activate status
-    if (targetUid) {
-      const targetUser = await db.select().from(users).where(eq(users.id, targetUid)).limit(1);
-      if (targetUser.length === 1) {
-        userEmail = targetUser[0].email;
-        userRole = targetUser[0].role;
-        
-        // Ensure user status is activated upon setting password
-        await db.update(users).set({ status: 'active' }).where(eq(users.id, targetUid));
-
-        if (name) {
-          try {
-            // Verify that this uid actually belongs to the person who just reset their password
-            // by attempting a sign in with their email and the newly set password
-            const signinRes = await auth.api.signInEmail({
-              body: { email: userEmail, password },
-              headers: new Headers()
-            }) as unknown as { user?: { id: string } }
-            
-            if (signinRes && signinRes.user) {
-              // Verification succeeded! Update the name
-              await db.update(users).set({ name, status: 'active' }).where(eq(users.id, targetUid));
-              
-              // Automatically clean up the temporary session created for verification
-              await db.delete(sessions).where(eq(sessions.userId, targetUid));
-            }
-          } catch (e) {
-            console.error("Name update failed due to unauthorized uid mismatch or sign in error", e);
-          }
-        }
-        
-        // Hapus undangan yang telah diaktivasi agar otomatis hilang dan tidak menumpuk di database
-        await db
-          .delete(tenantInvitations)
-          .where(eq(tenantInvitations.email, userEmail));
-      }
+    try {
+      await auth.api.resetPassword({
+        body: { newPassword: password, token },
+        headers: request.headers,
+      });
+    } catch (authError) {
+      errorLog('RESET_PASSWORD_TOKEN', authError);
+      throw new AppError('Token reset kata sandi tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_TOKEN');
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: "Kata sandi berhasil diatur ulang",
-      email: userEmail,
-      role: userRole
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    if (invitation) {
+      const activated = await db.update(users).set({ status: 'active', emailVerified: true, ...(name ? { name } : {}) })
+        .where(and(eq(users.id, targetUser.id), eq(users.status, 'pending')))
+        .returning({ id: users.id });
+      if (activated.length) {
+        await db.delete(sessions).where(eq(sessions.userId, targetUser.id));
+        await db.delete(tenantInvitations).where(eq(tenantInvitations.id, invitation.id));
+      }
+    }
+    await logActivity({
+      userId: targetUser.id,
+      action: invitation ? 'USER_ACTIVATED' : 'Reset Password',
+      details: { email: targetUser.email, role: targetUser.role },
     });
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengatur ulang sandi';
-    return new Response(JSON.stringify({ error: errorMsg }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+    const userEmail = targetUser.email;
+    const userRole = targetUser.role;
+
+    return jsonSuccess(
+      { email: userEmail, role: userRole },
+      200,
+      'Kata sandi berhasil diatur ulang'
+    );
+  });
 };

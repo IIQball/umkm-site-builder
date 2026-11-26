@@ -12,7 +12,7 @@ import {
   BusinessCategoryCreateSchema,
   BusinessCategoryUpdateSchema,
 } from '@/schemas';
-import { getNavGroups } from '@/components/dashboard/sidebar/sidebar.helpers';
+import { getNavGroups } from '@/components/shell/sidebar/sidebar.helpers';
 import { getRoleNavLinks } from '@/components/common/navbar.helpers';
 
 vi.mock('@/lib/auth', () => ({
@@ -77,7 +77,7 @@ describe('Business Categories API, Schemas & Navigation', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(Array.isArray(body.data)).toBe(true);
     });
   });
@@ -149,6 +149,23 @@ describe('Business Categories API, Schemas & Navigation', () => {
       const bizLink = links.find((l) => l.href === '/superadmin/business-categories');
       expect(bizLink).toBeDefined();
       expect(bizLink?.label).toBe('Kategori Bisnis');
+    });
+  });
+
+  describe('Tenant Sidebar Navigation', () => {
+    it('includes Studio AI in tenant sidebar nav items below Katalog Produk', () => {
+      const navGroups = getNavGroups('tenant');
+      const storeGroup = navGroups.find((g) => g.title === 'Manajemen Toko');
+      expect(storeGroup).toBeDefined();
+
+      const aiItem = storeGroup?.items.find((item) => item.href === '/dashboard/ai');
+      expect(aiItem).toBeDefined();
+      expect(aiItem?.label).toBe('Studio AI');
+      expect(aiItem?.icon).toBe('auto_awesome');
+
+      const productIdx = storeGroup?.items.findIndex((item) => item.href === '/dashboard/products');
+      const aiIdx = storeGroup?.items.findIndex((item) => item.href === '/dashboard/ai');
+      expect(aiIdx).toBe((productIdx ?? -1) + 1);
     });
   });
 });

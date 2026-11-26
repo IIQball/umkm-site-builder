@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import gsap from 'gsap'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
   import { COL_1, COL_2, COL_3 } from './testimonials.data'
 
   let containerEl: HTMLElement
@@ -10,13 +8,22 @@
   let col1El: HTMLElement
   let col2El: HTMLElement
   let col3El: HTMLElement
-  let ctx: gsap.Context | null = null
+  let ctx: any = null
+  let timer: any = null
 
-  onMount(() => {
-    gsap.registerPlugin(ScrollTrigger)
-
+  onMount(async () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) return
+    if (!containerEl) return
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion || !containerEl) return
+    if (prefersReducedMotion) return
+
+    const [gsapMod, stMod] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger')
+    ])
+    const gsap = gsapMod.gsap || gsapMod.default || gsapMod
+    const ScrollTrigger = stMod.ScrollTrigger || stMod.default || stMod
+    gsap.registerPlugin(ScrollTrigger)
 
     ctx = gsap.context(() => {
       if (headerEl) {
@@ -105,14 +112,13 @@
       }
     }, containerEl)
 
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh()
+    timer = setTimeout(() => {
+      ScrollTrigger?.refresh()
     }, 150)
-
-    return () => clearTimeout(timer)
   })
 
   onDestroy(() => {
+    if (timer) clearTimeout(timer)
     ctx?.revert()
   })
 </script>
@@ -125,10 +131,10 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header Section: Jarak rapat di mobile (mb-6) agar menyatu erat dengan card pertama -->
     <div bind:this={headerEl} class="max-w-2xl mx-auto text-center mb-6 sm:mb-10 md:mb-14">
-      <h2 class="heading-section text-neutral-950 dark:text-white text-center">
+      <h2 class="heading-section text-main text-center">
         Dipercaya Wirausaha & Desainer Lokal
       </h2>
-      <p class="desc-section text-neutral-600 dark:text-neutral-400 mt-2 sm:mt-3 text-center">
+      <p class="desc-section text-secondary mt-2 sm:mt-3 text-center">
         Cerita nyata mereka yang bertumbuh bersama ekosistem digital Pinoka.
       </p>
     </div>
@@ -144,25 +150,25 @@
           <div
             class="feedback-card group {card.flexClass} flex flex-col justify-between relative overflow-hidden rounded-2xl p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl {card.theme === 'orange'
               ? 'bg-neutral-950 dark:bg-neutral-900 text-white border border-white/10 shadow-lg shadow-black/20'
-              : 'bg-neutral-50/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border hover:border-neutral-300 dark:hover:border-neutral-700'}"
+              : 'bg-card text-main border border-border hover:border-main/20'}"
           >
             {#if card.isPattern}
               <div class="absolute inset-0 bg-[radial-gradient(rgba(var(--color-text-main),0.04)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-0"></div>
             {/if}
 
-            <p class="font-normal leading-relaxed mb-6 relative z-10 transition-colors duration-200 {card.theme === 'orange' ? 'body-sm text-white/90' : 'body-base text-neutral-700 dark:text-neutral-200'}">
+            <p class="font-normal leading-relaxed mb-6 relative z-10 transition-colors duration-200 {card.theme === 'orange' ? 'body-sm text-white/90' : 'body-base text-secondary'}">
               &ldquo;{card.quote}&rdquo;
             </p>
 
             <div class="flex items-center gap-3 relative z-10 pt-4 border-t {card.theme === 'orange' ? 'border-white/10' : 'border-border'}">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 {card.theme === 'orange' ? 'bg-white/10 text-white border border-white/20 shadow-xs' : 'bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-300/40 dark:border-neutral-700/50'}">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 {card.theme === 'orange' ? 'bg-white/10 text-white border border-white/20 shadow-xs' : 'bg-nested text-main border border-light'}">
                 {card.initials}
               </div>
               <div class="min-w-0">
-                <p class="font-heading font-semibold text-sm leading-tight tracking-tight {card.theme === 'orange' ? 'text-white' : 'text-neutral-950 dark:text-white'}">
+                <p class="font-heading font-semibold text-sm leading-tight tracking-tight {card.theme === 'orange' ? 'text-white' : 'text-main'}">
                   {card.author}
                 </p>
-                <p class="text-xs font-sans font-medium mt-1 truncate {card.theme === 'orange' ? 'text-orange-400' : 'text-neutral-500 dark:text-neutral-400'}">
+                <p class="text-xs font-sans font-medium mt-1 truncate {card.theme === 'orange' ? 'text-amber-300' : 'text-muted'}">
                   {card.role}
                 </p>
               </div>
@@ -175,21 +181,21 @@
       <div bind:this={col2El} class="flex flex-col gap-3 h-full will-change-transform">
         {#each COL_2 as card}
           <div
-            class="feedback-card group flex-1 flex flex-col justify-between relative overflow-hidden rounded-2xl p-5 sm:p-6 bg-neutral-50/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-neutral-300 dark:hover:border-neutral-700"
+            class="feedback-card group flex-1 flex flex-col justify-between relative overflow-hidden rounded-2xl p-5 sm:p-6 bg-card text-main border border-border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-main/20"
           >
-            <p class="body-sm font-normal leading-relaxed text-neutral-700 dark:text-neutral-200 mb-4 transition-colors duration-200">
+            <p class="body-sm font-normal leading-relaxed text-secondary mb-4 transition-colors duration-200">
               &ldquo;{card.quote}&rdquo;
             </p>
 
             <div class="flex items-center gap-3 pt-3.5 border-t border-border">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-300/40 dark:border-neutral-700/50">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 bg-nested text-main border border-light">
                 {card.initials}
               </div>
               <div class="min-w-0">
-                <p class="font-heading font-semibold text-xs leading-tight tracking-tight text-neutral-950 dark:text-white">
+                <p class="font-heading font-semibold text-xs leading-tight tracking-tight text-main">
                   {card.author}
                 </p>
-                <p class="text-xs font-sans font-medium text-neutral-500 dark:text-neutral-400 mt-1 truncate">
+                <p class="text-xs font-sans font-medium text-muted mt-1 truncate">
                   {card.role}
                 </p>
               </div>
@@ -204,25 +210,25 @@
           <div
             class="feedback-card group {card.flexClass} flex flex-col justify-between relative overflow-hidden rounded-2xl p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl {card.theme === 'dark'
               ? 'bg-neutral-950 dark:bg-neutral-900 text-white border border-white/10 shadow-lg shadow-black/20'
-              : 'bg-neutral-50/90 dark:bg-neutral-900/60 text-neutral-900 dark:text-white border border-border hover:border-neutral-300 dark:hover:border-neutral-700'}"
+              : 'bg-card text-main border border-border hover:border-main/20'}"
           >
             {#if card.isPattern}
               <div class="absolute inset-0 bg-[radial-gradient(rgba(var(--color-text-main),0.04)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-0"></div>
             {/if}
 
-            <p class="font-normal leading-relaxed mb-6 relative z-10 transition-colors duration-200 {card.theme === 'dark' ? 'body-sm text-white/90' : 'body-base text-neutral-700 dark:text-neutral-200'}">
+            <p class="font-normal leading-relaxed mb-6 relative z-10 transition-colors duration-200 {card.theme === 'dark' ? 'body-sm text-white/90' : 'body-base text-secondary'}">
               &ldquo;{card.quote}&rdquo;
             </p>
 
             <div class="flex items-center gap-3 relative z-10 pt-4 border-t {card.theme === 'dark' ? 'border-white/10' : 'border-border'}">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 {card.theme === 'dark' ? 'bg-white/10 text-white border border-white/20 shadow-xs' : 'bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-300/40 dark:border-neutral-700/50'}">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center font-heading text-xs font-bold shrink-0 transition-transform duration-300 group-hover:scale-105 {card.theme === 'dark' ? 'bg-white/10 text-white border border-white/20 shadow-xs' : 'bg-nested text-main border border-light'}">
                 {card.initials}
               </div>
               <div class="min-w-0">
-                <p class="font-heading font-semibold text-sm leading-tight tracking-tight {card.theme === 'dark' ? 'text-white' : 'text-neutral-950 dark:text-white'}">
+                <p class="font-heading font-semibold text-sm leading-tight tracking-tight {card.theme === 'dark' ? 'text-white' : 'text-main'}">
                   {card.author}
                 </p>
-                <p class="text-xs font-sans font-medium mt-1 truncate {card.theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}">
+                <p class="text-xs font-sans font-medium mt-1 truncate {card.theme === 'dark' ? 'text-white/80' : 'text-muted'}">
                   {card.role}
                 </p>
               </div>

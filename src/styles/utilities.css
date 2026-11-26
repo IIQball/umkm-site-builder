@@ -1,0 +1,265 @@
+/* Theme Semantic Utilities */
+.bg-canvas {
+  background-color: var(--color-bg-base);
+}
+.bg-card {
+  background-color: var(--color-card-base);
+}
+.bg-nested {
+  background-color: var(--color-nested-base);
+}
+.text-main {
+  color: var(--color-text-main);
+}
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-muted {
+  color: var(--color-text-muted);
+}
+.text-light-muted {
+  color: var(--color-text-light);
+}
+.border-main {
+  border-color: var(--color-border);
+}
+.border-light {
+  border-color: var(--color-border-light);
+}
+
+/* Theme Reactive Glass Surfaces */
+.hero-glass-card {
+  background-color: rgb(var(--color-card-rgb, 255 255 255) / 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="dark"] .hero-glass-card,
+.dark .hero-glass-card {
+  background-color: rgb(var(--color-card-rgb, 17 24 39) / 0.82);
+  border-color: rgba(248, 250, 252, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+.navbar-glass-surface {
+  background-color: rgb(var(--color-bg-base-rgb, 248 250 252) / 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+html[data-theme="dark"] .navbar-glass-surface,
+.dark .navbar-glass-surface {
+  background-color: rgb(var(--color-bg-base-rgb, 11 15 25) / 0.85);
+  border-bottom-color: rgba(248, 250, 252, 0.08);
+}
+
+/* Animations & Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleY(0);
+    opacity: 0.3;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bar-grow {
+  transform-origin: bottom;
+  animation: barGrow 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Builder Shell & Workspace Strict Font Isolation */
+.builder-root,
+.builder-root header,
+.builder-root aside,
+.builder-root [data-builder-shell] {
+  font-family: var(--font-ui-sans, 'Poppins', system-ui, -apple-system, sans-serif);
+}
+
+.builder-root h1,
+.builder-root h2,
+.builder-root h3,
+.builder-root h4,
+.builder-root h5,
+.builder-root h6 {
+  font-family: var(--font-ui-heading, 'Host Grotesk', system-ui, -apple-system, sans-serif);
+}
+
+/* Canvas Preview Strict Variable & Typography Scoping */
+#canvas-frame,
+.builder-canvas-viewport {
+  font-family: var(--font-family, var(--theme-font-body, system-ui, -apple-system, sans-serif));
+}
+
+#canvas-frame h1,
+.builder-canvas-viewport h1 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h1, var(--text-h1-size, 42px));
+  font-weight: var(--theme-text-h1-weight, var(--text-h1-weight, 700));
+}
+
+#canvas-frame h2,
+.builder-canvas-viewport h2 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h2, var(--text-h2-size, 26px));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 700));
+}
+
+#canvas-frame h3,
+.builder-canvas-viewport h3 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+  font-size: var(--theme-text-h3, var(--text-h3-size, 20px));
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));
+}
+
+#canvas-frame h4,
+#canvas-frame h5,
+#canvas-frame h6,
+.builder-canvas-viewport h4,
+.builder-canvas-viewport h5,
+.builder-canvas-viewport h6 {
+  font-family: var(--font-heading, var(--theme-font-heading, inherit));
+}
+
+#canvas-frame [data-node="badge"],
+#canvas-frame [data-node$="_badge"],
+#canvas-frame [data-node*="badge"],
+.builder-canvas-viewport [data-node="badge"],
+.builder-canvas-viewport [data-node$="_badge"],
+.builder-canvas-viewport [data-node*="badge"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+#canvas-frame [data-node="cta"] a,
+#canvas-frame [data-node$="_cta"] a,
+.builder-canvas-viewport [data-node="cta"] a,
+.builder-canvas-viewport [data-node$="_cta"] a {
+  font-size: var(--theme-text-body, var(--text-body-size, 16px));
+}
+
+/* Layout transition neutralizer - enforce composite-only transforms */
+details summary:after,
+.dropdown summary:after,
+[class*="dropdown"] summary:after {
+  transition-property: transform !important;
+}
+
+/* Storefront & Template Preview Strict Isolation: Suppress builder outline rings and selection borders */
+.storefront-root [class*="hover:outline"]:hover,
+.storefront-root [class*="hover:outline-dashed"]:hover,
+.storefront-root [class*="outline-dashed"],
+.storefront-root [class*="outline-dashed"]:hover,
+.storefront-root [data-node],
+.storefront-root [data-node-key],
+.storefront-root [data-node]:hover,
+.storefront-root [data-node-key]:hover {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
+.storefront-root [class*="ring-2"]:not(input):not(textarea):not(select):not(button):not(a):not(.keep-ring),
+.storefront-root [data-node].ring-2:not(input):not(textarea):not(select),
+.storefront-root [data-node-key].ring-2:not(input):not(textarea):not(select),
+.storefront-root [role="button"][data-node].ring-2,
+.storefront-root .footer-card [role="button"].ring-2,
+.storefront-root .header-nav-container [role="button"].ring-2 {
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  background-color: transparent !important;
+}
+
+.storefront-root [data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root [data-node-key]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root [role="button"][data-node]:not(a):not(button):not(input):not(select):not(textarea):not(summary):not(label):not([role="tab"]):not(.cursor-pointer),
+.storefront-root .footer-card [role="button"]:not(a):not(button):not(.cursor-pointer),
+.storefront-root .cq-footer-bottom-bar > div:not(a):not(button):not(.cursor-pointer) {
+  cursor: default !important;
+}
+
+.storefront-root a,
+.storefront-root button,
+.storefront-root .builder-header-nav-link,
+.storefront-root [role="tab"] {
+  cursor: pointer !important;
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-spinners::-webkit-inner-spin-button,
+  .no-spinners::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"].no-spinners {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  /* Dark mode border & line softening rules */
+  html[data-theme="dark"] .border-light,
+  html[data-theme="dark"] [class*="border-light"],
+  [data-theme="dark"] .border-light,
+  [data-theme="dark"] [class*="border-light"],
+  .dark .border-light,
+  .dark [class*="border-light"] {
+    border-color: rgba(255, 255, 255, 0.07) !important;
+  }
+
+  html[data-theme="dark"] .border-border,
+  html[data-theme="dark"] [class*="border-border"],
+  [data-theme="dark"] .border-border,
+  [data-theme="dark"] [class*="border-border"],
+  .dark .border-border,
+  .dark [class*="border-border"] {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  html[data-theme="dark"] hr,
+  [data-theme="dark"] hr,
+  .dark hr,
+  html[data-theme="dark"] .divider::before,
+  html[data-theme="dark"] .divider::after,
+  [data-theme="dark"] .divider::before,
+  [data-theme="dark"] .divider::after,
+  .dark .divider::before,
+  .dark .divider::after {
+    border-color: rgba(255, 255, 255, 0.07) !important;
+  }
+}

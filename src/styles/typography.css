@@ -1,0 +1,187 @@
+/* Golden Ratio & Responsive Typography Hierarchy */
+@layer utilities {
+  /* Display Hero Utama (H1 Landing Page) */
+  .heading-hero {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.88;
+    font-size: 2.25rem;
+  }
+  @media (min-width: 640px) {
+    .heading-hero { font-size: 3rem; }
+  }
+  @media (min-width: 768px) {
+    .heading-hero { font-size: 3.75rem; }
+  }
+  @media (min-width: 1024px) {
+    .heading-hero { font-size: 4.375rem; }
+  }
+  @media (min-width: 1280px) {
+    .heading-hero { font-size: 4.75rem; }
+  }
+
+  /* Editorial Statement Masked (H2 Text Reveal) */
+  .heading-statement {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    font-size: 2.25rem;
+  }
+  @media (min-width: 640px) {
+    .heading-statement { font-size: 3.75rem; }
+  }
+  @media (min-width: 768px) {
+    .heading-statement { font-size: 4.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .heading-statement { font-size: 5.125rem; }
+  }
+
+  /* Section Title & Hero Captions (H2 Umum) */
+  .heading-section {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    font-size: 1.875rem;
+  }
+  @media (min-width: 640px) {
+    .heading-section { font-size: 2.25rem; }
+  }
+  @media (min-width: 768px) {
+    .heading-section { font-size: 3rem; }
+  }
+  @media (min-width: 1024px) {
+    .heading-section { font-size: 3.375rem; }
+  }
+
+  /* Standar Platform H1 (Page Display) */
+  .heading-1,
+  .text-heading-xl {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    font-size: clamp(2.625rem, 5vw, 4.25rem);
+  }
+
+  /* Standar Platform H2 (Page Title) */
+  .heading-2,
+  .text-heading-lg {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    font-size: 2.125rem;
+  }
+  @media (min-width: 768px) {
+    .heading-2,
+    .text-heading-lg { font-size: 2.625rem; }
+  }
+
+  /* Standar Platform H3 (Card & Modal Title) */
+  .heading-3,
+  .text-heading-md {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    font-size: 1.375rem;
+  }
+  @media (min-width: 768px) {
+    .heading-3,
+    .text-heading-md { font-size: 1.625rem; }
+  }
+
+  /* Standar Platform H4 (Sub-heading & Tagline) */
+  .heading-4,
+  .text-tagline {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.30;
+    font-size: 1.25rem;
+  }
+
+  /* Heading SM */
+  .heading-sm,
+  .text-heading-sm {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    font-size: 1.125rem;
+  }
+
+  /* Deskripsi Hero Kanan Bawah */
+  .desc-hero {
+    font-family: var(--font-family);
+    font-weight: 600;
+    line-height: 1.35;
+    font-size: 1rem;
+  }
+  @media (min-width: 640px) {
+    .desc-hero { font-size: 1.125rem; }
+  }
+  @media (min-width: 1024px) {
+    .desc-hero { font-size: 1.1875rem; }
+  }
+
+  /* Deskripsi 2 Kolom Statement */
+  .desc-statement {
+    font-family: var(--font-family);
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 0.75rem;
+  }
+  @media (min-width: 640px) {
+    .desc-statement { font-size: 0.875rem; }
+  }
+
+  /* Deskripsi Seksi Umum */
+  .desc-section {
+    font-family: var(--font-family);
+    font-weight: 400;
+    line-height: 1.45;
+    font-size: 0.875rem;
+  }
+  @media (min-width: 640px) {
+    .desc-section { font-size: 1rem; }
+  }
+  @media (min-width: 768px) {
+    .desc-section { font-size: 1.125rem; }
+  }
+
+  /* Label Mikro & Kaps */
+  .label-caps,
+  .text-label-caps {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+  }
+
+  /* Body Regular & Small */
+  .body-base,
+  .text-body-base {
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.45;
+  }
+  @media (min-width: 768px) {
+    .body-base,
+    .text-body-base { font-size: 1rem; }
+  }
+
+  .body-sm,
+  .text-body-sm {
+    font-family: var(--font-family);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+}

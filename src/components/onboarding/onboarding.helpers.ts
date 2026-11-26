@@ -1,4 +1,5 @@
 import type { RegionData, SavedOnboardingState } from './onboarding.types';
+import { apiFetch, parseApiResponse } from '@/lib/api/parse-response';
 
 export const DEFAULT_WA_CHECKOUT_TEMPLATE =
   'Halo, saya ingin bertanya seputar produk di toko Anda. Boleh minta informasi lebih lanjut?';
@@ -105,19 +106,12 @@ export async function checkSubdomainAvailability(
       return { status: 'error', message: 'Terlalu sering memeriksa. Mohon tunggu beberapa detik.' };
     }
 
-    const data = await res.json().catch(() => null);
-    if (!data) {
-      return { status: 'error', message: 'Gagal memproses respon server.' };
+    const parsed = await parseApiResponse<{ available?: boolean }>(res, 'Validasi subdomain gagal');
+    if (!parsed.success) {
+      return { status: 'invalid', message: parsed.message };
     }
 
-    if (!data.ok) {
-      const errorMsg = typeof data.error === 'string'
-        ? data.error
-        : (data.error?.message ?? 'Validasi subdomain gagal');
-      return { status: 'invalid', message: errorMsg };
-    }
-
-    if (data.data?.available) {
+    if (parsed.data?.available) {
       return { status: 'available', message: 'Subdomain tersedia' };
     }
     return { status: 'taken', message: 'Subdomain sudah digunakan' };
@@ -148,23 +142,23 @@ export async function submitOnboardStore(payload: OnboardPayload): Promise<{
   code?: string;
 }> {
   try {
-    const res = await fetch('/api/stores/onboard', {
+    const result = await apiFetch('/api/stores/onboard', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      fallbackError: 'Gagal membuat toko',
     });
 
-    if (res.status === 401) {
+    if (result.status === 401) {
       window.location.href = '/auth/login';
       return { ok: false, error: 'Unauthorized' };
     }
 
-    const data = await res.json();
-    if (!data.ok) {
+    if (!result.success) {
       return {
         ok: false,
-        error: data.error?.message ?? 'Gagal membuat toko',
-        code: data.error?.code,
+        error: result.message,
+        code: result.errorCode,
       };
     }
     return { ok: true };
@@ -193,22 +187,22 @@ export async function submitUpdateStore(payload: UpdateStorePayload): Promise<{
 }> {
   try {
     const endpoint = `/api/stores/settings?storeId=${encodeURIComponent(payload.storeId)}`;
-    const res = await fetch(endpoint, {
+    const result = await apiFetch(endpoint, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      fallbackError: 'Gagal menyimpan pengaturan toko',
     });
 
-    if (res.status === 401) {
+    if (result.status === 401) {
       window.location.href = '/auth/login';
       return { ok: false, error: 'Unauthorized' };
     }
 
-    const data = await res.json();
-    if (!data.success) {
+    if (!result.success) {
       return {
         ok: false,
-        error: data.error || 'Gagal menyimpan pengaturan toko',
+        error: result.message,
       };
     }
     return { ok: true };

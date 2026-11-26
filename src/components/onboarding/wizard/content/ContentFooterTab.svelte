@@ -1,9 +1,26 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding untuk keperluan
+  fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pada skenario ini, kustomisasi konten & gaya (warna, tipografi, teks seksi) diserahkan
+  sepenuhnya kepada modul Template Builder & Designer Studio, bukan di onboarding.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai modul kustomisasi konten
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { Info } from 'lucide-svelte';
+  import { FOOTER_PRESET_SLOTS } from '@/components/builder/sections/footer/footerLayout.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'multi_column';
   export let onUpdate: (() => void) | undefined = undefined;
+
+  $: slots = FOOTER_PRESET_SLOTS[layoutPreset] || [];
+  $: hasStoreHours = slots.includes('footer_contact') || slots.includes('footer_status_badge') || layoutPreset === 'multi_column';
 </script>
 
 <div class="space-y-4 text-left">
@@ -23,19 +40,21 @@
   </div>
 
   <!-- Jam Operasional -->
-  <div>
-    <label for="footer-hours-input" class="block text-xs font-bold text-main font-heading mb-1.5">
-      Jam Operasional Toko
-    </label>
-    <input
-      id="footer-hours-input"
-      type="text"
-      bind:value={customization.footer.storeHours}
-      on:input={() => onUpdate?.()}
-      placeholder="Contoh: Buka Setiap Hari (08.00 - 21.00 WIB)"
-      class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
-    />
-  </div>
+  {#if hasStoreHours}
+    <div>
+      <label for="footer-hours-input" class="block text-xs font-bold text-main font-heading mb-1.5">
+        Jam Operasional Toko
+      </label>
+      <input
+        id="footer-hours-input"
+        type="text"
+        bind:value={customization.footer.storeHours}
+        on:input={() => onUpdate?.()}
+        placeholder="Contoh: Buka Setiap Hari (08.00 - 21.00 WIB)"
+        class="w-full bg-card text-main border border-light rounded-xl px-3 py-2 text-xs sm:text-sm font-sans focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-semibold"
+      />
+    </div>
+  {/if}
 
   <!-- Hak Cipta -->
   <div>

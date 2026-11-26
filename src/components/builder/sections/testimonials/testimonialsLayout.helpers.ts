@@ -12,10 +12,8 @@ export const TESTIMONIALS_PRESET_SLOTS: Record<string, string[]> = {
   single_spotlight: ['badge', 'title', 'subtitle'],
   chat_bubble_flow: ['badge', 'title', 'subtitle'],
   infinite_marquee_scroll: ['badge', 'title', 'subtitle'],
-  video_review_cards: ['badge', 'title', 'subtitle'],
   social_post_cards: ['badge', 'title', 'subtitle'],
   side_by_side_3_cards: ['badge', 'title', 'subtitle'],
-  logo_client_cloud: ['badge', 'title', 'subtitle', 'testi_logo_cloud'],
   split_rating_stats: ['badge', 'title', 'subtitle', 'testi_stats'],
   carousel_slider: ['badge', 'title', 'subtitle'],
 };
@@ -52,8 +50,6 @@ export function getTestimonialsSlotLabel(slot: string, _preset?: string, testimo
       return 'Skor Rating Agregat';
     case 'testi_slider_track':
       return 'Alur Slider Ulasan';
-    case 'testi_logo_cloud':
-      return 'Daftar Logo Kemitraan';
     case 'testi_spotlight_quote':
       return 'Kutipan Ulasan Utama';
     case 'testi_spotlight_author':

@@ -75,7 +75,7 @@ describe('POST /api/admin/users/register', () => {
     const json = await response.json()
 
     expect(response.status).toBe(200)
-    expect(json.ok).toBe(true)
+    expect(json.success).toBe(true)
     expect(json.data.id).toBe('new_user_123')
 
     // verify signUpEmail is called with empty Headers
@@ -83,8 +83,7 @@ describe('POST /api/admin/users/register', () => {
       expect.objectContaining({
         body: expect.objectContaining({
           name: 'Tenant User',
-          email: 'tenant@test.com',
-          role: 'tenant'
+          email: 'tenant@test.com'
         }),
         headers: expect.any(Headers)
       })
@@ -105,8 +104,8 @@ describe('POST /api/admin/users/register', () => {
     const json = await response.json()
 
     expect(response.status).toBe(400)
-    expect(json.ok).toBe(false)
-    expect(json.error).toBeDefined()
+    expect(json.success).toBe(false)
+    expect(json.meta.code).toBeDefined()
   })
 
   it('should return 400 if email already exists', async () => {
@@ -128,6 +127,6 @@ describe('POST /api/admin/users/register', () => {
     const json = await response.json()
 
     expect(response.status).toBe(400)
-    expect(json.error.message).toBe('Email is already registered in the system')
+    expect(json.message).toBe('Email is already registered in the system')
   })
 })

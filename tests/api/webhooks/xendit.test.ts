@@ -39,7 +39,8 @@ describe('Xendit Webhook API Route', () => {
     const res = (await POST({ request, locals: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(403);
     const data = await res.json();
-    expect(data.error.code).toBe('FORBIDDEN');
+    expect(data.success).toBe(false);
+    expect(data.meta?.code).toBe('FORBIDDEN');
   });
 
   it('returns 403 when x-callback-token is invalid', async () => {

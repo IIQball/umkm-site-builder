@@ -20,9 +20,29 @@ export const GET: APIRoute = async (context): Promise<Response> => {
       createdAt: users.createdAt,
     })
     .from(users)
-    .innerJoin(adminWhitelist, eq(users.email, adminWhitelist.email))
     .where(eq(users.role, 'admin'))
     .orderBy(desc(users.createdAt));
+
+    // Ensure all registered admins are synchronized into admin_whitelist table
+    const existingWhitelist = await db.select({ email: adminWhitelist.email }).from(adminWhitelist);
+    const whitelistedEmails = new Set(existingWhitelist.map(w => w.email.toLowerCase()));
+
+    for (const admin of admins) {
+      if (!whitelistedEmails.has(admin.email.toLowerCase())) {
+        try {
+          await db.insert(adminWhitelist).values({
+            id: crypto.randomUUID(),
+            email: admin.email,
+            role: 'admin',
+            addedBy: user.id,
+            createdAt: admin.createdAt || new Date(),
+          });
+          whitelistedEmails.add(admin.email.toLowerCase());
+        } catch {
+          // Ignore unique collision if added concurrently
+        }
+      }
+    }
 
     return jsonSuccess(admins);
   });
@@ -51,21 +71,20 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           name: validated.name,
           email: validated.email,
           password: validated.password,
-          role: 'admin'
         },
         headers: new Headers()
       }) as unknown as { user?: { id: string } };
       if (res && res.user) {
         newUserId = res.user.id;
         // Explicitly set the role to 'admin' in case BetterAuth ignored it
-        await db.update(users).set({ role: 'admin' }).where(eq(users.id, newUserId));
+        await db.update(users).set({ role: 'admin', emailVerified: true }).where(eq(users.id, newUserId));
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
       } else {
         throw new AppError('Failed to create admin account', 500);
       }
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : 'Error during admin registration';
-      throw new AppError(errorMessage, 500);
+      if (e instanceof AppError) throw e;
+      throw e;
     }
 
     await db.insert(adminWhitelist).values({
@@ -100,6 +119,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     const validated = validate(adminStatusUpdateSchema, body);
 
     await db.update(users).set({ status: validated.status }).where(eq(users.id, id));
+    if (validated.status !== 'active') await db.delete(sessions).where(eq(sessions.userId, id));
     
     await db.insert(activityLogs).values({
       id: crypto.randomUUID(),

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { formatCurrency, formatDate } from '@/lib/utils/format';
-  import { Badge, Button } from '@/components/ui';
+  import { Badge, Button, Modal } from '@/components/ui';
   import { getOptimizedCloudinaryUrl } from '@/lib/cloudinary';
+  import { toast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let rowNumber: number = 1;
   export let template: {
@@ -22,24 +24,32 @@
 
   let isDeleting = false;
   let imageLoadError = false;
+  let showDeleteModal = false;
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (onDeleteDraft) {
       onDeleteDraft(template);
       return;
     }
-    if (!confirm('Hapus draf template ini? Tindakan tidak dapat dibatalkan.')) return;
+    showDeleteModal = true;
+  };
+
+  const confirmDelete = async () => {
     try {
       isDeleting = true;
-      const res = await fetch(`/api/designer/templates/draft?templateId=${template.id}`, { method: 'DELETE' });
-      const result = await res.json();
-      if (res.ok) {
+      const result = await apiFetch(`/api/designer/templates/draft?templateId=${template.id}`, {
+        method: 'DELETE',
+        fallbackError: 'Gagal menghapus draf template.',
+      });
+      if (result.success) {
+        showDeleteModal = false;
+        toast.success(result.message || 'Draf template berhasil dihapus.');
         window.location.reload();
       } else {
-        alert(result.error?.message || 'Gagal menghapus draf');
+        toast.error(result.message, 'Gagal Menghapus Draf');
       }
     } catch {
-      alert('Terjadi kesalahan koneksi');
+      toast.error('Terjadi kesalahan koneksi saat menghapus draf.');
     } finally {
       isDeleting = false;
     }
@@ -191,7 +201,7 @@
             className="rounded-xl font-bold whitespace-nowrap"
             on:click={handleShowRejection}
           >
-            <span class="material-symbols-outlined text-xs text-rose-500">info</span>
+            <span class="material-symbols-outlined text-xs text-error">info</span>
             <span>Alasan</span>
           </Button>
           <Button
@@ -219,3 +229,29 @@
     </div>
   </div>
 </div>
+
+<Modal bind:open={showDeleteModal} title="Hapus Draf Template" size="sm">
+  <p class="text-sm text-secondary leading-relaxed">
+    Anda yakin ingin menghapus draf <strong class="text-main">{template.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+  </p>
+  <svelte:fragment slot="footer">
+    <div class="flex justify-end gap-2 w-full">
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={isDeleting}
+        on:click={() => (showDeleteModal = false)}
+      >
+        Batal
+      </Button>
+      <Button
+        variant="destructive"
+        size="sm"
+        disabled={isDeleting}
+        on:click={confirmDelete}
+      >
+        {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+      </Button>
+    </div>
+  </svelte:fragment>
+</Modal>

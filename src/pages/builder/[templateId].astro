@@ -20,7 +20,7 @@ const platformFeePercentage = await getPlatformFeePercentage();
 const maxStoreBranches = await getMaxStoreBranches();
 ---
 
-<BaseLayout title="Template Builder" hideNavbar={true}>
+<BaseLayout title="Template Builder" hideNavbar={true} showBugButton={false}>
   <div class="h-[calc(100vh-2rem)] sm:h-[calc(100vh-2.125rem)] w-full bg-canvas text-main overflow-hidden flex flex-col">
     <BuilderEditor client:only="svelte" {templateId} {platformFeePercentage} {maxStoreBranches} />
   </div>

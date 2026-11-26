@@ -43,25 +43,45 @@
 .cq-title,
 .title-heading {
   font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
-  font-size: var(--text-h2-size, 2rem);
-  font-weight: var(--text-h2-weight, 800);
+  font-size: var(--theme-text-h2, var(--text-h2-size, 2rem));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 800));
   line-height: 1.2;
   letter-spacing: -0.025em;
   color: var(--color-text-main, var(--theme-text-primary, #0f172a));
 }
 
-.feature-item-title {
+.feature-card [data-node="badge"],
+.feature-card [data-node="feature_badge"],
+[data-node="badge"],
+[data-node="feature_badge"],
+[data-node="feature_card"] span[class*="rounded-full"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+.feature-item-title,
+.feature-card h3,
+.feature-card [data-node="feature_title"] {
   font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
-  font-size: 1.125rem;
+  font-size: var(--theme-text-h3, var(--text-h3-size, 1.125rem));
   line-height: 1.35;
-  font-weight: 700;
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 700));
   color: var(--color-text-main, var(--theme-text-primary, #0f172a));
   letter-spacing: -0.015em;
 }
 
+.feature-item-desc,
+.feature-card [data-node="feature_desc"] {
+  font-family: var(--font-family, var(--font-sans, var(--theme-font-body, system-ui, sans-serif)));
+  font-size: var(--theme-text-body, var(--text-body-size, 0.875rem));
+  line-height: 1.5;
+  font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400));
+  color: var(--color-text-secondary, var(--theme-text-muted, #64748b));
+}
+
 .feature-item-title-compact {
   font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
-  font-size: 0.9375rem;
+  font-size: var(--theme-text-body, var(--text-body-size, 0.9375rem));
   line-height: 1.3;
   font-weight: 600;
   color: var(--color-text-main, var(--theme-text-primary, #0f172a));

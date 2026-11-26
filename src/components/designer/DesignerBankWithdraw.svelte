@@ -2,6 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import type { BankAccount, PayoutHistoryItem } from '@/types';
   import { formatIDR, parseCurrencyInput } from '@/lib/currency';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
   import DesignerBankCard from './DesignerBankCard.svelte';
   import DesignerBankModal from './DesignerBankModal.svelte';
   import DesignerWithdrawModal from './DesignerWithdrawModal.svelte';
@@ -10,6 +12,13 @@
   import DesignerPayoutInfoCard from './DesignerPayoutInfoCard.svelte';
   import AdminMerchantGrowthChart from '@/components/admin/growth/AdminMerchantGrowthChart.svelte';
   import type { MerchantGrowthSummary } from '@/components/admin/growth/merchantGrowth.types';
+  import {
+    createBankAccountApi,
+    loadBankAccountsList,
+    loadPayoutHistory,
+    pollPayoutStatusApi,
+    submitPayoutWithdrawal,
+  } from './designerWithdraw.helpers';
 
   export let balance: number, availableBalance: number;
   export let totalNetIncome = 0, totalTemplatesSold = 0, settlementDelayDays = 7;
@@ -26,11 +35,10 @@
   async function fetchPayoutHistory() {
     isLoadingPayouts = true;
     try {
-      const res = await fetch('/api/designer/payout');
-      const result = await res.json();
-      if (result.ok && result.data) {
-        payoutHistory = result.data.payouts || [];
-        minPayoutLimit = result.data.minPayoutLimit || 50000;
+      const res = await loadPayoutHistory();
+      if (res) {
+        payoutHistory = res.payouts;
+        if (res.minPayoutLimit) minPayoutLimit = res.minPayoutLimit;
       }
     } catch (err) {
       console.error('Failed to fetch payout history:', err);
@@ -41,18 +49,23 @@
 
   async function pollStatus() {
     try {
-      const res = await fetch('/api/designer/payout/status');
-      const result = await res.json();
-      if (res.ok && result.ok && result.data) {
-        payoutHistory = result.data.payouts || [];
-        if (result.data.wallet) {
-          balance = Number(result.data.wallet.balance);
-          availableBalance = Number(result.data.wallet.availableBalance);
-        }
-        if (!payoutHistory.some((p) => p.status.toLowerCase() === 'processing')) stopPolling();
+      const res = await pollPayoutStatusApi();
+      if (!res) return;
+      payoutHistory = res.payouts;
+      if (res.wallet) {
+        balance = Number(res.wallet.balance);
+        availableBalance = Number(res.wallet.availableBalance);
       }
+      if (!payoutHistory.some((p) => p.status.toLowerCase() === 'processing')) stopPolling();
     } catch (err) {
       console.error('Error during status polling:', err);
+    }
+  }
+
+  function stopPolling() {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      pollingInterval = null;
     }
   }
 
@@ -65,45 +78,28 @@
     }
   }
 
-  function stopPolling() {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      pollingInterval = null;
-    }
-  }
-
   $: if (payoutHistory) checkAndStartPolling();
   onDestroy(() => stopPolling());
 
-  const fetchBankAccounts = async () => {
+  async function fetchBankAccounts() {
     isLoading = true;
     apiError = '';
     try {
-      const res = await fetch('/api/designer/bank-account');
-      const result = await res.json();
-      if (res.ok && result.ok && result.data) {
-        const rawAccounts: BankAccount[] = result.data.accounts || [result.data];
-        bankAccounts = rawAccounts.map((a) => {
-          const r = a as unknown as Record<string, unknown>;
-          const resolvedName = (a.accountHolder || a.holderName || r.accountHolderName || '') as string;
-          return { ...a, holderName: resolvedName, accountHolder: resolvedName };
-        });
-        const primary = bankAccounts.find((a) => a.isPrimary) || bankAccounts[0];
-        bankAccount = primary || null;
-        if (!selectedAccountId || !bankAccounts.some((a) => a.id === selectedAccountId)) {
-          selectedAccountId = primary?.id || '';
-        }
-      } else {
-        bankAccounts = [];
-        bankAccount = null;
-        selectedAccountId = '';
+      bankAccounts = await loadBankAccountsList();
+      const primary = bankAccounts.find((a) => a.isPrimary) || bankAccounts[0];
+      bankAccount = primary || null;
+      if (!selectedAccountId || !bankAccounts.some((a) => a.id === selectedAccountId)) {
+        selectedAccountId = primary?.id || '';
       }
     } catch (err) {
       console.error('Failed to fetch bank accounts:', err);
+      bankAccounts = [];
+      bankAccount = null;
+      selectedAccountId = '';
     } finally {
       isLoading = false;
     }
-  };
+  }
 
   onMount(() => {
     fetchBankAccounts();
@@ -118,62 +114,63 @@
     showBankModal = true;
   };
 
-  const saveBankAccount = async () => {
+  async function saveBankAccount() {
     if (!inputAccountNumber || !inputHolderName) {
       apiError = 'Semua field wajib diisi';
       return;
     }
-
     isLoading = true;
     apiError = '';
     try {
-      const res = await fetch('/api/designer/bank-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bankCode: inputBankName, bankName: inputBankName, accountNumber: inputAccountNumber,
-          accountHolder: inputHolderName, holderName: inputHolderName,
-        }),
-      });
-
-      const result = await res.json();
-      if (res.ok && result.ok) {
+      const result = await createBankAccountApi({ bankName: inputBankName, accountNumber: inputAccountNumber, holderName: inputHolderName });
+      if (result.success) {
         showBankModal = false;
+        toast.success('Rekening bank berhasil disimpan.');
         await fetchBankAccounts();
         if (result.data?.id) selectedAccountId = result.data.id;
       } else {
-        apiError = result.error?.message || 'Gagal menyimpan rekening bank.';
+        apiError = result.message;
+        toast.error(apiError);
       }
     } catch {
       apiError = 'Terjadi kesalahan koneksi.';
+      toast.error(apiError);
     } finally {
       isLoading = false;
     }
-  };
+  }
 
-  const handleSetPrimary = async (accountId: string) => {
+  async function handleSetPrimary(accountId: string) {
     try {
-      const res = await fetch('/api/designer/bank-account', {
+      const res = await apiFetch('/api/designer/bank-account', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: accountId }),
+        fallbackError: 'Gagal mengatur rekening utama.',
       });
-      if (res.ok) await fetchBankAccounts();
+      if (res.success) { toast.success('Rekening utama diperbarui.'); await fetchBankAccounts(); }
+      else toast.error(res.message);
     } catch (err) {
       console.error('Failed to set primary account:', err);
+      toast.error('Gagal memperbarui rekening utama.');
     }
-  };
+  }
 
-  const handleDeleteAccount = async (accountId: string) => {
+  async function handleDeleteAccount(accountId: string) {
     try {
-      const res = await fetch(`/api/designer/bank-account?id=${accountId}`, { method: 'DELETE' });
-      if (res.ok) await fetchBankAccounts();
+      const res = await apiFetch(`/api/designer/bank-account?id=${accountId}`, {
+        method: 'DELETE',
+        fallbackError: 'Gagal menghapus rekening bank.',
+      });
+      if (res.success) { toast.success('Rekening bank dihapus.'); await fetchBankAccounts(); }
+      else toast.error(res.message);
     } catch (err) {
       console.error('Failed to delete bank account:', err);
+      toast.error('Gagal menghapus rekening bank.');
     }
-  };
+  }
 
-  const handleWithdraw = async (targetBankAccountId: string, amountOverride?: number) => {
+  async function handleWithdraw(targetBankAccountId: string, amountOverride?: number) {
     const targetAccount = bankAccounts.find((a) => a.id === targetBankAccountId) || bankAccount;
     if (!targetAccount) return;
 
@@ -191,47 +188,36 @@
     withdrawError = '';
     isWithdrawing = true;
     try {
-      const res = await fetch('/api/designer/payout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey,
-        },
-        body: JSON.stringify({ amount: amountNum, bankAccountId: targetAccount.id, idempotencyKey }),
-      });
-
-      const result = await res.json();
-      if (res.ok && result.ok) {
+      const result = await submitPayoutWithdrawal(amountNum, targetAccount.id, idempotencyKey);
+      if (result.success && result.data) {
         isWithdrawing = false;
         withdrawSuccess = true;
+        toast.success('Permintaan penarikan dana berhasil dikirim.');
         balance = Math.max(0, balance - amountNum);
         availableBalance = Math.max(0, availableBalance - amountNum);
-
-        const mockMutation = {
-          id: result.data.id,
-          amount: amountNum,
-          balanceAfter: balance,
-          type: 'DEBIT' as const,
-          description: `Penarikan dana ke ${targetAccount.bankName} (${targetAccount.accountNumber})`,
-          referenceId: result.data.id,
-          createdAt: result.data.createdAt,
-        };
-
-        window.dispatchEvent(
-          new CustomEvent('designer_balance_updated', {
-            detail: { balance, availableBalance, mutation: mockMutation },
-          })
-        );
+        window.dispatchEvent(new CustomEvent('designer_balance_updated', {
+          detail: {
+            balance,
+            availableBalance,
+            mutation: {
+              id: result.data.id, amount: amountNum, balanceAfter: balance, type: 'DEBIT' as const,
+              description: `Penarikan dana ke ${targetAccount.bankName} (${targetAccount.accountNumber})`,
+              referenceId: result.data.id, createdAt: result.data.createdAt,
+            },
+          },
+        }));
         await fetchPayoutHistory();
       } else {
-        withdrawError = result.error?.message || 'Gagal mengajukan penarikan dana.';
+        withdrawError = result.message;
+        toast.error(withdrawError);
       }
     } catch {
       withdrawError = 'Terjadi kesalahan koneksi saat memproses penarikan.';
+      toast.error(withdrawError);
     } finally {
       isWithdrawing = false;
     }
-  };
+  }
 
   const closeWithdrawModal = () => {
     showWithdrawModal = false;
@@ -241,59 +227,24 @@
   };
 </script>
 
-<!-- Bank Account & Optional Performance Cards, Growth Chart, or Info Card -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch mb-6">
   {#if showPerformanceCards}
-    <div class="lg:col-span-1 h-full">
-      <DesignerPerformanceCards {totalNetIncome} {totalTemplatesSold} />
-    </div>
+    <div class="lg:col-span-1 h-full"><DesignerPerformanceCards {totalNetIncome} {totalTemplatesSold} /></div>
   {/if}
-
   <div class="{showPerformanceCards || accountType === 'admin' ? 'lg:col-span-2' : 'lg:col-span-3'} h-full">
     <DesignerBankCard
-      {bankAccount}
-      {bankAccounts}
-      {selectedAccountId}
-      {isLoading}
-      {balance}
-      {availableBalance}
-      {minPayoutLimit}
-      {settlementDelayDays}
-      onOpenBankModal={openBankModal}
-      onOpenWithdrawModal={() => (showWithdrawModal = true)}
-      onSetPrimary={handleSetPrimary}
-      onDeleteAccount={handleDeleteAccount}
-      onSelectAccount={(id) => (selectedAccountId = id)}
+      {bankAccount} {bankAccounts} {selectedAccountId} {isLoading} {balance} {availableBalance} {minPayoutLimit} {settlementDelayDays}
+      onOpenBankModal={openBankModal} onOpenWithdrawModal={() => (showWithdrawModal = true)}
+      onSetPrimary={handleSetPrimary} onDeleteAccount={handleDeleteAccount} onSelectAccount={(id) => (selectedAccountId = id)}
     />
   </div>
-
   {#if accountType === 'admin'}
     <div class="lg:col-span-1 h-full">
-      {#if merchantGrowthData}
-        <AdminMerchantGrowthChart growthData={merchantGrowthData} />
-      {:else}
-        <DesignerPayoutInfoCard {minPayoutLimit} {settlementDelayDays} />
-      {/if}
+      {#if merchantGrowthData}<AdminMerchantGrowthChart growthData={merchantGrowthData} />{:else}<DesignerPayoutInfoCard {minPayoutLimit} {settlementDelayDays} />{/if}
     </div>
   {/if}
 </div>
 
-<!-- Modals -->
-<DesignerBankModal
-  showModal={showBankModal}
-  {bankAccount} {isLoading} {apiError}
-  bind:inputBankName bind:inputAccountNumber bind:inputHolderName
-  onSave={saveBankAccount} onClose={() => (showBankModal = false)}
-/>
-
-<DesignerWithdrawModal
-  showModal={showWithdrawModal}
-  {withdrawSuccess} {bankAccount} {bankAccounts}
-  bind:selectedBankAccountId={selectedAccountId}
-  {balance} {availableBalance} {isWithdrawing} {minPayoutLimit}
-  bind:withdrawAmount bind:withdrawError
-  onWithdraw={handleWithdraw} onClose={closeWithdrawModal}
-/>
-
-<!-- Payout History Table -->
+<DesignerBankModal showModal={showBankModal} {bankAccount} {isLoading} {apiError} bind:inputBankName bind:inputAccountNumber bind:inputHolderName onSave={saveBankAccount} onClose={() => (showBankModal = false)} />
+<DesignerWithdrawModal showModal={showWithdrawModal} {withdrawSuccess} {bankAccount} {bankAccounts} bind:selectedBankAccountId={selectedAccountId} {balance} {availableBalance} {isWithdrawing} {minPayoutLimit} bind:withdrawAmount bind:withdrawError onWithdraw={handleWithdraw} onClose={closeWithdrawModal} />
 <DesignerPayoutHistoryTable {payoutHistory} isLoading={isLoadingPayouts} />

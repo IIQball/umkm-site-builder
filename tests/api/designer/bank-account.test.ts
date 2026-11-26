@@ -46,8 +46,8 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(body.success).toBe(false);
+      expect(body.meta.code).toBe('UNAUTHORIZED');
     });
 
     it('returns bank accounts list and primary account if configured', async () => {
@@ -80,7 +80,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.accounts).toHaveLength(1);
       expect(body.data.accounts[0].accountNumber).toBe('1234567890');
       expect(body.data.primaryAccount.id).toBe('ba_1');
@@ -104,7 +104,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data).toBeNull();
     });
   });
@@ -127,8 +127,8 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(401);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(body.success).toBe(false);
+      expect(body.meta.code).toBe('UNAUTHORIZED');
     });
 
     it('returns 400 validation error when input is invalid', async () => {
@@ -149,8 +149,8 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.success).toBe(false);
+      expect(body.meta.code).toBe('VALIDATION_ERROR');
     });
 
     it('adds a new bank account successfully', async () => {
@@ -206,7 +206,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.accountNumber).toBe('1234567890');
       expect(body.data.isPrimary).toBe(true);
     });
@@ -250,8 +250,8 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.message).toContain('Maksimal 3 rekening');
+      expect(body.success).toBe(false);
+      expect(body.message).toContain('Maksimal 3 rekening');
     });
 
     it('rejects adding duplicate bank account', async () => {
@@ -291,8 +291,8 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(400);
       const body = await res.json();
-      expect(body.ok).toBe(false);
-      expect(body.error.message).toContain('sudah terdaftar');
+      expect(body.success).toBe(false);
+      expect(body.message).toContain('sudah terdaftar');
     });
   });
 
@@ -340,7 +340,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.success).toBe(true);
     });
   });
@@ -394,7 +394,7 @@ describe('Designer Bank Account API Endpoint', () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(body.data.isPrimary).toBe(true);
     });
   });

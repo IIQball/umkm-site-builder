@@ -26,7 +26,7 @@ describe('Section Registry Map Architecture', () => {
       expect(sectionRegistry[type].label).toBeTruthy();
       expect(sectionRegistry[type].renderComponent).toBeDefined();
       expect(sectionRegistry[type].layoutPresets.length).toBeGreaterThanOrEqual(
-        type === 'header_announcement' ? 9 : 10
+        type === 'testimonials' ? 8 : 10
       );
     }
   });
@@ -105,7 +105,7 @@ describe('Section Registry Map Architecture', () => {
     ]);
   });
 
-  it('contains all 20 defined layout presets for product_catalog section', () => {
+  it('contains all 10 defined layout presets for product_catalog section', () => {
     const catalogDef = getSectionDefinition('product_catalog');
     expect(catalogDef).toBeDefined();
     expect(catalogDef?.layoutPresets).toEqual([
@@ -119,20 +119,10 @@ describe('Section Registry Map Architecture', () => {
       'price_table_view',
       'lookbook_gallery',
       'flash_sale_countdown',
-      'interactive_filter_tabs',
-      'quick_buy_whatsapp_direct',
-      'bundle_package_tiers',
-      'single_product_deep_focus',
-      'badge_stock_scarcity',
-      'seasonal_hampers_gift',
-      'before_after_product_effect',
-      'digital_download_catalog',
-      'customer_review_paired_card',
-      'minimal_accordion_catalog',
     ]);
   });
 
-  it('contains all 10 defined layout presets for testimonials section', () => {
+  it('contains all 8 defined layout presets for testimonials section', () => {
     const testiDef = getSectionDefinition('testimonials');
     expect(testiDef).toBeDefined();
     expect(testiDef?.layoutPresets).toEqual([
@@ -140,10 +130,8 @@ describe('Section Registry Map Architecture', () => {
       'single_spotlight',
       'chat_bubble_flow',
       'infinite_marquee_scroll',
-      'video_review_cards',
       'social_post_cards',
       'side_by_side_3_cards',
-      'logo_client_cloud',
       'split_rating_stats',
       'carousel_slider',
     ]);

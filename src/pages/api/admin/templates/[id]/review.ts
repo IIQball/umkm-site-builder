@@ -24,10 +24,11 @@ export const handleReview = async (context: Parameters<APIRoute>[0]): Promise<Re
 
     const updatedData = await reviewTemplate(templateId, validatedInput.action, validatedInput.rejectionReason, user.id);
 
-    const res = jsonSuccess(updatedData);
-    const responseBody = await res.json();
-    responseBody.template = updatedData;
-    return Response.json(responseBody, { status: 200 });
+    return jsonSuccess(
+      updatedData,
+      200,
+      validatedInput.action === 'approve' ? 'Template berhasil disetujui' : 'Template berhasil ditolak'
+    );
   });
 };
 

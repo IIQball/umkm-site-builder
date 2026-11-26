@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions, tenantInvitations, activityLogs } from '@/db/index';
+import { db, users, sessions, tenantInvitations, activityLogs, adminWhitelist, designers, wallets } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin, auth } from '@/lib/auth';
 import { manualUserRegistrationSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -44,7 +44,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           name: validated.name,
           email: validated.email,
           password: finalPassword as string,
-          role: validated.role,
         },
         // Empty Headers so it doesn't set cookies on the admin's browser session
         headers: new Headers()
@@ -59,6 +58,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           status: 'pending',
           registeredBy: user.id
         }).where(eq(users.id, newUserId));
+
+        if (validated.role === 'designer') {
+          await db.insert(designers).values({ userId: newUserId, isVerified: true }).onConflictDoNothing();
+          await db.insert(wallets).values({ id: `wal_${crypto.randomUUID()}`, userId: newUserId, balance: 0 }).onConflictDoNothing();
+        }
 
         // Delete any session created by signUpEmail to prevent auto-login
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
@@ -81,6 +85,24 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           expiresAt: expiresAt,
         });
 
+        // If registered user is an admin, also insert into adminWhitelist table
+        if (validated.role === 'admin') {
+          const existingWhitelist = await db
+            .select()
+            .from(adminWhitelist)
+            .where(eq(adminWhitelist.email, validated.email))
+            .limit(1);
+
+          if (existingWhitelist.length === 0) {
+            await db.insert(adminWhitelist).values({
+              id: crypto.randomUUID(),
+              email: validated.email,
+              role: 'admin',
+              addedBy: user.id,
+            });
+          }
+        }
+
         // Add activity log
         await db.insert(activityLogs).values({
           id: crypto.randomUUID(),
@@ -95,8 +117,7 @@ export const POST: APIRoute = async (context): Promise<Response> => {
       }
     } catch (e: unknown) {
       if (e instanceof AppError) throw e;
-      const errorMessage = e instanceof Error ? e.message : 'Error during user registration';
-      throw new AppError(errorMessage, 500);
+      throw e;
     }
 
     return jsonSuccess({ id: newUserId, email: validated.email });

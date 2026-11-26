@@ -110,6 +110,10 @@ Deny by default. A role not listed for an action does not have it.
 | **Platform Settings** | | | | | | | | |
 | platform_settings | read | yes | yes | no | no | no | — | — |
 | platform_settings | update | yes | no | no | no | no | — | — |
+| **Bug Reports** | | | | | | | | |
+| bug_reports | create | yes | yes | yes | yes | yes | — | Rate limited (5 / 5 min) |
+| bug_reports | read | yes | no | no | no | no | — | Strictly `superadmin` |
+| bug_reports | update | yes | no | no | no | no | — | Strictly `superadmin` |
 
 ---
 
@@ -130,10 +134,10 @@ someone else's record. Every handler must explicitly check ownership after role 
 
 | Case | Response | HTTP Code | Reason |
 |---|---|---|---|
-| no session | `{ ok: false, error: { code: 'UNAUTHORIZED', message: 'Please log in' } }` | 401 | User must authenticate first |
-| wrong role | `{ ok: false, error: { code: 'FORBIDDEN', message: 'Your role cannot access this' } }` | 403 | Role lacks permission for action |
-| not owner | `{ ok: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }` | 403 | Avoid confirming record exists (information leak) |
-| wrong state | `{ ok: false, error: { code: 'INVALID_STATE', message: 'Resource is not in a state that permits this action' } }` | 400 | E.g., trying to approve a template that is already published |
+| no session | `{ success: false, data: null, message: 'Silakan masuk terlebih dahulu', meta: { code: 'UNAUTHORIZED' } }` | 401 | User must authenticate first |
+| wrong role | `{ success: false, data: null, message: 'Akses ditolak', meta: { code: 'FORBIDDEN' } }` | 403 | Role lacks permission for action |
+| not owner | `{ success: false, data: null, message: 'Akses ditolak', meta: { code: 'FORBIDDEN' } }` | 403 | Avoid confirming record exists (information leak) |
+| wrong state | `{ success: false, data: null, message: 'Status tidak valid', meta: { code: 'VALIDATION_ERROR' } }` | 400 | E.g., trying to approve a template that is already published |
 
 ---
 

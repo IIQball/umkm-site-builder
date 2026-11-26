@@ -8,6 +8,44 @@
   const _transitions = { fade, fly };
   void _transitions;
 
+  function topLayerPopover(node: HTMLElement, _count: number) {
+    const canPopover = typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype;
+
+    const promote = () => {
+      if (!canPopover) return;
+      if (!node.hasAttribute('popover')) {
+        node.setAttribute('popover', 'manual');
+      }
+      try {
+        const el = node as HTMLElement & { showPopover?: () => void };
+        if (!node.matches(':popover-open')) {
+          el.showPopover?.();
+        }
+      } catch {
+        // Fallback to z-[9999] fixed stacking
+      }
+    };
+
+    promote();
+
+    return {
+      update() {
+        promote();
+      },
+      destroy() {
+        if (!canPopover) return;
+        try {
+          const el = node as HTMLElement & { hidePopover?: () => void };
+          if (node.matches(':popover-open')) {
+            el.hidePopover?.();
+          }
+        } catch {
+          // Ignore teardown errors
+        }
+      },
+    };
+  }
+
   onMount(() => {
     if (typeof window === 'undefined') return;
 
@@ -70,7 +108,8 @@
 
 {#if $toast.length > 0}
   <div
-    class="toast toast-top toast-end z-[9999] p-4 flex flex-col gap-2.5 max-w-sm sm:max-w-md pointer-events-none"
+    use:topLayerPopover={$toast.length}
+    class="fixed top-4 right-4 left-auto bottom-auto m-0 bg-transparent border-0 z-[9999] p-0 flex flex-col gap-2.5 w-[calc(100vw-2rem)] sm:w-full sm:max-w-md pointer-events-none"
     aria-live="polite"
     aria-atomic="true"
   >
@@ -78,14 +117,14 @@
       <div
         in:fly={{ y: -20, duration: 250 }}
         out:fade={{ duration: 200 }}
-        class={`alert shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
+        class={`w-full shadow-xl flex items-center gap-3 pointer-events-auto border py-3 px-4 rounded-2xl ${
           item.type === 'success'
             ? 'bg-success text-white border-success/30 shadow-success/20'
             : item.type === 'error'
             ? 'bg-error text-white border-error/30 shadow-error/20'
             : item.type === 'warning'
             ? 'bg-orange text-white border-orange-light/30 shadow-orange/20'
-            : 'bg-primary text-slate-950 border-primary-light/30 shadow-primary/20'
+            : 'bg-primary text-main border-primary-light/30 shadow-primary/20'
         }`}
         role="alert"
       >

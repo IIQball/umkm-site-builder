@@ -116,7 +116,7 @@ describe('POST /api/designer/bank/validate', () => {
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.success).toBe(false);
-    expect(data.isValid).toBe(false);
+    expect(data.meta?.details?.isValid).toBe(false);
   });
 
   it('detects name mismatch and returns warning when account holder differs from profile', async () => {
@@ -137,9 +137,9 @@ describe('POST /api/designer/bank/validate', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.success).toBe(true);
-    expect(data.isValid).toBe(true);
-    expect(data.nameMismatch).toBe(true);
-    expect(data.warning).toContain('Nama pemilik rekening berbeda');
+    expect(data.data.isValid).toBe(true);
+    expect(data.data.nameMismatch).toBe(true);
+    expect(data.data.warning).toContain('Nama pemilik rekening berbeda');
   });
 
   it('returns 400 when input schema is invalid', async () => {
@@ -236,8 +236,8 @@ describe('POST /api/designer/bank/validate', () => {
 
       const data = await res.json();
       expect(data.success).toBe(true);
-      expect(data.isValid).toBe(true);
-      expect(typeof data.accountHolderName).toBe('string');
+      expect(data.data.isValid).toBe(true);
+      expect(typeof data.data.accountHolderName).toBe('string');
     }
   });
 

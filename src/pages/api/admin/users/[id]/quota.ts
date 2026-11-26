@@ -3,6 +3,7 @@ import { db, stores, notifications } from '@/db';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { handleApiRoute, AppError, jsonSuccess } from '@/lib/utils';
+import { logActivity } from '@/services/audit.service';
 import { z } from 'zod';
 
 const QuotaSchema = z.object({
@@ -47,6 +48,18 @@ export const PUT: APIRoute = async (context): Promise<Response> => {
       title: 'Peningkatan Kuota Disetujui',
       message: `Admin telah menyetujui dan memperbarui kuota toko Anda menjadi ${maxProducts} Produk dan ${maxCategories} Kategori.`,
       metadata: { storeId: store.id }
+    });
+
+    await logActivity({
+      userId: user.id,
+      storeId: store.id,
+      action: 'Update User Quota',
+      details: {
+        targetUserId: userId,
+        storeId: store.id,
+        maxProducts,
+        maxCategories,
+      },
     });
 
     return jsonSuccess({ message: 'Kuota berhasil diperbarui' }, 200);

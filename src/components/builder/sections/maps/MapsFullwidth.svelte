@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { ArrowRight } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
   import type { MapBranchItem } from './maps.helpers';
@@ -21,6 +22,27 @@
   export let ctaIcon: string = 'Navigation';
   export let nodeStyles: Record<string, Record<string, string>> = {};
   export let elementOrder: string[] = [];
+
+  let iframeContainerEl: HTMLElement;
+  let isMapVisible = false;
+
+  onMount(() => {
+    if (!iframeContainerEl || typeof IntersectionObserver === 'undefined') {
+      isMapVisible = true;
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          isMapVisible = true;
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(iframeContainerEl);
+    return () => observer.disconnect();
+  });
 
   $: hasIframe = !elementOrder.length || elementOrder.includes('maps_iframe') || elementOrder.includes('iframe') || elementOrder.includes('map');
   $: hasInfoCard = !elementOrder.length || elementOrder.includes('maps_info_card') || elementOrder.includes('info_card') || elementOrder.includes('card');
@@ -63,6 +85,7 @@
 
 {#if hasIframe}
 <div
+  bind:this={iframeContainerEl}
   data-node="maps_iframe"
   data-node-id="maps_iframe"
   role="button"
@@ -74,14 +97,23 @@
   }`}
   style={`border-radius: ${iframeStyle.borderRadius || '1rem'}; margin-top: ${iframeStyle.marginTop}; margin-bottom: ${iframeStyle.marginBottom}; ${iframeStyle.borderColor ? `border-color: ${iframeStyle.borderColor} !important;` : ''}`}
 >
-  <iframe
-    title="Peta Lokasi Toko"
-    src={mapEmbedUrl}
-    class="w-full cq-map-frame-height border-0"
-    style={mapHeight ? `min-height: ${mapHeight}` : ''}
-    loading="lazy"
-    allowfullscreen
-  ></iframe>
+  {#if isMapVisible}
+    <iframe
+      title="Peta Lokasi Toko"
+      src={mapEmbedUrl}
+      class="w-full cq-map-frame-height border-0"
+      style={mapHeight ? `min-height: ${mapHeight}` : ''}
+      loading="lazy"
+      allowfullscreen
+    ></iframe>
+  {:else}
+    <div
+      class="w-full cq-map-frame-height flex items-center justify-center bg-[var(--theme-surface,var(--color-card-base))] text-[var(--color-text-muted)] text-sm"
+      style={mapHeight ? `min-height: ${mapHeight}` : ''}
+    >
+      <span>Memuat peta lokasi...</span>
+    </div>
+  {/if}
 
   {#if hasInfoCard}
   <!-- Floating Glassmorphism Card -->

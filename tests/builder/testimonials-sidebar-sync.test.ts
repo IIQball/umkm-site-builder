@@ -110,12 +110,6 @@ describe('Testimonials Section Synchronization & Heading Hierarchy', () => {
     expect(slots).toContain('testi_stats');
     expect(getTestimonialsSlotLabel('testi_stats')).toBe('Skor Rating Agregat');
   });
-
-  it('supports special preset slots like logo_client_cloud', () => {
-    const slots = getDefaultTestimonialsSlots('logo_client_cloud', sampleTestimonials);
-    expect(slots).toContain('testi_logo_cloud');
-    expect(getTestimonialsSlotLabel('testi_logo_cloud')).toBe('Daftar Logo Kemitraan');
-  });
 });
 
 describe('Testimonial Styles & Margin Gating Logic', () => {
@@ -155,11 +149,9 @@ describe('Testimonial Styles & Margin Gating Logic', () => {
       'masonry_grid',
       'side_by_side_3_cards',
       'social_post_cards',
-      'video_review_cards',
       'infinite_marquee_scroll',
       'carousel_slider',
       'split_rating_stats',
-      'logo_client_cloud',
     ];
 
     const isVerticalStackCard = (preset: string) =>

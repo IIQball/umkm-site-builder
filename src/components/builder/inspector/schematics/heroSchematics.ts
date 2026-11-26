@@ -63,6 +63,36 @@ export const getHeroSchematicSvg = (presetId: string): string => {
     </svg>`;
   }
 
+  // 5b. Floating Cards Showcase (Judul tengah di atas, 3 kartu miring melayang di bawah)
+  if (id === 'floating_cards_showcase') {
+    return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="240" height="135" rx="8" fill="#090d16"/>
+      <rect x="96" y="10" width="48" height="5" rx="2.5" fill="#3b82f6" opacity="0.8"/>
+      <rect x="48" y="19" width="144" height="10" rx="3" fill="#f8fafc"/>
+      <rect x="72" y="32" width="96" height="5" rx="2" fill="#64748b"/>
+      <rect x="98" y="41" width="44" height="12" rx="4" fill="#3b82f6"/>
+      <!-- 3 floating cards below -->
+      <g transform="translate(18, 62) rotate(-3 30 30)">
+        <rect width="60" height="58" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <rect x="8" y="10" width="16" height="16" rx="4" fill="#3b82f6" opacity="0.3"/>
+        <rect x="8" y="32" width="42" height="6" rx="2" fill="#f8fafc"/>
+        <rect x="8" y="42" width="36" height="4" rx="1.5" fill="#64748b"/>
+      </g>
+      <g transform="translate(90, 58)">
+        <rect width="60" height="62" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+        <rect x="8" y="10" width="16" height="16" rx="4" fill="#3b82f6"/>
+        <rect x="8" y="34" width="44" height="6" rx="2" fill="#f8fafc"/>
+        <rect x="8" y="44" width="38" height="4" rx="1.5" fill="#64748b"/>
+      </g>
+      <g transform="translate(162, 62) rotate(3 30 30)">
+        <rect width="60" height="58" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+        <rect x="8" y="10" width="16" height="16" rx="4" fill="#10b981" opacity="0.3"/>
+        <rect x="8" y="32" width="42" height="6" rx="2" fill="#f8fafc"/>
+        <rect x="8" y="42" width="36" height="4" rx="1.5" fill="#64748b"/>
+      </g>
+    </svg>`;
+  }
+
   // 6. Bento Masonry Hero (Grid asimetris)
   if (id === 'bento_masonry_hero') {
     return `<svg viewBox="0 0 240 135" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">

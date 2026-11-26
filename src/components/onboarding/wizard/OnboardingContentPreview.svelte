@@ -1,8 +1,20 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding/Pengaturan Toko
+  untuk keperluan fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pratinjau visual dan kustomisasi desain dipusatkan pada modul Template Builder.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai komponen preview live
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Monitor, Tablet, Smartphone, Layout } from 'lucide-svelte';
+  import { Monitor, Tablet, Smartphone, Layout, Moon, Sun } from 'lucide-svelte';
   import type { TemplateConfig } from '@/schemas';
   import StorefrontDynamicPage from '@/components/storefront/StorefrontDynamicPage.svelte';
+  import { buildCanvasCssVars } from '@/components/builder/canvas/canvasCss.helpers';
 
   export let baseConfig: TemplateConfig;
   export let finalMergedConfig: TemplateConfig;
@@ -21,6 +33,7 @@
   export let subdomain: string = '';
   export let mainDomain: string = 'localhost:4321';
   export let canvasCssVars: string = '';
+  export let isDarkPreview: boolean = false;
 
   type ViewMode = 'desktop' | 'tablet' | 'mobile';
   export let previewViewMode: ViewMode = 'desktop';
@@ -35,6 +48,7 @@
   let containerWidth = 0;
   let canvasHeight = 0;
 
+  $: effectiveCssVars = buildCanvasCssVars(finalMergedConfig?.theme ?? {}, isDarkPreview, previewViewMode) || canvasCssVars;
   $: targetWidth = previewViewMode === 'desktop' ? 1200 : previewViewMode === 'tablet' ? 768 : 375;
   $: paddingHorizontal = 24;
   $: availableWidth = Math.max(0, containerWidth - paddingHorizontal);
@@ -49,6 +63,9 @@
   }
 
   onMount(() => {
+    if (typeof document !== 'undefined') {
+      isDarkPreview = document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
+    }
     const handleLinkClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement)?.closest('a');
       if (target) e.preventDefault();
@@ -76,18 +93,34 @@
       <span class="text-muted shrink-0 text-xs">({Math.round(scaleRatio * 100)}%)</span>
     </div>
 
-    <!-- Device Viewport Switcher -->
-    <div class="flex items-center bg-card p-0.5 rounded-lg border border-light gap-0.5 shrink-0">
-      {#each VIEW_MODES as mode}
-        <button
-          type="button"
-          on:click={() => (previewViewMode = mode.id)}
-          class="p-1 rounded text-xs transition-colors cursor-pointer {previewViewMode === mode.id ? 'bg-primary text-primary-content shadow-2xs' : 'text-secondary hover:text-main'}"
-          title="Tampilan {mode.label}"
-        >
-          <svelte:component this={mode.icon} size={13} />
-        </button>
-      {/each}
+    <!-- Device Viewport Switcher & Theme Preview Toggle -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button
+        type="button"
+        on:click={() => (isDarkPreview = !isDarkPreview)}
+        class="p-1 rounded text-xs transition-colors cursor-pointer bg-card border border-light text-secondary hover:text-main"
+        title={isDarkPreview ? "Mode Terang" : "Mode Gelap"}
+        aria-label="Alihkan tema preview"
+      >
+        {#if isDarkPreview}
+          <Sun size={13} class="text-warning" />
+        {:else}
+          <Moon size={13} class="text-secondary" />
+        {/if}
+      </button>
+
+      <div class="flex items-center bg-card p-0.5 rounded-lg border border-light gap-0.5 shrink-0">
+        {#each VIEW_MODES as mode}
+          <button
+            type="button"
+            on:click={() => (previewViewMode = mode.id)}
+            class="p-1 rounded text-xs transition-colors cursor-pointer {previewViewMode === mode.id ? 'bg-primary text-primary-content shadow-2xs' : 'text-secondary hover:text-main'}"
+            title="Tampilan {mode.label}"
+          >
+            <svelte:component this={mode.icon} size={13} />
+          </button>
+        {/each}
+      </div>
     </div>
   </div>
 
@@ -107,8 +140,9 @@
         >
           <div
             bind:clientHeight={canvasHeight}
-            class="shadow-2xl bg-canvas text-main rounded-xl border border-light overflow-hidden transition-transform duration-300 ease-out flex flex-col"
-            style="{canvasCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
+            data-theme={isDarkPreview ? 'dark' : 'light'}
+            class="shadow-2xl bg-canvas text-main rounded-xl border border-light overflow-hidden transition-transform duration-300 ease-out flex flex-col {isDarkPreview ? 'dark' : ''}"
+            style="{effectiveCssVars}; width: {targetWidth}px; transform: scale({scaleRatio}); transform-origin: top left; position: {scaleRatio < 1 ? 'absolute' : 'relative'}; top: 0; left: 0;"
           >
             <StorefrontDynamicPage
               config={finalMergedConfig}

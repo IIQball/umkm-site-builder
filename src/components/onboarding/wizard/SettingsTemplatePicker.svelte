@@ -1,3 +1,14 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding/Pengaturan Toko
+  untuk keperluan fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pemilihan template dan modifikasi tata letak dipusatkan pada modul Template Builder.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai komponen picker template
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { Check, ExternalLink, Layout } from "lucide-svelte";
   import type { TemplateItem } from "../onboarding.types";

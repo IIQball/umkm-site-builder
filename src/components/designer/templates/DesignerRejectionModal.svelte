@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Modal, Button } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
 
   export let selectedRejection: {
     id: string;
@@ -15,10 +16,9 @@
   const loadRealTimeLimit = async () => {
     try {
       isLoadingLimit = true;
-      const res = await fetch('/api/public/commission');
-      const json = await res.json();
-      if (json.ok && json.data?.maxTemplateRevisions !== undefined) {
-        maxRevisions = Number(json.data.maxTemplateRevisions);
+      const res = await apiFetch<{ maxTemplateRevisions?: number }>('/api/public/commission');
+      if (res.success && res.data?.maxTemplateRevisions !== undefined) {
+        maxRevisions = Number(res.data.maxTemplateRevisions);
       }
     } catch {
       // Keep default 3
@@ -43,7 +43,7 @@
 >
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-error/15 border border-error/25 text-error flex items-center justify-center flex-shrink-0 shadow-2xs">
         <span class="material-symbols-outlined text-lg">feedback</span>
       </div>
       <div>
@@ -69,10 +69,10 @@
     </div>
 
     <!-- Real-Time Info Batas Revisi -->
-    <div class="p-4 rounded-2xl border {canRevise ? 'bg-amber-500/10 border-amber-500/25 text-amber-950 dark:text-amber-200' : 'bg-rose-500/10 border-rose-500/25 text-rose-950 dark:text-rose-200'} space-y-2">
+    <div class="p-4 rounded-2xl border {canRevise ? 'bg-warning/10 border-warning/25 text-warning' : 'bg-error/10 border-error/25 text-error'} space-y-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-base {canRevise ? 'text-amber-500' : 'text-rose-500'}">
+          <span class="material-symbols-outlined text-base {canRevise ? 'text-warning' : 'text-error'}">
             {canRevise ? 'history_edu' : 'block'}
           </span>
           <span class="text-xs font-bold font-heading">

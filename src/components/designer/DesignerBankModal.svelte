@@ -2,6 +2,7 @@
   import { onDestroy } from 'svelte';
   import type { BankAccount } from '@/types';
   import { Modal, Input, Select, Button } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { BANK_OPTIONS, resolveBankKey } from './bankBranding.helpers';
 
   export let showModal = false;
@@ -51,23 +52,28 @@
     activeAbortController = controller;
 
     try {
-      const res = await fetch('/api/designer/bank/validate', {
+      const res = await apiFetch<{
+        isValid?: boolean;
+        accountHolderName?: string;
+        nameMismatch?: boolean;
+        warning?: string;
+      }>('/api/designer/bank/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bankCode: bankKey, accountNumber: cleanNum }),
         signal: controller.signal,
+        fallbackError: 'Koneksi ke server validasi terputus. Silakan coba lagi.',
       });
 
-      if (controller.signal.aborted) return;
-      const data = await res.json().catch(() => ({}));
-      if (controller.signal.aborted) return;
+      if (res.errorCode === 'ABORTED' || controller.signal.aborted) return;
 
-      if (res.ok && data.success && data.isValid) {
+      const bodyData = res.data;
+      if (res.success && bodyData?.isValid) {
         isVerified = true;
         validationError = '';
-        inputHolderName = String(data.accountHolderName || '').toUpperCase();
-        nameMismatch = Boolean(data.nameMismatch);
-        nameMismatchWarning = data.warning || '';
+        inputHolderName = String(bodyData.accountHolderName || '').toUpperCase();
+        nameMismatch = Boolean(bodyData.nameMismatch);
+        nameMismatchWarning = bodyData.warning || '';
         lastValidatedKey = `${inputBankName}:${cleanNum}`;
         failedAttempts = 0;
         isRateLimited = false;
@@ -75,13 +81,8 @@
         isVerified = false; inputHolderName = ''; nameMismatch = false; nameMismatchWarning = '';
         failedAttempts += 1;
         if (res.status === 429) isRateLimited = true;
-        validationError = data.message || 'Nomor rekening tidak terdaftar pada bank yang dipilih';
+        validationError = res.message || 'Nomor rekening tidak terdaftar pada bank yang dipilih';
       }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') return;
-      isVerified = false; inputHolderName = ''; nameMismatch = false; nameMismatchWarning = '';
-      failedAttempts += 1;
-      validationError = 'Koneksi ke server validasi terputus. Silakan coba lagi.';
     } finally {
       if (activeAbortController === controller) { activeAbortController = null; isValidating = false; }
     }
@@ -132,7 +133,7 @@
 >
   <svelte:fragment slot="header">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white dark:bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+      <div class="w-10 h-10 rounded-2xl bg-main text-canvas dark:bg-nested flex items-center justify-center flex-shrink-0 shadow-2xs">
         <span class="material-symbols-outlined text-lg">account_balance</span>
       </div>
       <div>
@@ -167,7 +168,7 @@
           on:input={handleAccountInput}
           on:blur={handleBlur}
           size="sm"
-          className="font-mono font-bold"
+          class="font-mono font-bold"
         />
 
         <!-- Validation Status Indicator & Badges -->
@@ -178,12 +179,12 @@
               <span>Memverifikasi rekening ke sistem bank...</span>
             </div>
           {:else if isVerified}
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-full text-2xs font-bold font-sans tracking-wide">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-success/10 border border-success/30 text-success rounded-full text-2xs font-bold font-sans tracking-wide">
               <span class="material-symbols-outlined text-xs">verified</span>
               <span>Rekening Terverifikasi Resmi</span>
             </div>
           {:else if validationError}
-            <div class="flex items-center gap-1 text-2xs text-red-500 font-medium">
+            <div class="flex items-center gap-1 text-2xs text-error font-medium">
               <span class="material-symbols-outlined text-xs">error</span>
               <span>{validationError}</span>
             </div>

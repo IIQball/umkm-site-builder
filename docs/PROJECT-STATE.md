@@ -1,17 +1,29 @@
 # PROJECT STATE — Live Checkpoint
 
-Status: LIVE · Updated: 2026-10-09 by feature/h14-fauzan-stress-test
+Status: LIVE · Updated: 2026-10-30 by feature/h10-fauzan-final-biling-audit
 
 The handoff file between sessions. Read it second, right after `README.md`. Update it at
 the end of every session that changed anything — this is part of the definition of done.
 
 Keep it short and current. This is a checkpoint, not a changelog.
 
+- **Xendit Invoice Idempotency & Merchant Credit Refresh:**
+  - Invoice webhook status transition and fulfillment now run atomically; only one callback can claim a transaction's transition to `success`. AI credit balance and purchased totals use atomic upsert increments.
+  - AI credit checkout returns to `/dashboard/ai` with invoice status polling; once paid fulfillment commits, the merchant credit header refetches the balance.
+  - Added concurrent webhook and AI checkout return-flow coverage; API idempotency documentation updated.
+
+- **H8 Admin Analytics Formula Unit Tests & Responsive Chart Reactivity ([`tests/admin/analytics-formula.test.ts`](tests/admin/analytics-formula.test.ts), [`src/components/admin/ai/CostTrendChart.svelte`](src/components/admin/ai/CostTrendChart.svelte)):**
+  - **Comprehensive Backend Unit Testing**: Created `tests/admin/analytics-formula.test.ts` (31 tests, 223 assertions) strictly validating `calculateBudgetUsedPercentage` and `calculateCostPerPercentUsage` under edge cases: zero division (limit = 0, spent = 0), negative nominals, non-finite inputs (NaN, Infinity), micro-spending rounding, over-budget ratios (>100%, 150%, 500%), and enterprise scale (billions IDR).
+  - **Frontend Chart Layout Reactivity**: Tested `computeBarChartLayout` across mobile viewports (320px, 375px, 414px, 480px) and wide screens (768px, 1024px, 1440px, 1920px), verifying strictly positive usable dimensions, bar width limits (4px to 36px), centered slot positions, ascending coordinate order, and bounded tooltip ratio coordinates [0%, 100%].
+  - **Mobile Tooltip Alignment Fix**: Moved floating tooltip card inside the scrollable relative container (`min-w-[500px] relative`) in `CostTrendChart.svelte`, preventing tooltip position offset from drifting during horizontal scroll on small screens.
+  - **Quality Gates**: All tests passing (`bun test`), all files strictly under 300 lines (`analytics-formula.test.ts` 274 lines, `CostTrendChart.svelte` 257 lines).
+
+
 - **H14 Multi-Domain SSR Stress Test & CLS Optimization ([`scripts/load-test.ts`](scripts/load-test.ts), [`src/lib/performance/cls.helpers.ts`](src/lib/performance/cls.helpers.ts), [`src/components/storefront/StorefrontDynamicPage.svelte`](src/components/storefront/StorefrontDynamicPage.svelte), [`docs/prd/features/h14-stress-test.md`](docs/prd/features/h14-stress-test.md)):**
   - **Load Testing Script**: `scripts/load-test.ts` simulates 50 concurrent store domains with 5 requests each (250 total). Validates SSR response time SLA: p95 < 1000ms, success rate ≥ 95%. Run via `bun run load-test`.
   - **CLS Optimization Helpers**: `src/lib/performance/cls.helpers.ts` provides utilities to prevent layout shifts: `getImageContainerStyle()` (reserve space for images), `getProductCardStyle()` (fix product card heights), `getHeroSectionStyle()` (reserve space for hero), `monitorCLS()` (real-time CLS monitoring via PerformanceObserver).
   - **StorefrontDynamicPage Integration**: Added `monitorCLS(0.05)` on mount to monitor layout shifts > 5% in browser console.
-  - **Feature Spec & Manual Testing Guide**: `docs/prd/features/h14-stress-test.md` and `docs/H14_MANUAL_TESTING_GUIDE.md` provide complete specifications and step-by-step manual testing instructions (load test, CLS monitoring, Lighthouse audit, regression check).
+  - **Feature Spec**: `docs/prd/features/h14-stress-test.md` provides complete specifications for load test, CLS monitoring, Lighthouse audit, and regression check.
   - **Status**: Ready for manual testing. Pending user walkthrough before PR creation to `dev`.
   - 0 typecheck errors (`bun run type-check`), 0 lint warnings (`bun run lint`). Load test framework ready; CLS monitoring active in browser.
 
@@ -700,5 +712,11 @@ Single-use kickoff files and selection procedures have completed their job. The 
 | G3 vp / Vite Plus                              | Plain Vite + Bun scripts (no vp)                     | docs/tech/architecture.md          |
 | G4 git mode (strict / light)                   | Strict (main protected, dev integration, PR-only)    | docs/tech/architecture.md          |
 | G5 auth pools and roles                        | 5 roles: superadmin, admin, designer, tenant, public | docs/tech/permissions-matrix.md    |
-| G6 never-push list                             | .env*, secrets, dumps, uploaded media, credentials   | .gitignore + docs/tech/security.md |
-| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert          | docs/tech/architecture.md          |
+| G6 never-push list | .env*, secrets, dumps, uploaded media, credentials | .gitignore + docs/tech/security.md |
+| G7 media storage (Cloudinary / R2 / R2+Images) | Cloudinary Free Tier with WebP auto-convert | docs/tech/architecture.md |
+
+## Pre-Deploy Hardening & Cross-App Bug Reporting Checkpoint
+
+- **End-to-End Bug Reporting:** Added `bug_reports` table + indexed migration (`drizzle/0013_bug_reports.sql`), `src/schemas/bug-report.schema.ts`, `src/services/bug-report.service.ts`, rate-limited CORS-aware ingestion (`POST /api/public/bug-reports`), strict `superadmin` triage APIs (`/api/superadmin/bug-reports`, `/api/superadmin/bug-reports/[id]`), `/superadmin/bug-reports` UI (`BugReportsManager.svelte`, `BugReportDetailModal.svelte`), and client triggers/modals in both `umkm-site-builder` and `pinoka-landing-page`.
+- **API Envelope & Error Sanitization:** Standardized all endpoints to `{ success: boolean, data: T | null, message: string, meta?: object }`; centralized error classification, DB timeout wrapper (`withDbTimeout`), runtime env auditing (`env-validator.ts`), unhandled rejection hooks, and strict separation between structured backend `errorLog` and safe user-facing messages.
+- **UX, Notification & Responsive Modularity:** Eliminated all native `window.alert`/`confirm`/`prompt` and stray `console.log`; centralized `ToastContainer.svelte` top-layer popover; added keyboard-accessible responsive `Table.svelte` scrolling; refactored all `src/` files >300 LOC in both repos (only `src/db/schema.ts` remains exempt).

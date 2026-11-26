@@ -6,9 +6,10 @@
 import { db } from '@/lib/db/client';
 import { transactions, users, templates, userTemplates } from '@/db/schema';
 import { xenditClient } from '@/lib/finance/xendit';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { AppError, formatCurrency } from '@/lib/utils';
 import { idempotencyManager } from '@/lib/finance/idempotency';
+import { withTransaction } from '@/lib/db/transaction';
 import type { TransactionInitiateInput, TransactionRecord, TransactionType, PaymentStatus } from '@/types';
 import {
   mapTransactionToRecord,
@@ -20,6 +21,7 @@ import {
   formatInvoiceNum,
   grantFreeTemplate,
   getTransactionByExternalId,
+  expireStalePendingTransactions,
 } from './transaction.helpers';
 import { getAdminServiceFee } from './commission.service';
 
@@ -56,15 +58,23 @@ export class TransactionService {
         : 0;
       const totalAmount = input.adminFee !== undefined ? input.amount : input.amount + adminFee;
       const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const returnUrl = input.type === 'ai_credit_purchase'
+        ? `${baseUrl}/dashboard/ai?creditPurchase=${encodeURIComponent(invoiceNum)}`
+        : `${baseUrl}/checkout/${invoiceNum}?status=success`;
+      const failureUrl = input.type === 'ai_credit_purchase'
+        ? `${baseUrl}/dashboard/ai?creditPurchase=${encodeURIComponent(invoiceNum)}`
+        : `${baseUrl}/checkout/${invoiceNum}?status=failed`;
 
       const xenditInvoice = await xenditClient.createInvoice({
         invoiceNum,
         amount: totalAmount,
         payerEmail: user[0].email,
-        description: 'Payment for Template Purchase',
+        description: input.type === 'ai_credit_purchase'
+          ? 'Pembelian Paket Kredit AI Toko'
+          : (input.type === 'store_quota_purchase' ? 'Pembelian Paket Kuota Toko' : 'Payment for Template Purchase'),
         expiryDate,
-        successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
-        failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
+        successRedirectUrl: returnUrl,
+        failureRedirectUrl: failureUrl,
         metadata: {
           userId,
           type: input.type,
@@ -174,37 +184,21 @@ export class TransactionService {
         successRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=success`,
         failureRedirectUrl: `${baseUrl}/checkout/${invoiceNum}?status=failed`,
         metadata: {
-          userId,
-          type: 'template_purchase',
-          templateId: template.id,
-          assistedBy: assistedBy || null,
-          adminFee,
-          idempotencyKey: cleanKey || null,
+          userId, type: 'template_purchase', templateId: template.id,
+          assistedBy: assistedBy || null, adminFee, idempotencyKey: cleanKey || null,
         },
       });
 
       await db.insert(transactions).values({
         id: `txn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        userId,
-        type: 'template_purchase',
-        amount: totalAmount,
-        adminFee,
-        assistedBy: assistedBy || null,
-        status: 'pending',
-        templateId: template.id,
-        externalId: invoiceNum,
-        paymentGatewayRef: xenditInvoice.id,
-        paymentChannel: null,
-        createdAt: new Date(),
+        userId, type: 'template_purchase', amount: totalAmount, adminFee,
+        assistedBy: assistedBy || null, status: 'pending', templateId: template.id,
+        externalId: invoiceNum, paymentGatewayRef: xenditInvoice.id, paymentChannel: null, createdAt: new Date(),
       });
 
       return {
         isFree: false,
-        data: {
-          invoiceUrl: xenditInvoice.invoiceUrl || '',
-          invoiceId: xenditInvoice.id,
-          externalId: invoiceNum,
-        },
+        data: { invoiceUrl: xenditInvoice.invoiceUrl || '', invoiceId: xenditInvoice.id, externalId: invoiceNum },
       };
     };
 
@@ -243,23 +237,28 @@ export class TransactionService {
       return { status: 'ignored', message: 'Already processed' };
     }
 
-    let newStatus: PaymentStatus = 'pending';
-    if (isPaid) newStatus = 'success';
-    else if (status === 'FAILED') newStatus = 'failed';
-    else if (status === 'EXPIRED') newStatus = 'expired';
-    else if (status === 'CANCELED') newStatus = 'canceled';
+    const statusMap: Record<string, PaymentStatus> = {
+      FAILED: 'failed',
+      EXPIRED: 'expired',
+      CANCELED: 'canceled',
+    };
+    const newStatus: PaymentStatus = isPaid ? 'success' : (statusMap[status] ?? 'pending');
 
-    await db.update(transactions).set({
-      status: newStatus,
-      paymentGatewayRef: payload.id,
-      paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
-    }).where(eq(transactions.id, transaction.id));
+    const processed = await withTransaction(async (tx) => {
+      const [claimedTransaction] = await tx.update(transactions).set({
+        status: newStatus,
+        paymentGatewayRef: payload.id,
+        paymentChannel: payload.payment_channel || payload.payment_method || 'xendit',
+      }).where(and(eq(transactions.id, transaction.id), ne(transactions.status, 'success'))).returning();
 
-    if (isPaid) {
-      await fulfillPaidTransaction(transaction);
-    }
+      if (!claimedTransaction) return false;
+      if (isPaid) await fulfillPaidTransaction(claimedTransaction, tx);
+      return true;
+    });
 
-    return { status: 'success', message: 'Webhook processed successfully' };
+    return processed
+      ? { status: 'success', message: 'Webhook processed successfully' }
+      : { status: 'ignored', message: 'Already processed' };
   }
 
   async getTransactionDetails(externalId: string): Promise<TransactionRecord | null> {
@@ -267,20 +266,24 @@ export class TransactionService {
     return tx ? mapTransactionToRecord(tx) : null;
   }
 
-  async getInvoiceUrl(externalId: string): Promise<string | null> {
+  getInvoiceUrl(externalId: string): Promise<string | null> {
     return fetchInvoiceUrl(externalId);
   }
 
-  async getTenantOrders(userId: string) {
+  getTenantOrders(userId: string) {
     return queryTenantOrders(userId);
   }
 
-  async getDesignerIncomingOrders(designerId: string) {
+  getDesignerIncomingOrders(designerId: string) {
     return queryDesignerIncomingOrders(designerId);
   }
 
   formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  expireStalePendingTransactions(maxHours: number = 24) {
+    return expireStalePendingTransactions(maxHours);
   }
 }
 

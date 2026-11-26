@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TemplateTheme } from '@/schemas';
-  import { Button } from '@/components/ui';
   import { RADIUS_PRESETS } from '@/components/tokens/radius';
+  import { Button } from '@/components/ui';
 
   export let theme: TemplateTheme;
   export let onButtonVariantChange: (variantKey: string, key: string, value: string) => void = () => {};
@@ -45,13 +45,13 @@
 <div class="space-y-5 text-xs">
   <!-- 1. Global Border Radius -->
   <div>
-    <div class="flex items-center justify-between mb-1.5">
+    <div class="flex items-center justify-between mb-2">
       <span class="font-semibold text-base-content/80 text-[11px]">Global Border Radius</span>
-      <span class="text-[10px] font-mono font-medium text-primary px-1.5 py-0.5 rounded bg-primary/10">
+      <span class="text-[10px] font-mono font-medium text-primary px-2 py-0.5 rounded-full bg-primary/10">
         {currentRadius}
       </span>
     </div>
-    <div class="grid grid-cols-3 gap-1 bg-base-200/70 p-1 rounded-xl border border-base-300 text-[11px]">
+    <div class="grid grid-cols-3 gap-1.5 bg-base-200/60 p-1.5 rounded-xl border border-base-300 text-[11px]">
       {#each RADIUS_PRESETS as rp}
         {@const valStr = getRadiusString(rp.value)}
         <Button
@@ -62,7 +62,7 @@
           class={`!py-1.5 !px-2 !h-auto !min-h-0 rounded-lg font-medium text-center ${
             currentRadius === valStr
               ? 'font-bold shadow-xs'
-              : 'text-base-content/60 hover:text-base-content hover:bg-base-100/50'
+              : 'text-base-content/70 hover:text-base-content hover:bg-base-100/50'
           }`}
         >
           {rp.label}
@@ -90,25 +90,23 @@
 
       <div class="p-3.5 bg-base-200/40 rounded-xl border border-base-300 space-y-3">
         <!-- Header & Badge -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5">
-            <span class="font-semibold text-base-content text-xs">{cfg.title}</span>
-            <span class="badge badge-neutral badge-xs font-medium">
-              {cfg.badge}
-            </span>
-          </div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="font-semibold text-base-content text-xs">{cfg.title}</span>
+          <span class="badge badge-neutral badge-xs font-medium">
+            {cfg.badge}
+          </span>
         </div>
 
         <p class="text-[10.5px] text-base-content/60 leading-relaxed">{cfg.desc}</p>
 
         <!-- Live Visual Preview -->
-        <div class="p-3 rounded-lg bg-base-100/90 border border-base-200 flex items-center justify-center min-h-[56px]">
+        <div class="p-4 rounded-xl bg-base-100/90 border border-base-200 flex items-center justify-center min-h-[58px]">
           {#if cfg.type === 'primary'}
             <button
               type="button"
               tabindex="-1"
               style="border-radius: {currentRadius}; background-color: {primaryColor}; color: {activeColor};"
-              class="btn btn-sm btn-primary h-9 px-5 text-xs font-heading font-semibold shadow-xs inline-flex items-center justify-center gap-1.5 cursor-default select-none pointer-events-none transition-all"
+              class="px-5 py-2 text-xs font-heading font-semibold shadow-xs inline-flex items-center justify-center gap-1.5 cursor-default select-none pointer-events-none transition-all"
             >
               <span>Tombol Utama</span>
             </button>
@@ -116,8 +114,8 @@
             <button
               type="button"
               tabindex="-1"
-              style="border-radius: {currentRadius}; background-color: transparent; border: 1px solid var(--color-border); color: {activeColor};"
-              class="btn btn-sm btn-outline h-9 px-5 text-xs font-heading font-semibold inline-flex items-center justify-center gap-1.5 cursor-default select-none pointer-events-none transition-all"
+              style="border-radius: {currentRadius}; background-color: transparent; border: 1.5px solid var(--color-border); color: {activeColor};"
+              class="px-5 py-2 text-xs font-heading font-semibold inline-flex items-center justify-center gap-1.5 cursor-default select-none pointer-events-none transition-all"
             >
               <span>Tombol Kedua</span>
             </button>
@@ -126,7 +124,7 @@
               type="button"
               tabindex="-1"
               style="background-color: transparent; color: {activeColor}; border: none;"
-              class="btn btn-link btn-sm h-auto p-0 text-xs font-heading font-medium underline underline-offset-4 inline-flex items-center justify-center gap-1 cursor-default select-none pointer-events-none transition-all"
+              class="p-1 text-xs font-heading font-semibold underline underline-offset-4 inline-flex items-center justify-center gap-1 cursor-default select-none pointer-events-none transition-all"
             >
               <span>Tombol Teks Tautan</span>
             </button>
@@ -134,7 +132,7 @@
         </div>
 
         <!-- Single Color Picker: Text Color Only -->
-        <div class="pt-1 flex items-center justify-between">
+        <div class="pt-2 border-t border-base-200/60 flex items-center justify-between">
           <div class="flex flex-col">
             <span class="text-[11px] font-medium text-base-content/80">Warna Teks</span>
             <span class="text-[10px] text-base-content/50">Hanya warna teks yang dapat diubah</span>

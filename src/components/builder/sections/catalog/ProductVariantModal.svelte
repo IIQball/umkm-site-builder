@@ -32,11 +32,18 @@
   );
 
   $: normalizedVariants = Array.isArray(product?.variants)
-    ? product.variants.map((group: any, idx: number) => ({
-        id: group?.id || `group_${idx}`,
-        groupName: group?.groupName || group?.name || `Varian ${idx + 1}`,
-        options: Array.isArray(group?.options) ? group.options : [],
-      }))
+    ? product.variants.map((group: any, idx: number) => {
+        const rawOpts = Array.isArray(group?.options) ? group.options : [];
+        const hasBase = rawOpts.some((o: any) => (Number(o?.priceAdjustment) || 0) <= 0);
+        const options = (!hasBase && rawOpts.length > 0)
+          ? [{ name: 'Normal (Standar)', priceAdjustment: 0, isAvailable: true }, ...rawOpts]
+          : rawOpts;
+        return {
+          id: group?.id || `group_${idx}`,
+          groupName: group?.groupName || group?.name || `Varian ${idx + 1}`,
+          options,
+        };
+      })
     : [];
 
   // Reset & initialize defaults when product opens
@@ -65,13 +72,9 @@
     if (next >= 1 && next <= 99) qty = next;
   };
 
-  $: variantAdjustment = Object.values(selectedVariants).reduce(
-    (sum, opt) => sum + (Number(opt?.priceAdjustment) || 0),
-    0
-  );
+  $: variantAdjustment = Object.values(selectedVariants).reduce((sum, opt) => sum + (Number(opt?.priceAdjustment) || 0), 0);
   $: unitPrice = basePrice + variantAdjustment;
   $: totalPrice = unitPrice * qty;
-
   $: displayImage = product?.image || product?.imageUrl || product?.imageUrls?.[0] || null;
   $: categoryName = product?.categoryName || product?.category?.name || null;
 
@@ -100,7 +103,7 @@
     aria-modal="true"
     aria-label="Pilih Varian Produk"
     tabindex="-1"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-neutral/60 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs"
     transition:fade={{ duration: 180 }}
   >
     <button
@@ -111,18 +114,18 @@
       tabindex="-1"
     ></button>
     <div
-      class="relative w-full max-w-lg bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden flex flex-col max-h-[90vh]"
+      class="relative w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-light overflow-hidden flex flex-col max-h-[90vh]"
       transition:scale={{ start: 0.95, duration: 200 }}
     >
       <!-- Header -->
-      <div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
-        <h3 class="text-base font-bold text-base-content">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-light bg-card">
+        <h3 class="text-base font-bold text-main">
           {mode === 'buy' ? 'Beli Sekarang' : 'Tambah ke Keranjang'}
         </h3>
         <button
           type="button"
           on:click={onClose}
-          class="p-1.5 rounded-full text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
+          class="p-1.5 rounded-full text-muted hover:text-main hover:bg-nested transition-colors"
           aria-label="Tutup"
         >
           <X size={20} />
@@ -130,10 +133,10 @@
       </div>
 
       <!-- Content (Scrollable) -->
-      <div class="p-5 overflow-y-auto space-y-5 text-left">
+      <div class="p-5 overflow-y-auto space-y-5 text-left bg-card">
         <!-- Product Quick Info -->
-        <div class="flex gap-4 items-start bg-base-200/50 p-3.5 rounded-xl border border-base-200">
-          <div class="w-20 h-20 rounded-lg overflow-hidden bg-base-300 flex-shrink-0">
+        <div class="flex gap-4 items-start bg-nested p-3.5 rounded-xl border border-light">
+          <div class="w-20 h-20 rounded-lg overflow-hidden bg-base-200 flex-shrink-0">
             {#if displayImage}
               <img
                 src={displayImage}
@@ -172,7 +175,7 @@
                   on:click={() => (isDescriptionExpanded = !isDescriptionExpanded)}
                   aria-expanded={isDescriptionExpanded}
                   aria-label={isDescriptionExpanded ? 'Sembunyikan deskripsi lengkap' : 'Lihat deskripsi lengkap'}
-                  class="inline-flex items-center gap-0.5 text-xs-dense font-semibold text-[var(--theme-primary,var(--color-primary))] hover:underline mt-0.5 focus:outline-none"
+                  class="inline-flex items-center gap-0.5 text-xs-dense font-semibold text-[var(--theme-primary,#2563eb)] hover:underline mt-0.5 focus:outline-none"
                 >
                   <span>{isDescriptionExpanded ? 'Sembunyikan' : 'Selanjutnya'}</span>
                   {#if isDescriptionExpanded}
@@ -183,7 +186,7 @@
                 </button>
               {/if}
             {/if}
-            <p class="text-sm font-extrabold font-mono text-[var(--theme-primary, var(--color-primary))] mt-1.5">
+            <p class="text-sm font-extrabold font-mono text-[var(--theme-primary,#2563eb)] mt-1.5">
               {formatIDR(unitPrice)}
             </p>
           </div>
@@ -207,8 +210,8 @@
                         on:click={() => handleSelectOption(group.groupName, opt)}
                         class="px-3.5 py-1.5 text-xs font-semibold rounded-xl border transition-all {
                           isSelected
-                            ? 'bg-[var(--theme-primary,var(--color-primary))] border-[var(--theme-primary,var(--color-primary))] text-primary-content shadow-sm ring-2 ring-[var(--theme-primary,var(--color-primary))]/20'
-                            : 'bg-base-100 border-base-300 text-base-content hover:border-primary/50'
+                            ? 'bg-[var(--theme-primary,#2563eb)] border-[var(--theme-primary,#2563eb)] text-white shadow-sm ring-2 ring-[var(--theme-primary,#2563eb)]/20'
+                            : 'bg-card border-light text-main hover:border-primary/50'
                         } disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {opt.name}
@@ -225,30 +228,30 @@
         {/if}
 
         <!-- Quantity Selector -->
-        <div class="flex items-center justify-between pt-2 border-t border-base-200">
+        <div class="flex items-center justify-between pt-2 border-t border-light">
           <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-base-content block">
+            <span class="text-xs font-bold uppercase tracking-wider text-main block">
               Jumlah
             </span>
-            <span class="text-xs-dense text-base-content/50">Atur kuantitas pesanan</span>
+            <span class="text-xs-dense text-muted">Atur kuantitas pesanan</span>
           </div>
 
-          <div class="flex items-center border border-base-300 rounded-xl bg-base-200 overflow-hidden">
+          <div class="flex items-center border border-light rounded-xl bg-nested overflow-hidden">
             <button
               type="button"
               on:click={() => adjustQty(-1)}
-              class="w-9 h-9 flex items-center justify-center text-base-content/70 hover:bg-base-300 transition-colors"
+              class="w-9 h-9 flex items-center justify-center text-muted hover:text-main hover:bg-base-200 transition-colors"
               aria-label="Kurang kuantitas"
             >
               <Minus size={14} />
             </button>
-            <span class="w-10 text-center font-bold font-mono text-sm text-base-content">
+            <span class="w-10 text-center font-bold font-mono text-sm text-main">
               {qty}
             </span>
             <button
               type="button"
               on:click={() => adjustQty(1)}
-              class="w-9 h-9 flex items-center justify-center text-base-content/70 hover:bg-base-300 transition-colors"
+              class="w-9 h-9 flex items-center justify-center text-muted hover:text-main hover:bg-base-200 transition-colors"
               aria-label="Tambah kuantitas"
             >
               <Plus size={14} />
@@ -258,10 +261,10 @@
       </div>
 
       <!-- Footer & Action Buttons -->
-      <div class="p-4 sm:p-5 border-t border-base-200 bg-base-200/50 space-y-3">
+      <div class="p-4 sm:p-5 border-t border-light bg-nested space-y-3">
         <div class="flex items-center justify-between text-sm">
-          <span class="text-base-content/70 font-medium">Total Pembayaran</span>
-          <span class="text-lg font-black font-mono text-[var(--theme-primary, var(--color-primary))]">
+          <span class="text-muted font-medium">Total Pembayaran</span>
+          <span class="text-lg font-black font-mono text-[var(--theme-primary,#2563eb)]">
             {formatIDR(totalPrice)}
           </span>
         </div>
@@ -270,8 +273,8 @@
           <button
             type="button"
             on:click={handleConfirmBuyNow}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-            style="border-radius: var(--btn-radius, 0.75rem);"
+            class="w-full py-3.5 px-4 hover:opacity-90 active:scale-[0.98] text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff));"
           >
             <span>Beli Sekarang</span>
           </button>
@@ -279,8 +282,8 @@
           <button
             type="button"
             on:click={handleConfirmAddToCart}
-            class="w-full py-3.5 px-4 bg-[var(--color-primary)] hover:opacity-90 active:scale-[0.98] text-primary-content text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-            style="border-radius: var(--btn-radius, 0.75rem);"
+            class="w-full py-3.5 px-4 hover:opacity-90 active:scale-[0.98] text-sm font-heading font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            style="border-radius: var(--theme-btn-radius, var(--btn-radius, 0.75rem)); background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-card-base, #ffffff));"
           >
             <ShoppingCart size={18} />
             <span>+ Keranjang</span>

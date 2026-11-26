@@ -62,3 +62,14 @@ export interface PayoutHistoryItem {
     accountHolder: string;
   };
 }
+
+export interface CreditPackage {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  credits: number;
+  description: string;
+  benefits: string[];
+  isPopular: boolean;
+}

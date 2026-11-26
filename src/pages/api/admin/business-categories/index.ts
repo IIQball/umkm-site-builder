@@ -6,6 +6,7 @@ import {
   getBusinessCategories,
   createBusinessCategory,
 } from '@/services/business-categories';
+import { logActivity } from '@/services/audit.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -30,6 +31,16 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const input = validate(BusinessCategoryCreateSchema, body);
 
     const created = await createBusinessCategory(input, user.id);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Create Business Category',
+      details: {
+        categoryId: created.id,
+        name: created.name,
+      },
+    });
+
     return jsonSuccess(created, 201);
   });
 };

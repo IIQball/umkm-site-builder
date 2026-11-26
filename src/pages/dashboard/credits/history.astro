@@ -1,0 +1,141 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import CreditQuotaGauge from '@/components/tenant/ai-credits/CreditQuotaGauge.svelte';
+import TenantCreditHistoryTable from '@/components/tenant/ai-credits/TenantCreditHistoryTable.svelte';
+import StatCard from '@/components/ui/StatCard.svelte';
+import Button from '@/components/ui/Button.svelte';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { stores, transactions } from '@/db/schema';
+import { eq, and, or, desc } from 'drizzle-orm';
+import { formatIDR } from '@/lib/currency';
+
+export const prerender = false;
+
+const user = await getAuthenticatedUser(Astro.request);
+if (!user) return Astro.redirect('/auth/login');
+if (user.role === 'designer') return Astro.redirect('/designer');
+if (user.role === 'superadmin') return Astro.redirect('/superadmin');
+if (user.role === 'admin') return Astro.redirect('/admin');
+
+const [tenantStore] = await db
+  .select({ id: stores.id, name: stores.name })
+  .from(stores)
+  .where(eq(stores.userId, user.id))
+  .limit(1);
+
+const storeId = tenantStore?.id || '';
+
+const invoiceTransactions = await db
+  .select({
+    id: transactions.id,
+    externalId: transactions.externalId,
+    amount: transactions.amount,
+    adminFee: transactions.adminFee,
+    status: transactions.status,
+    paymentChannel: transactions.paymentChannel,
+    paymentGatewayRef: transactions.paymentGatewayRef,
+    createdAt: transactions.createdAt,
+  })
+  .from(transactions)
+  .where(
+    and(
+      or(
+        storeId ? eq(transactions.storeId, storeId) : undefined,
+        eq(transactions.userId, user.id)
+      ),
+      eq(transactions.type, 'ai_credit_purchase')
+    )
+  )
+  .orderBy(desc(transactions.createdAt))
+  .limit(50);
+
+const totalPaidAmount = invoiceTransactions
+  .filter((tx) => tx.status === 'success')
+  .reduce((acc, tx) => acc + tx.amount, 0);
+
+const successfulCount = invoiceTransactions.filter((tx) => tx.status === 'success').length;
+const pendingCount = invoiceTransactions.filter((tx) => tx.status === 'pending').length;
+---
+
+<DashboardLayout title="Riwayat Kuota & Faktur AI" breadcrumb="Dashboard / Kuota AI / Riwayat">
+  <div class="min-h-full space-y-8 md:space-y-10 pb-12">
+    <!-- Page Header (matching superadmin/template-categories) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+      <div>
+        <h1 class="text-heading-lg text-main font-bold tracking-tight">
+          Riwayat Kuota & Faktur AI
+        </h1>
+        <p class="text-sm text-secondary mt-1 max-w-2xl leading-relaxed">
+          Pantau mutasi saldo kredit AI, audit transaksi invoice Xendit yang sukses, dan unduh rincian pembayaran.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2.5 shrink-0">
+        <Button
+          client:load
+          href="/dashboard/credits/buy"
+          variant="primary"
+          size="md"
+          class="font-bold shadow-xs cursor-pointer"
+        >
+          <span class="material-symbols-outlined text-base">flash_on</span>
+          <span>Beli Paket Kredit</span>
+        </Button>
+      </div>
+    </div>
+
+    <!-- Statcards Grid (animated on client load) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <StatCard
+        client:load
+        label="Total Pembayaran Berhasil"
+        value={formatIDR(totalPaidAmount)}
+        rawValue={totalPaidAmount}
+        icon="payments"
+        cardTheme="dark"
+        badge="Terverifikasi"
+        footerText="Akumulasi paket kredit yang diselesaikan"
+        delayClass="delay-100"
+      />
+      <StatCard
+        client:load
+        label="Faktur Lunas"
+        value={`${successfulCount} Invoice`}
+        rawValue={successfulCount}
+        icon="check_circle"
+        cardTheme="default"
+        badge="Lunas"
+        footerText="Transaksi sukses via gateway Xendit"
+        delayClass="delay-150"
+      />
+      <StatCard
+        client:load
+        label="Menunggu Pembayaran"
+        value={`${pendingCount} Invoice`}
+        rawValue={pendingCount}
+        icon="pending_actions"
+        cardTheme="blue"
+        badge="Tagihan Aktif"
+        footerText="Menunggu penyelesaian pembayaran"
+        delayClass="delay-200"
+      />
+    </div>
+
+    <!-- Quota Gauge & Real-time Ledger -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-heading-sm font-bold text-main font-heading">Saldo Aktif & Mutasi Kuota</h2>
+          <p class="text-body-sm text-secondary">Rincian pemakaian generator AI dan kredit masuk toko</p>
+        </div>
+      </div>
+      <CreditQuotaGauge client:load />
+    </div>
+
+    <!-- Interactive Table Panel matching superadmin/template-categories -->
+    <div class="animate-fade-in-up delay-300">
+      <TenantCreditHistoryTable client:load initialTransactions={invoiceTransactions} />
+    </div>
+  </div>
+</DashboardLayout>

@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client';
 import { templates, designers, users, notifications } from '@/db/schema';
 import { eq, ne, isNull, desc, and } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
+import { logActivity } from '@/services/audit.service';
 
 export async function getTemplatesForAdmin(statusFilter?: string | null) {
   // Hanya data yang statusnya pending, approved, dan rejected yang masuk kurasi admin.
@@ -90,6 +91,18 @@ export async function reviewTemplate(
     title: `Review Template: ${action === 'approve' ? 'Disetujui' : 'Ditolak'}`,
     message: notificationMessage,
     metadata: { templateId: existingTemplate.id, action }
+  });
+
+  await logActivity({
+    userId: adminUserId,
+    action: action === 'approve' ? 'Approve Template' : 'Reject Template',
+    details: {
+      templateId: existingTemplate.id,
+      templateName: existingTemplate.name,
+      designerId: existingTemplate.designerId,
+      action,
+      rejectionReason: action === 'reject' ? (rejectionReason || null) : null,
+    },
   });
 
   return updatedData;

@@ -43,7 +43,8 @@ describe('Request Upgrade API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data.error.message).toBe('Tenant access required to request quota upgrade');
+    expect(data.success).toBe(false);
+    expect(data.message).toBe('Tenant access required to request quota upgrade');
   });
 
   it('POST returns 400 if request body is invalid', async () => {
@@ -59,7 +60,8 @@ describe('Request Upgrade API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.message).toBe('Data permintaan tidak valid');
+    expect(data.success).toBe(false);
+    expect(data.message).toBe('Data permintaan tidak valid');
   });
 
   it('POST creates notification and returns 200 on success', async () => {

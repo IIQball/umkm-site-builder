@@ -62,16 +62,6 @@ export const ProductCatalogPresetSchema = z.enum([
   'price_table_view',
   'lookbook_gallery',
   'flash_sale_countdown',
-  'interactive_filter_tabs',
-  'quick_buy_whatsapp_direct',
-  'bundle_package_tiers',
-  'single_product_deep_focus',
-  'badge_stock_scarcity',
-  'seasonal_hampers_gift',
-  'before_after_product_effect',
-  'digital_download_catalog',
-  'customer_review_paired_card',
-  'minimal_accordion_catalog',
 ]);
 export type ProductCatalogPreset = z.infer<typeof ProductCatalogPresetSchema>;
 
@@ -80,10 +70,8 @@ export const TestimonialsPresetSchema = z.enum([
   'single_spotlight',
   'chat_bubble_flow',
   'infinite_marquee_scroll',
-  'video_review_cards',
   'social_post_cards',
   'side_by_side_3_cards',
-  'logo_client_cloud',
   'split_rating_stats',
   'carousel_slider',
 ]);

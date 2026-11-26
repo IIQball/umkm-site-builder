@@ -48,6 +48,10 @@ One pack. Never a second. No emojis as substitutes.
 | ImageUpload | src/components/shared/ImageUpload.svelte | card, btn, alert, progress, lucide icons | folder, maxFiles, maxSizeMB, existingUrls, onUpload |
 | TrafficWidget | src/components/dashboard/TrafficWidget.svelte | card, btn, alert, progress, lucide icons (TrendingUp, Users, MessageCircle, Loader2) | storeId |
 | SearchableSelect | src/components/ui/SearchableSelect.svelte | combobox, popover, search input, lucide icons (Search, ChevronDown, Check, X) | value, options, placeholder, searchPlaceholder, emptyText, size, clearable, disabled |
+| ToastContainer | src/components/ui/ToastContainer.svelte | native HTML `popover="manual"`, tailwind, lucide icons | Centralized accessible non-blocking notifications (`$lib/toast`) |
+| Table | src/components/ui/Table.svelte | table, keyboard-scrollable `region` (`tabindex="0"`) | columns, data, responsive, keyField |
+| BugReportTrigger / Modal | src/components/common/BugReportTrigger.svelte, BugReportModal.svelte | Sidebar footer & Builder TopBar trigger, bottom-right public pill, `Modal.svelte`, `Input`, `Textarea`, silent telemetry | Cross-app bug reporter (`site_builder`) |
+| BugReportsManager | src/components/superadmin/bug-reports/BugReportsManager.svelte | `StatCard` grid (`BugReportStatsGrid`), `Card`, capsule filter, `Table` (`BugReportsTable`), `Pagination`, `BugReportDetailModal` | Superadmin bug triage dashboard |
 
 ## 4. Established patterns
 

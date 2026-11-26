@@ -7,6 +7,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
+  compressHTML: true,
   integrations: [
     svelte(),
   ],
@@ -16,6 +17,9 @@ export default defineConfig({
   vite: {
     server: {
       allowedHosts: true,
+    },
+    define: {
+      'process.env': {},
     },
     optimizeDeps: {
       exclude: ['@astrojs/svelte', 'worker-mailer', 'three/examples/jsm/loaders/GLTFLoader.js'],

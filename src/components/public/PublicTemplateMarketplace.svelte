@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Palette, RotateCcw } from 'lucide-svelte';
   import { Pagination, Button, Badge, Card } from '@/components/ui';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { addToast } from '@/lib/toast';
   import type { PublicTemplate, CategoryItem, AssistedTenant } from './marketplace.types';
   import MarketplaceFilterBar from './marketplace/MarketplaceFilterBar.svelte';
@@ -20,7 +21,7 @@
   export let adminServiceFee: number = 5000;
   export let pagination: { currentPage: number; totalItems: number; pageSize: number; totalPages: number } | undefined = undefined;
 
-  $: isAdmin = userRole === 'admin' || userRole === 'superadmin';
+  $: isAdmin = userRole === 'admin';
   $: isTenantOrGuest = !isLoggedIn || userRole === 'tenant';
 
   let templates = [...initialTemplates];
@@ -75,6 +76,16 @@
       return;
     }
 
+    if (userRole === 'designer' || userRole === 'superadmin') {
+      addToast({
+        type: 'error',
+        message: userRole === 'designer'
+          ? 'Akun desainer tidak dapat membeli template'
+          : 'Akun superadmin tidak dapat membeli template',
+      });
+      return;
+    }
+
     if (isAdmin && !selectedTenantId) {
       addToast({
         type: 'error',
@@ -118,13 +129,13 @@
 
       // Skenario toko sudah memiliki template -> Pasang langsung ke toko binaan tanpa tagihan baru
       if (isAdmin && selectedTenant && isAlreadyOwned) {
-        const res = await fetch(`/api/stores/${selectedTenant.storeId}/apply-template`, {
+        const result = await apiFetch(`/api/stores/${selectedTenant.storeId}/apply-template`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ templateId: template.id }),
+          fallbackError: 'Gagal memasang template ke toko',
         });
-        const result = await res.json();
-        if (!res.ok || !result.ok) throw new Error(result.error?.message || 'Gagal memasang template ke toko');
+        if (!result.success) throw new Error(result.message);
 
         addToast({
           type: 'success',
@@ -151,20 +162,23 @@
         payload.assistedBy = currentUserId;
       }
 
-      const res = await fetch('/api/tenant/transactions/template-purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey,
-        },
-        body: JSON.stringify(payload),
-      });
-      const result = await res.json();
-      if (!res.ok || !result.ok) {
-        throw new Error(result.error?.message || 'Gagal memproses transaksi');
+      const result = await apiFetch<{ isFree?: boolean; externalId?: string }>(
+        '/api/tenant/transactions/template-purchase',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey,
+          },
+          body: JSON.stringify(payload),
+          fallbackError: 'Gagal memproses transaksi',
+        }
+      );
+      if (!result.success) {
+        throw new Error(result.message);
       }
 
-      if (result.isFree) {
+      if (result.data?.isFree) {
         addToast({
           type: 'success',
           message: isAdmin
@@ -275,11 +289,7 @@
 
     {#if pagination ? pagination.totalItems > pagination.pageSize : filteredTemplates.length > pageSize}
       <div class="pt-6 flex justify-center">
-        <Pagination
-          bind:currentPage={currentPage}
-          totalItems={pagination ? pagination.totalItems : filteredTemplates.length}
-          pageSize={pagination ? pagination.pageSize : pageSize}
-        />
+        <Pagination bind:currentPage totalItems={pagination ? pagination.totalItems : filteredTemplates.length} pageSize={pagination ? pagination.pageSize : pageSize} />
       </div>
     {/if}
   {/if}

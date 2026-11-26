@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import {
     ArrowLeft,
     ArrowRight,
@@ -12,7 +11,6 @@
   import { Button, Badge } from "@/components/ui";
   import type { StoreContentCustomization, TemplateItem, StoreBranchItem } from "../onboarding.types";
   import { DEFAULT_WA_CHECKOUT_TEMPLATE } from "../onboarding.helpers";
-  import { getMainDomain } from "@/lib/domain";
   import OnboardingContentPreview from "./OnboardingContentPreview.svelte";
   import SettingsTemplatePicker from "./SettingsTemplatePicker.svelte";
   import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
@@ -44,14 +42,6 @@
 
   let mainDomain = "localhost:4321";
   let previewViewMode: "desktop" | "tablet" | "mobile" = "desktop";
-
-  onMount(() => {
-    mainDomain = getMainDomain();
-  });
-
-  $: if (!selectedTemplateId && templates.length > 0) {
-    selectedTemplateId = templates[0].id;
-  }
 
   function resetWaTemplate() {
     waCheckoutTemplate = DEFAULT_WA_CHECKOUT_TEMPLATE;
@@ -89,7 +79,7 @@
       Pengaturan Operasional & Template Toko
     </h2>
     <p class="text-body-sm text-secondary mt-0.5 font-sans">
-      Atur status ketersediaan toko, pesan transaksi WhatsApp, dan tinjau tampilan real landing page lengkap toko Anda.
+      Atur status ketersediaan toko, pesan transaksi WhatsApp, dan tinjau tampilan langsung website toko Anda.
     </p>
   </div>
 
@@ -134,14 +124,16 @@
               Pesan Transaksi WhatsApp
             </h3>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="xs"
             on:click={resetWaTemplate}
-            class="inline-flex items-center gap-1 text-2xs text-secondary hover:text-primary transition-colors font-medium cursor-pointer"
+            class="text-2xs text-secondary hover:text-primary gap-1 font-medium h-auto py-0.5 px-1.5"
           >
             <RotateCcw size={12} />
             <span>Pesan Standar</span>
-          </button>
+          </Button>
         </div>
 
         <p class="text-2xs text-secondary leading-relaxed font-sans">
@@ -156,8 +148,10 @@
         ></textarea>
       </div>
 
-      <!-- 3. Koleksi & Pilihan Template Toko -->
-      <SettingsTemplatePicker {templates} bind:selectedTemplateId />
+      <!-- 3. Template Picker -->
+      {#if templates.length > 0}
+        <SettingsTemplatePicker {templates} bind:selectedTemplateId />
+      {/if}
 
       {#if submitError}
         <div class="p-3 rounded-xl bg-error/10 border border-error/20 text-xs text-error flex items-center gap-2">
@@ -199,14 +193,18 @@
             disabled={submitStatus === "submitting"}
             on:click={onSave}
           >
-            <Save size={16} />
-            <span>Simpan Perubahan Toko</span>
+            {#if submitStatus === "submitting"}
+              <span>Menyimpan...</span>
+            {:else}
+              <Save size={16} />
+              <span>Simpan Perubahan Toko</span>
+            {/if}
           </Button>
         {/if}
       </div>
     </div>
 
-    <!-- Right Section: Real Live Storefront Preview (7 cols) -->
+    <!-- Right Section: Live Storefront Preview (7 cols) -->
     <div class="lg:col-span-7 sticky top-6">
       <OnboardingContentPreview
         {baseConfig}

@@ -61,11 +61,11 @@
 {#if open}
   <div
     use:teleport
-    class="modal modal-open z-50 overflow-y-auto p-4 sm:p-6 !bg-main/60 backdrop-blur-sm transition-all"
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6 bg-main/60 backdrop-blur-sm transition-all"
     role="presentation"
   >
     <div
-      class="modal-box w-full p-0 max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-light rounded-3xl shadow-2xl overflow-hidden relative text-main my-auto {sizeStyles[size] || sizeStyles.md} {className}"
+      class="w-full p-0 max-h-[calc(100vh-3rem)] flex flex-col bg-card border border-light rounded-3xl shadow-2xl overflow-hidden relative text-main my-auto {sizeStyles[size] || sizeStyles.md} {className}"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}

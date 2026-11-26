@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Palette, Type, MousePointerClick, Layout, Sparkles } from 'lucide-svelte';
   import { Button } from '@/components/ui';
-  import { editorStore } from '../stores/editorStore';
+  import { editorStore, canvasStore } from '../stores/editorStore';
+  import { ensurePx } from '../canvas/canvasCss.helpers';
   import type { TemplateTheme } from '@/schemas';
   import ThemeColorsTab from './theme/ThemeColorsTab.svelte';
   import ThemeTypographyTab from './theme/ThemeTypographyTab.svelte';
@@ -68,14 +69,20 @@
 
   const updateScale = (tag: string, field: string, value: string) => {
     const current = (theme.typography as Record<string, Record<string, string> | undefined>)?.[tag] || {};
+    const safeValue = field === 'fontSize' ? ensurePx(value, '16px') : value;
     if (field === 'fontSize') {
       setCanvasCssVar({
-        [`--theme-text-${tag}`]: value,
-        [`--text-${tag}-size`]: value,
+        [`--theme-text-${tag}`]: safeValue,
+        [`--text-${tag}-size`]: safeValue,
+      });
+    } else if (field === 'fontWeight') {
+      setCanvasCssVar({
+        [`--theme-text-${tag}-weight`]: safeValue,
+        [`--text-${tag}-weight`]: safeValue,
       });
     }
     editorStore.updateGlobalTheme({
-      typography: { [tag]: { ...current, [field]: value } },
+      typography: { [tag]: { ...current, [field]: safeValue } },
     });
   };
 
@@ -107,11 +114,23 @@
     editorStore.updateGlobalTheme({ buttons: { borderRadius: value } });
   };
 
-  const updateLayoutParam = (key: string, value: string) => {
+  const updateLayoutParam = (key: string, rawVal: string) => {
+    const value = ensurePx(rawVal, key === 'maxWidth' ? '1200px' : '32px');
+    const currentView = $canvasStore.viewMode || 'desktop';
+
     if (key === 'maxWidth') setCanvasCssVar({ '--theme-max-width': value, '--active-max-width': value });
-    if (key === 'horizontalMarginDesktop') setCanvasCssVar({ '--theme-safe-zone-desktop': value, '--active-safe-zone': value });
-    if (key === 'horizontalMarginTablet') setCanvasCssVar({ '--theme-safe-zone-tablet': value, '--active-safe-zone': value });
-    if (key === 'horizontalMarginMobile') setCanvasCssVar({ '--theme-safe-zone-mobile': value, '--active-safe-zone': value });
+    if (key === 'horizontalMarginDesktop') {
+      setCanvasCssVar({ '--theme-safe-zone-desktop': value });
+      if (currentView === 'desktop') setCanvasCssVar({ '--active-safe-zone': value, '--active-margin': value });
+    }
+    if (key === 'horizontalMarginTablet') {
+      setCanvasCssVar({ '--theme-safe-zone-tablet': value });
+      if (currentView === 'tablet') setCanvasCssVar({ '--active-safe-zone': value, '--active-margin': value });
+    }
+    if (key === 'horizontalMarginMobile') {
+      setCanvasCssVar({ '--theme-safe-zone-mobile': value });
+      if (currentView === 'mobile') setCanvasCssVar({ '--active-safe-zone': value, '--active-margin': value });
+    }
     editorStore.updateGlobalTheme({ layout: { [key]: value } });
   };
 </script>

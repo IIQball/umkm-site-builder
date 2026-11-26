@@ -46,7 +46,7 @@
         <h3 class="text-heading-sm sm:text-heading-md text-main font-bold font-heading leading-tight">
           {title}
         </h3>
-        <p class="text-body-xs text-secondary mt-0.5 font-sans">
+        <p class="text-xs text-secondary mt-0.5 font-sans">
           {growthData.periodLabel ? `${subtitle} (${growthData.periodLabel})` : subtitle}
         </p>
       </div>

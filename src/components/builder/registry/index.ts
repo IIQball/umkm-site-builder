@@ -14,7 +14,7 @@ import { DEFAULT_TEMPLATE_SECTIONS } from '@/schemas';
 import type { SectionDefinition, SectionRegistryMap } from './registry.types';
 
 // Section Render Components
-import HeaderAnnouncement from '../sections/HeaderAnnouncement.svelte';
+import Header from '../sections/Header.svelte';
 import Hero from '../sections/Hero.svelte';
 import Features from '../sections/Features.svelte';
 import ProductCatalog from '../sections/ProductCatalog.svelte';
@@ -24,17 +24,17 @@ import GoogleMaps from '../sections/GoogleMaps.svelte';
 import Footer from '../sections/Footer.svelte';
 
 // Content Inspector Components
-import HeaderContent from '../content/HeaderContent.svelte';
-import HeroContent from '../content/HeroContent.svelte';
-import FeaturesContent from '../content/FeaturesContent.svelte';
-import ProductCatalogContent from '../content/ProductCatalogContent.svelte';
-import TestimonialsContent from '../content/TestimonialsContent.svelte';
-import FaqContent from '../content/FaqContent.svelte';
-import GoogleMapsContent from '../content/GoogleMapsContent.svelte';
-import FooterContent from '../content/FooterContent.svelte';
+import HeaderContent from '../inspector/header/HeaderContent.svelte';
+import HeroContent from '../inspector/hero/HeroContent.svelte';
+import FeaturesContent from '../inspector/features/FeaturesContent.svelte';
+import ProductCatalogContent from '../inspector/catalog/ProductCatalogContent.svelte';
+import TestimonialsContent from '../inspector/testimonials/TestimonialsContent.svelte';
+import FaqContent from '../inspector/faq/FaqContent.svelte';
+import GoogleMapsContent from '../inspector/maps/GoogleMapsContent.svelte';
+import FooterContent from '../inspector/footer/FooterContent.svelte';
 
 // Styles Inspector Components
-import HeaderStylesTab from '../inspector/HeaderStylesTab.svelte';
+import HeaderStylesTab from '../inspector/header/HeaderStylesTab.svelte';
 
 export * from './registry.types';
 
@@ -52,7 +52,7 @@ export const sectionRegistry: SectionRegistryMap = {
     type: 'header_announcement',
     label: 'Header & Announcement',
     icon: Megaphone as unknown as ComponentType,
-    renderComponent: HeaderAnnouncement as unknown as ComponentType,
+    renderComponent: Header as unknown as ComponentType,
     inspectorComponent: HeaderContent as unknown as ComponentType,
     stylesComponent: HeaderStylesTab as unknown as ComponentType,
     defaultConfig: defaultSectionConfigs['header_announcement'],
@@ -139,16 +139,6 @@ export const sectionRegistry: SectionRegistryMap = {
       'price_table_view',
       'lookbook_gallery',
       'flash_sale_countdown',
-      'interactive_filter_tabs',
-      'quick_buy_whatsapp_direct',
-      'bundle_package_tiers',
-      'single_product_deep_focus',
-      'badge_stock_scarcity',
-      'seasonal_hampers_gift',
-      'before_after_product_effect',
-      'digital_download_catalog',
-      'customer_review_paired_card',
-      'minimal_accordion_catalog',
     ],
     isFullBleed: true,
   },
@@ -164,10 +154,8 @@ export const sectionRegistry: SectionRegistryMap = {
       'single_spotlight',
       'chat_bubble_flow',
       'infinite_marquee_scroll',
-      'video_review_cards',
       'social_post_cards',
       'side_by_side_3_cards',
-      'logo_client_cloud',
       'split_rating_stats',
       'carousel_slider',
     ],

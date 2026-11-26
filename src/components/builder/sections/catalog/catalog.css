@@ -34,11 +34,32 @@
 .cq-title,
 .cq-title-catalog {
   font-family: var(--font-heading, var(--theme-font-heading, system-ui, sans-serif));
-  font-size: var(--text-h2-size, 2rem);
-  font-weight: var(--text-h2-weight, 800);
+  font-size: var(--theme-text-h2, var(--text-h2-size, 2rem));
+  font-weight: var(--theme-text-h2-weight, var(--text-h2-weight, 800));
   line-height: 1.2;
   letter-spacing: -0.025em;
   color: var(--color-text-main, var(--theme-text-primary, #0f172a));
+}
+
+.product-card [data-node="badge"],
+.product-card [data-node="catalog_badge"],
+[data-node="badge"],
+[data-node="catalog_badge"],
+.product-card span[class*="rounded-full"][class*="uppercase"] {
+  font-size: var(--theme-text-caption, var(--text-caption-size, 10px));
+  font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));
+}
+
+.product-card h3,
+.product-card [data-node^="product_name"],
+.product-card [data-node="product_title"] {
+  font-size: var(--theme-text-h3, var(--text-h3-size, 1.125rem));
+  font-weight: var(--theme-text-h3-weight, var(--text-h3-weight, 600));
+}
+
+.product-card [data-node="product_desc"] {
+  font-size: var(--theme-text-body, var(--text-body-size, 0.875rem));
+  font-weight: var(--theme-text-body-weight, var(--text-body-weight, 400));
 }
 
 .cq-prod-grid-3 {

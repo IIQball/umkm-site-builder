@@ -29,6 +29,7 @@ export const GET: APIRoute = async (context): Promise<Response> => {
     return jsonSuccess({
       invoiceId: transaction.externalId,
       status: transaction.status,
+      type: transaction.type,
       amount: transaction.amount,
       amountFormatted: formatIDR(transaction.amount),
       baseAmount,

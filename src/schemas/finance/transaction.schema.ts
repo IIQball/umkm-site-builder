@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 export const TransactionInitiateInputSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  type: z.literal('template_purchase'),
+  type: z.enum(['template_purchase', 'ai_credit_purchase', 'store_quota_purchase']),
   storeId: z.string().optional(),
   templateId: z.string().optional(),
   assistedBy: z.string().optional().nullable(),

@@ -1,9 +1,11 @@
 <script lang="ts">
   import { Modal, Button, Textarea } from '@/components/ui';
   import { addToast } from '@/lib/toast';
+  import { apiFetch } from '@/lib/api/parse-response';
   import type { AssistedStoreItem } from '@/types/admin';
 
   export let open: boolean = false;
+  export let isUnsuspend: boolean = false;
   export let store: AssistedStoreItem | null = null;
 
   let reason: string = '';
@@ -20,18 +22,17 @@
 
     loading = true;
     try {
-      const response = await fetch(`/api/admin/stores/${store.id}/suspend`, {
+      const result = await apiFetch(`/api/admin/stores/${store.id}/suspend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reason.trim() }),
+        fallbackError: 'Gagal menangguhkan toko',
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
+      if (!result.success) {
         addToast({
           type: 'error',
-          message: result.error?.message || 'Gagal menangguhkan toko',
+          message: result.message,
         });
         return;
       }
@@ -42,13 +43,48 @@
       });
 
       close();
-      // Trigger page refresh or parent component update
       window.location.reload();
     } catch (error) {
-      console.error('[AdminStoreSuspendModal] Error:', error);
+      console.error('[AdminStoreSuspendModal] Error suspend:', error);
       addToast({
         type: 'error',
         message: 'Terjadi kesalahan saat menangguhkan toko',
+      });
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function handleUnsuspend() {
+    if (!store?.id) return;
+
+    loading = true;
+    try {
+      const result = await apiFetch(`/api/admin/stores/${store.id}/unsuspend`, {
+        method: 'POST',
+        fallbackError: 'Gagal memulihkan toko',
+      });
+
+      if (!result.success) {
+        addToast({
+          type: 'error',
+          message: result.message,
+        });
+        return;
+      }
+
+      addToast({
+        type: 'success',
+        message: `Toko "${store.name}" telah dipulihkan dan aktif kembali`,
+      });
+
+      close();
+      window.location.reload();
+    } catch (error) {
+      console.error('[AdminStoreSuspendModal] Error unsuspend:', error);
+      addToast({
+        type: 'error',
+        message: 'Terjadi kesalahan saat memulihkan toko',
       });
     } finally {
       loading = false;
@@ -63,23 +99,41 @@
 
 <Modal
   {open}
-  title="Tangguhkan Toko"
-  description={store ? `Tangguhkan toko "${store.name}" dari ${store.tenantName}` : ''}
+  title={isUnsuspend ? "Pulihkan Toko" : "Tangguhkan Toko"}
+  description={store
+    ? isUnsuspend
+      ? `Pulihkan toko "${store.name}" dari ${store.tenantName} agar kembali aktif`
+      : `Tangguhkan toko "${store.name}" dari ${store.tenantName}`
+    : ''}
   size="md"
   on:close={close}
 >
-  <div class="space-y-4">
-    <Textarea
-      id="suspend-reason"
-      label="Alasan Penangguhan"
-      helper="Alasan ini akan diinformasikan kepada pemilik toko"
-      placeholder="Jelaskan alasan penangguhan toko..."
-      bind:value={reason}
-      rows={4}
-      resizable={false}
-      required
-    />
-  </div>
+  {#if isUnsuspend}
+    <div class="space-y-3 py-1">
+      <div class="p-3.5 bg-success/10 border border-success/20 rounded-xl text-xs text-main flex items-start gap-2.5">
+        <span class="material-symbols-outlined text-success text-base flex-shrink-0 mt-0.5">check_circle</span>
+        <div class="space-y-1">
+          <p class="font-bold text-success">Konfirmasi Pemulihan Toko</p>
+          <p class="text-secondary leading-relaxed">
+            Apakah Anda yakin ingin mengaktifkan kembali toko <strong class="text-main">{store?.name}</strong>? Status toko akan kembali aktif dan dapat diakses pembeli melalui subdomain.
+          </p>
+        </div>
+      </div>
+    </div>
+  {:else}
+    <div class="space-y-4">
+      <Textarea
+        id="suspend-reason"
+        label="Alasan Penangguhan"
+        helper="Alasan ini akan diinformasikan kepada pemilik toko"
+        placeholder="Jelaskan alasan penangguhan toko..."
+        bind:value={reason}
+        rows={4}
+        resizable={false}
+        required
+      />
+    </div>
+  {/if}
 
   <svelte:fragment slot="footer">
     <Button
@@ -90,13 +144,24 @@
     >
       Batal
     </Button>
-    <Button
-      variant="destructive"
-      size="sm"
-      loading={loading}
-      on:click={handleSuspend}
-    >
-      Tangguhkan Toko
-    </Button>
+    {#if isUnsuspend}
+      <Button
+        variant="primary"
+        size="sm"
+        loading={loading}
+        on:click={handleUnsuspend}
+      >
+        Pulihkan Toko
+      </Button>
+    {:else}
+      <Button
+        variant="destructive"
+        size="sm"
+        loading={loading}
+        on:click={handleSuspend}
+      >
+        Tangguhkan Toko
+      </Button>
+    {/if}
   </svelte:fragment>
 </Modal>

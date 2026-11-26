@@ -180,7 +180,7 @@
   </div>
 
   {#if errorMessage}
-    <p class="text-xs text-rose-500 font-semibold mt-1 bg-rose-500/10 px-2 py-1 rounded-lg border border-rose-500/20">
+    <p class="text-xs text-error font-semibold mt-1 bg-error/10 px-2 py-1 rounded-lg border border-error/20">
       {errorMessage}
     </p>
   {/if}

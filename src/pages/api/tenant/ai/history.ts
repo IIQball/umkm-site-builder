@@ -1,0 +1,58 @@
+import type { APIRoute } from 'astro';
+import { db } from '@/db';
+import { stores, aiGenerationLogs } from '@/db/schema';
+import { eq, and, isNotNull, desc } from 'drizzle-orm';
+import { handleApiRoute, jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { getAuthenticatedUser } from '@/lib/auth';
+import type { AiFeatureType } from '@/types/ai';
+
+export const prerender = false;
+
+export const GET: APIRoute = async ({ request }) => {
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
+    }
+
+    const [store] = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .where(eq(stores.userId, user.id))
+      .limit(1);
+
+    if (!store) {
+      return jsonSuccess({ items: [], total: 0 }, 200);
+    }
+
+    const url = new URL(request.url);
+    const featureTypeParam = url.searchParams.get('featureType') as AiFeatureType | null;
+
+    const conditions = [
+      eq(aiGenerationLogs.tenantId, store.id),
+      eq(aiGenerationLogs.status, 'success'),
+      isNotNull(aiGenerationLogs.cloudinaryUrl),
+    ];
+
+    if (featureTypeParam && ['logo', 'packaging_mockup', 'product_poster'].includes(featureTypeParam)) {
+      conditions.push(eq(aiGenerationLogs.featureType, featureTypeParam));
+    }
+
+    const items = await db
+      .select({
+        id: aiGenerationLogs.id,
+        featureType: aiGenerationLogs.featureType,
+        modelUsed: aiGenerationLogs.modelUsed,
+        sizeRatio: aiGenerationLogs.sizeRatio,
+        promptFinal: aiGenerationLogs.promptFinal,
+        cloudinaryUrl: aiGenerationLogs.cloudinaryUrl,
+        creditsDeducted: aiGenerationLogs.creditsDeducted,
+        createdAt: aiGenerationLogs.createdAt,
+      })
+      .from(aiGenerationLogs)
+      .where(and(...conditions))
+      .orderBy(desc(aiGenerationLogs.createdAt));
+
+    return jsonSuccess({ items, total: items.length }, 200);
+  });
+};

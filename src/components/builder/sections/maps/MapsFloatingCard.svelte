@@ -91,7 +91,7 @@
     style={`border-radius: ${cardStyle.borderRadius || '1rem'}; padding: ${cardStyle.padding || ''}; ${cardStyle.backgroundColor ? `background-color: ${cardStyle.backgroundColor} !important;` : ''} ${cardStyle.borderColor ? `border-color: ${cardStyle.borderColor} !important;` : ''}`}
   >
     <div class="flex items-start gap-2">
-      <MapPin size={16} class="text-primary mt-0.5 shrink-0" />
+      <MapPin size={16} class="text-[var(--theme-secondary,var(--color-secondary))] mt-0.5 shrink-0" />
       <div>
         <h4
           class="font-heading font-bold text-main"

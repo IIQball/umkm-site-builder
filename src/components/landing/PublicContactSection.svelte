@@ -7,6 +7,10 @@
   import { onMount } from 'svelte'
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
+  import { normalizeWhatsAppNumber, generateWhatsAppLink } from '@/lib/whatsapp'
+
+  export let contactPhone: string = ''
+  export let contactEmail: string = ''
 
   let name = ''
   let phone = ''
@@ -18,11 +22,16 @@
   let leftColEl: HTMLElement
   let rightColEl: HTMLElement
 
-  const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'support@pinoka.id'
-  const contactWA = import.meta.env.PUBLIC_CONTACT_WA || '6285736653639'
-  const waLink = `https://wa.me/${contactWA.replace(/[^0-9]/g, '')}`
+  let dynamicPhone = contactPhone || ''
+  let dynamicEmail = contactEmail || ''
+
+  $: activeContactPhone = dynamicPhone || contactPhone || import.meta.env.PUBLIC_CONTACT_WA || ''
+  $: activeContactEmail = dynamicEmail || contactEmail || import.meta.env.PUBLIC_CONTACT_EMAIL || 'support@pinoka.id'
+  $: normalizedWA = normalizeWhatsAppNumber(activeContactPhone)
+  $: waLink = generateWhatsAppLink(normalizedWA, 'Halo Tim Pinoka, saya ingin berkonsultasi seputar platform.')
 
   const copyToClipboard = (text: string, type: string) => {
+    if (!text) return
     navigator.clipboard.writeText(text)
     toast.success(`${type} berhasil disalin`)
   }
@@ -32,8 +41,9 @@
       toast.error('Mohon lengkapi nama, nomor telepon, dan pertanyaan')
       return
     }
-    const text = `Halo Tim Pinoka, saya ${name}.%0A%0A*No WA:* ${phone}%0A*Email:* ${email || '-'}%0A*Topik:* ${topic}%0A%0A*Pertanyaan:*%0A${message}`
-    window.open(`${waLink}?text=${text}`, '_blank')
+    const text = `Halo Tim Pinoka, saya ${name}.\n\n*No WA:* ${phone}\n*Email:* ${email || '-'}\n*Topik:* ${topic}\n\n*Pertanyaan:*\n${message}`
+    const targetLink = generateWhatsAppLink(normalizedWA, text)
+    window.open(targetLink, '_blank')
   }
 
   const handleEmail = () => {
@@ -41,11 +51,23 @@
       toast.error('Mohon lengkapi nama, email, dan pertanyaan')
       return
     }
-    const body = `Halo Tim Pinoka,%0A%0ASaya ${name}.%0A%0ANo WA: ${phone || '-'}%0AEmail: ${email}%0ATopik: ${topic}%0A%0APertanyaan:%0A${message}`
-    window.open(`mailto:${contactEmail}?subject=[${topic}] dari ${name}&body=${body}`, '_blank')
+    const body = encodeURIComponent(`Halo Tim Pinoka,\n\nSaya ${name}.\n\nNo WA: ${phone || '-'}\nEmail: ${email}\nTopik: ${topic}\n\nPertanyaan:\n${message}`)
+    window.open(`mailto:${activeContactEmail}?subject=[${encodeURIComponent(topic)}] dari ${encodeURIComponent(name)}&body=${body}`, '_blank')
   }
 
   onMount(() => {
+    if (!contactPhone || !contactEmail) {
+      fetch('/api/public/platform-settings')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (json?.data?.contactPhone) dynamicPhone = json.data.contactPhone
+          if (json?.data?.contactEmail) dynamicEmail = json.data.contactEmail
+        })
+        .catch(() => {
+          // Fallback to activeContactPhone / activeContactEmail
+        })
+    }
+
     gsap.registerPlugin(ScrollTrigger)
     
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -106,8 +128,8 @@
           </p>
           
           <div class="flex items-center justify-between bg-white dark:bg-black/20 border border-emerald-100 dark:border-emerald-900/30 rounded-xl px-4 py-3.5">
-            <span class="font-medium text-emerald-950 dark:text-emerald-50 tracking-wide">{contactWA}</span>
-            <button type="button" on:click={() => copyToClipboard(contactWA, 'Nomor WhatsApp')} class="text-emerald-500 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors p-1 focus:outline-none" aria-label="Salin Nomor">
+            <span class="font-medium text-emerald-950 dark:text-emerald-50 tracking-wide">{activeContactPhone || '-'}</span>
+            <button type="button" on:click={() => copyToClipboard(activeContactPhone, 'Nomor WhatsApp')} class="text-emerald-500 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors p-1 focus:outline-none" aria-label="Salin Nomor">
               <Copy size={18} />
             </button>
           </div>
@@ -132,13 +154,13 @@
           </div>
           
           <div class="flex items-center justify-between bg-nested border border-border rounded-xl px-4 py-3.5 mt-1">
-            <span class="font-medium text-main">{contactEmail}</span>
-            <button type="button" on:click={() => copyToClipboard(contactEmail, 'Email')} class="text-secondary hover:text-main transition-colors p-1 focus:outline-none" aria-label="Salin Email">
+            <span class="font-medium text-main">{activeContactEmail}</span>
+            <button type="button" on:click={() => copyToClipboard(activeContactEmail, 'Email')} class="text-secondary hover:text-main transition-colors p-1 focus:outline-none" aria-label="Salin Email">
               <Copy size={18} />
             </button>
           </div>
           
-          <a href="mailto:{contactEmail}" class="w-full bg-transparent hover:bg-nested border border-border text-main font-medium py-3 sm:py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]">
+          <a href="mailto:{activeContactEmail}" class="w-full bg-transparent hover:bg-nested border border-border text-main font-medium py-3 sm:py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]">
             <Mail size={18} />
             Kirim Email Langsung
           </a>

@@ -46,7 +46,7 @@
             ? (isAlreadyOwned ? 'Pasang Template ke Toko Binaan' : 'Beli Template untuk Toko Binaan')
             : (isFree ? 'Pasang Desain Template' : 'Konfirmasi Pembelian Template')}
         </h2>
-        <p class="text-body-xs text-secondary mt-0.5">
+        <p class="text-xs text-secondary mt-0.5">
           {isAdmin && selectedTenant
             ? (isAlreadyOwned ? 'Template ini sudah dimiliki merchant. Terapkan langsung ke toko.' : 'Rincian transaksi pembelian template atas nama merchant')
             : 'Pastikan rincian pesanan template Anda sudah sesuai'}

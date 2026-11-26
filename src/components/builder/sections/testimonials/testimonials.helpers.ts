@@ -86,10 +86,9 @@ export const DEFAULT_VIDEO_REVIEWS: VideoReviewItem[] = [
 
 export const IMAGE_SUPPORTED_TESTIMONIALS_PRESETS = [
   'masonry_grid',
-  'video_review_cards',
   'social_post_cards',
   'side_by_side_3_cards',
-  'logo_client_cloud',
+  'carousel_slider',
 ];
 
 export function isTestimonialsImageSupported(preset: string): boolean {

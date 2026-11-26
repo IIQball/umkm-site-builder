@@ -6,6 +6,7 @@ import {
   getTemplateCategories,
   createTemplateCategory,
 } from '@/services/template-categories';
+import { logActivity } from '@/services/audit.service';
 
 export const GET: APIRoute = async (context): Promise<Response> => {
   return handleApiRoute(async () => {
@@ -30,6 +31,16 @@ export const POST: APIRoute = async (context): Promise<Response> => {
     const input = validate(TemplateCategoryCreateSchema, body);
 
     const created = await createTemplateCategory(input);
+
+    await logActivity({
+      userId: user.id,
+      action: 'Create Template Category',
+      details: {
+        categoryId: created.id,
+        name: created.name,
+      },
+    });
+
     return jsonSuccess(created, 201);
   });
 };

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { Check, Search, LayoutGrid, Sparkles } from 'lucide-svelte';
-  import { Modal, Button } from '@/components/ui';
+  import { Modal, Button, Input } from '@/components/ui';
   import {
     SECTION_TYPE_LABELS,
     PRESETS_BY_SECTION_TYPE,
@@ -14,14 +14,52 @@
   export let onSelectPreset: (presetId: string) => void;
   export let onClose: () => void = () => {};
 
+  const RECENT_PRESETS_KEY = 'pinoka_recent_layout_presets';
+
+  function getRecentPreset(type: string): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(RECENT_PRESETS_KEY);
+      if (!raw) return null;
+      const map = JSON.parse(raw);
+      return map[type] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveRecentPreset(type: string, id: string) {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(RECENT_PRESETS_KEY);
+      const map = raw ? JSON.parse(raw) : {};
+      map[type] = id;
+      localStorage.setItem(RECENT_PRESETS_KEY, JSON.stringify(map));
+    } catch {
+      // safe fallback
+    }
+  }
+
   let searchQuery = '';
   let scrollContainerEl: HTMLElement | null = null;
   let prevOpen = false;
+  let recentPresetId: string | null = null;
+
+  $: if (open && sectionType) {
+    recentPresetId = getRecentPreset(sectionType);
+  }
 
   $: allPresets = PRESETS_BY_SECTION_TYPE[sectionType] || [];
   $: sectionLabel = SECTION_TYPE_LABELS[sectionType] || 'Section Layout';
 
-  $: filteredPresets = allPresets.filter((preset) => {
+  $: orderedPresets = (() => {
+    if (!recentPresetId) return allPresets;
+    const recent = allPresets.find((p) => p.id === recentPresetId);
+    if (!recent) return allPresets;
+    return [recent, ...allPresets.filter((p) => p.id !== recentPresetId)];
+  })();
+
+  $: filteredPresets = orderedPresets.filter((preset) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -57,6 +95,8 @@
 
   const handleSelect = (presetId: string) => {
     activePresetId = presetId;
+    saveRecentPreset(sectionType, presetId);
+    recentPresetId = presetId;
     onSelectPreset(presetId);
     scrollToActivePreset(true);
   };
@@ -80,7 +120,7 @@
           <div>
             <h3 class="text-base font-extrabold text-main font-heading leading-tight flex items-center gap-2">
               <span>Eksplorasi Tata Letak (8pt Grid)</span>
-              <span class="badge badge-primary badge-outline badge-xs font-mono uppercase font-bold">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-mono font-bold uppercase tracking-wider border border-primary/30 bg-primary/10 text-primary">
                 {filteredPresets.length} Pilihan
               </span>
             </h3>
@@ -92,22 +132,22 @@
       </div>
 
       <!-- Search Input -->
-      <div class="relative flex-shrink-0 w-full sm:w-64">
-        <span class="absolute inset-y-0 left-3 flex items-center text-muted pointer-events-none">
-          <Search size={14} />
-        </span>
-        <input
-          type="text"
+      <div class="flex-shrink-0 w-full sm:w-64">
+        <Input
           bind:value={searchQuery}
           placeholder="Cari preset layout..."
-          class="w-full pl-9 pr-3 py-1.5 text-xs bg-nested border border-light rounded-xl text-main placeholder:text-muted focus:outline-none focus:border-primary/50 transition-colors"
-        />
+          size="sm"
+        >
+          <svelte:fragment slot="prefix">
+            <Search size={14} class="text-muted" />
+          </svelte:fragment>
+        </Input>
       </div>
     </div>
   </svelte:fragment>
 
   <!-- Modal Body: Side-by-Side Visual Shot Grid (Ala Dribbble) -->
-  <div bind:this={scrollContainerEl} class="flex-1 overflow-y-auto p-5 sm:p-7 bg-base-200/30">
+  <div bind:this={scrollContainerEl} class="flex-1 overflow-y-auto p-5 sm:p-7 bg-nested/30">
     {#if filteredPresets.length === 0}
       <div class="py-16 text-center text-secondary space-y-2">
         <Sparkles size={28} class="mx-auto text-muted/60" />
@@ -124,26 +164,30 @@
             tabindex="0"
             on:click={() => handleSelect(preset.id)}
             on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelect(preset.id)}
-            class={`group relative flex flex-col rounded-2xl border text-left overflow-hidden cursor-pointer transition-all duration-300 ${
+            class={`group relative flex flex-col rounded-2xl border text-left overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
               isSelected
                 ? 'bg-card border-primary ring-2 ring-primary/40 shadow-xl shadow-primary/10'
                 : 'bg-card border-light hover:border-primary/40 hover:shadow-xl hover:-translate-y-1'
             }`}
           >
             <!-- Visual Wireframe Shot (Dribbble View) -->
-            <div class="relative w-full aspect-[16/9] bg-slate-950 p-3 overflow-hidden border-b border-light flex items-center justify-center">
+            <div class="relative w-full aspect-[16/9] bg-[#090d16] p-3 overflow-hidden border-b border-light flex items-center justify-center">
               {@html getPresetSchematicSvg(sectionType, preset.id)}
 
               <!-- Tag Pill -->
-              {#if preset.tag}
-                <span class="badge badge-neutral badge-xs font-mono font-bold tracking-wider absolute top-3 left-3 border border-light backdrop-blur-xs">
+              {#if preset.id === recentPresetId}
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold tracking-wider absolute top-2.5 left-2.5 z-10 shadow-md bg-amber-400 text-slate-950 border border-amber-300">
+                  Terbaru Dipilih
+                </span>
+              {:else if preset.tag}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold tracking-wider absolute top-2.5 left-2.5 z-10 shadow-md bg-slate-800/95 text-slate-100 border border-slate-600/80 backdrop-blur-xs">
                   {preset.tag}
                 </span>
               {/if}
 
               <!-- Active Badge -->
               {#if isSelected}
-                <div class="badge badge-primary badge-xs gap-1 font-mono uppercase absolute top-3 right-3 shadow-md animate-fade-in">
+                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-mono uppercase font-bold tracking-wider absolute top-2.5 right-2.5 z-10 shadow-md bg-primary text-slate-950 border border-primary-light/50 animate-fade-in">
                   <Check size={10} strokeWidth={3} />
                   <span>Aktif</span>
                 </div>
@@ -168,7 +212,7 @@
 
               <!-- Action button inside card -->
               <div class="pt-2 border-t border-light/50 flex items-center justify-between">
-                <span class="text-xs font-mono text-muted">Preset ID: {preset.id}</span>
+                <span class="text-2xs font-mono text-muted">Preset ID: {preset.id}</span>
                 <Button
                   type="button"
                   size="xs"
@@ -191,15 +235,4 @@
     {/if}
   </div>
 
-  <!-- Modal Footer -->
-  <svelte:fragment slot="footer">
-    <div class="flex items-center justify-between w-full">
-      <span class="text-2xs text-muted font-sans hidden sm:inline">
-        💡 Tips: Klik kartu preview untuk melihat perubahan tata letak secara instan di layar kanvas.
-      </span>
-      <Button variant="outline" size="sm" on:click={onClose}>
-        <span>Tutup Galeri</span>
-      </Button>
-    </div>
-  </svelte:fragment>
 </Modal>

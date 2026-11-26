@@ -20,7 +20,13 @@
   };
 </script>
 
-<div class="{responsive ? 'overflow-x-auto w-full' : 'w-full'} {className}">
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div
+  class="{responsive ? 'overflow-x-auto w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40' : 'w-full'} {className}"
+  tabindex={responsive ? 0 : undefined}
+  role={responsive ? 'region' : undefined}
+  aria-label={responsive ? 'Tabel data' : undefined}
+>
   <table class="w-full text-sm {minWidth} border-collapse">
     <thead>
       <tr class="bg-nested/60 border-b border-light">

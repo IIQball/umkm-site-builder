@@ -1,4 +1,5 @@
 ---
+import { resolveGoogleMapsUrl } from "@/lib/stores/coordinates";
 import StorefrontLayout from "@/layouts/StorefrontLayout.astro";
 import StorefrontDynamicPage from "@/components/storefront/StorefrontDynamicPage.svelte";
 import { db } from "@/lib/db/client";
@@ -9,7 +10,7 @@ import { mergeStoreCustomization } from "@/lib/templates/mergeCustomization";
 import { buildStorefrontCssTheme } from "@/components/builder/canvas/canvasCss.helpers";
 import { extractFontNames, buildGoogleFontsUrl } from "@/components/builder/canvas/fontLoader.helpers";
 import { firstProductImageUrl } from "@/lib/products/image";
-import { deserializeVariants } from "@/components/tenant/product/productForm.helpers";
+import { deserializeVariants } from "@/components/tenant/products/productForm.helpers";
 
 const { subdomain } = Astro.params;
 
@@ -90,26 +91,13 @@ const categories = dbCategories.map((c) => ({
 const baseTemplateConfig = store.template?.config;
 const normalizedConfig = migrateTemplateConfig(baseTemplateConfig);
 
-// Resolve Google Maps shortlinks (goo.gl / maps.app.goo.gl) to full canonical place URL
-let canonicalMapsUrl = store.googleMapsUrl;
-if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl.includes('maps.app.goo.gl'))) {
-  try {
-    const headRes = await fetch(canonicalMapsUrl, {
-      redirect: 'manual',
-      signal: AbortSignal.timeout(2500),
-    });
-    const redirectLocation = headRes.headers.get('location');
-    if (redirectLocation) {
-      canonicalMapsUrl = redirectLocation;
-    }
-  } catch {
-    void 0;
-  }
-}
+const canonicalMapsUrl = await resolveGoogleMapsUrl(store.googleMapsUrl);
 
 const storeCustomization = (store.customization as Record<string, unknown>) || {};
 const branchMode = (storeCustomization.maps as any)?.branchMode || (storeCustomization as any).branchMode || 'single';
 const branches = (storeCustomization.maps as any)?.branches || (storeCustomization as any).branches || [];
+const templateLogoUrl = normalizedConfig.sections?.find((s: any) => s.type === 'header_announcement')?.props?.logoImageUrl as string | undefined;
+const activeLogoUrl = (storeCustomization.logoUrl as string) || ((storeCustomization.header as any)?.logoImageUrl as string) || templateLogoUrl || null;
 
 const finalConfig = mergeStoreCustomization(normalizedConfig, store.customization, {
   id: store.id,
@@ -118,12 +106,13 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
   address: store.address,
   waNumber: store.waNumber,
   googleMapsEmbedUrl: store.googleMapsEmbedUrl,
-  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  googleMapsUrl: canonicalMapsUrl,
   categoryName: store.category?.name || undefined,
   latitude: store.latitude,
   longitude: store.longitude,
   branchMode,
   branches,
+  logoUrl: activeLogoUrl,
 });
 
 // 5. Dynamic Theme Tokens & Google Fonts Injection
@@ -137,12 +126,20 @@ const googleFontsUrl = buildGoogleFontsUrl(fontNames);
 
 const customization = storeCustomization;
 const isOpen = customization.isOpen !== false;
-const storeLogo = (customization.logoUrl as string) || storeProducts[0]?.image || '/og-image.png';
+const storeLogo = activeLogoUrl || storeProducts[0]?.image || '/og-image.png';
 
-// Set cache headers
-Astro.response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
-Astro.response.headers.set("Surrogate-Control", "public, max-age=86400");
+// Set cache headers - allow immediate fresh content
+Astro.response.headers.set("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=60");
+Astro.response.headers.set("Surrogate-Control", "public, max-age=60");
 Astro.response.headers.set("Surrogate-Key", `store-${store.id}`);
+
+const userAgent = Astro.request.headers.get("user-agent") || "";
+const secChUaMobile = Astro.request.headers.get("sec-ch-ua-mobile");
+const isMobileDevice = secChUaMobile === "?1" || /Mobile|Android|iPhone|iPad|iPod/i.test(userAgent);
+const initialViewMode: 'mobile' | 'desktop' = isMobileDevice ? "mobile" : "desktop";
+
+const heroSection = finalConfig.sections?.find((s: any) => s.type === 'hero');
+const heroImageUrl = (heroSection?.props as any)?.imageUrl || 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=1200&q=80';
 
 const safeStore = {
   id: store.id,
@@ -152,13 +149,14 @@ const safeStore = {
   waNumber: store.waNumber,
   whatsappTemplate: customization.waCheckoutTemplate as string,
   address: store.address,
-  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  googleMapsUrl: canonicalMapsUrl,
   googleMapsEmbedUrl: store.googleMapsEmbedUrl,
   latitude: store.latitude,
   longitude: store.longitude,
   status: store.status,
   branchMode,
   branches,
+  logoUrl: activeLogoUrl,
   category: store.category ? { id: store.category.id, name: store.category.name, slug: store.category.slug } : null,
   managedByAdmin: store.registeredBy && store.registrar?.name ? { name: store.registrar.name } : null,
 };
@@ -168,8 +166,24 @@ const safeStore = {
   title={`${store.name} — ${store.category?.name || "Toko Online"}`}
   description={`${store.name} — Toko online resmi di Banyuwangi. ${store.address ? store.address + '.' : ''} Pesan produk lokal terbaik langsung via WhatsApp.`}
   image={storeLogo}
+  favicon={activeLogoUrl || undefined}
 >
-  {googleFontsUrl && <link rel="stylesheet" href={googleFontsUrl} />}
+  <link
+    rel="preload"
+    as="image"
+    href={heroImageUrl.includes('images.unsplash.com') ? heroImageUrl.replace('w=1200', 'w=500').replace('q=80', 'q=75') : heroImageUrl}
+    imagesrcset={heroImageUrl.includes('images.unsplash.com') ? `${heroImageUrl.replace('w=1200', 'w=500').replace('q=80', 'q=75')} 500w, ${heroImageUrl} 1200w` : undefined}
+    imagesizes="(max-width: 640px) 100vw, 600px"
+    fetchpriority="high"
+  />
+  {googleFontsUrl && (
+    <link
+      rel="stylesheet"
+      href={googleFontsUrl}
+      media="print"
+      onload="this.media='all'"
+    />
+  )}
   <style is:inline set:html={themeCss} />
 
   <StorefrontDynamicPage
@@ -179,5 +193,21 @@ const safeStore = {
     products={storeProducts}
     categories={categories}
     isOpen={isOpen}
+    viewModeOverride={initialViewMode}
   />
+
+  {safeStore.id && (
+    <script is:inline define:vars={{ storeId: safeStore.id }}>
+      if (typeof window !== 'undefined' && storeId) {
+        try {
+          fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ storeId: storeId, eventType: 'store_view' }),
+            keepalive: true
+          }).catch(function() {});
+        } catch (e) {}
+      }
+    </script>
+  )}
 </StorefrontLayout>

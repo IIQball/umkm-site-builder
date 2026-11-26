@@ -20,10 +20,10 @@
               class="absolute -inset-10 -z-10 bg-gradient-to-tr from-white/90 via-white/50 to-transparent dark:from-black/95 dark:via-black/60 dark:to-transparent blur-2xl rounded-3xl pointer-events-none"
             ></div>
 
-            <h2 class="heading-section text-base-content drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+            <h2 class="heading-section text-main drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
               {stage.headline}
             </h2>
-            <p class="desc-section text-base-content/80 mt-3 drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            <p class="desc-section text-secondary mt-3 drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               {stage.subtitle}
             </p>
           </div>
@@ -37,13 +37,13 @@
       <div class="relative w-full max-w-xs min-h-[195px] sm:min-h-[205px]">
         {#each STAGES as stage, idx}
           <div
-            class="card bg-base-200/75 backdrop-blur-md border border-base-content/10 p-5 rounded-2xl max-w-xs shadow-xl pointer-events-auto transition-all duration-500 ease-out absolute inset-0 flex flex-col justify-between {activeStage === idx
+            class="bg-canvas/80 dark:bg-canvas/90 backdrop-blur-md border border-border/80 dark:border-white/10 p-5 rounded-2xl max-w-xs shadow-xl pointer-events-auto transition-all duration-500 ease-out absolute inset-0 flex flex-col justify-between {activeStage === idx
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-3 scale-95 pointer-events-none'}"
           >
             <div>
-              <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-base-content/10">
-                <span class="label-caps text-base-content/50">
+              <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-border/80 dark:border-white/10">
+                <span class="label-caps text-muted">
                   {stage.roleLabel}
                 </span>
                 <div class="flex items-center gap-1">
@@ -51,18 +51,18 @@
                     <span
                       class="h-1 rounded-full transition-all duration-300 {activeStage === dotIdx
                         ? 'w-3.5 bg-orange'
-                        : 'w-1 bg-base-content/20'}"
+                        : 'w-1 bg-border'}"
                     ></span>
                   {/each}
                 </div>
               </div>
-              <p class="body-sm text-base-content/80">
+              <p class="body-sm text-secondary">
                 {stage.cardDesc}
               </p>
             </div>
             <a
               href="#contact"
-              class="btn btn-sm btn-neutral rounded-full mt-4 font-heading font-medium text-xs-dense w-fit normal-case transition-transform hover:scale-105 inline-flex items-center gap-1.5 group"
+              class="px-3 py-1.5 bg-main text-canvas dark:bg-white dark:text-main rounded-full mt-4 font-heading font-medium text-xs-dense w-fit transition-transform hover:scale-105 inline-flex items-center gap-1.5 group cursor-pointer shadow-xs"
             >
               <span>Eksplorasi</span>
               <ArrowRight size={13} class="transition-transform duration-200 group-hover:translate-x-0.5" />

@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client';
 import { activityLogs, users, stores } from '@/db/schema';
 import { desc, eq, sql, or, and } from 'drizzle-orm';
 import { AppError } from '@/lib/utils';
+import { DEFAULT_AUDIT_ACTIONS } from './audit.constants';
 
 export interface GetAuditLogsParams {
   page?: number;
@@ -10,6 +11,45 @@ export interface GetAuditLogsParams {
   callerId?: string;
   actionFilter?: string;
   roleFilter?: string;
+}
+
+export interface LogActivityParams {
+  userId: string;
+  action: string;
+  storeId?: string | null;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Record an activity to the audit log.
+ * Safe and non-blocking: never throws to avoid breaking user flows.
+ * Strictly excludes login/logout events.
+ */
+export async function logActivity(params: LogActivityParams): Promise<void> {
+  try {
+    if (!params.userId || !params.action) return;
+
+    const lowerAction = params.action.toLowerCase();
+    if (
+      lowerAction.includes('login') ||
+      lowerAction.includes('logout') ||
+      lowerAction.includes('sign in') ||
+      lowerAction.includes('sign out')
+    ) {
+      return;
+    }
+
+    await db.insert(activityLogs).values({
+      id: crypto.randomUUID(),
+      userId: params.userId,
+      storeId: params.storeId || null,
+      action: params.action,
+      details: params.details || {},
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    console.error('[AuditService] Failed to record activity log:', error);
+  }
 }
 
 export async function getAuditLogs(params: GetAuditLogsParams = {}) {
@@ -92,5 +132,24 @@ export async function getAuditLogs(params: GetAuditLogsParams = {}) {
   } catch (error) {
     console.error('Failed to get audit logs:', error);
     throw new AppError('Failed to retrieve audit logs', 500, undefined, 'INTERNAL_ERROR');
+  }
+}
+
+/**
+ * Retrieve all unique activity log actions recorded in the database.
+ * Merged with predefined default system actions to ensure comprehensive coverage.
+ */
+export async function getDistinctAuditActions(): Promise<string[]> {
+  try {
+    const records = await db
+      .selectDistinct({ action: activityLogs.action })
+      .from(activityLogs);
+
+    const dbActions = records.map((r) => r.action).filter(Boolean);
+    const unique = Array.from(new Set([...DEFAULT_AUDIT_ACTIONS, ...dbActions])).sort();
+    return unique;
+  } catch (error) {
+    console.error('[AuditService] Failed to get distinct audit actions:', error);
+    return [...DEFAULT_AUDIT_ACTIONS].sort();
   }
 }

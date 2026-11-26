@@ -28,7 +28,8 @@ describe('GET /api/storefront/catalog', () => {
     const response = (await GET({ request } as unknown as APIContext)) as Response;
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
+    expect(data.success).toBe(false);
+    expect(data.meta.code).toBe('VALIDATION_ERROR');
   });
 
   it('should return 404 if store is not found', async () => {

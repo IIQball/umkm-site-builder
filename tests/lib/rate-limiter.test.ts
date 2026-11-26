@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { InMemoryRateLimiter } from '@/lib/utils/rate-limiter';
+import { InMemoryRateLimiter, extractClientIp } from '@/lib/utils/rate-limiter';
 
 type WithStore = { store: Map<string, unknown> };
 
@@ -60,5 +60,18 @@ describe('InMemoryRateLimiter', () => {
     expect(store.has('stale-1')).toBe(false);
     expect(store.has('stale-2')).toBe(false);
     expect(store.has('fresh')).toBe(true);
+  });
+
+  it('extractClientIp prefers trusted cf-connecting-ip and socket address over spoofable x-forwarded-for', () => {
+    const cfReq = new Request('http://localhost/api/test', {
+      headers: { 'cf-connecting-ip': '198.51.100.1', 'x-forwarded-for': '203.0.113.99' },
+    });
+    expect(extractClientIp(cfReq, '127.0.0.1')).toBe('198.51.100.1');
+
+    const socketReq = new Request('http://localhost/api/test', {
+      headers: { 'x-forwarded-for': '203.0.113.99' },
+    });
+    expect(extractClientIp(socketReq, '192.0.2.10')).toBe('192.0.2.10');
+    expect(extractClientIp(socketReq)).toBe('203.0.113.99');
   });
 });

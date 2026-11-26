@@ -1,5 +1,5 @@
 import type { ColorToken, NodeStyles } from './builder';
-import type { VariantGroup } from '../../schemas/product-variant.schema';
+import type { VariantGroup } from '@/schemas/tenant/product-variant.schema';
 
 export interface HeaderAnnouncementProps {
   showAnnouncement?: boolean;
@@ -35,6 +35,7 @@ export interface HeaderAnnouncementProps {
   bpomText?: string;
   halalIcon?: string;
   halalText?: string;
+  isSticky?: boolean; stickyNav?: boolean;
   nodeStyles?: Record<string, NodeStyles>;
   [key: string]: unknown;
 }

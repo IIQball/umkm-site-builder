@@ -1,14 +1,37 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding untuk keperluan
+  fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pada skenario ini, kustomisasi konten & gaya (warna, tipografi, teks seksi) diserahkan
+  sepenuhnya kepada modul Template Builder & Designer Studio, bukan di onboarding.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai modul kustomisasi konten
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { Plus, Trash2 } from 'lucide-svelte';
   import { Button } from '@/components/ui';
+  import {
+    ITEM_IMAGE_FEATURE_PRESETS,
+    SHOWCASE_IMAGE_FEATURE_PRESETS,
+  } from '@/components/builder/sections/features/features.helpers';
   import { ICON_CHOICES } from './contentCustomization.helpers';
   import type { StoreContentCustomization } from '../../onboarding.types';
 
   export let customization: StoreContentCustomization;
+  export let layoutPreset: string = 'grid_3_cards';
   export let onUpdate: (() => void) | undefined = undefined;
 
+  $: hasImages =
+    ITEM_IMAGE_FEATURE_PRESETS.includes(layoutPreset) ||
+    SHOWCASE_IMAGE_FEATURE_PRESETS.includes(layoutPreset);
+  $: maxFeatures = hasImages ? 4 : 6;
+  $: canAdd = customization.features.items.length < maxFeatures;
+
   function addItem() {
-    if (customization.features.items.length >= 6) return;
+    if (!canAdd) return;
     customization.features.items = [
       ...customization.features.items,
       {
@@ -62,15 +85,15 @@
   <!-- Repeater Header -->
   <div class="flex items-center justify-between">
     <span class="text-xs font-bold text-main font-heading">
-      Daftar Butir Keunggulan ({customization.features.items.length}/6)
+      Daftar Butir Keunggulan ({customization.features.items.length}/{maxFeatures})
     </span>
     <Button
       type="button"
       size="sm"
       variant="ghost"
-      disabled={customization.features.items.length >= 6}
+      disabled={!canAdd}
       on:click={addItem}
-      class="text-primary font-bold text-xs !px-2.5 !py-1 !h-auto gap-1"
+      class="text-primary font-bold text-xs !px-2.5 !py-1 !h-auto gap-1 disabled:opacity-40"
     >
       <Plus size={14} />
       <span>Tambah Poin</span>

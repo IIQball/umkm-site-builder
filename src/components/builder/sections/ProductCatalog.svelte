@@ -3,8 +3,9 @@
   import type { ProductCatalogProps, SectionStyles, ProductItem } from '@/types';
   import { ShoppingCart } from 'lucide-svelte';
   import { formatIDR } from '@/lib/currency';
+  import { toast } from '@/lib/toast';
   import { generateWhatsAppLink, getEffectiveWhatsAppNumber, openWhatsAppWithTracking } from '@/lib/whatsapp';
-  import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './productCatalog.helpers';
+  import { DEFAULT_DEMO_PRODUCTS, type CartItem } from './catalog/productCatalog.helpers';
   import CatalogHeader from './catalog/CatalogHeader.svelte';
   import CatalogGridStandard from './catalog/CatalogGridStandard.svelte';
   import CatalogCarouselScroll from './catalog/CatalogCarouselScroll.svelte';
@@ -15,10 +16,6 @@
   import CatalogPriceTable from './catalog/CatalogPriceTable.svelte';
   import CatalogLookbook from './catalog/CatalogLookbook.svelte';
   import CatalogFlashSale from './catalog/CatalogFlashSale.svelte';
-  import CatalogBundleTiers from './catalog/CatalogBundleTiers.svelte';
-  import CatalogSingleFocus from './catalog/CatalogSingleFocus.svelte';
-  import CatalogSpecialCards from './catalog/CatalogSpecialCards.svelte';
-  import CatalogAccordion from './catalog/CatalogAccordion.svelte';
   import CatalogCheckoutModal from './catalog/CatalogCheckoutModal.svelte';
   import ProductVariantModal from './catalog/ProductVariantModal.svelte';
   import { fly } from 'svelte/transition';
@@ -38,15 +35,11 @@
     ? nodeStyles
     : ((props?.nodeStyles || styles?.nodeStyles || {}) as Record<string, Record<string, string>>);
 
-  let dynamicProducts: ProductItem[] = [];
-  let categories: { id: string; name: string; slug: string }[] = [];
-  let activeCategoryId: string = "all";
-
-  let currentView: "catalog" | "checkout" = "catalog";
-  let storeWaNumber: string = "";
-  let cart: CartItem[] = [];
-  let isMounted = false;
+  let dynamicProducts: ProductItem[] = [], categories: { id: string; name: string; slug: string }[] = [], activeCategoryId: string = "all";
+  let currentView: "catalog" | "checkout" = "catalog", storeWaNumber: string = "", cart: CartItem[] = [], isMounted = false;
   let form = { name: "", phone: "", address: "", delivery: "Reguler", notes: "" };
+  let buyButtonText = '', cartButtonText = 'Keranjang';
+  let marginTop = '0px', marginBottom = '0px', paddingTop = '48px', paddingBottom = '48px', paddingLeft = '', paddingRight = '';
 
   $: effectiveStoreId = storeId || (props?.storeId as string) || '';
   $: storageKey = `cart_${effectiveStoreId || 'default'}`;
@@ -66,17 +59,10 @@
   });
 
   $: if (isMounted && typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(cart));
-    } catch {
-      void 0;
-    }
+    try { localStorage.setItem(storageKey, JSON.stringify(cart)); } catch { void 0; }
   }
 
-  // State for variant modal
-  let selectedVariantProduct: ProductItem | null = null;
-  let isVariantModalOpen = false;
-  let variantModalMode: 'cart' | 'buy' = 'cart';
+  let selectedVariantProduct: ProductItem | null = null, isVariantModalOpen = false, variantModalMode: 'cart' | 'buy' = 'cart';
 
   // In live storefront: use only real products (empty state if none). In builder: fallback to demo.
   $: products = isLiveStorefront
@@ -110,7 +96,7 @@
 
   const addConfiguredItemToCart = (
     product: ProductItem,
-    selections: Record<string, any> = {},
+    selections: Record<string, string | { name: string }> = {},
     qty: number = 1,
     overrideUnitPrice?: number
   ) => {
@@ -126,16 +112,21 @@
           const sel = selections[group.groupName];
           const selName = typeof sel === 'object' && sel ? sel.name : sel;
           if (selName && group.options) {
-            const opt = group.options.find((o: any) => o.name === selName);
+            const opt = group.options.find((o: { name: string; priceAdjustment?: number }) => o.name === selName);
             if (opt && typeof opt.priceAdjustment === 'number') base += opt.priceAdjustment;
           }
         }
       }
       cart = [...cart, { product, variantId: variantKey, selections, qty, price: base, subtotal: base * qty }];
     }
+    toast.success(`${product.name} dimasukkan ke keranjang`);
   };
 
   const handleAddToCart = (product: ProductItem) => {
+    if (!product.variants || product.variants.length === 0) {
+      addConfiguredItemToCart(product);
+      return;
+    }
     selectedVariantProduct = product;
     variantModalMode = 'cart';
     isVariantModalOpen = true;
@@ -149,6 +140,12 @@
   };
 
   const handleBuyNow = (product: ProductItem) => {
+    if (!product.variants || product.variants.length === 0) {
+      addConfiguredItemToCart(product);
+      currentView = 'checkout';
+      scrollToCatalog();
+      return;
+    }
     selectedVariantProduct = product;
     variantModalMode = 'buy';
     isVariantModalOpen = true;
@@ -158,21 +155,19 @@
     cart[idx].qty += delta;
     cart = cart[idx].qty <= 0 ? cart.filter((_, i) => i !== idx) : [...cart];
   };
-
-  const removeFromCart = (idx: number) => {
-    cart = cart.filter((_, i) => i !== idx);
-  };
+  const removeFromCart = (idx: number) => { cart = cart.filter((_, i) => i !== idx); };
 
   const handleCheckout = () => {
     if (!form.name || !form.phone || !form.address) {
-      alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.');
+      toast.warning('Mohon lengkapi Nama, Nomor WhatsApp, dan Alamat Pengiriman.', 'Data Belum Lengkap');
       return;
     }
     const itemsSummary = detailedCart.map((item) => {
-      const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as any).name : opt).filter(Boolean).join(", ");
+      const optNames = Object.values(item.selections).map(opt => typeof opt === 'object' && opt ? (opt as { name?: string }).name : opt).filter(Boolean).join(", ");
       return `- ${item.product.name}${optNames ? ` (Opsi: ${optNames})` : ''} x${item.qty}: ${formatIDR(item.subtotal)}`;
     }).join("\n");
-    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
+    const deliveryMethod = form.delivery || 'Kurir Toko / Pengantaran Langsung';
+    const message = `Halo ${storeName || 'Toko'}, saya ingin memesan:\n\n*DAFTAR PESANAN:*\n${itemsSummary}\n\n*TOTAL:* ${formatIDR(cartTotal)}\n\n*DATA PENGIRIMAN:*\nNama: ${form.name}\nWhatsApp: ${form.phone}\nAlamat: ${form.address}\nMetode Pengiriman: ${deliveryMethod}\nCatatan: ${form.notes || "-"}\n\nMohon konfirmasi ketersediaan & info pembayaran. Terima kasih!`;
     const waLink = generateWhatsAppLink(effectiveWaNumber, message);
     
     openWhatsAppWithTracking(waLink, effectiveStoreId);
@@ -180,9 +175,10 @@
 </script>
 
 <div
+  id={sectionId || 'produk'}
   data-node="product_catalog_container"
-  class="product-card w-full box-border relative overflow-hidden"
-  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom}; container-type: inline-size; container-name: productcard;"
+  class="w-full box-border relative"
+  style="{sectionBgStyle} margin-top: {marginTop}; margin-bottom: {marginBottom};"
 >
   {#if currentView === 'checkout'}
     <div
@@ -222,7 +218,7 @@
         />
       </div>
 
-      <div style="order: {isGridFirst ? 1 : 2};">
+      <div class="product-card" style="order: {isGridFirst ? 1 : 2};">
         <!-- Empty State: shown in live storefront when store has no products yet -->
         {#if isLiveStorefront && products.length === 0}
           <div class="flex flex-col items-center justify-center gap-4 py-20 text-center text-muted">
@@ -248,36 +244,30 @@
             <CatalogLookbook {sectionId} {products} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
           {:else if activePreset === 'flash_sale_countdown'}
             <CatalogFlashSale {sectionId} {products} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'bundle_package_tiers'}
-            <CatalogBundleTiers {sectionId} {products} waNumber={effectiveWaNumber} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'single_product_deep_focus'}
-            <CatalogSingleFocus {sectionId} {products} waNumber={effectiveWaNumber} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'seasonal_hampers_gift' || activePreset === 'before_after_product_effect' || activePreset === 'digital_download_catalog' || activePreset === 'customer_review_paired_card'}
-            <CatalogSpecialCards {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
-          {:else if activePreset === 'minimal_accordion_catalog'}
-            <CatalogAccordion {sectionId} {products} {buyButtonText} nodeStyles={effectiveNodeStyles} onBuyNow={handleBuyNow} />
           {:else}
-            <!-- Standard, compact_mini_cards, quick_buy_whatsapp_direct, badge_stock_scarcity, interactive_filter_tabs -->
-            <CatalogGridStandard {sectionId} {products} {activePreset} waNumber={effectiveWaNumber} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+            <!-- Standard, compact_mini_cards -->
+            <CatalogGridStandard {sectionId} {products} {activePreset} {isLiveStorefront} {buyButtonText} {cartButtonText} nodeStyles={effectiveNodeStyles} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
           {/if}
         {/if}
       </div>
     </div>
 
-    <!-- Floating Sticky Cart Pill -->
+    <!-- Floating Sticky Cart Pill (posisi rapih di atas Laporkan Bug) -->
     {#if totalCartItems > 0}
-      <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-6 right-6 z-40">
+      <div transition:fly={{ y: 20, duration: 250 }} class="fixed bottom-20 right-4 sm:right-6 z-40">
         <button
           type="button"
           on:click={() => { currentView = 'checkout'; scrollToCatalog(); }}
-          class="btn btn-primary rounded-full shadow-2xl h-auto py-3 px-5 border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-bold text-sm group"
+          class="flex items-center gap-2.5 py-2.5 px-4 rounded-full shadow-2xl border border-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer font-heading font-semibold text-xs sm:text-sm select-none whitespace-nowrap"
+          style="background-color: var(--theme-btn-primary-bg, var(--theme-primary, var(--color-primary))); color: var(--theme-btn-primary-text, var(--color-card-base, #ffffff));"
         >
-          <div class="relative">
-            <ShoppingCart size={18} />
-            <span class="badge badge-error badge-xs absolute -top-2 -right-2 text-white font-mono font-bold p-1">{totalCartItems}</span>
+          <div class="flex items-center gap-1.5 bg-black/15 dark:bg-white/20 px-2 py-0.5 rounded-full font-mono font-bold text-xs">
+            <ShoppingCart size={14} />
+            <span>{totalCartItems}</span>
           </div>
           <span>Keranjang</span>
-          <span class="badge badge-ghost font-mono text-xs">{formatIDR(cartTotal)}</span>
+          <span class="opacity-40">•</span>
+          <span class="font-bold font-mono">{formatIDR(cartTotal)}</span>
         </button>
       </div>
     {/if}

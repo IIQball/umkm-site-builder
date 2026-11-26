@@ -22,6 +22,41 @@ export interface PublicStoreDetail {
 }
 
 /**
+ * Checks if a user already owns an active (non-deleted) store.
+ */
+export async function hasExistingStore(userId: string): Promise<boolean> {
+  const [existing] = await db
+    .select({ id: stores.id })
+    .from(stores)
+    .where(and(eq(stores.userId, userId), isNull(stores.deletedAt)))
+    .limit(1);
+  return !!existing;
+}
+
+/**
+ * Checks if a subdomain is already in use by any non-deleted store.
+ */
+export async function isSubdomainTaken(subdomain: string): Promise<boolean> {
+  const [existing] = await db
+    .select({ id: stores.id })
+    .from(stores)
+    .where(and(eq(stores.subdomain, subdomain), isNull(stores.deletedAt)))
+    .limit(1);
+  return !!existing;
+}
+
+/**
+ * Verifies whether a store has completed required onboarding criteria.
+ */
+export function isStoreFullyOnboarded(store?: {
+  subdomain?: string | null;
+  templateId?: string | null;
+  status?: string | null;
+} | null): boolean {
+  return Boolean(store && store.subdomain && store.templateId && store.status === 'active');
+}
+
+/**
  * Updates store's lastEditedBy and updatedAt timestamp.
  */
 export async function touchStoreLastEdited(storeId: string, userId: string): Promise<void> {

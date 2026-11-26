@@ -59,12 +59,12 @@
           tabindex="0"
           on:click={(e) => handleSelectSlot(e, 'badge')}
           on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectSlot(e, 'badge')}
-          class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3 py-1 transition-all cursor-pointer ${
+          class={`inline-flex items-center rounded-full border text-2xs gap-1.5 font-heading font-medium mb-3 shadow-2xs px-3.5 py-1 min-h-[24px] transition-all cursor-pointer ${
             isBadgeActive
               ? 'ring-2 ring-[var(--theme-primary, var(--color-primary))] ring-offset-2'
               : 'hover:outline-dashed hover:outline-1 hover:outline-[var(--theme-primary, var(--color-primary))]/50'
           }`}
-          style="background-color: color-mix(in srgb, {badgeColor || 'var(--color-primary)'} 10%, transparent); border-color: color-mix(in srgb, {badgeColor || 'var(--color-primary)'} 25%, transparent); color: {badgeColor || 'var(--color-primary)'}; margin-top: {badgeMarginTop}; margin-bottom: {badgeMarginBottom};"
+          style="background-color: color-mix(in srgb, {badgeColor || 'var(--theme-secondary, var(--color-secondary))'} 10%, transparent); border-color: color-mix(in srgb, {badgeColor || 'var(--theme-secondary, var(--color-secondary))'} 25%, transparent); color: {badgeColor || 'var(--theme-secondary, var(--color-secondary))'}; font-size: {badgeStyle.fontSize || 'var(--theme-text-caption, var(--text-caption-size, 10px))'}; font-weight: {badgeStyle.fontWeight || 'var(--theme-text-caption-weight, var(--text-caption-weight, 700))'}; margin-top: {badgeMarginTop}; margin-bottom: {badgeMarginBottom};"
         >
           <Star size={12} class="fill-current" />
           <span>{badgeText}</span>
@@ -86,7 +86,7 @@
         >
           <h2
             class="cq-title font-heading font-extrabold tracking-tight"
-            style="{titleColor ? `color: ${titleColor};` : 'color: var(--theme-text-primary, var(--color-text-main));'} font-family: var(--theme-heading-font, var(--font-heading));"
+            style="{titleColor ? `color: ${titleColor};` : 'color: var(--theme-text-primary, var(--color-text-main));'} font-family: var(--theme-heading-font, var(--font-heading)); font-size: {titleStyle.fontSize || 'var(--theme-text-h2, var(--text-h2-size, 26px))'}; font-weight: {titleStyle.fontWeight || 'var(--theme-text-h2-weight, var(--text-h2-weight, 700))'};"
           >
             {title}
           </h2>
@@ -108,7 +108,7 @@
         >
           <p
             class="text-body-base max-w-2xl mx-auto leading-relaxed"
-            style="{subtitleColor ? `color: ${subtitleColor};` : 'color: var(--theme-text-muted, var(--color-text-secondary));'} font-family: var(--theme-body-font, var(--font-family));"
+            style="{subtitleColor ? `color: ${subtitleColor};` : 'color: var(--theme-text-muted, var(--color-text-secondary));'} font-family: var(--theme-body-font, var(--font-family)); font-size: {subtitleStyle.fontSize || 'var(--theme-text-body, var(--text-body-size, 16px))'}; font-weight: {subtitleStyle.fontWeight || 'var(--theme-text-body-weight, var(--text-body-weight, 400))'};"
           >
             {subtitle}
           </p>

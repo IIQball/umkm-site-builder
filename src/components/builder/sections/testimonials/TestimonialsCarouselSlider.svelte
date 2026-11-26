@@ -75,12 +75,12 @@
     {/if}
 
     <div>
-      <h4 class="font-heading font-bold text-xs text-main">
+      <h3 class="font-heading font-bold text-xs text-main">
         {currentItem?.customerName}
-      </h4>
+      </h3>
       <div class="flex items-center justify-center gap-1.5 text-[10px] text-secondary mt-0.5">
         {#if currentItem?.verified !== false}
-          <span class="text-emerald-600 font-semibold flex items-center gap-0.5">
+          <span class="text-success font-semibold flex items-center gap-0.5">
             <CheckCircle2 size={10} />
             <span>{currentItem?.verifiedText || 'Pembeli Terverifikasi'}</span>
           </span>

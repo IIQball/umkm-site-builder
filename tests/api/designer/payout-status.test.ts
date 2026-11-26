@@ -40,8 +40,8 @@ describe('GET /api/designer/payout/status', () => {
 
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('UNAUTHORIZED');
   });
 
   it('returns 401 when user is not an authorized designer', async () => {
@@ -82,7 +82,7 @@ describe('GET /api/designer/payout/status', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.success).toBe(true);
     expect(body.data.payouts).toEqual(mockPayouts);
     expect(body.data.wallet).toEqual({ balance: 200000, availableBalance: 150000 });
   });

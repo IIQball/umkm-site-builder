@@ -1,9 +1,20 @@
+<!--
+  =============================================================================
+  CATATAN ARSIP / STATUS FITUR (TA FOKUS: TEMPLATE BUILDER):
+  File ini sengaja disembunyikan sementara dari alur Onboarding untuk keperluan
+  fokus topik Tugas Akhir (TA) mahasiswa: "Modul Template Builder (Section-Based)".
+  Pada skenario ini, kustomisasi konten & gaya (warna, tipografi, teks seksi) diserahkan
+  sepenuhnya kepada modul Template Builder & Designer Studio, bukan di onboarding.
+
+  JANGAN DIHAPUS. File ini tetap dipertahankan sebagai modul kustomisasi konten
+  bawaan (legacy/fallback) atau untuk re-integrasi masa depan.
+  =============================================================================
+-->
 <script lang="ts">
   import { onMount } from 'svelte';
   import {
     ArrowLeft,
     CheckCircle,
-    Loader2,
     Palette,
     Layout,
     Sparkles,
@@ -29,6 +40,7 @@
   import { DEFAULT_TEMPLATE_CONFIG } from '@/schemas/templates/template.defaults';
   import { buildCanvasCssVars } from '@/components/builder/canvas/canvasCss.helpers';
   import { loadDynamicGoogleFonts } from '@/components/builder/canvas/fontLoader.helpers';
+  import { apiFetch } from '@/lib/api/parse-response';
   import { getMainDomain } from '@/lib/domain';
 
   export let templates: TemplateItem[] = [];
@@ -56,7 +68,7 @@
   let canonicalMapsUrl: string = '';
 
   const TABS: Array<{ id: ContentTab; label: string; icon: typeof Palette }> = [
-    { id: 'design', label: 'Warna', icon: Palette },
+    { id: 'design', label: 'Warna Brand', icon: Palette },
     { id: 'header', label: 'Header', icon: Compass },
     { id: 'hero', label: 'Hero', icon: Layout },
     { id: 'features', label: 'Keunggulan', icon: Sparkles },
@@ -76,15 +88,14 @@
   $: {
     const rawMaps = googleMapsUrl || customization?.maps?.branches?.[0]?.googleMapsUrl || '';
     if (rawMaps && (rawMaps.includes('goo.gl') || rawMaps.includes('maps.app.goo.gl'))) {
-      fetch(`/api/public/resolve-maps?url=${encodeURIComponent(rawMaps)}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data?.canonicalUrl) {
-            canonicalMapsUrl = data.canonicalUrl;
+      apiFetch<{ canonicalUrl?: string }>(`/api/public/resolve-maps?url=${encodeURIComponent(rawMaps)}`)
+        .then((result) => {
+          const resolved = result.data?.canonicalUrl;
+          if (result.success && resolved) {
+            canonicalMapsUrl = resolved;
+          } else if (!result.success) {
+            canonicalMapsUrl = rawMaps;
           }
-        })
-        .catch(() => {
-          canonicalMapsUrl = rawMaps;
         });
     } else {
       canonicalMapsUrl = rawMaps;
@@ -97,6 +108,19 @@
     : DEFAULT_TEMPLATE_CONFIG;
 
   $: headerSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'header_announcement');
+  $: heroSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'hero');
+  $: featuresSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'features');
+  $: testimonialsSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'testimonials');
+  $: faqSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'faq');
+  $: footerSectionInTemplate = baseConfig?.sections?.find((s) => s.type === 'footer');
+
+  $: headerPreset = (headerSectionInTemplate?.layoutPreset as string) || (headerSectionInTemplate?.props?.layoutPreset as string) || 'default_split';
+  $: heroPreset = (heroSectionInTemplate?.layoutPreset as string) || (heroSectionInTemplate?.props?.layoutPreset as string) || 'split_left_text';
+  $: featuresPreset = (featuresSectionInTemplate?.layoutPreset as string) || (featuresSectionInTemplate?.props?.layoutPreset as string) || 'grid_3_cards';
+  $: testimonialsPreset = (testimonialsSectionInTemplate?.layoutPreset as string) || (testimonialsSectionInTemplate?.props?.layoutPreset as string) || 'masonry_grid';
+  $: faqPreset = (faqSectionInTemplate?.layoutPreset as string) || (faqSectionInTemplate?.props?.layoutPreset as string) || 'accordion_single_col';
+  $: footerPreset = (footerSectionInTemplate?.layoutPreset as string) || (footerSectionInTemplate?.props?.layoutPreset as string) || 'multi_column';
+
   $: templateHasHeaderLogo = Boolean(
     headerSectionInTemplate &&
     (headerSectionInTemplate.props?.logoType !== 'text_only' || Boolean(headerSectionInTemplate.props?.logoImageUrl))
@@ -174,17 +198,17 @@
           {#if activeTab === 'design'}
             <ContentDesignTab bind:customization onUpdate={triggerSync} />
           {:else if activeTab === 'header'}
-            <ContentHeaderTab bind:customization hasLogo={templateHasHeaderLogo} onUpdate={triggerSync} />
+            <ContentHeaderTab bind:customization hasLogo={templateHasHeaderLogo} layoutPreset={headerPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'hero'}
-            <ContentHeroTab bind:customization onUpdate={triggerSync} />
+            <ContentHeroTab bind:customization layoutPreset={heroPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'features'}
-            <ContentFeaturesTab bind:customization onUpdate={triggerSync} />
+            <ContentFeaturesTab bind:customization layoutPreset={featuresPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'testimonials'}
-            <ContentTestimonialsTab bind:customization onUpdate={triggerSync} />
+            <ContentTestimonialsTab bind:customization layoutPreset={testimonialsPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'faq'}
-            <ContentFaqTab bind:customization onUpdate={triggerSync} />
+            <ContentFaqTab bind:customization layoutPreset={faqPreset} onUpdate={triggerSync} />
           {:else if activeTab === 'footer'}
-            <ContentFooterTab bind:customization onUpdate={triggerSync} />
+            <ContentFooterTab bind:customization layoutPreset={footerPreset} onUpdate={triggerSync} />
           {/if}
         </div>
       </div>
@@ -219,8 +243,7 @@
             on:click={onSubmit}
           >
             {#if submitStatus === 'submitting'}
-              <Loader2 size={16} class="animate-spin" />
-              Menyimpan...
+              <span>Menyimpan...</span>
             {:else}
               {isEdit ? 'Simpan Perubahan Toko' : 'Selesai & Buat Toko'}
               <CheckCircle size={16} />

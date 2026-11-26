@@ -55,6 +55,40 @@ describe('Dynamic Max Store Branches & Platform Settings', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('validates contactPhone and contactEmail formats', () => {
+      expect(
+        commissionSettingsSchema.safeParse({
+          platformFeePercentage: 20,
+          contactPhone: '085736653639',
+          contactEmail: 'support@pinoka.id',
+        }).success
+      ).toBe(true);
+
+      expect(
+        commissionSettingsSchema.safeParse({
+          platformFeePercentage: 20,
+          contactPhone: '+6281234567890',
+          contactEmail: 'halo@umkm.co.id',
+        }).success
+      ).toBe(true);
+
+      // Invalid email
+      expect(
+        commissionSettingsSchema.safeParse({
+          platformFeePercentage: 20,
+          contactEmail: 'not-an-email',
+        }).success
+      ).toBe(false);
+
+      // Invalid phone (too short)
+      expect(
+        commissionSettingsSchema.safeParse({
+          platformFeePercentage: 20,
+          contactPhone: '123',
+        }).success
+      ).toBe(false);
+    });
   });
 
   describe('getMaxStoreBranches service', () => {
@@ -66,10 +100,12 @@ describe('Dynamic Max Store Branches & Platform Settings', () => {
       expect(DEFAULT_MAX_STORE_BRANCHES).toBe(5);
     });
 
-    it('getPlatformSettings includes maxStoreBranches', async () => {
+    it('getPlatformSettings includes maxStoreBranches, contactPhone, and contactEmail', async () => {
       const settings = await getPlatformSettings();
       expect(typeof settings.maxStoreBranches).toBe('number');
       expect(settings.maxStoreBranches).toBeGreaterThanOrEqual(1);
+      expect(typeof settings.contactPhone).toBe('string');
+      expect(typeof settings.contactEmail).toBe('string');
     });
 
     it('updatePlatformSettings throws if maxStoreBranches out of bounds', async () => {
@@ -100,10 +136,12 @@ describe('Dynamic Max Store Branches & Platform Settings', () => {
       expect(res.status).toBe(200);
 
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(typeof body.data.maxStoreBranches).toBe('number');
       expect(body.data.maxStoreBranches).toBeGreaterThanOrEqual(1);
       expect(typeof body.data.platformFeePercentage).toBe('number');
+      expect(typeof body.data.contactPhone).toBe('string');
+      expect(typeof body.data.contactEmail).toBe('string');
     });
 
     it('GET /api/public/commission returns maxStoreBranches alongside fee percentages', async () => {
@@ -116,7 +154,7 @@ describe('Dynamic Max Store Branches & Platform Settings', () => {
       expect(res.status).toBe(200);
 
       const body = await res.json();
-      expect(body.ok).toBe(true);
+      expect(body.success).toBe(true);
       expect(typeof body.data.maxStoreBranches).toBe('number');
       expect(body.data.maxStoreBranches).toBeGreaterThanOrEqual(1);
     });

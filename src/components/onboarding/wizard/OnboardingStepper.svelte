@@ -12,13 +12,21 @@
   }
 
   let stepsList: StepItem[] = [];
-  $: stepsList = [
-    { num: 1, label: 'Subdomain' },
-    { num: 2, label: 'Profil & Lokasi' },
-    { num: 3, label: isEdit ? 'Template & Status' : 'Pilih Template' },
-    { num: 4, label: 'Kustomisasi Konten' },
-    { num: 5, label: 'Selesai' },
-  ];
+  $: stepsList = isEdit
+    ? [
+        { num: 1, label: 'Subdomain' },
+        { num: 2, label: 'Profil & Lokasi' },
+        { num: 3, label: 'Pengaturan Toko' },
+        { num: 4, label: 'Kustomisasi Desain' },
+        { num: 5, label: 'Selesai' },
+      ]
+    : [
+        { num: 1, label: 'Subdomain' },
+        { num: 2, label: 'Profil & Lokasi' },
+        { num: 3, label: 'Pilih Template' },
+        { num: 4, label: 'Kustomisasi Desain' },
+        { num: 5, label: 'Selesai' },
+      ];
 
   $: progressWidth =
     currentStep === 1
@@ -47,9 +55,9 @@
           disabled={isEdit ? s.num === 5 && currentStep !== 5 : s.num >= currentStep}
           on:click={() => { if (isEdit ? s.num <= 4 : s.num < currentStep) onStepClick(s.num); }}
           class="w-8 h-8 rounded-full flex items-center justify-center font-bold font-sans text-xs transition-all duration-150 {currentStep > s.num
-            ? 'bg-primary text-white shadow-xs ring-4 ring-card cursor-pointer hover:scale-105'
+            ? 'bg-primary text-primary-content shadow-xs ring-4 ring-card cursor-pointer hover:scale-105'
             : currentStep === s.num
-            ? 'bg-primary text-white shadow-sm ring-4 ring-primary/20 scale-105'
+            ? 'bg-primary text-primary-content shadow-sm ring-4 ring-primary/20 scale-105'
             : isEdit && s.num <= 4
             ? 'bg-nested text-main border border-light ring-4 ring-card cursor-pointer hover:scale-105'
             : 'bg-nested text-muted border border-light ring-4 ring-card cursor-default'}"

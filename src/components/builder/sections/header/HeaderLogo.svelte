@@ -11,7 +11,8 @@
   $: viewMode = $canvasStore?.viewMode || 'desktop';
   $: isMobile = viewMode === 'mobile';
 
-  $: logoType = props.logoType || 'image_text';
+  $: rawLogoType = props.logoType || 'image_text';
+  $: logoType = rawLogoType === 'image' ? 'image_text' : rawLogoType;
   $: logoText = props.logoText || 'Toko UMKM';
   $: logoImageUrl = props.logoImageUrl || '';
   $: logoHeight = Number(props.logoImageHeight) || 40;
@@ -70,6 +71,10 @@
       <img
         src={logoImageUrl}
         alt={logoText || 'Logo'}
+        width={logoHeight}
+        height={logoHeight}
+        loading="eager"
+        decoding="async"
         style={`height: ${logoHeight}px; width: ${logoShape === 'circle' ? `${logoHeight}px` : 'auto'}; max-height: 80px; border-radius: ${logoShape === 'circle' ? '9999px' : (props.logoBorderRadius || '6px')};`}
         class="object-cover select-none pointer-events-none"
       />

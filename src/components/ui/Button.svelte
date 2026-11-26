@@ -11,6 +11,7 @@
   export let title: string = ''
   export let id: string = ''
   export let className: string = ''
+  export let ariaPressed: boolean | undefined = undefined
   let customClass: string = ''
   export { customClass as class }
 
@@ -99,6 +100,7 @@
     {id}
     {title}
     disabled={isDisabled}
+    aria-pressed={ariaPressed}
     class={baseClasses}
     on:click={(e) => dispatch('click', e)}
     on:focus={(e) => dispatch('focus', e)}

@@ -10,19 +10,19 @@ this doc is the contract and the review checklist.
 ## 1. Response shape (global)
 
 ```ts
-{ ok: true, data: T }
-{ ok: false, error: { code: string, message: string } }
+{ success: true, data: T, message: string, meta?: Record<string, unknown> }
+{ success: false, data: null, message: string, meta?: { code: string, details?: unknown } }
 ```
 
-`message` is always safe and generic. Detail stays in the server log.
+`message` is always safe and user-friendly. Internal stack traces, SQL queries, paths, and runtime exceptions stay in the server log (`console.error` via `errorLog`).
 
 Example:
 ```ts
 // Success
-{ ok: true, data: { id: 'store_123', name: 'Kopi Budi', subdomain: 'kopi-budi' } }
+{ success: true, data: { id: 'store_123', name: 'Kopi Budi', subdomain: 'kopi-budi' }, message: 'Berhasil' }
 
 // Error
-{ ok: false, error: { code: 'UNAUTHORIZED', message: 'Please log in to continue' } }
+{ success: false, data: null, message: 'Silakan masuk terlebih dahulu untuk melanjutkan.', meta: { code: 'UNAUTHORIZED' } }
 ```
 
 ---
@@ -140,7 +140,7 @@ Adding a code is deliberate. Document it here before using.
 - **Server-derived:** None (only updates existing transaction record)
 - **Success:** `{ ok: true, data: {} }`
 - **Errors:** VALIDATION_ERROR (signature invalid), NOT_FOUND (transaction not in DB)
-- **Idempotency:** Unique constraint on `transactions.externalId` prevents double-crediting
+- **Idempotency:** The transaction status claim and paid-transaction fulfillment run in one database transaction. A conditional status update only returns one winner; retries that observe `success` do not fulfill again. `transactions.externalId` uniquely identifies the invoice.
 - **Side effects:** Updates transaction status (pending → success/failed/expired); creates commission and updates designer wallet if applicable; sends email to user and notification to admin
 - **Rate limit:** None (webhook retries from Xendit)
 
@@ -457,7 +457,16 @@ Adding a code is deliberate. Document it here before using.
 | POST /api/designer/templates/*/save | 100 | 1 hour | Live save during editing |
 | POST /api/admin/tenants/register | 100 | 1 day | Admin work hours |
 | POST /api/admin/stores/setup | 50 | 1 day | Admin work hours |
+| POST /api/public/bug-reports | 5 | 5 min | Spam/flood protection (public + cross-origin CORS) |
 | All others (read-only) | unlimited | — | CDN/caching handles load |
+
+### Bug Reporting Endpoints
+
+- `OPTIONS /api/public/bug-reports` — Preflight CORS for `pinoka.id`, `app.pinoka.id`, and configured landing/site origins.
+- `POST /api/public/bug-reports` — Submit bug report from `site_builder` or `landing_page` (`description`, optional `title`, `stepsToReproduce`, `routeUrl`, `userAgent`, optional `reporterEmail`, optional `attachmentMeta`).
+- `GET /api/superadmin/bug-reports` — List bug reports with `status`, `sourceApp`, `search`, `page`, `limit` (`superadmin` only).
+- `GET /api/superadmin/bug-reports/[id]` — Fetch full bug report detail (`superadmin` only).
+- `PATCH /api/superadmin/bug-reports/[id]` — Update `status` (`unresolved` | `in_progress` | `resolved`) and optional `adminNotes` (`superadmin` only).
 
 ---
 
@@ -482,13 +491,13 @@ Invalid input returns VALIDATION_ERROR with field-level messages.
 
 ## 6. Idempotency
 
-**Payment webhooks:** Unique constraint on `transactions.externalId` prevents double-crediting if webhook is retried.
+**Payment webhooks:** `transactions.externalId` uniquely identifies the invoice. The webhook conditionally changes the transaction to `success` and fulfills it in the same database transaction; concurrent/repeated callbacks cannot both claim the transition. AI credit upserts use atomic increments to preserve concurrent purchases.
 
 **Payout requests:** Unique constraint on `payout_requests.xenditPayoutId` prevents duplicate payouts.
 
 **Safe to retry (idempotent):**
 - POST /api/payments/initiate (if same amount/user, returns same invoiceId via externalId lookup)
-- POST /api/webhooks/xendit (retries are harmless due to unique externalId constraint)
+- POST /api/webhooks/xendit (retries are harmless due to the atomic success transition and fulfillment)
 - POST /api/admin/stores/setup (idempotent via subdomain uniqueness)
 
 **Not safe to retry (avoid retrying):**

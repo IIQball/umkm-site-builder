@@ -5,8 +5,7 @@
     getRoleConfig,
     getDashboardHomePath,
     getSettingsHref,
-  } from "@/components/dashboard/sidebar/sidebar.helpers";
-  import { signOutAndRedirect } from "@/lib/auth-client";
+  } from "./navbar.helpers";
 
   export let user: NavUser;
   export let onSignOut: (() => void | Promise<void>) | undefined = undefined;
@@ -31,6 +30,7 @@
     if (onSignOut) {
       await onSignOut();
     } else {
+      const { signOutAndRedirect } = await import("@/lib/auth-client");
       await signOutAndRedirect();
     }
   };
@@ -41,8 +41,17 @@
         isOpen = false;
       }
     };
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        isOpen = false;
+      }
+    };
     window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+      window.removeEventListener("keydown", handleKeydown);
+    };
   });
 </script>
 
@@ -60,7 +69,11 @@
         class="w-7 h-7 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden"
       >
         {#if user.image}
-          <img src={user.image} alt={user.name || "User"} class="w-full h-full object-cover" />
+          <img
+            src={user.image}
+            alt={user.name || "User"}
+            class="w-full h-full object-cover"
+          />
         {:else}
           <span>{userInitial}</span>
         {/if}
@@ -107,7 +120,11 @@
             class="w-9 h-9 rounded-xl bg-neutral text-neutral-content flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden"
           >
             {#if user.image}
-              <img src={user.image} alt={user.name || "User"} class="w-full h-full object-cover" />
+              <img
+                src={user.image}
+                alt={user.name || "User"}
+                class="w-full h-full object-cover"
+              />
             {:else}
               <span>{userInitial}</span>
             {/if}
@@ -136,7 +153,8 @@
             class="inline-flex items-center gap-1.5 text-2xs text-success font-medium bg-success/10 px-2 py-0.5 rounded-full border border-success/20"
             title="Sesi Anda saat ini sedang aktif"
           >
-            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"
+            ></span>
             <span>Sesi Aktif</span>
           </span>
         </div>
@@ -157,9 +175,7 @@
                hover:bg-nested hover:text-main transition-colors"
         role="menuitem"
       >
-        <span class="material-symbols-outlined text-base"
-          >manage_accounts</span
-        >
+        <span class="material-symbols-outlined text-base">manage_accounts</span>
         Pengaturan Akun
       </a>
       <div class="border-t border-light mt-1.5 pt-1">
@@ -171,7 +187,10 @@
                  hover:bg-error/10 transition-colors cursor-pointer text-left"
           role="menuitem"
         >
-          <span class="material-symbols-outlined text-base" class:animate-spin={isLoggingOut}>power_settings_new</span>
+          <span
+            class="material-symbols-outlined text-base"
+            class:animate-spin={isLoggingOut}>power_settings_new</span
+          >
           <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
         </button>
       </div>

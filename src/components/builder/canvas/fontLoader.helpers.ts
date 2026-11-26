@@ -16,7 +16,21 @@ const KNOWN_GOOGLE_FONTS: Record<string, string> = {
   'montserrat': 'Montserrat:wght@400;500;600;700;800',
   'roboto': 'Roboto:wght@300;400;500;700',
   'open sans': 'Open+Sans:wght@400;500;600;700',
+  'manrope': 'Manrope:wght@400;500;600;700',
+  'urbanist': 'Urbanist:wght@400;500;600;700',
+  'figtree': 'Figtree:wght@400;500;600;700',
+  'space grotesk': 'Space+Grotesk:wght@400;500;600;700',
+  'work sans': 'Work+Sans:wght@400;500;600;700',
+  'raleway': 'Raleway:wght@400;500;600;700',
+  'sora': 'Sora:wght@400;500;600;700',
+  'lora': 'Lora:ital,wght@0,400;0,600;1,400',
+  'cormorant garamond': 'Cormorant+Garamond:wght@400;600;700',
+  'cinzel': 'Cinzel:wght@400;600;700',
+  'bodoni moda': 'Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400',
+  'fraunces': 'Fraunces:wght@400;600;700',
+  'dm serif display': 'DM+Serif+Display',
   'jetbrains mono': 'JetBrains+Mono:wght@400;500;700',
+  'space mono': 'Space+Mono:wght@400;700',
 };
 
 const SYSTEM_FALLBACKS = new Set([
@@ -91,6 +105,29 @@ export function loadDynamicGoogleFonts(headingFont?: string, bodyFont?: string):
   if (!linkEl) {
     linkEl = document.createElement('link');
     linkEl.id = 'builder-dynamic-google-fonts';
+    linkEl.rel = 'stylesheet';
+    document.head.appendChild(linkEl);
+  }
+
+  if (linkEl.href !== fontUrl) {
+    linkEl.href = fontUrl;
+  }
+}
+
+/**
+ * Preloads all curated design system fonts into document head
+ * so that font picker options preview accurately in their native styles.
+ */
+export function preloadDesignSystemFonts(): void {
+  if (typeof document === 'undefined') return;
+  const allKnown = Object.keys(KNOWN_GOOGLE_FONTS);
+  const fontUrl = buildGoogleFontsUrl(allKnown);
+  if (!fontUrl) return;
+
+  let linkEl = document.getElementById('builder-preview-google-fonts') as HTMLLinkElement | null;
+  if (!linkEl) {
+    linkEl = document.createElement('link');
+    linkEl.id = 'builder-preview-google-fonts';
     linkEl.rel = 'stylesheet';
     document.head.appendChild(linkEl);
   }

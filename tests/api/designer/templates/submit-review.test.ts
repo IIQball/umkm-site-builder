@@ -56,8 +56,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('UNAUTHORIZED');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('UNAUTHORIZED');
   });
 
   it('should return 400 when templateId is missing', async () => {
@@ -72,8 +72,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('VALIDATION_ERROR');
   });
 
   it('should return 404 when template does not exist', async () => {
@@ -89,8 +89,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(404);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('NOT_FOUND');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('NOT_FOUND');
   });
 
   it('should return 403 when designer is not the owner of the template', async () => {
@@ -106,8 +106,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(403);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe('FORBIDDEN');
+    expect(body.success).toBe(false);
+    expect(body.meta.code).toBe('FORBIDDEN');
   });
 
   it('should successfully submit template for review', async () => {
@@ -140,9 +140,9 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.status).toBe('pending');
-    expect(body.redirectUrl).toBe('/builder/preview/tpl_123');
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe('pending');
+    expect(body.data.redirectUrl).toBe('/builder/preview/tpl_123');
   });
 
   it('should successfully resubmit a rejected template with revisionNotes', async () => {
@@ -179,8 +179,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.status).toBe('pending');
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe('pending');
   });
 
   it('should reject resubmission when max revisions limit is exceeded', async () => {
@@ -210,8 +210,8 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('Batas maksimal pengajuan revisi');
+    expect(body.success).toBe(false);
+    expect(body.message).toContain('Batas maksimal pengajuan revisi');
   });
 
   it('should return 429 when designer rate limit is exceeded', async () => {
@@ -230,7 +230,7 @@ describe('POST /api/templates/submit-review', () => {
     const res = (await POST({ request, params: {} } as unknown as Parameters<typeof POST>[0])) as Response;
     expect(res.status).toBe(429);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.message).toContain('Batas pengajuan kurasi tercapai');
+    expect(body.success).toBe(false);
+    expect(body.message).toContain('Batas pengajuan kurasi tercapai');
   });
 });

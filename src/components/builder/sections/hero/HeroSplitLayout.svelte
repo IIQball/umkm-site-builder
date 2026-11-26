@@ -18,8 +18,8 @@
   export let imageShape: 'rounded' | 'square' | 'circle' | 'squircle' = 'rounded';
   export let waNumber: string = '';
   export let activeNodeId: string | null = null;
-  export let selectNode: (e: MouseEvent, key: string) => void = () => {};
-  export let selectNodeKey: (e: KeyboardEvent, key: string) => void = () => {};
+  export let selectNode: ((e: MouseEvent, key: string) => void) | undefined = undefined;
+  export let selectNodeKey: ((e: KeyboardEvent, key: string) => void) | undefined = undefined;
   export let elementOrder: string[] = ['badge', 'title', 'subtitle', 'cta', 'image'];
 
   $: hasImage = elementOrder.includes('image');
@@ -55,10 +55,10 @@
     />
   </div>
 {:else}
-  <div class={`w-full grid gap-8 lg:gap-12 items-center ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-12'}`}>
+  <div class={`w-full grid gap-8 lg:gap-12 items-center ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-12'}`}>
     {#if effectiveIsImageLeft}
       <!-- Left: Image -->
-      <div class={`w-full ${isSmallScreen ? 'order-2' : 'col-span-6 order-1'}`}>
+      <div class={`w-full ${isSmallScreen ? 'order-2' : 'col-span-1 lg:col-span-6 order-2 lg:order-1'}`}>
         <HeroImageCard
           {imageUrl}
           altText={title}
@@ -73,7 +73,7 @@
       </div>
 
       <!-- Right: Text Content -->
-      <div class={`w-full ${isSmallScreen ? 'order-1' : 'col-span-6 order-2'}`}>
+      <div class={`w-full ${isSmallScreen ? 'order-1' : 'col-span-1 lg:col-span-6 order-1 lg:order-2'}`}>
         <HeroHeaderContent
           {badgeText}
           {badgeIcon}
@@ -94,7 +94,7 @@
       </div>
     {:else}
       <!-- Left: Text Content -->
-      <div class={`w-full ${isSmallScreen ? 'col-span-1' : 'col-span-6'}`}>
+      <div class={`w-full ${isSmallScreen ? 'col-span-1' : 'col-span-1 lg:col-span-6'}`}>
         <HeroHeaderContent
           {badgeText}
           {badgeIcon}
@@ -115,7 +115,7 @@
       </div>
 
       <!-- Right: Image -->
-      <div class={`w-full ${isSmallScreen ? 'col-span-1' : 'col-span-6'}`}>
+      <div class={`w-full ${isSmallScreen ? 'col-span-1' : 'col-span-1 lg:col-span-6'}`}>
         <HeroImageCard
           {imageUrl}
           altText={title}

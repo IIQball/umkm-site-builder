@@ -73,8 +73,8 @@ describe('Content Tab Layout Synchronization for All Sections', () => {
 
   it('catalog content slots match layout preset slots', () => {
     const catalogPresets = [
-      'grid_standard', 'flash_sale_countdown', 'bundle_package_tiers',
-      'price_table_view', 'single_product_deep_focus',
+      'grid_standard', 'flash_sale_countdown', 'split_category_sidebar',
+      'price_table_view', 'lookbook_gallery',
     ];
 
     for (const preset of catalogPresets) {
@@ -83,22 +83,18 @@ describe('Content Tab Layout Synchronization for All Sections', () => {
       if (preset === 'flash_sale_countdown') {
         expect(slots.includes('catalog_timer')).toBe(true);
       }
-      if (preset === 'bundle_package_tiers') {
-        expect(slots.includes('catalog_bundle_tier')).toBe(true);
-        expect(slots.includes('catalog_cta')).toBe(true);
+      if (preset === 'split_category_sidebar') {
+        expect(slots.includes('catalog_sidebar')).toBe(true);
       }
       if (preset === 'price_table_view') {
         expect(slots.includes('catalog_price_rows')).toBe(true);
-      }
-      if (preset === 'single_product_deep_focus') {
-        expect(slots.includes('product_desc')).toBe(true);
       }
     }
   });
 
   it('testimonials content slots match layout preset slots', () => {
     const testiPresets = [
-      'masonry_grid', 'logo_client_cloud', 'split_rating_stats',
+      'masonry_grid', 'single_spotlight', 'split_rating_stats',
     ];
 
     for (const preset of testiPresets) {
@@ -107,8 +103,8 @@ describe('Content Tab Layout Synchronization for All Sections', () => {
       if (preset === 'split_rating_stats') {
         expect(slots.includes('testi_stats')).toBe(true);
       }
-      if (preset === 'logo_client_cloud') {
-        expect(slots.includes('testi_logo_cloud')).toBe(true);
+      if (preset === 'single_spotlight') {
+        expect(slots.includes('title')).toBe(true);
       }
     }
   });

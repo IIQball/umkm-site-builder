@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import DirectoryMapView from '@/components/directory/DirectoryMapView.svelte';
   import type { DirectoryStore } from '@/components/directory/directory.types';
+  import { apiFetch } from '@/lib/api/parse-response';
+  import { toast } from '@/lib/toast';
 
   let stores: DirectoryStore[] = [];
   let userLocation: { lat: number; lng: number; label?: string } | null = null;
@@ -18,14 +20,18 @@
         url.searchParams.set('radius', '50'); // 50km radius
       }
 
-      const res = await fetch(url.toString());
-      const data = await res.json();
+      const result = await apiFetch<DirectoryStore[]>(url.toString(), {
+        fallbackError: 'Gagal memuat lokasi toko pada peta.',
+      });
 
-      if (data.ok && Array.isArray(data.data)) {
-        stores = data.data;
+      if (result.success && Array.isArray(result.data)) {
+        stores = result.data;
+      } else if (!result.success) {
+        toast.error(result.message);
       }
     } catch (err) {
       console.error('Failed to fetch stores for map:', err);
+      toast.error('Koneksi bermasalah saat memuat peta lokasi.');
     } finally {
       loading = false;
     }
@@ -55,7 +61,7 @@
 
 <div class="w-full relative rounded-2xl overflow-hidden shadow-inner group">
   {#if loading && stores.length === 0}
-    <div class="absolute inset-0 z-10 flex items-center justify-center bg-card-base/50 backdrop-blur-sm">
+    <div class="absolute inset-0 z-10 flex items-center justify-center bg-card/50 backdrop-blur-sm">
       <span class="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span>
     </div>
   {/if}

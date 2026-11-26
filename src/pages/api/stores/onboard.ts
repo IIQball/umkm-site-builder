@@ -1,52 +1,36 @@
 import type { APIRoute } from 'astro';
-import { db } from '@db/index';
-import { stores, templates } from '@db/schema';
+import { db } from '@/db';
+import { stores, templates } from '@/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
-import { OnboardStoreInput } from '@lib/stores/schemas';
+import { OnboardStoreInput } from '@/lib/stores/schemas';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { getMaxStoreBranches } from '@/services/finance';
+import { hasExistingStore, isSubdomainTaken } from '@/services/stores';
 import { ZodError } from 'zod';
-import { jsonSuccess, jsonError } from '@/lib/utils/api-handler';
+import { handleApiRoute, jsonSuccess, jsonError, parseJsonBody } from '@/lib/utils/api-handler';
 import { resolveStoreCoordinates } from '@/lib/stores/coordinates';
-
-
-
-async function hasExistingStore(userId: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.userId, userId), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
-
-async function isSubdomainTaken(subdomain: string): Promise<boolean> {
-  const [existing] = await db
-    .select({ id: stores.id })
-    .from(stores)
-    .where(and(eq(stores.subdomain, subdomain), isNull(stores.deletedAt)))
-    .limit(1);
-  return !!existing;
-}
+import { logActivity } from '@/services/audit.service';
+import { DEFAULT_TEMPLATE_ID } from '@/schemas';
 
 export const POST: APIRoute = async ({ request }) => {
-  const user = await getAuthenticatedUser(request);
-  if (!user) {
-    return jsonError('Unauthorized', 401, undefined, 'UNAUTHORIZED');
-  }
+  return handleApiRoute(async () => {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return jsonError('Silakan login terlebih dahulu', 401, undefined, 'UNAUTHORIZED');
+    }
 
-  if (user.status !== 'active') {
-    return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
-  }
+    if (user.status !== 'active') {
+      return jsonError('Akun Anda ditangguhkan', 403, undefined, 'FORBIDDEN');
+    }
 
-  const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
-  if (user.role !== 'tenant' && !isAdminOrSuper) {
-    return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
-  }
+    const isAdminOrSuper = user.role === 'admin' || user.role === 'superadmin';
+    if (user.role !== 'tenant' && !isAdminOrSuper) {
+      return jsonError('Akses ditolak. Hanya tenant atau admin yang dapat membuat profil toko', 403, undefined, 'FORBIDDEN');
+    }
 
-  try {
-    const body = await request.json();
-    const parsedData = OnboardStoreInput.parse(body);
+    try {
+      const body = await parseJsonBody(request);
+      const parsedData = OnboardStoreInput.parse(body);
     const { subdomain, name, categoryId, waNumber, googleMapsUrl, address, regionData, templateId, tenantId } = parsedData;
 
     const maxBranches = await getMaxStoreBranches();
@@ -68,13 +52,16 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     let selectedTemplateId = templateId;
-    if (!selectedTemplateId) {
-      const [firstTpl] = await db
-        .select({ id: templates.id })
-        .from(templates)
-        .where(eq(templates.status, 'approved'))
-        .limit(1);
-      selectedTemplateId = firstTpl?.id || 'tpl_1789012356261_smzf9nzf0';
+    if (selectedTemplateId) {
+      const validTpl = await db.query.templates.findFirst({
+        where: and(eq(templates.id, selectedTemplateId), isNull(templates.deletedAt)),
+        columns: { id: true },
+      });
+      if (!validTpl) {
+        selectedTemplateId = DEFAULT_TEMPLATE_ID;
+      }
+    } else {
+      selectedTemplateId = DEFAULT_TEMPLATE_ID;
     }
 
     const storeId = crypto.randomUUID();
@@ -109,13 +96,26 @@ export const POST: APIRoute = async ({ request }) => {
       lastEditedBy,
     });
 
-    return jsonSuccess({ storeId, subdomain, name }, 201);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      return jsonError(err.errors[0]?.message || 'Validation failed', 400, err.errors);
-    }
+    await logActivity({
+      userId: user.id,
+      storeId,
+      action: 'Create Store',
+      details: {
+        name,
+        subdomain,
+        categoryId,
+        tenantId: targetUserId,
+        registeredBy: registeredBy || null,
+        assistedByAdmin: !!isAdminOrSuper,
+      },
+    });
 
-    console.error('[STORE] onboard failed:', err);
-    return jsonError('Internal server error', 500, undefined, 'INTERNAL');
-  }
+    return jsonSuccess({ storeId, subdomain, name }, 201, 'Toko berhasil dibuat');
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return jsonError(err.issues[0]?.message || 'Validasi gagal', 400, err.issues, 'VALIDATION_ERROR');
+      }
+      throw err;
+    }
+  });
 };

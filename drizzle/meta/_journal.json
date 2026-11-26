@@ -64,6 +64,55 @@
       "when": 1791500000000,
       "tag": "0008_invitation_extension_count",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792218803709,
+      "tag": "0009_same_wolf_cub",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792470784044,
+      "tag": "0010_overrated_ken_ellis",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792478400000,
+      "tag": "0011_ai_generation_logs_is_testing_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792500000000,
+      "tag": "0012_ai_generation_logs_tenant_id_created_at_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794373894689,
+      "tag": "0013_bug_reports",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795258238542,
+      "tag": "0014_first_dexter_bennett",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795258238543,
+      "tag": "0015_reconcile_visitor_daily_limit",
+      "breakpoints": true
     }
   ]
 }

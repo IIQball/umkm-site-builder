@@ -38,10 +38,14 @@ describe('Template Schemas', () => {
       name: 'Template Batik Modern',
       price: 150000,
       description: 'Template elegan untuk UMKM busana',
+      categoryId: 'cat_batik',
     };
 
     const parsed = TemplateDraftCreateSchema.safeParse(validDraft);
     expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.categoryId).toBe('cat_batik');
+    }
   });
 
   it('should validate draft submit schema with 8 sections', () => {

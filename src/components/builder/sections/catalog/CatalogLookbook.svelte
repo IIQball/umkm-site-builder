@@ -3,7 +3,7 @@
   import type { ProductItem } from '@/types';
   import { ShoppingBag } from 'lucide-svelte';
   import { canvasStore } from '../../stores/editorStore';
-  import { resolveProductNodeStyle } from '../productCatalog.helpers';
+  import { resolveProductNodeStyle } from './productCatalog.helpers';
 
   export let sectionId: string = '';
   export let products: ProductItem[] = [];
@@ -76,7 +76,7 @@
         {#if product.badge}
           <span
             class="absolute top-3 left-3 text-2xs font-heading font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs z-10"
-            style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a));"
+            style="background-color: var(--theme-secondary, var(--color-secondary)); color: var(--theme-secondary-text, var(--color-text-main, #0f172a)); font-size: var(--theme-text-caption, var(--text-caption-size, 10px)); font-weight: var(--theme-text-caption-weight, var(--text-caption-weight, 700));"
           >
             {product.badge}
           </span>

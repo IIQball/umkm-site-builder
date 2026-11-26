@@ -32,6 +32,10 @@ vi.mock('@/lib/db/client', () => {
   return { db: mockDb, getDb: () => mockDb };
 });
 
+vi.mock('@/lib/db/transaction', () => ({
+  withTransaction: vi.fn(async <T>(fn: (tx: typeof db) => Promise<T>): Promise<T> => fn(db)),
+}));
+
 vi.mock('@/lib/auth', () => ({
   getAuthenticatedUser: vi.fn(),
   isAdmin: (u: AuthenticatedUser | null) => !!u && (u.role === 'admin' || u.role === 'superadmin'),
@@ -98,8 +102,8 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(reviewRes.status).toBe(200);
     const reviewData = await reviewRes.json();
-    expect(reviewData.ok).toBe(true);
-    expect(reviewData.template.status).toBe('approved');
+    expect(reviewData.success).toBe(true);
+    expect(reviewData.data.status).toBe('approved');
 
     // Step 2: Admin sets dynamic platform fee percentage to 20%
     mockGetAuthUser.mockResolvedValueOnce(adminUser);
@@ -117,7 +121,7 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(settingRes.status).toBe(200);
     const settingData = await settingRes.json();
-    expect(settingData.ok).toBe(true);
+    expect(settingData.success).toBe(true);
     expect(settingData.data.platformFeePercentage).toBe(20);
 
     // Step 3: Tenant purchases the approved template
@@ -145,12 +149,18 @@ describe('E2E Template Marketplace Flow', () => {
 
     expect(purchaseRes.status).toBe(200);
     const purchaseData = await purchaseRes.json();
-    expect(purchaseData.ok).toBe(true);
+    expect(purchaseData.success).toBe(true);
     expect(purchaseData.data.invoiceId).toBe('inv_xendit_e2e_123');
 
     // Step 4: Simulate Xendit webhook callback for paid invoice
     mockSelect.mockReturnValueOnce({ from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValueOnce([{ id: 'txn_e2e_1', userId: tenantUser.id, type: 'template_purchase', templateId: 'tpl_kuliner_1', amount: 200000, status: 'pending' }]) }) });
-    mockUpdate.mockReturnValueOnce({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValueOnce(undefined) }) });
+    mockUpdate.mockReturnValueOnce({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValueOnce([{ id: 'txn_e2e_1', userId: tenantUser.id, type: 'template_purchase', templateId: 'tpl_kuliner_1', amount: 200000, adminFee: 0, status: 'success' }]),
+        }),
+      }),
+    });
     mockInsert.mockReturnValueOnce({ values: vi.fn().mockResolvedValueOnce(undefined) });
     mockSelect.mockReturnValueOnce({ from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValueOnce([approvedTemplate]) }) }) });
     mockSelect.mockReturnValueOnce({ from: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValueOnce([{ platformFeePercentage: 20 }]) }) });
@@ -175,7 +185,7 @@ describe('E2E Template Marketplace Flow', () => {
     } as unknown as Parameters<typeof xenditWebhookApi>[0])) as Response;
 
     expect(webhookRes.status).toBe(200);
-    expect((await webhookRes.json()).ok).toBe(true);
+    expect((await webhookRes.json()).success).toBe(true);
 
     // Verification step: Verify calculations & record assertions
     expect(recordedCommissionPayload.totalAmount).toBe(200000);

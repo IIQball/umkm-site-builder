@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TemplateSection } from '@/schemas';
   import { Sparkles, Type, FileText, MousePointerClick, Image as ImageIcon, Sliders } from 'lucide-svelte';
-  import HeroImageStyleSettings from '../../content/hero/HeroImageStyleSettings.svelte';
+  import HeroImageStyleSettings from './HeroImageStyleSettings.svelte';
   import NodeStyleControls from '../NodeStyleControls.svelte';
   import { isHeroNonBackgroundImage, supportsHeroImage } from '../../sections/hero/heroLayout.helpers';
   import { btnVariantOptions } from '../nodeContent.constants';

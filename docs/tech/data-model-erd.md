@@ -424,16 +424,6 @@ function migrateStoreConfig(config: any) {
 
 ## Seeding & Initial Data
 
-On first deployment, system must create:
+The seed creates the first superadmin with a Better Auth credential and whitelist entry, a system designer linked to that user, and the template and business categories. It also creates the free, approved universal template `tpl-default-universal` used by the store onboarding flow.
 
-1. **System Default Template** (templates.id = `system-default-template`)
-   - Designer: null
-   - Status: published
-   - Price: 0 (free)
-   - Config: 7-section default (Hero, Catalog, Testimonials, FAQ, Footer, etc.)
-   - Purpose: Used by Admin to set up new stores; ID is hardcoded in admin setup flow
-
-2. **Reserved Subdomain Blacklist** (subdomain_blacklist)
-   - www, admin, api, dashboard, blog, support, status, help, contact
-
-Seeding script: `src/db/seed.ts` — run once per environment via `bun run seed`.
+For development, use `bun run seed` after setting up the schema. For production, follow the [first production release guide](../production-bootstrap.md).

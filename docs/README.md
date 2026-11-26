@@ -43,6 +43,7 @@ If you are a new session and have not read the files below, you are not ready to
 | `tech/security.md` | Threat surface and enforced controls | LOCKED |
 | `tech/code-standards.md` | Project-specific standards on top of `.agents/rules/` | LOCKED |
 | `tech/testing-strategy.md` | Test layers and the CI gate | LOCKED |
+| `production-bootstrap.md` | First production database and Worker setup | LIVE |
 | `planning/roadmap.md` | Foundation, core flow, quality, production | LOCKED |
 | `memory/codebase-map.md` | Where everything lives | LIVE |
 | `memory/css-vars.md` | Every token and custom class, and where it is used | LIVE |

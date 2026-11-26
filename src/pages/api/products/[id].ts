@@ -4,7 +4,6 @@ import { products, stores } from '@/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { ProductVariantsSchema } from '@/schemas/tenant/product-variant.schema';
-import { deleteFromCloudinary } from '@/lib/cloudinary';
 import { handleApiRoute, jsonSuccess, jsonError, parseJsonBody } from '@/lib/utils/api-handler';
 import { canManageStore, type AuthenticatedUser } from '@/lib/auth';
 import { logActivity } from '@/services/audit.service';
@@ -111,11 +110,6 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       .update(stores)
       .set({ lastEditedBy: (locals.user as AuthenticatedUser).id, updatedAt: new Date() })
       .where(eq(stores.id, store.id));
-
-    const imageUrls = (existingProduct[0].imageUrls || []) as Array<{ publicId?: string; url?: string }>;
-    if (imageUrls && imageUrls.length > 0 && imageUrls[0].publicId) {
-      await deleteFromCloudinary(imageUrls[0].publicId);
-    }
 
     await logActivity({
       userId: (locals.user as AuthenticatedUser).id,

@@ -1,5 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
-import { auth } from "@/lib/auth";
+import { auth, getAuth } from "@/lib/auth";
 import { db, users, stores } from "@/db";
 import { eq, and, isNull } from "drizzle-orm";
 import { InMemoryRateLimiter, extractClientIp } from "@/lib/utils/rate-limiter";
@@ -53,6 +53,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
   try {
+    if (import.meta.env.PROD && pathname.startsWith('/api/auth/')) {
+      try {
+        await getAuth();
+      } catch {
+        return pathname.startsWith('/api/')
+          ? jsonError('Layanan autentikasi tidak tersedia.', 503, undefined, 'SERVICE_UNAVAILABLE')
+          : new Response('Layanan autentikasi tidak tersedia.', { status: 503 });
+      }
+    }
     // --- SUBDOMAIN DIRECT ROUTING ---
     // Akses toko langsung sub-domain.main-domain tanpa prefix /storefront/
     const host = context.request.headers.get('host') || context.url.host;
@@ -61,6 +70,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (subdomain) {
       const isFileOrAsset = pathname.includes('.') ||
         pathname.startsWith('/_astro/') ||
+        pathname.startsWith('/_server-islands/') ||
+        pathname.startsWith('/_actions/') ||
+        pathname === '/_image' ||
         pathname.startsWith('/@') ||
         pathname.startsWith('/api/') ||
         pathname.startsWith('/storefront/');
@@ -105,27 +117,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
       });
 
       if (session?.user) {
-        const sessionUser = session.user as unknown as { role?: string; status?: string };
-        let userRole = sessionUser.role;
-        let userStatus = sessionUser.status;
-
-        if (!userRole) {
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.id, session.user.id),
-            columns: { role: true, status: true },
-          });
-          if (dbUser) {
-            userRole = dbUser.role;
-            userStatus = userStatus || dbUser.status;
-          }
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, session.user.id),
+          columns: { role: true, status: true },
+        });
+        if (dbUser?.status === 'active') {
+          context.locals.user = { ...session.user, role: dbUser.role, status: dbUser.status } as App.User;
+          context.locals.session = session.session;
+        } else {
+          context.locals.user = null;
+          context.locals.session = null;
         }
-
-        context.locals.user = {
-          ...session.user,
-          role: userRole || 'tenant',
-          status: userStatus || 'active',
-        } as App.User;
-        context.locals.session = session.session;
       } else {
         context.locals.user = null;
         context.locals.session = null;

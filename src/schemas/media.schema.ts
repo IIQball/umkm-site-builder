@@ -12,7 +12,7 @@ const ALLOWED_FOLDERS = ['products', 'templates', 'stores'] as const;
  */
 export const MediaSignInput = z.object({
   folder: z.enum(ALLOWED_FOLDERS, {
-    errorMap: () => ({ message: 'Folder harus salah satu: products, templates, stores' }),
+    error: 'Folder harus salah satu: products, templates, stores',
   }),
   resourceType: z.enum(['image', 'video']).optional().default('image'),
 });

@@ -97,7 +97,7 @@ function isOriginAllowed(origin: string): boolean {
 
   if (configured.includes(origin)) return true;
 
-  if (!import.meta.env?.PROD || process.env.NODE_ENV === 'test') {
+  if (!import.meta.env.PROD || process.env.NODE_ENV === 'test') {
     return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
   }
 

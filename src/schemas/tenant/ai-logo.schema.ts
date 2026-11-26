@@ -46,7 +46,7 @@ export type LogoFontFamily = (typeof LOGO_FONT_FAMILIES)[number];
 export const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 export const hexColorSchema = z
-  .string({ required_error: 'Kode warna hex wajib diisi' })
+  .string({ error: issue => issue.input === undefined ? 'Kode warna hex wajib diisi' : undefined })
   .trim()
   .regex(HEX_COLOR_REGEX, 'Format kode warna hex tidak valid (contoh: #C85A32 atau #FFF)');
 
@@ -69,13 +69,13 @@ export function sanitizeFocalSubject(val?: string | null): string | undefined {
 
 export const aiLogoSchema = z.object({
   storeName: z
-    .string({ required_error: 'Nama toko wajib diisi' })
+    .string({ error: issue => issue.input === undefined ? 'Nama toko wajib diisi' : undefined })
     .trim()
     .min(2, 'Nama toko minimal 2 karakter')
     .max(100, 'Nama toko maksimal 100 karakter'),
   conceptType: z
     .enum(LOGO_CONCEPT_TYPES, {
-      errorMap: () => ({ message: 'Pilihan konsep & bentuk logo tidak valid' }),
+      error: 'Pilihan konsep & bentuk logo tidak valid',
     })
     .optional(),
   visualStyle: z
@@ -100,15 +100,15 @@ export const aiLogoSchema = z.object({
     .refine(
       (val) => !val || val.trim().split(/\s+/).filter(Boolean).length <= 3,
       { message: 'Fokus objek maksimal 3 kata' }
-    ),
+    ).optional(),
   lockupType: z
     .enum(LOGO_LOCKUP_TYPES, {
-      errorMap: () => ({ message: 'Pilihan susunan lockup logo tidak valid' }),
+      error: 'Pilihan susunan lockup logo tidak valid',
     })
     .optional(),
   fontFamily: z
     .enum(LOGO_FONT_FAMILIES, {
-      errorMap: () => ({ message: 'Pilihan tipografi font logo tidak valid' }),
+      error: 'Pilihan tipografi font logo tidak valid',
     })
     .optional()
     .default('Plus Jakarta Sans'),
@@ -125,7 +125,7 @@ export const aiLogoSchema = z.object({
     .or(z.literal('')),
   colorPalette: z
     .array(hexColorSchema, {
-      required_error: 'Palet warna wajib dipilih',
+      error: issue => issue.input === undefined ? 'Palet warna wajib dipilih' : undefined,
     })
     .min(1, 'Pilih minimal 1 warna palet')
     .max(3, 'Maksimal 3 warna dalam palet logo sesuai aturan minimalisme visual'),

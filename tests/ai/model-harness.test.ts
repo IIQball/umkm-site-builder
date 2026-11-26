@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type OpenAI from 'openai';
 import { generateLogoImage } from '@/services/ai/logo-generator.service';
 import { generateProductMockup } from '@/services/ai/product-mockup.service';
@@ -14,24 +14,30 @@ import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 import { cloudinary } from '@/lib/cloudinary.server';
 import { db } from '@/db';
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
+    select: vi.fn(),
   },
-}));
+  };
+});
 
 const TINY_B64_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 describe('AI Image Model Validation Harness Runner (bun:test)', () => {
-  let mockGenerate: ReturnType<typeof mock>;
-  let mockEdit: ReturnType<typeof mock>;
+  let mockGenerate: ReturnType<typeof vi.fn>;
+  let mockEdit: ReturnType<typeof vi.fn>;
   let mockOpenAiClient: OpenAI;
-  let uploadSpy: ReturnType<typeof spyOn>;
+  let uploadSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    mockGenerate = mock();
-    mockEdit = mock();
+    process.env.CLOUDINARY_NAME = 'test-cloud';
+    process.env.CLOUDINARY_API_KEY = 'test-key';
+    process.env.CLOUDINARY_SECRET = 'test-secret';
+    mockGenerate = vi.fn();
+    mockEdit = vi.fn();
     mockOpenAiClient = {
       images: {
         generate: mockGenerate,
@@ -40,7 +46,7 @@ describe('AI Image Model Validation Harness Runner (bun:test)', () => {
     } as unknown as OpenAI;
     setOpenAIClientForTesting(mockOpenAiClient);
 
-    uploadSpy = spyOn(cloudinary.uploader, 'upload').mockResolvedValue({
+    uploadSpy = vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValue({
       public_id: 'pinoka/test_asset',
       secure_url: 'https://res.cloudinary.com/pinoka/test_asset.webp',
       bytes: 2048,
@@ -223,7 +229,7 @@ describe('AI Image Model Validation Harness Runner (bun:test)', () => {
     });
 
     it('falls back to flare model and 1 credit when store has no purchase or credit history', async () => {
-      const mockSelect = db.select as unknown as ReturnType<typeof mock>;
+      const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
       mockSelect.mockReturnValueOnce({
         from: () => ({ leftJoin: () => ({ where: () => ({ orderBy: () => ({ limit: () => Promise.resolve([]) }) }) }) }),
       });
@@ -245,7 +251,7 @@ describe('AI Image Model Validation Harness Runner (bun:test)', () => {
     });
 
     it('falls back to sunburst default pricing in calculateCost when unknown model is used', async () => {
-      const mockSelect = db.select as unknown as ReturnType<typeof mock>;
+      const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
       mockSelect.mockReturnValueOnce({
         from: () => ({ orderBy: () => ({ limit: () => Promise.resolve([{ exchangeRate: 16000 }]) }) }),
       });

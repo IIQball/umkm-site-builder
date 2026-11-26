@@ -16,7 +16,7 @@ export function resolveAuthBaseAndOrigins(): { authBaseUrl: string; trustedOrigi
 
   const primaryOrigin = new URL(authBaseUrl).origin;
   const trustedOrigins = [
-    ...new Set(import.meta.env?.PROD ? [primaryOrigin] : [primaryOrigin, ...DEV_ORIGINS]),
+    ...new Set(import.meta.env.PROD ? [primaryOrigin] : [primaryOrigin, ...DEV_ORIGINS]),
   ];
   return { authBaseUrl, trustedOrigins };
 }

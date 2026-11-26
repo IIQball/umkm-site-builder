@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from 'vitest';
 import { sanitizePromptInput, isPotentialPromptInjection } from '@/lib/security/prompt-sanitizer';
 import {
   aiLogoSchema,

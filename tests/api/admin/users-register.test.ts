@@ -83,8 +83,7 @@ describe('POST /api/admin/users/register', () => {
       expect.objectContaining({
         body: expect.objectContaining({
           name: 'Tenant User',
-          email: 'tenant@test.com',
-          role: 'tenant'
+          email: 'tenant@test.com'
         }),
         headers: expect.any(Headers)
       })

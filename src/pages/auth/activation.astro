@@ -12,7 +12,7 @@ const description = "Lengkapi data diri dan atur kata sandi baru untuk mengaktif
 // Strict Access Control: Token is strictly required.
 // We redirect to login instantly if there is no token.
 const token = Astro.url.searchParams.get("token");
-const uid = Astro.url.searchParams.get("uid");
+
 
 if (!token) {
   return Astro.redirect("/auth/login?error=invalid_token");
@@ -33,9 +33,9 @@ if (!validToken) {
 }
 
 // Validasi status user dan link undangan dari tenantInvitations
-if (uid) {
+{
   const targetUser = await db.query.users.findFirst({
-    where: eq(users.id, uid)
+    where: eq(users.id, validToken.value)
   });
 
   if (!targetUser) {
@@ -53,7 +53,7 @@ if (uid) {
   });
 
   // Jika undangan sudah hilang (misal: otomatis terhapus karena > 7 hari tidak diperpanjang)
-  if (!invitation) {
+  if (!invitation || !targetUser.registeredBy || invitation.invitedBy !== targetUser.registeredBy || invitation.acceptedAt || targetUser.status !== 'pending') {
     return Astro.redirect("/auth/login?error=invitation_not_found");
   }
 

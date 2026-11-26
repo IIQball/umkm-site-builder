@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type OpenAI from 'openai';
 import {
   withOpenAiRetry,
@@ -73,8 +73,8 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
 
   describe('withOpenAiRetry execution flow', () => {
     it('executes successfully on the first attempt without retry', async () => {
-      const mockFn = mock().mockResolvedValue('immediate-success');
-      const onRetry = mock();
+      const mockFn = vi.fn().mockResolvedValue('immediate-success');
+      const onRetry = vi.fn();
 
       const result = await withOpenAiRetry(mockFn, { onRetry });
 
@@ -87,12 +87,12 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
       const error429 = Object.assign(new Error('Rate limited'), { status: 429 });
       const error503 = Object.assign(new Error('Service unavailable'), { status: 503 });
 
-      const mockFn = mock()
+      const mockFn = vi.fn()
         .mockRejectedValueOnce(error429)
         .mockRejectedValueOnce(error503)
         .mockResolvedValueOnce('recovered-payload');
 
-      const onRetry = mock();
+      const onRetry = vi.fn();
       const result = await withOpenAiRetry(mockFn, {
         maxRetries: 3,
         baseDelayMs: 10,
@@ -111,15 +111,15 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
 
     it('rejects immediately without retry when receiving HTTP 400 or 401', async () => {
       const error400 = Object.assign(new Error('Bad Request: Invalid prompt parameters'), { status: 400 });
-      const mockFn400 = mock().mockRejectedValueOnce(error400);
-      const onRetry = mock();
+      const mockFn400 = vi.fn().mockRejectedValueOnce(error400);
+      const onRetry = vi.fn();
 
       await expect(withOpenAiRetry(mockFn400, { onRetry })).rejects.toThrow('Bad Request');
       expect(mockFn400).toHaveBeenCalledTimes(1);
       expect(onRetry).not.toHaveBeenCalled();
 
       const error401 = Object.assign(new Error('Unauthorized: Invalid API Key'), { status: 401 });
-      const mockFn401 = mock().mockRejectedValueOnce(error401);
+      const mockFn401 = vi.fn().mockRejectedValueOnce(error401);
 
       await expect(withOpenAiRetry(mockFn401, { onRetry })).rejects.toThrow('Unauthorized');
       expect(mockFn401).toHaveBeenCalledTimes(1);
@@ -128,8 +128,8 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
 
     it('throws the final error when retry limit is exhausted', async () => {
       const persistentError = Object.assign(new Error('Persistent 503 gateway outage'), { status: 503 });
-      const mockFn = mock().mockRejectedValue(persistentError);
-      const onRetry = mock();
+      const mockFn = vi.fn().mockRejectedValue(persistentError);
+      const onRetry = vi.fn();
 
       await expect(
         withOpenAiRetry(mockFn, {
@@ -146,18 +146,18 @@ describe('OpenAI Retry Resilience Utility (bun:test)', () => {
   });
 
   describe('Payload & Reference Image Validation (4 MB Limit)', () => {
-    let mockEdit: ReturnType<typeof mock>;
+    let mockEdit: ReturnType<typeof vi.fn>;
     let uploadSpy: { mockRestore: () => void } | undefined;
 
     beforeEach(() => {
-      mockEdit = mock();
+      mockEdit = vi.fn();
       setOpenAIClientForTesting({
         images: {
           edit: mockEdit,
         },
       } as unknown as OpenAI);
 
-      uploadSpy = spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
+      uploadSpy = vi.spyOn(cloudinaryUploader, 'uploadBase64Image').mockResolvedValue({
         publicId: 'pinoka/mockups/test',
         secureUrl: 'https://res.cloudinary.com/test.webp',
         bytes: 1024,

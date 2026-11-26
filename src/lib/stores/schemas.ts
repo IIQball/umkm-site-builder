@@ -18,10 +18,10 @@ export const OnboardStoreInput = z.object({
   waNumber: z.string().regex(/^628[0-9]{7,12}$/, 'Nomor WhatsApp tidak valid. Gunakan format 628...'),
   googleMapsUrl: z.string().url('URL Google Maps tidak valid'),
   address: z.string().min(5, 'Alamat lengkap wajib diisi'),
-  regionData: z.record(z.any()).optional(),
+  regionData: z.record(z.string(), z.any()).optional(),
   templateId: z.string().optional(),
   tenantId: z.string().optional(),
-  customization: z.record(z.any()).optional(),
+  customization: z.record(z.string(), z.any()).optional(),
 });
 
 export const StoreSettingsInput = z.object({
@@ -30,12 +30,12 @@ export const StoreSettingsInput = z.object({
   googleMapsUrl: z.string().url('URL Google Maps tidak valid').optional().or(z.literal('')),
   address: z.string().optional(),
   categoryId: z.string().optional(),
-  regionData: z.record(z.any()).optional(),
+  regionData: z.record(z.string(), z.any()).optional(),
   templateId: z.string().optional(),
   isOpen: z.boolean().optional(),
   waCheckoutTemplate: z.string().optional(),
   storeId: z.string().optional(),
-  customization: z.record(z.any()).optional(),
+  customization: z.record(z.string(), z.any()).optional(),
 });
 
 export const StoreStatusInput = z.object({

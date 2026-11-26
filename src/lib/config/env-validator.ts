@@ -1,4 +1,5 @@
 import { errorLog } from '@/lib/utils/logger';
+import { getEnv } from 'astro/env/runtime';
 
 export type EnvKeySpec = string | readonly string[];
 
@@ -23,15 +24,13 @@ export class EnvironmentConfigError extends Error {
   }
 }
 
-const buildTimeEnv = import.meta.env as unknown as Record<string, string | undefined>;
 let startupAuditLogged = false;
 
 /**
- * Reads an environment variable prioritizing runtime `process.env` over build-time `import.meta.env`.
+ * Reads the runtime environment configured by Astro's adapter.
  */
 export function readRuntimeEnv(key: string): string {
-  const runtime = typeof process !== 'undefined' ? process.env?.[key] : undefined;
-  return runtime || buildTimeEnv?.[key] || '';
+  return getEnv(key) || '';
 }
 
 function resolveKeySpec(spec: EnvKeySpec): { label: string; value: string } {
@@ -85,7 +84,7 @@ const PROD_REQUIRED_ENV: readonly EnvKeySpec[] = [
  * Pass `{ strict: true }` to throw `EnvironmentConfigError` immediately when variables are absent.
  */
 export function validateRuntimeEnv(options: { strict?: boolean; isProd?: boolean } = {}): EnvAuditReport {
-  const isProd = options.isProd ?? Boolean(import.meta.env?.PROD);
+  const isProd = options.isProd ?? Boolean(import.meta.env.PROD);
   const missingRequired: string[] = [];
   const missingProduction: string[] = [];
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import OpenAI, * as openaiModule from 'openai';
 import {
   buildProductPosterPrompt,
@@ -20,10 +20,27 @@ import { LOGO_FONT_FAMILIES } from '@/lib/validators/ai-logo';
 import * as cloudinaryUploader from '@/services/media/cloudinary-uploader';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 
+vi.mock('openai', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('openai')>();
+  const { vi } = await import('vitest');
+  return {
+    ...actual,
+    default: actual.default,
+    toFile: vi.fn(actual.toFile),
+  };
+});
+
+vi.mock('@/services/media/cloudinary-uploader', async () => {
+  const { vi } = await import('vitest');
+  return {
+    uploadBase64Image: vi.fn(),
+  };
+});
+
 describe('AI Visual Discipline & Anti-Slop (bun:test)', () => {
-  const mockGenerate = mock();
-  const mockEdit = mock();
-  const mockCreate = mock();
+  const mockGenerate = vi.fn();
+  const mockEdit = vi.fn();
+  const mockCreate = vi.fn();
 
   const mockClient = {
     images: {
@@ -37,23 +54,19 @@ describe('AI Visual Discipline & Anti-Slop (bun:test)', () => {
     },
   } as unknown as OpenAI;
 
-  let uploadBase64ImageSpy: ReturnType<typeof spyOn>;
-  let toFileSpy: ReturnType<typeof spyOn>;
+  const uploadBase64ImageSpy = vi.mocked(cloudinaryUploader.uploadBase64Image);
 
   beforeEach(() => {
     mockGenerate.mockReset();
     mockEdit.mockReset();
     mockCreate.mockReset();
+    vi.mocked(openaiModule.toFile).mockClear();
+    uploadBase64ImageSpy.mockReset();
     setOpenAIClientForTesting(mockClient);
-
-    toFileSpy = spyOn(openaiModule, 'toFile');
-    uploadBase64ImageSpy = spyOn(cloudinaryUploader, 'uploadBase64Image');
   });
 
   afterEach(() => {
     resetOpenAIClient();
-    toFileSpy.mockRestore();
-    uploadBase64ImageSpy.mockRestore();
   });
 
   describe('Part 1: Logo Lockup Proportions & Typography', () => {

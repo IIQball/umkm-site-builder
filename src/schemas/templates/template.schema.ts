@@ -39,7 +39,7 @@ export const TemplateSectionSchema = z.object({
     'footer',
   ]),
   layoutPreset: z.string().optional(),
-  props: z.record(z.unknown()).optional(),
+  props: z.record(z.string(), z.unknown()).optional(),
   styles: TemplateStylesSchema.optional(),
 });
 

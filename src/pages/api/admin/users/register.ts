@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, users, sessions, tenantInvitations, activityLogs, adminWhitelist } from '@/db/index';
+import { db, users, sessions, tenantInvitations, activityLogs, adminWhitelist, designers, wallets } from '@/db/index';
 import { getAuthenticatedUser, isAuthorizedAdmin, auth } from '@/lib/auth';
 import { manualUserRegistrationSchema } from '@/schemas/admin';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
@@ -44,7 +44,6 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           name: validated.name,
           email: validated.email,
           password: finalPassword as string,
-          role: validated.role,
         },
         // Empty Headers so it doesn't set cookies on the admin's browser session
         headers: new Headers()
@@ -59,6 +58,11 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           status: 'pending',
           registeredBy: user.id
         }).where(eq(users.id, newUserId));
+
+        if (validated.role === 'designer') {
+          await db.insert(designers).values({ userId: newUserId, isVerified: true }).onConflictDoNothing();
+          await db.insert(wallets).values({ id: `wal_${crypto.randomUUID()}`, userId: newUserId, balance: 0 }).onConflictDoNothing();
+        }
 
         // Delete any session created by signUpEmail to prevent auto-login
         await db.delete(sessions).where(eq(sessions.userId, newUserId));

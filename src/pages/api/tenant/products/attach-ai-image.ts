@@ -11,7 +11,7 @@ const attachAiImageInput = z.object({
   productId: z.string().min(1, 'Product ID wajib diisi'),
   cloudinaryUrl: z.string().url('URL Cloudinary tidak valid'),
   attachmentType: z.enum(['logo', 'product_poster', 'packaging_mockup'], {
-    errorMap: () => ({ message: 'Tipe attachment tidak valid' }),
+    error: 'Tipe attachment tidak valid',
   }),
 });
 

@@ -109,7 +109,7 @@ export const POST: APIRoute = async (context) => {
       return jsonSuccess({ logoUrl: data.logoUrl }, 200, 'Logo toko berhasil diperbarui');
     } catch (error) {
       if (error instanceof ZodError) {
-        return jsonError(error.errors[0]?.message || 'Data tidak valid', 400, error.errors, 'VALIDATION_ERROR');
+        return jsonError(error.issues[0]?.message || 'Data tidak valid', 400, error.issues, 'VALIDATION_ERROR');
       }
       throw error;
     }

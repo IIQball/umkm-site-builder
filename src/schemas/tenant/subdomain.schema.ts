@@ -30,7 +30,7 @@ export function validateSubdomainLocally(input: string): string | null {
   if (!input) return null;
   const result = subdomainField.safeParse(input);
   if (!result.success) {
-    return result.error.errors[0]?.message ?? 'Subdomain tidak valid';
+    return result.error.issues[0]?.message ?? 'Subdomain tidak valid';
   }
   return null;
 }

@@ -3,14 +3,7 @@
  * All external service URLs and keys configured here
  */
 
-// `import.meta.env.FOO` is inlined by Vite as a string literal at build time, so a value
-// supplied only at runtime (a Cloudflare Worker secret) never reaches it. Reading a bare
-// `import.meta.env` gives the whole build-time object, which we fall back to for `astro dev`
-// and for tests, where .env files are loaded into it and `process.env` is empty.
-//
-// `process.env` is checked first because it is the only source that can change without a
-// rebuild: on Workers it is populated from vars and secrets by `nodejs_compat`. Same order
-// as lib/auth.ts and lib/cloudinary.ts.
+// The Astro adapter supplies runtime environment values without embedding the env object.
 import { readRuntimeEnv, validateRuntimeEnv } from './env-validator';
 
 const env = readRuntimeEnv;

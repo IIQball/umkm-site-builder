@@ -116,7 +116,7 @@ export const PUT: APIRoute = async (context) => {
       return jsonSuccess({ updated: true }, 200, 'Pengaturan toko berhasil diperbarui');
     } catch (error) {
       if (error instanceof ZodError) {
-        return jsonError(error.errors[0]?.message || 'Validasi gagal', 400, error.errors, 'VALIDATION_ERROR');
+        return jsonError(error.issues[0]?.message || 'Validasi gagal', 400, error.issues, 'VALIDATION_ERROR');
       }
       throw error;
     }

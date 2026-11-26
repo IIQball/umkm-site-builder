@@ -43,13 +43,13 @@ export const CARTOON_CLICHE_TRIGGERS = [
  */
 export const generateLogoPromptSchema = z.object({
   storeName: z
-    .string({ required_error: 'Store name is required' })
+    .string({ error: issue => issue.input === undefined ? 'Store name is required' : undefined })
     .trim()
     .min(1, 'Store name is required and cannot be empty')
     .max(100, 'Store name must be under 100 characters')
     .transform(sanitizeText),
   category: z
-    .string({ required_error: 'Category is required' })
+    .string({ error: issue => issue.input === undefined ? 'Category is required' : undefined })
     .trim()
     .min(1, 'Category is required and cannot be empty')
     .default('General Store')

@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach, afterEach, spyOn, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import type OpenAI from 'openai';
 import { sanitizePromptInput, isPotentialPromptInjection } from '@/lib/security/prompt-sanitizer';
 import { buildLogoPrompt } from '@/services/ai/prompt-builder.service';
@@ -10,22 +10,28 @@ import { db } from '@/db';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 import { cloudinary } from '@/lib/cloudinary.server';
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
-    insert: mock(),
-    update: mock(),
-    transaction: mock(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    transaction: vi.fn(),
   },
-}));
+  };
+});
 
 describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-cycle.test.ts)', () => {
   const mockSelect = db.select as unknown as Mock;
   const mockInsert = db.insert as unknown as Mock;
   const mockUpdate = db.update as unknown as Mock;
-  let uploadSpy: ReturnType<typeof spyOn>;
+  let uploadSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
+    process.env.CLOUDINARY_NAME = 'test-cloud';
+    process.env.CLOUDINARY_API_KEY = 'test-key';
+    process.env.CLOUDINARY_SECRET = 'test-secret';
     mockSelect.mockReset();
     mockInsert.mockReset();
     mockUpdate.mockReset();
@@ -33,7 +39,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
     setOpenAIClientForTesting({
       chat: {
         completions: {
-          create: mock(() =>
+          create: vi.fn(() =>
             Promise.resolve({
               choices: [
                 {
@@ -48,7 +54,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
         },
       },
       images: {
-        generate: mock(() =>
+        generate: vi.fn(() =>
           Promise.resolve({
             data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
             usage: { input_tokens: 1200, output_tokens: 450 },
@@ -57,7 +63,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
       },
     } as unknown as OpenAI);
 
-    uploadSpy = spyOn(cloudinary.uploader, 'upload');
+    uploadSpy = vi.spyOn(cloudinary.uploader, 'upload');
   });
 
   afterEach(() => {
@@ -130,7 +136,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
     // 7. Atomic Ledger Debit & Audit Logging
     let balanceState = 10;
     mockUpdate.mockReturnValue({
-      set: mock((val: { balance?: number; totalUsed?: number }) => {
+      set: vi.fn((val: { balance?: number; totalUsed?: number }) => {
         if (typeof val.balance === 'number') balanceState = val.balance;
         return { where: () => Promise.resolve([{ id: 'cred_1', balance: balanceState }]) };
       }),
@@ -140,7 +146,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
     balanceState -= 2;
 
     mockInsert.mockReturnValue({
-      values: mock((logPayload) => ({
+      values: vi.fn((logPayload) => ({
         returning: () => Promise.resolve([{ id: 'log_cycle_01', ...logPayload, status: 'success' }]),
       })),
     });
@@ -194,7 +200,7 @@ describe('AI Complete Pipeline Cycle Integration (tests/integration/ai-complete-
 
     // 3. Rollback mekanisme dipanggil
     mockUpdate.mockReturnValue({
-      set: mock(() => ({
+      set: vi.fn(() => ({
         where: () => {
           currentBalance += requiredCredits;
           return Promise.resolve([{ id: 'cred_fail', balance: currentBalance }]);

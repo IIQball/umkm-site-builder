@@ -1,13 +1,16 @@
-import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { db } from '@/db';
 import { getPlatformAiCapacity, notifySuperadminsAiDepleted } from '@/services/ai/ai-capacity.service';
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
-    insert: mock(),
+    select: vi.fn(),
+    insert: vi.fn(),
   },
-}));
+  };
+});
 
 describe('AI Platform Capacity & Depletion Protection (bun:test)', () => {
   const mockSelect = db.select as unknown as Mock;
@@ -22,12 +25,12 @@ describe('AI Platform Capacity & Depletion Protection (bun:test)', () => {
     it('calculates available credits and remaining USD deposit correctly', async () => {
       // 1. Deposit sum ($10.00 USD)
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{ totalDepositUsd: 10 }]),
+        from: vi.fn().mockResolvedValue([{ totalDepositUsd: 10 }]),
       });
 
       // 2. Logs cost sum ($2.00 USD)
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{ totalCostUsd: 2 }]),
+        from: vi.fn().mockResolvedValue([{ totalCostUsd: 2 }]),
       });
 
       // 3. Exchange rate from cost-calculator
@@ -50,12 +53,12 @@ describe('AI Platform Capacity & Depletion Protection (bun:test)', () => {
     it('identifies depleted state when cost exceeds deposit', async () => {
       // Deposit $5.00
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{ totalDepositUsd: 5 }]),
+        from: vi.fn().mockResolvedValue([{ totalDepositUsd: 5 }]),
       });
 
       // Cost $5.50
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{ totalCostUsd: 5.5 }]),
+        from: vi.fn().mockResolvedValue([{ totalCostUsd: 5.5 }]),
       });
 
       // Exchange rate
@@ -93,7 +96,7 @@ describe('AI Platform Capacity & Depletion Protection (bun:test)', () => {
         }),
       });
 
-      const mockValues1 = mock().mockResolvedValue({});
+      const mockValues1 = vi.fn().mockResolvedValue({});
       mockInsert.mockReturnValueOnce({ values: mockValues1 });
 
       // 3. Existing notification check for sa_02 (none)
@@ -105,7 +108,7 @@ describe('AI Platform Capacity & Depletion Protection (bun:test)', () => {
         }),
       });
 
-      const mockValues2 = mock().mockResolvedValue({});
+      const mockValues2 = vi.fn().mockResolvedValue({});
       mockInsert.mockReturnValueOnce({ values: mockValues2 });
 
       await notifySuperadminsAiDepleted({

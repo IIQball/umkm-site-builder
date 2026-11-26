@@ -31,7 +31,8 @@ const { authBaseUrl, trustedOrigins } = resolveAuthBaseAndOrigins();
 const googleClientId = readRuntimeEnv('GOOGLE_CLIENT_ID');
 const googleClientSecret = readRuntimeEnv('GOOGLE_CLIENT_SECRET');
 
-export const auth = betterAuth({
+function createAuth(secret: string) {
+  return betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -41,7 +42,7 @@ export const auth = betterAuth({
       verification: verifications,
     },
   }),
-  secret: readRuntimeEnv('BETTER_AUTH_SECRET') || 'dev-fallback-secret-override-in-prod',
+  secret,
   baseURL: authBaseUrl,
   trustedOrigins,
   emailAndPassword: {
@@ -106,15 +107,14 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60,
+      enabled: false,
     },
   },
   user: {
     additionalFields: {
-      role: { type: 'string', required: false, defaultValue: 'tenant', input: true },
+      role: { type: 'string', required: false, defaultValue: 'tenant', input: false },
       status: { type: 'string', required: false, defaultValue: 'active', input: false },
-      registeredBy: { type: 'string', required: false, input: true },
+      registeredBy: { type: 'string', required: false, input: false },
     },
   },
   onAPIError: {
@@ -144,8 +144,10 @@ export const auth = betterAuth({
           return {
             data: {
               ...user,
-              emailVerified: true,
-              status: user.registeredBy ? 'pending' : 'active',
+              emailVerified: user.emailVerified ?? false,
+              role: 'tenant',
+              registeredBy: null,
+              status: 'active',
             },
           };
         },
@@ -196,15 +198,54 @@ export const auth = betterAuth({
       },
     },
   },
-});
+  });
+}
 
-export type Auth = typeof auth;
+type AuthInstance = ReturnType<typeof createAuth>;
+let authInstance: AuthInstance | undefined;
+export async function getAuth(): Promise<AuthInstance> {
+  let secret: string | undefined;
+  if (import.meta.env.PROD) {
+    const runtime = await import('./auth/runtime-secret');
+    secret = runtime.getAuthSecret();
+    if (!secret || secret.trim().length < 32 || secret.length * Math.log2(new Set(secret).size) < 128) {
+      throw new Error('BETTER_AUTH_SECRET must be strong and provided at runtime');
+    }
+    return createAuth(secret);
+  } else {
+    if (authInstance) return authInstance;
+    secret = readRuntimeEnv('BETTER_AUTH_SECRET') || 'development-only-auth-secret-32-characters';
+  }
+  authInstance = createAuth(secret);
+  return authInstance;
+}
+
+export const auth = {
+  handler: async (...args: Parameters<AuthInstance['handler']>) => (await getAuth()).handler(...args),
+  api: new Proxy({
+    getSession: async (...args: unknown[]) => {
+      const instance = await getAuth();
+      return Reflect.apply(instance.api.getSession, instance.api, args);
+    },
+  } as AuthInstance['api'], {
+    get(target, key) {
+      if (Reflect.has(target, key)) return Reflect.get(target, key);
+      return async (...args: unknown[]) => {
+        const instance = await getAuth();
+        const method = Reflect.get(instance.api, key) as (...values: unknown[]) => unknown;
+        return method(...args);
+      };
+    },
+  }),
+} as AuthInstance;
+
+export type Auth = AuthInstance;
 
 async function findAuthenticatedUserById(userId: string): Promise<AuthenticatedUser | null> {
   const user = await db.query.users.findFirst({
     where: (u, { eq: eqFn }) => eqFn(u.id, userId),
   });
-  if (!user) return null;
+  if (!user || user.status !== 'active') return null;
 
   return {
     id: user.id,
@@ -221,7 +262,7 @@ import { isDevHeaderOverrideAllowed as checkDevHeaderOverride } from '@/lib/auth
 function isDevHeaderOverrideAllowed(): boolean {
   return checkDevHeaderOverride({
     nodeEnv: typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined,
-    isDev: Boolean(import.meta.env?.DEV),
+    isDev: Boolean(import.meta.env.DEV),
     allowDevHeader: readRuntimeEnv('ALLOW_DEV_AUTH_HEADER'),
   });
 }

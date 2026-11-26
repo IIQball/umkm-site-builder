@@ -71,14 +71,13 @@ export const POST: APIRoute = async (context): Promise<Response> => {
           name: validated.name,
           email: validated.email,
           password: validated.password,
-          role: 'admin'
         },
         headers: new Headers()
       }) as unknown as { user?: { id: string } };
       if (res && res.user) {
         newUserId = res.user.id;
         // Explicitly set the role to 'admin' in case BetterAuth ignored it
-        await db.update(users).set({ role: 'admin' }).where(eq(users.id, newUserId));
+        await db.update(users).set({ role: 'admin', emailVerified: true }).where(eq(users.id, newUserId));
         await db.delete(sessions).where(eq(sessions.userId, newUserId));
       } else {
         throw new AppError('Failed to create admin account', 500);
@@ -120,6 +119,7 @@ export const PATCH: APIRoute = async (context): Promise<Response> => {
     const validated = validate(adminStatusUpdateSchema, body);
 
     await db.update(users).set({ status: validated.status }).where(eq(users.id, id));
+    if (validated.status !== 'active') await db.delete(sessions).where(eq(sessions.userId, id));
     
     await db.insert(activityLogs).values({
       id: crypto.randomUUID(),

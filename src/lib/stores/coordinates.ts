@@ -89,41 +89,43 @@ export function findCoordinatesInAddress(address?: string | null): Coordinates |
   return null;
 }
 
-/**
- * Resolves short links (e.g. maps.app.goo.gl) by following redirect headers.
- */
-export async function resolveGoogleMapsCoordinates(googleMapsUrl?: string | null): Promise<Coordinates | null> {
-  if (!googleMapsUrl || typeof googleMapsUrl !== 'string') return null;
+const MAP_HOSTS = new Set(['maps.app.goo.gl', 'goo.gl', 'maps.google.com', 'www.google.com', 'google.com', 'maps.google.co.id', 'www.google.co.id', 'google.co.id']);
 
-  const direct = extractCoordinatesFromUrl(googleMapsUrl);
-  if (direct) return direct;
-
-  const isShortLink = googleMapsUrl.includes('goo.gl') || googleMapsUrl.includes('maps.app.goo.gl');
-  if (isShortLink) {
-    try {
-      const res = await fetch(googleMapsUrl, {
-        method: 'HEAD',
-        redirect: 'follow',
-        signal: AbortSignal.timeout(3500),
-      });
-      const resolvedFromHead = extractCoordinatesFromUrl(res.url);
-      if (resolvedFromHead) return resolvedFromHead;
-
-      if (!res.ok) {
-        const getRes = await fetch(googleMapsUrl, {
-          method: 'GET',
-          redirect: 'follow',
-          signal: AbortSignal.timeout(3500),
-        });
-        const resolvedFromGet = extractCoordinatesFromUrl(getRes.url);
-        if (resolvedFromGet) return resolvedFromGet;
-      }
-    } catch {
-      // safe fallback on network timeout or fetch error
-    }
+export function isGoogleMapsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const googleSite = ['www.google.com', 'google.com', 'www.google.co.id', 'google.co.id'].includes(url.hostname);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.port && MAP_HOSTS.has(url.hostname) &&
+      (!googleSite || url.pathname === '/maps' || url.pathname.startsWith('/maps/'));
+  } catch {
+    return false;
   }
+}
 
-  return null;
+export async function resolveGoogleMapsUrl(value?: string | null): Promise<string | null> {
+  if (!value || !isGoogleMapsUrl(value)) return null;
+  let current = value;
+  const signal = AbortSignal.timeout(3500);
+  try {
+    for (let i = 0; i < 5; i++) {
+      const host = new URL(current).hostname;
+      if (host !== 'goo.gl' && host !== 'maps.app.goo.gl') return current;
+      const response = await fetch(current, { method: 'HEAD', redirect: 'manual', signal });
+      const location = response.headers.get('location');
+      if (!location || response.status < 300 || response.status >= 400) return null;
+      const next = new URL(location, current).href;
+      if (!isGoogleMapsUrl(next)) return null;
+      current = next;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function resolveGoogleMapsCoordinates(googleMapsUrl?: string | null): Promise<Coordinates | null> {
+  const resolved = await resolveGoogleMapsUrl(googleMapsUrl);
+  return resolved ? extractCoordinatesFromUrl(resolved) : null;
 }
 
 /**

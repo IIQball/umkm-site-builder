@@ -1,4 +1,5 @@
 ---
+import { resolveGoogleMapsUrl } from "@/lib/stores/coordinates";
 import StorefrontLayout from "@/layouts/StorefrontLayout.astro";
 import StorefrontDynamicPage from "@/components/storefront/StorefrontDynamicPage.svelte";
 import { db } from "@/lib/db/client";
@@ -90,22 +91,7 @@ const categories = dbCategories.map((c) => ({
 const baseTemplateConfig = store.template?.config;
 const normalizedConfig = migrateTemplateConfig(baseTemplateConfig);
 
-// Resolve Google Maps shortlinks (goo.gl / maps.app.goo.gl) to full canonical place URL
-let canonicalMapsUrl = store.googleMapsUrl;
-if (canonicalMapsUrl && (canonicalMapsUrl.includes('goo.gl') || canonicalMapsUrl.includes('maps.app.goo.gl'))) {
-  try {
-    const headRes = await fetch(canonicalMapsUrl, {
-      redirect: 'manual',
-      signal: AbortSignal.timeout(800),
-    });
-    const redirectLocation = headRes.headers.get('location');
-    if (redirectLocation) {
-      canonicalMapsUrl = redirectLocation;
-    }
-  } catch {
-    void 0;
-  }
-}
+const canonicalMapsUrl = await resolveGoogleMapsUrl(store.googleMapsUrl);
 
 const storeCustomization = (store.customization as Record<string, unknown>) || {};
 const branchMode = (storeCustomization.maps as any)?.branchMode || (storeCustomization as any).branchMode || 'single';
@@ -120,7 +106,7 @@ const finalConfig = mergeStoreCustomization(normalizedConfig, store.customizatio
   address: store.address,
   waNumber: store.waNumber,
   googleMapsEmbedUrl: store.googleMapsEmbedUrl,
-  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  googleMapsUrl: canonicalMapsUrl,
   categoryName: store.category?.name || undefined,
   latitude: store.latitude,
   longitude: store.longitude,
@@ -163,7 +149,7 @@ const safeStore = {
   waNumber: store.waNumber,
   whatsappTemplate: customization.waCheckoutTemplate as string,
   address: store.address,
-  googleMapsUrl: canonicalMapsUrl || store.googleMapsUrl,
+  googleMapsUrl: canonicalMapsUrl,
   googleMapsEmbedUrl: store.googleMapsEmbedUrl,
   latitude: store.latitude,
   longitude: store.longitude,

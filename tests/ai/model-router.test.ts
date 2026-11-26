@@ -1,12 +1,15 @@
-import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { db } from '@/db';
 import { resolveStoreAiModel } from '@/services/ai/model-router.service';
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
+    select: vi.fn(),
   },
-}));
+  };
+});
 
 describe('AI Store Model Router Service (bun:test)', () => {
   const mockSelect = db.select as unknown as Mock;

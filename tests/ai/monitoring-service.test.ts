@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { db } from '@/lib/db/client';
 import {
   getAiMonitoringSummary,
@@ -9,11 +9,14 @@ import {
   getAiLogs,
 } from '@/services/ai/monitoring.service';
 
-mock.module('@/lib/db/client', () => ({
+vi.mock('@/lib/db/client', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
+    select: vi.fn(),
   },
-}));
+  };
+});
 
 describe('AI Monitoring Service (bun:test)', () => {
   const mockSelect = db.select as unknown as Mock;
@@ -26,7 +29,7 @@ describe('AI Monitoring Service (bun:test)', () => {
     it('aggregates AI generation logs correctly with numbers and success rate', async () => {
       // 1. Logs aggregation
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
+        from: vi.fn().mockResolvedValue([
           {
             totalExecutions: 10,
             totalCostIdr: 6500,
@@ -43,7 +46,7 @@ describe('AI Monitoring Service (bun:test)', () => {
 
       // 2. Deposit sum aggregation
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
+        from: vi.fn().mockResolvedValue([
           {
             totalDepositUsd: 10,
             totalDepositIdr: 165000,
@@ -87,14 +90,14 @@ describe('AI Monitoring Service (bun:test)', () => {
 
     it('handles empty database gracefully with zero defaults', async () => {
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{
+        from: vi.fn().mockResolvedValue([{
           totalExecutions: 0, totalCostIdr: 0, totalCostUsd: 0, totalInputTokens: 0, totalOutputTokens: 0,
           successCount: 0, failedCount: 0, pendingCount: 0, processingCount: 0,
         }]),
       });
 
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([{ totalDepositUsd: 0, totalDepositIdr: 0 }]),
+        from: vi.fn().mockResolvedValue([{ totalDepositUsd: 0, totalDepositIdr: 0 }]),
       });
 
       mockSelect.mockReturnValueOnce({
@@ -229,7 +232,7 @@ describe('AI Monitoring Service (bun:test)', () => {
   describe('getAiMonitoringDashboardData', () => {
     it('combines summary, recent logs, and deposit history into unified dashboard data', async () => {
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
+        from: vi.fn().mockResolvedValue([
           {
             totalExecutions: 5,
             totalCostIdr: 3250,
@@ -244,7 +247,7 @@ describe('AI Monitoring Service (bun:test)', () => {
         ]),
       });
       mockSelect.mockReturnValueOnce({
-        from: mock().mockResolvedValue([
+        from: vi.fn().mockResolvedValue([
           {
             totalDepositUsd: 10,
             totalDepositIdr: 165000,
@@ -406,10 +409,10 @@ describe('AI Monitoring Service (bun:test)', () => {
 
       // Count query mock
       mockSelect.mockReturnValueOnce({
-        from: mock().mockReturnValue({
-          leftJoin: mock().mockReturnValue({
-            leftJoin: mock().mockReturnValue({
-              where: mock().mockResolvedValue([{ total: 15 }]),
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            leftJoin: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([{ total: 15 }]),
             }),
           }),
         }),
@@ -417,13 +420,13 @@ describe('AI Monitoring Service (bun:test)', () => {
 
       // Data query mock
       mockSelect.mockReturnValueOnce({
-        from: mock().mockReturnValue({
-          leftJoin: mock().mockReturnValue({
-            leftJoin: mock().mockReturnValue({
-              orderBy: mock().mockReturnValue({
-                limit: mock().mockReturnValue({
-                  offset: mock().mockReturnValue({
-                    where: mock().mockResolvedValue([
+        from: vi.fn().mockReturnValue({
+          leftJoin: vi.fn().mockReturnValue({
+            leftJoin: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockReturnValue({
+                limit: vi.fn().mockReturnValue({
+                  offset: vi.fn().mockReturnValue({
+                    where: vi.fn().mockResolvedValue([
                       {
                         id: 'log_test_01',
                         isTesting: true,

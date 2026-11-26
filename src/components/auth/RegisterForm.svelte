@@ -16,6 +16,7 @@
   let name = "";
   let email = "";
   let otp = "";
+  let signupProof = "";
   let password = "";
   let confirmPassword = "";
   let role: "tenant" | "designer" | "" = "";
@@ -71,13 +72,14 @@
     }
     loading = true;
     try {
-      const result = await apiFetch('/api/auth/verify-otp', {
+      const result = await apiFetch<{ proof: string }>('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
         fallbackError: 'Kode OTP tidak valid.',
       });
       if (result.success) {
+        signupProof = result.data?.proof || "";
         toast.success(result.message || "Email berhasil diverifikasi!");
         step = 4;
       } else {
@@ -115,11 +117,13 @@
 
     loading = true;
     try {
-      const { error: errResponse } = await authClient.signUp.email({
-        email, password, name, role: role as "tenant" | "designer",
+      const result = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, role, proof: signupProof }),
       });
-      if (errResponse) {
-        toast.error(errResponse.message || "Gagal membuat akun");
+      if (!result.success) {
+        toast.error(result.message || "Gagal membuat akun");
         return;
       }
       toast.success("Akun berhasil dibuat! Silakan masuk dengan akun baru Anda.");

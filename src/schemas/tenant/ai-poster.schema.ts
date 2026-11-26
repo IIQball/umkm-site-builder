@@ -44,7 +44,7 @@ export const aiPosterSchema = z.object({
     .or(z.literal('')),
   posterStyle: z
     .enum(POSTER_STYLES, {
-      errorMap: () => ({ message: 'Pilihan gaya poster tidak valid' }),
+      error: 'Pilihan gaya poster tidak valid',
     })
     .optional()
     .default('vietnam_editorial'),
@@ -59,10 +59,10 @@ export const aiPosterSchema = z.object({
     )
     .optional(),
   sizeRatio: z.enum(POSTER_SIZE_RATIOS, {
-    errorMap: () => ({ message: 'Pilihan rasio aspek poster tidak valid' }),
+    error: 'Pilihan rasio aspek poster tidak valid',
   }),
   titleText: z
-    .string({ required_error: 'Judul poster makanan wajib diisi' })
+    .string({ error: issue => issue.input === undefined ? 'Judul poster makanan wajib diisi' : undefined })
     .trim()
     .min(2, 'Judul poster makanan minimal 2 karakter')
     .max(60, 'Judul poster makanan maksimal 60 karakter'),

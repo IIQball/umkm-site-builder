@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { db, users, sessions, tenantInvitations, verifications } from '@/db/index';
 import { logActivity } from '@/services/audit.service';
-import { eq, or } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 import { AppError, handleApiRoute, jsonError, jsonSuccess, parseJsonBody } from '@/lib/utils/api-handler';
 import { errorLog } from '@/lib/utils/logger';
 
@@ -20,23 +20,27 @@ export const POST: APIRoute = async ({ request }) => {
     const result = resetPasswordSchema.safeParse(body);
 
     if (!result.success) {
-      return jsonError(result.error.errors[0].message, 400, result.error.flatten().fieldErrors, 'VALIDATION_ERROR');
+      return jsonError(result.error.issues[0].message, 400, result.error.flatten().fieldErrors, 'VALIDATION_ERROR');
     }
 
-    const { token, password, uid, name } = result.data;
+    const { token, password, name } = result.data;
+    const verRecord = await db.query.verifications.findFirst({
+      where: and(eq(verifications.identifier, `reset-password:${token}`), gt(verifications.expiresAt, new Date())),
+    });
+    const targetUser = verRecord?.value ? await db.query.users.findFirst({
+      where: eq(users.id, verRecord.value),
+    }) : null;
+    if (!targetUser) {
+      throw new AppError('Token reset kata sandi tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_TOKEN');
+    }
 
-    let targetUid = uid;
-    if (!targetUid && token) {
-      const verRecord = await db.query.verifications.findFirst({
-        where: eq(verifications.identifier, `reset-password:${token}`),
+    let invitation: typeof tenantInvitations.$inferSelect | undefined;
+    if (targetUser.status === 'pending') {
+      invitation = await db.query.tenantInvitations.findFirst({
+        where: and(eq(tenantInvitations.email, targetUser.email), gt(tenantInvitations.expiresAt, new Date())),
       });
-      if (verRecord?.value) {
-        const matched = await db.query.users.findFirst({
-          where: or(eq(users.email, verRecord.value), eq(users.id, verRecord.value)),
-        });
-        if (matched) {
-          targetUid = matched.id;
-        }
+      if (!invitation || !targetUser.registeredBy || invitation.invitedBy !== targetUser.registeredBy || invitation.acceptedAt) {
+        throw new AppError('Undangan tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_INVITATION');
       }
     }
 
@@ -50,46 +54,22 @@ export const POST: APIRoute = async ({ request }) => {
       throw new AppError('Token reset kata sandi tidak valid atau telah kedaluwarsa.', 400, undefined, 'INVALID_TOKEN');
     }
 
-    let userEmail = '';
-    let userRole = '';
-
-    if (targetUid) {
-      const targetUser = await db.select().from(users).where(eq(users.id, targetUid)).limit(1);
-      if (targetUser.length === 1) {
-        userEmail = targetUser[0].email;
-        userRole = targetUser[0].role;
-        const wasPending = targetUser[0].status === 'pending';
-
-        await db.update(users).set({ status: 'active' }).where(eq(users.id, targetUid));
-
-        if (name) {
-          try {
-            const signinRes = (await auth.api.signInEmail({
-              body: { email: userEmail, password },
-              headers: new Headers(),
-            })) as unknown as { user?: { id: string } };
-
-            if (signinRes?.user) {
-              await db.update(users).set({ name, status: 'active' }).where(eq(users.id, targetUid));
-              await db.delete(sessions).where(eq(sessions.userId, targetUid));
-            }
-          } catch (e) {
-            errorLog('RESET_PASSWORD_NAME_UPDATE', e);
-          }
-        }
-
-        await db.delete(tenantInvitations).where(eq(tenantInvitations.email, userEmail));
-
-        await logActivity({
-          userId: targetUid,
-          action: wasPending ? 'USER_ACTIVATED' : 'Reset Password',
-          details: {
-            email: userEmail,
-            role: userRole,
-          },
-        });
+    if (invitation) {
+      const activated = await db.update(users).set({ status: 'active', emailVerified: true, ...(name ? { name } : {}) })
+        .where(and(eq(users.id, targetUser.id), eq(users.status, 'pending')))
+        .returning({ id: users.id });
+      if (activated.length) {
+        await db.delete(sessions).where(eq(sessions.userId, targetUser.id));
+        await db.delete(tenantInvitations).where(eq(tenantInvitations.id, invitation.id));
       }
     }
+    await logActivity({
+      userId: targetUser.id,
+      action: invitation ? 'USER_ACTIVATED' : 'Reset Password',
+      details: { email: targetUser.email, role: targetUser.role },
+    });
+    const userEmail = targetUser.email;
+    const userRole = targetUser.role;
 
     return jsonSuccess(
       { email: userEmail, role: userRole },

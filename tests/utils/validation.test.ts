@@ -27,7 +27,7 @@ describe('Validation Utility', () => {
       expect(validationError.message).toBe('Data validation error');
       expect(validationError.details).toHaveProperty('username');
       expect(validationError.details).toHaveProperty('email');
-      expect(validationError.details.username).toContainEqual(expect.stringContaining('at least 3 character(s)'));
+      expect(validationError.details.username).toContainEqual(expect.stringContaining('>=3 characters'));
     }
   });
 });

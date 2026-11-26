@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from 'vitest';
 import { compressImageClient } from '@/lib/client-compressor';
 
 describe('Client Compressor - compressImageClient', () => {
   it('throws an error if no file is provided', async () => {
     // @ts-expect-error testing missing argument
-    expect(compressImageClient(null)).rejects.toThrow('Berkas gambar wajib disertakan');
+    await expect(compressImageClient(null)).rejects.toThrow('Berkas gambar wajib disertakan');
   });
 
   it('safely handles file conversion in headless environment fallback', async () => {
@@ -16,7 +16,7 @@ describe('Client Compressor - compressImageClient', () => {
 
     expect(result).toBeDefined();
     expect(result.size).toBe(fakeFile.size);
-    expect(result.base64).toStartWith('data:image/png;base64,');
+    expect(result.base64).toMatch(/^data:image\/png;base64,/);
     expect(result.blob).toBeDefined();
   });
 
@@ -25,6 +25,6 @@ describe('Client Compressor - compressImageClient', () => {
     const result = await compressImageClient(fakeFile, 1024 * 1024);
 
     expect(result).toBeDefined();
-    expect(result.base64).toStartWith('data:image/jpeg;base64,');
+    expect(result.base64).toMatch(/^data:image\/jpeg;base64,/);
   });
 });

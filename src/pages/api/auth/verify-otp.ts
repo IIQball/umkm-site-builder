@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { eq } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 import { z } from 'zod';
 import { db, verifications } from '@/db';
 import { handleApiRoute, jsonError, jsonSuccess, parseJsonBody } from '@/lib/utils/api-handler';
@@ -27,19 +27,20 @@ export const POST: APIRoute = async ({ request }) => {
       return jsonError('Terlalu banyak percobaan OTP. Silakan tunggu 1 menit.', 429, undefined, 'RATE_LIMITED');
     }
 
-    const validVerifications = await db.query.verifications.findMany({
-      where: (v, { eq: eqFn, and, gt }) =>
-        and(eqFn(v.identifier, email), eqFn(v.value, otp), gt(v.expiresAt, new Date())),
-      orderBy: (v, { desc }) => [desc(v.createdAt)],
-      limit: 1,
-    });
-
-    if (validVerifications.length === 0) {
+    const consumed = await db.delete(verifications).where(and(
+      eq(verifications.identifier, email), eq(verifications.value, otp), gt(verifications.expiresAt, new Date())
+    )).returning({ id: verifications.id });
+    if (!consumed.length) {
       return jsonError('Kode OTP tidak valid atau sudah kedaluwarsa', 400, undefined, 'VALIDATION_ERROR');
     }
+    const proof = crypto.randomUUID() + crypto.randomUUID();
+    await db.insert(verifications).values({
+      id: `ver_${crypto.randomUUID()}`,
+      identifier: `signup:${email}`,
+      value: proof,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
 
-    await db.delete(verifications).where(eq(verifications.id, validVerifications[0].id));
-
-    return jsonSuccess(null, 200, 'OTP valid');
+    return jsonSuccess({ proof }, 200, 'OTP valid');
   });
 };

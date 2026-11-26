@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import type OpenAI from 'openai';
 import { POST as handleDepositPost } from '@/pages/api/admin/ai/deposits';
 import { POST as handleGeneratePost } from '@/pages/api/ai/generate';
@@ -7,20 +7,26 @@ import { db } from '@/db';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 import { cloudinary } from '@/lib/cloudinary.server';
 
-mock.module('@/lib/auth', () => ({
-  getAuthenticatedUser: mock(),
-  isAuthorizedSuperAdmin: mock(),
-  isAuthorizedAdmin: mock(),
-}));
+vi.mock('@/lib/auth', async () => {
+  const { vi } = await import("vitest");
+  return {
+  getAuthenticatedUser: vi.fn(),
+  isAuthorizedSuperAdmin: vi.fn(),
+  isAuthorizedAdmin: vi.fn(),
+  };
+});
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
-    insert: mock(),
-    update: mock(),
-    transaction: mock(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    transaction: vi.fn(),
   },
-}));
+  };
+});
 
 type DepositContext = Parameters<typeof handleDepositPost>[0];
 type GenerateContext = Parameters<typeof handleGeneratePost>[0];
@@ -47,9 +53,9 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
   let activeMockTx: { update?: Mock; insert?: Mock } | null = null;
   let txErrorToThrow: Error | null = null;
 
-  let mockGenerate: ReturnType<typeof mock>;
-  let mockEdit: ReturnType<typeof mock>;
-  let mockChatCreate: ReturnType<typeof mock>;
+  let mockGenerate: ReturnType<typeof vi.fn>;
+  let mockEdit: ReturnType<typeof vi.fn>;
+  let mockChatCreate: ReturnType<typeof vi.fn>;
   let mockOpenAiClient: OpenAI;
 
   const mockStoreAndTier = ({
@@ -212,6 +218,9 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
   };
 
   beforeEach(() => {
+    process.env.CLOUDINARY_NAME = 'test-cloud';
+    process.env.CLOUDINARY_API_KEY = 'test-key';
+    process.env.CLOUDINARY_SECRET = 'test-secret';
     mockGetAuthUser.mockReset();
     mockIsSuperAdmin.mockReset();
     mockSelect.mockReset();
@@ -253,9 +262,9 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         return activeMockTx.update(...args);
       }
       return {
-        set: mock().mockReturnValue({
-          where: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
           }),
         }),
       };
@@ -266,15 +275,15 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         return activeMockTx.insert(...args);
       }
       return {
-        values: mock().mockReturnValue({
-          returning: mock().mockResolvedValue([{ id: 'log_mock_default' }]),
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ id: 'log_mock_default' }]),
         }),
       };
     });
 
-    mockGenerate = mock();
-    mockEdit = mock();
-    mockChatCreate = mock().mockResolvedValue({
+    mockGenerate = vi.fn();
+    mockEdit = vi.fn();
+    mockChatCreate = vi.fn().mockResolvedValue({
       choices: [{ message: { content: 'Swiss minimal geometric vector logo symbol, pure white background' } }],
     });
     mockOpenAiClient = {
@@ -349,8 +358,8 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         createdBy: 'super_1',
       };
 
-      const mockReturning = mock().mockResolvedValue([mockInserted]);
-      const mockValues = mock().mockReturnValue({ returning: mockReturning });
+      const mockReturning = vi.fn().mockResolvedValue([mockInserted]);
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning });
       mockInsert.mockReturnValue({ values: mockValues });
 
       const request = new Request('http://localhost/api/admin/ai/deposits', {
@@ -504,14 +513,14 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
 
       // Simulate concurrent update conflict where atomic returning returns empty
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([]), // Empty: race condition lost!
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([]), // Empty: race condition lost!
             }),
           }),
         }),
-        insert: mock(),
+        insert: vi.fn(),
       };
       mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
 
@@ -537,23 +546,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 150, output_tokens: 600 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/logo_1',
         secure_url: 'https://res.cloudinary.com/pinoka/logo.png',
         bytes: 1024,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_abc123' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_abc123' }]),
           }),
         }),
       };
@@ -590,23 +599,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 300, output_tokens: 800 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/logo_2',
         secure_url: 'https://res.cloudinary.com/pinoka/logo2.png',
         bytes: 2048,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_sunburst123' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_sunburst123' }]),
           }),
         }),
       };
@@ -641,7 +650,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 250, output_tokens: 750 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/mockups/mockup_1',
         secure_url: 'https://res.cloudinary.com/pinoka/mockups/mockup_1.webp',
         bytes: 4096,
@@ -649,18 +658,18 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
 
       let insertedLog: Partial<RecordedLogPayload> = {};
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockImplementation((val: RecordedLogPayload) => {
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((val: RecordedLogPayload) => {
             insertedLog = val;
             return {
-              returning: mock().mockResolvedValue([{ id: 'log_mockup_1', ...val }]),
+              returning: vi.fn().mockResolvedValue([{ id: 'log_mockup_1', ...val }]),
             };
           }),
         }),
@@ -696,23 +705,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 100, output_tokens: 500 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/logo_form',
         secure_url: 'https://res.cloudinary.com/pinoka/logo_form.png',
         bytes: 1024,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 2 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 2 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_form_1' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_form_1' }]),
           }),
         }),
       };
@@ -744,23 +753,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 150, output_tokens: 450 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/mockups/mockup_form',
         secure_url: 'https://res.cloudinary.com/pinoka/mockup_form.webp',
         bytes: 2048,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_mockup_form' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_mockup_form' }]),
           }),
         }),
       };
@@ -795,23 +804,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 120, output_tokens: 380 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/posters/poster_food',
         secure_url: 'https://res.cloudinary.com/pinoka/poster_food.webp',
         bytes: 4096,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_poster_123' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_poster_123' }]),
           }),
         }),
       };
@@ -846,7 +855,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 200, output_tokens: 500 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/test_logo',
         secure_url: 'https://res.cloudinary.com/pinoka/test_logo.png',
         bytes: 1024,
@@ -854,12 +863,12 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
 
       let auditLogVal: Partial<RecordedLogPayload> = {};
       const mockTx = {
-        update: mock(),
-        insert: mock().mockReturnValue({
-          values: mock().mockImplementation((val: RecordedLogPayload) => {
+        update: vi.fn(),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((val: RecordedLogPayload) => {
             auditLogVal = val;
             return {
-              returning: mock().mockResolvedValue([{ id: 'log_test_audit', ...val }]),
+              returning: vi.fn().mockResolvedValue([{ id: 'log_test_audit', ...val }]),
             };
           }),
         }),
@@ -903,17 +912,17 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 100, output_tokens: 200 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/fallback_test',
         secure_url: 'https://res.cloudinary.com/pinoka/fallback_test.png',
         bytes: 1024,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock(),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_fallback_test' }]),
+        update: vi.fn(),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_fallback_test' }]),
           }),
         }),
       };
@@ -942,7 +951,7 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 300, output_tokens: 800 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/logos/tamper_logo',
         secure_url: 'https://res.cloudinary.com/pinoka/tamper.png',
         bytes: 1024,
@@ -950,18 +959,18 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
 
       let recordedLogPayload: Partial<RecordedLogPayload> = {};
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 3 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockImplementation((val: RecordedLogPayload) => {
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockImplementation((val: RecordedLogPayload) => {
             recordedLogPayload = val;
             return {
-              returning: mock().mockResolvedValue([{ id: 'log_tamper_123', ...val }]),
+              returning: vi.fn().mockResolvedValue([{ id: 'log_tamper_123', ...val }]),
             };
           }),
         }),
@@ -1002,18 +1011,18 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
       let creditDeductedInDb = false;
       let updateCalls = 0;
       const mockTx = {
-        update: mock().mockImplementation(() => {
+        update: vi.fn().mockImplementation(() => {
           updateCalls++;
           creditDeductedInDb = updateCalls === 1;
           return {
-            set: mock().mockReturnValue({
-              where: mock().mockReturnValue({
-                returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
               }),
             }),
           };
         }),
-        insert: mock(),
+        insert: vi.fn(),
       };
 
       mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx));
@@ -1066,23 +1075,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         usage: { input_tokens: 200, output_tokens: 500 },
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/posters/poster_1',
         secure_url: 'https://res.cloudinary.com/pinoka/poster.png',
         bytes: 1024,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_poster_1' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_poster_1' }]),
           }),
         }),
       };
@@ -1113,23 +1122,23 @@ describe('Atomic Ledger & AI Generation Integration (bun:test)', () => {
         data: [{ b64_json: TINY_B64_PNG }],
       });
 
-      spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
+      vi.spyOn(cloudinary.uploader, 'upload').mockResolvedValueOnce({
         public_id: 'pinoka/posters/poster_2',
         secure_url: 'https://res.cloudinary.com/pinoka/poster_edited.png',
         bytes: 2048,
       } as unknown as Awaited<ReturnType<typeof cloudinary.uploader.upload>>);
 
       const mockTx = {
-        update: mock().mockReturnValue({
-          set: mock().mockReturnValue({
-            where: mock().mockReturnValue({
-              returning: mock().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              returning: vi.fn().mockResolvedValue([{ id: 'cred_1', balance: 1 }]),
             }),
           }),
         }),
-        insert: mock().mockReturnValue({
-          values: mock().mockReturnValue({
-            returning: mock().mockResolvedValue([{ id: 'log_poster_2' }]),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: 'log_poster_2' }]),
           }),
         }),
       };

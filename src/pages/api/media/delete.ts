@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { handleApiRoute, jsonSuccess, validate, AppError } from '@/lib/utils';
-import { deleteFromCloudinary } from '@/lib/cloudinary';
+import { deleteFromCloudinary, isOwnedMedia } from '@/lib/cloudinary';
 import { z } from 'zod';
 
 const deleteMediaSchema = z.object({
@@ -10,6 +10,8 @@ const deleteMediaSchema = z.object({
 
 export const POST: APIRoute = async (context) => {
   return handleApiRoute(async () => {
+    const user = context.locals.user;
+    if (!user) throw new AppError('Silakan login terlebih dahulu', 401);
     const body = await context.request.json().catch(() => ({}));
     const validated = validate(deleteMediaSchema, body);
 
@@ -26,7 +28,12 @@ export const POST: APIRoute = async (context) => {
       throw new AppError('Public ID atau URL Cloudinary valid diperlukan', 400);
     }
 
-    await deleteFromCloudinary(targetPublicId);
+    if (!isOwnedMedia(targetPublicId, user.id)) {
+      throw new AppError('Media bukan milik Anda', 403);
+    }
+
+    const resourceType = validated.url && new URL(validated.url).pathname.includes('/video/upload/') ? 'video' : 'image';
+    await deleteFromCloudinary(targetPublicId, resourceType);
 
     return jsonSuccess({ deleted: true, publicId: targetPublicId });
   });

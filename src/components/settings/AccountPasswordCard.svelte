@@ -143,7 +143,7 @@
     </div>
 
     <div class="p-4 sm:px-6 py-4 border-t border-light flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-auto bg-card">
-      <a href="/auth/forgot-password" class="text-label-caps font-bold text-primary hover:text-primary-focus hover:underline active:scale-95 transition-all duration-150 ease-out">
+      <a href="/forgot-password" class="text-label-caps font-bold text-primary hover:text-primary-focus hover:underline active:scale-95 transition-all duration-150 ease-out">
         LUPA KATA SANDI LAMA?
       </a>
       <Button type="submit" variant="primary" size="md" className="shadow-xs font-bold rounded-2xl w-full sm:w-auto" loading={isUpdatingPassword} disabled={isUpdatingPassword || isCooldownActive}>

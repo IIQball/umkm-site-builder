@@ -59,7 +59,7 @@ describe('CheckSubdomainInput schema', () => {
     const result = CheckSubdomainInput.safeParse({ subdomain: 'kopi-' });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.errors[0]?.message).toBe('Subdomain tidak boleh diawali atau diakhiri tanda hubung');
+      expect(result.error.issues[0]?.message).toBe('Subdomain tidak boleh diawali atau diakhiri tanda hubung');
     }
   });
 
@@ -67,7 +67,7 @@ describe('CheckSubdomainInput schema', () => {
     const result = CheckSubdomainInput.safeParse({ subdomain: '-kopi' });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.errors[0]?.message).toBe('Subdomain tidak boleh diawali atau diakhiri tanda hubung');
+      expect(result.error.issues[0]?.message).toBe('Subdomain tidak boleh diawali atau diakhiri tanda hubung');
     }
   });
 
@@ -77,7 +77,7 @@ describe('CheckSubdomainInput schema', () => {
       const result = CheckSubdomainInput.safeParse({ subdomain });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.errors[0]?.message).toBe('Subdomain tidak tersedia (kata terlarang)');
+        expect(result.error.issues[0]?.message).toBe('Subdomain tidak tersedia (kata terlarang)');
       }
     }
   });

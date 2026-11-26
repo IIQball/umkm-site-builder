@@ -1,33 +1,47 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import OpenAI from 'openai';
 import * as openaiModule from 'openai';
 import { generateProductMockup } from '@/services/ai/product-mockup.service';
 import * as cloudinaryUploader from '@/services/media/cloudinary-uploader';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 
+vi.mock('openai', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('openai')>();
+  const { vi } = await import('vitest');
+  return {
+    ...actual,
+    default: actual.default,
+    toFile: vi.fn(actual.toFile),
+  };
+});
+
+vi.mock('@/services/media/cloudinary-uploader', async () => {
+  const { vi } = await import('vitest');
+  return {
+    uploadBase64Image: vi.fn(),
+  };
+});
+
 describe('ProductMockupService - generateProductMockup (bun:test)', () => {
-  const mockEdit = mock();
+  const mockEdit = vi.fn();
   const mockClient = {
     images: {
       edit: mockEdit,
     },
   } as unknown as OpenAI;
 
-  let uploadBase64ImageSpy: ReturnType<typeof spyOn>;
-  let toFileSpy: ReturnType<typeof spyOn>;
+  const uploadBase64ImageSpy = vi.mocked(cloudinaryUploader.uploadBase64Image);
+  const toFileSpy = vi.mocked(openaiModule.toFile);
 
   beforeEach(() => {
     mockEdit.mockReset();
+    toFileSpy.mockClear();
+    uploadBase64ImageSpy.mockReset();
     setOpenAIClientForTesting(mockClient);
-
-    toFileSpy = spyOn(openaiModule, 'toFile');
-    uploadBase64ImageSpy = spyOn(cloudinaryUploader, 'uploadBase64Image');
   });
 
   afterEach(() => {
     resetOpenAIClient();
-    toFileSpy.mockRestore();
-    uploadBase64ImageSpy.mockRestore();
   });
 
   describe('Happy path & Model Parameters', () => {

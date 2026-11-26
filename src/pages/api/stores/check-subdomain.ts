@@ -26,7 +26,7 @@ async function handleCheckSubdomain(request: Request, rawInput: unknown) {
       return jsonSuccess({ available: !existing, subdomain }, 200);
     } catch (err) {
       if (err instanceof ZodError) {
-        return jsonError(err.errors[0]?.message || 'Validasi gagal', 400, err.errors, 'VALIDATION_ERROR');
+        return jsonError(err.issues[0]?.message || 'Validasi gagal', 400, err.issues, 'VALIDATION_ERROR');
       }
       throw err;
     }

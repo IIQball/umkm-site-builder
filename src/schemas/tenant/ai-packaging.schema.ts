@@ -30,21 +30,21 @@ const MAX_BASE64_LENGTH = 6 * 1024 * 1024;
 
 export const aiPackagingSchema = z.object({
   packagingType: z.enum(PACKAGING_TYPES, {
-    errorMap: () => ({ message: 'Pilihan jenis kemasan tidak valid' }),
+    error: 'Pilihan jenis kemasan tidak valid',
   }),
   presentationStyle: z
     .enum(MOCKUP_PRESENTATION_STYLES, {
-      errorMap: () => ({ message: 'Pilihan gaya presentasi mockup tidak valid' }),
+      error: 'Pilihan gaya presentasi mockup tidak valid',
     })
     .optional()
     .default('clean_studio'),
   productLabel: z
-    .string({ required_error: 'Label kemasan produk wajib diisi' })
+    .string({ error: issue => issue.input === undefined ? 'Label kemasan produk wajib diisi' : undefined })
     .trim()
     .min(2, 'Label kemasan minimal 2 karakter')
     .max(100, 'Label kemasan maksimal 100 karakter'),
   referenceImageBase64: z
-    .string({ required_error: 'Foto referensi produk wajib diunggah' })
+    .string({ error: issue => issue.input === undefined ? 'Foto referensi produk wajib diunggah' : undefined })
     .trim()
     .min(10, 'Foto referensi produk tidak boleh kosong')
     .max(MAX_BASE64_LENGTH, 'Ukuran foto referensi melebihi batas 4 MB')

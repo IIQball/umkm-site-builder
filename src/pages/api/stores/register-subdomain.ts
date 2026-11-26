@@ -80,7 +80,7 @@ export const POST: APIRoute = async ({ request }) => {
       return jsonSuccess({ storeId, subdomain }, 201, 'Subdomain berhasil didaftarkan');
     } catch (err) {
       if (err instanceof ZodError) {
-        return jsonError(err.errors[0]?.message || 'Validasi gagal', 400, err.errors, 'VALIDATION_ERROR');
+        return jsonError(err.issues[0]?.message || 'Validasi gagal', 400, err.issues, 'VALIDATION_ERROR');
       }
       throw err;
     }

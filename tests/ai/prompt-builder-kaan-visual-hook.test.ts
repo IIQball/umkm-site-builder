@@ -1,14 +1,20 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildLogoPrompt } from '@/services/ai/prompt-builder.service';
 import { resetOpenAIClient } from '@/lib/openai';
 
-const mockCreate = mock();
+const { mockCreate, MockOpenAI } = vi.hoisted(() => {
+  const mockCreate = vi.fn();
 
-const MockOpenAI = mock(() => ({
-  chat: { completions: { create: mockCreate } },
-}));
+  const MockOpenAI = vi.fn(function () {
+    return {
+      chat: { completions: { create: mockCreate } },
+    };
+  });
 
-mock.module('openai', () => ({
+  return { mockCreate, MockOpenAI };
+});
+
+vi.mock('openai', () => ({
   default: MockOpenAI,
   OpenAI: MockOpenAI,
 }));

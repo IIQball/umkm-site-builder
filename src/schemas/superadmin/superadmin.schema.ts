@@ -76,7 +76,7 @@ export const adminStatusUpdateSchema = z.object({
 export type AdminStatusUpdateInput = z.infer<typeof adminStatusUpdateSchema>;
 
 export const manualUserRegistrationSchema = z.object({
-  role: z.enum(['tenant', 'designer', 'admin'], { required_error: 'Peran wajib dipilih' }),
+  role: z.enum(['tenant', 'designer', 'admin'], { error: issue => issue.input === undefined ? 'Peran wajib dipilih' : undefined }),
   name: z.string().min(3, 'Nama minimal 3 karakter'),
   email: z.string().email('Format email tidak valid')
 });

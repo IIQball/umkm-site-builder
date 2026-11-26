@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
       );
     }
 
-    const params = await generateSignedUploadParams(result.data.folder, result.data.resourceType);
+    const params = await generateSignedUploadParams(result.data.folder, result.data.resourceType, locals.user.id);
 
     return jsonSuccess(params, 200, 'Signature upload berhasil dibuat');
   });

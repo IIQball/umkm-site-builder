@@ -1,3 +1,10 @@
+export function isOwnedMedia(publicId: string, userId: string): boolean {
+  const parts = publicId.split('/');
+  return parts.length === 5 && parts[0] === 'umkm-builder' &&
+    ['products', 'templates', 'stores'].includes(parts[1]) && parts[2] === 'owners' &&
+    parts[3] === encodeURIComponent(userId) && Boolean(parts[4]) && parts[4] !== '.' && parts[4] !== '..';
+}
+
 export async function generateSignature(params: Record<string, string>, apiSecret: string) {
   const sortedKeys = Object.keys(params).sort();
   const queryToSign = sortedKeys.map((key) => `${key}=${params[key]}`).join('&');
@@ -46,11 +53,11 @@ export function getCloudinaryConfig() {
  * Client uses these params to POST directly to Cloudinary upload API.
  * No file bytes pass through our server.
  */
-export async function generateSignedUploadParams(folder: string, resourceType: 'image' | 'video' = 'image') {
+export async function generateSignedUploadParams(folder: string, resourceType: 'image' | 'video' = 'image', ownerId?: string) {
   const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
   const timestamp = Math.floor(Date.now() / 1000).toString();
-  const fullFolder = `umkm-builder/${folder}`;
+  const fullFolder = ownerId ? `umkm-builder/${folder}/owners/${encodeURIComponent(ownerId)}` : `umkm-builder/${folder}`;
 
   const params: Record<string, string> = {
     folder: fullFolder,
@@ -126,7 +133,7 @@ export async function uploadToCloudinary(file: File, folder: string) {
   }
 }
 
-export async function deleteFromCloudinary(publicId: string) {
+export async function deleteFromCloudinary(publicId: string, resourceType: 'image' | 'video' = 'image') {
   try {
     const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
 
@@ -143,7 +150,7 @@ export async function deleteFromCloudinary(publicId: string) {
     formData.append("timestamp", timestamp);
     formData.append("signature", signature);
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/destroy`, {
       method: "POST",
       body: formData,
     });

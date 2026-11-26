@@ -1,27 +1,33 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildLogoPrompt, cleanGeneratedPrompt } from '@/services/ai/prompt-builder.service';
 import { ValidationError } from '@/lib/utils/validation';
 import { UMKM_COLOR_PALETTES } from '@/services/ai/rules/logo-design-rules';
 import { resetOpenAIClient } from '@/lib/openai';
 
-const mockCreate = mock();
+const { mockCreate, MockAPIError, MockOpenAI } = vi.hoisted(() => {
+  const mockCreate = vi.fn();
 
-class MockAPIError extends Error {
-  status?: number;
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = 'APIError';
-    this.status = status;
+  class MockAPIError extends Error {
+    status?: number;
+    constructor(status: number, message: string) {
+      super(message);
+      this.name = 'APIError';
+      this.status = status;
+    }
   }
-}
 
-const MockOpenAI = mock(() => ({
-  chat: { completions: { create: mockCreate } },
-}));
+  const MockOpenAI = vi.fn(function () {
+    return {
+      chat: { completions: { create: mockCreate } },
+    };
+  });
 
-(MockOpenAI as unknown as Record<string, unknown>).APIError = MockAPIError;
+  (MockOpenAI as unknown as Record<string, unknown>).APIError = MockAPIError;
 
-mock.module('openai', () => ({
+  return { mockCreate, MockAPIError, MockOpenAI };
+});
+
+vi.mock('openai', () => ({
   default: MockOpenAI,
   OpenAI: MockOpenAI,
   APIError: MockAPIError,

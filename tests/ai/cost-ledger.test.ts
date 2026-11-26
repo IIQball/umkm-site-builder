@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { db } from '@/db';
 import {
   calculateCost,
@@ -10,14 +10,17 @@ import {
   DALLE3_HD_IMAGE_COST_USD,
 } from '@/services/ai/cost-calculator.service';
 
-mock.module('@/db', () => ({
+vi.mock('@/db', async () => {
+  const { vi } = await import("vitest");
+  return {
   db: {
-    select: mock(),
-    insert: mock(),
-    update: mock(),
-    transaction: mock(),
+    select: vi.fn(),
+    insert: vi.fn(),
+    update: vi.fn(),
+    transaction: vi.fn(),
   },
-}));
+  };
+});
 
 describe('Cost Ledger Unit Tests (tests/ai/cost-ledger.test.ts)', () => {
   const mockSelect = db.select as unknown as Mock;
@@ -113,9 +116,9 @@ describe('Cost Ledger Unit Tests (tests/ai/cost-ledger.test.ts)', () => {
 
       mockTransaction.mockImplementation(async (callback) => {
         const tx = {
-          update: mock(() => ({
-            set: mock((values: Record<string, unknown>) => ({
-              where: mock((condition: { tenantId?: string }) => {
+          update: vi.fn(() => ({
+            set: vi.fn((values: Record<string, unknown>) => ({
+              where: vi.fn((condition: { tenantId?: string }) => {
                 if (condition?.tenantId) targetTenant = condition.tenantId;
                 if (typeof values.balance === 'number') capturedBalance = values.balance;
                 if (typeof values.totalUsed === 'number') capturedTotalUsed = values.totalUsed;
@@ -190,7 +193,7 @@ describe('Cost Ledger Unit Tests (tests/ai/cost-ledger.test.ts)', () => {
       };
 
       mockInsert.mockReturnValue({
-        values: mock(() => ({
+        values: vi.fn(() => ({
           returning: () => Promise.resolve([mockLogEntry]),
         })),
       });
@@ -236,7 +239,7 @@ describe('Cost Ledger Unit Tests (tests/ai/cost-ledger.test.ts)', () => {
       };
 
       mockInsert.mockReturnValue({
-        values: mock(() => ({
+        values: vi.fn(() => ({
           returning: () => Promise.resolve([mockAuditLog]),
         })),
       });

@@ -1,10 +1,10 @@
-import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import OpenAI from 'openai';
 import { generateLogoImage } from '@/services/ai/logo-generator.service';
 import { setOpenAIClientForTesting, resetOpenAIClient } from '@/lib/openai';
 
 describe('LogoGeneratorService - generateLogoImage (bun:test)', () => {
-  const mockGenerate = mock();
+  const mockGenerate = vi.fn();
   const mockClient = {
     images: {
       generate: mockGenerate,

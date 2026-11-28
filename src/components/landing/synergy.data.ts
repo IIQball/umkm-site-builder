@@ -18,11 +18,6 @@ export interface StageData {
 
 export const MODEL_PATH = '/assets/3d/banyuwangi_map.glb'
 
-export const BEFORE_STAGE = {
-  camera: { x: 0.0382, y: 0.0600, z: 0.0162 },
-  lookAt: { x: 0.0002, y: 0.0019, z: 0.0026 }
-}
-
 export const STAGES: StageData[] = [
   {
     id: 'stage-0',

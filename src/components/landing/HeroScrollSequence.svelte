@@ -3,7 +3,9 @@
   import HeroCaptions from './HeroCaptions.svelte'
 
   const TOTAL_FRAMES = 839
-  const BUFFER_AHEAD = 15
+  const BUFFER_AHEAD = 3
+  const KEEP_BEHIND = 3
+  const MAX_PENDING = 3
   const SOURCE_WIDTH = 1280
   const SOURCE_HEIGHT = 720
 
@@ -13,16 +15,18 @@
   let ctx: any = null
   let ScrollTriggerInstance: any = null
 
-  const images: HTMLImageElement[] = new Array(TOTAL_FRAMES)
+  const images = new Map<number, HTMLImageElement>()
+  const failedFrames = new Set<number>()
+  const pendingFrames = new Set<number>()
   const playhead = { frame: 1 }
 
   let currentFrameIndex = 1
-  let lastRenderedIndex = 1
+  let lastRenderedImage: HTMLImageElement | null = null
+  let hasDrawnFrame = false
   let progress = 0
   let mistOpacity = 1
   let isScrolling = false
   let scrollTimeout: ReturnType<typeof setTimeout> | null = null
-  let refreshTimeout: ReturnType<typeof setTimeout> | null = null
   let isDestroyed = false
 
   const getFrameUrl = (index: number) => {
@@ -46,76 +50,73 @@
     ctx2d.drawImage(image, offsetX, offsetY, renderW, renderH)
   }
 
-  const getAvailableFrame = (index: number): HTMLImageElement | null => {
-    const exact = images[index - 1]
-    if (exact && exact.complete && exact.naturalWidth > 0) return exact
-    if (lastRenderedIndex >= 1 && images[lastRenderedIndex - 1]?.complete) {
-      return images[lastRenderedIndex - 1]
-    }
-    for (let delta = 1; delta <= 50; delta++) {
-      const prev = index - 1 - delta
-      if (prev >= 0 && images[prev]?.complete && images[prev].naturalWidth > 0) {
-        return images[prev]
-      }
-      const next = index - 1 + delta
-      if (next < TOTAL_FRAMES && images[next]?.complete && images[next].naturalWidth > 0) {
-        return images[next]
-      }
-    }
-    return null
-  }
+  const isReady = (img: HTMLImageElement | undefined): img is HTMLImageElement =>
+    !!img?.complete && img.naturalWidth > 0
 
-  const loadImage = (index: number) => {
-    if (index < 1 || index > TOTAL_FRAMES || images[index - 1]) return
-    const img = new Image()
-    img.src = getFrameUrl(index)
-    img.onload = () => {
-      images[index - 1] = img
-      if (index === currentFrameIndex) {
+  const bufferFrames = () => {
+    const start = Math.max(2, currentFrameIndex - KEEP_BEHIND)
+    const end = Math.min(TOTAL_FRAMES, currentFrameIndex + BUFFER_AHEAD)
+
+    for (const index of images.keys()) {
+      if ((index < start || index > end) && !pendingFrames.has(index)) images.delete(index)
+    }
+    if (currentFrameIndex === 1) return
+
+    for (let index = currentFrameIndex; index <= end && pendingFrames.size < MAX_PENDING; index++) {
+      if (images.has(index) || failedFrames.has(index)) continue
+
+      const img = new Image()
+      const finish = () => {
+        if (isDestroyed) return
+        pendingFrames.delete(index)
         renderCanvas(currentFrameIndex)
       }
-    }
-  }
-
-  const bufferFramesAhead = (frameIndex: number) => {
-    if (isDestroyed) return
-    const max = Math.min(frameIndex + BUFFER_AHEAD, TOTAL_FRAMES)
-    for (let i = frameIndex; i <= max; i++) {
-      if (!images[i - 1]) {
-        loadImage(i)
+      img.onload = finish
+      img.onerror = () => {
+        failedFrames.add(index)
+        images.delete(index)
+        finish()
       }
+      pendingFrames.add(index)
+      images.set(index, img)
+      img.src = getFrameUrl(index)
     }
   }
 
-  const renderCanvas = (target: number) => {
-    currentFrameIndex = Math.min(TOTAL_FRAMES, Math.max(1, target))
+  const renderCanvas = (target: number, forceDraw = false) => {
+    const nextFrame = Math.min(TOTAL_FRAMES, Math.max(1, target))
+    const frameChanged = nextFrame !== currentFrameIndex
+    currentFrameIndex = nextFrame
     progress = (currentFrameIndex - 1) / (TOTAL_FRAMES - 1)
     mistOpacity = Math.max(0, 1 - progress / 0.04)
 
-    if (progress > 0) {
-      bufferFramesAhead(currentFrameIndex)
-      isScrolling = true
+    if (frameChanged) {
+      isScrolling = progress > 0
       if (scrollTimeout) clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false
-      }, 250)
-    } else {
-      isScrolling = false
-      if (scrollTimeout) clearTimeout(scrollTimeout)
+      if (isScrolling) scrollTimeout = setTimeout(() => { isScrolling = false }, 250)
     }
 
-    const img = getAvailableFrame(currentFrameIndex)
-    if (img && img.complete && img.naturalWidth > 0) {
-      drawCover(img)
-      lastRenderedIndex = currentFrameIndex
-    } else {
-      loadImage(currentFrameIndex)
+    bufferFrames()
+    if (currentFrameIndex === 1) {
+      hasDrawnFrame = false
+      lastRenderedImage = null
+      return
+    }
+
+    const exact = images.get(currentFrameIndex)
+    const next = images.get(currentFrameIndex + 1)
+    const prev = images.get(currentFrameIndex - 1)
+    const image = isReady(exact) ? exact : lastRenderedImage ?? (isReady(prev) ? prev : isReady(next) ? next : null)
+    if (image && (forceDraw || image !== lastRenderedImage)) {
+      drawCover(image)
+      lastRenderedImage = image
+      hasDrawnFrame = true
     }
   }
 
   const updateCanvasDimensions = () => {
     if (!canvasEl || !ctx2d) return
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
     const w = window.innerWidth
     const h = window.innerHeight
     canvasEl.width = w * dpr
@@ -130,7 +131,7 @@
 
   const handleResize = () => {
     updateCanvasDimensions()
-    renderCanvas(currentFrameIndex)
+    renderCanvas(currentFrameIndex, true)
     ScrollTriggerInstance?.refresh()
   }
 
@@ -142,9 +143,10 @@
   }
 
   onMount(async () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     ctx2d = canvasEl.getContext('2d', { alpha: false })
+    if (!ctx2d) return
     updateCanvasDimensions()
-    loadImage(1)
 
     const [gsapMod, stMod] = await Promise.all([
       import('gsap'),
@@ -195,7 +197,12 @@
       window.removeEventListener('scroll', handleTopScroll)
     }
     if (scrollTimeout) clearTimeout(scrollTimeout)
-    if (refreshTimeout) clearTimeout(refreshTimeout)
+    for (const img of images.values()) {
+      img.onload = null
+      img.onerror = null
+    }
+    images.clear()
+    pendingFrames.clear()
   })
 
   $: heroOpacity = currentFrameIndex <= 80 ? 1 : currentFrameIndex >= 120 ? 0 : (120 - currentFrameIndex) / 40
@@ -223,6 +230,7 @@
   <canvas
     bind:this={canvasEl}
     class="absolute inset-0 w-full h-full -z-20 pointer-events-none block"
+    class:invisible={!hasDrawnFrame}
   ></canvas>
 
   <div class="absolute inset-0 -z-15 pointer-events-none bg-black/5 dark:bg-black/40 transition-colors duration-300"></div>

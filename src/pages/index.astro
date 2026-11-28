@@ -23,6 +23,11 @@ const currentPath = Astro.url.pathname
   customMarquee={true}
   hideToasts={false}
 >
+  <Fragment slot="head">
+    <link rel="preload" as="image" href="/frames/frame_0001_sm.webp" media="(max-width: 768px)" fetchpriority="high" type="image/webp" />
+    <link rel="preload" as="image" href="/frames/frame_0001.webp" media="(width > 768px)" fetchpriority="high" type="image/webp" />
+  </Fragment>
+
   <div
     class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
   >

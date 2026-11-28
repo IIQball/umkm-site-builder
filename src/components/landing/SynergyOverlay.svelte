@@ -3,73 +3,47 @@
   import { STAGES } from './synergy.data'
 
   export let activeStage = 0
+  $: stage = STAGES[activeStage]
 </script>
 
-<div class="relative z-10 pointer-events-none w-full h-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center">
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center w-full">
-    <div class="col-span-12 lg:col-span-5 pointer-events-none">
-      <div class="relative min-h-[120px] sm:min-h-[140px] flex items-center">
-        {#each STAGES as stage, idx}
-          <div
-            class="absolute inset-0 flex flex-col justify-center transition-all duration-500 ease-out max-w-sm sm:max-w-md {activeStage === idx
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-4 pointer-events-none'}"
-          >
-            <!-- Scrim Atmosferik Lembut (Background Asap) -->
-            <div
-              class="absolute -inset-10 -z-10 bg-gradient-to-tr from-white/90 via-white/50 to-transparent dark:from-black/95 dark:via-black/60 dark:to-transparent blur-2xl rounded-3xl pointer-events-none"
-            ></div>
+<div class="mx-auto grid w-full max-w-7xl items-center gap-8 px-6 sm:px-8 lg:grid-cols-12 lg:gap-12 lg:px-12">
+  <div class="lg:col-span-5">
+    <h2 id="synergy-title" class="heading-section text-main">{STAGES[0].headline}</h2>
+    <p class="desc-section mt-3 text-secondary">{STAGES[0].subtitle}</p>
+  </div>
 
-            <h2 class="heading-section text-main drop-shadow-sm dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-              {stage.headline}
-            </h2>
-            <p class="desc-section text-secondary mt-3 drop-shadow-sm dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-              {stage.subtitle}
-            </p>
-          </div>
-        {/each}
-      </div>
+  <div class="lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+    <slot />
+  </div>
+
+  <div class="lg:col-span-5">
+    <div role="group" aria-label="Bagian ekosistem" class="mb-4 flex flex-wrap gap-2">
+      {#each STAGES as option, index (option.id)}
+        <button
+          type="button"
+          aria-pressed={activeStage === index}
+          class="rounded-full border px-3 py-1.5 text-sm font-medium {activeStage === index
+            ? 'border-main bg-main text-canvas'
+            : 'border-border bg-canvas text-secondary hover:text-main'}"
+          on:click={() => { activeStage = index }}
+        >
+          {option.roleLabel}
+        </button>
+      {/each}
     </div>
-
-    <div class="hidden lg:block lg:col-span-3 pointer-events-none"></div>
-
-    <div class="col-span-12 lg:col-span-4 flex justify-start lg:justify-end">
-      <div class="relative w-full max-w-xs min-h-[195px] sm:min-h-[205px]">
-        {#each STAGES as stage, idx}
-          <div
-            class="bg-canvas/80 dark:bg-canvas/90 backdrop-blur-md border border-border/80 dark:border-white/10 p-5 rounded-2xl max-w-xs shadow-xl pointer-events-auto transition-all duration-500 ease-out absolute inset-0 flex flex-col justify-between {activeStage === idx
-              ? 'opacity-100 translate-y-0 scale-100'
-              : 'opacity-0 translate-y-3 scale-95 pointer-events-none'}"
-          >
-            <div>
-              <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-border/80 dark:border-white/10">
-                <span class="label-caps text-muted">
-                  {stage.roleLabel}
-                </span>
-                <div class="flex items-center gap-1">
-                  {#each STAGES as _, dotIdx}
-                    <span
-                      class="h-1 rounded-full transition-all duration-300 {activeStage === dotIdx
-                        ? 'w-3.5 bg-orange'
-                        : 'w-1 bg-border'}"
-                    ></span>
-                  {/each}
-                </div>
-              </div>
-              <p class="body-sm text-secondary">
-                {stage.cardDesc}
-              </p>
-            </div>
-            <a
-              href="#contact"
-              class="px-3 py-1.5 bg-main text-canvas dark:bg-white dark:text-main rounded-full mt-4 font-heading font-medium text-xs-dense w-fit transition-transform hover:scale-105 inline-flex items-center gap-1.5 group cursor-pointer shadow-xs"
-            >
-              <span>Eksplorasi</span>
-              <ArrowRight size={13} class="transition-transform duration-200 group-hover:translate-x-0.5" />
-            </a>
-          </div>
-        {/each}
-      </div>
+    <div class="max-w-md rounded-2xl border border-border bg-canvas p-5">
+      <h3 class="font-heading text-lg font-semibold text-main">{activeStage === 0 ? stage.roleLabel : stage.headline}</h3>
+      {#if activeStage !== 0}
+        <p class="body-sm mt-2 text-secondary">{stage.subtitle}</p>
+      {/if}
+      <p class="body-sm mt-2 text-secondary">{stage.cardDesc}</p>
+      <a
+        href="#contact"
+        class="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-main px-3 py-1.5 font-heading text-xs-dense font-medium text-canvas"
+      >
+        <span>Eksplorasi</span>
+        <ArrowRight size={13} />
+      </a>
     </div>
   </div>
 </div>

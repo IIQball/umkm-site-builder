@@ -3,7 +3,15 @@
   "name": "umkm-web-builder",
   "main": "./src/worker.ts",
   "keep_vars": true,
-  "assets": { "run_worker_first": true },
+  "assets": {
+    "run_worker_first": [
+      "/*",
+      "!/frames/frame_*.webp",
+      "!/assets/3d/banyuwangi_map.glb",
+      "!/assets/3d/banyuwangi_map.webp",
+      "!/assets/landing/collaboration.mp4"
+    ]
+  },
   "durable_objects": { "bindings": [{ "name": "TURNSTILE_CHALLENGES", "class_name": "TurnstileChallenge" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TurnstileChallenge"] }],
   "compatibility_date": "2026-09-03",

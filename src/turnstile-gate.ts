@@ -5,10 +5,16 @@ const ACTION = 'page_open';
 const COOKIE = '__Host-pinoka-challenge-';
 const MAX_CHALLENGES = 8;
 const TTL = 300;
+const DNS_HOSTNAME = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const noStore = { 'Cache-Control': 'private, no-store, max-age=0', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' };
 
 type Stub = { fetch(request: Request): Promise<Response> };
-type Env = { TURNSTILE_SITE_KEY?: string; TURNSTILE_SECRET_KEY?: string; TURNSTILE_CHALLENGES?: { idFromName(name: string): unknown; get(id: unknown): Stub } };
+type Env = {
+  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET_KEY?: string;
+  TURNSTILE_CHALLENGES?: { idFromName(name: string): unknown; get(id: unknown): Stub };
+  TURNSTILE_MANAGED_CHALLENGE_HOST?: string;
+};
 
 type State = { target: string; hostname: string; expires: number; status: 'verified' | 'consumed' };
 type Storage = { get<T>(key: string): Promise<T | undefined>; put(key: string, value: unknown): Promise<void>; setAlarm(time: number): Promise<void>; deleteAll(): Promise<void>; transaction<T>(fn: (txn: Storage) => Promise<T>): Promise<T> };
@@ -75,6 +81,13 @@ function bypass(path: string) {
   }
   return ['/robots.txt', '/sitemap.xml', '/llms.txt', '/favicon.svg', '/icon-512x512.svg', '/icon-desktop-512.svg', '/apple-touch-icon.svg', '/og-image.png', '/site.webmanifest'].includes(path);
 }
+function usesManagedChallenge(url: URL, configuredHost?: string) {
+  if (typeof configuredHost !== 'string') return false;
+  const hostname = configuredHost.trim().toLowerCase();
+  return url.protocol === 'https:' && hostname === url.hostname &&
+    hostname.length <= 253 && DNS_HOSTNAME.test(hostname) &&
+    hostname !== 'workers.dev' && !hostname.endsWith('.workers.dev');
+}
 function cookies(request: Request): { id: string; value: string }[] {
   return (request.headers.get('Cookie') || '').split(';').map(part => part.trim())
     .flatMap(part => {
@@ -92,6 +105,7 @@ function shell(sitekey: string, id: string, nonce: string) {
 
 export async function gate(request: Request, env: Env, next: (request: Request) => Promise<Response>): Promise<Response> {
   const url = new URL(request.url);
+  if (usesManagedChallenge(url, env.TURNSTILE_MANAGED_CHALLENGE_HOST)) return next(request);
   const path = url.pathname;
   if (path === CLEANUP_PATH && request.method === 'GET') return new Response("{const href=location.href;const i=href.indexOf('#');const base=i<0?href:href.slice(0,i);history.replaceState(history.state,'',base.replace(/[?&]__pinoka_continue=[a-f0-9]{64}$/,'')+(i<0?'':href.slice(i)))}", { headers: { ...noStore, 'Content-Type': 'application/javascript; charset=utf-8' } });
   if (path !== VERIFY_PATH && bypass(path)) return next(request);

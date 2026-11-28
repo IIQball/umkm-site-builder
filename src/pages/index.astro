@@ -28,7 +28,7 @@ const currentPath = Astro.url.pathname
   >
     <!-- Fixed Global Architectural Top Marquee & Capsule Navbar -->
     <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none hero-enter-nav flex flex-col">
-      <LandingMarquee client:load />
+      {import.meta.env.DEV && <LandingMarquee client:load />}
       <PublicNavbar
         client:load
         user={user

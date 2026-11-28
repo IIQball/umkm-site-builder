@@ -34,6 +34,7 @@ const {
 } = Astro.props
 
 const currentUserEmail = Astro.locals.user?.email ?? ''
+const showDevelopmentMarquee = import.meta.env.DEV && !customMarquee
 
 const siteUrl = Astro.url.origin
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href
@@ -209,10 +210,10 @@ const ogImageUrl = new URL(image, siteUrl).href
     <SmoothScroll client:load />
     {!hideToasts && <ToastContainer client:idle />}
     {!hideToasts && <RateLimitAlert client:idle />}
-    {hideNavbar && !customMarquee && <LandingMarquee client:load />}
+    {hideNavbar && showDevelopmentMarquee && <LandingMarquee client:load />}
     {!hideNavbar && (
       <div class="sticky top-0 inset-x-0 z-50 w-full flex flex-col">
-        {!customMarquee && <LandingMarquee client:load />}
+        {showDevelopmentMarquee && <LandingMarquee client:load />}
         <Navbar />
       </div>
     )}

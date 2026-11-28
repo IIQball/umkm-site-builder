@@ -24,6 +24,35 @@ function id(cookie: string) { return cookie.split('=')[0].slice('__Host-pinoka-c
 function continuation(url: string, cookie: string) { return url + (url.includes('?') ? '&' : '?') + '__pinoka_continue=' + id(cookie); }
 afterEach(() => vi.unstubAllGlobals());
 describe('Turnstile page gate', () => {
+  it('lets the configured HTTPS hostname rely on its Managed Challenge rule', async () => {
+    const { next } = setup();
+    const env = { TURNSTILE_MANAGED_CHALLENGE_HOST: ' Pinoka.My.ID ' };
+
+    for (const path of ['/', '/produk', '/__pinoka/verify']) {
+      const request = new Request('https://pinoka.my.id' + path);
+      expect(await (await gate(request, env, next)).text()).toBe('APP');
+      expect(next).toHaveBeenLastCalledWith(request);
+    }
+  });
+  it.each([
+    ['https://pinoka.my.id/', undefined],
+    ['https://pinoka.my.id/', ''],
+    ['https://pinoka.my.id/', '*.my.id'],
+    ['https://pinoka.my.id/', 'https://pinoka.my.id'],
+    ['https://pinoka.my.id/', 'pinoka.my.id/'],
+    ['https://pinoka..my.id/', 'pinoka..my.id'],
+    ['http://pinoka.my.id/', 'pinoka.my.id'],
+    ['https://shop.pinoka.my.id/', 'pinoka.my.id'],
+    ['https://pinoka.my.id.example.com/', 'pinoka.my.id'],
+    ['https://pinoka.pinokaofficial.workers.dev/', 'pinoka.pinokaofficial.workers.dev'],
+    ['https://preview-pinoka.pinokaofficial.workers.dev/', 'preview-pinoka.pinokaofficial.workers.dev'],
+  ])('requires the existing gate for %s with Managed Challenge host %s', async (url, host) => {
+    const { next } = setup();
+    const result = await gate(new Request(url), { TURNSTILE_MANAGED_CHALLENGE_HOST: host }, next);
+
+    expect(result.status).toBe(503);
+    expect(next).not.toHaveBeenCalled();
+  });
   it('withholds all page routes before Astro and passes explicit protocols and assets', async () => {
     const { request, next } = setup();
     for (const path of ['/', '/dashboard', '/storefront/shop?x=1', '/some.html', '/images/page.html', '/missing', '/api%2Fauth']) {

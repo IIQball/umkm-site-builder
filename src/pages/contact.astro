@@ -25,7 +25,7 @@ const contactEmail = settings.contactEmail || ''
   <div class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200 min-h-screen flex flex-col">
     <!-- Fixed Global Architectural Top Marquee & Capsule Navbar -->
     <div class="fixed top-0 inset-x-0 z-50 w-full pointer-events-none flex flex-col">
-      <LandingMarquee client:load />
+      {import.meta.env.DEV && <LandingMarquee client:load />}
       <PublicNavbar
         client:idle
         user={user

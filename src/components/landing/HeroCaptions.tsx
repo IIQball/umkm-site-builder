@@ -1,5 +1,5 @@
 export interface SceneCaption {
-  id: 'collaboration' | 'decision' | 'breakthrough' | 'showcase' | 'map'
+  id: 'decision' | 'breakthrough' | 'showcase' | 'map'
   headline: string
   subtext: string
   frameStart: number
@@ -8,16 +8,12 @@ export interface SceneCaption {
   frameEnd: number
 }
 
+export const COLLABORATION_CAPTION = {
+  headline: 'Kolaborasi Nyata<br />di Titik Temu',
+  subtext: 'Menyatukan desainer digital dengan wirausaha lokal untuk membangun nilai baru.',
+} as const
+
 export const HERO_SCENES: readonly SceneCaption[] = [
-  {
-    id: 'collaboration',
-    headline: 'Kolaborasi Nyata<br />di Titik Temu',
-    subtext: 'Menyatukan desainer digital dengan wirausaha lokal untuk membangun nilai baru.',
-    frameStart: 125,
-    fadeInEnd: 145,
-    fadeOutStart: 195,
-    frameEnd: 215
-  },
   {
     id: 'decision',
     headline: 'Satu Aksi<br />Menuju Ruang Baru',

@@ -1,9 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import HeroCaptions from './HeroCaptions.svelte'
+  import { HERO_SCENES } from './HeroCaptions'
 
-  const TOTAL_FRAMES = 839
-  const BUFFER_AHEAD = 15
+  const FIRST_FRAME = 216
+  const LAST_FRAME = 839
+  const BUFFER_AHEAD = 3
+  const KEEP_BEHIND = 3
+  const MAX_PENDING = 3
   const SOURCE_WIDTH = 1280
   const SOURCE_HEIGHT = 720
 
@@ -13,16 +17,14 @@
   let ctx: any = null
   let ScrollTriggerInstance: any = null
 
-  const images: HTMLImageElement[] = new Array(TOTAL_FRAMES)
-  const playhead = { frame: 1 }
+  const images = new Map<number, HTMLImageElement>()
+  const failedFrames = new Set<number>()
+  const pendingFrames = new Set<number>()
+  const playhead = { frame: FIRST_FRAME }
 
-  let currentFrameIndex = 1
-  let lastRenderedIndex = 1
-  let progress = 0
-  let mistOpacity = 1
-  let isScrolling = false
-  let scrollTimeout: ReturnType<typeof setTimeout> | null = null
-  let refreshTimeout: ReturnType<typeof setTimeout> | null = null
+  let currentFrameIndex = FIRST_FRAME
+  let lastRenderedImage: HTMLImageElement | null = null
+  let hasDrawnFrame = false
   let isDestroyed = false
 
   const getFrameUrl = (index: number) => {
@@ -46,76 +48,63 @@
     ctx2d.drawImage(image, offsetX, offsetY, renderW, renderH)
   }
 
-  const getAvailableFrame = (index: number): HTMLImageElement | null => {
-    const exact = images[index - 1]
-    if (exact && exact.complete && exact.naturalWidth > 0) return exact
-    if (lastRenderedIndex >= 1 && images[lastRenderedIndex - 1]?.complete) {
-      return images[lastRenderedIndex - 1]
-    }
-    for (let delta = 1; delta <= 50; delta++) {
-      const prev = index - 1 - delta
-      if (prev >= 0 && images[prev]?.complete && images[prev].naturalWidth > 0) {
-        return images[prev]
-      }
-      const next = index - 1 + delta
-      if (next < TOTAL_FRAMES && images[next]?.complete && images[next].naturalWidth > 0) {
-        return images[next]
-      }
-    }
-    return null
-  }
+  const isReady = (img: HTMLImageElement | undefined): img is HTMLImageElement =>
+    !!img?.complete && img.naturalWidth > 0
 
-  const loadImage = (index: number) => {
-    if (index < 1 || index > TOTAL_FRAMES || images[index - 1]) return
-    const img = new Image()
-    img.src = getFrameUrl(index)
-    img.onload = () => {
-      images[index - 1] = img
-      if (index === currentFrameIndex) {
+  const bufferFrames = () => {
+    const start = Math.max(FIRST_FRAME + 1, currentFrameIndex - KEEP_BEHIND)
+    const end = Math.min(LAST_FRAME, currentFrameIndex + BUFFER_AHEAD)
+
+    for (const index of images.keys()) {
+      if ((index < start || index > end) && !pendingFrames.has(index)) images.delete(index)
+    }
+    if (currentFrameIndex === FIRST_FRAME) return
+
+    for (let index = currentFrameIndex; index <= end && pendingFrames.size < MAX_PENDING; index++) {
+      if (images.has(index) || failedFrames.has(index)) continue
+
+      const img = new Image()
+      const finish = () => {
+        if (isDestroyed) return
+        pendingFrames.delete(index)
         renderCanvas(currentFrameIndex)
       }
-    }
-  }
-
-  const bufferFramesAhead = (frameIndex: number) => {
-    if (isDestroyed) return
-    const max = Math.min(frameIndex + BUFFER_AHEAD, TOTAL_FRAMES)
-    for (let i = frameIndex; i <= max; i++) {
-      if (!images[i - 1]) {
-        loadImage(i)
+      img.onload = finish
+      img.onerror = () => {
+        failedFrames.add(index)
+        images.delete(index)
+        finish()
       }
+      pendingFrames.add(index)
+      images.set(index, img)
+      img.src = getFrameUrl(index)
     }
   }
 
-  const renderCanvas = (target: number) => {
-    currentFrameIndex = Math.min(TOTAL_FRAMES, Math.max(1, target))
-    progress = (currentFrameIndex - 1) / (TOTAL_FRAMES - 1)
-    mistOpacity = Math.max(0, 1 - progress / 0.04)
+  const renderCanvas = (target: number, forceDraw = false) => {
+    currentFrameIndex = Math.min(LAST_FRAME, Math.max(FIRST_FRAME, target))
 
-    if (progress > 0) {
-      bufferFramesAhead(currentFrameIndex)
-      isScrolling = true
-      if (scrollTimeout) clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false
-      }, 250)
-    } else {
-      isScrolling = false
-      if (scrollTimeout) clearTimeout(scrollTimeout)
+    bufferFrames()
+    if (currentFrameIndex === FIRST_FRAME) {
+      hasDrawnFrame = false
+      lastRenderedImage = null
+      return
     }
 
-    const img = getAvailableFrame(currentFrameIndex)
-    if (img && img.complete && img.naturalWidth > 0) {
-      drawCover(img)
-      lastRenderedIndex = currentFrameIndex
-    } else {
-      loadImage(currentFrameIndex)
+    const exact = images.get(currentFrameIndex)
+    const next = images.get(currentFrameIndex + 1)
+    const prev = images.get(currentFrameIndex - 1)
+    const image = isReady(exact) ? exact : lastRenderedImage ?? (isReady(prev) ? prev : isReady(next) ? next : null)
+    if (image && (forceDraw || image !== lastRenderedImage)) {
+      drawCover(image)
+      lastRenderedImage = image
+      hasDrawnFrame = true
     }
   }
 
   const updateCanvasDimensions = () => {
     if (!canvasEl || !ctx2d) return
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
     const w = window.innerWidth
     const h = window.innerHeight
     canvasEl.width = w * dpr
@@ -130,21 +119,15 @@
 
   const handleResize = () => {
     updateCanvasDimensions()
-    renderCanvas(currentFrameIndex)
+    renderCanvas(currentFrameIndex, true)
     ScrollTriggerInstance?.refresh()
   }
 
-  const handleTopScroll = () => {
-    if (window.scrollY <= 10 && currentFrameIndex !== 1) {
-      playhead.frame = 1
-      renderCanvas(1)
-    }
-  }
-
   onMount(async () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     ctx2d = canvasEl.getContext('2d', { alpha: false })
+    if (!ctx2d) return
     updateCanvasDimensions()
-    loadImage(1)
 
     const [gsapMod, stMod] = await Promise.all([
       import('gsap'),
@@ -157,25 +140,20 @@
 
     ctx = gsap.context(() => {
       gsap.to(playhead, {
-        frame: TOTAL_FRAMES,
+        frame: LAST_FRAME,
         ease: 'none',
+        onUpdate: () => {
+          const frame = Math.round(playhead.frame)
+          if (frame !== currentFrameIndex) renderCanvas(frame)
+        },
         scrollTrigger: {
           trigger: heroContainerEl,
           start: 'top top',
-          end: '+=5000',
+          end: '+=3700',
           pin: true,
           pinSpacing: true,
           scrub: 0.5,
-          anticipatePin: 1,
-          onUpdate: (self: { progress: number }) => {
-            if (self.progress >= 1) {
-              renderCanvas(TOTAL_FRAMES)
-            } else if (self.progress <= 0) {
-              renderCanvas(1)
-            } else {
-              renderCanvas(Math.round(playhead.frame))
-            }
-          }
+          anticipatePin: 1
         }
       })
     }, heroContainerEl)
@@ -184,7 +162,6 @@
     ScrollTriggerInstance.refresh()
 
     window.addEventListener('resize', handleResize, { passive: true })
-    window.addEventListener('scroll', handleTopScroll, { passive: true })
   })
 
   onDestroy(() => {
@@ -192,65 +169,46 @@
     ctx?.revert()
     if (typeof window !== 'undefined') {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('scroll', handleTopScroll)
     }
-    if (scrollTimeout) clearTimeout(scrollTimeout)
-    if (refreshTimeout) clearTimeout(refreshTimeout)
+    for (const img of images.values()) {
+      img.onload = null
+      img.onerror = null
+    }
+    images.clear()
+    pendingFrames.clear()
   })
-
-  $: heroOpacity = currentFrameIndex <= 80 ? 1 : currentFrameIndex >= 120 ? 0 : (120 - currentFrameIndex) / 40
-  $: isNavbarVisible = progress === 0 || !isScrolling
 </script>
 
 <div
   bind:this={heroContainerEl}
-  id="hero-scroll-track"
-  class="relative overflow-hidden w-full h-[100dvh] min-h-[100dvh] z-10 flex flex-col justify-between"
+  id="hero-comic-sequence"
+  class="relative isolate overflow-hidden w-full h-[100dvh] bg-canvas motion-reduce:hidden"
 >
-  <picture class="absolute inset-0 w-full h-full -z-30 pointer-events-none block">
-    <source media="(max-width: 768px)" srcset="/frames/frame_0001_sm.webp" type="image/webp" />
-    <img
-      src="/frames/frame_0001.webp"
-      alt="Pinoka Visual Hero"
-      class="w-full h-full object-cover pointer-events-none block"
-      fetchpriority="high"
-      loading="eager"
-      width="1280"
-      height="720"
-    />
-  </picture>
+  <img
+    src="/frames/frame_0216.webp"
+    alt=""
+    class="absolute inset-0 w-full h-full -z-30 object-cover pointer-events-none"
+    loading="lazy"
+    width="1280"
+    height="720"
+  />
 
   <canvas
     bind:this={canvasEl}
+    aria-hidden="true"
     class="absolute inset-0 w-full h-full -z-20 pointer-events-none block"
+    class:invisible={!hasDrawnFrame}
   ></canvas>
 
   <div class="absolute inset-0 -z-15 pointer-events-none bg-black/5 dark:bg-black/40 transition-colors duration-300"></div>
-
-  <div
-    class="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-white/30 via-white/10 to-transparent dark:from-black/40 dark:via-black/15 dark:to-transparent transition-opacity duration-150"
-    style="opacity: {mistOpacity}"
-  ></div>
-
-  {#if $$slots.navbar}
-    <div
-      class="fixed top-0 inset-x-0 z-50 transition-all duration-300 ease-out {isNavbarVisible
-        ? 'translate-y-0 opacity-100 pointer-events-auto'
-        : '-translate-y-full opacity-0 pointer-events-none'}"
-    >
-      <slot name="navbar" />
-    </div>
-  {/if}
-
-  <div
-    class="relative z-20 flex-1 flex flex-col justify-between w-full transition-opacity duration-300 ease-out"
-    style:opacity="{heroOpacity.toFixed(3)}"
-    style:pointer-events="{heroOpacity > 0.1 ? 'auto' : 'none'}"
-  >
-    <slot name="hero">
-      <slot />
-    </slot>
-  </div>
-
   <HeroCaptions currentFrame={currentFrameIndex} />
+</div>
+
+<div class="hidden max-w-7xl mx-auto px-6 py-12 gap-8 sm:grid-cols-2 sm:px-12 motion-reduce:grid">
+  {#each HERO_SCENES as scene (scene.id)}
+    <article>
+      <h2 class="heading-section text-main">{@html scene.headline}</h2>
+      <p class="desc-section text-main mt-3">{scene.subtext}</p>
+    </article>
+  {/each}
 </div>

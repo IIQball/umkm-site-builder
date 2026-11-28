@@ -1,247 +1,128 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte'
+  import { onMount } from 'svelte'
   import * as THREE from 'three'
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-  import gsap from 'gsap'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
-  import { MODEL_PATH, STAGES, BEFORE_STAGE } from './synergy.data'
-  import { setupSceneLights, createCameraTimeline, disposeThreeScene } from './synergy3d.helpers'
+  import { MODEL_PATH, STAGES } from './synergy.data'
+  import { setupSceneLights, disposeThreeScene } from './synergy3d.helpers'
 
-  export let containerElement: HTMLElement
   export let activeStage = 0
+  export let onReady: () => void
+  export let onFailure: () => void
 
   let canvasElement: HTMLCanvasElement
-  let isLoaded = false
-  let renderer: THREE.WebGLRenderer | null = null
-  let scene: THREE.Scene | null = null
-  let camera: THREE.PerspectiveCamera | null = null
-  let animId = 0
-  let tl: gsap.core.Timeline | null = null
-  let observer: IntersectionObserver | null = null
-
-  const pinNodes: Record<string, THREE.Object3D | null> = {
-    Pin_Kopi: null,
-    Pin_Batik: null,
-    Pin_Anyaman: null
-  }
-
-  const cameraState = {
-    x: BEFORE_STAGE.camera.x,
-    y: BEFORE_STAGE.camera.y,
-    z: BEFORE_STAGE.camera.z,
-    lookX: BEFORE_STAGE.lookAt.x,
-    lookY: BEFORE_STAGE.lookAt.y,
-    lookZ: BEFORE_STAGE.lookAt.z
-  }
-
-  let mouseX = 0
-  let mouseY = 0
-  let targetMouseX = 0
-  let targetMouseY = 0
-
-  function handleMouseMove(e: MouseEvent) {
-    const halfW = window.innerWidth / 2
-    const halfH = window.innerHeight / 2
-    targetMouseX = (e.clientX - halfW) / halfW
-    targetMouseY = (e.clientY - halfH) / halfH
-  }
-
-  function handleMouseLeave() {
-    targetMouseX = 0
-    targetMouseY = 0
-  }
-
-  function handleResize() {
-    if (!containerElement || !renderer || !camera) return
-    const width = containerElement.clientWidth
-    const height = containerElement.clientHeight
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  }
+  let queueDraw: ((stage: number) => void) | undefined
+  $: queueDraw?.(activeStage)
 
   onMount(() => {
-    gsap.registerPlugin(ScrollTrigger)
+    const controller = new AbortController()
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 100)
+    let renderer: THREE.WebGLRenderer | undefined
+    let sizeObserver: ResizeObserver | undefined
+    let paint = 0
 
-    const width = containerElement.clientWidth || window.innerWidth
-    const height = containerElement.clientHeight || window.innerHeight
-
-    scene = new THREE.Scene()
-    camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 100)
-    camera.position.set(cameraState.x, cameraState.y, cameraState.z)
-    camera.lookAt(cameraState.lookX, cameraState.lookY, cameraState.lookZ)
-
-    renderer = new THREE.WebGLRenderer({
-      canvas: canvasElement,
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance'
-    })
-    renderer.setClearColor(0x000000, 0)
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.3
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    setupSceneLights(scene)
-
-    const loader = new GLTFLoader()
-    loader.load(
-      MODEL_PATH,
-      (gltf) => {
-        if (!scene) return
-        scene.add(gltf.scene)
-
-        gltf.scene.traverse((child) => {
-          if (child.name === 'Banyuwangi_Map' && child instanceof THREE.Mesh) {
-            const mat = Array.isArray(child.material) ? child.material[0] : child.material
-            if (mat && 'color' in mat) {
-              mat.color.setHex(0x16181d)
-              mat.roughness = 0.4
-              mat.metalness = 0.3
-              mat.needsUpdate = true
-            }
-
-            const edgesGeom = new THREE.EdgesGeometry(child.geometry, 25)
-            const edgeMat = new THREE.LineBasicMaterial({
-              color: 0xFC018B,
-              transparent: true,
-              opacity: 0.65
-            })
-            const edgeLines = new THREE.LineSegments(edgesGeom, edgeMat)
-            edgeLines.position.y += 0.00005
-            child.add(edgeLines)
-          }
-        })
-
-        const pinNames = ['Pin_Kopi', 'Pin_Batik', 'Pin_Anyaman']
-        pinNames.forEach((name) => {
-          const pin = gltf.scene.getObjectByName(name)
-          if (pin) {
-            pinNodes[name] = pin
-            pin.scale.set(0.65, 0.65, 0.65)
-            const pinLight = new THREE.PointLight(0xFC018B, 2.0, 0.03)
-            pinLight.position.set(0, 0.004, 0)
-            pin.add(pinLight)
-          }
-        })
-
-        isLoaded = true
-        handleResize()
-        ScrollTrigger.refresh()
-      },
-      undefined,
-      (err) => {
-        console.error('Failed to load 3D model', err)
-      }
-    )
-
-    tl = createCameraTimeline(containerElement, cameraState, (stage) => {
-      activeStage = stage
-    })
-
-    const clock = new THREE.Clock()
-    let isVisible = true
-
-    if (typeof IntersectionObserver !== 'undefined' && containerElement) {
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          isVisible = entry.isIntersecting
-        },
-        { rootMargin: '400px 0px' }
-      )
-      observer.observe(containerElement)
+    const fail = () => {
+      if (!controller.signal.aborted) onFailure()
     }
 
-    function animate() {
-      animId = requestAnimationFrame(animate)
-      if (!isVisible || !renderer || !scene || !camera) return
-
-      const elapsed = clock.getElapsedTime()
-      mouseX += (targetMouseX - mouseX) * 0.05
-      mouseY += (targetMouseY - mouseY) * 0.05
-
-      const floatY = Math.sin(elapsed * 1.6) * 0.0004
-      const floatX = Math.cos(elapsed * 1.2) * 0.0003
-      const offsetX = mouseX * 0.0032 + floatX
-      const offsetY = mouseY * 0.0022 + floatY
-
-      camera.position.set(
-        cameraState.x + offsetX,
-        cameraState.y - offsetY,
-        cameraState.z
-      )
-      camera.lookAt(
-        cameraState.lookX + offsetX * 0.25,
-        cameraState.lookY - offsetY * 0.25,
-        cameraState.lookZ
-      )
-
-      const activePinName = STAGES[activeStage]?.targetPin
-      for (const [name, pin] of Object.entries(pinNodes)) {
-        if (!pin) continue
-        const isActive = activeStage === 0 || name === activePinName
-        const pulseBase = activeStage === 0 ? 0.72 : 0.82
-        const pulseSpeed = activeStage === 0 ? 3 : 4
-        const targetScale = isActive ? pulseBase + Math.sin(elapsed * pulseSpeed) * 0.04 : 0.65
-        const currentScale = pin.scale.x
-        const nextScale = currentScale + (targetScale - currentScale) * 0.1
-        pin.scale.set(nextScale, nextScale, nextScale)
-      }
-
+    function draw(stage: number) {
+      if (!renderer) return
+      const view = STAGES[stage]
+      camera.position.set(view.camera.x, view.camera.y, view.camera.z)
+      camera.lookAt(view.lookAt.x, view.lookAt.y, view.lookAt.z)
       renderer.render(scene, camera)
     }
 
-    animate()
+    async function initialize() {
+      renderer = new THREE.WebGLRenderer({
+        canvas: canvasElement,
+        alpha: true,
+        antialias: true,
+      })
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.3
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      setupSceneLights(scene)
 
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseleave', handleMouseLeave)
-  })
+      const response = await fetch(MODEL_PATH, { signal: controller.signal })
+      if (!response.ok) throw new Error('Peta 3D tidak tersedia')
+      const { scene: model } = await new GLTFLoader().parseAsync(await response.arrayBuffer(), '')
+      if (controller.signal.aborted) {
+        disposeThreeScene(model)
+        return
+      }
+      scene.add(model)
 
-  onDestroy(() => {
-    if (observer) {
-      observer.disconnect()
-      observer = null
+      const terrain = model.getObjectByName('Banyuwangi_Map')
+      if (terrain instanceof THREE.Mesh) {
+        const material = Array.isArray(terrain.material) ? terrain.material[0] : terrain.material
+        if (material instanceof THREE.MeshStandardMaterial) {
+          material.color.setHex(0x16181d)
+          material.roughness = 0.4
+          material.metalness = 0.3
+        }
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(terrain.geometry, 25),
+          new THREE.LineBasicMaterial({ color: 0xfc018b, transparent: true, opacity: 0.65 }),
+        )
+        edges.position.y += 0.00005
+        terrain.add(edges)
+      }
+
+      for (const { targetPin } of STAGES.slice(1)) {
+        const pin = model.getObjectByName(targetPin)
+        if (!pin) continue
+        pin.scale.setScalar(0.72)
+        const light = new THREE.PointLight(0xfc018b, 2, 0.03)
+        light.position.y = 0.004
+        pin.add(light)
+      }
+
+      function resize() {
+        const { clientWidth, clientHeight } = canvasElement
+        if (!clientWidth || !clientHeight || !renderer) return
+        camera.aspect = clientWidth / clientHeight
+        camera.updateProjectionMatrix()
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+        renderer.setSize(clientWidth, clientHeight, false)
+        draw(activeStage)
+      }
+
+      resize()
+      queueDraw = (stage) => {
+        cancelAnimationFrame(paint)
+        paint = requestAnimationFrame(() => {
+          try {
+            draw(stage)
+          } catch {
+            fail()
+          }
+        })
+      }
+      sizeObserver = new ResizeObserver(() => {
+        try {
+          resize()
+        } catch {
+          fail()
+        }
+      })
+      sizeObserver.observe(canvasElement)
+      onReady()
     }
 
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseleave', handleMouseLeave)
-    }
+    canvasElement.addEventListener('webglcontextlost', fail)
+    void initialize().catch(fail)
 
-    if (animId) {
-      cancelAnimationFrame(animId)
-    }
-
-    if (tl) {
-      tl.scrollTrigger?.kill()
-      tl.kill()
-    }
-
-    if (scene) {
+    return () => {
+      controller.abort()
+      sizeObserver?.disconnect()
+      window.cancelAnimationFrame(paint)
+      canvasElement.removeEventListener('webglcontextlost', fail)
       disposeThreeScene(scene)
-    }
-
-    if (renderer) {
-      renderer.dispose()
-      renderer.forceContextLoss()
+      renderer?.dispose()
+      renderer?.forceContextLoss()
     }
   })
 </script>
 
-<canvas
-  bind:this={canvasElement}
-  class="absolute inset-0 z-0 w-full h-full block transition-opacity duration-700 pointer-events-none {isLoaded ? 'opacity-100' : 'opacity-0'}"
-></canvas>
-
-{#if !isLoaded}
-  <div class="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-    <div class="flex items-center gap-2.5 px-4 py-2 rounded-full bg-base-200/90 border border-base-content/10 shadow-lg backdrop-blur-md">
-      <span class="loading loading-spinner loading-xs text-primary"></span>
-      <span class="label-caps text-base-content/80 tracking-wider">Memuat Model 3D Peta...</span>
-    </div>
-  </div>
-{/if}
+<canvas bind:this={canvasElement} class="absolute inset-0 h-full w-full" aria-hidden="true"></canvas>

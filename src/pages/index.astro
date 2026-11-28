@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro"
 import PublicNavbar from "@/components/common/PublicNavbar.svelte"
+import CollaborationChapter from "@/components/landing/CollaborationChapter.svelte"
 import HeroScrollSequence from "@/components/landing/HeroScrollSequence.svelte"
 import TextRevealSection from "@/components/landing/TextRevealSection.svelte"
 import SynergySection from "@/components/landing/SynergySection.svelte"
@@ -23,6 +24,11 @@ const currentPath = Astro.url.pathname
   customMarquee={true}
   hideToasts={false}
 >
+  <Fragment slot="head">
+    <link rel="preload" as="image" href="/frames/frame_0001_sm.webp" media="(max-width: 768px)" fetchpriority="high" type="image/webp" />
+    <link rel="preload" as="image" href="/frames/frame_0001.webp" media="(width > 768px)" fetchpriority="high" type="image/webp" />
+  </Fragment>
+
   <div
     class="w-full bg-canvas text-main selection:bg-orange selection:text-white relative transition-colors duration-200"
   >
@@ -44,99 +50,108 @@ const currentPath = Astro.url.pathname
       />
     </div>
 
-    <!-- Cinematic Scroll-Linked HTML5 Canvas Hero -->
-    <HeroScrollSequence client:load>
-      <!-- Hero Content -->
-      <div
-        slot="hero"
-        class="w-full h-full flex flex-col justify-between pt-24 sm:pt-26 md:pt-28 pb-3 sm:pb-6 md:pb-8"
+    <section id="hero-scroll-track" aria-labelledby="hero-heading" class="relative isolate flex min-h-[100dvh] w-full flex-col overflow-hidden pt-24 pb-3 sm:pt-26 sm:pb-6 md:pt-28 md:pb-8">
+      <picture class="absolute inset-0 -z-10 block h-full w-full pointer-events-none">
+        <source media="(max-width: 768px)" srcset="/frames/frame_0001_sm.webp" type="image/webp" />
+        <img
+          src="/frames/frame_0001.webp"
+          alt=""
+          class="block h-full w-full object-cover"
+          fetchpriority="high"
+          loading="eager"
+          width="1280"
+          height="720"
+        />
+      </picture>
+      <!-- Atmospheric Scrim Layer: Lapisan asap difusi rata dan seimbang tanpa gumpalan sudut -->
+      <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <!-- Asap horizontal atas rata untuk mendukung keterbacaan H1 -->
+        <div
+          class="absolute top-0 inset-x-0 h-80 sm:h-96 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent transition-colors duration-300"
+        >
+        </div>
+
+        <!-- Asap horizontal bawah rata untuk mendukung keterbacaan deskripsi dan tombol -->
+        <div
+          class="absolute bottom-0 inset-x-0 h-72 sm:h-80 bg-gradient-to-t from-canvas/85 via-canvas/45 to-transparent transition-colors duration-300"
+        >
+        </div>
+
+        <!-- Diffused ambient glow pengikat panggung -->
+        <div
+          class="absolute inset-0 bg-canvas/15 dark:bg-black/20 transition-colors duration-300"
+        >
+        </div>
+      </div>
+
+      <!-- Stage Composition: H1 Kiri Atas & Deskripsi Kanan Bawah -->
+      <main
+        class="relative z-20 flex-1 w-full max-w-7xl mx-auto px-5 sm:px-8 md:px-12 pt-1 sm:pt-3 md:pt-5 pb-2 sm:pb-6 md:pb-8 flex flex-col justify-between overflow-x-clip"
       >
-        <!-- Atmospheric Scrim Layer: Lapisan asap difusi rata dan seimbang tanpa gumpalan sudut -->
-        <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <!-- Asap horizontal atas rata untuk mendukung keterbacaan H1 -->
-          <div
-            class="absolute top-0 inset-x-0 h-80 sm:h-96 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent transition-colors duration-300"
-          >
-          </div>
+        <!-- Top-Left: H1 Masif 3 Baris Rapat Proporsional -->
+        <div class="w-full flex justify-start items-start hero-enter-left">
+          <div class="relative max-w-4xl">
+            <!-- Background asap difusi halus di belakang teks H1 -->
+            <div class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"></div>
 
-          <!-- Asap horizontal bawah rata untuk mendukung keterbacaan deskripsi dan tombol -->
-          <div
-            class="absolute bottom-0 inset-x-0 h-72 sm:h-80 bg-gradient-to-t from-canvas/85 via-canvas/45 to-transparent transition-colors duration-300"
-          >
-          </div>
-
-          <!-- Diffused ambient glow pengikat panggung -->
-          <div
-            class="absolute inset-0 bg-canvas/15 dark:bg-black/20 transition-colors duration-300"
-          >
+            <h1
+              id="hero-heading"
+              class="heading-hero text-main max-w-2xl lg:max-w-3xl transition-colors duration-200 select-none"
+            >
+              <span class="block">Website toko mandiri</span>
+              <span class="block">untuk seluruh UMKM</span>
+              <span class="block">Banyuwangi</span>
+            </h1>
           </div>
         </div>
 
-        <!-- Stage Composition: H1 Kiri Atas & Deskripsi Kanan Bawah -->
-        <main
-          class="relative z-20 flex-1 w-full max-w-7xl mx-auto px-5 sm:px-8 md:px-12 pt-1 sm:pt-3 md:pt-5 pb-2 sm:pb-6 md:pb-8 flex flex-col justify-between overflow-x-clip"
-        >
-          <!-- Top-Left: H1 Masif 3 Baris Rapat Proporsional -->
-          <div class="w-full flex justify-start items-start hero-enter-left">
-            <div class="relative max-w-4xl">
-              <!-- Background asap difusi halus di belakang teks H1 -->
-              <div class="absolute -inset-6 sm:-inset-8 bg-canvas/50 dark:bg-canvas/60 blur-2xl -z-10 pointer-events-none rounded-3xl"></div>
+        <!-- Open Center Stage Spacer: Terkendali di mobile agar button CTA tidak terpotong -->
+        <div class="flex-1 max-h-4 sm:max-h-12 md:max-h-none min-h-[6px] sm:min-h-[12px] md:min-h-[30px] pointer-events-none"></div>
 
-              <h1
-                class="heading-hero text-main max-w-2xl lg:max-w-3xl transition-colors duration-200 select-none"
+        <!-- Bottom-Right: Deskripsi Padat 3 Baris & CTA -->
+        <div class="w-full flex justify-end items-end hero-enter-right">
+          <div class="relative w-full max-w-[320px] sm:max-w-[350px] flex flex-col items-start space-y-3 sm:space-y-4 md:space-y-5 text-left">
+            <!-- Bayangan difusi peredam lembut di belakang teks deskripsi -->
+            <div class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"></div>
+
+            <p
+              class="desc-hero text-main transition-colors duration-200"
+            >
+              Miliki katalog online profesional tanpa koding dan terima pesanan langsung via WhatsApp.
+            </p>
+
+            <!-- CTA Button -->
+            <Button
+              href="/auth/login?mode=register"
+              variant="orange"
+              size="md"
+              class="!rounded-full !px-5 sm:!px-6 !py-2.5 sm:!py-3 text-sm sm:text-base shadow-md hover:shadow-lg transition-all group cursor-pointer"
+            >
+              <span class="tracking-wide font-semibold">Buat Toko Gratis</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="transition-transform duration-200 group-hover:translate-x-1"
+                aria-hidden="true"
               >
-                <span class="block">Website toko mandiri</span>
-                <span class="block">untuk seluruh UMKM</span>
-                <span class="block">Banyuwangi</span>
-              </h1>
-            </div>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </Button>
           </div>
+        </div>
+      </main>
+    </section>
 
-          <!-- Open Center Stage Spacer: Terkendali di mobile agar button CTA tidak terpotong -->
-          <div class="flex-1 max-h-4 sm:max-h-12 md:max-h-none min-h-[6px] sm:min-h-[12px] md:min-h-[30px] pointer-events-none"></div>
-
-          <!-- Bottom-Right: Deskripsi Padat 3 Baris & CTA -->
-          <div class="w-full flex justify-end items-end hero-enter-right">
-            <div class="relative w-full max-w-[320px] sm:max-w-[350px] flex flex-col items-start space-y-3 sm:space-y-4 md:space-y-5 text-left">
-              <!-- Bayangan difusi peredam lembut di belakang teks deskripsi -->
-              <div class="absolute -inset-4 bg-canvas/50 dark:bg-canvas/65 blur-xl -z-10 pointer-events-none rounded-2xl"></div>
-
-              <p
-                class="desc-hero text-main transition-colors duration-200"
-              >
-                Miliki katalog online profesional tanpa koding dan terima pesanan langsung via WhatsApp.
-              </p>
-
-              <!-- CTA Button -->
-              <Button
-                href="/auth/login?mode=register"
-                variant="orange"
-                size="md"
-                class="!rounded-full !px-5 sm:!px-6 !py-2.5 sm:!py-3 text-sm sm:text-base shadow-md hover:shadow-lg transition-all group cursor-pointer"
-              >
-                <span class="tracking-wide font-semibold">Buat Toko Gratis</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="transition-transform duration-200 group-hover:translate-x-1"
-                  aria-hidden="true"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </Button>
-            </div>
-          </div>
-        </main>
-      </div>
-    </HeroScrollSequence>
+    <CollaborationChapter client:visible />
+    <HeroScrollSequence client:visible={{ rootMargin: '200px' }} />
 
     <!-- Theme-Responsive Architectural Post-Hero Sections -->
     <div

@@ -142,6 +142,10 @@
       gsap.to(playhead, {
         frame: LAST_FRAME,
         ease: 'none',
+        onUpdate: () => {
+          const frame = Math.round(playhead.frame)
+          if (frame !== currentFrameIndex) renderCanvas(frame)
+        },
         scrollTrigger: {
           trigger: heroContainerEl,
           start: 'top top',
@@ -149,16 +153,7 @@
           pin: true,
           pinSpacing: true,
           scrub: 0.5,
-          anticipatePin: 1,
-          onUpdate: (self: { progress: number }) => {
-            if (self.progress >= 1) {
-              renderCanvas(LAST_FRAME)
-            } else if (self.progress <= 0) {
-              renderCanvas(FIRST_FRAME)
-            } else {
-              renderCanvas(Math.round(playhead.frame))
-            }
-          }
+          anticipatePin: 1
         }
       })
     }, heroContainerEl)
